@@ -56,6 +56,65 @@ jobs:
           open(p, "w").write(s)
           EOF
 
+      - name: Koppelingen instellen (Health Connect en Strava-terugkeer)
+        run: |
+          python3 - <<'EOF2'
+          import glob, re
+          # 1) AndroidManifest: rechten, terugkeer-link van Strava, Health Connect-uitleg
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "android.permission.health.READ_EXERCISE" not in s:
+              perms = (
+                  '<uses-permission android:name="android.permission.health.READ_EXERCISE"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>\n'
+                  '    <application')
+              s = s.replace("<application", perms, 1)
+              filters = (
+                  '</intent-filter>\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />\n'
+                  '            </intent-filter>\n'
+                  '            <intent-filter android:autoVerify="false">\n'
+                  '                <action android:name="android.intent.action.VIEW" />\n'
+                  '                <category android:name="android.intent.category.DEFAULT" />\n'
+                  '                <category android:name="android.intent.category.BROWSABLE" />\n'
+                  '                <data android:scheme="runwise" android:host="app" />\n'
+                  '            </intent-filter>')
+              s = s.replace("</intent-filter>", filters, 1)
+              alias = (
+                  '</activity>\n'
+                  '        <activity-alias\n'
+                  '            android:name="ViewPermissionUsageActivity"\n'
+                  '            android:exported="true"\n'
+                  '            android:targetActivity=".MainActivity"\n'
+                  '            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />\n'
+                  '                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />\n'
+                  '            </intent-filter>\n'
+                  '        </activity-alias>')
+              s = s.replace("</activity>", alias, 1)
+              s = s.replace("<queries>", '<queries>\n        <package android:name="com.google.android.apps.healthdata" />', 1)
+          open(p, "w").write(s)
+
+          # 2) MainActivity moet een FlutterFragmentActivity zijn (vereist door Health Connect)
+          for m in glob.glob("android/app/src/main/kotlin/**/MainActivity.kt", recursive=True):
+              k = open(m).read()
+              k = k.replace("io.flutter.embedding.android.FlutterActivity", "io.flutter.embedding.android.FlutterFragmentActivity")
+              k = re.sub(r":\s*FlutterActivity\(\)", ": FlutterFragmentActivity()", k)
+              open(m, "w").write(k)
+              print("::notice::MainActivity aangepast:", m)
+
+          # 3) Health Connect werkt vanaf Android 8 (API 26)
+          g = "android/app/build.gradle.kts"
+          t = open(g).read()
+          t2 = re.sub(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 26", t)
+          assert t2 != t or "minSdk = 26" in t, "minSdk niet gevonden"
+          open(g, "w").write(t2)
+          print("::notice::Health Connect en Strava-terugkeer ingesteld")
+          EOF2
+
       - name: Code-inkorting (R8) veilig instellen
         run: |
           cat > android/app/proguard-rules.pro <<'EOF2'

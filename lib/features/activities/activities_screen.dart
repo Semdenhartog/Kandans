@@ -7,6 +7,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
 
 class ActivitiesScreen extends ConsumerWidget {
@@ -48,13 +49,18 @@ class ActivitiesScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.directions_run,
               title: 'Nog geen runs',
-              message: 'Voeg je runs toe. Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
+              message: 'Voeg je runs toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
               actionLabel: 'Eerste run toevoegen',
               onAction: () => context.go('/runs/new'),
             );
           }
           return RefreshIndicator(
             onRefresh: () async {
+              try {
+                await ref.read(syncServiceProvider).syncAll(force: true);
+              } catch (e) {
+                if (context.mounted) showMessage(context, friendlyError(e), error: true);
+              }
               ref.invalidate(activitiesProvider);
               await ref.read(activitiesProvider.future);
             },
@@ -119,7 +125,11 @@ class _ActivityTile extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: RwColors.surfaceHigh,
           child: Icon(
-            a.source == 'strava' ? Icons.sync : Icons.directions_run,
+            switch (a.source) {
+              'strava' => Icons.sync,
+              'health_connect' => Icons.watch_outlined,
+              _ => Icons.directions_run,
+            },
             color: RwColors.accent,
           ),
         ),

@@ -14,6 +14,7 @@ import '../features/coach/coach_screen.dart';
 import '../features/coach/paywall_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/profile/strava_return_screen.dart';
 import '../features/races/add_race_screen.dart';
 import '../features/races/race_detail_screen.dart';
 import '../features/races/races_screen.dart';
@@ -63,6 +64,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
       GoRoute(path: '/premium', builder: (c, s) => const PaywallScreen()),
+      // Terugkomst na koppelen met Strava: runwise://app/strava-connected?status=ok
+      GoRoute(
+        path: '/strava-connected',
+        builder: (c, s) => StravaReturnScreen(status: s.uri.queryParameters['status'] ?? 'error'),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [

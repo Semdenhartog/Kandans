@@ -14,6 +14,7 @@ import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
+import 'connections_card.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -35,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
     final ok = await confirmDialog(
       context,
       title: 'Account definitief verwijderen?',
-      message: 'Al je runs, routes, wedstrijden, coachgesprekken en je account worden direct en definitief verwijderd. '
+      message: 'Al je runs, routes, wedstrijden, coachgesprekken en koppelingen en je account worden direct en definitief verwijderd. '
           'Dit kan niet ongedaan worden gemaakt.\n\n'
           'Heb je Premium? Zeg je abonnement dan ook op in Google Play, anders loopt de betaling door.',
       confirmLabel: 'Definitief verwijderen',
@@ -97,6 +98,8 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _InsightsCard(insights: insights),
+          const SizedBox(height: 12),
+          const ConnectionsCard(),
           const SizedBox(height: 12),
           Card(
             child: Column(

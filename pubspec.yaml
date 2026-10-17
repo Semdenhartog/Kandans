@@ -21,6 +21,7 @@ dependencies:
   intl: any
   url_launcher: ^6.3.1
   purchases_flutter: ^9.13.0
+  health: ^13.3.0
 
 dev_dependencies:
   flutter_test:

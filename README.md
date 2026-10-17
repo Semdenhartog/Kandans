@@ -14,7 +14,9 @@ Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het we
 
 **Premium (in aanbouw):** AI-hardloopcoach achter een abonnement: eerste maand gratis, daarna €5 per maand of €40 per jaar (via Google Play + RevenueCat). Gratis gebruikers krijgen 3 proefvragen.
 
-Bewust **nog niet**: pushmeldingen en Garmin.
+**Koppelingen:** runs komen automatisch binnen van je horloge via **Health Connect** (Fitbit, Samsung, Garmin, Polar …; de laatste 30 dagen en daarna alles nieuw) en via **Strava**. Ophalen gebeurt bij het openen van de app en bij vernieuwen in Runs. Strava-runs gaan niet naar de AI-coach (Strava-voorwaarden).
+
+Bewust **nog niet**: pushmeldingen en ophalen terwijl de app dicht is.
 
 ## Mappen
 
@@ -70,6 +72,12 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 6. **Project Settings → API**: kopieer de **Project URL** en de **anon / publishable key**
    naar `config.json`. Gebruik **nooit** de service-role key in de app.
 
+### 3a. Strava-koppeling instellen
+1. Ga naar https://www.strava.com/settings/api en maak een API-app aan (naam RunWise).
+2. Vul bij **Authorization Callback Domain** in: `jdswennyfczpqblfkrxt.supabase.co`
+3. Supabase → **Edge Functions → Secrets**: zet `STRAVA_CLIENT_ID` en `STRAVA_CLIENT_SECRET` (zelf invullen, niet in een chat plakken).
+4. Let op: een nieuwe Strava-app kan eerst maar een beperkt aantal sporters koppelen; meer aanvragen kan bij Strava.
+
 ### 3b. AI-coach en Premium instellen
 
 **AI-coach (server-functie `coach`)**
@@ -107,6 +115,10 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
    **Settings → Secrets and variables → Actions → New repository secret**.
 3. Bewaar `runwise-upload-key.jks` en het wachtwoord veilig, en verwijder het tekstbestand.
 4. Vanaf de volgende push bouwt GitHub naast de APK ook **runwise-playstore-aab**: dat bestand upload je in de Play Console.
+
+### 4c. Health Connect en de Play Store
+Google Play vraagt bij de eerste versie een **verklaring voor Health Connect**: RunWise leest alleen *trainingen*, *afstand* en *hartslag* om je runs automatisch te loggen en je loopprofiel te berekenen. Zet dit ook in de privacyverklaring:
+> RunWise leest met jouw toestemming hardlooptrainingen, afstand en hartslag uit Health Connect om je runs automatisch toe te voegen. Deze gegevens worden alleen gebruikt voor jouw eigen overzicht, loopprofiel en coach, worden niet verkocht of gedeeld met adverteerders, en worden verwijderd als je je account verwijdert.
 
 ### 5. Later: publiceren in de Play Store
 - Google Play-ontwikkelaarsaccount (eenmalig ca. $25).
