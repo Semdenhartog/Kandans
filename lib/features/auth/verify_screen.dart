@@ -67,9 +67,17 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
     return AuthScaffold(
       eyebrow: 'Nog één stap',
       title: 'Bevestig je e-mailadres.',
-      subtitle: 'We hebben een code gestuurd naar ${widget.email}. Vul die hieronder in. '
-          'Niets ontvangen? Kijk ook in je spammap.',
+      subtitle: 'We hebben een e-mail gestuurd naar ${widget.email}. '
+          'Staat er een link in? Klik erop (krijg je daarna een foutpagina, dan is dat niet erg) en log hier in. '
+          'Staat er een code in? Vul die hieronder in. Niets ontvangen? Kijk ook in je spammap.',
       children: [
+        FilledButton(
+          onPressed: () => context.go('/login'),
+          child: const Text('Ik heb op de link geklikt, nu inloggen'),
+        ),
+        const SizedBox(height: 24),
+        const Text('Of vul de code in:', style: TextStyle(color: RwColors.muted)),
+        const SizedBox(height: 8),
         TextField(
           controller: _code,
           keyboardType: TextInputType.number,
@@ -82,15 +90,14 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
         ),
         const SizedBox(height: 16),
         FormError(_error),
-        BusyButton(label: 'Activeer account', busy: _busy, onPressed: _verify),
+        OutlinedButton(
+          onPressed: _busy ? null : _verify,
+          child: Text(_busy ? 'Bezig…' : 'Activeer met code'),
+        ),
         const SizedBox(height: 12),
         TextButton(
           onPressed: _resend,
           child: const Text('Stuur de code opnieuw', style: TextStyle(color: RwColors.muted)),
-        ),
-        TextButton(
-          onPressed: () => context.go('/login'),
-          child: const Text('Terug naar inloggen', style: TextStyle(color: RwColors.muted)),
         ),
       ],
     );
