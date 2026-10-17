@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -8,6 +11,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/rain_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/start_time_scoring.dart';
@@ -25,8 +29,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   TrainingType _type = TrainingType.easy;
   String? _routeId;
   int _durationMinutes = 45;
+  Timer? _live;
+
+  @override
+  void initState() {
+    super.initState();
+    // Live: elke 5 minuten de buienradar en de berekening verversen.
+    _live = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (mounted) ref.invalidate(rainNowcastProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _live?.cancel();
+    super.dispose();
+  }
 
   Future<void> _refresh() async {
+    ref.invalidate(rainNowcastProvider);
     ref.invalidate(weatherLocationProvider);
     ref.invalidate(forecastProvider);
     ref.invalidate(activitiesProvider);
@@ -53,6 +74,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           error: (_, _) => const <RunRoute>[],
         );
     final insights = ref.watch(insightsProvider);
+    final rain = ref.watch(rainNowcastProvider).value;
 
     final name = profile.when(
       data: (p) => p?.displayName ?? 'loper',
@@ -125,8 +147,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     profile: insights,
                     track: selectedRoute == null ? const [] : decodePolyline(selectedRoute.polyline),
                     durationMinutes: _durationMinutes,
+                    rain: rain,
                   );
-                  return _Results(planner: planner, type: _type, insightsPersonal: insights.isPersonal);
+                  return _Results(
+                    planner: planner,
+                    type: _type,
+                    insightsPersonal: insights.isPersonal,
+                    rain: rain,
+                  );
                 },
               ),
             ],
@@ -236,10 +264,11 @@ class _RouteAndDuration extends StatelessWidget {
 }
 
 class _Results extends StatefulWidget {
-  const _Results({required this.planner, required this.type, required this.insightsPersonal});
+  const _Results({required this.planner, required this.type, required this.insightsPersonal, this.rain});
   final StartTimePlanner planner;
   final TrainingType type;
   final bool insightsPersonal;
+  final RainNowcast? rain;
 
   @override
   State<_Results> createState() => _ResultsState();
@@ -258,8 +287,9 @@ class _ResultsState extends State<_Results> {
         message: 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
       );
     }
-    final best = all.reduce((a, b) => b.score > a.score ? b : a);
-    final now = all.first;
+    // Beste moment op 5 minuten nauwkeurig; de staafjes blijven per uur.
+    final best = widget.planner.bestPrecise(widget.type) ?? all.reduce((a, b) => b.score > a.score ? b : a);
+    final now = widget.planner.scoreAt(StartTimePlanner.roundUp(DateTime.now(), 5), widget.type);
     final shown = _selected == null
         ? best
         : all.firstWhere((s) => s.start == _selected, orElse: () => best);
@@ -270,6 +300,10 @@ class _ResultsState extends State<_Results> {
       children: [
         _BestCard(score: shown, isBest: isBest),
         const SizedBox(height: 12),
+        if (widget.rain != null && widget.rain!.points.isNotEmpty) ...[
+          _RainCard(rain: widget.rain!),
+          const SizedBox(height: 12),
+        ],
         if (!isBest || now.start != best.start)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
@@ -465,7 +499,7 @@ class _HourBars extends StatelessWidget {
         itemBuilder: (context, i) {
           final s = scores[i];
           final isSel = s.start == selected;
-          final isBest = s.start == best.start;
+          final isBest = s.start.day == best.start.day && s.start.hour == best.start.hour;
           final newDay = i == 0 || scores[i - 1].start.day != s.start.day;
           return GestureDetector(
             onTap: () => onTap(s),
@@ -537,6 +571,78 @@ class _RouteWindCard extends StatelessWidget {
     return RwCard(
       title: 'WIND OP JE ROUTE',
       child: Text(text, style: const TextStyle(height: 1.5)),
+    );
+  }
+}
+
+
+/// Live buien voor de komende 2 uur, per 5 minuten (Buienradar).
+class _RainCard extends StatelessWidget {
+  const _RainCard({required this.rain});
+  final RainNowcast rain;
+
+  String get _summary {
+    final firstRain = rain.firstRain;
+    if (rain.rainingNow) {
+      final dry = rain.firstDry;
+      return dry == null ? 'Het regent de komende 2 uur.' : 'Het regent nu; droog vanaf ${Fmt.time(dry)}.';
+    }
+    if (firstRain == null) return 'Droog de komende 2 uur.';
+    return 'Droog tot ${Fmt.time(firstRain)}, daarna buien.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final maxMm = rain.points.fold<double>(1, (m, p) => p.mmPerHour > m ? p.mmPerHour : m);
+    return RwCard(
+      title: 'BUIEN KOMENDE 2 UUR · LIVE',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_summary, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (final p in rain.points)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 1),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.bottomCenter,
+                        heightFactor: p.mmPerHour < 0.1 ? 0.06 : (0.2 + 0.8 * (p.mmPerHour / maxMm)).clamp(0.2, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: p.mmPerHour < 0.1 ? RwColors.bar : const Color(0xFF5AA9FF),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(Fmt.time(rain.points.first.time), style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+              const Spacer(),
+              Text(Fmt.time(rain.points.last.time), style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => launchUrl(Uri.parse('https://www.buienradar.nl'), mode: LaunchMode.externalApplication),
+            child: Text(
+              'Neerslagverwachting: Buienradar.nl · bijgewerkt ${Fmt.time(rain.fetchedAt)}',
+              style: const TextStyle(fontSize: 11, color: RwColors.subtle, decoration: TextDecoration.underline),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

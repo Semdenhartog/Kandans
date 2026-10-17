@@ -336,11 +336,19 @@ class HourWeather {
 }
 
 class Forecast {
-  Forecast({required this.latitude, required this.longitude, required this.hours});
+  Forecast({
+    required this.latitude,
+    required this.longitude,
+    required this.hours,
+    this.quarters = const [],
+  });
 
   final double latitude;
   final double longitude;
   final List<HourWeather> hours;
+
+  /// Weer per kwartier (komende dagen). Leeg als het niet beschikbaar is.
+  final List<HourWeather> quarters;
 
   /// Het uur dat het dichtst bij [t] ligt.
   HourWeather? at(DateTime t) {
@@ -356,4 +364,89 @@ class Forecast {
     }
     return bestDiff <= 90 ? best : null;
   }
+
+  /// Weer op precies [t]: tussen twee kwartieren in geschat (geïnterpoleerd).
+  /// Zonder kwartierdata valt het terug op het dichtstbijzijnde uur.
+  HourWeather? precise(DateTime t) {
+    final hourly = at(t);
+    HourWeather? before;
+    HourWeather? after;
+    for (final q in quarters) {
+      if (!q.time.isAfter(t)) {
+        before = q;
+      } else {
+        after = q;
+        break;
+      }
+    }
+    if (before == null) return hourly;
+    if (after == null || t.difference(before.time).inMinutes > 30) {
+      return t.difference(before.time).inMinutes <= 15 ? _withHourly(before, hourly, t) : hourly;
+    }
+    final span = after.time.difference(before.time).inSeconds;
+    final f = span <= 0 ? 0.0 : t.difference(before.time).inSeconds / span;
+    double lerp(double a, double b) => a + (b - a) * f;
+    double? lerpN(double? a, double? b) => (a == null || b == null) ? (a ?? b) : lerp(a, b);
+    final near = f < 0.5 ? before : after;
+    return HourWeather(
+      time: t,
+      temperature: lerp(before.temperature, after.temperature),
+      feelsLike: lerpN(before.feelsLike, after.feelsLike),
+      humidity: hourly?.humidity,
+      precipitationProbability: hourly?.precipitationProbability,
+      precipitation: lerpN(before.precipitation, after.precipitation),
+      windSpeed: lerp(before.windSpeed, after.windSpeed),
+      windDirection: near.windDirection,
+      windGusts: lerpN(before.windGusts, after.windGusts),
+      uvIndex: hourly?.uvIndex,
+      weatherCode: hourly?.weatherCode,
+      isDay: near.isDay,
+    );
+  }
+
+  HourWeather _withHourly(HourWeather q, HourWeather? h, DateTime t) => HourWeather(
+        time: t,
+        temperature: q.temperature,
+        feelsLike: q.feelsLike,
+        humidity: h?.humidity,
+        precipitationProbability: h?.precipitationProbability,
+        precipitation: q.precipitation,
+        windSpeed: q.windSpeed,
+        windDirection: q.windDirection,
+        windGusts: q.windGusts,
+        uvIndex: h?.uvIndex,
+        weatherCode: h?.weatherCode,
+        isDay: q.isDay,
+      );
+}
+
+/// Buienverwachting per 5 minuten voor de komende 2 uur (Buienradar).
+class RainNowcast {
+  RainNowcast({required this.points, required this.fetchedAt});
+
+  /// Tijdstip en neerslag in mm per uur, oplopend in tijd.
+  final List<({DateTime time, double mmPerHour})> points;
+  final DateTime fetchedAt;
+
+  bool covers(DateTime t) =>
+      points.isNotEmpty && !t.isBefore(points.first.time) && !t.isAfter(points.last.time.add(const Duration(minutes: 5)));
+
+  /// Neerslag op [t] (mm/u), of null als [t] buiten de 2 uur valt.
+  double? at(DateTime t) {
+    if (!covers(t)) return null;
+    var value = points.first.mmPerHour;
+    for (final p in points) {
+      if (p.time.isAfter(t)) break;
+      value = p.mmPerHour;
+    }
+    return value;
+  }
+
+  /// Eerste moment met regen (>= 0,1 mm/u), of null als het droog blijft.
+  DateTime? get firstRain => points.where((p) => p.mmPerHour >= 0.1).map((p) => p.time).firstOrNull;
+
+  /// Eerste droge moment na regen, of null.
+  DateTime? get firstDry => points.where((p) => p.mmPerHour < 0.1).map((p) => p.time).firstOrNull;
+
+  bool get rainingNow => points.isNotEmpty && points.first.mmPerHour >= 0.1;
 }

@@ -155,7 +155,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'RunWise 1.0 · Weerdata via Open-Meteo.com',
+            'RunWise 1.0 · Weer via Open-Meteo.com · Buien via Buienradar.nl',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.subtle, fontSize: 12),
           ),

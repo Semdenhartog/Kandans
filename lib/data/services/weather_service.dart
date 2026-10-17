@@ -25,6 +25,17 @@ class WeatherService {
     'is_day',
   ];
 
+  /// Per kwartier (echte 15-minutendata voor Nederland uit het ICON-D2-model).
+  static const _forecastQuarterly = [
+    'temperature_2m',
+    'apparent_temperature',
+    'precipitation',
+    'wind_speed_10m',
+    'wind_direction_10m',
+    'wind_gusts_10m',
+    'is_day',
+  ];
+
   static const _historyHourly = [
     'temperature_2m',
     'apparent_temperature',
@@ -40,6 +51,8 @@ class WeatherService {
       'latitude': lat.toStringAsFixed(4),
       'longitude': lon.toStringAsFixed(4),
       'hourly': _forecastHourly.join(','),
+      'minutely_15': _forecastQuarterly.join(','),
+      'forecast_minutely_15': (days.clamp(1, 3) * 96).toString(),
       'timezone': 'auto',
       'forecast_days': days.clamp(1, 16).toString(),
     });
@@ -96,28 +109,40 @@ class WeatherService {
 
   static Forecast _parse(Map<String, dynamic> json, double lat, double lon) {
     final hourly = (json['hourly'] as Map?)?.cast<String, dynamic>() ?? {};
-    final times = (hourly['time'] as List?)?.cast<String>() ?? const [];
+    final quarterly = (json['minutely_15'] as Map?)?.cast<String, dynamic>() ?? {};
+    return Forecast(
+      latitude: lat,
+      longitude: lon,
+      hours: _series(hourly),
+      // Neerslag per kwartier (mm) omrekenen naar mm per uur, zoals bij de uurdata.
+      quarters: _series(quarterly, precipitationFactor: 4),
+    );
+  }
+
+  static List<HourWeather> _series(Map<String, dynamic> series, {double precipitationFactor = 1}) {
+    final times = (series['time'] as List?)?.cast<String>() ?? const [];
 
     double? val(String key, int i) {
-      final list = hourly[key] as List?;
+      final list = series[key] as List?;
       if (list == null || i >= list.length) return null;
       final v = list[i];
       return v == null ? null : (v as num).toDouble();
     }
 
-    final hours = <HourWeather>[];
+    final out = <HourWeather>[];
     for (var i = 0; i < times.length; i++) {
       final temp = val('temperature_2m', i);
       final wind = val('wind_speed_10m', i);
       if (temp == null || wind == null) continue;
-      hours.add(HourWeather(
+      final rain = val('precipitation', i);
+      out.add(HourWeather(
         // Open-Meteo geeft lokale tijd zonder tijdzone, bijv. "2026-10-17T14:00".
         time: DateTime.parse(times[i]),
         temperature: temp,
         feelsLike: val('apparent_temperature', i),
         humidity: val('relative_humidity_2m', i),
         precipitationProbability: val('precipitation_probability', i),
-        precipitation: val('precipitation', i),
+        precipitation: rain == null ? null : rain * precipitationFactor,
         windSpeed: wind,
         windDirection: val('wind_direction_10m', i),
         windGusts: val('wind_gusts_10m', i),
@@ -126,7 +151,7 @@ class WeatherService {
         isDay: (val('is_day', i) ?? 1) >= 1,
       ));
     }
-    return Forecast(latitude: lat, longitude: lon, hours: hours);
+    return out;
   }
 }
 

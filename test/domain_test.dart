@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/core/format.dart';
 import 'package:runwise/data/models/models.dart';
+import 'package:runwise/data/services/rain_service.dart';
 import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/gpx_parser.dart';
 import 'package:runwise/domain/performance_model.dart';
@@ -139,6 +140,60 @@ void main() {
       expect(p.optimalMax, greaterThan(10));
       expect(p.optimalMax, lessThanOrEqualTo(16));
       expect(p.pctFasterInOptimal, closeTo(9.1, 0.5));
+    });
+  });
+
+  group('op de minuut', () {
+    test('afronden naar boven op 5 minuten', () {
+      expect(StartTimePlanner.roundUp(DateTime(2030, 6, 1, 14, 2), 5), DateTime(2030, 6, 1, 14, 5));
+      expect(StartTimePlanner.roundUp(DateTime(2030, 6, 1, 14, 5), 5), DateTime(2030, 6, 1, 14, 5));
+      expect(StartTimePlanner.roundUp(DateTime(2030, 6, 1, 14, 58), 5), DateTime(2030, 6, 1, 15, 0));
+    });
+
+    test('kwartierweer wordt tussen twee kwartieren geschat', () {
+      final t0 = DateTime(2030, 6, 1, 18);
+      final f = Forecast(
+        latitude: 52,
+        longitude: 5,
+        hours: [hour(t0, temp: 10)],
+        quarters: [
+          hour(t0, temp: 10, wind: 20),
+          hour(t0.add(const Duration(minutes: 15)), temp: 12, wind: 10),
+        ],
+      );
+      final w = f.precise(t0.add(const Duration(minutes: 5)))!;
+      expect(w.temperature, closeTo(10.67, 0.05));
+      expect(w.windSpeed, closeTo(16.67, 0.05));
+    });
+
+    test('Buienradar-tekst lezen, ook over middernacht', () {
+      final now = DateTime(2030, 6, 1, 23, 52);
+      final rc = RainService.parse('000|23:55\n077|00:00\n109|00:05\n000|00:10', now);
+      expect(rc.points.length, 4);
+      expect(rc.points[1].time, DateTime(2030, 6, 2, 0, 0));
+      expect(rc.points[0].mmPerHour, 0);
+      expect(rc.points[2].mmPerHour, closeTo(1.0, 0.01));
+      expect(rc.firstRain, DateTime(2030, 6, 2, 0, 0));
+    });
+
+    test('wacht tot de bui voorbij is, op 5 minuten nauwkeurig', () {
+      final now = DateTime(2030, 6, 1, 14, 0);
+      final hours = [
+        for (var i = 0; i < 4; i++) hour(now.add(Duration(hours: i)), temp: 12, wind: 5),
+      ];
+      // Regen tot 14:35, daarna droog.
+      final points = [
+        for (var m = 0; m <= 120; m += 5)
+          (time: now.add(Duration(minutes: m)), mmPerHour: m < 35 ? 3.0 : 0.0),
+      ];
+      final planner = StartTimePlanner(
+        forecast: Forecast(latitude: 52, longitude: 5, hours: hours),
+        profile: PerformanceInsights.defaults,
+        durationMinutes: 30,
+        rain: RainNowcast(points: points, fetchedAt: now),
+      );
+      final best = planner.bestPrecise(TrainingType.easy, from: now, horizon: const Duration(hours: 2))!;
+      expect(best.start, DateTime(2030, 6, 1, 14, 35));
     });
   });
 }
