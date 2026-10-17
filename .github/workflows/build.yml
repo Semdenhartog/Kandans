@@ -60,7 +60,10 @@ jobs:
         run: |
           flutter analyze --format=machine > analyze.txt 2>&1 || true
           python3 - <<'EOF2'
-          for line in open("analyze.txt"):
+          lines = open("analyze.txt").read().splitlines()
+          issues = [l for l in lines if l.count("|") >= 7]
+          print(f"::notice::Analyse: {len(issues)} meldingen ({len(lines)} regels uitvoer)")
+          for line in lines:
               parts = line.strip().split("|")
               if len(parts) < 8:
                   continue
@@ -94,7 +97,7 @@ jobs:
         run: flutter build apk --release --dart-define-from-file=config.json
 
       - name: APK beschikbaar maken
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: runwise-apk
           path: build/app/outputs/flutter-apk/app-release.apk
