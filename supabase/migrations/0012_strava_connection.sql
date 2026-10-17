@@ -39,11 +39,14 @@ alter table public.external_connections
   add column if not exists athlete_name text,
   add column if not exists last_error text;
 
-drop policy if exists "external_connections_all_own" on public.external_connections;
-
-create policy "external_connections_select_own"
-  on public.external_connections for select
-  using (auth.uid() = user_id);
+-- De bestaande lees-/schrijfpolicy blijft; schrijven door gebruikers wordt
+-- geblokkeerd met "restrictive" policies (alleen de server mag wijzigen).
+create policy "external_connections_no_insert" on public.external_connections
+  as restrictive for insert to anon, authenticated with check (false);
+create policy "external_connections_no_update" on public.external_connections
+  as restrictive for update to anon, authenticated using (false);
+create policy "external_connections_no_delete" on public.external_connections
+  as restrictive for delete to anon, authenticated using (false);
 
 -- Runs: zoeken op bron (voor dubbele runs en ontkoppelen).
 create index if not exists idx_activities_user_source
