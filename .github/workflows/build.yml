@@ -209,7 +209,15 @@ jobs:
           EOF2
 
       - name: Code controleren
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: |
+          set -o pipefail
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee analyze-plain.txt || {
+            # Fouten als annotaties tonen, zodat ze ook zonder de volledige log leesbaar zijn.
+            grep -E "error •|warning •" analyze-plain.txt | head -40 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            exit 1
+          }
 
       - name: Tests
         run: flutter test
