@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config.dart';
@@ -34,8 +35,9 @@ class ProfileScreen extends ConsumerWidget {
     final ok = await confirmDialog(
       context,
       title: 'Account definitief verwijderen?',
-      message: 'Al je runs, routes, wedstrijden en je account worden direct en definitief verwijderd. '
-          'Dit kan niet ongedaan worden gemaakt.',
+      message: 'Al je runs, routes, wedstrijden, coachgesprekken en je account worden direct en definitief verwijderd. '
+          'Dit kan niet ongedaan worden gemaakt.\n\n'
+          'Heb je Premium? Zeg je abonnement dan ook op in Google Play, anders loopt de betaling door.',
       confirmLabel: 'Definitief verwijderen',
     );
     if (!ok) return;
@@ -95,6 +97,28 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _InsightsCard(insights: insights),
+          const SizedBox(height: 12),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.auto_awesome, color: RwColors.accent),
+                  title: const Text('AI-coach'),
+                  subtitle: const Text('Vraag advies over je training'),
+                  onTap: () => context.push('/coach'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.workspace_premium_outlined),
+                  title: const Text('RunWise Premium'),
+                  subtitle: Text(
+                    profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
+                  ),
+                  onTap: () => context.push('/premium'),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
           Card(
             child: Column(

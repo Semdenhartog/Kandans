@@ -12,7 +12,9 @@ Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het we
 | **Wedstrijden** | Wedstrijddoelen met verwachte eindtijd (Riegel-formule op je beste recente run), weercorrectie vanaf ~15 dagen vooraf, en advies voor tempo, kleding en drinken. |
 | **Ik** | Persoonlijk loopprofiel (na 8 runs): ideale temperatuur, windgevoeligheid, ochtend of avond. Privacyverklaring, gegevens kopiëren, account verwijderen. |
 
-Bewust **nog niet** in v1: AI-coach, abonnementen, pushmeldingen, Strava-synchronisatie en Garmin. Die komen later.
+**Premium (in aanbouw):** AI-hardloopcoach achter een abonnement: eerste maand gratis, daarna €5 per maand of €40 per jaar (via Google Play + RevenueCat). Gratis gebruikers krijgen 3 proefvragen.
+
+Bewust **nog niet**: pushmeldingen en Garmin.
 
 ## Mappen
 
@@ -67,6 +69,26 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
    plak de inhoud van `supabase/functions/delete-account/index.ts` en klik op *Deploy*.
 6. **Project Settings → API**: kopieer de **Project URL** en de **anon / publishable key**
    naar `config.json`. Gebruik **nooit** de service-role key in de app.
+
+### 3b. AI-coach en Premium instellen
+
+**AI-coach (server-functie `coach`)**
+1. Maak een account op https://console.anthropic.com, zet er een paar euro tegoed op en maak een **API key**.
+2. Supabase → **Edge Functions → Secrets**: voeg `ANTHROPIC_API_KEY` toe met die key.
+   (Optioneel `COACH_MODEL`; standaard `claude-haiku-5-5`.)
+3. Zet in de Anthropic Console een **maandlimiet** op je uitgaven, zodat de kosten nooit uit de hand lopen.
+4. Limieten aanpassen kan in de tabel `model_config`: `coach_free_questions` (standaard 3) en `coach_premium_daily_limit` (standaard 30).
+
+**Abonnement (Google Play + RevenueCat)**
+1. Google Play Console → je app → **Monetiseren → Abonnementen**: maak twee abonnementen,
+   `runwise_premium_monthly` (€5/maand) en `runwise_premium_yearly` (€40/jaar).
+   Voeg bij beide een **aanbieding met gratis proefperiode van 1 maand** toe.
+2. Maak een gratis account op https://www.revenuecat.com, koppel je Play-app en importeer de twee producten.
+   Maak een *entitlement* `premium` en een *offering* (standaard) met een **Monthly**- en **Annual**-pakket.
+3. RevenueCat → **Integrations → Webhooks**: URL `https://jdswennyfczpqblfkrxt.supabase.co/functions/v1/revenuecat-webhook`,
+   en kies zelf een lang wachtwoord als *Authorization header*. Zet hetzelfde wachtwoord in Supabase Secrets als `REVENUECAT_WEBHOOK_SECRET`.
+4. Zet de publieke RevenueCat **Android SDK-key** (begint met `goog_`) in `app_config.json` bij `REVENUECAT_ANDROID_KEY`.
+   Zolang die leeg is, toont de app "Abonnementen zijn binnenkort beschikbaar".
 
 ### 4. Op je telefoon testen
 1. Telefoon: *Instellingen → Over de telefoon* → 7× tikken op *Buildnummer* → *Ontwikkelaarsopties* → **USB-foutopsporing** aan.

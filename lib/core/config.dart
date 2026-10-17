@@ -20,6 +20,12 @@ class AppConfig {
     defaultValue: 'https://runwise.netlify.app/privacy.html',
   );
 
+  /// Publieke RevenueCat SDK-sleutel voor Android (begint met "goog_").
+  /// Leeg = abonnementen nog niet ingesteld; de paywall toont dan "binnenkort".
+  static const revenueCatAndroidKey = String.fromEnvironment('REVENUECAT_ANDROID_KEY');
+
+  static bool get billingConfigured => revenueCatAndroidKey.isNotEmpty;
+
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 

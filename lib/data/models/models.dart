@@ -13,9 +13,13 @@ class Profile {
     this.username,
     this.homeLatitude,
     this.homeLongitude,
+    this.isPremium = false,
+    this.coachFreeQuestionsUsed = 0,
   });
 
   final String id;
+  final bool isPremium;
+  final int coachFreeQuestionsUsed;
   final String? fullName;
   final String? firstName;
   final String? username;
@@ -37,6 +41,27 @@ class Profile {
         username: j['username'] as String?,
         homeLatitude: _dn(j['home_latitude']),
         homeLongitude: _dn(j['home_longitude']),
+        isPremium: (j['is_premium'] as bool?) ?? false,
+        coachFreeQuestionsUsed: _in(j['coach_free_questions_used']) ?? 0,
+      );
+}
+
+/// Eén bericht in het gesprek met de AI-coach.
+class CoachMessage {
+  CoachMessage({required this.role, required this.content, required this.createdAt, this.id});
+
+  final String? id;
+  final String role; // 'user' of 'assistant'
+  final String content;
+  final DateTime createdAt;
+
+  bool get isUser => role == 'user';
+
+  factory CoachMessage.fromJson(Map<String, dynamic> j) => CoachMessage(
+        id: j['id'] as String?,
+        role: j['role'] as String,
+        content: j['content'] as String,
+        createdAt: DateTime.parse(j['created_at'] as String),
       );
 }
 

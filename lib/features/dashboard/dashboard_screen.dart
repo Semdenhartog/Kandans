@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -61,11 +62,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final selectedRoute = routes.where((r) => r.id == _routeId).firstOrNull;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'coach',
+        onPressed: () => context.push('/coach'),
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('Vraag de coach'),
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refresh,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
             children: [
               Text(
                 '${_greeting()}${name.isEmpty ? '' : ', $name'}.',

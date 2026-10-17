@@ -10,6 +10,8 @@ import '../features/activities/add_activity_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
 import '../features/auth/verify_screen.dart';
+import '../features/coach/coach_screen.dart';
+import '../features/coach/paywall_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/races/add_race_screen.dart';
@@ -59,6 +61,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (c, s) =>
             VerifyScreen(email: s.uri.queryParameters['email'] ?? ''),
       ),
+      GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
+      GoRoute(path: '/premium', builder: (c, s) => const PaywallScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [

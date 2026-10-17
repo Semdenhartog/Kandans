@@ -152,6 +152,38 @@ class RunWiseRepository {
     await _db.from('race_events').delete().eq('id', id);
   }
 
+  // ---------- AI-coach ----------
+
+  Future<List<CoachMessage>> coachMessages() async {
+    final rows = await _db
+        .from('coach_messages')
+        .select()
+        .eq('user_id', _uid)
+        .order('created_at', ascending: false)
+        .limit(100);
+    return rows.map(CoachMessage.fromJson).toList().reversed.toList();
+  }
+
+  /// Stuurt een vraag naar de coach (server-functie `coach`).
+  Future<CoachReply> askCoach(String message) async {
+    try {
+      final res = await _db.functions.invoke('coach', body: {'message': message});
+      final data = (res.data as Map).cast<String, dynamic>();
+      return CoachReply(
+        reply: data['reply'] as String,
+        freeLeft: (data['free_left'] as num?)?.toInt(),
+      );
+    } on FunctionException catch (e) {
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (e.status == 402 || details['paywall'] == true) throw const PaywallRequired();
+      throw Exception(details['error'] ?? 'De coach is even niet bereikbaar. Probeer het zo opnieuw.');
+    }
+  }
+
+  Future<void> clearCoachChat() async {
+    await _db.from('coach_messages').delete().eq('user_id', _uid);
+  }
+
   // ---------- Account ----------
 
   /// Alle eigen gegevens als één overzicht (AVG: recht op inzage).
@@ -161,6 +193,7 @@ class RunWiseRepository {
     final activities = await _db.from('activities').select().eq('user_id', uid);
     final routes = await _db.from('routes').select().eq('user_id', uid);
     final races = await _db.from('race_events').select().eq('user_id', uid);
+    final coach = await _db.from('coach_messages').select().eq('user_id', uid);
     return {
       'exported_at': DateTime.now().toUtc().toIso8601String(),
       'email': _db.auth.currentUser?.email,
@@ -168,6 +201,7 @@ class RunWiseRepository {
       'activities': activities,
       'routes': routes,
       'race_events': races,
+      'coach_messages': coach,
     };
   }
 
@@ -179,6 +213,20 @@ class RunWiseRepository {
     }
     await _db.auth.signOut();
   }
+}
+
+/// Antwoord van de coach.
+class CoachReply {
+  CoachReply({required this.reply, this.freeLeft});
+  final String reply;
+
+  /// Aantal gratis vragen dat nog over is (null bij premium).
+  final int? freeLeft;
+}
+
+/// De gratis vragen zijn op: toon de paywall.
+class PaywallRequired implements Exception {
+  const PaywallRequired();
 }
 
 final repositoryProvider = Provider<RunWiseRepository>(
@@ -214,3 +262,8 @@ final racesProvider = FutureProvider<List<RaceEvent>>((ref) {
 final raceDetailProvider = FutureProvider.family<RaceEvent, String>(
   (ref, id) => ref.watch(repositoryProvider).race(id),
 );
+
+final coachMessagesProvider = FutureProvider<List<CoachMessage>>((ref) {
+  ref.watch(currentUserProvider);
+  return ref.watch(repositoryProvider).coachMessages();
+});
