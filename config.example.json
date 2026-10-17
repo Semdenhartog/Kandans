@@ -1,0 +1,5 @@
+{
+  "SUPABASE_URL": "https://JOUW-PROJECT.supabase.co",
+  "SUPABASE_ANON_KEY": "sb_publishable_of_anon_key_hier",
+  "PRIVACY_URL": "https://runwise.netlify.app/privacy.html"
+}

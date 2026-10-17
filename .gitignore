@@ -1,0 +1,15 @@
+# Geheimen en lokale instellingen
+config.json
+*.jks
+*.keystore
+android/key.properties
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.iml
+.idea/
+analyze.txt
+tests.txt

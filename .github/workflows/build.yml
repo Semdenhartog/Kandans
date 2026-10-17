@@ -1,0 +1,86 @@
+# Bouwt RunWise in de cloud bij elke wijziging:
+# controleert de code, draait de tests en maakt een APK om op je telefoon te zetten.
+name: Build RunWise
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter-versie
+        run: flutter --version
+
+      - name: Android-projectbestanden aanmaken
+        run: flutter create --org nl.runwise --project-name runwise --platforms android .
+
+      - name: Rechten toevoegen aan AndroidManifest.xml
+        run: |
+          python3 - <<'EOF'
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "android.permission.INTERNET" not in s:
+              s = s.replace("<application", (
+                  '<uses-permission android:name="android.permission.INTERNET"/>\n'
+                  '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n'
+                  '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n'
+                  '    <application'), 1)
+          if "android.intent.action.VIEW" not in s:
+              s = s.replace("</manifest>", (
+                  '    <queries>\n'
+                  '        <intent>\n'
+                  '            <action android:name="android.intent.action.VIEW" />\n'
+                  '            <data android:scheme="https" />\n'
+                  '        </intent>\n'
+                  '    </queries>\n'
+                  '</manifest>'))
+          s = s.replace('android:label="runwise"', 'android:label="RunWise"')
+          open(p, "w").write(s)
+          EOF
+
+      - name: Pakketten downloaden
+        run: flutter pub get
+
+      - name: Code controleren
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Tests
+        run: flutter test
+
+      - name: Instellingen klaarzetten
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          json.dump({
+              "SUPABASE_URL": os.environ.get("SUPABASE_URL", ""),
+              "SUPABASE_ANON_KEY": os.environ.get("SUPABASE_ANON_KEY", ""),
+          }, open("config.json", "w"))
+          EOF
+
+      - name: APK bouwen
+        run: flutter build apk --release --dart-define-from-file=config.json
+
+      - name: APK beschikbaar maken
+        uses: actions/upload-artifact@v4
+        with:
+          name: runwise-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
