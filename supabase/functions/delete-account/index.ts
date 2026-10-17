@@ -39,6 +39,20 @@ Deno.serve(async (req) => {
   const { data, error } = await admin.auth.getUser(token);
   if (error || !data?.user) return json(401, { error: "Sessie ongeldig. Log opnieuw in." });
 
+  // Strava-koppeling intrekken (als die er is), zodat RunWise daar geen toegang meer heeft.
+  try {
+    const { data: tokens } = await admin.rpc("strava_get_tokens", { p_user: data.user.id });
+    const access = (tokens as { access_token: string }[] | null)?.[0]?.access_token;
+    if (access) {
+      await fetch("https://www.strava.com/oauth/deauthorize", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${access}` },
+      });
+    }
+  } catch (_) {
+    // Niet fataal: de tokens verdwijnen hoe dan ook met het account.
+  }
+
   const { error: deleteError } = await admin.auth.admin.deleteUser(data.user.id);
   if (deleteError) {
     console.error("delete-account failed", deleteError.message);

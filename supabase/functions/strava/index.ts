@@ -1,0 +1,425 @@
+// Edge Function: strava
+// Koppelt een RunWise-account aan Strava en haalt de runs op.
+//
+//   POST  { action: "connect" }     -> geeft de Strava-inloglink terug
+//   GET   /strava/callback          -> Strava stuurt de gebruiker hierheen na toestemming
+//   POST  { action: "sync" }        -> haalt nieuwe runs op (met het weer van dat moment)
+//   POST  { action: "disconnect" }  -> ontkoppelt en verwijdert de Strava-runs
+//
+// Geheimen (Supabase -> Edge Functions -> Secrets):
+//   STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
+// De tokens staan in het afgeschermde schema "private" en komen nooit in de app.
+//
+// Deploy met "Verify JWT" UIT: Strava roept /callback aan zonder RunWise-login.
+// De POST-acties controleren de login zelf.
+
+import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+
+const APP_RETURN_URL = "runwise://app/strava-connected";
+const STRAVA = "https://www.strava.com";
+const FIRST_SYNC_DAYS = 365;
+const MAX_PAGES_PER_SYNC = 3; // 3 x 100 activiteiten; de rest volgt bij de volgende sync
+const RUN_TYPES = new Set(["Run", "TrailRun"]); // geen loopband (VirtualRun): weer doet daar niet mee
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
+
+function json(status: number, body: Record<string, unknown>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
+
+function backToApp(status: string) {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: `${APP_RETURN_URL}?status=${encodeURIComponent(status)}` },
+  });
+}
+
+const env = (k: string) => Deno.env.get(k) ?? "";
+
+function admin(): SupabaseClient {
+  const key = env("SUPABASE_SERVICE_ROLE_KEY") || env("SUPABASE_SECRET_KEY");
+  return createClient(env("SUPABASE_URL"), key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+function callbackUrl() {
+  return `${env("SUPABASE_URL")}/functions/v1/strava/callback`;
+}
+
+// ---------------------------------------------------------------- tokens
+
+type Tokens = {
+  athlete_id: number;
+  access_token: string;
+  refresh_token: string;
+  expires_at: string;
+  scope: string | null;
+};
+
+class ReconnectNeeded extends Error {}
+
+async function tokenRequest(params: Record<string, string>) {
+  const res = await fetch(`${STRAVA}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: env("STRAVA_CLIENT_ID"),
+      client_secret: env("STRAVA_CLIENT_SECRET"),
+      ...params,
+    }),
+  });
+  const body = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, body };
+}
+
+/** Geeft een geldige access token; ververst hem als hij (bijna) verlopen is. */
+async function accessToken(db: SupabaseClient, userId: string): Promise<string> {
+  const { data, error } = await db.rpc("strava_get_tokens", { p_user: userId });
+  if (error) throw error;
+  const t = (data as Tokens[] | null)?.[0];
+  if (!t) throw new ReconnectNeeded();
+
+  if (new Date(t.expires_at).getTime() - Date.now() > 10 * 60 * 1000) {
+    return t.access_token;
+  }
+  const r = await tokenRequest({ grant_type: "refresh_token", refresh_token: t.refresh_token });
+  if (!r.ok) {
+    if (r.status === 400 || r.status === 401) throw new ReconnectNeeded();
+    throw new Error(`Strava token refresh ${r.status}`);
+  }
+  await db.rpc("strava_save_tokens", {
+    p_user: userId,
+    p_athlete: t.athlete_id,
+    p_access: r.body.access_token,
+    p_refresh: r.body.refresh_token,
+    p_expires: new Date(r.body.expires_at * 1000).toISOString(),
+    p_scope: null,
+  });
+  return r.body.access_token;
+}
+
+async function forgetConnection(db: SupabaseClient, userId: string, message: string | null) {
+  await db.rpc("strava_delete_tokens", { p_user: userId });
+  if (message) {
+    await db.from("external_connections")
+      .update({ sync_status: "error", last_error: message })
+      .eq("user_id", userId).eq("provider", "strava");
+  } else {
+    await db.from("external_connections").delete().eq("user_id", userId).eq("provider", "strava");
+  }
+}
+
+// ---------------------------------------------------------------- weer
+
+type Weather = {
+  temperature_celsius: number | null;
+  feels_like_celsius: number | null;
+  wind_speed_kmh: number | null;
+  wind_direction_degrees: number | null;
+  humidity_pct: number | null;
+};
+
+const weatherCache = new Map<string, Promise<Record<string, unknown> | null>>();
+
+function isoDate(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+
+/** Weer van het uur waarin de run startte (Open-Meteo, gratis). */
+async function weatherAt(lat: number, lon: number, startUtc: Date): Promise<Weather | null> {
+  const hourly = "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_direction_10m";
+  const daysAgo = (Date.now() - startUtc.getTime()) / 86_400_000;
+  const la = lat.toFixed(2), lo = lon.toFixed(2);
+  let url: string;
+  if (daysAgo <= 6) {
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&hourly=${hourly}&timezone=GMT&past_days=7&forecast_days=1`;
+  } else {
+    const day = isoDate(startUtc);
+    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${la}&longitude=${lo}&hourly=${hourly}&timezone=GMT&start_date=${day}&end_date=${day}`;
+  }
+  if (!weatherCache.has(url)) {
+    weatherCache.set(url, (async () => {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+        return res.ok ? await res.json() : null;
+      } catch {
+        return null;
+      }
+    })());
+  }
+  const data = await weatherCache.get(url)!;
+  const h = (data as { hourly?: Record<string, (number | string | null)[]> } | null)?.hourly;
+  if (!h?.time) return null;
+
+  const target = startUtc.toISOString().slice(0, 13); // "2026-10-17T14"
+  const i = (h.time as string[]).findIndex((t) => t.startsWith(target));
+  if (i < 0) return null;
+  const v = (k: string) => (h[k]?.[i] as number | null | undefined) ?? null;
+  if (v("temperature_2m") === null) return null;
+  return {
+    temperature_celsius: v("temperature_2m"),
+    feels_like_celsius: v("apparent_temperature"),
+    wind_speed_kmh: v("wind_speed_10m"),
+    wind_direction_degrees: v("wind_direction_10m"),
+    humidity_pct: v("relative_humidity_2m"),
+  };
+}
+
+async function mapLimit<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
+  }));
+  return out;
+}
+
+// ---------------------------------------------------------------- acties
+
+async function connect(db: SupabaseClient, userId: string) {
+  if (!env("STRAVA_CLIENT_ID") || !env("STRAVA_CLIENT_SECRET")) {
+    return json(503, { error: "De Strava-koppeling is nog niet ingesteld op de server." });
+  }
+  const state = crypto.randomUUID();
+  const { error } = await db.rpc("strava_save_state", { p_state: state, p_user: userId });
+  if (error) throw error;
+
+  const url = new URL(`${STRAVA}/oauth/mobile/authorize`);
+  url.searchParams.set("client_id", env("STRAVA_CLIENT_ID"));
+  url.searchParams.set("redirect_uri", callbackUrl());
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("approval_prompt", "auto");
+  url.searchParams.set("scope", "read,activity:read_all");
+  url.searchParams.set("state", state);
+  return json(200, { url: url.toString() });
+}
+
+async function callback(req: Request) {
+  const params = new URL(req.url).searchParams;
+  if (params.get("error")) return backToApp("denied"); // gebruiker klikte op Annuleren
+
+  const state = params.get("state") ?? "";
+  const code = params.get("code") ?? "";
+  const scope = params.get("scope") ?? "";
+  if (!state || !code) return backToApp("error");
+
+  const db = admin();
+  const { data: userId, error } = await db.rpc("strava_take_state", { p_state: state });
+  if (error || !userId) return backToApp("expired");
+
+  if (!scope.includes("activity:read")) return backToApp("scope");
+
+  const r = await tokenRequest({ grant_type: "authorization_code", code });
+  if (!r.ok) {
+    console.error("strava token exchange failed", r.status);
+    return backToApp("error");
+  }
+  const athlete = r.body.athlete ?? {};
+  await db.rpc("strava_save_tokens", {
+    p_user: userId,
+    p_athlete: athlete.id,
+    p_access: r.body.access_token,
+    p_refresh: r.body.refresh_token,
+    p_expires: new Date(r.body.expires_at * 1000).toISOString(),
+    p_scope: scope,
+  });
+  const name = [athlete.firstname, athlete.lastname].filter(Boolean).join(" ") || null;
+  const { error: upErr } = await db.from("external_connections").upsert({
+    user_id: userId,
+    provider: "strava",
+    provider_athlete_id: String(athlete.id),
+    athlete_name: name,
+    connected_at: new Date().toISOString(),
+    sync_status: "idle",
+    last_error: null,
+  }, { onConflict: "user_id,provider" });
+  if (upErr) {
+    console.error("external_connections upsert failed", upErr.message);
+    return backToApp("error");
+  }
+  return backToApp("ok");
+}
+
+type StravaActivity = {
+  id: number;
+  sport_type?: string;
+  type?: string;
+  start_date: string;
+  distance: number;
+  moving_time: number;
+  total_elevation_gain?: number;
+  average_heartrate?: number;
+  trainer?: boolean;
+  manual?: boolean;
+  start_latlng?: [number, number] | [];
+};
+
+async function sync(db: SupabaseClient, userId: string) {
+  const { data: conn } = await db.from("external_connections")
+    .select("last_synced_at, sync_status, connected_at")
+    .eq("user_id", userId).eq("provider", "strava").maybeSingle();
+  if (!conn) return json(409, { error: "Strava is niet gekoppeld." });
+
+  await db.from("external_connections").update({ sync_status: "syncing" })
+    .eq("user_id", userId).eq("provider", "strava");
+
+  try {
+    const token = await accessToken(db, userId);
+
+    // Vanaf de vorige sync (met een uur overlap), de eerste keer een jaar terug.
+    const since = conn.last_synced_at
+      ? new Date(new Date(conn.last_synced_at).getTime() - 3600_000)
+      : new Date(Date.now() - FIRST_SYNC_DAYS * 86_400_000);
+    const after = Math.floor(since.getTime() / 1000);
+
+    const fetched: StravaActivity[] = [];
+    for (let page = 1; page <= MAX_PAGES_PER_SYNC; page++) {
+      const res = await fetch(
+        `${STRAVA}/api/v3/athlete/activities?after=${after}&per_page=100&page=${page}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.status === 401) throw new ReconnectNeeded();
+      if (res.status === 429) {
+        if (fetched.length > 0) break; // wat we al hebben gewoon opslaan
+        throw new Error("rate_limit");
+      }
+      if (!res.ok) throw new Error(`Strava activities ${res.status}`);
+      const list = (await res.json()) as StravaActivity[];
+      fetched.push(...list);
+      if (list.length < 100) break;
+    }
+
+    const runs = fetched.filter((a) =>
+      RUN_TYPES.has(a.sport_type ?? a.type ?? "") && !a.trainer && a.distance > 500 && a.moving_time > 0
+    );
+
+    // Handmatig ingevoerde runs rond hetzelfde tijdstip niet dubbel opslaan.
+    const { data: manual } = await db.from("activities").select("started_at")
+      .eq("user_id", userId).eq("source", "manual")
+      .gte("started_at", new Date(since.getTime() - 86_400_000).toISOString());
+    const manualTimes = (manual ?? []).map((m) => new Date(m.started_at as string).getTime());
+    const isDuplicate = (t: number) => manualTimes.some((m) => Math.abs(m - t) < 20 * 60_000);
+
+    const fresh = runs.filter((a) => !isDuplicate(new Date(a.start_date).getTime()));
+
+    const rows = await mapLimit(fresh, 6, async (a) => {
+      const start = new Date(a.start_date);
+      const ll = a.start_latlng && a.start_latlng.length === 2 ? a.start_latlng : null;
+      const w = ll ? await weatherAt(ll[0], ll[1], start) : null;
+      return {
+        user_id: userId,
+        source: "strava",
+        external_id: String(a.id),
+        started_at: start.toISOString(),
+        distance_meters: a.distance,
+        moving_time_seconds: a.moving_time,
+        average_pace_seconds_per_km: Math.round((a.moving_time / (a.distance / 1000)) * 100) / 100,
+        average_heart_rate: a.average_heartrate ? Math.round(a.average_heartrate) : null,
+        elevation_gain_meters: a.total_elevation_gain ?? null,
+        temperature_celsius: w?.temperature_celsius ?? null,
+        feels_like_celsius: w?.feels_like_celsius ?? null,
+        wind_speed_kmh: w?.wind_speed_kmh ?? null,
+        wind_direction_degrees: w?.wind_direction_degrees ?? null,
+        humidity_pct: w?.humidity_pct ?? null,
+      };
+    });
+
+    if (rows.length > 0) {
+      const { error } = await db.from("activities")
+        .upsert(rows, { onConflict: "user_id,source,external_id" });
+      if (error) throw error;
+    }
+
+    const newest = fetched.reduce(
+      (max, a) => Math.max(max, new Date(a.start_date).getTime()),
+      conn.last_synced_at ? new Date(conn.last_synced_at).getTime() : since.getTime(),
+    );
+    await db.from("external_connections").update({
+      sync_status: "idle",
+      last_error: null,
+      last_synced_at: new Date(Math.max(newest, since.getTime())).toISOString(),
+    }).eq("user_id", userId).eq("provider", "strava");
+
+    return json(200, { imported: rows.length, skipped_duplicates: runs.length - fresh.length });
+  } catch (e) {
+    if (e instanceof ReconnectNeeded) {
+      await forgetConnection(db, userId, "Strava-toegang is ingetrokken. Koppel opnieuw.");
+      return json(409, { error: "Strava-toegang is verlopen of ingetrokken. Koppel Strava opnieuw.", reconnect: true });
+    }
+    const rateLimited = e instanceof Error && e.message === "rate_limit";
+    console.error("strava sync failed", e instanceof Error ? e.message : e);
+    await db.from("external_connections").update({
+      sync_status: "error",
+      last_error: rateLimited ? "Strava is even druk. Probeer het over 15 minuten opnieuw." : "Synchroniseren is mislukt.",
+    }).eq("user_id", userId).eq("provider", "strava");
+    return json(rateLimited ? 429 : 502, {
+      error: rateLimited
+        ? "Strava is even druk. Probeer het over 15 minuten opnieuw."
+        : "Runs ophalen bij Strava is mislukt. Probeer het later opnieuw.",
+    });
+  }
+}
+
+async function disconnect(db: SupabaseClient, userId: string) {
+  try {
+    const token = await accessToken(db, userId);
+    await fetch(`${STRAVA}/oauth/deauthorize`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    // Al ingetrokken of verlopen: lokaal opruimen is genoeg.
+  }
+  await forgetConnection(db, userId, null);
+  // Strava-gegevens bewaren we niet na ontkoppelen.
+  await db.from("activities").delete().eq("user_id", userId).eq("source", "strava");
+  return json(200, { disconnected: true });
+}
+
+// ---------------------------------------------------------------- router
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+
+  const path = new URL(req.url).pathname;
+  if (req.method === "GET" && path.endsWith("/callback")) {
+    try {
+      return await callback(req);
+    } catch (e) {
+      console.error("strava callback crashed", e instanceof Error ? e.message : e);
+      return backToApp("error");
+    }
+  }
+  if (req.method !== "POST") return json(405, { error: "Alleen POST is toegestaan." });
+
+  const jwt = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  if (!jwt) return json(401, { error: "Niet ingelogd." });
+  const db = admin();
+  const { data, error } = await db.auth.getUser(jwt);
+  if (error || !data?.user) return json(401, { error: "Sessie ongeldig. Log opnieuw in." });
+  const userId = data.user.id;
+
+  const body = await req.json().catch(() => ({}));
+  try {
+    switch (body.action) {
+      case "connect": return await connect(db, userId);
+      case "sync": return await sync(db, userId);
+      case "disconnect": return await disconnect(db, userId);
+      default: return json(400, { error: "Onbekende actie." });
+    }
+  } catch (e) {
+    console.error("strava action failed", body.action, e instanceof Error ? e.message : e);
+    return json(500, { error: "Er ging iets mis. Probeer het later opnieuw." });
+  }
+});
