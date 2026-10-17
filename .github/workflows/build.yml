@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -55,6 +55,21 @@ jobs:
 
       - name: Pakketten downloaden
         run: flutter pub get
+
+      - name: Analyse-meldingen als annotaties tonen
+        run: |
+          flutter analyze --format=machine > analyze.txt 2>&1 || true
+          python3 - <<'EOF2'
+          for line in open("analyze.txt"):
+              parts = line.strip().split("|")
+              if len(parts) < 8:
+                  continue
+              sev, typ, code, path, ln, col = parts[:6]
+              msg = "|".join(parts[7:])
+              level = "error" if sev == "ERROR" else "warning"
+              path = path.split("/runwise/")[-1] if "/runwise/" in path else path
+              print(f"::{level} file={path},line={ln},col={col}::[{sev}/{code}] {msg}")
+          EOF2
 
       - name: Code controleren
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
