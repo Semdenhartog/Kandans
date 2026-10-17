@@ -209,7 +209,6 @@ class SyncService {
   double _meters(num? value, HealthDataUnit? unit) {
     if (value == null) return 0;
     return switch (unit) {
-      HealthDataUnit.KILOMETER => value * 1000.0,
       HealthDataUnit.MILE => value * 1609.344,
       _ => value.toDouble(),
     };
