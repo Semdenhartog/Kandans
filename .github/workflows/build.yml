@@ -80,21 +80,8 @@ jobs:
       - name: Tests
         run: flutter test
 
-      - name: Instellingen klaarzetten
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          python3 - <<'EOF'
-          import json, os
-          json.dump({
-              "SUPABASE_URL": os.environ.get("SUPABASE_URL", ""),
-              "SUPABASE_ANON_KEY": os.environ.get("SUPABASE_ANON_KEY", ""),
-          }, open("config.json", "w"))
-          EOF
-
       - name: APK bouwen
-        run: flutter build apk --release --dart-define-from-file=config.json
+        run: flutter build apk --release --dart-define-from-file=app_config.json
 
       - name: APK beschikbaar maken
         uses: actions/upload-artifact@v5

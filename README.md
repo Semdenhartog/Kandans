@@ -27,7 +27,8 @@ test/          automatische tests
 supabase/functions/delete-account/   server-functie voor account verwijderen
 ```
 
-De database-migraties staan in de map `supabase\migrations` op je bureaublad (0001 t/m 0010).
+De database-migraties staan in `supabase/migrations` (0001 t/m 0011) en zijn al toegepast op het Supabase-project.
+De publieke Supabase-instellingen (URL en publishable key) staan in `app_config.json`; die zijn bedoeld om openbaar te zijn.
 
 ---
 
