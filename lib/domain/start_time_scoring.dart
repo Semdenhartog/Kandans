@@ -212,7 +212,7 @@ class StartTimePlanner {
       temperature: w.temperature,
       feelsLike: w.feelsLike,
       humidity: w.humidity,
-      precipitationProbability: mm >= 0.1 ? 95 : 3,
+      precipitationProbability: mm >= 0.1 ? 95 : 0,
       precipitation: mm,
       windSpeed: w.windSpeed,
       windDirection: w.windDirection,
