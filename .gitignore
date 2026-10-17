@@ -13,3 +13,9 @@ build/
 .idea/
 analyze.txt
 tests.txt
+
+# Ondertekeningssleutel en geheimen (nooit in git)
+*.jks
+*.keystore
+key.properties
+runwise-github-geheimen.txt

@@ -98,6 +98,16 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
    flutter run --dart-define-from-file=config.json
    ```
 
+### 4b. Uploadsleutel voor de Play Store (eenmalig)
+1. Voer op je laptop uit (in de map van de app):
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\maak-sleutel.ps1
+   ```
+2. Open `runwise-github-geheimen.txt` en zet de 4 waarden in GitHub:
+   **Settings → Secrets and variables → Actions → New repository secret**.
+3. Bewaar `runwise-upload-key.jks` en het wachtwoord veilig, en verwijder het tekstbestand.
+4. Vanaf de volgende push bouwt GitHub naast de APK ook **runwise-playstore-aab**: dat bestand upload je in de Play Console.
+
 ### 5. Later: publiceren in de Play Store
 - Google Play-ontwikkelaarsaccount (eenmalig ca. $25).
 - Gesloten test met **minimaal 12 testers gedurende 14 dagen**.

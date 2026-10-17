@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      # Ondertekeningssleutel voor de Play Store (staat in GitHub Secrets, nooit in de code).
+      HAS_UPLOAD_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -85,6 +88,46 @@ jobs:
           print("::notice::R8-inkorting uitgeschakeld en keep-regels toegevoegd")
           EOF2
 
+      - name: Ondertekenen voor de Play Store instellen
+        if: env.HAS_UPLOAD_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+          python3 - <<'EOF2'
+          p = "android/app/build.gradle.kts"
+          s = open(p).read()
+          s = "import java.io.FileInputStream\nimport java.util.Properties\n\n" + s
+          block = '''    signingConfigs {
+                  create("release") {
+                      val props = Properties()
+                      props.load(FileInputStream(rootProject.file("key.properties")))
+                      keyAlias = props["keyAlias"] as String
+                      keyPassword = props["keyPassword"] as String
+                      storeFile = file(props["storeFile"] as String)
+                      storePassword = props["storePassword"] as String
+                  }
+              }
+
+              buildTypes {'''
+          assert "    buildTypes {" in s, "buildTypes niet gevonden"
+          s = s.replace("    buildTypes {", block, 1)
+          old = 'signingConfig = signingConfigs.getByName("debug")'
+          assert old in s, "debug-ondertekening niet gevonden"
+          s = s.replace(old, 'signingConfig = signingConfigs.getByName("release")', 1)
+          open(p, "w").write(s)
+          print("::notice::Release wordt ondertekend met de uploadsleutel")
+          EOF2
+
       - name: Pakketten downloaden
         run: flutter pub get
 
@@ -113,7 +156,7 @@ jobs:
         run: flutter test
 
       - name: APK bouwen
-        run: flutter build apk --release --dart-define-from-file=app_config.json
+        run: flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }}
 
       - name: APK beschikbaar maken
         uses: actions/upload-artifact@v5
@@ -121,3 +164,19 @@ jobs:
           name: runwise-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
+
+      - name: App bundle voor de Play Store bouwen
+        if: env.HAS_UPLOAD_KEY == 'true'
+        run: flutter build appbundle --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }}
+
+      - name: App bundle beschikbaar maken
+        if: env.HAS_UPLOAD_KEY == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: runwise-playstore-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Uitleg als de sleutel nog ontbreekt
+        if: env.HAS_UPLOAD_KEY != 'true'
+        run: echo "::notice::Geen Play Store-bundle gebouwd - voer eerst maak-sleutel.ps1 uit en zet de 4 geheimen in GitHub (zie README)."
