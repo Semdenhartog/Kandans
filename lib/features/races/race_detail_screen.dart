@@ -73,7 +73,7 @@ class RaceDetailScreen extends ConsumerWidget {
     try {
       await ref.read(repositoryProvider).deleteRace(race.id!);
       ref.invalidate(racesProvider);
-      if (context.mounted) context.go('/races');
+      if (context.mounted) context.go('/me/races');
     } catch (e) {
       if (context.mounted) showMessage(context, friendlyError(e), error: true);
     }

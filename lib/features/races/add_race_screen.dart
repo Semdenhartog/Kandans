@@ -79,7 +79,7 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
             startLongitude: route?.startLongitude,
           ));
       ref.invalidate(racesProvider);
-      if (mounted) context.go('/races');
+      if (mounted) context.go('/me/races');
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
     } finally {

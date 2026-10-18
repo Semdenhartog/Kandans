@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config.dart';
@@ -11,6 +12,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
+import '../../shared/rw_components.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 
@@ -52,12 +54,19 @@ class ProfileScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final profile = ref.watch(profileProvider);
     final insights = ref.watch(insightsProvider);
+    final runCount = ref.watch(activitiesProvider).when<int?>(
+          data: (a) => a.length,
+          loading: () => null,
+          error: (_, _) => null,
+        );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ik')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      body: SafeArea(
+        child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
+          const PageHeader(title: 'Profiel', subtitle: 'Je account, loopprofiel en gegevens'),
+          const SizedBox(height: 16),
           RwCard(
             child: Row(
               children: [
@@ -100,6 +109,22 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
+                  leading: const Icon(Icons.directions_run, color: RwColors.primair),
+                  title: const Text('Mijn runs'),
+                  subtitle: Text(runCount == null ? 'Runs toevoegen en bekijken' : '$runCount runs'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.go('/me/runs'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.flag_outlined, color: RwColors.primair),
+                  title: const Text('Wedstrijden'),
+                  subtitle: const Text('Doelen, voorspelling en advies'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.go('/me/races'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: const Text('Privacyverklaring'),
                   onTap: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
@@ -133,6 +158,7 @@ class ProfileScreen extends ConsumerWidget {
             style: TextStyle(color: RwColors.subtle, fontSize: 12),
           ),
         ],
+      ),
       ),
     );
   }

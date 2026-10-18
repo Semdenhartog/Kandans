@@ -37,6 +37,7 @@ jobs:
           if "android.permission.INTERNET" not in s:
               s = s.replace("<application", (
                   '<uses-permission android:name="android.permission.INTERNET"/>\n'
+                  '    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>\n'
                   '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n'
                   '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n'
                   '    <application'), 1)

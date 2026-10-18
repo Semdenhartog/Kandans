@@ -71,14 +71,9 @@ class RunWiseLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: RwColors.accent, width: 2.5),
-          ),
-          child: const Icon(Icons.schedule, size: 18, color: RwColors.accent),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.asset('assets/icon/icon.png', width: 40, height: 40),
         ),
         const SizedBox(width: 10),
         const Text(

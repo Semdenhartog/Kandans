@@ -33,7 +33,7 @@ class ActivitiesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Mijn runs')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/runs/new'),
+        onPressed: () => context.go('/me/runs/new'),
         icon: const Icon(Icons.add),
         label: const Text('Run toevoegen'),
       ),
@@ -50,7 +50,7 @@ class ActivitiesScreen extends ConsumerWidget {
               title: 'Nog geen runs',
               message: 'Voeg je runs toe. Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
               actionLabel: 'Eerste run toevoegen',
-              onAction: () => context.go('/runs/new'),
+              onAction: () => context.go('/me/runs/new'),
             );
           }
           return RefreshIndicator(

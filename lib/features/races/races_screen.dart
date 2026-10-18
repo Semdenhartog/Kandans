@@ -18,7 +18,7 @@ class RacesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Wedstrijden')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/races/new'),
+        onPressed: () => context.go('/me/races/new'),
         icon: const Icon(Icons.add),
         label: const Text('Wedstrijd toevoegen'),
       ),
@@ -36,7 +36,7 @@ class RacesScreen extends ConsumerWidget {
               message: 'Voeg je volgende wedstrijd toe. Vanaf ongeveer 2 weken vooraf krijg je '
                   'een voorspelling met het verwachte weer, kleding- en tempo-advies.',
               actionLabel: 'Wedstrijd toevoegen',
-              onAction: () => context.go('/races/new'),
+              onAction: () => context.go('/me/races/new'),
             );
           }
           final upcoming = list.where((r) => r.daysUntil >= 0).toList();
@@ -89,7 +89,7 @@ class _RaceTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: RwCard(
-        onTap: () => context.go('/races/${race.id}'),
+        onTap: () => context.go('/me/races/${race.id}'),
         child: Row(
           children: [
             Expanded(

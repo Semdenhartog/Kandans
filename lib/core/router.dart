@@ -10,6 +10,7 @@ import '../features/activities/add_activity_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
 import '../features/auth/verify_screen.dart';
+import '../features/coach/coach_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/races/add_race_screen.dart';
@@ -70,50 +71,43 @@ final routerProvider = Provider<GoRouter>((ref) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
-              path: '/runs',
-              builder: (c, s) => const ActivitiesScreen(),
-              routes: [
-                GoRoute(
-                  path: 'new',
-                  builder: (c, s) => const AddActivityScreen(),
-                ),
-              ],
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
               path: '/routes',
               builder: (c, s) => const RoutesScreen(),
               routes: [
                 GoRoute(
                   path: ':id',
-                  builder: (c, s) =>
-                      RouteDetailScreen(routeId: s.pathParameters['id']!),
+                  builder: (c, s) => RouteDetailScreen(routeId: s.pathParameters['id']!),
                 ),
               ],
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/races',
-              builder: (c, s) => const RacesScreen(),
-              routes: [
-                GoRoute(
-                  path: 'new',
-                  builder: (c, s) => const AddRaceScreen(),
-                ),
-                GoRoute(
-                  path: ':id',
-                  builder: (c, s) =>
-                      RaceDetailScreen(raceId: s.pathParameters['id']!),
-                ),
-              ],
-            ),
+            GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/me',
               builder: (c, s) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'runs',
+                  builder: (c, s) => const ActivitiesScreen(),
+                  routes: [
+                    GoRoute(path: 'new', builder: (c, s) => const AddActivityScreen()),
+                  ],
+                ),
+                GoRoute(
+                  path: 'races',
+                  builder: (c, s) => const RacesScreen(),
+                  routes: [
+                    GoRoute(path: 'new', builder: (c, s) => const AddRaceScreen()),
+                    GoRoute(
+                      path: ':id',
+                      builder: (c, s) => RaceDetailScreen(raceId: s.pathParameters['id']!),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ]),
         ],
