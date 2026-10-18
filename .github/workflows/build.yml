@@ -88,6 +88,9 @@ jobs:
       - name: Pakketten downloaden
         run: flutter pub get
 
+      - name: App-icoon genereren
+        run: dart run flutter_launcher_icons
+
       - name: Analyse-meldingen als annotaties tonen
         run: |
           flutter analyze --format=machine > analyze.txt 2>&1 || true

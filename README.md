@@ -14,6 +14,10 @@ Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het we
 
 Bewust **nog niet** in v1: AI-coach, abonnementen, pushmeldingen, Strava-synchronisatie en Garmin. Die komen later.
 
+## App-icoon
+
+Het icoon staat in `assets/icon/` (limegroene klok met snelheidsstreepjes op donkergroen, in de stijl van de website). `play_store_512.png` is de versie voor de Play Store. Bij elke build wordt het icoon automatisch ingesteld.
+
 ## Mappen
 
 ```
