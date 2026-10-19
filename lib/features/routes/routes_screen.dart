@@ -14,7 +14,7 @@ import '../../data/services/sync_service.dart';
 import '../../domain/gpx_parser.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
-import 'route_shape.dart';
+import 'route_photos_strip.dart';
 
 class RoutesScreen extends ConsumerStatefulWidget {
   const RoutesScreen({super.key});
@@ -126,11 +126,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                 onTap: () => context.go('/routes/${r.id}'),
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: RouteShape(polyline: r.polyline, strokeWidth: 2),
-                    ),
+                    RouteThumb(polyline: r.polyline),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(

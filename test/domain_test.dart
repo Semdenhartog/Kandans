@@ -29,6 +29,7 @@ import 'package:runwise/domain/run_filter.dart';
 import 'package:runwise/domain/intervals.dart';
 import 'package:runwise/domain/run_export.dart';
 import 'package:runwise/domain/route_drawing.dart';
+import 'package:runwise/domain/route_photos.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -926,6 +927,55 @@ void main() {
       }
       expect(r.distance, lessThan(5));
       expect(r.movingSeconds, greaterThan(40));
+    });
+  });
+
+  group('foto\'s langs de route', () {
+    // Route van 3 km naar het oosten.
+    final t = RouteTrack([for (var i = 0; i <= 30; i++) LatLng(52.0, 5.0 + i * 100 / 68540)]);
+    test('punten gelijkmatig verdeeld met looprichting', () {
+      final s = photoSamples(t, every: 500);
+      expect(s.length, 6);
+      expect(s.first.meters, closeTo(250, 5));
+      expect(s.first.bearing, closeTo(90, 2));
+      expect(photoSamples(t, max: 3).length, 3);
+    });
+    test('straatfoto\'s van de server', () {
+      final s = photoSamples(t, every: 500);
+      final photos = parseStreetPhotos({
+        'photos': [
+          {'index': 2, 'id': 'b', 'url': 'https://x/b.jpg', 'lat': 52.0, 'lon': 5.02, 'captured_at': 1700000000000, 'creator': 'piet'},
+          {'index': 0, 'id': 'a', 'url': 'https://x/a.jpg', 'lat': 52.0, 'lon': 5.004},
+          {'index': 99, 'id': 'z', 'url': 'https://x/z.jpg', 'lat': 52.0, 'lon': 5.0},
+        ],
+      }, s);
+      expect(photos.length, 2);
+      expect(photos.first.url, 'https://x/a.jpg');
+      expect(photos.last.credit, contains('piet'));
+      expect(photos.last.link, contains('pKey=b'));
+    });
+    test('bezienswaardigheden dicht bij de route', () {
+      final body = '{"query":{"pages":['
+          '{"title":"Molen De Hoop","coordinates":[{"lat":52.0005,"lon":5.0146}],"thumbnail":{"source":"https://w/m.jpg"},"description":"molen"},'
+          '{"title":"Ver weg","coordinates":[{"lat":52.02,"lon":5.01}],"thumbnail":{"source":"https://w/v.jpg"}},'
+          '{"title":"Zonder foto","coordinates":[{"lat":52.0,"lon":5.01}]}'
+          ']}}';
+      final l = parseWikipediaLandmarks(body, t);
+      expect(l.length, 1);
+      expect(l.first.title, 'Molen De Hoop');
+      expect(l.first.meters, closeTo(1000, 30));
+      expect(l.first.link, contains('Molen_De_Hoop'));
+      final merged = mergeRoutePhotos([
+        RoutePhoto(source: PhotoSource.street, url: 'a', thumb: 'a', point: t.at(950), meters: 950),
+        RoutePhoto(source: PhotoSource.street, url: 'b', thumb: 'b', point: t.at(2000), meters: 2000),
+      ], l);
+      expect(merged.length, 2);
+      expect(merged.first.source, PhotoSource.landmark);
+    });
+    test('vakje om de route', () {
+      final b = routeBounds(t.points, marginM: 200);
+      expect(b.south, lessThan(52.0));
+      expect(b.east, greaterThan(5.0438));
     });
   });
 }

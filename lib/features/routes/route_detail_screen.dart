@@ -24,6 +24,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import 'elevation_profile.dart';
 import 'route_map.dart';
+import 'route_photos_strip.dart';
 import 'route_map_screen.dart';
 
 /// Huidig weer bij de start van een route.
@@ -373,6 +374,13 @@ class _MapAndProfileState extends ConsumerState<_MapAndProfile> {
             child: ElevationProfileChart(profile: profile, highlight: _highlight),
           ),
         ],
+        const SizedBox(height: 12),
+        RoutePhotosCard(
+          polyline: r.polyline,
+          length: r.distanceMeters,
+          reversed: widget.reversed,
+          onHighlight: (f) => _highlight.value = f,
+        ),
         const SizedBox(height: 12),
         _PoiCard(
           pois: pois,
