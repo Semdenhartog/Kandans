@@ -57,21 +57,34 @@ function dist(lat1: number, lon1: number, lat2: number, lon2: number) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-async function nearPoint(key: string, lat: number, lon: number, bearing: number | null): Promise<MlyImage | null> {
-  // Vakje van ongeveer 90 x 90 m rond het punt.
-  const dLat = 0.0004, dLon = 0.0006;
+let rawSeen = 0;
+let withThumb = 0;
+
+async function query(key: string, lat: number, lon: number, dLat: number, dLon: number) {
   const bbox = [lon - dLon, lat - dLat, lon + dLon, lat + dLat].map((v) => v.toFixed(6)).join(",");
   const fields = "id,thumb_1024_url,thumb_256_url,computed_geometry,geometry,captured_at,is_pano,compass_angle,computed_compass_angle,creator";
   const url = `https://graph.mapillary.com/images?access_token=${encodeURIComponent(key)}&fields=${fields}&bbox=${bbox}&limit=25`;
   const res = await fetch(url, { signal: AbortSignal.timeout(12_000) });
-  if (res.status === 401 || res.status === 403) throw new Error("bad_token");
+  if (res.status === 401 || res.status === 403) {
+    console.error("mapillary auth", res.status, (await res.text()).slice(0, 200));
+    throw new Error("bad_token");
+  }
   if (res.status === 429) throw new Error("rate_limit");
   if (!res.ok) {
-    console.error("mapillary", res.status, (await res.text()).slice(0, 200));
-    return null;
+    console.error("mapillary", res.status, (await res.text()).slice(0, 300));
+    return [] as MlyImage[];
   }
   const data = await res.json();
   const list = (data.data ?? []) as MlyImage[];
+  rawSeen += list.length;
+  withThumb += list.filter((im) => im.thumb_1024_url).length;
+  return list;
+}
+
+async function nearPoint(key: string, lat: number, lon: number, bearing: number | null): Promise<MlyImage | null> {
+  // Eerst een vakje van ongeveer 90 x 90 m rond het punt, anders ruimer (ongeveer 250 x 250 m).
+  let list = await query(key, lat, lon, 0.0004, 0.0006);
+  if (list.length === 0) list = await query(key, lat, lon, 0.0011, 0.0018);
   let best: MlyImage | null = null;
   let bestScore = -Infinity;
   const now = Date.now();
@@ -106,6 +119,8 @@ Deno.serve(async (req) => {
     .filter((p: number[]) => p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]) && Math.abs(p[0]) <= 90 && Math.abs(p[1]) <= 180);
   if (points.length === 0) return json(400, { error: "Geen punten ontvangen." });
 
+  rawSeen = 0;
+  withThumb = 0;
   try {
     const out: Record<string, unknown>[] = [];
     const seen = new Set<string>();
@@ -115,6 +130,7 @@ Deno.serve(async (req) => {
       const found = await Promise.all(batch.map((p: number[]) =>
         nearPoint(key, p[0], p[1], p.length > 2 && Number.isFinite(p[2]) ? p[2] : null).catch((e) => {
           if (e instanceof Error && (e.message === "bad_token" || e.message === "rate_limit")) throw e;
+          console.error("punt mislukt", e instanceof Error ? e.message : String(e));
           return null;
         })
       ));
@@ -135,6 +151,7 @@ Deno.serve(async (req) => {
         });
       });
     }
+    console.log(`street-photos: ${points.length} punten, ${rawSeen} beelden gevonden (${withThumb} met foto), ${out.length} gekozen`);
     return json(200, { photos: out });
   } catch (e) {
     if (e instanceof Error && e.message === "bad_token") {

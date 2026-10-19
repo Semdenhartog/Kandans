@@ -175,15 +175,8 @@ class _ProfilePainter extends CustomPainter {
       ..lineTo(x(profile.last.meters), chart.bottom)
       ..lineTo(x(profile.first.meters), chart.bottom)
       ..close();
-    canvas.drawPath(
-      area,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [RwColors.accent.withValues(alpha: 0.45), RwColors.accent.withValues(alpha: 0.02)],
-        ).createShader(chart),
-    );
+    // Effen vlak (geen kleurverloop): sommige Samsung-toestellen tekenen een verloop-shader niet.
+    canvas.drawPath(area, Paint()..color = RwColors.accent.withValues(alpha: 0.22));
     canvas.drawPath(
       line,
       Paint()

@@ -541,13 +541,13 @@ class _PoiCard extends StatelessWidget {
     final water = pois.where((p) => p.kind == PoiKind.water).length;
     final toilets = pois.length - water;
     return RwCard(
-      title: 'ONDERWEG: WATER EN TOILET',
+      title: 'WATER EN TOILET',
       child: loading && pois.isEmpty
           ? const Row(
               children: [
                 SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                 SizedBox(width: 10),
-                Text('Zoeken langs je route…', style: TextStyle(color: RwColors.muted)),
+                Expanded(child: Text('Zoeken in OpenStreetMap… dit kan even duren.', style: TextStyle(color: RwColors.muted))),
               ],
             )
           : failed
