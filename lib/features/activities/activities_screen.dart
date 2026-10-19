@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -9,15 +13,24 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
+import '../../domain/run_export.dart';
+import '../../domain/run_filter.dart';
 import '../../domain/weekly_load.dart';
 import '../record/record_run_screen.dart';
 import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 
-class ActivitiesScreen extends ConsumerWidget {
+class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
 
-  Future<void> _delete(BuildContext context, WidgetRef ref, Activity a) async {
+  @override
+  ConsumerState<ActivitiesScreen> createState() => _ActivitiesScreenState();
+}
+
+class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
+  RunFilter _filter = const RunFilter();
+
+  Future<void> _delete(Activity a) async {
     final ok = await confirmDialog(
       context,
       title: 'Run verwijderen?',
@@ -28,27 +41,95 @@ class ActivitiesScreen extends ConsumerWidget {
       await ref.read(repositoryProvider).deleteActivity(a.id!);
       ref.invalidate(activitiesProvider);
     } catch (e) {
-      if (context.mounted) showMessage(context, friendlyError(e), error: true);
+      if (mounted) showMessage(context, friendlyError(e), error: true);
     }
   }
 
+  Future<void> _export(bool gpx) async {
+    final all = ref.read(activitiesProvider).value ?? const <Activity>[];
+    // Strava-runs exporteer je in Strava zelf; hier alleen je eigen runs.
+    final runs = all.where((a) => a.source != 'strava').toList();
+    if (runs.isEmpty) {
+      showMessage(context, 'Er zijn nog geen eigen runs om te exporteren.');
+      return;
+    }
+    final shoes = {for (final s in ref.read(shoesProvider).value ?? const <Shoe>[]) if (s.id != null) s.id!: s.name};
+    final routes = {for (final r in ref.read(routesProvider).value ?? const <RunRoute>[]) if (r.id != null) r.id!: r.name};
+    final date = DateTime.now().toIso8601String().substring(0, 10);
+    final String text, name, mime;
+    if (gpx) {
+      if (!runs.any((a) => a.hasTrack)) {
+        showMessage(context, 'Geen runs met een GPS-spoor om te exporteren.');
+        return;
+      }
+      text = runsGpx(runs);
+      name = 'runwise-sporen-$date.gpx';
+      mime = 'application/gpx+xml';
+    } else {
+      text = runsCsv(runs, shoeNames: shoes, routeNames: routes);
+      name = 'runwise-runs-$date.csv';
+      mime = 'text/csv';
+    }
+    try {
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(Uint8List.fromList(utf8.encode(text)), mimeType: mime, name: name)],
+        subject: 'Mijn runs uit RunWise',
+      ));
+    } catch (e) {
+      if (mounted) showMessage(context, 'Exporteren is niet gelukt: ${friendlyError(e)}', error: true);
+    }
+  }
+
+  Future<void> _openFilter() async {
+    final f = await showModalBottomSheet<RunFilter>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _FilterSheet(initial: _filter),
+    );
+    if (f != null) setState(() => _filter = f);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final activities = ref.watch(activitiesProvider);
     final records = ref.watch(recordsProvider);
+    final active = _filter.activeCount;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mijn runs'),
         actions: [
           IconButton(
-            tooltip: 'Run met de hand toevoegen',
-            icon: const Icon(Icons.edit_note),
-            onPressed: () => context.go('/runs/new'),
+            tooltip: active == 0 ? 'Runs filteren' : 'Filters ($active aan)',
+            icon: Badge(
+              isLabelVisible: active > 0,
+              label: Text('$active'),
+              child: const Icon(Icons.filter_list),
+            ),
+            onPressed: _openFilter,
           ),
           IconButton(
             tooltip: 'Mijn records',
             icon: const Icon(Icons.emoji_events_outlined),
             onPressed: () => context.go('/runs/records'),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Meer',
+            onSelected: (v) {
+              switch (v) {
+                case 'new':
+                  context.go('/runs/new');
+                case 'csv':
+                  _export(false);
+                case 'gpx':
+                  _export(true);
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
+              PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
+              PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text('Exporteer GPS-sporen (GPX)'))),
+            ],
           ),
         ],
       ),
@@ -69,11 +150,13 @@ class ActivitiesScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.directions_run,
               title: 'Nog geen runs',
-              message: 'Voeg je runs toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
+              message: 'Neem een run op met Start run, voeg er een met de hand toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
               actionLabel: 'Eerste run toevoegen',
               onAction: () => context.go('/runs/new'),
             );
           }
+          final shown = _filter.apply(list);
+          final km = shown.fold<double>(0, (s, a) => s + a.distanceMeters);
           return RefreshIndicator(
             onRefresh: () async {
               try {
@@ -86,16 +169,35 @@ class ActivitiesScreen extends ConsumerWidget {
             },
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              itemCount: list.length + 1,
+              itemCount: shown.length + 2,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, i) {
-                if (i == 0) return _WeekSummary(activities: list);
-                final a = list[i - 1];
+                if (i == 0) return _Overview(activities: list);
+                if (i == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _filter.isEmpty
+                                ? 'ALLE RUNS · ${list.length}'
+                                : '${shown.length} VAN ${list.length} RUNS · ${Fmt.km(km, decimals: 0)}',
+                            style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4),
+                          ),
+                        ),
+                        if (!_filter.isEmpty)
+                          TextButton(onPressed: () => setState(() => _filter = const RunFilter()), child: const Text('Wis filters')),
+                      ],
+                    ),
+                  );
+                }
+                final a = shown[i - 2];
                 return _ActivityTile(
                   activity: a,
                   badges: records.badgesFor(a),
                   onTap: a.id == null ? null : () => context.go('/runs/${a.id}'),
-                  onDelete: () => _delete(context, ref, a),
+                  onDelete: () => _delete(a),
                 );
               },
             ),
@@ -106,71 +208,93 @@ class ActivitiesScreen extends ConsumerWidget {
   }
 }
 
-class _WeekSummary extends StatelessWidget {
-  const _WeekSummary({required this.activities});
+/// Bovenaan Runs: de week in bolletjes (zoals Runna) en totalen per week, maand of jaar.
+class _Overview extends StatefulWidget {
+  const _Overview({required this.activities});
   final List<Activity> activities;
 
   @override
+  State<_Overview> createState() => _OverviewState();
+}
+
+class _OverviewState extends State<_Overview> {
+  Period _period = Period.week;
+
+  static const _months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  static const _days = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'];
+
+  String _barLabel(PeriodTotal t, bool current) {
+    if (current) return switch (_period) { Period.week => 'nu', Period.month => _months[t.start.month - 1], Period.year => '${t.start.year}' };
+    return switch (_period) {
+      Period.week => '${t.start.day}/${t.start.month}',
+      Period.month => _months[t.start.month - 1],
+      Period.year => '${t.start.year}',
+    };
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final runs = widget.activities;
     final now = DateTime.now();
-    final weeks = weeklyTotals(activities, now);
-    final week = weeks.last;
-    final check = loadCheck(activities, now);
-    final streak = weekStreak(activities, now);
-    final maxKm = weeks.map((w) => w.km).fold<double>(0, (a, b) => a > b ? a : b);
+    final strip = weekStrip(runs, now);
+    final totals = periodTotals(runs, now, _period, count: switch (_period) { Period.week => 8, Period.month => 12, Period.year => 5 });
+    final cur = totals.last;
+    final check = loadCheck(runs, now);
+    final streak = weekStreak(runs, now);
+    final maxKm = totals.map((w) => w.km).fold<double>(0, (a, b) => a > b ? a : b);
+    final weekKm = strip.fold<double>(0, (s, d) => s + d.km);
     final msg = check.message;
+    final periodWord = switch (_period) { Period.week => 'deze week', Period.month => 'deze maand', Period.year => 'dit jaar' };
     return RwCard(
-      title: 'DEZE WEEK',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(week.km * 1000, decimals: 1))),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Runs', value: '${week.runs}')),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(week.seconds))),
+              const Expanded(
+                child: Text('DEZE WEEK',
+                    style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+              ),
+              Text(Fmt.km(weekKm * 1000, decimals: 1), style: const TextStyle(fontWeight: FontWeight.w700, color: RwColors.accent)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Semantics(
-            label: 'Kilometers per week, laatste 8 weken: ${weeks.map((w) => w.km.round()).join(', ')}.',
+            label: 'Deze week: ${[for (final d in strip) if (d.runs > 0) '${_days[d.date.weekday - 1]} ${d.km.toStringAsFixed(1)} km'].join(', ')}.',
             excludeSemantics: true,
-            child: SizedBox(
-              height: 92,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  for (final (i, w) in weeks.indexed)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(w.km < 0.5 ? '' : '${w.km.round()}',
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    color: i == weeks.length - 1 ? RwColors.accent : RwColors.subtle,
-                                    fontWeight: FontWeight.w600)),
-                            const SizedBox(height: 3),
-                            Container(
-                              height: maxKm <= 0 ? 3 : 3 + 54 * (w.km / maxKm),
-                              decoration: BoxDecoration(
-                                color: i == weeks.length - 1 ? RwColors.accent : RwColors.bar,
-                                borderRadius: BorderRadius.circular(5),
-                              ),
+            child: Row(
+              children: [
+                for (final d in strip)
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(_days[d.date.weekday - 1],
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: d.isToday ? RwColors.text : RwColors.subtle,
+                                fontWeight: d.isToday ? FontWeight.w700 : FontWeight.w400)),
+                        const SizedBox(height: 5),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: d.runs > 0 ? RwColors.accent : (d.isFuture ? Colors.transparent : RwColors.surfaceHigh),
+                            border: Border.all(
+                              color: d.isToday ? RwColors.text : (d.runs > 0 ? RwColors.accent : RwColors.border),
+                              width: d.isToday ? 2 : 1,
                             ),
-                            const SizedBox(height: 4),
-                            Text(i == weeks.length - 1 ? 'nu' : '${w.start.day}/${w.start.month}',
-                                style: const TextStyle(fontSize: 10, color: RwColors.subtle)),
-                          ],
+                          ),
+                          child: d.runs > 0
+                              ? Text(d.km >= 10 ? d.km.round().toString() : d.km.toStringAsFixed(1).replaceAll('.', ','),
+                                  style: const TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w800, fontSize: 12))
+                              : null,
                         ),
-                      ),
+                      ],
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
           if (streak >= 2) ...[
@@ -180,7 +304,8 @@ class _WeekSummary extends StatelessWidget {
                 const Icon(Icons.local_fire_department, color: RwColors.accent, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text('$streak weken op rij gelopen${week.runs == 0 ? '. Loop deze week om je reeks te houden.' : '.'}',
+                  child: Text(
+                      '$streak weken op rij gelopen${strip.every((d) => d.runs == 0) ? '. Loop deze week om je reeks te houden.' : '.'}',
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ],
@@ -198,7 +323,182 @@ class _WeekSummary extends StatelessWidget {
               ],
             ),
           ],
+          const Divider(height: 28),
+          SegmentedButton<Period>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(value: Period.week, label: Text('Week')),
+              ButtonSegment(value: Period.month, label: Text('Maand')),
+              ButtonSegment(value: Period.year, label: Text('Jaar')),
+            ],
+            selected: {_period},
+            onSelectionChanged: (s) => setState(() => _period = s.first),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(cur.km * 1000, decimals: cur.km >= 100 ? 0 : 1))),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Runs', value: '${cur.runs}')),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(cur.seconds))),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Tempo', value: cur.paceSecPerKm <= 0 ? '–' : Fmt.pace(cur.paceSecPerKm).replaceAll(' /km', ''))),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Semantics(
+            label: 'Kilometers per ${_period == Period.week ? 'week' : _period == Period.month ? 'maand' : 'jaar'}: '
+                '${totals.map((w) => w.km.round()).join(', ')}. Laatste is $periodWord.',
+            excludeSemantics: true,
+            child: SizedBox(
+              height: 96,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final (i, w) in totals.indexed)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FittedBox(
+                              child: Text(w.km < 0.5 ? '' : '${w.km.round()}',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: i == totals.length - 1 ? RwColors.accent : RwColors.subtle,
+                                      fontWeight: FontWeight.w600)),
+                            ),
+                            const SizedBox(height: 3),
+                            Container(
+                              height: maxKm <= 0 ? 3 : 3 + 54 * (w.km / maxKm),
+                              decoration: BoxDecoration(
+                                color: i == totals.length - 1 ? RwColors.accent : RwColors.bar,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            FittedBox(
+                              child: Text(_barLabel(w, i == totals.length - 1),
+                                  style: const TextStyle(fontSize: 10, color: RwColors.subtle)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Filteren op afstand, bron, route, schoen, wind en notities.
+class _FilterSheet extends ConsumerStatefulWidget {
+  const _FilterSheet({required this.initial});
+  final RunFilter initial;
+
+  @override
+  ConsumerState<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends ConsumerState<_FilterSheet> {
+  late RunFilter _f = widget.initial;
+
+  static const _sources = {
+    'runwise': 'Opgenomen in RunWise',
+    'strava': 'Strava',
+    'health_connect': 'Horloge',
+    'manual': 'Met de hand',
+  };
+
+  Widget _label(String t) => Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 8),
+        child: Text(t, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final routes = ref.watch(routesProvider).value ?? const <RunRoute>[];
+    final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Runs filteren', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+              _label('AFSTAND'),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                for (final b in DistanceBand.values)
+                  ChoiceChip(label: Text(b.label), selected: _f.band == b, onSelected: (_) => setState(() => _f = _f.copyWith(band: b))),
+              ]),
+              _label('BRON'),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                ChoiceChip(label: const Text('Alles'), selected: _f.source == null, onSelected: (_) => setState(() => _f = _f.copyWith(source: () => null))),
+                for (final e in _sources.entries)
+                  ChoiceChip(label: Text(e.value), selected: _f.source == e.key, onSelected: (_) => setState(() => _f = _f.copyWith(source: () => e.key))),
+              ]),
+              if (routes.isNotEmpty) ...[
+                _label('ROUTE'),
+                DropdownButtonFormField<String?>(
+                  initialValue: routes.any((r) => r.id == _f.routeId) ? _f.routeId : null,
+                  isExpanded: true,
+                  decoration: const InputDecoration(isDense: true),
+                  items: [
+                    const DropdownMenuItem<String?>(value: null, child: Text('Alle routes')),
+                    for (final r in routes) DropdownMenuItem<String?>(value: r.id, child: Text(r.name, overflow: TextOverflow.ellipsis)),
+                  ],
+                  onChanged: (v) => setState(() => _f = _f.copyWith(routeId: () => v)),
+                ),
+              ],
+              if (shoes.isNotEmpty) ...[
+                _label('SCHOEN'),
+                DropdownButtonFormField<String?>(
+                  initialValue: shoes.any((s) => s.id == _f.shoeId) ? _f.shoeId : null,
+                  isExpanded: true,
+                  decoration: const InputDecoration(isDense: true),
+                  items: [
+                    const DropdownMenuItem<String?>(value: null, child: Text('Alle schoenen')),
+                    for (final s in shoes) DropdownMenuItem<String?>(value: s.id, child: Text(s.name, overflow: TextOverflow.ellipsis)),
+                  ],
+                  onChanged: (v) => setState(() => _f = _f.copyWith(shoeId: () => v)),
+                ),
+              ],
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Alleen met veel wind'),
+                subtitle: const Text('20 km/u of meer'),
+                value: _f.windyOnly,
+                onChanged: (v) => setState(() => _f = _f.copyWith(windyOnly: v)),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Alleen met gevoel of notitie'),
+                value: _f.withNote,
+                onChanged: (v) => setState(() => _f = _f.copyWith(withNote: v)),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(onPressed: () => Navigator.pop(context, const RunFilter()), child: const Text('Wissen')),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(onPressed: () => Navigator.pop(context, _f), child: const Text('Toon runs')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

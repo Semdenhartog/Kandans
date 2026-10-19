@@ -82,6 +82,28 @@ class RouteGeneratorService {
       throw Exception(details['error'] ?? 'Routes maken is niet gelukt. Probeer het later opnieuw.');
     }
   }
+
+  /// Volgt paden en wegen langs de getikte punten (zelf een route tekenen).
+  Future<GeneratedLoop> followPath(List<LatLng> points) async {
+    try {
+      final res = await _db.functions.invoke('route-generator', body: {
+        'mode': 'path',
+        'points': [for (final p in points) [p.lat, p.lon]],
+      });
+      final r = (res.data as Map)['route'] as Map;
+      return GeneratedLoop(
+        points: [
+          for (final c in (r['coordinates'] as List).cast<List>())
+            LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble(), c.length > 2 ? (c[2] as num).toDouble() : null),
+        ],
+        distanceMeters: (r['distance_m'] as num).toDouble(),
+        ascentMeters: (r['ascent_m'] as num).toDouble(),
+      );
+    } on FunctionException catch (e) {
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      throw Exception(details['error'] ?? 'De route volgen is niet gelukt. Probeer het opnieuw.');
+    }
+  }
 }
 
 final routeGeneratorProvider = Provider<RouteGeneratorService>(

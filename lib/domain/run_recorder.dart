@@ -45,6 +45,7 @@ class RunRecording {
   static const pauseBelow = 0.6; // m/s
   static const pauseAfter = Duration(seconds: 8);
   static const resumeAbove = 1.2; // m/s
+  static const jitterFactor = 0.4;
 
   void start(DateTime t) {
     status = RecorderStatus.running;
@@ -96,6 +97,19 @@ class RunRecording {
         if (status == RecorderStatus.autoPaused && v >= resumeAbove) status = RecorderStatus.running;
       }
       if (status == RecorderStatus.autoPaused) return null;
+    }
+
+    // GPS-ruis: kleine verschuivingen binnen de meetonnauwkeurigheid nog niet meetellen,
+    // maar optellen tot je echt verder bent. Zo loopt de afstand niet op als je stilstaat.
+    final jitter = (math.max(prev.accuracy, fix.accuracy) * jitterFactor).clamp(1.0, 8.0);
+    if (d < jitter) {
+      if (dt < 10) {
+        _last = prev;
+        return null;
+      }
+      // Al 10 s binnen de ruis: nieuw beginpunt, geen afstand. Zonder autopauze loopt de klok door.
+      if (!autoPause) movingSeconds += dt;
+      return null;
     }
 
     distance += d;

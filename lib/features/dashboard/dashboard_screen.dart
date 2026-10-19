@@ -26,6 +26,9 @@ import '../../domain/availability.dart';
 import '../planner/availability_provider.dart';
 import '../planner/week_planner_screen.dart';
 import '../record/record_run_screen.dart';
+import '../../domain/dashboard_layout.dart';
+import '../../domain/verdict.dart';
+import 'dashboard_layout_sheet.dart';
 import 'month_challenge_card.dart';
 import 'dashboard_providers.dart';
 
@@ -117,6 +120,43 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       error: (_, _) => 'loper',
     );
     final selectedRoute = routes.where((r) => r.id == _routeId).firstOrNull;
+    final layout = ref.watch(dashLayoutProvider);
+
+    final settings = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _TypePicker(
+          value: _type,
+          onChanged: (t) {
+            setState(() => _type = t);
+            NotificationService.instance.rememberTrainingType(t).then((_) => _rescheduleReminder()).ignore();
+          },
+        ),
+        const SizedBox(height: 12),
+        _RouteAndDuration(
+          routes: routes,
+          routeId: _routeId,
+          durationMinutes: _durationMinutes,
+          onRoute: (id) => setState(() {
+            _routeId = id;
+            final r = routes.where((x) => x.id == id).firstOrNull;
+            if (r?.estimatedDurationSeconds != null) {
+              _durationMinutes = (r!.estimatedDurationSeconds! / 60).round().clamp(10, 300);
+            }
+          }),
+          onDuration: (m) => setState(() => _durationMinutes = m),
+        ),
+      ],
+    );
+    const extras = <DashCard, Widget>{
+      DashCard.planner: WeekPlannerEntry(),
+      DashCard.month: MonthChallengeCard(),
+      DashCard.live: LiveShareEntryCard(),
+    };
+    final extrasOnly = [
+      for (final c in layout.visible)
+        if (extras[c] case final w?) ...[const SizedBox(height: 12), w],
+    ];
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -131,9 +171,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
             children: [
-              Text(
-                '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Indeling van Vandaag aanpassen',
+                    icon: const Icon(Icons.tune, color: RwColors.subtle),
+                    onPressed: () => showDashLayoutSheet(context),
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -144,44 +196,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 style: const TextStyle(color: RwColors.subtle),
               ),
-              const SizedBox(height: 20),
-              _TypePicker(
-                value: _type,
-                onChanged: (t) {
-                  setState(() => _type = t);
-                  NotificationService.instance.rememberTrainingType(t).then((_) => _rescheduleReminder()).ignore();
-                },
-              ),
-              const SizedBox(height: 12),
-              _RouteAndDuration(
-                routes: routes,
-                routeId: _routeId,
-                durationMinutes: _durationMinutes,
-                onRoute: (id) => setState(() {
-                  _routeId = id;
-                  final r = routes.where((x) => x.id == id).firstOrNull;
-                  if (r?.estimatedDurationSeconds != null) {
-                    _durationMinutes = (r!.estimatedDurationSeconds! / 60).round().clamp(10, 300);
-                  }
-                }),
-                onDuration: (m) => setState(() => _durationMinutes = m),
-              ),
-              const SizedBox(height: 20),
-              forecast.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.only(top: 60),
-                  child: LoadingView(),
-                ),
-                error: (e, _) => ErrorView(
-                  message: friendlyError(e),
-                  onRetry: () => ref.invalidate(forecastProvider),
-                ),
+              const SizedBox(height: 16),
+              ...forecast.when<List<Widget>>(
+                loading: () => [
+                  settings,
+                  const Padding(padding: EdgeInsets.only(top: 60), child: LoadingView()),
+                  ...extrasOnly,
+                ],
+                error: (e, _) => [
+                  settings,
+                  const SizedBox(height: 20),
+                  ErrorView(message: friendlyError(e), onRetry: () => ref.invalidate(forecastProvider)),
+                  ...extrasOnly,
+                ],
                 data: (f) {
                   if (f.hours.isEmpty) {
-                    return ErrorView(
-                      message: 'Er is geen weerdata beschikbaar.',
-                      onRetry: () => ref.invalidate(forecastProvider),
-                    );
+                    return [
+                      settings,
+                      const SizedBox(height: 20),
+                      ErrorView(message: 'Er is geen weerdata beschikbaar.', onRetry: () => ref.invalidate(forecastProvider)),
+                      ...extrasOnly,
+                    ];
                   }
                   final planner = StartTimePlanner(
                     forecast: f,
@@ -191,21 +226,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     rain: rain,
                     availability: ref.watch(availabilityProvider).value ?? Availability.always,
                   );
-                  return _Results(
-                    planner: planner,
-                    type: _type,
-                    insightsPersonal: insights.isPersonal,
-                    rain: rain,
-                    air: ref.watch(airQualityProvider).value ?? const [],
-                  );
+                  return [
+                    _Results(
+                      planner: planner,
+                      type: _type,
+                      insightsPersonal: insights.isPersonal,
+                      rain: rain,
+                      air: ref.watch(airQualityProvider).value ?? const [],
+                      settings: settings,
+                      layout: layout,
+                      extras: extras,
+                    ),
+                  ];
                 },
               ),
-              const SizedBox(height: 12),
-              const WeekPlannerEntry(),
-              const SizedBox(height: 12),
-              const MonthChallengeCard(),
-              const SizedBox(height: 12),
-              const LiveShareEntryCard(),
             ],
           ),
         ),
@@ -319,12 +353,18 @@ class _Results extends StatefulWidget {
     required this.insightsPersonal,
     this.rain,
     this.air = const [],
+    required this.settings,
+    required this.layout,
+    required this.extras,
   });
   final StartTimePlanner planner;
   final TrainingType type;
   final bool insightsPersonal;
   final RainNowcast? rain;
   final List<AirQuality> air;
+  final Widget settings;
+  final DashLayout layout;
+  final Map<DashCard, Widget> extras;
 
   @override
   State<_Results> createState() => _ResultsState();
@@ -332,68 +372,106 @@ class _Results extends StatefulWidget {
 
 class _ResultsState extends State<_Results> {
   DateTime? _selected;
+  bool _goodOnly = false;
 
   @override
   Widget build(BuildContext context) {
     final all = widget.planner.scoreAll(widget.type);
+    final extras = [
+      for (final c in widget.layout.visible)
+        if (widget.extras[c] case final w?) ...[const SizedBox(height: 12), w],
+    ];
     if (all.isEmpty) {
       final custom = !widget.planner.availability.isAlways;
-      return EmptyState(
-        icon: Icons.nights_stay_outlined,
-        title: 'Geen loopmomenten meer',
-        message: custom
-            ? 'Binnen je looptijden is er de komende 36 uur geen moment meer. Pas je looptijden aan of kijk in de weekplanner.'
-            : 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
-        actionLabel: 'Weekplanner',
-        onAction: () => openWeekPlanner(context),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          widget.settings,
+          const SizedBox(height: 20),
+          EmptyState(
+            icon: Icons.nights_stay_outlined,
+            title: 'Geen loopmomenten meer',
+            message: custom
+                ? 'Binnen je looptijden is er de komende 36 uur geen moment meer. Pas je looptijden aan of kijk in de weekplanner.'
+                : 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
+            actionLabel: 'Weekplanner',
+            onAction: () => openWeekPlanner(context),
+          ),
+          ...extras,
+        ],
       );
     }
     // Beste moment op 5 minuten nauwkeurig; de staafjes blijven per uur.
     final best = widget.planner.bestPrecise(widget.type) ?? all.reduce((a, b) => b.score > a.score ? b : a);
-    final now = widget.planner.scoreAt(StartTimePlanner.roundUp(DateTime.now(), 5), widget.type);
+    final nowStart = StartTimePlanner.roundUp(DateTime.now(), 5);
+    final now = widget.planner.scoreAt(nowStart, widget.type);
+    final verdict = runVerdict(now, best,
+        nowAllowed: widget.planner.availability.allows(nowStart, widget.planner.durationMinutes), time: Fmt.time);
     final shown = _selected == null
         ? best
         : all.firstWhere((s) => s.start == _selected, orElse: () => best);
     final isBest = identical(shown, best) || shown.start == best.start;
+    final bars = _goodOnly ? goodHoursOnly(all) : all;
+    final warnings = runWarnings(widget.planner.forecast, shown.start, widget.planner.durationMinutes,
+        air: airAt(widget.air, shown.start));
+
+    Widget? card(DashCard c) => switch (c) {
+          DashCard.warnings => warnings.isEmpty ? null : _WarningsCard(warnings: warnings),
+          DashCard.clothing => _ClothingCard(
+              advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes),
+              at: shown.start,
+            ),
+          DashCard.rain => widget.rain != null && widget.rain!.points.isNotEmpty ? _RainCard(rain: widget.rain!) : null,
+          DashCard.now => !isBest || now.start != best.start ? _NowCard(now: now, best: best) : null,
+          DashCard.hours => RwCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text('LOOPOMSTANDIGHEDEN PER UUR',
+                            style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+                      ),
+                      FilterChip(
+                        label: const Text('Alleen goede uren'),
+                        selected: _goodOnly,
+                        onSelected: (v) => setState(() => _goodOnly = v),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  if (bars.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text('Geen uren met een goede score (70 of hoger) in de komende 36 uur.',
+                          style: TextStyle(color: RwColors.muted)),
+                    )
+                  else
+                    _HourBars(
+                      scores: bars,
+                      best: best,
+                      selected: shown.start,
+                      onTap: (s) => setState(() => _selected = s.start),
+                    ),
+                ],
+              ),
+            ),
+          DashCard.routeWind => shown.routeWind != null ? _RouteWindCard(score: shown, track: widget.planner.track) : null,
+          _ => widget.extras[c],
+        };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _VerdictBanner(verdict: verdict, onShowBest: () => setState(() => _selected = null)),
+        const SizedBox(height: 16),
+        widget.settings,
+        const SizedBox(height: 16),
         _BestCard(score: shown, isBest: isBest),
-        const SizedBox(height: 12),
-        if (runWarnings(widget.planner.forecast, shown.start, widget.planner.durationMinutes,
-                air: airAt(widget.air, shown.start))
-            case final warnings when warnings.isNotEmpty) ...[
-          _WarningsCard(warnings: warnings),
-          const SizedBox(height: 12),
-        ],
-        _ClothingCard(
-          advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes),
-          at: shown.start,
-        ),
-        const SizedBox(height: 12),
-        if (widget.rain != null && widget.rain!.points.isNotEmpty) ...[
-          _RainCard(rain: widget.rain!),
-          const SizedBox(height: 12),
-        ],
-        if (!isBest || now.start != best.start)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _NowCard(now: now, best: best),
-          ),
-        RwCard(
-          title: 'LOOPOMSTANDIGHEDEN PER UUR',
-          child: _HourBars(
-            scores: all,
-            best: best,
-            selected: shown.start,
-            onTap: (s) => setState(() => _selected = s.start),
-          ),
-        ),
-        if (shown.routeWind != null) ...[
-          const SizedBox(height: 12),
-          _RouteWindCard(score: shown, track: widget.planner.track),
-        ],
+        for (final c in widget.layout.visible)
+          if (card(c) case final w?) ...[const SizedBox(height: 12), w],
         const SizedBox(height: 12),
         Text(
           widget.insightsPersonal
@@ -403,6 +481,98 @@ class _ResultsState extends State<_Results> {
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+}
+
+/// Eén oordeel in één oogopslag: nu lopen, later lopen of vandaag lastig.
+class _VerdictBanner extends StatelessWidget {
+  const _VerdictBanner({required this.verdict, required this.onShowBest});
+  final RunVerdict verdict;
+  final VoidCallback onShowBest;
+
+  @override
+  Widget build(BuildContext context) {
+    final v = verdict;
+    final (color, icon) = switch (v.kind) {
+      VerdictKind.goNow => (RwColors.good, Icons.directions_run),
+      VerdictKind.later => (RwColors.accent, Icons.schedule),
+      VerdictKind.tough => (RwColors.warning, Icons.wb_cloudy_outlined),
+    };
+    final remindAt = v.best.start.subtract(const Duration(minutes: 15));
+    return Semantics(
+      container: true,
+      label: '${v.title}. ${v.detail}',
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.13),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.45)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                    child: Icon(icon, color: RwColors.background, size: 26),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(v.title,
+                            style: TextStyle(
+                                fontFamily: RwFonts.display, fontSize: 24, fontWeight: FontWeight.w800, color: color, height: 1.1)),
+                        const SizedBox(height: 3),
+                        Text(v.detail, style: const TextStyle(color: RwColors.muted, height: 1.35)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (v.kind == VerdictKind.goNow)
+                  FilledButton.icon(
+                    onPressed: () => openRecorder(context),
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Start run'),
+                  )
+                else if (remindAt.isAfter(DateTime.now()))
+                  FilledButton.icon(
+                    onPressed: () async {
+                      final ok = await setAlarm(remindAt, 'RunWise: om ${Fmt.time(v.best.start)} lopen');
+                      if (!ok && context.mounted) {
+                        showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
+                      }
+                    },
+                    icon: const Icon(Icons.alarm_add_outlined),
+                    label: Text('Wekker ${Fmt.time(remindAt)}'),
+                  ),
+                if (v.kind == VerdictKind.tough)
+                  OutlinedButton.icon(
+                    onPressed: () => openWeekPlanner(context),
+                    icon: const Icon(Icons.calendar_view_week_outlined),
+                    label: const Text('Betere dag zoeken'),
+                  ),
+                if (v.kind != VerdictKind.goNow)
+                  TextButton(onPressed: onShowBest, child: const Text('Waarom?')),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

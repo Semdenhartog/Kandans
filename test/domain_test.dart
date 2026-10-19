@@ -23,6 +23,12 @@ import 'package:runwise/data/services/air_quality_service.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
 import 'package:runwise/domain/weather_correction.dart';
 import 'package:runwise/domain/weekly_load.dart';
+import 'package:runwise/domain/verdict.dart';
+import 'package:runwise/domain/dashboard_layout.dart';
+import 'package:runwise/domain/run_filter.dart';
+import 'package:runwise/domain/intervals.dart';
+import 'package:runwise/domain/run_export.dart';
+import 'package:runwise/domain/route_drawing.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -783,6 +789,143 @@ void main() {
       expect(spokenPace(300), '5 minuten');
       expect(spokenDuration(3725), '1 uur 2 minuten');
       expect(spokenDuration(1420), '23 minuten 40');
+    });
+  });
+
+  group('oordeel bovenaan', () {
+    StartTimeScore sc(DateTime t, int score, [List<String> r = const ['Weinig wind']]) =>
+        StartTimeScore(start: t, score: score, weather: hour(t), reasons: r);
+    final t = DateTime(2026, 10, 20, 17);
+    test('nu lopen als nu bijna net zo goed is', () {
+      final v = runVerdict(sc(t, 78), sc(t.add(const Duration(hours: 2)), 81));
+      expect(v.kind, VerdictKind.goNow);
+    });
+    test('later lopen als wachten duidelijk beter is', () {
+      final v = runVerdict(sc(t, 50), sc(t.add(const Duration(hours: 2)), 80));
+      expect(v.kind, VerdictKind.later);
+      expect(v.title, 'Later lopen: 19:00');
+      expect(v.detail, startsWith('30 punten beter dan nu'));
+    });
+    test('vandaag lastig', () {
+      expect(runVerdict(sc(t, 20), sc(t, 35)).kind, VerdictKind.tough);
+    });
+    test('nu valt buiten je looptijden', () {
+      expect(runVerdict(sc(t, 80), sc(t, 80), nowAllowed: false).kind, VerdictKind.later);
+    });
+    test('alleen goede uren', () {
+      expect(goodHoursOnly([sc(t, 40), sc(t, 75), sc(t, 90)]).length, 2);
+    });
+  });
+
+  group('indeling Vandaag', () {
+    test('opslaan, lezen en nieuwe kaarten achteraan', () {
+      final l = DashLayout.standard.move(DashCard.values.indexOf(DashCard.month), 0).toggle(DashCard.rain);
+      final back = DashLayout.decode(l.encode());
+      expect(back.order.first, DashCard.month);
+      expect(back.hidden, {DashCard.rain});
+      expect(back.visible, isNot(contains(DashCard.rain)));
+      final old = DashLayout.decode('month,-rain,onbekend');
+      expect(old.order.length, DashCard.values.length);
+      expect(old.order.first, DashCard.month);
+    });
+  });
+
+  group('runs filteren en per periode', () {
+    Activity run(DateTime t, double km, {String source = 'runwise', double? wind, String? note}) =>
+        Activity(startedAt: t, distanceMeters: km * 1000, movingTimeSeconds: (km * 330).round(), source: source, windSpeedKmh: wind, note: note);
+    final now = DateTime(2026, 10, 21, 12); // woensdag
+    final runs = [
+      run(DateTime(2026, 10, 19, 8), 5),
+      run(DateTime(2026, 10, 21, 7), 12, source: 'strava', wind: 25),
+      run(DateTime(2026, 9, 3, 7), 8, note: 'zwaar'),
+      run(DateTime(2025, 6, 1, 7), 21.2),
+    ];
+    test('maand en jaar', () {
+      final m = periodTotals(runs, now, Period.month, count: 3);
+      expect(m.last.km, closeTo(17, 0.01));
+      expect(m[1].km, closeTo(8, 0.01));
+      final y = periodTotals(runs, now, Period.year, count: 2);
+      expect(y.first.km, closeTo(21.2, 0.01));
+      expect(y.last.runs, 3);
+    });
+    test('weekstrook', () {
+      final s = weekStrip(runs, now);
+      expect(s.length, 7);
+      expect(s[0].km, closeTo(5, 0.01));
+      expect(s[2].isToday, isTrue);
+      expect(s[3].isFuture, isTrue);
+    });
+    test('filters', () {
+      expect(const RunFilter(band: DistanceBand.mid).apply(runs).length, 2);
+      expect(const RunFilter(source: 'strava').apply(runs).length, 1);
+      expect(const RunFilter(windyOnly: true).apply(runs).length, 1);
+      expect(const RunFilter(withNote: true).apply(runs).length, 1);
+      expect(const RunFilter().isEmpty, isTrue);
+      expect(const RunFilter(band: DistanceBand.long, windyOnly: true).activeCount, 2);
+    });
+    test('export', () {
+      final csv = runsCsv(runs);
+      expect(csv.split('\n').where((l) => l.isNotEmpty).length, 6);
+      expect(csv, contains('2025-06-01;07:00;21.20'));
+      final gpx = runsGpx([
+        Activity(startedAt: now, distanceMeters: 1000, movingTimeSeconds: 300,
+            trackPolyline: encodePolyline(const [LatLng(52, 5), LatLng(52.001, 5), LatLng(52.002, 5)])),
+      ]);
+      expect('<trk>'.allMatches(gpx).length, 1);
+      expect('<trkpt'.allMatches(gpx).length, 3);
+    });
+  });
+
+  group('intervallen', () {
+    test('schema bouwen', () {
+      final p = IntervalPlan.build(reps: 6, workMeters: 400, restSeconds: 90);
+      expect(p.name, '6 × 400 m');
+      expect(p.reps, 6);
+      expect(p.steps.length, 1 + 6 + 5 + 1);
+      final back = IntervalPlan.fromJson(p.toJson())!;
+      expect(back.steps.length, p.steps.length);
+      expect(IntervalPlan.build(reps: 4, workMeters: 1000, restSeconds: 60).name, '4 × 1 km');
+      expect(IntervalPlan.presets.length, greaterThanOrEqualTo(4));
+    });
+    test('stappen doorlopen op tijd en afstand', () {
+      final p = IntervalPlan.build(warmupMin: 1, reps: 2, workMeters: 400, restSeconds: 60, cooldownMin: 0);
+      final tr = IntervalTracker(p);
+      expect(tr.start(0, 0).text, startsWith('Inlopen'));
+      final cues = <String>[];
+      // 3 m/s, één update per seconde.
+      for (var s = 1; s <= 600 && !tr.finished; s++) {
+        final c = tr.update(s.toDouble(), s * 3.0);
+        if (c != null) cues.add(c.text);
+      }
+      expect(tr.finished, isTrue);
+      expect(cues.where((c) => c.startsWith('Snel!')).length, 2);
+      expect(cues.first, startsWith('Nog 10 seconden'));
+      expect(cues, contains(startsWith('Nog 100 meter')));
+      expect(cues.last, startsWith('Intervallen klaar'));
+    });
+  });
+
+  group('route tekenen', () {
+    const a = LatLng(52, 5), b = LatLng(52.01, 5), c = LatLng(52.01, 5.01);
+    test('vormen', () {
+      expect(drawWaypoints([a, b, c], DrawShape.open).length, 3);
+      expect(drawWaypoints([a, b, c], DrawShape.loop).last, a);
+      expect(drawWaypoints([a, b, c], DrawShape.outAndBack), [a, b, c, b, a]);
+      expect(straightLength([a, b]), closeTo(1112, 5));
+    });
+  });
+
+  group('GPS-ruis', () {
+    test('stilstaan zonder autopauze telt geen afstand', () {
+      final t0 = DateTime(2026, 10, 20, 18);
+      final r = RunRecording(autoPause: false)..start(t0);
+      for (var s = 0; s <= 60; s++) {
+        // Ruis van ±1,5 m rond hetzelfde punt, nauwkeurigheid 10 m.
+        final jitter = (s % 2 == 0 ? 1 : -1) * 1.5 / 68540;
+        r.add(GpsFix(LatLng(52.0, 5.0 + jitter), t0.add(Duration(seconds: s)), accuracy: 10));
+      }
+      expect(r.distance, lessThan(5));
+      expect(r.movingSeconds, greaterThan(40));
     });
   });
 }
