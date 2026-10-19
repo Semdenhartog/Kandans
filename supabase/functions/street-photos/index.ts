@@ -4,7 +4,7 @@
 //   POST { points: [[lat, lon, bearing?], ...] }  (max 24)
 //     -> { photos: [{ index, id, url, thumb, lat, lon, captured_at, creator, pano }] }
 //
-// Geheim (Supabase -> Edge Functions -> Secrets): MAPILLARY_TOKEN  (client token "MLY|...")
+// Geheim (Supabase -> Edge Functions -> Secrets): MAPILLARY_TOKEN  (client token "MLY|..."; elke naam werkt)
 // Foto's © Mapillary-bijdragers, licentie CC BY-SA 4.0.
 
 const cors = {
@@ -18,12 +18,18 @@ function json(status: number, body: Record<string, unknown>) {
 }
 
 function readKey(): string {
-  for (const n of ["MAPILLARY_TOKEN", "MAPILLARY_ACCESS_TOKEN", "MAPILLARY", "mapillary", "api mapillary", "Mapillary", "MAPILLARY_CLIENT_TOKEN"]) {
+  for (const n of ["MAPILLARY_TOKEN", "MAPILLARY_ACCESS_TOKEN", "MAPILLARY", "mapillary", "api mapillary", "Mapillary", "MAPILLARY_CLIENT_TOKEN", "runwise", "RUNWISE"]) {
     try {
       const v = (Deno.env.get(n) ?? "").trim();
-      if (v) return v;
+      if (v.startsWith("MLY|")) return v;
     } catch (_) { /* ongeldige naam */ }
   }
+  // Onder een andere naam opgeslagen: herken de sleutel aan de vorm "MLY|...".
+  try {
+    for (const v of Object.values(Deno.env.toObject())) {
+      if (typeof v === "string" && v.trim().startsWith("MLY|")) return v.trim();
+    }
+  } catch (_) { /* geen toegang tot alle variabelen */ }
   return "";
 }
 
