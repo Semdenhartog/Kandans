@@ -30,7 +30,14 @@ jobs:
         run: flutter --version
 
       - name: Android-projectbestanden aanmaken
-        run: flutter create --org nl.runwise --project-name runwise --platforms android .
+        run: |
+          set -o pipefail
+          flutter create --org nl.runwise --project-name runwise --platforms android . 2>&1 | tee create.txt || {
+            grep -iE "because|version solving|error|not found|depends on|requires" create.txt | head -25 | while IFS= read -r line; do
+              echo "::error title=Pakketten::$line"
+            done
+            exit 1
+          }
 
       - name: Rechten toevoegen aan AndroidManifest.xml
         run: |
