@@ -30,7 +30,7 @@ int suggestedGoalKm(List<Activity> activities, DateTime now) {
   final active = past.where((k) => k > 0).toList();
   if (active.isEmpty) return 30;
   final avg = active.reduce((a, b) => a + b) / active.length;
-  return math.max(20, ((avg * 1.1) / 5).ceil() * 5);
+  return math.max(20, ((avg * 1.1) / 5 - 1e-9).ceil() * 5);
 }
 
 /// Voortgang van je maanduitdaging.
