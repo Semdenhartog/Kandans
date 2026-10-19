@@ -5,6 +5,7 @@
 //   GET   /strava/callback          -> Strava stuurt de gebruiker hierheen na toestemming
 //   POST  { action: "sync" }        -> haalt nieuwe runs op (met het weer van dat moment)
 //   POST  { action: "disconnect" }  -> ontkoppelt en verwijdert de Strava-runs
+//   POST  { action: "streams", activity_id } -> tijden per km en grafiek van één run
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets):
 //   STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
@@ -463,6 +464,50 @@ async function sync(db: SupabaseClient, userId: string) {
   }
 }
 
+/// Verloop van één run (tijd, afstand, hoogte, hartslag, positie) voor tijden per km en de grafiek.
+/// Eenmalig ophalen bij Strava en bewaren; daarna uit de database.
+async function streams(db: SupabaseClient, userId: string, activityId: string) {
+  const { data: act } = await db.from("activities")
+    .select("id, external_id, source, streams")
+    .eq("id", activityId).eq("user_id", userId).maybeSingle();
+  if (!act) return json(404, { error: "Run niet gevonden." });
+  if (act.source !== "strava" || !act.external_id) return json(400, { error: "Alleen beschikbaar voor runs uit Strava." });
+  if (act.streams) return json(200, { streams: act.streams });
+
+  const token = await accessToken(db, userId);
+  const res = await fetch(
+    `${STRAVA}/api/v3/activities/${act.external_id}/streams?keys=time,distance,altitude,heartrate,latlng&key_by_type=true`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (res.status === 401) throw new ReconnectNeeded();
+  if (res.status === 429) return json(429, { error: "Strava is even druk. Probeer het over 15 minuten opnieuw." });
+  if (res.status === 404) return json(404, { error: "Deze run heeft geen gegevens per seconde in Strava." });
+  if (!res.ok) return json(502, { error: "Ophalen bij Strava is mislukt." });
+  const raw = await res.json() as Record<string, { data: unknown[] }>;
+  const time = (raw.time?.data ?? []) as number[];
+  const dist = (raw.distance?.data ?? []) as number[];
+  if (time.length < 2 || dist.length !== time.length) return json(404, { error: "Deze run heeft te weinig gegevens." });
+  const alt = (raw.altitude?.data ?? []) as number[];
+  const hr = (raw.heartrate?.data ?? []) as number[];
+  const ll = (raw.latlng?.data ?? []) as [number, number][];
+
+  // Terugbrengen tot hooguit ~600 punten (elke ~10 m bij een 6 km-run): genoeg voor splits en grafiek.
+  const step = Math.max(1, Math.ceil(time.length / 600));
+  const keep: number[] = [];
+  for (let i = 0; i < time.length; i += step) keep.push(i);
+  if (keep[keep.length - 1] !== time.length - 1) keep.push(time.length - 1);
+  const pick = <T>(arr: T[], f: (v: T) => unknown) => arr.length === time.length ? keep.map((i) => f(arr[i])) : null;
+  const compact = {
+    t: keep.map((i) => time[i]),
+    d: keep.map((i) => Math.round(dist[i] * 10) / 10),
+    alt: pick(alt, (v) => Math.round(Number(v) * 10) / 10),
+    hr: pick(hr, (v) => Math.round(Number(v))),
+    ll: pick(ll, (v) => [Math.round(v[0] * 1e5) / 1e5, Math.round(v[1] * 1e5) / 1e5]),
+  };
+  await db.from("activities").update({ streams: compact }).eq("id", act.id);
+  return json(200, { streams: compact });
+}
+
 async function disconnect(db: SupabaseClient, userId: string) {
   try {
     const token = await accessToken(db, userId);
@@ -508,6 +553,7 @@ Deno.serve(async (req) => {
       case "connect": return await connect(db, userId);
       case "sync": return await sync(db, userId);
       case "disconnect": return await disconnect(db, userId);
+      case "streams": return await streams(db, userId, String(body.activity_id ?? ""));
       default: return json(400, { error: "Onbekende actie." });
     }
   } catch (e) {

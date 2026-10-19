@@ -17,6 +17,7 @@ import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
 import 'activity_providers.dart';
 import 'share_run_screen.dart';
+import 'splits_card.dart';
 
 /// Eén run: tijden, weer, records, route en delen.
 class ActivityDetailScreen extends ConsumerWidget {
@@ -225,6 +226,10 @@ class ActivityDetailScreen extends ConsumerWidget {
                     ],
                   ),
           ),
+          if (a.id != null && a.source == 'strava') ...[
+            const SizedBox(height: 12),
+            SplitsCard(activity: a),
+          ],
           if (a.id != null) ...[
             const SizedBox(height: 12),
             _FeelCard(activity: a),

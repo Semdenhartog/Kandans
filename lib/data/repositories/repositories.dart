@@ -12,6 +12,27 @@ class RunWiseRepository {
 
   final SupabaseClient _db;
 
+  /// Kolommen voor de runlijst (zonder het zware verloop per seconde).
+  static const _activityColumns =
+      'id, started_at, distance_meters, moving_time_seconds, source, route_id, average_heart_rate, '
+      'elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, wind_direction_degrees, '
+      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note';
+
+  /// Verloop van een Strava-run (tijden per km, grafiek). Wordt eenmalig bij Strava opgehaald.
+  Future<Map<String, dynamic>?> activityStreams(String activityId) async {
+    final row = await _db.from('activities').select('streams').eq('id', activityId).maybeSingle();
+    final cached = row?['streams'];
+    if (cached is Map) return cached.cast<String, dynamic>();
+    try {
+      final res = await _db.functions.invoke('strava', body: {'action': 'streams', 'activity_id': activityId});
+      final data = (res.data as Map?)?['streams'];
+      return data is Map ? data.cast<String, dynamic>() : null;
+    } on FunctionException catch (e) {
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      throw Exception(details['error'] ?? 'Tijden per km konden niet worden opgehaald.');
+    }
+  }
+
   /// Rijen ophalen; zonder internet de laatst bewaarde rijen.
   Future<List<Map<String, dynamic>>> _rows(String key, Future<List<Map<String, dynamic>>> Function() fresh) =>
       OfflineCache.fetch<List<Map<String, dynamic>>>(
@@ -50,7 +71,12 @@ class RunWiseRepository {
     final uid = _uid;
     final rows = await _rows(
       'activities',
-      () => _db.from('activities').select().eq('user_id', uid).order('started_at', ascending: false).limit(500),
+      () => _db
+          .from('activities')
+          .select(_activityColumns)
+          .eq('user_id', uid)
+          .order('started_at', ascending: false)
+          .limit(500),
     );
     return rows.map(Activity.fromJson).toList();
   }
@@ -358,6 +384,11 @@ final routesProvider = FutureProvider<List<RunRoute>>((ref) {
 
 final routeDetailProvider = FutureProvider.family<RunRoute, String>(
   (ref, id) => ref.watch(repositoryProvider).routeWithPoints(id),
+);
+
+/// Verloop van een run (alleen runs uit Strava).
+final activityStreamsProvider = FutureProvider.family<Map<String, dynamic>?, String>(
+  (ref, id) => ref.watch(repositoryProvider).activityStreams(id),
 );
 
 final shoesProvider = FutureProvider<List<Shoe>>((ref) {

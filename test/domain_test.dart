@@ -15,6 +15,7 @@ import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/poi.dart';
 import 'package:runwise/domain/records.dart';
 import 'package:runwise/domain/run_matcher.dart';
+import 'package:runwise/domain/run_streams.dart';
 import 'package:runwise/domain/run_warnings.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
@@ -620,6 +621,42 @@ void main() {
       final list = runWarnings(fc((t) => w(t)), t0, 30, air: at);
       expect(list.map((x) => x.kind), containsAll(['air', 'pollen']));
       expect(list.firstWhere((x) => x.kind == 'pollen').title, 'Veel graspollen');
+    });
+  });
+
+  group('tijden per km', () {
+    // 3,05 km: eerste km in 300 s, tweede in 330 s, derde in 280 s, laatste 50 m bij de derde.
+    final t = <double>[], d = <double>[], alt = <double>[], hr = <double>[];
+    for (var m = 0.0; m <= 3050; m += 10) {
+      final sec = m <= 1000 ? m * 0.3 : m <= 2000 ? 300 + (m - 1000) * 0.33 : 630 + (m - 2000) * 0.28;
+      t.add(sec);
+      d.add(m);
+      alt.add(m < 1500 ? m / 100 : 15 - (m - 1500) / 200);
+      hr.add(m < 1000 ? 140 : 155);
+    }
+    final json = {'t': t, 'd': d, 'alt': alt, 'hr': hr};
+
+    test('splits met tempo, hartslag en hoogte', () {
+      final s = RunStreams.fromJson(json)!;
+      final sp = splitsOf(s);
+      expect(sp.length, 3);
+      expect(sp[0].paceSecPerKm, closeTo(300, 1));
+      expect(sp[1].paceSecPerKm, closeTo(330, 1));
+      expect(sp[2].meters, closeTo(1050, 1));
+      expect(sp[0].heartRate, closeTo(140, 1));
+      expect(sp[0].elevationGain, closeTo(10, 0.5));
+      final ex = extremes(sp);
+      expect(ex.fastest?.index, 3);
+      expect(ex.slowest?.index, 2);
+    });
+
+    test('tempo-lijn en onvolledige gegevens', () {
+      final s = RunStreams.fromJson(json)!;
+      final p = paceSeries(s);
+      expect(p, isNotEmpty);
+      expect(p.first.pace, closeTo(300, 5));
+      expect(RunStreams.fromJson({'t': [0], 'd': [0]}), isNull);
+      expect(RunStreams.fromJson(null), isNull);
     });
   });
 }
