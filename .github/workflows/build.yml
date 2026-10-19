@@ -14,6 +14,12 @@ jobs:
       # Ondertekeningssleutel voor de Play Store (staat in GitHub Secrets, nooit in de code).
       HAS_UPLOAD_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
+      - name: Schijfruimte vrijmaken
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/local/lib/node_modules /usr/share/swift || true
+          sudo docker image prune --all --force >/dev/null 2>&1 || true
+          df -h / | tail -1
+
       - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v5
