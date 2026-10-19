@@ -85,6 +85,12 @@ class RunWiseRepository {
     await _db.from('activities').insert(a.toInsert(_uid));
   }
 
+  /// Slaat een run op en geeft het id terug.
+  Future<String> addActivityReturningId(Activity a) async {
+    final row = await _db.from('activities').insert(a.toInsert(_uid)).select('id').single();
+    return row['id'] as String;
+  }
+
   Future<void> deleteActivity(String id) async {
     await _db.from('activities').delete().eq('id', id);
   }

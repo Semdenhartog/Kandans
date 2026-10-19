@@ -138,6 +138,21 @@ jobs:
           print("::notice::Voorgrondservice voor live delen ingesteld")
           EOF2
 
+      - name: Stemcoach (tekst-naar-spraak)
+        run: |
+          python3 - <<'EOF2'
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "android.intent.action.TTS_SERVICE" not in s:
+              s = s.replace("<queries>", (
+                  '<queries>\n'
+                  '        <intent>\n'
+                  '            <action android:name="android.intent.action.TTS_SERVICE" />\n'
+                  '        </intent>'), 1)
+              open(p, "w").write(s)
+          print("::notice::Stemcoach ingesteld")
+          EOF2
+
       - name: Meldingen instellen (dagelijkse melding)
         run: |
           python3 - <<'EOF2'

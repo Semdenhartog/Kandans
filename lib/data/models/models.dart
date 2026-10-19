@@ -162,6 +162,8 @@ class Activity {
         'wind_speed_kmh': windSpeedKmh,
         'wind_direction_degrees': windDirectionDegrees,
         'humidity_pct': humidityPct,
+        if (trackPolyline != null) 'track_polyline': trackPolyline,
+        if (shoeId != null) 'shoe_id': shoeId,
       };
 }
 

@@ -25,6 +25,7 @@ import '../live/live_share_screen.dart';
 import '../../domain/availability.dart';
 import '../planner/availability_provider.dart';
 import '../planner/week_planner_screen.dart';
+import '../record/record_run_screen.dart';
 import 'month_challenge_card.dart';
 import 'dashboard_providers.dart';
 
@@ -118,6 +119,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final selectedRoute = routes.where((r) => r.id == _routeId).firstOrNull;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'start-run-today',
+        onPressed: () => openRecorder(context),
+        icon: const Icon(Icons.play_arrow),
+        label: const Text('Start run'),
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refresh,

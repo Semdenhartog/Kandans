@@ -10,6 +10,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
 import '../../domain/weekly_load.dart';
+import '../record/record_run_screen.dart';
 import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 
@@ -40,6 +41,11 @@ class ActivitiesScreen extends ConsumerWidget {
         title: const Text('Mijn runs'),
         actions: [
           IconButton(
+            tooltip: 'Run met de hand toevoegen',
+            icon: const Icon(Icons.edit_note),
+            onPressed: () => context.go('/runs/new'),
+          ),
+          IconButton(
             tooltip: 'Mijn records',
             icon: const Icon(Icons.emoji_events_outlined),
             onPressed: () => context.go('/runs/records'),
@@ -47,9 +53,10 @@ class ActivitiesScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/runs/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Run toevoegen'),
+        heroTag: 'start-run',
+        onPressed: () => openRecorder(context),
+        icon: const Icon(Icons.play_arrow),
+        label: const Text('Start run'),
       ),
       body: activities.when(
         loading: () => const LoadingView(),
@@ -220,6 +227,7 @@ class _ActivityTile extends StatelessWidget {
             switch (a.source) {
               'strava' => Icons.sync,
               'health_connect' => Icons.watch_outlined,
+              'runwise' => Icons.gps_fixed,
               _ => Icons.directions_run,
             },
             color: RwColors.accent,

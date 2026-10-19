@@ -29,6 +29,7 @@ dependencies:
   latlong2: ^0.9.1
   share_plus: ^13.0.0
   android_intent_plus: ^6.1.0
+  flutter_tts: ^4.2.0
 
 dev_dependencies:
   flutter_test:

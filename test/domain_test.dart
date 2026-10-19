@@ -16,6 +16,7 @@ import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/poi.dart';
 import 'package:runwise/domain/records.dart';
 import 'package:runwise/domain/run_matcher.dart';
+import 'package:runwise/domain/run_recorder.dart';
 import 'package:runwise/domain/run_streams.dart';
 import 'package:runwise/domain/run_warnings.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
@@ -726,6 +727,62 @@ void main() {
       expect(all.every((s) => s.start.hour >= 18 && s.start.hour < 20), isTrue);
       final best = planner.bestPrecise(TrainingType.easy, from: start, horizon: const Duration(hours: 16));
       expect(best!.start.hour, inInclusiveRange(18, 19));
+    });
+  });
+
+  group('run opnemen', () {
+    // Loop naar het oosten met 3 m/s (5:33/km), één meting per seconde.
+    final t0 = DateTime(2026, 10, 20, 18);
+    GpsFix at(int sec, double meters, {double acc = 5, double? speed}) =>
+        GpsFix(LatLng(52.0, 5.0 + meters / 68540), t0.add(Duration(seconds: sec)), accuracy: acc, speed: speed);
+
+    test('afstand, tijd en kilometers', () {
+      final r = RunRecording()..start(t0);
+      final kms = <int>[];
+      for (var s = 0; s <= 700; s++) {
+        final km = r.add(at(s, s * 3.0));
+        if (km != null) kms.add(km);
+      }
+      expect(r.distance, closeTo(2100, 15));
+      expect(r.movingSeconds, closeTo(700, 1));
+      expect(kms, [1, 2]);
+      expect(r.kmTimes.first, closeTo(333, 3));
+      expect(r.averagePace, closeTo(333, 3));
+      expect(r.currentPace, closeTo(333, 5));
+      expect(kmAnnouncement(r, 2), contains('Kilometer 2.'));
+      expect(r.simplifiedTrack().length, inInclusiveRange(90, 120));
+    });
+
+    test('automatisch pauzeren bij stilstaan en GPS-sprongen negeren', () {
+      final r = RunRecording()..start(t0);
+      var s = 0;
+      for (; s <= 60; s++) {
+        r.add(at(s, s * 3.0));
+      }
+      // 30 seconden stil bij een stoplicht.
+      for (var i = 1; i <= 30; i++) {
+        r.add(at(s + i, 180, speed: 0));
+      }
+      expect(r.status, RecorderStatus.autoPaused);
+      final movingBefore = r.movingSeconds;
+      expect(movingBefore, lessThan(75));
+      // Weer lopen.
+      for (var i = 1; i <= 20; i++) {
+        r.add(at(s + 30 + i, 180 + i * 3.0, speed: 3));
+      }
+      expect(r.status, RecorderStatus.running);
+      // Onnauwkeurig en een sprong van 500 m: niet meetellen.
+      final d = r.distance;
+      r.add(at(s + 51, 300, acc: 80));
+      r.add(at(s + 52, 800));
+      expect(r.distance, closeTo(d, 0.01));
+    });
+
+    test('stem: tijden uitspreken', () {
+      expect(spokenPace(332), '5 minuten 32');
+      expect(spokenPace(300), '5 minuten');
+      expect(spokenDuration(3725), '1 uur 2 minuten');
+      expect(spokenDuration(1420), '23 minuten 40');
     });
   });
 }

@@ -127,8 +127,9 @@ class LiveShareService {
     }
   }
 
-  /// Start delen en geeft de link terug.
-  Future<String> start({required String name, required Duration duration}) async {
+  /// Start delen en geeft de link terug. Met [ownStream] = false levert iemand anders
+  /// (de run-opname) de posities aan via [feed], zodat er maar één GPS-stroom loopt.
+  Future<String> start({required String name, required Duration duration, bool ownStream = true}) async {
     if (state.value.isOn) return state.value.url!;
     final uid = _db.auth.currentUser?.id;
     if (uid == null) throw Exception('Je bent niet ingelogd.');
@@ -156,7 +157,11 @@ class LiveShareService {
         startedAt: now,
         expiresAt: expires,
       );
-      _beginStream();
+      if (ownStream) {
+        _beginStream();
+      } else {
+        _startExpiryTimer();
+      }
       return state.value.url!;
     } catch (e) {
       state.value = const LiveShareState();
@@ -194,12 +199,21 @@ class LiveShareService {
         state.value = state.value.copyWith(error: 'Locatie kon niet worden bepaald. Staat GPS aan?');
       },
     );
+    _startExpiryTimer();
+  }
+
+  void _startExpiryTimer() {
     _expiryTimer?.cancel();
     final expires = state.value.expiresAt;
     if (expires != null) {
       final left = expires.difference(DateTime.now().toUtc());
       _expiryTimer = Timer(left.isNegative ? Duration.zero : left, () => stop());
     }
+  }
+
+  /// Positie van buitenaf (de run-opname).
+  void feed(Position p) {
+    if (_sub == null && state.value.shareId != null) _onPosition(p);
   }
 
   Future<void> _onPosition(Position p) async {
