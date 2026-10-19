@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../data/models/models.dart';
+import 'availability.dart';
 import 'geo.dart';
 import 'performance_model.dart';
 
@@ -110,7 +111,11 @@ class StartTimePlanner {
     this.track = const [],
     this.durationMinutes = 60,
     this.rain,
+    this.availability = Availability.always,
   }) : _segments = trackSegments(track);
+
+  /// Wanneer je kunt lopen; daarbuiten wordt geen tijd voorgesteld.
+  final Availability availability;
 
   final Forecast forecast;
 
@@ -140,7 +145,13 @@ class StartTimePlanner {
     for (final h in forecast.hours) {
       if (h.time.isBefore(startFrom) || h.time.isAfter(end)) continue;
       if (h.time.hour < earliestHour || h.time.hour > latestHour) continue;
-      results.add(scoreAt(h.time, type));
+      if (availability.isAlways) {
+        results.add(scoreAt(h.time, type));
+      } else {
+        // Eerste moment in dit uur dat binnen je looptijden valt.
+        final t = availability.firstAllowedInHour(h.time, durationMinutes);
+        if (t != null && !t.isBefore(now.subtract(const Duration(minutes: 1)))) results.add(scoreAt(t, type));
+      }
     }
     return results;
   }
@@ -171,7 +182,11 @@ class StartTimePlanner {
     final first = roundUp(now, stepMinutes);
     final end = now.add(horizon);
     bool allowed(DateTime t) =>
-        !t.isBefore(first) && !t.isAfter(end) && t.hour >= earliestHour && t.hour <= latestHour;
+        !t.isBefore(first) &&
+        !t.isAfter(end) &&
+        t.hour >= earliestHour &&
+        t.hour <= latestHour &&
+        availability.allows(t, durationMinutes);
 
     final candidates = <DateTime>{};
     final top = [...hourly]..sort((a, b) => b.score.compareTo(a.score));

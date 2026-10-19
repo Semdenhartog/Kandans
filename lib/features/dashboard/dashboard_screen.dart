@@ -22,6 +22,9 @@ import '../../domain/run_warnings.dart';
 import '../../shared/alarm.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
+import '../../domain/availability.dart';
+import '../planner/availability_provider.dart';
+import '../planner/week_planner_screen.dart';
 import 'month_challenge_card.dart';
 import 'dashboard_providers.dart';
 
@@ -69,6 +72,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           track: route == null ? const [] : decodePolyline(route.polyline),
           durationMinutes: _durationMinutes,
           rain: ref.read(rainNowcastProvider).value,
+          availability: ref.read(availabilityProvider).value ?? Availability.always,
         )
         .ignore();
   }
@@ -178,6 +182,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     track: selectedRoute == null ? const [] : decodePolyline(selectedRoute.polyline),
                     durationMinutes: _durationMinutes,
                     rain: rain,
+                    availability: ref.watch(availabilityProvider).value ?? Availability.always,
                   );
                   return _Results(
                     planner: planner,
@@ -188,6 +193,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 12),
+              const WeekPlannerEntry(),
               const SizedBox(height: 12),
               const MonthChallengeCard(),
               const SizedBox(height: 12),
@@ -323,10 +330,15 @@ class _ResultsState extends State<_Results> {
   Widget build(BuildContext context) {
     final all = widget.planner.scoreAll(widget.type);
     if (all.isEmpty) {
-      return const EmptyState(
+      final custom = !widget.planner.availability.isAlways;
+      return EmptyState(
         icon: Icons.nights_stay_outlined,
         title: 'Geen loopmomenten meer',
-        message: 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
+        message: custom
+            ? 'Binnen je looptijden is er de komende 36 uur geen moment meer. Pas je looptijden aan of kijk in de weekplanner.'
+            : 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
+        actionLabel: 'Weekplanner',
+        onAction: () => openWeekPlanner(context),
       );
     }
     // Beste moment op 5 minuten nauwkeurig; de staafjes blijven per uur.

@@ -5,6 +5,7 @@ import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/services/live_share_service.dart';
 import 'package:runwise/data/services/rain_service.dart';
 import 'package:runwise/data/services/route_generator_service.dart';
+import 'package:runwise/domain/availability.dart';
 import 'package:runwise/domain/clothing.dart';
 import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/route_direction.dart';
@@ -20,6 +21,7 @@ import 'package:runwise/domain/run_warnings.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
 import 'package:runwise/domain/weather_correction.dart';
+import 'package:runwise/domain/weekly_load.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -657,6 +659,73 @@ void main() {
       expect(p.first.pace, closeTo(300, 5));
       expect(RunStreams.fromJson({'t': [0], 'd': [0]}), isNull);
       expect(RunStreams.fromJson(null), isNull);
+    });
+  });
+
+  group('weekoverzicht', () {
+    final now = DateTime(2026, 10, 22, 12); // woensdag
+    Activity r(DateTime t, double km) => Activity(startedAt: t, distanceMeters: km * 1000, movingTimeSeconds: (km * 330).round());
+
+    test('weken, reeks en opbouw', () {
+      final runs = [
+        r(DateTime(2026, 10, 21), 14), r(DateTime(2026, 10, 19, 8), 12), // deze week en 20 okt
+        r(DateTime(2026, 10, 14), 8), // vorige week
+        r(DateTime(2026, 10, 7), 8),
+        r(DateTime(2026, 9, 30), 8),
+        r(DateTime(2026, 9, 23), 8),
+      ];
+      final w = weeklyTotals(runs, now);
+      expect(w.length, 8);
+      expect(w.last.start, DateTime(2026, 10, 19));
+      expect(w.last.km, 26);
+      expect(w.last.runs, 2);
+      expect(weekStreak(runs, now), 5);
+      final c = loadCheck(runs, now);
+      expect(c.last7Km, 26);
+      expect(c.previousAvgKm, 8);
+      expect(c.tooFast, isTrue);
+      expect(c.message, contains('%'));
+    });
+
+    test('reeks loopt door als je deze week nog niet liep', () {
+      final runs = [r(DateTime(2026, 10, 14), 5), r(DateTime(2026, 10, 8), 5)];
+      expect(weekStreak(runs, now), 2);
+      expect(weekStreak(const [], now), 0);
+      expect(loadCheck(runs, now).message, isNull);
+    });
+  });
+
+  group('looptijden', () {
+    test('alleen binnen je tijden, hele run moet passen', () {
+      final a = Availability.preset('werk');
+      final mon = DateTime(2026, 10, 19); // maandag
+      expect(a.allows(mon.add(const Duration(hours: 17)), 60), isTrue);
+      expect(a.allows(mon.add(const Duration(hours: 21)), 45), isFalse); // eindigt na 21:30
+      expect(a.allows(mon.add(const Duration(hours: 12)), 30), isFalse);
+      expect(a.allows(DateTime(2026, 10, 25, 9), 90), isTrue); // zondag
+      expect(a.firstAllowedInHour(mon.add(const Duration(hours: 16)), 30), isNull);
+      final half = Availability({1: const [TimeWindow(17 * 60 + 30, 19 * 60)]});
+      expect(half.firstAllowedInHour(mon.add(const Duration(hours: 17)), 30), mon.add(const Duration(hours: 17, minutes: 30)));
+      expect(Availability.always.allows(mon.add(const Duration(hours: 3)), 30), isTrue);
+      final back = Availability.fromJson(a.toJson());
+      expect(back.allows(mon.add(const Duration(hours: 17)), 60), isTrue);
+      expect(back.days.length, 7);
+    });
+
+    test('planner kiest alleen tijden binnen je looptijden', () {
+      final start = DateTime(2026, 10, 19, 6);
+      final f = Forecast(latitude: 52, longitude: 5, hours: [for (var h = 0; h < 18; h++) hour(start.add(Duration(hours: h)))]);
+      final planner = StartTimePlanner(
+        forecast: f,
+        profile: PerformanceInsights.defaults,
+        durationMinutes: 45,
+        availability: Availability({1: const [TimeWindow(18 * 60, 20 * 60)]}),
+      );
+      final all = planner.scoreAll(TrainingType.easy, from: start, horizon: const Duration(hours: 16));
+      expect(all, isNotEmpty);
+      expect(all.every((s) => s.start.hour >= 18 && s.start.hour < 20), isTrue);
+      final best = planner.bestPrecise(TrainingType.easy, from: start, horizon: const Duration(hours: 16));
+      expect(best!.start.hour, inInclusiveRange(18, 19));
     });
   });
 }

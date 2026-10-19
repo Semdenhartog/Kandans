@@ -9,6 +9,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
+import '../../domain/weekly_load.dart';
 import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 
@@ -105,19 +106,91 @@ class _WeekSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
-    final week = activities.where((a) => !a.startedAt.toLocal().isBefore(monday)).toList();
-    final meters = week.fold<double>(0, (s, a) => s + a.distanceMeters);
-    final seconds = week.fold<int>(0, (s, a) => s + a.movingTimeSeconds);
+    final weeks = weeklyTotals(activities, now);
+    final week = weeks.last;
+    final check = loadCheck(activities, now);
+    final streak = weekStreak(activities, now);
+    final maxKm = weeks.map((w) => w.km).fold<double>(0, (a, b) => a > b ? a : b);
+    final msg = check.message;
     return RwCard(
       title: 'DEZE WEEK',
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(meters, decimals: 1))),
-          const SizedBox(width: 8),
-          Expanded(child: StatTile(label: 'Runs', value: '${week.length}')),
-          const SizedBox(width: 8),
-          Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(seconds))),
+          Row(
+            children: [
+              Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(week.km * 1000, decimals: 1))),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Runs', value: '${week.runs}')),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(week.seconds))),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Semantics(
+            label: 'Kilometers per week, laatste 8 weken: ${weeks.map((w) => w.km.round()).join(', ')}.',
+            excludeSemantics: true,
+            child: SizedBox(
+              height: 92,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final (i, w) in weeks.indexed)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(w.km < 0.5 ? '' : '${w.km.round()}',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: i == weeks.length - 1 ? RwColors.accent : RwColors.subtle,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 3),
+                            Container(
+                              height: maxKm <= 0 ? 3 : 3 + 54 * (w.km / maxKm),
+                              decoration: BoxDecoration(
+                                color: i == weeks.length - 1 ? RwColors.accent : RwColors.bar,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(i == weeks.length - 1 ? 'nu' : '${w.start.day}/${w.start.month}',
+                                style: const TextStyle(fontSize: 10, color: RwColors.subtle)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          if (streak >= 2) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.local_fire_department, color: RwColors.accent, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('$streak weken op rij gelopen${week.runs == 0 ? '. Loop deze week om je reeks te houden.' : '.'}',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+          ],
+          if (msg != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(check.tooFast ? Icons.warning_amber_rounded : Icons.info_outline,
+                    color: check.tooFast ? RwColors.warning : RwColors.muted, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(msg, style: const TextStyle(color: RwColors.muted, height: 1.4))),
+              ],
+            ),
+          ],
         ],
       ),
     );

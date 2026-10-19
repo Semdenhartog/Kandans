@@ -6,6 +6,7 @@ import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/format.dart';
+import '../../domain/availability.dart';
 import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
 import '../../domain/start_time_scoring.dart';
@@ -108,6 +109,7 @@ class NotificationService {
     List<LatLng> track = const [],
     int durationMinutes = 45,
     RainNowcast? rain,
+    Availability availability = Availability.always,
   }) async {
     if (!Platform.isAndroid) return;
     final s = await settings();
@@ -120,6 +122,7 @@ class NotificationService {
       track: track,
       durationMinutes: durationMinutes,
       rain: rain,
+      availability: availability,
     );
 
     final now = DateTime.now();
