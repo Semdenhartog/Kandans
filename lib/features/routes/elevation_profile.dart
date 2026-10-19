@@ -78,8 +78,13 @@ class _ElevationProfileChartState extends State<ElevationProfileChart> {
             child: SizedBox(
               height: widget.height,
               width: c.maxWidth,
+              // Voor schermlezers: een samenvatting in plaats van de grafiek.
+              child: Semantics(
+                label: 'Hoogteprofiel: ${ascent.round()} meter omhoog, hoogste punt ${range.max.round()} meter, laagste ${range.min.round()} meter.',
+                excludeSemantics: true,
               child: CustomPaint(
                 painter: _ProfilePainter(p, range.min, range.max, f, _leftAxis),
+              ),
               ),
             ),
           ),

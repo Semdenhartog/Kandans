@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/theme.dart';
+import '../data/services/offline_cache.dart';
 import '../data/services/sync_service.dart';
 
 /// Onderste navigatiebalk met de vijf hoofdtabbladen.
@@ -45,18 +47,62 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     final shell = widget.shell;
     return Scaffold(
       body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (i) =>
-            shell.goBranch(i, initialLocation: i == shell.currentIndex),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), label: 'Vandaag'),
-          NavigationDestination(icon: Icon(Icons.directions_run), label: 'Runs'),
-          NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Routes'),
-          NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), label: 'Coach'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Ik'),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _OfflineBanner(),
+          NavigationBar(
+            selectedIndex: shell.currentIndex,
+            onDestinationSelected: (i) =>
+                shell.goBranch(i, initialLocation: i == shell.currentIndex),
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), label: 'Vandaag'),
+              NavigationDestination(icon: Icon(Icons.directions_run), label: 'Runs'),
+              NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Routes'),
+              NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), label: 'Coach'),
+              NavigationDestination(icon: Icon(Icons.person_outline), label: 'Ik'),
+            ],
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Smalle balk als de app geen internet heeft en bewaarde gegevens toont.
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<DateTime?>(
+      valueListenable: OfflineCache.showingCachedSince,
+      builder: (context, since, _) {
+        if (since == null) return const SizedBox.shrink();
+        final t = since.toLocal();
+        final hhmm = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+        final today = DateUtils.isSameDay(t, DateTime.now());
+        return Semantics(
+          liveRegion: true,
+          child: Container(
+            width: double.infinity,
+            color: RwColors.surfaceHigh,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                const Icon(Icons.cloud_off, size: 16, color: RwColors.warning),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Geen internet. Je ziet de gegevens van ${today ? 'vandaag $hhmm' : '${t.day}-${t.month} $hhmm'}.',
+                    style: const TextStyle(fontSize: 13, color: RwColors.muted),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

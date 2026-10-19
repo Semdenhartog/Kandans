@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:runwise/core/error_reporter.dart';
 import 'package:runwise/core/format.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/services/live_share_service.dart';
@@ -523,6 +524,18 @@ void main() {
     test('Strava-polyline (alleen hoekpunten) wordt ook herkend', () {
       final sparse = [home[0], home[20], home[40], home[60], home[80]];
       expect(matchRun(sparse, routes)?.routeId, 'thuis');
+    });
+  });
+
+  group('foutmeldingen', () {
+    test('zelfde fout herkennen en lange teksten inkorten', () {
+      final st = StackTrace.fromString('#0      foo (package:runwise/a.dart:10)\n#1      bar (package:runwise/b.dart:2)');
+      final a = ErrorReporter.fingerprint(StateError('kapot'), st);
+      final b = ErrorReporter.fingerprint(StateError('kapot'), st);
+      expect(a, b);
+      expect(a, isNot(ErrorReporter.fingerprint(StateError('anders'), st)));
+      expect(ErrorReporter.clip('x' * 3000, 2000).length, 2000);
+      expect(ErrorReporter.clip('kort', 2000), 'kort');
     });
   });
 }

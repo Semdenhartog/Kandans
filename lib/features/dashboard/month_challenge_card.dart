@@ -84,7 +84,10 @@ class MonthChallengeCard extends ConsumerWidget {
       onTap: () => _edit(context, ref, target, suggested),
       child: Row(
         children: [
-          SizedBox(
+          Semantics(
+            label: '${done.round()} van ${target.round()} kilometer gelopen, ${(p.fraction * 100).round()} procent.',
+            excludeSemantics: true,
+            child: SizedBox(
             width: 92,
             height: 92,
             child: CustomPaint(
@@ -98,6 +101,7 @@ class MonthChallengeCard extends ConsumerWidget {
                       ),
               ),
             ),
+          ),
           ),
           const SizedBox(width: 16),
           Expanded(

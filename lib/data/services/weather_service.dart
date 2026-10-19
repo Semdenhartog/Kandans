@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/models.dart';
+import 'offline_cache.dart';
 
 /// Haalt weerdata op bij Open-Meteo (gratis, geen API-key nodig).
 class WeatherService {
@@ -56,7 +57,15 @@ class WeatherService {
       'timezone': 'auto',
       'forecast_days': days.clamp(1, 16).toString(),
     });
-    return _parse(await _get(uri), lat, lon);
+    // Zonder internet: de laatst opgehaalde verwachting (max. 2 dagen oud).
+    final json = await OfflineCache.fetch<Map<String, dynamic>>(
+      'forecast_${lat.toStringAsFixed(2)}_${lon.toStringAsFixed(2)}_$days',
+      () => _get(uri),
+      encode: (v) => v,
+      decode: (d) => (d as Map).cast<String, dynamic>(),
+      maxAge: const Duration(hours: 48),
+    );
+    return _parse(json, lat, lon);
   }
 
   /// Weer op een moment in het verleden, voor het automatisch invullen

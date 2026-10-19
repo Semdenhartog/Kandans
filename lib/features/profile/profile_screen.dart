@@ -12,6 +12,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
+import '../../data/services/offline_cache.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'connections_card.dart';
@@ -146,7 +147,10 @@ class ProfileScreen extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.logout),
                   title: const Text('Uitloggen'),
-                  onTap: () => ref.read(supabaseProvider).auth.signOut(),
+                  onTap: () async {
+                    await OfflineCache.clear();
+                    await ref.read(supabaseProvider).auth.signOut();
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(

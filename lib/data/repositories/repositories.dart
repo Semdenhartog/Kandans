@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase.dart';
 import '../models/models.dart';
+import '../services/offline_cache.dart';
 
 /// Alle database-toegang via Supabase. Row Level Security zorgt ervoor
 /// dat elke gebruiker alleen zijn eigen rijen kan zien en wijzigen.
@@ -10,6 +11,15 @@ class RunWiseRepository {
   RunWiseRepository(this._db);
 
   final SupabaseClient _db;
+
+  /// Rijen ophalen; zonder internet de laatst bewaarde rijen.
+  Future<List<Map<String, dynamic>>> _rows(String key, Future<List<Map<String, dynamic>>> Function() fresh) =>
+      OfflineCache.fetch<List<Map<String, dynamic>>>(
+        '${_db.auth.currentUser?.id ?? 'anon'}_$key',
+        fresh,
+        encode: (v) => v,
+        decode: (d) => [for (final m in (d as List).cast<Map>()) m.cast<String, dynamic>()],
+      );
 
   String get _uid {
     final id = _db.auth.currentUser?.id;
@@ -20,8 +30,12 @@ class RunWiseRepository {
   // ---------- Profiel ----------
 
   Future<Profile?> profile() async {
-    final row = await _db.from('profiles').select().eq('id', _uid).maybeSingle();
-    return row == null ? null : Profile.fromJson(row);
+    final uid = _uid;
+    final rows = await _rows('profile', () async {
+      final row = await _db.from('profiles').select().eq('id', uid).maybeSingle();
+      return row == null ? <Map<String, dynamic>>[] : [row];
+    });
+    return rows.isEmpty ? null : Profile.fromJson(rows.first);
   }
 
   Future<void> updateHome(double lat, double lon) async {
@@ -33,12 +47,11 @@ class RunWiseRepository {
   // ---------- Runs ----------
 
   Future<List<Activity>> activities() async {
-    final rows = await _db
-        .from('activities')
-        .select()
-        .eq('user_id', _uid)
-        .order('started_at', ascending: false)
-        .limit(500);
+    final uid = _uid;
+    final rows = await _rows(
+      'activities',
+      () => _db.from('activities').select().eq('user_id', uid).order('started_at', ascending: false).limit(500),
+    );
     return rows.map(Activity.fromJson).toList();
   }
 
@@ -69,24 +82,27 @@ class RunWiseRepository {
   // ---------- Routes ----------
 
   Future<List<RunRoute>> routes() async {
-    final rows = await _db
-        .from('routes')
-        .select()
-        .eq('user_id', _uid)
-        .order('is_favorite', ascending: false)
-        .order('created_at', ascending: false);
+    final uid = _uid;
+    final rows = await _rows(
+      'routes',
+      () => _db
+          .from('routes')
+          .select()
+          .eq('user_id', uid)
+          .order('is_favorite', ascending: false)
+          .order('created_at', ascending: false),
+    );
     return rows.map(RunRoute.fromJson).toList();
   }
 
   Future<RunRoute> routeWithPoints(String id) async {
-    final row = await _db.from('routes').select().eq('id', id).single();
-    final pts = await _db
-        .from('route_points')
-        .select()
-        .eq('route_id', id)
-        .order('sequence_index');
-    return RunRoute.fromJson(row)
-        .copyWith(points: pts.map(RoutePoint.fromJson).toList());
+    // Eerste rij = de route, de rest = punten per kilometer (zo in één keer te bewaren).
+    final rows = await _rows('route_$id', () async {
+      final row = await _db.from('routes').select().eq('id', id).single();
+      final pts = await _db.from('route_points').select().eq('route_id', id).order('sequence_index');
+      return [row, ...pts];
+    });
+    return RunRoute.fromJson(rows.first).copyWith(points: rows.skip(1).map(RoutePoint.fromJson).toList());
   }
 
   /// Slaat een route op met de punten per kilometer.
@@ -259,6 +275,7 @@ class RunWiseRepository {
     if (res.status != 200) {
       throw Exception('Account verwijderen is mislukt. Probeer het later opnieuw.');
     }
+    await OfflineCache.clear();
     await _db.auth.signOut();
   }
 }

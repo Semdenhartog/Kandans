@@ -168,9 +168,18 @@ class _RouteMapState extends State<RouteMap> {
         child: const Text('Geen route om te tonen', style: TextStyle(color: RwColors.subtle)),
       );
     }
-    return ValueListenableBuilder<MapLayer>(
-      valueListenable: mapLayerNotifier,
-      builder: (context, layer, _) => _buildMap(context, layer),
+    final km = (_track.length / 1000).toStringAsFixed(1).replaceAll('.', ',');
+    final windText = !_windColored
+        ? ''
+        : ' Rood is tegenwind, groen is wind mee.';
+    return Semantics(
+      label: 'Kaart van de route, $km kilometer.$windText${widget.onExpand != null ? ' Dubbeltik om de kaart groot te openen.' : ''}',
+      button: widget.onExpand != null,
+      onTap: widget.onExpand,
+      child: ValueListenableBuilder<MapLayer>(
+        valueListenable: mapLayerNotifier,
+        builder: (context, layer, _) => _buildMap(context, layer),
+      ),
     );
   }
 

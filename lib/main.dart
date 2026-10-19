@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config.dart';
+import 'core/error_reporter.dart';
 import 'core/theme.dart';
 import 'data/services/notification_service.dart';
 import 'shared/config_missing_app.dart';
@@ -16,6 +17,8 @@ import 'shared/config_missing_app.dart';
 void main() {
   runZonedGuarded(() {
     WidgetsFlutterBinding.ensureInitialized();
+    // Onverwachte fouten melden in Supabase (alleen als je bent ingelogd).
+    ErrorReporter.install();
     // Licenties van de meegeleverde lettertypes (SIL Open Font License).
     LicenseRegistry.addLicense(() async* {
       yield LicenseEntryWithLineBreaks(['Saira'], await rootBundle.loadString('assets/fonts/OFL-Saira.txt'));
@@ -33,6 +36,7 @@ void main() {
     runApp(const _Bootstrap());
   }, (error, stack) {
     debugPrint('Onverwachte fout: $error\n$stack');
+    ErrorReporter.report(error, stack, context: 'zone');
   });
 }
 
