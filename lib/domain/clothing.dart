@@ -55,7 +55,7 @@ ClothingAdvice clothingFor(HourWeather w, TrainingType type, {int durationMinute
   final rainProb = w.precipitationProbability ?? 0;
   final rain = w.precipitation ?? 0;
   if (rain >= 0.3 || rainProb >= 50) {
-    extras.add(t < 15 ? 'Regenjack: grote kans op nat worden' : 'Dun regenjack of accepteer nat worden: het is warm genoeg');
+    extras.add(feels < 14 ? 'Regenjack: grote kans op nat worden, en nat is koud' : 'Dun regenjack, of accepteer nat worden: het is warm genoeg');
   }
   if (w.windSpeed >= 25 && t < 20 && !items.any((i) => i.contains('jack'))) {
     extras.add('Winddicht jack tegen de harde wind (${w.windSpeed.round()} km/u)');

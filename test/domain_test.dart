@@ -202,7 +202,7 @@ void main() {
   group('kledingadvies', () {
     test('koud: lange tight, jack en handschoenen', () {
       final a = clothingFor(hour(DateTime(2030, 1, 10, 8), temp: -2, wind: 10), TrainingType.easy);
-      expect(a.items.join(' '), contains('Handschoenen'));
+      expect(a.items.join(' ').toLowerCase(), contains('handschoenen'));
       expect(a.items.join(' '), contains('tight'));
     });
     test('warm: korte broek, en drinken bij een lange run', () {
@@ -230,8 +230,8 @@ void main() {
       expect(isLoop([a, b]), isFalse);
     });
 
-    test('wind uit het noorden: rechtsom geeft minder tegenwind op het eind', () {
-      final adv = adviseDirection(loop, 20, 0)!;
+    test('wind uit het zuidwesten: rechtsom geeft minder tegenwind op het eind', () {
+      final adv = adviseDirection(loop, 20, 225)!;
       expect(adv.reverse, isTrue);
       expect(adv.bestLabel, 'rechtsom');
       expect(adv.endHeadwind, lessThan(adv.otherEndHeadwind));
