@@ -65,7 +65,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (c, s) =>
             VerifyScreen(email: s.uri.queryParameters['email'] ?? ''),
       ),
-      GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
       GoRoute(path: '/premium', builder: (c, s) => const PaywallScreen()),
       // Terugkomst na koppelen met Strava: runwise://app/strava-connected?status=ok
       GoRoute(
@@ -120,26 +119,29 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/races',
-              builder: (c, s) => const RacesScreen(),
-              routes: [
-                GoRoute(
-                  path: 'new',
-                  builder: (c, s) => const AddRaceScreen(),
-                ),
-                GoRoute(
-                  path: ':id',
-                  builder: (c, s) =>
-                      RaceDetailScreen(raceId: s.pathParameters['id']!),
-                ),
-              ],
-            ),
+            GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/me',
               builder: (c, s) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'races',
+                  builder: (c, s) => const RacesScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (c, s) => const AddRaceScreen(),
+                    ),
+                    GoRoute(
+                      path: ':id',
+                      builder: (c, s) =>
+                          RaceDetailScreen(raceId: s.pathParameters['id']!),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ]),
         ],

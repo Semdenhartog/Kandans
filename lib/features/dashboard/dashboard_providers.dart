@@ -4,7 +4,9 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/weather_service.dart';
+import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
+import '../../domain/start_time_scoring.dart';
 
 /// Weersverwachting voor de komende 2 dagen op de weerlocatie.
 final forecastProvider = FutureProvider<Forecast>((ref) async {
@@ -20,4 +22,25 @@ final insightsProvider = Provider<PerformanceInsights>((ref) {
     loading: () => PerformanceInsights.defaults,
     error: (_, _) => PerformanceInsights.defaults,
   );
+});
+
+/// Beste vertrekmoment per route (rustige duurloop), voor de routelijst.
+/// Sleutel = route-id.
+final routeBestProvider = FutureProvider<Map<String, StartTimeScore>>((ref) async {
+  final routes = await ref.watch(routesProvider.future);
+  final forecast = await ref.watch(forecastProvider.future);
+  final profile = ref.watch(insightsProvider);
+  if (forecast.hours.isEmpty) return const {};
+  final out = <String, StartTimeScore>{};
+  for (final r in routes) {
+    if (r.id == null) continue;
+    final best = StartTimePlanner(
+      forecast: forecast,
+      profile: profile,
+      track: decodePolyline(r.polyline),
+      durationMinutes: ((r.estimatedDurationSeconds ?? 2700) / 60).round(),
+    ).best(TrainingType.easy, horizon: const Duration(hours: 24));
+    if (best != null) out[r.id!] = best;
+  }
+  return out;
 });

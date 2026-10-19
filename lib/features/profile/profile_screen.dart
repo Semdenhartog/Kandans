@@ -108,10 +108,11 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.auto_awesome, color: RwColors.accent),
-                  title: const Text('AI-coach'),
-                  subtitle: const Text('Vraag advies over je training'),
-                  onTap: () => context.push('/coach'),
+                  leading: const Icon(Icons.flag_outlined, color: RwColors.accent),
+                  title: const Text('Wedstrijden'),
+                  subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.go('/me/races'),
                 ),
                 const Divider(height: 1),
                 ListTile(

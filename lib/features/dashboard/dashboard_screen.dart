@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
@@ -18,6 +17,7 @@ import '../../domain/clothing.dart';
 import '../../domain/geo.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
+import '../../shared/alarm.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
 import 'month_challenge_card.dart';
@@ -112,12 +112,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final selectedRoute = routes.where((r) => r.id == _routeId).firstOrNull;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'coach',
-        onPressed: () => context.push('/coach'),
-        icon: const Icon(Icons.auto_awesome),
-        label: const Text('Vraag de coach'),
-      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refresh,
@@ -402,6 +396,7 @@ class _BestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = score.weather;
+    final remindAt = score.start.subtract(const Duration(minutes: 15));
     return RwCard(
       padding: const EdgeInsets.all(22),
       child: Column(
@@ -476,6 +471,19 @@ class _BestCard extends StatelessWidget {
                 ],
               ),
             ),
+          if (remindAt.isAfter(DateTime.now())) ...[
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final ok = await setAlarm(remindAt, 'RunWise: om ${Fmt.time(score.start)} lopen');
+                if (!ok && context.mounted) {
+                  showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
+                }
+              },
+              icon: const Icon(Icons.alarm_add_outlined, size: 18),
+              label: Text('Wekker om ${Fmt.time(remindAt)} (15 min ervoor)'),
+            ),
+          ],
         ],
       ),
     );

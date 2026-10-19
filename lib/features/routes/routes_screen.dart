@@ -13,6 +13,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../domain/gpx_parser.dart';
 import '../../shared/widgets.dart';
+import '../dashboard/dashboard_providers.dart';
 import 'route_shape.dart';
 
 class RoutesScreen extends ConsumerStatefulWidget {
@@ -73,6 +74,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
   @override
   Widget build(BuildContext context) {
     final routes = ref.watch(routesProvider);
+    final bests = ref.watch(routeBestProvider).value ?? const {};
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mijn routes'),
@@ -154,6 +156,13 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                             ].join(' · '),
                             style: const TextStyle(color: RwColors.subtle),
                           ),
+                          if (bests[r.id] != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Beste moment: ${Fmt.time(bests[r.id]!.start)} · score ${bests[r.id]!.score}',
+                              style: const TextStyle(color: RwColors.accent, fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ],
                       ),
                     ),

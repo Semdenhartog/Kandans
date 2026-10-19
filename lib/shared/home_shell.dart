@@ -53,7 +53,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), label: 'Vandaag'),
           NavigationDestination(icon: Icon(Icons.directions_run), label: 'Runs'),
           NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Routes'),
-          NavigationDestination(icon: Icon(Icons.flag_outlined), label: 'Wedstrijden'),
+          NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), label: 'Coach'),
           NavigationDestination(icon: Icon(Icons.person_outline), label: 'Ik'),
         ],
       ),
