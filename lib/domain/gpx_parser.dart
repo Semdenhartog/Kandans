@@ -2,6 +2,7 @@ import 'package:xml/xml.dart';
 
 import '../data/models/models.dart';
 import 'geo.dart';
+import 'route_geometry.dart';
 
 class GpxParseException implements Exception {
   GpxParseException(this.message);
@@ -132,5 +133,6 @@ RunRoute buildRoute(
     startLongitude: raw.first.lon,
     polyline: encodePolyline(simplified),
     points: points,
+    elevationProfile: sampleElevation(raw),
   );
 }

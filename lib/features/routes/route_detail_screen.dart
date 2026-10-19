@@ -12,9 +12,12 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/route_direction.dart';
+import '../../domain/route_geometry.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
+import 'elevation_profile.dart';
 import 'route_map.dart';
+import 'route_map_screen.dart';
 
 /// Huidig weer bij de start van een route.
 final _routeWeatherProvider = FutureProvider.family<HourWeather?, String>((ref, routeId) async {
@@ -99,18 +102,12 @@ class RouteDetailScreen extends ConsumerWidget {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
-              AspectRatio(
-                aspectRatio: 1.3,
-                child: RouteMap(
-                  polyline: r.polyline,
-                  windFromDegrees: w?.windDirection,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                '● start   ● finish   ➝ windrichting nu',
-                style: TextStyle(color: RwColors.subtle, fontSize: 12),
-                textAlign: TextAlign.center,
+              _MapAndProfile(
+                route: r,
+                windSpeedKmh: w?.windSpeed,
+                windFromDegrees: w?.windDirection,
+                reversed: advice?.reverse ?? false,
+                directionLabel: advice?.bestLabel,
               ),
               const SizedBox(height: 16),
               Row(
@@ -229,6 +226,87 @@ class _KmRow extends StatelessWidget {
           Text(windText, style: TextStyle(color: color)),
         ],
       ),
+    );
+  }
+}
+
+/// Kaart met daaronder het hoogteprofiel; slepen over het profiel toont de plek op de kaart.
+class _MapAndProfile extends StatefulWidget {
+  const _MapAndProfile({
+    required this.route,
+    required this.windSpeedKmh,
+    required this.windFromDegrees,
+    required this.reversed,
+    required this.directionLabel,
+  });
+
+  final RunRoute route;
+  final double? windSpeedKmh;
+  final double? windFromDegrees;
+  final bool reversed;
+  final String? directionLabel;
+
+  @override
+  State<_MapAndProfile> createState() => _MapAndProfileState();
+}
+
+class _MapAndProfileState extends State<_MapAndProfile> {
+  final _highlight = ValueNotifier<double?>(null);
+
+  @override
+  void dispose() {
+    _highlight.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.route;
+    final base = r.profileOrKmPoints;
+    final profile = widget.reversed ? reverseProfile(base) : base;
+    void expand() => openRouteMap(
+          context,
+          RouteMapData(
+            title: r.name,
+            polyline: r.polyline,
+            distanceMeters: r.distanceMeters,
+            windSpeedKmh: widget.windSpeedKmh,
+            windFromDegrees: widget.windFromDegrees,
+            reversed: widget.reversed,
+            profile: profile,
+          ),
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AspectRatio(
+          aspectRatio: 1.1,
+          child: RouteMap(
+            polyline: r.polyline,
+            windSpeedKmh: widget.windSpeedKmh,
+            windFromDegrees: widget.windFromDegrees,
+            reversed: widget.reversed,
+            highlightFraction: _highlight,
+            onExpand: expand,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          widget.directionLabel == null
+              ? 'Pijltjes tonen de looprichting. Tik op de kaart om hem groot te openen.'
+              : 'Pijltjes tonen de beste richting van nu: ${widget.directionLabel}. Tik op de kaart om hem groot te openen.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+        ),
+        if (profile.length >= 3) ...[
+          const SizedBox(height: 12),
+          RwCard(
+            title: 'HOOGTEPROFIEL',
+            child: ElevationProfileChart(profile: profile, highlight: _highlight),
+          ),
+        ],
+      ],
     );
   }
 }

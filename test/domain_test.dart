@@ -6,6 +6,7 @@ import 'package:runwise/data/services/route_generator_service.dart';
 import 'package:runwise/domain/clothing.dart';
 import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/route_direction.dart';
+import 'package:runwise/domain/route_geometry.dart';
 import 'package:runwise/domain/gpx_parser.dart';
 import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
@@ -270,6 +271,74 @@ void main() {
       expect(r.distanceMeters, closeTo(6830, 120));
       expect(r.points.length, greaterThanOrEqualTo(7));
       expect(r.estimatedDurationSeconds, closeTo(6.83 * 360, 60));
+    });
+  });
+
+  group('route op de kaart', () {
+    // Recht naar het oosten (2 km) en weer terug naar het westen.
+    final east = [for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + 0.0292 * i / 20, 10.0 + i)];
+    final outAndBack = [...east, ...east.reversed.skip(1)];
+
+    test('punt en richting op afstand', () {
+      final t = RouteTrack(east);
+      expect(t.length, closeTo(2000, 30));
+      expect(t.at(t.length / 2).lon, closeTo(5.0146, 1e-3));
+      expect(t.bearingAt(500), closeTo(90, 1));
+      expect(t.reversed().bearingAt(500), closeTo(270, 1));
+    });
+
+    test('westenwind: heen wind mee, terug tegenwind', () {
+      final segs = windSegments(RouteTrack(outAndBack), windSpeedKmh: 20, windFromDegrees: 270);
+      expect(segs.map((s) => s.windClass).toList(), [WindClass.tail, WindClass.head]);
+      // De stukken sluiten op elkaar aan.
+      expect(segs[0].points.last.lon, closeTo(segs[1].points.first.lon, 1e-9));
+    });
+
+    test('zijwind en weinig wind', () {
+      expect(classifyWind(90, 20, 0), WindClass.side);
+      expect(classifyWind(90, 4, 90), WindClass.calm);
+      final segs = windSegments(RouteTrack(east), windSpeedKmh: 5, windFromDegrees: 90);
+      expect(segs.single.windClass, WindClass.calm);
+    });
+
+    test('pijltjes en kilometerbordjes', () {
+      final t = RouteTrack(outAndBack);
+      final arrows = arrowPositions(t, 400);
+      expect(arrows.length, 10);
+      expect(arrows.first.bearing, closeTo(90, 2));
+      expect(arrows.last.bearing, closeTo(270, 2));
+      expect(kmPositions(t).map((k) => k.km).toList(), [1, 2, 3]);
+      expect(markerDensity(25000).kmEvery, 2);
+      expect(markerDensity(5000, compact: true).kmEvery, 0);
+    });
+
+    test('hoogteprofiel', () {
+      final prof = sampleElevation(east);
+      expect(prof.first.meters, 0);
+      expect(prof.last.meters, closeTo(2000, 30));
+      expect(prof.length, 42);
+      final range = elevationRange(prof);
+      expect(range.max, greaterThan(range.min));
+      expect(elevationAt(prof, 1000), closeTo(20, 1.5));
+      // Zonder hoogtes geen profiel.
+      expect(sampleElevation([for (final p in east) LatLng(p.lat, p.lon)]), isEmpty);
+      // Opslaan en teruglezen.
+      final back = ElevationSample.listFromJson([for (final e in prof) e.toJson()]);
+      expect(back.length, prof.length);
+      expect(back[10].ele, closeTo(prof[10].ele, 0.06));
+      // Omgekeerd lopen: begint hoog, eindigt laag.
+      final rev = reverseProfile(prof);
+      expect(rev.first.meters, 0);
+      expect(rev.first.ele, closeTo(prof.last.ele, 1e-9));
+      expect(profileAscent(prof), closeTo(prof.last.ele - prof.first.ele, 1.5));
+      expect(profileAscent(rev), lessThan(1));
+    });
+
+    test('route krijgt een hoogteprofiel', () {
+      final r = buildRoute(east, name: 'Oost', source: 'generated');
+      expect(r.elevationProfile.length, greaterThan(30));
+      expect(r.toInsert('u')['elevation_profile'], isA<List>());
+      expect(r.profileOrKmPoints, isNotEmpty);
     });
   });
 }

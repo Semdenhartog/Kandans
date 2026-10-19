@@ -1,6 +1,10 @@
 /// Datamodellen die overeenkomen met de Supabase-tabellen.
 library;
 
+import '../../domain/route_geometry.dart';
+
+export '../../domain/route_geometry.dart' show ElevationSample;
+
 double _d(dynamic v) => v == null ? 0 : (v as num).toDouble();
 double? _dn(dynamic v) => v == null ? null : (v as num).toDouble();
 int? _in(dynamic v) => v == null ? null : (v as num).round();
@@ -170,6 +174,7 @@ class RunRoute {
     this.estimatedDurationSeconds,
     this.isFavorite = false,
     this.points = const [],
+    this.elevationProfile = const [],
   });
 
   final String? id;
@@ -185,6 +190,19 @@ class RunRoute {
 
   /// Punten per kilometer (met looprichting), alleen geladen in detailweergave.
   final List<RoutePoint> points;
+
+  /// Hoogte elke ~50 m (leeg bij oudere of getekende routes).
+  final List<ElevationSample> elevationProfile;
+
+  /// Hoogteprofiel, of anders de hoogtes per kilometer als die er zijn.
+  List<ElevationSample> get profileOrKmPoints {
+    if (elevationProfile.length >= 3) return elevationProfile;
+    final km = [
+      for (final p in points)
+        if (p.elevation != null) ElevationSample(p.kmMarker * 1000, p.elevation!),
+    ];
+    return km.length >= 3 ? km : const [];
+  }
 
   String get sourceLabel => switch (source) {
         'gpx_upload' => 'GPX',
@@ -205,6 +223,7 @@ class RunRoute {
         estimatedDurationSeconds: estimatedDurationSeconds,
         isFavorite: isFavorite ?? this.isFavorite,
         points: points ?? this.points,
+        elevationProfile: elevationProfile,
       );
 
   factory RunRoute.fromJson(Map<String, dynamic> j) => RunRoute(
@@ -218,6 +237,7 @@ class RunRoute {
         elevationGainMeters: _dn(j['elevation_gain_meters']),
         estimatedDurationSeconds: _in(j['estimated_duration_seconds']),
         isFavorite: (j['is_favorite'] as bool?) ?? false,
+        elevationProfile: ElevationSample.listFromJson(j['elevation_profile']),
       );
 
   Map<String, dynamic> toInsert(String userId) => {
@@ -231,6 +251,7 @@ class RunRoute {
         'start_longitude': startLongitude,
         'polyline': polyline,
         'is_favorite': isFavorite,
+        if (elevationProfile.isNotEmpty) 'elevation_profile': [for (final e in elevationProfile) e.toJson()],
       };
 }
 

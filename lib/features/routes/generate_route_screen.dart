@@ -16,6 +16,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'route_map.dart';
+import 'route_map_screen.dart';
 
 /// Een voorgesteld rondje met het beste vertrekmoment en de beste looprichting.
 class _Candidate {
@@ -323,8 +324,25 @@ class _CandidateCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            height: 200,
-            child: RouteMap(polyline: r.polyline, windFromDegrees: b.weather.windDirection, interactive: false),
+            height: 220,
+            child: RouteMap(
+              polyline: r.polyline,
+              windSpeedKmh: b.weather.windSpeed,
+              windFromDegrees: b.weather.windDirection,
+              compact: true,
+              interactive: false,
+              onExpand: () => openRouteMap(
+                context,
+                RouteMapData(
+                  title: r.name,
+                  polyline: r.polyline,
+                  distanceMeters: r.distanceMeters,
+                  windSpeedKmh: b.weather.windSpeed,
+                  windFromDegrees: b.weather.windDirection,
+                  profile: r.elevationProfile,
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -341,6 +359,11 @@ class _CandidateCard extends StatelessWidget {
                     Text(
                       'Beste vertrektijd ${Fmt.time(b.start)} · score ${b.score}',
                       style: const TextStyle(color: RwColors.muted),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Kleuren op de kaart: de wind om ${Fmt.time(b.start)}',
+                      style: const TextStyle(color: RwColors.subtle, fontSize: 12),
                     ),
                     if (candidate.directionLabel != null) ...[
                       const SizedBox(height: 4),
