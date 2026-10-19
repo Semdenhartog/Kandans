@@ -4,9 +4,12 @@ import 'geo.dart';
 
 /// Eén GPS-meting tijdens het lopen.
 class GpsFix {
-  const GpsFix(this.point, this.time, {this.accuracy = 10, this.speed});
+  const GpsFix(this.point, this.time, {this.accuracy = 10, this.speed, this.altitude});
   final LatLng point;
   final DateTime time;
+
+  /// Hoogte boven zeeniveau volgens de GPS (grof, wordt gladgestreken).
+  final double? altitude;
 
   /// Nauwkeurigheid in meters.
   final double accuracy;
@@ -16,6 +19,16 @@ class GpsFix {
 }
 
 enum RecorderStatus { idle, running, paused, autoPaused, finished }
+
+/// Eén meetpunt van de run: bewegende tijd, afstand, positie en eventueel hoogte en hartslag.
+class RunSample {
+  const RunSample(this.t, this.d, this.point, {this.alt, this.hr});
+  final double t;
+  final double d;
+  final LatLng point;
+  final double? alt;
+  final int? hr;
+}
 
 /// Houdt een run bij: afstand, bewegende tijd, automatisch pauzeren en kilometertijden.
 /// Bevat geen GPS of timers zelf, zodat het goed te testen is.
@@ -34,6 +47,17 @@ class RunRecording {
 
   /// Tijd (bewegend) waarop elke hele km werd bereikt.
   final List<double> kmTimes = [];
+
+  /// Meetpunten om de paar seconden, voor tijden per km, grafiek en snelste stukken.
+  final List<RunSample> samples = [];
+
+  /// Huidige hartslag van een hartslagband (null = geen band).
+  int? heartRate;
+  int _hrSum = 0;
+  int _hrCount = 0;
+
+  /// Gemiddelde hartslag over de bewegende tijd.
+  int? get averageHeartRate => _hrCount == 0 ? null : (_hrSum / _hrCount).round();
 
   GpsFix? _last;
   DateTime? _slowSince;
@@ -74,6 +98,7 @@ class RunRecording {
     _last = fix;
     if (prev == null) {
       if (track.isEmpty) track.add(fix.point);
+      if (samples.isEmpty) samples.add(RunSample(movingSeconds, distance, fix.point, alt: fix.altitude, hr: heartRate));
       return null;
     }
     final dt = fix.time.difference(prev.time).inMilliseconds / 1000;
@@ -114,6 +139,14 @@ class RunRecording {
 
     distance += d;
     movingSeconds += dt;
+    final hr = heartRate;
+    if (hr != null && hr > 30 && hr < 240) {
+      _hrSum += hr;
+      _hrCount++;
+    }
+    if (samples.isEmpty || movingSeconds - samples.last.t >= 3) {
+      samples.add(RunSample(movingSeconds, distance, fix.point, alt: fix.altitude, hr: hr));
+    }
     // Punt bewaren zodra je minstens 3 m van het vorige bewaarde punt bent.
     if (track.isEmpty || distanceMeters(track.last, fix.point) >= 3) track.add(fix.point);
     _recent.add((meters: d, seconds: dt));
@@ -154,6 +187,53 @@ class RunRecording {
   double? get lastKmSeconds {
     if (kmTimes.isEmpty) return null;
     return kmTimes.length == 1 ? kmTimes.first : kmTimes.last - kmTimes[kmTimes.length - 2];
+  }
+
+  /// Het verloop om op te slaan, in dezelfde vorm als bij Strava (t, d, alt, hr, ll).
+  /// Hoogte wordt gladgestreken (GPS-hoogte springt), ontbrekende waarden aangevuld.
+  Map<String, dynamic>? streamsJson() {
+    if (samples.length < 2) return null;
+    final t = [for (final s in samples) double.parse(s.t.toStringAsFixed(1))];
+    final d = [for (final s in samples) double.parse(s.d.toStringAsFixed(1))];
+    final ll = [
+      for (final s in samples) [double.parse(s.point.lat.toStringAsFixed(6)), double.parse(s.point.lon.toStringAsFixed(6))],
+    ];
+    List<double>? fill(List<double?> v) {
+      if (v.every((x) => x == null)) return null;
+      final out = <double>[];
+      double? last = v.firstWhere((x) => x != null);
+      for (final x in v) {
+        last = x ?? last;
+        out.add(last!);
+      }
+      return out;
+    }
+
+    final alt = fill([for (final s in samples) s.alt]);
+    List<double>? smooth(List<double>? v, int w) {
+      if (v == null) return null;
+      return [
+        for (var i = 0; i < v.length; i++)
+          () {
+            final a = math.max(0, i - w), b = math.min(v.length - 1, i + w);
+            var sum = 0.0;
+            for (var j = a; j <= b; j++) {
+              sum += v[j];
+            }
+            return double.parse((sum / (b - a + 1)).toStringAsFixed(1));
+          }(),
+      ];
+    }
+
+    final hr = fill([for (final s in samples) s.hr?.toDouble()]);
+    return {
+      't': t,
+      'd': d,
+      'll': ll,
+      if (alt != null) 'alt': smooth(alt, 3),
+      if (hr != null) 'hr': hr,
+      'src': 'runwise',
+    };
   }
 
   /// Vereenvoudigde track (punt om de ~20 m) om op te slaan.

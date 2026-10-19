@@ -6,6 +6,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../domain/best_efforts.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/widgets.dart';
@@ -27,7 +28,7 @@ class SplitsCard extends ConsumerWidget {
           children: [
             SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
             SizedBox(width: 10),
-            Text('Tijden ophalen bij Strava…', style: TextStyle(color: RwColors.muted)),
+            Text('Tijden per km laden…', style: TextStyle(color: RwColors.muted)),
           ],
         ),
         error: (e, _) => Row(
@@ -70,13 +71,48 @@ class SplitsCard extends ConsumerWidget {
               const Divider(height: 12),
               for (final sp in splits) _row(sp, ex, hasHr, hasEle),
               const SizedBox(height: 6),
-              const Text('Gegevens via Strava. Wind = het weer bij de start van je run.',
-                  style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+              Text('${a.source == 'strava' ? 'Gegevens via Strava' : 'Opgenomen met RunWise'}. Wind = het weer bij de start van je run.',
+                  style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+              ..._efforts(s, ref),
             ],
           );
         },
       ),
     );
+  }
+
+  /// Snelste stukken binnen deze run, met een kroontje als het je snelste ooit is.
+  List<Widget> _efforts(RunStreams s, WidgetRef ref) {
+    final list = bestEfforts(s);
+    if (list.isEmpty) return const [];
+    final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final overall = bestOverall([
+      for (final x in all)
+        if (x.id != null && x.bestEfforts != null && x.id != activity.id) (id: x.id!, efforts: x.bestEfforts!),
+    ]);
+    return [
+      const Divider(height: 28),
+      const Text('SNELSTE STUKKEN', style: _head),
+      const SizedBox(height: 8),
+      for (final b in list)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              SizedBox(width: 110, child: Text(b.label, style: const TextStyle(fontWeight: FontWeight.w600))),
+              Expanded(child: Text(Fmt.duration(b.seconds), style: const TextStyle(fontWeight: FontWeight.w700))),
+              Text(Fmt.pace(b.paceSecPerKm), style: const TextStyle(color: RwColors.muted)),
+              if ((overall[b.meters.round()]?.seconds ?? double.infinity) > b.seconds + 0.5) ...[
+                const SizedBox(width: 8),
+                const Tooltip(
+                  message: 'Je snelste ooit op deze afstand',
+                  child: Icon(Icons.emoji_events, color: RwColors.accent, size: 18),
+                ),
+              ],
+            ],
+          ),
+        ),
+    ];
   }
 
   static const _head = TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w600);

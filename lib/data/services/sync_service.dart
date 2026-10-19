@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health/health.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -117,6 +118,54 @@ class SyncService {
       _healthTypes,
       permissions: _healthTypes.map((_) => HealthDataAccess.READ).toList(),
     );
+  }
+
+  // ---------- Runs naar Health Connect (Samsung Health, Google Fit) ----------
+
+  static const _writeKey = 'health_write_runs';
+
+  Future<bool> healthWriteEnabled() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      return p.getBool(_writeKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Zet het schrijven aan (vraagt dan toestemming) of uit.
+  Future<bool> setHealthWrite(bool on) async {
+    if (on) {
+      if (!Platform.isAndroid) return false;
+      await _configureHealth();
+      final ok = await _health.requestAuthorization(
+        const [HealthDataType.WORKOUT],
+        permissions: const [HealthDataAccess.READ_WRITE],
+      );
+      if (!ok) return false;
+    }
+    final p = await SharedPreferences.getInstance();
+    await p.setBool(_writeKey, on);
+    return true;
+  }
+
+  /// Zet een opgenomen run in Health Connect, zodat hij ook in Samsung Health staat.
+  Future<bool> writeRunToHealth(Activity a) async {
+    if (!Platform.isAndroid || !await healthWriteEnabled()) return false;
+    try {
+      await _configureHealth();
+      final end = a.startedAt.add(Duration(seconds: a.movingTimeSeconds));
+      return await _health.writeWorkoutData(
+        activityType: HealthWorkoutActivityType.RUNNING,
+        start: a.startedAt,
+        end: end,
+        totalDistance: a.distanceMeters.round(),
+        totalDistanceUnit: HealthDataUnit.METER,
+        title: 'Hardlopen (RunWise)',
+      );
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Leest hardloopsessies uit Health Connect en slaat nieuwe op (met het weer van dat moment).

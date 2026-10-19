@@ -30,6 +30,7 @@ import 'package:runwise/domain/intervals.dart';
 import 'package:runwise/domain/run_export.dart';
 import 'package:runwise/domain/route_drawing.dart';
 import 'package:runwise/domain/route_photos.dart';
+import 'package:runwise/domain/best_efforts.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -976,6 +977,47 @@ void main() {
       final b = routeBounds(t.points, marginM: 200);
       expect(b.south, lessThan(52.0));
       expect(b.east, greaterThan(5.0438));
+    });
+  });
+
+  group('snelste stukken en verloop van eigen opnames', () {
+    test('snelste km midden in een run', () {
+      // 3 km: eerste en laatste km in 6:00, middelste in 4:30.
+      final t = <double>[], d = <double>[];
+      for (var m = 0; m <= 3000; m += 10) {
+        d.add(m.toDouble());
+        final sec = m <= 1000 ? m * 0.36 : (m <= 2000 ? 360 + (m - 1000) * 0.27 : 630 + (m - 2000) * 0.36);
+        t.add(sec);
+      }
+      final s = RunStreams(time: t, distance: d);
+      final b = bestEfforts(s);
+      final km = b.firstWhere((e) => e.meters == 1000);
+      expect(km.seconds, closeTo(270, 1));
+      expect(km.startMeters, closeTo(1000, 15));
+      expect(b.any((e) => e.meters == 5000), isFalse);
+      final json = bestEffortsToJson(b);
+      expect(json['1000'], closeTo(270, 1));
+      final overall = bestOverall([(id: 'a', efforts: {'1000': 280.0}), (id: 'b', efforts: json)]);
+      expect(overall[1000]!.activityId, 'b');
+      expect(bestEffortLabel(5000), '5 km');
+    });
+
+    test('opname bewaart verloop met hoogte en hartslag', () {
+      final t0 = DateTime(2026, 10, 20, 18);
+      final r = RunRecording()..start(t0);
+      for (var s = 0; s <= 400; s++) {
+        r.heartRate = 140 + (s ~/ 100);
+        r.add(GpsFix(LatLng(52.0, 5.0 + s * 3.0 / 68540), t0.add(Duration(seconds: s)),
+            accuracy: 5, altitude: 10 + (s % 7).toDouble()));
+      }
+      final j = r.streamsJson()!;
+      final parsed = RunStreams.fromJson(j)!;
+      expect(parsed.length, greaterThan(100));
+      expect(parsed.altitude, isNotNull);
+      expect(parsed.heartRate, isNotNull);
+      expect(parsed.totalDistance, closeTo(1200, 15));
+      expect(splitsOf(parsed).first.paceSecPerKm, closeTo(333, 5));
+      expect(r.averageHeartRate, inInclusiveRange(140, 144));
     });
   });
 }

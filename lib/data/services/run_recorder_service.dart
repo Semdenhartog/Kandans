@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:vibration/vibration.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../domain/geo.dart';
@@ -72,6 +73,9 @@ class RunRecorderService {
   FlutterTts? _tts;
   bool voice = true;
   bool shareLive = false;
+
+  /// Trillen bij elke kilometer en bij intervalwissels (handig zonder oortjes).
+  bool haptics = true;
   IntervalTracker? _intervals;
   LatLng? _position;
 
@@ -120,7 +124,8 @@ class RunRecorderService {
     });
   }
 
-  Future<void> start({bool voice = true, bool shareLive = false, String name = '', IntervalPlan? intervals}) async {
+  Future<void> start({bool voice = true, bool shareLive = false, String name = '', IntervalPlan? intervals, bool haptics = true}) async {
+    this.haptics = haptics;
     this.voice = voice || intervals != null;
     this.shareLive = shareLive;
     if (_sub == null) await warmUp();
@@ -167,11 +172,13 @@ class RunRecorderService {
     if (r == null) return;
     _lastFixAt = DateTime.now();
     final before = r.status;
-    final km = r.add(GpsFix(LatLng(p.latitude, p.longitude), p.timestamp, accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null));
+    final km = r.add(GpsFix(LatLng(p.latitude, p.longitude), p.timestamp,
+        accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null, altitude: p.altitude == 0 ? null : p.altitude));
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
     if (before == RecorderStatus.autoPaused && r.status == RecorderStatus.running) _say('Verder.');
     // Tijdens intervallen geen lange kilometer-melding, die zit de aanwijzingen in de weg.
     if (km != null && _intervals == null) _say(kmAnnouncement(r, km));
+    if (km != null) _buzz(const [0, 180, 140, 180]);
     _position = LatLng(p.latitude, p.longitude);
     _checkIntervals();
     if (shareLive && r.isActive) LiveShareService.instance.feed(p);
@@ -182,7 +189,27 @@ class RunRecorderService {
     final it = _intervals, r = _rec;
     if (it == null || r == null || !r.isActive || it.finished) return;
     final cue = it.update(_movingNow(), r.distance);
-    if (cue != null) _say(cue.text);
+    if (cue != null) {
+      _say(cue.text);
+      _buzzFor(cue, it);
+    }
+  }
+
+  void _buzzFor(IntervalCue cue, IntervalTracker it) {
+    if (!cue.stepChanged) {
+      _buzz(const [0, 120]);
+    } else if (cue.finished) {
+      _buzz(const [0, 300, 150, 300, 150, 600]);
+    } else if (it.current?.kind == StepKind.work) {
+      _buzz(const [0, 400, 120, 400, 120, 400]);
+    } else {
+      _buzz(const [0, 700]);
+    }
+  }
+
+  void _buzz(List<int> pattern) {
+    if (!haptics) return;
+    Vibration.vibrate(pattern: pattern).catchError((_) {});
   }
 
   /// Sla de huidige intervalstap over (bijv. als je eerder klaar bent met inlopen).
@@ -190,7 +217,10 @@ class RunRecorderService {
     final it = _intervals, r = _rec;
     if (it == null || r == null) return;
     final cue = it.skip(_movingNow(), r.distance);
-    if (cue != null) _say(cue.text);
+    if (cue != null) {
+      _say(cue.text);
+      _buzzFor(cue, it);
+    }
     view.value = _snapshot();
   }
 

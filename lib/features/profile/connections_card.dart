@@ -20,6 +20,7 @@ class ConnectionsCard extends ConsumerStatefulWidget {
 }
 
 class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsBindingObserver {
+  Future<bool>? _writeOn;
   bool _busy = false;
 
   @override
@@ -171,6 +172,23 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             enabled: !_busy && health != HealthStatus.unavailable,
             onTap: () => _healthTap(health),
           ),
+          if (health != HealthStatus.unavailable && health != HealthStatus.needsInstall)
+            FutureBuilder<bool>(
+              future: _writeOn ??= _sync.healthWriteEnabled(),
+              builder: (context, snap) => SwitchListTile(
+                secondary: const Icon(Icons.upload_outlined, color: RwColors.subtle),
+                title: const Text('Opgenomen runs naar Samsung Health'),
+                subtitle: const Text('Zet runs die je in RunWise opneemt ook in Health Connect (Samsung Health, Google Fit)'),
+                value: snap.data ?? false,
+                onChanged: _busy
+                    ? null
+                    : (v) async {
+                        final ok = await _sync.setHealthWrite(v);
+                        if (!ok && mounted) showMessage(context, 'Geen toestemming gekregen van Health Connect.');
+                        setState(() => _writeOn = _sync.healthWriteEnabled());
+                      },
+              ),
+            ),
           const Divider(height: 1),
           ListTile(
             leading: Icon(Icons.link, color: conn == null ? _stravaOrange : RwColors.accent),

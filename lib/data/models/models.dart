@@ -89,6 +89,8 @@ class Activity {
     this.shoeId,
     this.feel,
     this.note,
+    this.bestEfforts,
+    this.photos = const [],
   });
 
   final String? id;
@@ -120,6 +122,12 @@ class Activity {
   final int? feel;
   final String? note;
 
+  /// Snelste stukken binnen deze run: afstand in meters (als tekst) -> seconden.
+  final Map<String, double>? bestEfforts;
+
+  /// Foto's bij deze run (paden in de opslag 'run-photos').
+  final List<String> photos;
+
   /// Automatisch aan de route gekoppeld (niet door de gebruiker gekozen).
   bool get autoLinked => routeId != null && !routeLinkLocked && source != 'manual';
 
@@ -145,6 +153,13 @@ class Activity {
         shoeId: j['shoe_id'] as String?,
         feel: _in(j['feel']),
         note: j['note'] as String?,
+        bestEfforts: j['best_efforts'] is Map
+            ? {
+                for (final e in (j['best_efforts'] as Map).entries)
+                  if (e.value is num) e.key.toString(): (e.value as num).toDouble(),
+              }
+            : null,
+        photos: j['photos'] is List ? [for (final p in j['photos'] as List) p.toString()] : const [],
       );
 
   Map<String, dynamic> toInsert(String userId) => {

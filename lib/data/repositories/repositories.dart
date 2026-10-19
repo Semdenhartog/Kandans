@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase.dart';
 import '../models/models.dart';
 import '../services/offline_cache.dart';
+import '../../domain/best_efforts.dart';
+import '../../domain/run_streams.dart';
 
 /// Alle database-toegang via Supabase. Row Level Security zorgt ervoor
 /// dat elke gebruiker alleen zijn eigen rijen kan zien en wijzigen.
@@ -16,21 +18,30 @@ class RunWiseRepository {
   static const _activityColumns =
       'id, started_at, distance_meters, moving_time_seconds, source, route_id, average_heart_rate, '
       'elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, wind_direction_degrees, '
-      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note';
+      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos';
 
-  /// Verloop van een Strava-run (tijden per km, grafiek). Wordt eenmalig bij Strava opgehaald.
+  /// Verloop van een run (tijden per km, grafiek). Eigen opnames hebben het al; bij Strava-runs
+  /// wordt het eenmalig bij Strava opgehaald. De snelste stukken worden er meteen bij berekend.
   Future<Map<String, dynamic>?> activityStreams(String activityId) async {
-    final row = await _db.from('activities').select('streams').eq('id', activityId).maybeSingle();
-    final cached = row?['streams'];
-    if (cached is Map) return cached.cast<String, dynamic>();
-    try {
-      final res = await _db.functions.invoke('strava', body: {'action': 'streams', 'activity_id': activityId});
-      final data = (res.data as Map?)?['streams'];
-      return data is Map ? data.cast<String, dynamic>() : null;
-    } on FunctionException catch (e) {
-      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
-      throw Exception(details['error'] ?? 'Tijden per km konden niet worden opgehaald.');
+    final row = await _db.from('activities').select('streams, source, best_efforts').eq('id', activityId).maybeSingle();
+    var streams = row?['streams'] is Map ? (row!['streams'] as Map).cast<String, dynamic>() : null;
+    if (streams == null && row?['source'] == 'strava') {
+      try {
+        final res = await _db.functions.invoke('strava', body: {'action': 'streams', 'activity_id': activityId});
+        final data = (res.data as Map?)?['streams'];
+        streams = data is Map ? data.cast<String, dynamic>() : null;
+      } on FunctionException catch (e) {
+        final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+        throw Exception(details['error'] ?? 'Tijden per km konden niet worden opgehaald.');
+      }
     }
+    if (streams != null && row?['best_efforts'] == null) {
+      final parsed = RunStreams.fromJson(streams);
+      if (parsed != null) {
+        setActivityBestEfforts(activityId, bestEffortsToJson(bestEfforts(parsed))).ignore();
+      }
+    }
+    return streams;
   }
 
   /// Rijen ophalen; zonder internet de laatst bewaarde rijen.
@@ -114,6 +125,18 @@ class RunWiseRepository {
   /// Hoe voelde de run (1 zwaar, 2 oké, 3 top) en een notitie.
   Future<void> setActivityFeel(String id, {int? feel, String? note}) async {
     await _db.from('activities').update({'feel': feel, 'note': (note ?? '').trim().isEmpty ? null : note!.trim()}).eq('id', id);
+  }
+
+  /// Verloop en snelste stukken van een run opslaan (eigen opnames, of berekend uit Strava-tijden).
+  Future<void> setActivityStreams(String id, Map<String, dynamic> streams, {Map<String, double>? bestEfforts}) async {
+    await _db.from('activities').update({
+      'streams': streams,
+      if (bestEfforts != null) 'best_efforts': bestEfforts,
+    }).eq('id', id);
+  }
+
+  Future<void> setActivityBestEfforts(String id, Map<String, double> bestEfforts) async {
+    await _db.from('activities').update({'best_efforts': bestEfforts}).eq('id', id);
   }
 
   Future<void> setActivityShoe(String id, String? shoeId) async {

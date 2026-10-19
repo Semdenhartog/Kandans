@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
@@ -13,13 +14,16 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sync_service.dart';
 import '../../data/services/weather_service.dart';
+import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
+import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
 import 'interval_picker.dart';
+import 'run_summary_screen.dart';
 
 void openRecorder(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const RecordRunScreen()));
@@ -39,6 +43,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _share = false;
   bool _saving = false;
   bool _locked = false;
+  bool _haptics = true;
+  bool _batteryDone = true;
   String? _error;
   IntervalPlan? _plan;
   final _pages = PageController();
@@ -50,6 +56,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   void initState() {
     super.initState();
     SharedPreferences.getInstance().then((p) {
+      if (mounted) {
+        setState(() {
+          _haptics = p.getBool('rec_haptics') ?? true;
+          _batteryDone = !Platform.isAndroid || (p.getBool('battery_explained') ?? false);
+        });
+      }
       final raw = p.getString(_planKey);
       if (raw == null || !mounted) return;
       try {
@@ -74,9 +86,58 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   Future<void> _start() async {
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
-      await _svc.start(voice: _voice, shareLive: _share, name: name == 'loper' ? '' : name, intervals: _plan);
+      await _svc.start(voice: _voice, shareLive: _share, name: name == 'loper' ? '' : name, intervals: _plan, haptics: _haptics);
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
+    }
+  }
+
+  /// Samsung en andere merken zetten apps op de achtergrond soms in slaapstand; dan stopt de opname.
+  Future<void> _explainBattery() async {
+    final done = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Laat RunWise doorlopen op de achtergrond',
+                  style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              const Text(
+                'Om batterij te sparen zetten veel telefoons apps in slaapstand als je scherm uit is. '
+                'Dan stopt RunWise halverwege je run met meten. Zo voorkom je dat:',
+                style: TextStyle(color: RwColors.muted, height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              const Text('1. Tik hieronder op "Batterij-instellingen" en kies bij RunWise "Niet optimaliseren" of "Onbeperkt".',
+                  style: TextStyle(height: 1.4)),
+              const SizedBox(height: 8),
+              const Text(
+                  '2. Samsung: Instellingen → Batterij → Achtergrondgebruik beperken → Apps nooit in slaapstand → voeg RunWise toe.',
+                  style: TextStyle(height: 1.4)),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => AndroidIntent(action: 'android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS')
+                    .launch()
+                    .catchError((Object _) => AndroidIntent(action: 'android.settings.SETTINGS').launch()),
+                icon: const Icon(Icons.settings),
+                label: const Text('Batterij-instellingen'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Gedaan')),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (done == true) {
+      setState(() => _batteryDone = true);
+      final p = await SharedPreferences.getInstance();
+      await p.setBool('battery_explained', true);
     }
   }
 
@@ -116,11 +177,21 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       }
       final shoes = ref.read(shoesProvider).value ?? const <Shoe>[];
       final repo = ref.read(repositoryProvider);
-      final id = await repo.addActivityReturningId(Activity(
+      final streamsJson = rec.streamsJson();
+      final streams = streamsJson == null ? null : RunStreams.fromJson(streamsJson);
+      final efforts = streams == null ? const <BestEffort>[] : bestEfforts(streams);
+      // Je snelste tijden van vóór deze run, om nieuwe records te herkennen.
+      final before = ref.read(activitiesProvider).value ?? const <Activity>[];
+      final previousBest = bestOverall([
+        for (final x in before)
+          if (x.id != null && x.bestEfforts != null) (id: x.id!, efforts: x.bestEfforts!),
+      ]);
+      final activity = Activity(
         startedAt: start,
         distanceMeters: double.parse(rec.distance.toStringAsFixed(1)),
         movingTimeSeconds: rec.movingSeconds.round(),
         source: 'runwise',
+        averageHeartRate: rec.averageHeartRate,
         temperatureCelsius: w?.temperature,
         feelsLikeCelsius: w?.feelsLike,
         windSpeedKmh: w?.windSpeed,
@@ -128,13 +199,44 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         humidityPct: w?.humidity,
         trackPolyline: track.length >= 2 ? encodePolyline(track) : '',
         shoeId: defaultShoe(shoes)?.id,
-      ));
+      );
+      final id = await repo.addActivityReturningId(activity);
+      if (streamsJson != null) {
+        await repo
+            .setActivityStreams(id, streamsJson, bestEfforts: bestEffortsToJson(efforts))
+            .catchError((Object _) {}); // Het verloop is een extraatje; de run zelf staat er al.
+      }
+      final sync = ref.read(syncServiceProvider);
+      final written = await sync.writeRunToHealth(activity);
       ref.invalidate(activitiesProvider);
-      await ref.read(syncServiceProvider).autoLinkRuns().catchError((_) => 0);
+      await sync.autoLinkRuns().catchError((_) => 0);
       if (!mounted) return;
-      showMessage(context, 'Run opgeslagen: ${Fmt.km(rec.distance, decimals: 2)}.');
-      Navigator.of(context).pop();
-      context.go('/runs/$id');
+      final saved = Activity(
+        id: id,
+        startedAt: activity.startedAt,
+        distanceMeters: activity.distanceMeters,
+        movingTimeSeconds: activity.movingTimeSeconds,
+        source: activity.source,
+        averageHeartRate: activity.averageHeartRate,
+        temperatureCelsius: activity.temperatureCelsius,
+        feelsLikeCelsius: activity.feelsLikeCelsius,
+        windSpeedKmh: activity.windSpeedKmh,
+        windDirectionDegrees: activity.windDirectionDegrees,
+        humidityPct: activity.humidityPct,
+        trackPolyline: activity.trackPolyline,
+        shoeId: activity.shoeId,
+        bestEfforts: bestEffortsToJson(efforts),
+      );
+      Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => RunSummaryScreen(
+          activity: saved,
+          streams: streams,
+          efforts: efforts,
+          previousBest: previousBest,
+          healthWritten: written,
+        ),
+      ));
     } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
@@ -192,21 +294,45 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _choosePlan,
                   ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: _voice || _plan != null,
-                    onChanged: _plan != null ? null : (x) => setState(() => _voice = x),
-                    title: const Text('Stemcoach'),
-                    subtitle: Text(_plan != null
-                        ? 'Staat aan voor de intervallen'
-                        : 'Elke kilometer je tijd en tempo, ook met je scherm uit. Muziek gaat even zachter.'),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: _share,
-                    onChanged: (x) => setState(() => _share = x),
-                    title: const Text('Live delen'),
-                    subtitle: const Text('Iemand thuis kan meekijken via een link'),
+                  if (!_batteryDone)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.battery_alert_outlined, color: RwColors.warning),
+                      title: const Text('Zorg dat je telefoon je run niet stopt'),
+                      subtitle: const Text('Eenmalig instellen, duurt 1 minuut'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: _explainBattery,
+                    ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilterChip(
+                        avatar: const Icon(Icons.record_voice_over_outlined, size: 18),
+                        label: const Text('Stemcoach'),
+                        tooltip: 'Elke kilometer je tijd en tempo, ook met je scherm uit. Muziek gaat even zachter.',
+                        selected: _voice || _plan != null,
+                        onSelected: _plan != null ? null : (x) => setState(() => _voice = x),
+                      ),
+                      FilterChip(
+                        avatar: const Icon(Icons.vibration, size: 18),
+                        label: const Text('Trillen'),
+                        tooltip: 'Bij elke kilometer en bij intervalwissels',
+                        selected: _haptics,
+                        onSelected: (x) {
+                          setState(() => _haptics = x);
+                          SharedPreferences.getInstance().then((p) => p.setBool('rec_haptics', x)).ignore();
+                        },
+                      ),
+                      FilterChip(
+                        avatar: const Icon(Icons.share_location_outlined, size: 18),
+                        label: const Text('Live delen'),
+                        tooltip: 'Iemand thuis kan meekijken via een link',
+                        selected: _share,
+                        onSelected: (x) => setState(() => _share = x),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   FilledButton.icon(
