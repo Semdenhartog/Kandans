@@ -18,6 +18,12 @@ Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het we
 
 Bewust **nog niet**: pushmeldingen en ophalen terwijl de app dicht is.
 
+## Ontwerp
+
+- **Figma:** [RunWise – huisstijl en app](https://www.figma.com/design/9UghVxyQMKiRE2Vi1vmQOb) — kleuren, letters, logo, onderdelen en de schermen Vandaag, Coach en Premium.
+- De kleuren in Figma heten hetzelfde als in `lib/core/theme.dart` (`RwColors`) en op de website (`--accent`, `--bg` …). Verander je een kleur, doe dat dan op alle drie de plekken.
+- Logo-bestanden: `assets/logo/` (merkteken, woordmerk, volledig logo) en `assets/icon/` (app-icoon).
+
 ## Mappen
 
 ```
