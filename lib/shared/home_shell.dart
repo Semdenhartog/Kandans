@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme.dart';
+import '../data/services/location_service.dart';
 import '../data/services/offline_cache.dart';
 import '../data/services/sync_service.dart';
+import '../features/onboarding/onboarding_screen.dart';
 
 /// Onderste navigatiebalk met de vijf hoofdtabbladen.
 /// Haalt bij het openen (en terugkomen in) de app automatisch nieuwe runs op
@@ -23,7 +25,10 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _autoSync());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoSync();
+      _onboarding();
+    });
   }
 
   @override
@@ -35,6 +40,21 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) _autoSync();
+  }
+
+  Future<void> _onboarding() async {
+    final next = await showOnboardingIfNeeded(context);
+    if (next == null || !mounted) return;
+    // Na de rondleiding kan er locatie zijn: weer opnieuw ophalen.
+    ref.invalidate(weatherLocationProvider);
+    switch (next) {
+      case OnboardingNext.connect:
+        context.go('/me');
+      case OnboardingNext.route:
+        context.go('/routes/maken');
+      case OnboardingNext.today:
+        context.go('/today');
+    }
   }
 
   void _autoSync() {

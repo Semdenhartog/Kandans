@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config.dart';
 import '../models/models.dart';
@@ -14,12 +15,31 @@ class Coordinates {
   final String label;
 }
 
+/// Mag de app om locatie vragen? Pas nadat de gebruiker de uitleg heeft gezien
+/// (rondleiding of uitlegvenster), zodat de vraag nooit uit het niets komt.
+const locationExplainedKey = 'location_explained';
+
+Future<bool> locationExplained() async {
+  try {
+    return (await SharedPreferences.getInstance()).getBool(locationExplainedKey) ?? false;
+  } catch (_) {
+    return false;
+  }
+}
+
+Future<void> markLocationExplained() async {
+  try {
+    await (await SharedPreferences.getInstance()).setBool(locationExplainedKey, true);
+  } catch (_) {}
+}
+
 /// Vraagt de GPS-locatie op. Geeft null als dat niet mag of niet lukt.
+/// Om toestemming wordt alleen gevraagd als de uitleg al is getoond.
 Future<Coordinates?> currentPosition() async {
   try {
     if (!await Geolocator.isLocationServiceEnabled()) return null;
     var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
+    if (permission == LocationPermission.denied && await locationExplained()) {
       permission = await Geolocator.requestPermission();
     }
     if (permission == LocationPermission.denied ||

@@ -31,6 +31,24 @@ class _ReminderTileState extends ConsumerState<ReminderTile> {
   void _refreshSchedule() => ref.invalidate(forecastProvider);
 
   Future<void> _toggle(bool on) async {
+    if (on) {
+      // Eerst uitleggen waarom, dan pas de vraag van Android.
+      final go = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Dagelijkse melding'),
+          content: const Text(
+            'RunWise stuurt je één melding per dag met het beste moment om te lopen. '
+            'Daarvoor vraagt je telefoon zo om toestemming voor meldingen. Geen reclame, en je zet het hier altijd weer uit.',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Niet nu')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Aanzetten')),
+          ],
+        ),
+      );
+      if (go != true || !mounted) return;
+    }
     final ok = await NotificationService.instance.setEnabled(on);
     if (!mounted) return;
     if (!ok) {

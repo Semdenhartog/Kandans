@@ -88,6 +88,11 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
       final double lat, lon;
       final String startLabel;
       if (_useMyLocation) {
+        // Je koos zelf "Mijn locatie": dan mag de app om toestemming vragen.
+        if (!await locationExplained()) {
+          await markLocationExplained();
+          ref.invalidate(weatherLocationProvider);
+        }
         final loc = await ref.read(weatherLocationProvider.future);
         lat = loc.latitude;
         lon = loc.longitude;
