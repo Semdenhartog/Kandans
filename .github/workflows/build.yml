@@ -322,7 +322,15 @@ jobs:
           }
 
       - name: APK bouwen
-        run: flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }}
+        run: |
+          set -o pipefail
+          flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }} 2>&1 | tee build.txt || {
+            # Bouwfouten als leesbare meldingen tonen.
+            grep -E -A8 "What went wrong|^e: |error:|Error:|FAILURE:|Could not resolve|requires|minSdk|compileSdk" build.txt | grep -v "^--$" | head -60 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            exit 1
+          }
 
       - name: APK beschikbaar maken
         uses: actions/upload-artifact@v5
