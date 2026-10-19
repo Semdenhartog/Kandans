@@ -109,9 +109,13 @@ class StartTimePlanner {
     required this.profile,
     this.track = const [],
     this.durationMinutes = 60,
+    this.rain,
   }) : _segments = trackSegments(track);
 
   final Forecast forecast;
+
+  /// Live buienverwachting (komende 2 uur, per 5 minuten). Gaat voor de gewone verwachting.
+  final RainNowcast? rain;
   final PerformanceInsights profile;
 
   /// Route als lijst punten. Leeg = geen route, wind wordt dan algemeen meegewogen.
@@ -141,22 +145,93 @@ class StartTimePlanner {
     return results;
   }
 
-  /// Beste vertrektijd binnen de horizon (of null als er geen weerdata is).
+  /// Beste vertrektijd binnen de horizon, afgerond op het hele uur.
   StartTimeScore? best(TrainingType type, {DateTime? from, Duration? horizon}) {
     final all = scoreAll(type, from: from, horizon: horizon ?? const Duration(hours: 36));
     if (all.isEmpty) return null;
     return all.reduce((a, b) => b.score > a.score ? b : a);
   }
 
-  /// Score voor vertrekken op [start]: het gemiddelde over de uren die je onderweg bent.
+  /// Beste vertrektijd op [stepMinutes] minuten nauwkeurig.
+  ///
+  /// Eerst per uur, daarna rond de drie beste uren en in de komende 2 uur
+  /// (waar de buienradar meekijkt) per [stepMinutes] minuten verfijnd.
+  StartTimeScore? bestPrecise(
+    TrainingType type, {
+    DateTime? from,
+    Duration horizon = const Duration(hours: 36),
+    int stepMinutes = 5,
+    int earliestHour = 5,
+    int latestHour = 22,
+  }) {
+    final now = from ?? DateTime.now();
+    final hourly = scoreAll(type, from: now, horizon: horizon, earliestHour: earliestHour, latestHour: latestHour);
+    if (hourly.isEmpty) return null;
+
+    final first = roundUp(now, stepMinutes);
+    final end = now.add(horizon);
+    bool allowed(DateTime t) =>
+        !t.isBefore(first) && !t.isAfter(end) && t.hour >= earliestHour && t.hour <= latestHour;
+
+    final candidates = <DateTime>{};
+    final top = [...hourly]..sort((a, b) => b.score.compareTo(a.score));
+    for (final h in top.take(3)) {
+      for (var m = -55; m <= 55; m += stepMinutes) {
+        candidates.add(h.start.add(Duration(minutes: m)));
+      }
+    }
+    for (var m = 0; m <= 120; m += stepMinutes) {
+      candidates.add(first.add(Duration(minutes: m)));
+    }
+
+    StartTimeScore? best;
+    final sorted = candidates.where(allowed).toList()..sort();
+    for (final t in sorted) {
+      final s = scoreAt(t, type);
+      if (best == null || s.score > best.score) best = s;
+    }
+    return best ?? top.first;
+  }
+
+  /// [t] naar boven afgerond op [step] minuten (14:02 → 14:05).
+  static DateTime roundUp(DateTime t, int step) {
+    final base = DateTime(t.year, t.month, t.day, t.hour);
+    final minutes = t.minute + (t.second > 0 || t.millisecond > 0 ? 1 : 0);
+    final rounded = ((minutes + step - 1) ~/ step) * step;
+    return base.add(Duration(minutes: rounded));
+  }
+
+  /// Weer op precies [t]: kwartierdata geïnterpoleerd, en waar Buienradar
+  /// iets zegt over de komende 2 uur gaat de regen daarvan voor.
+  HourWeather? weatherAt(DateTime t) {
+    final w = forecast.precise(t) ?? forecast.at(t);
+    final mm = rain?.at(t);
+    if (w == null || mm == null) return w;
+    return HourWeather(
+      time: w.time,
+      temperature: w.temperature,
+      feelsLike: w.feelsLike,
+      humidity: w.humidity,
+      precipitationProbability: mm >= 0.1 ? 95 : 0,
+      precipitation: mm,
+      windSpeed: w.windSpeed,
+      windDirection: w.windDirection,
+      windGusts: w.windGusts,
+      uvIndex: w.uvIndex,
+      weatherCode: w.weatherCode,
+      isDay: w.isDay,
+    );
+  }
+
+  /// Score voor vertrekken op [start]: het gemiddelde over de tijd dat je onderweg bent,
+  /// elke 10 minuten bekeken.
   StartTimeScore scoreAt(DateTime start, TrainingType type) {
-    final hoursOnRoad = math.max(1, (durationMinutes / 60).ceil());
     final slices = <HourWeather>[];
-    for (var i = 0; i < hoursOnRoad; i++) {
-      final w = forecast.at(start.add(Duration(minutes: i * 60 + 15)));
+    for (var m = 0; m < math.max(10, durationMinutes); m += 10) {
+      final w = weatherAt(start.add(Duration(minutes: m)));
       if (w != null) slices.add(w);
     }
-    final main = forecast.at(start) ?? (slices.isNotEmpty ? slices.first : forecast.hours.first);
+    final main = weatherAt(start) ?? (slices.isNotEmpty ? slices.first : forecast.hours.first);
     if (slices.isEmpty) slices.add(main);
 
     var total = 0.0;
@@ -215,7 +290,12 @@ class StartTimePlanner {
     };
     final rainProb = w.precipitationProbability ?? ((w.precipitation ?? 0) > 0.1 ? 60.0 : 0.0);
     final rainPenalty = rainProb * rainMul + math.min(20.0, (w.precipitation ?? 0) * 8);
-    if (rainPenalty > 0) p['Kans op regen (${rainProb.round()}%)'] = rainPenalty;
+    if (rainPenalty > 0) {
+      final label = rainProb >= 95 && (w.precipitation ?? 0) >= 0.1
+          ? 'Buien volgens Buienradar (${(w.precipitation ?? 0).toStringAsFixed(1)} mm/u)'
+          : 'Kans op regen (${rainProb.round()}%)';
+      p[label] = rainPenalty;
+    }
 
     // Wind: met route rekenen we met tegenwind op jouw looprichting.
     RouteWind? rw;

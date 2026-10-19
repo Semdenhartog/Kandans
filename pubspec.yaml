@@ -20,24 +20,51 @@ dependencies:
   xml: ^6.5.0
   intl: any
   url_launcher: ^6.3.1
+  purchases_flutter: ^9.13.0
+  health: ^13.3.0
+  flutter_local_notifications: ">=19.0.0 <20.0.0"
+  timezone: ^0.10.0
+  shared_preferences: ^2.3.0
+  flutter_map: ^8.1.0
+  latlong2: ^0.9.1
+  share_plus: ^13.0.0
   android_intent_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.14.4
-
-flutter_launcher_icons:
-  android: true
-  ios: false
-  image_path: "assets/icon/icon.png"
-  adaptive_icon_background: "assets/icon/icon_background.png"
-  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
-  adaptive_icon_monochrome: "assets/icon/icon_monochrome.png"
-  min_sdk_android: 21
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/icon/icon.png
+    - assets/logo/
+    - assets/fonts/OFL-Saira.txt
+    - assets/fonts/OFL-DMSans.txt
+  fonts:
+    - family: Saira
+      fonts:
+        - asset: assets/fonts/Saira-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Saira-ExtraBold.ttf
+          weight: 800
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/DMSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/DMSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/DMSans-Bold.ttf
+          weight: 700
+
+# App-icoon (wordt in de cloudbuild gemaakt met: dart run flutter_launcher_icons)
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#09090B"
+  adaptive_icon_foreground: "assets/icon/foreground.png"
+  min_sdk_android: 26

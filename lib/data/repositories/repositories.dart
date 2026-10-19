@@ -50,6 +50,22 @@ class RunWiseRepository {
     await _db.from('activities').delete().eq('id', id);
   }
 
+  /// Koppelt een run aan een route (of los met null), door de gebruiker zelf.
+  /// Daarna koppelt RunWise deze run niet meer automatisch.
+  Future<void> setActivityRoute(String activityId, String? routeId) async {
+    await _db.from('activities').update({'route_id': routeId, 'route_link_locked': true}).eq('id', activityId);
+  }
+
+  /// Automatische koppeling (blijft aanpasbaar door de gebruiker).
+  Future<void> autoLinkActivity(String activityId, String routeId) async {
+    await _db
+        .from('activities')
+        .update({'route_id': routeId})
+        .eq('id', activityId)
+        .isFilter('route_id', null)
+        .eq('route_link_locked', false);
+  }
+
   // ---------- Routes ----------
 
   Future<List<RunRoute>> routes() async {
@@ -108,6 +124,36 @@ class RunWiseRepository {
     await _db.from('routes').delete().eq('id', id);
   }
 
+  // ---------- Maanduitdaging ----------
+
+  static String _monthKey(DateTime m) =>
+      '${m.year.toString().padLeft(4, '0')}-${m.month.toString().padLeft(2, '0')}-01';
+
+  /// Doel (km) voor de maand van [month], of null als er nog geen is.
+  Future<double?> monthlyGoal(DateTime month) async {
+    final row = await _db
+        .from('monthly_goals')
+        .select('target_km')
+        .eq('user_id', _uid)
+        .eq('month', _monthKey(month))
+        .maybeSingle();
+    final v = row?['target_km'];
+    return v == null ? null : (v as num).toDouble();
+  }
+
+  Future<void> setMonthlyGoal(DateTime month, double km) async {
+    await _db.from('monthly_goals').upsert({
+      'user_id': _uid,
+      'month': _monthKey(month),
+      'target_km': km,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
+  Future<void> deleteMonthlyGoal(DateTime month) async {
+    await _db.from('monthly_goals').delete().eq('user_id', _uid).eq('month', _monthKey(month));
+  }
+
   // ---------- Wedstrijden ----------
 
   Future<List<RaceEvent>> races() async {
@@ -152,6 +198,38 @@ class RunWiseRepository {
     await _db.from('race_events').delete().eq('id', id);
   }
 
+  // ---------- AI-coach ----------
+
+  Future<List<CoachMessage>> coachMessages() async {
+    final rows = await _db
+        .from('coach_messages')
+        .select()
+        .eq('user_id', _uid)
+        .order('created_at', ascending: false)
+        .limit(100);
+    return rows.map(CoachMessage.fromJson).toList().reversed.toList();
+  }
+
+  /// Stuurt een vraag naar de coach (server-functie `coach`).
+  Future<CoachReply> askCoach(String message) async {
+    try {
+      final res = await _db.functions.invoke('coach', body: {'message': message});
+      final data = (res.data as Map).cast<String, dynamic>();
+      return CoachReply(
+        reply: data['reply'] as String,
+        freeLeft: (data['free_left'] as num?)?.toInt(),
+      );
+    } on FunctionException catch (e) {
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (e.status == 402 || details['paywall'] == true) throw const PaywallRequired();
+      throw Exception(details['error'] ?? 'De coach is even niet bereikbaar. Probeer het zo opnieuw.');
+    }
+  }
+
+  Future<void> clearCoachChat() async {
+    await _db.from('coach_messages').delete().eq('user_id', _uid);
+  }
+
   // ---------- Account ----------
 
   /// Alle eigen gegevens als één overzicht (AVG: recht op inzage).
@@ -161,6 +239,8 @@ class RunWiseRepository {
     final activities = await _db.from('activities').select().eq('user_id', uid);
     final routes = await _db.from('routes').select().eq('user_id', uid);
     final races = await _db.from('race_events').select().eq('user_id', uid);
+    final coach = await _db.from('coach_messages').select().eq('user_id', uid);
+    final goals = await _db.from('monthly_goals').select().eq('user_id', uid);
     return {
       'exported_at': DateTime.now().toUtc().toIso8601String(),
       'email': _db.auth.currentUser?.email,
@@ -168,6 +248,8 @@ class RunWiseRepository {
       'activities': activities,
       'routes': routes,
       'race_events': races,
+      'coach_messages': coach,
+      'monthly_goals': goals,
     };
   }
 
@@ -179,6 +261,20 @@ class RunWiseRepository {
     }
     await _db.auth.signOut();
   }
+}
+
+/// Antwoord van de coach.
+class CoachReply {
+  CoachReply({required this.reply, this.freeLeft});
+  final String reply;
+
+  /// Aantal gratis vragen dat nog over is (null bij premium).
+  final int? freeLeft;
+}
+
+/// De gratis vragen zijn op: toon de paywall.
+class PaywallRequired implements Exception {
+  const PaywallRequired();
 }
 
 final repositoryProvider = Provider<RunWiseRepository>(
@@ -214,3 +310,8 @@ final racesProvider = FutureProvider<List<RaceEvent>>((ref) {
 final raceDetailProvider = FutureProvider.family<RaceEvent, String>(
   (ref, id) => ref.watch(repositoryProvider).race(id),
 );
+
+final coachMessagesProvider = FutureProvider<List<CoachMessage>>((ref) {
+  ref.watch(currentUserProvider);
+  return ref.watch(repositoryProvider).coachMessages();
+});

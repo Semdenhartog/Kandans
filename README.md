@@ -12,11 +12,17 @@ Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het we
 | **Wedstrijden** | Wedstrijddoelen met verwachte eindtijd (Riegel-formule op je beste recente run), weercorrectie vanaf ~15 dagen vooraf, en advies voor tempo, kleding en drinken. |
 | **Ik** | Persoonlijk loopprofiel (na 8 runs): ideale temperatuur, windgevoeligheid, ochtend of avond. Privacyverklaring, gegevens kopiëren, account verwijderen. |
 
-Bewust **nog niet** in v1: AI-coach, abonnementen, pushmeldingen, Strava-synchronisatie en Garmin. Die komen later.
+**Premium (in aanbouw):** AI-hardloopcoach achter een abonnement: eerste maand gratis, daarna €5 per maand of €40 per jaar (via Google Play + RevenueCat). Gratis gebruikers krijgen 3 proefvragen.
 
-## App-icoon
+**Koppelingen:** runs komen automatisch binnen van je horloge via **Health Connect** (Fitbit, Samsung, Garmin, Polar …; de laatste 30 dagen en daarna alles nieuw) en via **Strava**. Ophalen gebeurt bij het openen van de app en bij vernieuwen in Runs. Strava-runs gaan niet naar de AI-coach (Strava-voorwaarden).
 
-Het icoon staat in `assets/icon/` (limegroene klok met snelheidsstreepjes op donkergroen, in de stijl van de website). `play_store_512.png` is de versie voor de Play Store. Bij elke build wordt het icoon automatisch ingesteld.
+Bewust **nog niet**: pushmeldingen en ophalen terwijl de app dicht is.
+
+## Ontwerp
+
+- **Figma:** [RunWise – huisstijl en app](https://www.figma.com/design/9UghVxyQMKiRE2Vi1vmQOb) — kleuren, letters, logo, onderdelen en de schermen Vandaag, Coach en Premium.
+- De kleuren in Figma heten hetzelfde als in `lib/core/theme.dart` (`RwColors`) en op de website (`--accent`, `--bg` …). Verander je een kleur, doe dat dan op alle drie de plekken.
+- Logo-bestanden: `assets/logo/` (merkteken, woordmerk, volledig logo) en `assets/icon/` (app-icoon).
 
 ## Mappen
 
@@ -72,6 +78,37 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 6. **Project Settings → API**: kopieer de **Project URL** en de **anon / publishable key**
    naar `config.json`. Gebruik **nooit** de service-role key in de app.
 
+### 3a. Strava-koppeling instellen
+1. Ga naar https://www.strava.com/settings/api en maak een API-app aan (naam RunWise).
+2. Vul bij **Authorization Callback Domain** in: `jdswennyfczpqblfkrxt.supabase.co`
+3. Supabase → **Edge Functions → Secrets**: zet `STRAVA_CLIENT_ID` en `STRAVA_CLIENT_SECRET` (zelf invullen, niet in een chat plakken).
+4. Let op: een nieuwe Strava-app kan eerst maar een beperkt aantal sporters koppelen; meer aanvragen kan bij Strava.
+
+### 3a2. Route maken instellen (openrouteservice, gratis)
+1. Maak een gratis account op https://openrouteservice.org/dev/#/signup en kopieer je **API key** (standaard-abonnement).
+2. Supabase → **Edge Functions → Secrets**: zet `ORS_API_KEY` (zelf invullen, niet in een chat plakken).
+3. Adressen zoeken gaat via PDOK (overheid, gratis, geen sleutel nodig).
+
+### 3b. AI-coach en Premium instellen
+
+**AI-coach (server-functie `coach`)**
+1. Maak een account op https://console.anthropic.com, zet er een paar euro tegoed op en maak een **API key**.
+2. Supabase → **Edge Functions → Secrets**: voeg `ANTHROPIC_API_KEY` toe met die key.
+   (Optioneel `COACH_MODEL`; standaard `claude-haiku-5-5`.)
+3. Zet in de Anthropic Console een **maandlimiet** op je uitgaven, zodat de kosten nooit uit de hand lopen.
+4. Limieten aanpassen kan in de tabel `model_config`: `coach_free_questions` (standaard 3) en `coach_premium_daily_limit` (standaard 30).
+
+**Abonnement (Google Play + RevenueCat)**
+1. Google Play Console → je app → **Monetiseren → Abonnementen**: maak twee abonnementen,
+   `runwise_premium_monthly` (€5/maand) en `runwise_premium_yearly` (€40/jaar).
+   Voeg bij beide een **aanbieding met gratis proefperiode van 1 maand** toe.
+2. Maak een gratis account op https://www.revenuecat.com, koppel je Play-app en importeer de twee producten.
+   Maak een *entitlement* `premium` en een *offering* (standaard) met een **Monthly**- en **Annual**-pakket.
+3. RevenueCat → **Integrations → Webhooks**: URL `https://jdswennyfczpqblfkrxt.supabase.co/functions/v1/revenuecat-webhook`,
+   en kies zelf een lang wachtwoord als *Authorization header*. Zet hetzelfde wachtwoord in Supabase Secrets als `REVENUECAT_WEBHOOK_SECRET`.
+4. Zet de publieke RevenueCat **Android SDK-key** (begint met `goog_`) in `app_config.json` bij `REVENUECAT_ANDROID_KEY`.
+   Zolang die leeg is, toont de app "Abonnementen zijn binnenkort beschikbaar".
+
 ### 4. Op je telefoon testen
 1. Telefoon: *Instellingen → Over de telefoon* → 7× tikken op *Buildnummer* → *Ontwikkelaarsopties* → **USB-foutopsporing** aan.
 2. Telefoon met USB aansluiten en toestaan.
@@ -79,6 +116,20 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
    ```powershell
    flutter run --dart-define-from-file=config.json
    ```
+
+### 4b. Uploadsleutel voor de Play Store (eenmalig)
+1. Voer op je laptop uit (in de map van de app):
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\maak-sleutel.ps1
+   ```
+2. Open `runwise-github-geheimen.txt` en zet de 4 waarden in GitHub:
+   **Settings → Secrets and variables → Actions → New repository secret**.
+3. Bewaar `runwise-upload-key.jks` en het wachtwoord veilig, en verwijder het tekstbestand.
+4. Vanaf de volgende push bouwt GitHub naast de APK ook **runwise-playstore-aab**: dat bestand upload je in de Play Console.
+
+### 4c. Health Connect en de Play Store
+Google Play vraagt bij de eerste versie een **verklaring voor Health Connect**: RunWise leest alleen *trainingen*, *afstand* en *hartslag* om je runs automatisch te loggen en je loopprofiel te berekenen. Zet dit ook in de privacyverklaring:
+> RunWise leest met jouw toestemming hardlooptrainingen, afstand en hartslag uit Health Connect om je runs automatisch toe te voegen. Deze gegevens worden alleen gebruikt voor jouw eigen overzicht, loopprofiel en coach, worden niet verkocht of gedeeld met adverteerders, en worden verwijderd als je je account verwijdert.
 
 ### 5. Later: publiceren in de Play Store
 - Google Play-ontwikkelaarsaccount (eenmalig ca. $25).

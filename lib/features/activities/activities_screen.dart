@@ -7,7 +7,10 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
+import 'activity_detail_screen.dart';
+import 'activity_providers.dart';
 
 class ActivitiesScreen extends ConsumerWidget {
   const ActivitiesScreen({super.key});
@@ -30,10 +33,20 @@ class ActivitiesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activities = ref.watch(activitiesProvider);
+    final records = ref.watch(recordsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mijn runs')),
+      appBar: AppBar(
+        title: const Text('Mijn runs'),
+        actions: [
+          IconButton(
+            tooltip: 'Mijn records',
+            icon: const Icon(Icons.emoji_events_outlined),
+            onPressed: () => context.go('/runs/records'),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/me/runs/new'),
+        onPressed: () => context.go('/runs/new'),
         icon: const Icon(Icons.add),
         label: const Text('Run toevoegen'),
       ),
@@ -48,13 +61,18 @@ class ActivitiesScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.directions_run,
               title: 'Nog geen runs',
-              message: 'Voeg je runs toe. Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
+              message: 'Voeg je runs toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
               actionLabel: 'Eerste run toevoegen',
-              onAction: () => context.go('/me/runs/new'),
+              onAction: () => context.go('/runs/new'),
             );
           }
           return RefreshIndicator(
             onRefresh: () async {
+              try {
+                await ref.read(syncServiceProvider).syncAll(force: true);
+              } catch (e) {
+                if (context.mounted) showMessage(context, friendlyError(e), error: true);
+              }
               ref.invalidate(activitiesProvider);
               await ref.read(activitiesProvider.future);
             },
@@ -65,7 +83,12 @@ class ActivitiesScreen extends ConsumerWidget {
               itemBuilder: (context, i) {
                 if (i == 0) return _WeekSummary(activities: list);
                 final a = list[i - 1];
-                return _ActivityTile(activity: a, onDelete: () => _delete(context, ref, a));
+                return _ActivityTile(
+                  activity: a,
+                  badges: records.badgesFor(a),
+                  onTap: a.id == null ? null : () => context.go('/runs/${a.id}'),
+                  onDelete: () => _delete(context, ref, a),
+                );
               },
             ),
           );
@@ -102,8 +125,10 @@ class _WeekSummary extends StatelessWidget {
 }
 
 class _ActivityTile extends StatelessWidget {
-  const _ActivityTile({required this.activity, required this.onDelete});
+  const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete});
   final Activity activity;
+  final List<String> badges;
+  final VoidCallback? onTap;
   final VoidCallback onDelete;
 
   @override
@@ -119,13 +144,26 @@ class _ActivityTile extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: RwColors.surfaceHigh,
           child: Icon(
-            a.source == 'strava' ? Icons.sync : Icons.directions_run,
+            switch (a.source) {
+              'strava' => Icons.sync,
+              'health_connect' => Icons.watch_outlined,
+              _ => Icons.directions_run,
+            },
             color: RwColors.accent,
           ),
         ),
-        title: Text(
-          '${Fmt.km(a.distanceMeters)} · ${Fmt.pace(a.paceSecondsPerKm)}',
-          style: const TextStyle(fontWeight: FontWeight.w600),
+        onTap: onTap,
+        title: Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              '${Fmt.km(a.distanceMeters)} · ${Fmt.pace(a.paceSecondsPerKm)}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            for (final b in badges.take(2)) RecordBadge(b, small: true),
+          ],
         ),
         subtitle: Text(
           '${Fmt.date(a.startedAt)} ${Fmt.time(a.startedAt)} · ${Fmt.duration(a.movingTimeSeconds)}'

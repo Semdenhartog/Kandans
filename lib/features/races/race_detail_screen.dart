@@ -117,7 +117,7 @@ class RaceDetailScreen extends ConsumerWidget {
                     : r.daysUntil == 0
                         ? 'Het is vandaag. Succes!'
                         : 'Deze wedstrijd is geweest',
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, fontFamily: RwFonts.display),
               ),
               const SizedBox(height: 16),
               advice.when(
@@ -156,7 +156,7 @@ class _AdviceView extends StatelessWidget {
             children: [
               Text(
                 Fmt.duration(predicted),
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: RwColors.accent),
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: RwColors.accent, fontFamily: RwFonts.display),
               ),
               Text(
                 vsGoal.abs() < 15

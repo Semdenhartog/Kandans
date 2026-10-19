@@ -21,7 +21,7 @@ class ConfigMissingApp extends StatelessWidget {
               children: [
                 Text(
                   'RunWise is nog niet ingesteld',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, fontFamily: RwFonts.display),
                 ),
                 SizedBox(height: 12),
                 Text(

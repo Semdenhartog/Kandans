@@ -1,6 +1,10 @@
 /// Datamodellen die overeenkomen met de Supabase-tabellen.
 library;
 
+import '../../domain/route_geometry.dart';
+
+export '../../domain/route_geometry.dart' show ElevationSample;
+
 double _d(dynamic v) => v == null ? 0 : (v as num).toDouble();
 double? _dn(dynamic v) => v == null ? null : (v as num).toDouble();
 int? _in(dynamic v) => v == null ? null : (v as num).round();
@@ -13,9 +17,13 @@ class Profile {
     this.username,
     this.homeLatitude,
     this.homeLongitude,
+    this.isPremium = false,
+    this.coachFreeQuestionsUsed = 0,
   });
 
   final String id;
+  final bool isPremium;
+  final int coachFreeQuestionsUsed;
   final String? fullName;
   final String? firstName;
   final String? username;
@@ -37,6 +45,27 @@ class Profile {
         username: j['username'] as String?,
         homeLatitude: _dn(j['home_latitude']),
         homeLongitude: _dn(j['home_longitude']),
+        isPremium: (j['is_premium'] as bool?) ?? false,
+        coachFreeQuestionsUsed: _in(j['coach_free_questions_used']) ?? 0,
+      );
+}
+
+/// Eén bericht in het gesprek met de AI-coach.
+class CoachMessage {
+  CoachMessage({required this.role, required this.content, required this.createdAt, this.id});
+
+  final String? id;
+  final String role; // 'user' of 'assistant'
+  final String content;
+  final DateTime createdAt;
+
+  bool get isUser => role == 'user';
+
+  factory CoachMessage.fromJson(Map<String, dynamic> j) => CoachMessage(
+        id: j['id'] as String?,
+        role: j['role'] as String,
+        content: j['content'] as String,
+        createdAt: DateTime.parse(j['created_at'] as String),
       );
 }
 
@@ -55,6 +84,8 @@ class Activity {
     this.windSpeedKmh,
     this.windDirectionDegrees,
     this.humidityPct,
+    this.trackPolyline,
+    this.routeLinkLocked = false,
   });
 
   final String? id;
@@ -70,6 +101,17 @@ class Activity {
   final double? windSpeedKmh;
   final double? windDirectionDegrees;
   final double? humidityPct;
+
+  /// GPS-spoor van de run (Google-polyline, uit Strava). Leeg of null = geen spoor.
+  final String? trackPolyline;
+
+  /// De gebruiker heeft zelf de route gekozen of losgemaakt: niet automatisch koppelen.
+  final bool routeLinkLocked;
+
+  bool get hasTrack => (trackPolyline ?? '').isNotEmpty;
+
+  /// Automatisch aan de route gekoppeld (niet door de gebruiker gekozen).
+  bool get autoLinked => routeId != null && !routeLinkLocked && source != 'manual';
 
   double get paceSecondsPerKm =>
       distanceMeters <= 0 ? 0 : movingTimeSeconds / (distanceMeters / 1000);
@@ -88,6 +130,8 @@ class Activity {
         windSpeedKmh: _dn(j['wind_speed_kmh']),
         windDirectionDegrees: _dn(j['wind_direction_degrees']),
         humidityPct: _dn(j['humidity_pct']),
+        trackPolyline: j['track_polyline'] as String?,
+        routeLinkLocked: (j['route_link_locked'] as bool?) ?? false,
       );
 
   Map<String, dynamic> toInsert(String userId) => {
@@ -145,6 +189,7 @@ class RunRoute {
     this.estimatedDurationSeconds,
     this.isFavorite = false,
     this.points = const [],
+    this.elevationProfile = const [],
   });
 
   final String? id;
@@ -161,9 +206,23 @@ class RunRoute {
   /// Punten per kilometer (met looprichting), alleen geladen in detailweergave.
   final List<RoutePoint> points;
 
+  /// Hoogte elke ~50 m (leeg bij oudere of getekende routes).
+  final List<ElevationSample> elevationProfile;
+
+  /// Hoogteprofiel, of anders de hoogtes per kilometer als die er zijn.
+  List<ElevationSample> get profileOrKmPoints {
+    if (elevationProfile.length >= 3) return elevationProfile;
+    final km = [
+      for (final p in points)
+        if (p.elevation != null) ElevationSample(p.kmMarker * 1000, p.elevation!),
+    ];
+    return km.length >= 3 ? km : const [];
+  }
+
   String get sourceLabel => switch (source) {
         'gpx_upload' => 'GPX',
         'strava_import' => 'Strava',
+        'generated' => 'RunWise',
         _ => 'Getekend',
       };
 
@@ -179,6 +238,7 @@ class RunRoute {
         estimatedDurationSeconds: estimatedDurationSeconds,
         isFavorite: isFavorite ?? this.isFavorite,
         points: points ?? this.points,
+        elevationProfile: elevationProfile,
       );
 
   factory RunRoute.fromJson(Map<String, dynamic> j) => RunRoute(
@@ -192,6 +252,7 @@ class RunRoute {
         elevationGainMeters: _dn(j['elevation_gain_meters']),
         estimatedDurationSeconds: _in(j['estimated_duration_seconds']),
         isFavorite: (j['is_favorite'] as bool?) ?? false,
+        elevationProfile: ElevationSample.listFromJson(j['elevation_profile']),
       );
 
   Map<String, dynamic> toInsert(String userId) => {
@@ -205,6 +266,7 @@ class RunRoute {
         'start_longitude': startLongitude,
         'polyline': polyline,
         'is_favorite': isFavorite,
+        if (elevationProfile.isNotEmpty) 'elevation_profile': [for (final e in elevationProfile) e.toJson()],
       };
 }
 
@@ -311,11 +373,19 @@ class HourWeather {
 }
 
 class Forecast {
-  Forecast({required this.latitude, required this.longitude, required this.hours});
+  Forecast({
+    required this.latitude,
+    required this.longitude,
+    required this.hours,
+    this.quarters = const [],
+  });
 
   final double latitude;
   final double longitude;
   final List<HourWeather> hours;
+
+  /// Weer per kwartier (komende dagen). Leeg als het niet beschikbaar is.
+  final List<HourWeather> quarters;
 
   /// Het uur dat het dichtst bij [t] ligt.
   HourWeather? at(DateTime t) {
@@ -331,4 +401,89 @@ class Forecast {
     }
     return bestDiff <= 90 ? best : null;
   }
+
+  /// Weer op precies [t]: tussen twee kwartieren in geschat (geïnterpoleerd).
+  /// Zonder kwartierdata valt het terug op het dichtstbijzijnde uur.
+  HourWeather? precise(DateTime t) {
+    final hourly = at(t);
+    HourWeather? before;
+    HourWeather? after;
+    for (final q in quarters) {
+      if (!q.time.isAfter(t)) {
+        before = q;
+      } else {
+        after = q;
+        break;
+      }
+    }
+    if (before == null) return hourly;
+    if (after == null || t.difference(before.time).inMinutes > 30) {
+      return t.difference(before.time).inMinutes <= 15 ? _withHourly(before, hourly, t) : hourly;
+    }
+    final span = after.time.difference(before.time).inSeconds;
+    final f = span <= 0 ? 0.0 : t.difference(before.time).inSeconds / span;
+    double lerp(double a, double b) => a + (b - a) * f;
+    double? lerpN(double? a, double? b) => (a == null || b == null) ? (a ?? b) : lerp(a, b);
+    final near = f < 0.5 ? before : after;
+    return HourWeather(
+      time: t,
+      temperature: lerp(before.temperature, after.temperature),
+      feelsLike: lerpN(before.feelsLike, after.feelsLike),
+      humidity: hourly?.humidity,
+      precipitationProbability: hourly?.precipitationProbability,
+      precipitation: lerpN(before.precipitation, after.precipitation),
+      windSpeed: lerp(before.windSpeed, after.windSpeed),
+      windDirection: near.windDirection,
+      windGusts: lerpN(before.windGusts, after.windGusts),
+      uvIndex: hourly?.uvIndex,
+      weatherCode: hourly?.weatherCode,
+      isDay: near.isDay,
+    );
+  }
+
+  HourWeather _withHourly(HourWeather q, HourWeather? h, DateTime t) => HourWeather(
+        time: t,
+        temperature: q.temperature,
+        feelsLike: q.feelsLike,
+        humidity: h?.humidity,
+        precipitationProbability: h?.precipitationProbability,
+        precipitation: q.precipitation,
+        windSpeed: q.windSpeed,
+        windDirection: q.windDirection,
+        windGusts: q.windGusts,
+        uvIndex: h?.uvIndex,
+        weatherCode: h?.weatherCode,
+        isDay: q.isDay,
+      );
+}
+
+/// Buienverwachting per 5 minuten voor de komende 2 uur (Buienradar).
+class RainNowcast {
+  RainNowcast({required this.points, required this.fetchedAt});
+
+  /// Tijdstip en neerslag in mm per uur, oplopend in tijd.
+  final List<({DateTime time, double mmPerHour})> points;
+  final DateTime fetchedAt;
+
+  bool covers(DateTime t) =>
+      points.isNotEmpty && !t.isBefore(points.first.time) && !t.isAfter(points.last.time.add(const Duration(minutes: 5)));
+
+  /// Neerslag op [t] (mm/u), of null als [t] buiten de 2 uur valt.
+  double? at(DateTime t) {
+    if (!covers(t)) return null;
+    var value = points.first.mmPerHour;
+    for (final p in points) {
+      if (p.time.isAfter(t)) break;
+      value = p.mmPerHour;
+    }
+    return value;
+  }
+
+  /// Eerste moment met regen (>= 0,1 mm/u), of null als het droog blijft.
+  DateTime? get firstRain => points.where((p) => p.mmPerHour >= 0.1).map((p) => p.time).firstOrNull;
+
+  /// Eerste droge moment na regen, of null.
+  DateTime? get firstDry => points.where((p) => p.mmPerHour < 0.1).map((p) => p.time).firstOrNull;
+
+  bool get rainingNow => points.isNotEmpty && points.first.mmPerHour >= 0.1;
 }

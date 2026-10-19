@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      # Ondertekeningssleutel voor de Play Store (staat in GitHub Secrets, nooit in de code).
+      HAS_UPLOAD_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -27,7 +30,14 @@ jobs:
         run: flutter --version
 
       - name: Android-projectbestanden aanmaken
-        run: flutter create --org nl.runwise --project-name runwise --platforms android .
+        run: |
+          set -o pipefail
+          flutter create --org nl.runwise --project-name runwise --platforms android . 2>&1 | tee create.txt || {
+            grep -iE "because|version solving|error|not found|depends on|requires" create.txt | head -25 | while IFS= read -r line; do
+              echo "::error title=Pakketten::$line"
+            done
+            exit 1
+          }
 
       - name: Rechten toevoegen aan AndroidManifest.xml
         run: |
@@ -37,7 +47,6 @@ jobs:
           if "android.permission.INTERNET" not in s:
               s = s.replace("<application", (
                   '<uses-permission android:name="android.permission.INTERNET"/>\n'
-                  '    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>\n'
                   '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n'
                   '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n'
                   '    <application'), 1)
@@ -53,6 +62,113 @@ jobs:
           s = s.replace('android:label="runwise"', 'android:label="RunWise"')
           open(p, "w").write(s)
           EOF
+
+      - name: Koppelingen instellen (Health Connect en Strava-terugkeer)
+        run: |
+          python3 - <<'EOF2'
+          import glob, re
+          # 1) AndroidManifest: rechten, terugkeer-link van Strava, Health Connect-uitleg
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "android.permission.health.READ_EXERCISE" not in s:
+              perms = (
+                  '<uses-permission android:name="android.permission.health.READ_EXERCISE"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>\n'
+                  '    <application')
+              s = s.replace("<application", perms, 1)
+              filters = (
+                  '</intent-filter>\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />\n'
+                  '            </intent-filter>\n'
+                  '            <intent-filter android:autoVerify="false">\n'
+                  '                <action android:name="android.intent.action.VIEW" />\n'
+                  '                <category android:name="android.intent.category.DEFAULT" />\n'
+                  '                <category android:name="android.intent.category.BROWSABLE" />\n'
+                  '                <data android:scheme="runwise" android:host="app" />\n'
+                  '            </intent-filter>')
+              s = s.replace("</intent-filter>", filters, 1)
+              alias = (
+                  '</activity>\n'
+                  '        <activity-alias\n'
+                  '            android:name="ViewPermissionUsageActivity"\n'
+                  '            android:exported="true"\n'
+                  '            android:targetActivity=".MainActivity"\n'
+                  '            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />\n'
+                  '                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />\n'
+                  '            </intent-filter>\n'
+                  '        </activity-alias>')
+              s = s.replace("</activity>", alias, 1)
+              s = s.replace("<queries>", '<queries>\n        <package android:name="com.google.android.apps.healthdata" />', 1)
+          open(p, "w").write(s)
+
+          # 2) MainActivity moet een FlutterFragmentActivity zijn (vereist door Health Connect)
+          for m in glob.glob("android/app/src/main/kotlin/**/MainActivity.kt", recursive=True):
+              k = open(m).read()
+              k = k.replace("io.flutter.embedding.android.FlutterActivity", "io.flutter.embedding.android.FlutterFragmentActivity")
+              k = re.sub(r":\s*FlutterActivity\(\)", ": FlutterFragmentActivity()", k)
+              open(m, "w").write(k)
+              print("::notice::MainActivity aangepast:", m)
+
+          # 3) Health Connect werkt vanaf Android 8 (API 26)
+          g = "android/app/build.gradle.kts"
+          t = open(g).read()
+          t2 = re.sub(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 26", t)
+          assert t2 != t or "minSdk = 26" in t, "minSdk niet gevonden"
+          open(g, "w").write(t2)
+          print("::notice::Health Connect en Strava-terugkeer ingesteld")
+          EOF2
+
+      - name: Live locatie delen (voorgrondservice)
+        run: |
+          python3 - <<'EOF2'
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "FOREGROUND_SERVICE_LOCATION" not in s:
+              s = s.replace("<application", (
+                  '<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n'
+                  '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>\n'
+                  '    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n'
+                  '    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>\n'
+                  '    <application'), 1)
+              open(p, "w").write(s)
+          print("::notice::Voorgrondservice voor live delen ingesteld")
+          EOF2
+
+      - name: Meldingen instellen (dagelijkse melding)
+        run: |
+          python3 - <<'EOF2'
+          import re
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "POST_NOTIFICATIONS" not in s:
+              s = s.replace("<application", (
+                  '<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n'
+                  '    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n'
+                  '    <application'), 1)
+              s = s.replace("</application>", (
+                  '    <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />\n'
+                  '        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="android.intent.action.BOOT_COMPLETED"/>\n'
+                  '                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>\n'
+                  '                <action android:name="android.intent.action.QUICKBOOT_POWERON" />\n'
+                  '            </intent-filter>\n'
+                  '        </receiver>\n'
+                  '    </application>'), 1)
+              open(p, "w").write(s)
+          g = "android/app/build.gradle.kts"
+          t = open(g).read()
+          if "isCoreLibraryDesugaringEnabled" not in t:
+              t2 = t.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true", 1)
+              assert t2 != t, "compileOptions niet gevonden"
+              t2 += '\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n'
+              open(g, "w").write(t2)
+          print("::notice::Meldingen ingesteld (rechten, ontvangers, desugaring)")
+          EOF2
 
       - name: Code-inkorting (R8) veilig instellen
         run: |
@@ -86,11 +202,63 @@ jobs:
           print("::notice::R8-inkorting uitgeschakeld en keep-regels toegevoegd")
           EOF2
 
+      - name: Ondertekenen voor de Play Store instellen
+        if: env.HAS_UPLOAD_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+          python3 - <<'EOF2'
+          p = "android/app/build.gradle.kts"
+          s = open(p).read()
+          s = "import java.io.FileInputStream\nimport java.util.Properties\n\n" + s
+          block = '''    signingConfigs {
+                  create("release") {
+                      val props = Properties()
+                      props.load(FileInputStream(rootProject.file("key.properties")))
+                      keyAlias = props["keyAlias"] as String
+                      keyPassword = props["keyPassword"] as String
+                      storeFile = file(props["storeFile"] as String)
+                      storePassword = props["storePassword"] as String
+                  }
+              }
+
+              buildTypes {'''
+          assert "    buildTypes {" in s, "buildTypes niet gevonden"
+          s = s.replace("    buildTypes {", block, 1)
+          old = 'signingConfig = signingConfigs.getByName("debug")'
+          assert old in s, "debug-ondertekening niet gevonden"
+          s = s.replace(old, 'signingConfig = signingConfigs.getByName("release")', 1)
+          open(p, "w").write(s)
+          print("::notice::Release wordt ondertekend met de uploadsleutel")
+          EOF2
+
       - name: Pakketten downloaden
         run: flutter pub get
 
-      - name: App-icoon genereren
-        run: dart run flutter_launcher_icons
+      - name: App-icoon en donker opstartscherm
+        run: |
+          dart run flutter_launcher_icons
+          for f in android/app/src/main/res/drawable/launch_background.xml android/app/src/main/res/drawable-v21/launch_background.xml; do
+            [ -f "$f" ] || continue
+            cat > "$f" <<'EOF2'
+          <?xml version="1.0" encoding="utf-8"?>
+          <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+              <item><color android:color="#FF09090B" /></item>
+          </layer-list>
+          EOF2
+            sed -i 's/^          //' "$f"
+          done
+          echo "::notice::App-icoon (RunWise-logo) en donker opstartscherm ingesteld"
 
       - name: Analyse-meldingen als annotaties tonen
         run: |
@@ -111,13 +279,29 @@ jobs:
           EOF2
 
       - name: Code controleren
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: |
+          set -o pipefail
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee analyze-plain.txt || {
+            # Fouten als annotaties tonen, zodat ze ook zonder de volledige log leesbaar zijn.
+            grep -E "error •|warning •" analyze-plain.txt | head -40 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            exit 1
+          }
 
       - name: Tests
-        run: flutter test
+        run: |
+          set -o pipefail
+          flutter test --reporter expanded 2>&1 | tee tests-plain.txt || {
+            # Mislukte tests als annotaties tonen, zodat ze ook zonder de volledige log leesbaar zijn.
+            grep -E "\[E\]|Expected:|  Actual:|Which:" tests-plain.txt | head -30 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            exit 1
+          }
 
       - name: APK bouwen
-        run: flutter build apk --release --dart-define-from-file=app_config.json
+        run: flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }}
 
       - name: APK beschikbaar maken
         uses: actions/upload-artifact@v5
@@ -125,3 +309,19 @@ jobs:
           name: runwise-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
+
+      - name: App bundle voor de Play Store bouwen
+        if: env.HAS_UPLOAD_KEY == 'true'
+        run: flutter build appbundle --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }}
+
+      - name: App bundle beschikbaar maken
+        if: env.HAS_UPLOAD_KEY == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: runwise-playstore-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Uitleg als de sleutel nog ontbreekt
+        if: env.HAS_UPLOAD_KEY != 'true'
+        run: echo "::notice::Geen Play Store-bundle gebouwd - voer eerst maak-sleutel.ps1 uit en zet de 4 geheimen in GitHub (zie README)."

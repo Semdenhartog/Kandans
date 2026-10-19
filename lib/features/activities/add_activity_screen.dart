@@ -93,7 +93,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
         context,
         w == null ? 'Run opgeslagen (weer kon niet worden opgehaald).' : 'Run opgeslagen met het weer van dat moment.',
       );
-      context.go('/me/runs');
+      context.go('/runs');
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
     } finally {

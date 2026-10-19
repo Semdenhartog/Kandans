@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
-import '../../shared/rw_components.dart';
 import '../../shared/widgets.dart';
 
-/// Coach-scherm (paywall) volgens het Figma-ontwerp.
-/// De AI-coach en betalen via Google Play komen in een volgende versie.
+const _suggestions = [
+  'Wat zal ik deze week lopen?',
+  'Hoe pak ik mijn volgende wedstrijd aan?',
+  'Hoe word ik sneller op de 5 km?',
+  'Wat trek ik aan bij het weer van morgen?',
+];
+
 class CoachScreen extends ConsumerStatefulWidget {
   const CoachScreen({super.key});
 
@@ -17,259 +23,263 @@ class CoachScreen extends ConsumerStatefulWidget {
 }
 
 class _CoachScreenState extends ConsumerState<CoachScreen> {
-  bool _yearly = true;
+  final _input = TextEditingController();
+  final _scroll = ScrollController();
 
-  void _startTrial() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Bijna klaar'),
-        content: const Text(
-          'RunWise Coach is nog in ontwikkeling. Zodra hij beschikbaar is, kun je hier je gratis '
-          'proefmaand starten via Google Play. We laten het je weten in de app.',
-        ),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Oké'))],
-      ),
+  /// Berichten van deze sessie die nog niet opnieuw zijn ingeladen.
+  final _pending = <CoachMessage>[];
+  bool _sending = false;
+  int? _freeLeft;
+
+  @override
+  void dispose() {
+    _input.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _scrollDown() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) {
+        _scroll.animateTo(_scroll.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+      }
+    });
+  }
+
+  Future<void> _send([String? preset]) async {
+    final text = (preset ?? _input.text).trim();
+    if (text.isEmpty || _sending) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _sending = true;
+      _pending.add(CoachMessage(role: 'user', content: text, createdAt: DateTime.now()));
+      _input.clear();
+    });
+    _scrollDown();
+    try {
+      final r = await ref.read(repositoryProvider).askCoach(text);
+      setState(() {
+        _pending.add(CoachMessage(role: 'assistant', content: r.reply, createdAt: DateTime.now()));
+        _freeLeft = r.freeLeft;
+      });
+      _scrollDown();
+    } on PaywallRequired {
+      setState(() => _pending.removeLast());
+      _input.text = text;
+      if (mounted) context.push('/premium');
+    } catch (e) {
+      setState(() => _pending.removeLast());
+      _input.text = text;
+      if (mounted) showMessage(context, friendlyError(e), error: true);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _clear() async {
+    final ok = await confirmDialog(
+      context,
+      title: 'Gesprek wissen?',
+      message: 'Alle berichten met de coach worden verwijderd. De coach weet daarna niet meer wat jullie bespraken.',
+      confirmLabel: 'Wissen',
     );
+    if (!ok) return;
+    try {
+      await ref.read(repositoryProvider).clearCoachChat();
+      setState(_pending.clear);
+      ref.invalidate(coachMessagesProvider);
+    } catch (e) {
+      if (mounted) showMessage(context, friendlyError(e), error: true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(profileProvider);
-    final runs = ref.watch(activitiesProvider).when(
-          data: (a) => a,
-          loading: () => const <Activity>[],
-          error: (_, _) => const <Activity>[],
-        );
-    final name = profile.when(data: (p) => p?.displayName ?? '', loading: () => '', error: (_, _) => '');
-    final now = DateTime.now();
-    final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
-    final thisWeek = runs.where((a) => !a.startedAt.toLocal().isBefore(monday)).length;
-
-    final opener = thisWeek == 0
-        ? 'Hoi${name.isEmpty ? '' : ' $name'}! Deze week heb je nog niet gelopen. Zullen we een schema maken voor een 10 km onder de 50 minuten?'
-        : 'Hoi${name.isEmpty ? '' : ' $name'}! Je liep deze week $thisWeek keer. Zullen we toewerken naar een 10 km onder de 50 minuten?';
+    final history = ref.watch(coachMessagesProvider);
+    final profile = ref.watch(profileProvider).value;
+    final premium = profile?.isPremium ?? false;
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
-            const PageHeader(title: 'Coach', subtitle: 'Je persoonlijke hardloopcoach, 24/7'),
-            const SizedBox(height: 16),
-            RwPanel(
-              child: Column(
-                children: [
-                  _Bubble(text: opener, fromCoach: true),
-                  const SizedBox(height: 12),
-                  const _Bubble(text: 'Ja! Hoe vaak moet ik daarvoor per week lopen?', fromCoach: false),
-                  const SizedBox(height: 12),
-                  const Opacity(
-                    opacity: 0.3,
-                    child: _Bubble(
-                      text: 'Drie keer per week is ideaal: één intervaltraining, één tempoloop en één rustige '
-                          'duurloop. Ik plan ze voor je in rond…',
-                      fromCoach: true,
-                    ),
-                  ),
-                ],
-              ),
+      appBar: AppBar(
+        title: const Text('Coach'),
+        actions: [
+          if (!premium)
+            TextButton(
+              onPressed: () => context.push('/premium'),
+              child: const Text('Premium'),
             ),
-            const SizedBox(height: 16),
-            RwPanel(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Row(
-                    children: [
-                      IconBox(icon: Icons.lock_outline, size: 48, iconSize: 22, circle: true),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Ontgrendel RunWise Coach',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: RwColors.tekst)),
-                            SizedBox(height: 4),
-                            Text('De eerste maand is gratis',
-                                style: TextStyle(fontSize: 14, color: RwColors.tekstZacht)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const BenefitRow('Trainingsschema op maat, op basis van je eigen trainingen'),
-                  const SizedBox(height: 12),
-                  const BenefitRow('Advies per run: tempo, route en hoe je de wind slim gebruikt'),
-                  const SizedBox(height: 12),
-                  const BenefitRow('Stel al je vragen over hardlopen, blessures en voeding'),
-                  const SizedBox(height: 12),
-                  const BenefitRow('Schema past zich aan als je een training mist'),
-                  const SizedBox(height: 16),
-                  _PlanOption(
-                    title: 'Jaar',
-                    badge: 'Beste keuze',
-                    price: '€40 per jaar',
-                    note: '€3,33 per maand · bespaar 33%',
-                    selected: _yearly,
-                    onTap: () => setState(() => _yearly = true),
-                  ),
-                  const SizedBox(height: 8),
-                  _PlanOption(
-                    title: 'Maand',
-                    price: '€5 per maand',
-                    note: 'Maandelijks opzegbaar',
-                    selected: !_yearly,
-                    onTap: () => setState(() => _yearly = false),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: RwColors.oranje,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    onPressed: _startTrial,
-                    child: const Text('Start 1 maand gratis'),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Na je gratis maand betaal je ${_yearly ? '€40 per jaar' : '€5 per maand'}. '
-                    'Je abonnement wordt automatisch verlengd en is altijd op te zeggen via Google Play.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 12, height: 16 / 12, color: RwColors.tekstZacht),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => showMessage(context, 'Geen eerdere aankopen gevonden.'),
-                    child: const Text('Aankoop herstellen',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.text, required this.fromCoach});
-  final String text;
-  final bool fromCoach;
-
-  @override
-  Widget build(BuildContext context) {
-    const r = Radius.circular(RwRadius.r16);
-    const tail = Radius.circular(4);
-    final bubble = Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: fromCoach ? RwColors.primairZacht : RwColors.primair,
-        borderRadius: BorderRadius.only(
-          topLeft: r,
-          topRight: r,
-          bottomLeft: fromCoach ? tail : r,
-          bottomRight: fromCoach ? r : tail,
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 14,
-          height: 20 / 14,
-          color: fromCoach ? RwColors.tekst : RwColors.opPrimair,
-        ),
-      ),
-    );
-    if (!fromCoach) {
-      return Padding(padding: const EdgeInsets.only(left: 72), child: Align(alignment: Alignment.centerRight, child: bubble));
-    }
-    return Padding(
-      padding: const EdgeInsets.only(right: 40),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          const IconBox(
-            icon: Icons.auto_awesome_outlined,
-            size: 28,
-            iconSize: 14,
-            background: RwColors.primair,
-            color: RwColors.opPrimair,
-            circle: true,
+          IconButton(
+            tooltip: 'Gesprek wissen',
+            icon: const Icon(Icons.delete_sweep_outlined),
+            onPressed: _clear,
           ),
-          const SizedBox(width: 8),
-          Flexible(child: bubble),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: history.when(
+              loading: () => const LoadingView(),
+              error: (e, _) => ErrorView(
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(coachMessagesProvider),
+              ),
+              data: (saved) {
+                final all = [...saved, ..._pending];
+                if (all.isEmpty) return _Intro(onPick: _send, premium: premium, profile: profile);
+                return ListView.builder(
+                  controller: _scroll,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  itemCount: all.length + (_sending ? 1 : 0),
+                  itemBuilder: (context, i) {
+                    if (i == all.length) return const _Typing();
+                    return _Bubble(message: all[i]);
+                  },
+                );
+              },
+            ),
+          ),
+          if (!premium && _freeLeft != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                _freeLeft == 0
+                    ? 'Dit was je laatste gratis vraag.'
+                    : 'Nog $_freeLeft gratis vra${_freeLeft == 1 ? 'ag' : 'gen'}',
+                style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+              ),
+            ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _input,
+                      minLines: 1,
+                      maxLines: 5,
+                      maxLength: 1500,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: const InputDecoration(
+                        hintText: 'Vraag het je coach…',
+                        counterText: '',
+                      ),
+                      onSubmitted: (_) => _send(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    tooltip: 'Versturen',
+                    onPressed: _sending ? null : _send,
+                    icon: const Icon(Icons.arrow_upward),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _PlanOption extends StatelessWidget {
-  const _PlanOption({
-    required this.title,
-    required this.price,
-    required this.note,
-    required this.selected,
-    required this.onTap,
-    this.badge,
-  });
-
-  final String title;
-  final String price;
-  final String note;
-  final String? badge;
-  final bool selected;
-  final VoidCallback onTap;
+class _Intro extends StatelessWidget {
+  const _Intro({required this.onPick, required this.premium, required this.profile});
+  final void Function(String) onPick;
+  final bool premium;
+  final Profile? profile;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? RwColors.primairZacht : RwColors.oppervlak,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RwRadius.r16),
-        side: BorderSide(color: selected ? RwColors.primair : RwColors.rand, width: selected ? 2 : 1),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(RwRadius.r16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: RwColors.tekst)),
-                  if (badge != null) ...[
-                    const SizedBox(width: 8),
-                    Pill(badge!, small: true),
-                  ],
-                  const Spacer(),
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected ? RwColors.primair : Colors.transparent,
-                      border: selected ? null : Border.all(color: RwColors.rand, width: 2),
-                    ),
-                    child: selected ? const Icon(Icons.check, size: 14, color: RwColors.opPrimair) : null,
-                  ),
-                ],
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+      children: [
+        const Icon(Icons.auto_awesome, color: RwColors.accent, size: 40),
+        const SizedBox(height: 12),
+        const Text('Je persoonlijke hardloopcoach',
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display)),
+        const SizedBox(height: 8),
+        Text(
+          'De coach kijkt mee naar je runs, je wedstrijden en het weer. '
+          '${premium ? '' : 'Probeer het met een paar gratis vragen.'}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: RwColors.muted, height: 1.5),
+        ),
+        const SizedBox(height: 20),
+        for (final s in _suggestions)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: OutlinedButton(
+              onPressed: () => onPick(s),
+              style: OutlinedButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
-              const SizedBox(height: 4),
-              Text(price, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: RwColors.tekst)),
-              const SizedBox(height: 4),
-              Text(note, style: const TextStyle(fontSize: 13, color: RwColors.tekstZacht)),
-            ],
+              child: Text(s),
+            ),
           ),
+        const SizedBox(height: 12),
+        const Text(
+          'De coach is een AI en kan zich vergissen. Geen medisch advies: bij pijn of klachten ga je naar je huisarts of fysio.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),
+        ),
+      ],
+    );
+  }
+}
+
+class _Bubble extends StatelessWidget {
+  const _Bubble({required this.message});
+  final CoachMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = message.isUser;
+    return Align(
+      alignment: user ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
+        decoration: BoxDecoration(
+          color: user ? RwColors.accent : RwColors.surfaceHigh,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(user ? 18 : 4),
+            bottomRight: Radius.circular(user ? 4 : 18),
+          ),
+        ),
+        child: SelectableText(
+          // Simpele opmaak: **vet** weghalen, lijstjes blijven leesbaar.
+          message.content.replaceAll('**', ''),
+          style: TextStyle(color: user ? RwColors.accentDark : RwColors.text, height: 1.45),
         ),
       ),
     );
   }
+}
+
+class _Typing extends StatelessWidget {
+  const _Typing();
+
+  @override
+  Widget build(BuildContext context) => const Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+              SizedBox(width: 10),
+              Text('Coach denkt na…', style: TextStyle(color: RwColors.subtle)),
+            ],
+          ),
+        ),
+      );
 }

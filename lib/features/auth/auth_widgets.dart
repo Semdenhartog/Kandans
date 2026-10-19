@@ -45,6 +45,7 @@ class AuthScaffold extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontSize: 32,
+                      fontFamily: RwFonts.display,
                       fontWeight: FontWeight.w800,
                       height: 1.1,
                       letterSpacing: -0.5,
@@ -65,22 +66,24 @@ class AuthScaffold extends StatelessWidget {
 }
 
 class RunWiseLogo extends StatelessWidget {
-  const RunWiseLogo({super.key});
+  const RunWiseLogo({super.key, this.height = 30});
+
+  /// Hoogte van het merkteken; het woordmerk schaalt mee.
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.asset('assets/icon/icon.png', width: 40, height: 40),
-        ),
-        const SizedBox(width: 10),
-        const Text(
-          'RunWise',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.4),
-        ),
-      ],
+    return Semantics(
+      label: 'RunWise',
+      image: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset('assets/logo/mark.png', height: height, excludeFromSemantics: true),
+          SizedBox(width: height * 0.35),
+          Image.asset('assets/logo/wordmark.png', height: height * 0.62, excludeFromSemantics: true),
+        ],
+      ),
     );
   }
 }

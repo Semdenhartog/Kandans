@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -8,14 +10,19 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/notification_service.dart';
+import '../../data/services/rain_service.dart';
+import '../../data/services/weather_service.dart';
+import '../../domain/clothing.dart';
 import '../../domain/geo.dart';
+import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/alarm.dart';
-import '../../shared/rw_components.dart';
 import '../../shared/widgets.dart';
+import '../live/live_share_screen.dart';
+import 'month_challenge_card.dart';
 import 'dashboard_providers.dart';
 
-/// Startscherm "Vandaag" volgens het Figma-ontwerp.
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -24,18 +31,53 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  DateTime? _selected;
+  TrainingType _type = TrainingType.easy;
+  String? _routeId;
+  int _durationMinutes = 45;
+  Timer? _live;
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.instance.lastTrainingType().then((t) {
+      if (mounted) setState(() => _type = t);
+    });
+    // Live: elke 5 minuten de buienradar en de berekening verversen.
+    _live = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (mounted) ref.invalidate(rainNowcastProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _live?.cancel();
+    super.dispose();
+  }
+
+  /// Plant de dagelijkse melding opnieuw in met de nieuwste verwachting.
+  void _rescheduleReminder() {
+    final f = ref.read(forecastProvider).value;
+    if (f == null || f.hours.isEmpty) return;
+    final routes = ref.read(routesProvider).value ?? const <RunRoute>[];
+    final route = routes.where((r) => r.id == _routeId).firstOrNull;
+    NotificationService.instance
+        .reschedule(
+          forecast: f,
+          profile: ref.read(insightsProvider),
+          track: route == null ? const [] : decodePolyline(route.polyline),
+          durationMinutes: _durationMinutes,
+          rain: ref.read(rainNowcastProvider).value,
+        )
+        .ignore();
+  }
 
   Future<void> _refresh() async {
+    ref.invalidate(rainNowcastProvider);
     ref.invalidate(weatherLocationProvider);
     ref.invalidate(forecastProvider);
     ref.invalidate(activitiesProvider);
     ref.invalidate(routesProvider);
-    try {
-      await ref.read(forecastProvider.future);
-    } catch (_) {
-      // De foutmelding wordt al in het scherm getoond.
-    }
+    await ref.read(forecastProvider.future).catchError((_) => Forecast(latitude: 0, longitude: 0, hours: []));
   }
 
   String _greeting() {
@@ -51,37 +93,76 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final forecast = ref.watch(forecastProvider);
     final location = ref.watch(weatherLocationProvider);
     final profile = ref.watch(profileProvider);
-    final plan = ref.watch(trainingPlanProvider);
-    final insights = ref.watch(insightsProvider);
     final routes = ref.watch(routesProvider).when(
           data: (r) => r,
           loading: () => const <RunRoute>[],
           error: (_, _) => const <RunRoute>[],
         );
-    final route = routes.where((r) => r.id == plan.routeId).firstOrNull;
+    final insights = ref.watch(insightsProvider);
+    final rain = ref.watch(rainNowcastProvider).value;
+    ref.listen(forecastProvider, (_, next) {
+      if (next.hasValue) _rescheduleReminder();
+    });
 
-    final name = profile.when(data: (p) => p?.displayName ?? '', loading: () => '', error: (_, _) => '');
-    final place = location.when(data: (l) => l.label, loading: () => 'Locatie bepalen…', error: (_, _) => 'Locatie onbekend');
+    final name = profile.when(
+      data: (p) => p?.displayName ?? 'loper',
+      loading: () => '',
+      error: (_, _) => 'loper',
+    );
+    final selectedRoute = routes.where((r) => r.id == _routeId).firstOrNull;
 
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refresh,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
             children: [
-              _Header(
-                greeting: '${_greeting()}${name.isEmpty ? '' : ', $name'}',
-                subline: '$place · ${Fmt.dateLong(DateTime.now()).replaceAll(RegExp(r' \d{4}$'), '')}',
-                onBell: () => showMessage(
-                  context,
-                  'Pushmeldingen komen in een volgende versie. Gebruik "Herinner me" voor een wekker.',
-                ),
+              Text(
+                '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
+              Text(
+                location.when(
+                  data: (l) => 'Weer voor: ${l.label}',
+                  loading: () => 'Locatie bepalen…',
+                  error: (_, _) => 'Locatie onbekend',
+                ),
+                style: const TextStyle(color: RwColors.subtle),
+              ),
+              const SizedBox(height: 20),
+              _TypePicker(
+                value: _type,
+                onChanged: (t) {
+                  setState(() => _type = t);
+                  NotificationService.instance.rememberTrainingType(t).then((_) => _rescheduleReminder()).ignore();
+                },
+              ),
+              const SizedBox(height: 12),
+              _RouteAndDuration(
+                routes: routes,
+                routeId: _routeId,
+                durationMinutes: _durationMinutes,
+                onRoute: (id) => setState(() {
+                  _routeId = id;
+                  final r = routes.where((x) => x.id == id).firstOrNull;
+                  if (r?.estimatedDurationSeconds != null) {
+                    _durationMinutes = (r!.estimatedDurationSeconds! / 60).round().clamp(10, 300);
+                  }
+                }),
+                onDuration: (m) => setState(() => _durationMinutes = m),
+              ),
+              const SizedBox(height: 20),
               forecast.when(
-                loading: () => const Padding(padding: EdgeInsets.only(top: 80), child: LoadingView()),
-                error: (e, _) => ErrorView(message: friendlyError(e), onRetry: () => ref.invalidate(forecastProvider)),
+                loading: () => const Padding(
+                  padding: EdgeInsets.only(top: 60),
+                  child: LoadingView(),
+                ),
+                error: (e, _) => ErrorView(
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(forecastProvider),
+                ),
                 data: (f) {
                   if (f.hours.isEmpty) {
                     return ErrorView(
@@ -92,19 +173,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   final planner = StartTimePlanner(
                     forecast: f,
                     profile: insights,
-                    track: route == null ? const [] : decodePolyline(route.polyline),
-                    durationMinutes: plan.durationMinutes,
+                    track: selectedRoute == null ? const [] : decodePolyline(selectedRoute.polyline),
+                    durationMinutes: _durationMinutes,
+                    rain: rain,
                   );
-                  return _Content(
+                  return _Results(
                     planner: planner,
-                    plan: plan,
-                    route: route,
-                    selected: _selected,
-                    onSelect: (t) => setState(() => _selected = t),
-                    personal: insights.isPersonal,
+                    type: _type,
+                    insightsPersonal: insights.isPersonal,
+                    rain: rain,
                   );
                 },
               ),
+              const SizedBox(height: 12),
+              const MonthChallengeCard(),
+              const SizedBox(height: 12),
+              const LiveShareEntryCard(),
             ],
           ),
         ),
@@ -113,75 +197,121 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.greeting, required this.subline, required this.onBell});
-  final String greeting;
-  final String subline;
-  final VoidCallback onBell;
+class _TypePicker extends StatelessWidget {
+  const _TypePicker({required this.value, required this.onChanged});
+  final TrainingType value;
+  final ValueChanged<TrainingType> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(greeting,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: RwColors.tekst)),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: RwColors.tekstZacht),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(subline,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, color: RwColors.tekstZacht)),
-                  ),
-                ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final t in TrainingType.values)
+              ChoiceChip(
+                label: Text(t.label),
+                selected: t == value,
+                onSelected: (_) => onChanged(t),
+                selectedColor: RwColors.accent,
+                labelStyle: TextStyle(
+                  color: t == value ? RwColors.accentDark : RwColors.text,
+                  fontWeight: FontWeight.w600,
+                ),
+                backgroundColor: RwColors.surfaceHigh,
+                side: const BorderSide(color: RwColors.border),
+                showCheckmark: false,
               ),
-            ],
-          ),
+          ],
         ),
-        const SizedBox(width: 12),
-        RoundIconButton(icon: Icons.notifications_none, onTap: onBell, tooltip: 'Meldingen'),
+        const SizedBox(height: 6),
+        Text(value.description, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
       ],
     );
   }
 }
 
-String _dayWord(DateTime t) {
-  final now = DateTime.now();
-  final diff = DateTime(t.year, t.month, t.day).difference(DateTime(now.year, now.month, now.day)).inDays;
-  if (diff == 0) return 'vandaag';
-  if (diff == 1) return 'morgen';
-  return Fmt.date(t);
-}
-
-class _Content extends ConsumerWidget {
-  const _Content({
-    required this.planner,
-    required this.plan,
-    required this.route,
-    required this.selected,
-    required this.onSelect,
-    required this.personal,
+class _RouteAndDuration extends StatelessWidget {
+  const _RouteAndDuration({
+    required this.routes,
+    required this.routeId,
+    required this.durationMinutes,
+    required this.onRoute,
+    required this.onDuration,
   });
 
-  final StartTimePlanner planner;
-  final TrainingPlan plan;
-  final RunRoute? route;
-  final DateTime? selected;
-  final ValueChanged<DateTime> onSelect;
-  final bool personal;
+  final List<RunRoute> routes;
+  final String? routeId;
+  final int durationMinutes;
+  final ValueChanged<String?> onRoute;
+  final ValueChanged<int> onDuration;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final all = planner.scoreAll(plan.type);
+  Widget build(BuildContext context) {
+    const durations = [20, 30, 45, 60, 75, 90, 120, 150, 180];
+    final durationItems = {...durations, durationMinutes}.toList()..sort();
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: DropdownButtonFormField<String?>(
+            initialValue: routes.any((r) => r.id == routeId) ? routeId : null,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Route', isDense: true),
+            items: [
+              const DropdownMenuItem<String?>(value: null, child: Text('Geen route')),
+              for (final r in routes)
+                DropdownMenuItem<String?>(
+                  value: r.id,
+                  child: Text('${r.name} · ${Fmt.km(r.distanceMeters, decimals: 1)}',
+                      overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: onRoute,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 2,
+          child: DropdownButtonFormField<int>(
+            key: ValueKey(durationMinutes),
+            initialValue: durationMinutes,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Duur', isDense: true),
+            items: [
+              for (final d in durationItems)
+                DropdownMenuItem(value: d, child: Text(Fmt.duration(d * 60))),
+            ],
+            onChanged: (v) {
+              if (v != null) onDuration(v);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Results extends StatefulWidget {
+  const _Results({required this.planner, required this.type, required this.insightsPersonal, this.rain});
+  final StartTimePlanner planner;
+  final TrainingType type;
+  final bool insightsPersonal;
+  final RainNowcast? rain;
+
+  @override
+  State<_Results> createState() => _ResultsState();
+}
+
+class _ResultsState extends State<_Results> {
+  DateTime? _selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final all = widget.planner.scoreAll(widget.type);
     if (all.isEmpty) {
       return const EmptyState(
         icon: Icons.nights_stay_outlined,
@@ -189,139 +319,207 @@ class _Content extends ConsumerWidget {
         message: 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
       );
     }
-    final best = all.reduce((a, b) => b.score > a.score ? b : a);
-    final shown = selected == null ? best : all.firstWhere((s) => s.start == selected, orElse: () => best);
-    final isBest = shown.start == best.start;
-
-    // Venster: aansluitende uren die bijna net zo goed scoren.
-    var windowEnd = shown.start.add(const Duration(hours: 1));
-    final idx = all.indexWhere((s) => s.start == shown.start);
-    for (var i = idx + 1; i < all.length; i++) {
-      if (all[i].score < shown.score - 8 || all[i].start.difference(windowEnd).inMinutes > 0) break;
-      windowEnd = all[i].start.add(const Duration(hours: 1));
-    }
-
-    final typical = ref.watch(typicalPaceProvider);
-    final pace = paceFor(plan.type, typical);
+    // Beste moment op 5 minuten nauwkeurig; de staafjes blijven per uur.
+    final best = widget.planner.bestPrecise(widget.type) ?? all.reduce((a, b) => b.score > a.score ? b : a);
+    final now = widget.planner.scoreAt(StartTimePlanner.roundUp(DateTime.now(), 5), widget.type);
+    final shown = _selected == null
+        ? best
+        : all.firstWhere((s) => s.start == _selected, orElse: () => best);
+    final isBest = identical(shown, best) || shown.start == best.start;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _BestCard(
-          score: shown,
-          title: isBest
-              ? 'BESTE VERTREKTIJD ${_dayWord(shown.start).toUpperCase()}'
-              : 'VERTREKKEN ${_dayWord(shown.start).toUpperCase()} OM',
-          windowText: 'Venster tot ${Fmt.time(windowEnd)} · '
-              '${shown.score >= 70 ? 'ideaal' : 'prima'} voor je ${plan.type.label.toLowerCase()}',
+        _BestCard(score: shown, isBest: isBest),
+        const SizedBox(height: 12),
+        _ClothingCard(
+          advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes),
+          at: shown.start,
         ),
-        const SizedBox(height: 16),
-        _HourScores(all: all, best: best, selected: shown.start, onSelect: onSelect),
-        const SizedBox(height: 16),
-        _TrainingCard(plan: plan, route: route, pace: pace),
-        const SizedBox(height: 16),
-        _CoachTip(score: shown, plan: plan, route: route),
-        if (!personal) ...[
-          const SizedBox(height: 16),
-          const Text(
-            'Log minimaal 8 runs, dan stemt RunWise het advies af op jouw eigen prestaties.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: RwColors.tekstZacht),
-          ),
+        const SizedBox(height: 12),
+        if (widget.rain != null && widget.rain!.points.isNotEmpty) ...[
+          _RainCard(rain: widget.rain!),
+          const SizedBox(height: 12),
         ],
+        if (!isBest || now.start != best.start)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _NowCard(now: now, best: best),
+          ),
+        RwCard(
+          title: 'LOOPOMSTANDIGHEDEN PER UUR',
+          child: _HourBars(
+            scores: all,
+            best: best,
+            selected: shown.start,
+            onTap: (s) => setState(() => _selected = s.start),
+          ),
+        ),
+        if (shown.routeWind != null) ...[
+          const SizedBox(height: 12),
+          _RouteWindCard(score: shown, track: widget.planner.track),
+        ],
+        const SizedBox(height: 12),
+        Text(
+          widget.insightsPersonal
+              ? 'Berekend met jouw persoonlijke loopprofiel.'
+              : 'Log minimaal 8 runs om het advies op jouw eigen prestaties af te stemmen.',
+          style: const TextStyle(color: RwColors.subtle, fontSize: 13),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
 }
 
+String _dayLabel(DateTime t) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(t.year, t.month, t.day);
+  final diff = day.difference(today).inDays;
+  if (diff == 0) return 'Vandaag';
+  if (diff == 1) return 'Morgen';
+  return Fmt.date(t);
+}
+
+Color _scoreColor(int score) {
+  if (score >= 70) return RwColors.good;
+  if (score >= 45) return RwColors.warning;
+  return RwColors.danger;
+}
+
 class _BestCard extends StatelessWidget {
-  const _BestCard({required this.score, required this.title, required this.windowText});
+  const _BestCard({required this.score, required this.isBest});
   final StartTimeScore score;
-  final String title;
-  final String windowText;
+  final bool isBest;
 
   @override
   Widget build(BuildContext context) {
     final w = score.weather;
-    final remindAt = score.start.subtract(const Duration(minutes: 30));
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: RwColors.primair, borderRadius: BorderRadius.circular(RwRadius.r24)),
+    final remindAt = score.start.subtract(const Duration(minutes: 15));
+    return RwCard(
+      padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(title,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.72,
-                        color: RwColors.primairZacht)),
+              Text(
+                '${isBest ? 'Beste vertrektijd' : 'Vertrekken om'} · ${_dayLabel(score.start)}',
+                style: const TextStyle(color: RwColors.muted),
               ),
-              Pill('Score ${score.score}'),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _scoreColor(score.score).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${score.score} · ${score.verdict}',
+                  style: TextStyle(color: _scoreColor(score.score), fontWeight: FontWeight.w700),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(Fmt.time(score.start),
-              style: const TextStyle(
-                  fontSize: 56, height: 60 / 56, fontWeight: FontWeight.w700, color: RwColors.opPrimair)),
+          const SizedBox(height: 6),
+          Text(
+            Fmt.time(score.start),
+            style: const TextStyle(
+              fontSize: 64,
+              fontFamily: RwFonts.display,
+              fontWeight: FontWeight.w800,
+              color: RwColors.accent,
+              height: 1.05,
+              letterSpacing: -1.5,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(windowText, style: const TextStyle(fontSize: 14, color: RwColors.primairZacht)),
+          Text(weatherLabel(w.weatherCode), style: const TextStyle(color: RwColors.muted)),
           const SizedBox(height: 16),
           Row(
             children: [
+              Expanded(child: StatTile(label: 'Gevoel', value: Fmt.temp(w.feelsLike ?? w.temperature))),
+              const SizedBox(width: 8),
               Expanded(
-                child: WeatherTile(
-                  icon: Icons.thermostat,
-                  value: Fmt.temp(w.feelsLike ?? w.temperature),
-                  label: 'Temperatuur',
+                child: StatTile(
+                  label: 'Wind',
+                  value: w.windDirection == null
+                      ? Fmt.wind(w.windSpeed)
+                      : '${Fmt.wind(w.windSpeed)} ${Fmt.compass(w.windDirection!)}',
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: WeatherTile(
-                  icon: Icons.air,
-                  value: Fmt.wind(w.windSpeed),
-                  label: w.windDirection == null ? 'Wind' : 'Wind (${Fmt.compass(w.windDirection!)})',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: WeatherTile(
-                  icon: Icons.water_drop_outlined,
-                  value: Fmt.pct(w.precipitationProbability),
-                  label: 'Regenkans',
-                ),
-              ),
+              Expanded(child: StatTile(label: 'Regen', value: Fmt.pct(w.precipitationProbability))),
             ],
           ),
-          const SizedBox(height: 16),
-          Material(
-            color: RwColors.oppervlak,
-            shape: const StadiumBorder(),
-            child: InkWell(
-              customBorder: const StadiumBorder(),
-              onTap: () async {
+          const SizedBox(height: 14),
+          for (final r in score.reasons)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    score.reasons.length == 1 && r.startsWith('Prima')
+                        ? Icons.check_circle_outline
+                        : Icons.info_outline,
+                    size: 16,
+                    color: RwColors.subtle,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(r, style: const TextStyle(color: RwColors.muted))),
+                ],
+              ),
+            ),
+          if (remindAt.isAfter(DateTime.now())) ...[
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () async {
                 final ok = await setAlarm(remindAt, 'RunWise: om ${Fmt.time(score.start)} lopen');
                 if (!ok && context.mounted) {
                   showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
                 }
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.schedule, size: 18, color: RwColors.primair),
-                    const SizedBox(width: 8),
-                    Text('Herinner me om ${Fmt.time(remindAt)}',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: RwColors.primair)),
-                  ],
-                ),
-              ),
+              icon: const Icon(Icons.alarm_add_outlined, size: 18),
+              label: Text('Wekker om ${Fmt.time(remindAt)} (15 min ervoor)'),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _NowCard extends StatelessWidget {
+  const _NowCard({required this.now, required this.best});
+  final StartTimeScore now;
+  final StartTimeScore best;
+
+  @override
+  Widget build(BuildContext context) {
+    final gain = best.score - now.score;
+    return RwCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Nu vertrekken', style: TextStyle(color: RwColors.muted)),
+                const SizedBox(height: 2),
+                Text(
+                  gain <= 3
+                      ? 'Bijna net zo goed als het beste moment.'
+                      : 'Wachten tot ${Fmt.time(best.start)} scoort $gain punten beter.',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '${now.score}',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: _scoreColor(now.score), fontFamily: RwFonts.display),
           ),
         ],
       ),
@@ -329,275 +527,242 @@ class _BestCard extends StatelessWidget {
   }
 }
 
-class _HourScores extends StatelessWidget {
-  const _HourScores({required this.all, required this.best, required this.selected, required this.onSelect});
-  final List<StartTimeScore> all;
+class _HourBars extends StatelessWidget {
+  const _HourBars({
+    required this.scores,
+    required this.best,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final List<StartTimeScore> scores;
   final StartTimeScore best;
   final DateTime selected;
-  final ValueChanged<DateTime> onSelect;
-
-  bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+  final ValueChanged<StartTimeScore> onTap;
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final today = all.where((s) => _sameDay(s.start, now)).toList();
-    var day = today.length >= 3 ? today : all.where((s) => !_sameDay(s.start, now)).take(18).toList();
-    if (day.isEmpty) day = all;
-    final dayLabel = today.length >= 3 ? 'Vandaag' : 'Morgen';
-    final dayBest = day.reduce((a, b) => b.score > a.score ? b : a);
+    return SizedBox(
+      height: 130,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: scores.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 6),
+        itemBuilder: (context, i) {
+          final s = scores[i];
+          final isSel = s.start == selected;
+          final isBest = s.start.day == best.start.day && s.start.hour == best.start.hour;
+          final newDay = i == 0 || scores[i - 1].start.day != s.start.day;
+          return GestureDetector(
+            onTap: () => onTap(s),
+            child: SizedBox(
+              width: 30,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    newDay ? _dayLabel(s.start).substring(0, 2) : '',
+                    style: const TextStyle(fontSize: 10, color: RwColors.subtle),
+                  ),
+                  const SizedBox(height: 2),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: FractionallySizedBox(
+                        heightFactor: (s.score.clamp(5, 100)) / 100,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isBest
+                                ? RwColors.accent
+                                : (isSel ? RwColors.muted : RwColors.bar),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    s.start.hour.toString().padLeft(2, '0'),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isSel ? RwColors.text : RwColors.subtle,
+                      fontWeight: isSel ? FontWeight.w700 : FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
 
-    // Maximaal 8 staven, gelijk verdeeld, en het beste moment altijd erbij.
-    final slots = <StartTimeScore>[];
-    if (day.length <= 8) {
-      slots.addAll(day);
+class _RouteWindCard extends StatelessWidget {
+  const _RouteWindCard({required this.score, required this.track});
+  final StartTimeScore score;
+  final List<LatLng> track;
+
+  @override
+  Widget build(BuildContext context) {
+    final rw = score.routeWind!;
+    final diff = rw.secondHalfHead - rw.firstHalfHead;
+    final String text;
+    if (rw.headwindAvg < 5) {
+      text = 'Weinig tegenwind op je route. Lekker lopen!';
+    } else if (diff > 4) {
+      text = 'Let op: tegenwind op de terugweg (gem. ${rw.secondHalfHead.round()} km/u). '
+          'Loop de eerste helft rustig, zodat je energie overhoudt.';
+    } else if (diff < -4) {
+      text = 'Tegenwind in de eerste helft (gem. ${rw.firstHalfHead.round()} km/u), '
+          'rugwind op de terugweg. Start rustig, je haalt het terug.';
     } else {
-      for (var i = 0; i < 8; i++) {
-        slots.add(day[(i * (day.length - 1) / 7).round()]);
-      }
-      if (!slots.any((s) => s.start == dayBest.start)) {
-        var nearest = 0;
-        for (var i = 1; i < slots.length; i++) {
-          if ((slots[i].start.difference(dayBest.start)).abs() <
-              (slots[nearest].start.difference(dayBest.start)).abs()) {
-            nearest = i;
-          }
-        }
-        slots[nearest] = dayBest;
-      }
+      text = 'De tegenwind is gelijk verdeeld over je route (gem. ${rw.headwindAvg.round()} km/u).';
     }
-
-    return RwPanel(
+    final w = score.weather;
+    final advice = adviseDirection(track, w.windSpeed, w.windDirection);
+    return RwCard(
+      title: 'WIND OP JE ROUTE',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text('Hardloopscore per uur',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: RwColors.tekst)),
-              ),
-              Text(dayLabel, style: const TextStyle(fontSize: 13, color: RwColors.tekstZacht)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              for (final s in slots)
-                TimeSlotBar(
-                  label: s.start == dayBest.start ? Fmt.time(s.start) : s.start.hour.toString().padLeft(2, '0'),
-                  score: s.score,
-                  best: s.start == dayBest.start,
-                  selected: s.start == selected,
-                  onTap: () => onSelect(s.start),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Hoe hoger de staaf, hoe beter weer, wind en licht samen uitkomen. Tik op een staaf voor details.',
-            style: TextStyle(fontSize: 12, height: 16 / 12, color: RwColors.tekstZacht),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TrainingCard extends ConsumerWidget {
-  const _TrainingCard({required this.plan, required this.route, required this.pace});
-  final TrainingPlan plan;
-  final RunRoute? route;
-  final double pace;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final km = route != null ? route!.distanceMeters / 1000 : plan.durationMinutes * 60 / pace;
-    final minutes = route != null ? (km * pace / 60).round() : plan.durationMinutes;
-    final tempoWord = switch (plan.type) {
-      TrainingType.easy => 'Rustig tempo',
-      TrainingType.quality => 'Stevig tempo',
-      TrainingType.long => 'Rustig tempo',
-      TrainingType.recovery => 'Heel rustig',
-    };
-    return RwPanel(
-      onTap: () => showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        builder: (_) => const _PlanSheet(),
-      ),
-      child: Row(
-        children: [
-          const IconBox(icon: Icons.route),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+          if (advice != null) ...[
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Training van vandaag', style: TextStyle(fontSize: 12, color: RwColors.tekstZacht)),
-                const SizedBox(height: 4),
-                Text('${plan.type.label} · ${km.toStringAsFixed(km < 10 ? 1 : 0).replaceAll('.', ',')} km',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: RwColors.tekst)),
-                const SizedBox(height: 4),
-                Text(
-                  '$tempoWord ${Fmt.pace(pace)} · ca. $minutes min${route == null ? '' : ' · ${route!.name}'}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, color: RwColors.tekstZacht),
+                Icon(
+                  advice.bestLabel == 'linksom' ? Icons.rotate_left : Icons.rotate_right,
+                  color: RwColors.accent,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(advice.text, style: const TextStyle(height: 1.5, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
-          ),
-          const Icon(Icons.chevron_right, size: 20, color: RwColors.tekst),
+            const SizedBox(height: 10),
+          ],
+          Text(text, style: const TextStyle(height: 1.5, color: RwColors.muted)),
         ],
       ),
     );
   }
 }
 
-/// Kies soort training, route en duur.
-class _PlanSheet extends ConsumerWidget {
-  const _PlanSheet();
+/// Wat je aantrekt voor het gekozen vertrekmoment.
+class _ClothingCard extends StatelessWidget {
+  const _ClothingCard({required this.advice, required this.at});
+  final ClothingAdvice advice;
+  final DateTime at;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final plan = ref.watch(trainingPlanProvider);
-    final notifier = ref.read(trainingPlanProvider.notifier);
-    final routes = ref.watch(routesProvider).when(
-          data: (r) => r,
-          loading: () => const <RunRoute>[],
-          error: (_, _) => const <RunRoute>[],
-        );
-    const durations = [20, 30, 45, 60, 75, 90, 120];
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Training van vandaag', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 16),
-            const Text('Soort training', style: TextStyle(fontSize: 13, color: RwColors.tekstZacht)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final t in TrainingType.values)
-                  RwChip(label: t.label, active: t == plan.type, onTap: () => notifier.setType(t)),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(plan.type.description, style: const TextStyle(fontSize: 12, color: RwColors.tekstZacht)),
-            const SizedBox(height: 16),
-            const Text('Route', style: TextStyle(fontSize: 13, color: RwColors.tekstZacht)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                RwChip(label: 'Geen route', active: plan.routeId == null, onTap: () => notifier.setRoute(null)),
-                for (final r in routes)
-                  RwChip(
-                    label: '${r.name} · ${Fmt.km(r.distanceMeters, decimals: 1)}',
-                    active: r.id == plan.routeId,
-                    onTap: () => notifier.setRoute(r),
+  Widget build(BuildContext context) {
+    return RwCard(
+      title: 'AANTREKKEN OM ${Fmt.time(at)}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(advice.summary, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final item in advice.items)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: RwColors.surfaceHigh,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-              ],
-            ),
-            if (plan.routeId == null) ...[
-              const SizedBox(height: 16),
-              const Text('Duur', style: TextStyle(fontSize: 13, color: RwColors.tekstZacht)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                  child: Text(item, style: const TextStyle(fontSize: 13)),
+                ),
+            ],
+          ),
+          for (final tip in advice.extras)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final d in durations)
-                    RwChip(
-                      label: Fmt.duration(d * 60),
-                      active: d == plan.durationMinutes,
-                      onTap: () => notifier.setDuration(d),
-                    ),
+                  const Icon(Icons.info_outline, size: 16, color: RwColors.accent),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(tip, style: const TextStyle(color: RwColors.muted, height: 1.4))),
                 ],
               ),
-            ],
-            const SizedBox(height: 20),
-            FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Klaar')),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
 }
 
-class _CoachTip extends StatelessWidget {
-  const _CoachTip({required this.score, required this.plan, required this.route});
-  final StartTimeScore score;
-  final TrainingPlan plan;
-  final RunRoute? route;
 
-  String _tip() {
-    final w = score.weather;
-    final rw = score.routeWind;
-    final feels = w.feelsLike ?? w.temperature;
-    if (rw != null && rw.headwindAvg >= 5) {
-      if (rw.secondHalfHead - rw.firstHalfHead > 4) {
-        return 'Op de terugweg heb je tegenwind (${rw.secondHalfHead.round()} km/u). '
-            'Loop de eerste helft rustig, dan heb je energie over voor het laatste stuk.';
-      }
-      if (rw.firstHalfHead - rw.secondHalfHead > 4) {
-        return 'Je start met tegenwind en hebt hem op de terugweg in je rug. '
-            'Begin rustig, je haalt de tijd straks terug.';
-      }
+/// Live buien voor de komende 2 uur, per 5 minuten (Buienradar).
+class _RainCard extends StatelessWidget {
+  const _RainCard({required this.rain});
+  final RainNowcast rain;
+
+  String get _summary {
+    final firstRain = rain.firstRain;
+    if (rain.rainingNow) {
+      final dry = rain.firstDry;
+      return dry == null ? 'Het regent de komende 2 uur.' : 'Het regent nu; droog vanaf ${Fmt.time(dry)}.';
     }
-    if (feels >= 22) return 'Het voelt als ${feels.round()}°C. Neem water mee en loop 10 tot 15 seconden per km rustiger.';
-    if ((w.precipitationProbability ?? 0) >= 50) {
-      return 'Grote kans op regen rond ${Fmt.time(score.start)}. Een pet houdt de druppels uit je ogen.';
-    }
-    if (w.windSpeed >= 25) return 'Er staat flink wind. Kies een beschutte route, bijvoorbeeld door het bos.';
-    if (feels <= 3) return 'Het is koud. Warm binnen kort op en draag handschoenen; die doe je onderweg zo uit.';
-    if (!w.isDay) return 'Het is donker op dit tijdstip. Draag reflecterende kleding of een lampje.';
-    if (route == null) return 'Kies een route bij "Training van vandaag", dan houd ik rekening met de wind op jouw rondje.';
-    return 'Mooie omstandigheden. Geniet ervan en houd het tempo de eerste kilometers bewust rustig.';
+    if (firstRain == null) return 'Droog de komende 2 uur.';
+    return 'Droog tot ${Fmt.time(firstRain)}, daarna buien.';
   }
 
   @override
   Widget build(BuildContext context) {
-    return RwPanel(
-      color: RwColors.primairZacht,
-      border: false,
-      onTap: () => context.go('/coach'),
-      child: Row(
+    final maxMm = rain.points.fold<double>(1, (m, p) => p.mmPerHour > m ? p.mmPerHour : m);
+    return RwCard(
+      title: 'BUIEN KOMENDE 2 UUR · LIVE',
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IconBox(
-            icon: Icons.auto_awesome_outlined,
-            size: 40,
-            iconSize: 20,
-            background: RwColors.primair,
-            color: RwColors.opPrimair,
-            circle: true,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Text(_summary, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Row(
-                  children: [
-                    Text('RunWise Coach',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: RwColors.tekst)),
-                    SizedBox(width: 8),
-                    Pill('PRO', small: true),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(_tip(), style: const TextStyle(fontSize: 14, height: 20 / 14, color: RwColors.tekst)),
+                for (final p in rain.points)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 1),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.bottomCenter,
+                        heightFactor: p.mmPerHour < 0.1 ? 0.06 : (0.2 + 0.8 * (p.mmPerHour / maxMm)).clamp(0.2, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: p.mmPerHour < 0.1 ? RwColors.bar : const Color(0xFF5AA9FF),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(Fmt.time(rain.points.first.time), style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+              const Spacer(),
+              Text(Fmt.time(rain.points.last.time), style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => launchUrl(Uri.parse('https://www.buienradar.nl'), mode: LaunchMode.externalApplication),
+            child: Text(
+              'Neerslagverwachting: Buienradar.nl · bijgewerkt ${Fmt.time(rain.fetchedAt)}',
+              style: const TextStyle(fontSize: 11, color: RwColors.subtle, decoration: TextDecoration.underline),
             ),
           ),
         ],

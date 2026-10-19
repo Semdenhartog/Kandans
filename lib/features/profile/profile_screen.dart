@@ -12,9 +12,10 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
-import '../../shared/rw_components.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
+import 'connections_card.dart';
+import 'reminder_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -36,8 +37,9 @@ class ProfileScreen extends ConsumerWidget {
     final ok = await confirmDialog(
       context,
       title: 'Account definitief verwijderen?',
-      message: 'Al je runs, routes, wedstrijden en je account worden direct en definitief verwijderd. '
-          'Dit kan niet ongedaan worden gemaakt.',
+      message: 'Al je runs, routes, wedstrijden, coachgesprekken en koppelingen en je account worden direct en definitief verwijderd. '
+          'Dit kan niet ongedaan worden gemaakt.\n\n'
+          'Heb je Premium? Zeg je abonnement dan ook op in Google Play, anders loopt de betaling door.',
       confirmLabel: 'Definitief verwijderen',
     );
     if (!ok) return;
@@ -54,19 +56,12 @@ class ProfileScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final profile = ref.watch(profileProvider);
     final insights = ref.watch(insightsProvider);
-    final runCount = ref.watch(activitiesProvider).when<int?>(
-          data: (a) => a.length,
-          loading: () => null,
-          error: (_, _) => null,
-        );
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      appBar: AppBar(title: const Text('Ik')),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          const PageHeader(title: 'Profiel', subtitle: 'Je account, loopprofiel en gegevens'),
-          const SizedBox(height: 16),
           RwCard(
             child: Row(
               children: [
@@ -79,7 +74,7 @@ class ProfileScreen extends ConsumerWidget {
                       loading: () => '',
                       error: (_, _) => '?',
                     ),
-                    style: const TextStyle(color: RwColors.accentDark, fontSize: 22, fontWeight: FontWeight.w800),
+                    style: const TextStyle(color: RwColors.accentDark, fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -105,25 +100,36 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           _InsightsCard(insights: insights),
           const SizedBox(height: 12),
+          const ConnectionsCard(),
+          const SizedBox(height: 12),
+          const Card(child: ReminderTile()),
+          const SizedBox(height: 12),
           Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.directions_run, color: RwColors.primair),
-                  title: const Text('Mijn runs'),
-                  subtitle: Text(runCount == null ? 'Runs toevoegen en bekijken' : '$runCount runs'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.go('/me/runs'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.flag_outlined, color: RwColors.primair),
+                  leading: const Icon(Icons.flag_outlined, color: RwColors.accent),
                   title: const Text('Wedstrijden'),
-                  subtitle: const Text('Doelen, voorspelling en advies'),
+                  subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.go('/me/races'),
                 ),
                 const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.workspace_premium_outlined),
+                  title: const Text('RunWise Premium'),
+                  subtitle: Text(
+                    profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
+                  ),
+                  onTap: () => context.push('/premium'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Column(
+              children: [
                 ListTile(
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: const Text('Privacyverklaring'),
@@ -153,12 +159,11 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'RunWise 1.0 · Weerdata via Open-Meteo.com',
+            'RunWise 1.0 · Weer via Open-Meteo.com · Buien via Buienradar.nl',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.subtle, fontSize: 12),
           ),
         ],
-      ),
       ),
     );
   }
