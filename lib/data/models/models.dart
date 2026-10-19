@@ -84,6 +84,8 @@ class Activity {
     this.windSpeedKmh,
     this.windDirectionDegrees,
     this.humidityPct,
+    this.trackPolyline,
+    this.routeLinkLocked = false,
   });
 
   final String? id;
@@ -99,6 +101,17 @@ class Activity {
   final double? windSpeedKmh;
   final double? windDirectionDegrees;
   final double? humidityPct;
+
+  /// GPS-spoor van de run (Google-polyline, uit Strava). Leeg of null = geen spoor.
+  final String? trackPolyline;
+
+  /// De gebruiker heeft zelf de route gekozen of losgemaakt: niet automatisch koppelen.
+  final bool routeLinkLocked;
+
+  bool get hasTrack => (trackPolyline ?? '').isNotEmpty;
+
+  /// Automatisch aan de route gekoppeld (niet door de gebruiker gekozen).
+  bool get autoLinked => routeId != null && !routeLinkLocked && source != 'manual';
 
   double get paceSecondsPerKm =>
       distanceMeters <= 0 ? 0 : movingTimeSeconds / (distanceMeters / 1000);
@@ -117,6 +130,8 @@ class Activity {
         windSpeedKmh: _dn(j['wind_speed_kmh']),
         windDirectionDegrees: _dn(j['wind_direction_degrees']),
         humidityPct: _dn(j['humidity_pct']),
+        trackPolyline: j['track_polyline'] as String?,
+        routeLinkLocked: (j['route_link_locked'] as bool?) ?? false,
       );
 
   Map<String, dynamic> toInsert(String userId) => {

@@ -13,6 +13,7 @@ import 'package:runwise/domain/monthly_goal.dart';
 import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/poi.dart';
 import 'package:runwise/domain/records.dart';
+import 'package:runwise/domain/run_matcher.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
 import 'package:runwise/domain/weather_correction.dart';
 
@@ -473,6 +474,55 @@ void main() {
       expect(shouldSend(now: t0.add(const Duration(seconds: 8)), lastAt: t0, movedMeters: 20), isFalse);
       expect(shouldSend(now: t0.add(const Duration(seconds: 8)), lastAt: t0, movedMeters: 80), isTrue);
       expect(shouldSend(now: t0.add(const Duration(seconds: 16)), lastAt: t0, movedMeters: 0), isTrue);
+    });
+  });
+
+  group('runs automatisch aan routes koppelen', () {
+    // Vierkant rondje van ~4 km rond (52.0, 5.0), punten om de ~50 m.
+    List<LatLng> square(double lat0, double lon0, {double sideDeg = 0.009}) {
+      final lonSide = sideDeg / 0.6157; // even lang in meters
+      final corners = [
+        LatLng(lat0, lon0),
+        LatLng(lat0, lon0 + lonSide),
+        LatLng(lat0 + sideDeg, lon0 + lonSide),
+        LatLng(lat0 + sideDeg, lon0),
+        LatLng(lat0, lon0),
+      ];
+      final pts = <LatLng>[];
+      for (var c = 0; c < 4; c++) {
+        for (var i = 0; i < 20; i++) {
+          final f = i / 20;
+          final a = corners[c], b = corners[c + 1];
+          pts.add(LatLng(a.lat + (b.lat - a.lat) * f, a.lon + (b.lon - a.lon) * f));
+        }
+      }
+      return pts..add(corners.first);
+    }
+
+    final home = square(52.0, 5.0);
+    final other = square(52.03, 5.05);
+    final routes = [MatchableRoute('thuis', home), MatchableRoute('ander', other)];
+
+    test('zelfde rondje, andersom en elders gestart, met GPS-ruis', () {
+      // Start halverwege, loop andersom, en schuif alles ~20 m op.
+      final shifted = [for (final p in home) LatLng(p.lat + 0.00018, p.lon)];
+      final run = [...shifted.sublist(30), ...shifted.sublist(1, 31)].reversed.toList();
+      final m = matchRun(run, routes);
+      expect(m, isNotNull);
+      expect(m!.routeId, 'thuis');
+      expect(m.score, greaterThan(0.95));
+    });
+
+    test('ander rondje of maar een stukje: geen koppeling', () {
+      expect(matchRun(square(52.1, 5.2), routes), isNull);
+      expect(matchRun(home.sublist(0, 40), routes), isNull);
+      // Groter rondje dat de route deels volgt.
+      expect(matchRun(square(52.0, 5.0, sideDeg: 0.013), routes), isNull);
+    });
+
+    test('Strava-polyline (alleen hoekpunten) wordt ook herkend', () {
+      final sparse = [home[0], home[20], home[40], home[60], home[80]];
+      expect(matchRun(sparse, routes)?.routeId, 'thuis');
     });
   });
 }

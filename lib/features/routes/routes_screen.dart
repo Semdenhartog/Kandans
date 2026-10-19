@@ -10,6 +10,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/sync_service.dart';
 import '../../domain/gpx_parser.dart';
 import '../../shared/widgets.dart';
 import 'route_shape.dart';
@@ -52,8 +53,13 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
       );
       final id = await ref.read(repositoryProvider).addRoute(route);
       ref.invalidate(routesProvider);
+      final linked = await ref.read(syncServiceProvider).autoLinkRuns().catchError((_) => 0);
       if (!mounted) return;
-      showMessage(context, 'Route "${route.name}" toegevoegd (${Fmt.km(route.distanceMeters, decimals: 1)}).');
+      showMessage(
+        context,
+        'Route "${route.name}" toegevoegd (${Fmt.km(route.distanceMeters, decimals: 1)}).'
+        '${linked > 0 ? ' $linked eerdere ${linked == 1 ? 'run' : 'runs'} op deze route gekoppeld.' : ''}',
+      );
       context.go('/routes/$id');
     } on GpxParseException catch (e) {
       if (mounted) showMessage(context, e.message, error: true);

@@ -7,6 +7,9 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/sync_service.dart';
+import '../../domain/geo.dart';
+import '../../domain/gpx_parser.dart';
 import '../../domain/records.dart';
 import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
@@ -64,6 +67,36 @@ class ActivityDetailScreen extends ConsumerWidget {
       await ref.read(repositoryProvider).setActivityRoute(a.id!, picked.isEmpty ? null : picked);
       ref.invalidate(activitiesProvider);
       if (context.mounted) showMessage(context, picked.isEmpty ? 'Run losgemaakt van de route.' : 'Run gekoppeld aan de route.');
+    } catch (e) {
+      if (context.mounted) showMessage(context, friendlyError(e), error: true);
+    }
+  }
+
+  /// Maakt van het GPS-spoor van deze run een nieuwe route en koppelt de run eraan.
+  Future<void> _saveAsRoute(BuildContext context, WidgetRef ref, Activity a) async {
+    try {
+      final pts = decodePolyline(a.trackPolyline!);
+      final km = (a.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
+      final route = buildRoute(
+        pts,
+        name: 'Rondje $km km (${Fmt.date(a.startedAt)})',
+        source: a.source == 'strava' ? 'strava_import' : 'drawn',
+        estimatedPaceSecPerKm: a.paceSecondsPerKm > 0 ? a.paceSecondsPerKm : 360,
+      );
+      final repo = ref.read(repositoryProvider);
+      final id = await repo.addRoute(route);
+      await repo.setActivityRoute(a.id!, id);
+      ref.invalidate(routesProvider);
+      ref.invalidate(activitiesProvider);
+      final more = await ref.read(syncServiceProvider).autoLinkRuns().catchError((_) => 0);
+      if (context.mounted) {
+        showMessage(
+          context,
+          more > 0
+              ? 'Route bewaard. Ook $more andere ${more == 1 ? 'run' : 'runs'} op dit rondje gekoppeld.'
+              : 'Route bewaard en deze run gekoppeld.',
+        );
+      }
     } catch (e) {
       if (context.mounted) showMessage(context, friendlyError(e), error: true);
     }
@@ -198,11 +231,38 @@ class ActivityDetailScreen extends ConsumerWidget {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Koppel deze run aan een route. Dan zie je je tijden op die route naast elkaar, eerlijk vergeleken voor het weer.',
-                        style: TextStyle(color: RwColors.muted, height: 1.45),
-                      ),
+                      if (a.hasTrack) ...[
+                        SizedBox(
+                          height: 180,
+                          child: RouteMap(
+                            polyline: a.trackPolyline!,
+                            windSpeedKmh: a.windSpeedKmh,
+                            windFromDegrees: a.windDirectionDegrees,
+                            compact: true,
+                            interactive: false,
+                            showLayerToggle: false,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt RunWise je volgende runs hier vanzelf aan.',
+                          style: TextStyle(color: RwColors.muted, height: 1.45),
+                        ),
+                      ] else
+                        const Text(
+                          'Koppel deze run aan een route. Dan zie je je tijden op die route naast elkaar, eerlijk vergeleken voor het weer.',
+                          style: TextStyle(color: RwColors.muted, height: 1.45),
+                        ),
                       const SizedBox(height: 12),
+                      if (a.hasTrack)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: FilledButton.tonalIcon(
+                            onPressed: a.id == null ? null : () => _saveAsRoute(context, ref, a),
+                            icon: const Icon(Icons.bookmark_add_outlined),
+                            label: const Text('Bewaar als route'),
+                          ),
+                        ),
                       OutlinedButton.icon(
                         onPressed: a.id == null ? null : () => _linkRoute(context, ref, a),
                         icon: const Icon(Icons.add_link),
@@ -215,7 +275,17 @@ class ActivityDetailScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Text(route.name, style: const TextStyle(fontWeight: FontWeight.w700))),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(route.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                                if (a.autoLinked)
+                                  const Text('Automatisch herkend aan je GPS-spoor',
+                                      style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+                              ],
+                            ),
+                          ),
                           TextButton(onPressed: () => _linkRoute(context, ref, a), child: const Text('Wijzig')),
                         ],
                       ),

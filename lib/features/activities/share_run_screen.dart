@@ -152,7 +152,9 @@ class RunShareCard extends StatelessWidget {
       if (a.temperatureCelsius != null) '${a.temperatureCelsius!.round()}°',
       if (a.windSpeedKmh != null) '${a.windSpeedKmh!.round()} km/u',
     ].join(' · ');
-    final track = route == null ? null : RouteTrack(decodePolyline(route!.polyline));
+    // Liever het echte GPS-spoor van de run, anders de gekoppelde route.
+    final line = a.hasTrack ? a.trackPolyline! : route?.polyline;
+    final track = line == null ? null : RouteTrack(decodePolyline(line));
 
     return SizedBox(
       width: 360,

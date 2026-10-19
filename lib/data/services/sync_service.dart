@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config.dart';
 import '../../core/supabase.dart';
+import '../../domain/geo.dart';
+import '../../domain/run_matcher.dart';
 import '../models/models.dart';
 import '../repositories/repositories.dart';
 import 'weather_service.dart';
@@ -238,6 +240,36 @@ class SyncService {
 
   /// Haalt nieuwe runs op uit alle gekoppelde bronnen. Geeft het aantal nieuwe runs.
   /// Zonder [force] hooguit eens per 30 minuten (bij het openen van de app).
+  // ------------------------------------------------------------ Runs aan routes koppelen
+
+  /// Koppelt runs met een GPS-spoor (uit Strava) automatisch aan de route waarop
+  /// je liep. Runs waarvan je zelf de route koppelde of losmaakte, blijven zoals ze zijn.
+  /// Geeft het aantal nieuw gekoppelde runs terug.
+  Future<int> autoLinkRuns() async {
+    if (_db.auth.currentUser == null) return 0;
+    final repo = _ref.read(repositoryProvider);
+    final runs = await repo.activities();
+    final todo = runs.where((a) => a.id != null && a.routeId == null && !a.routeLinkLocked && a.hasTrack).toList();
+    if (todo.isEmpty) return 0;
+    final routes = await repo.routes();
+    if (routes.isEmpty) return 0;
+    final matchable = [
+      for (final r in routes)
+        if (r.id != null) MatchableRoute(r.id!, decodePolyline(r.polyline)),
+    ];
+    var linked = 0;
+    for (final a in todo) {
+      final m = matchRun(decodePolyline(a.trackPolyline!), matchable);
+      if (m == null) continue;
+      try {
+        await repo.autoLinkActivity(a.id!, m.routeId);
+        linked++;
+      } catch (_) {}
+    }
+    if (linked > 0) _ref.invalidate(activitiesProvider);
+    return linked;
+  }
+
   Future<int> syncAll({bool force = false}) async {
     if (_busy) return 0;
     if (!force && _lastAutoSync != null && DateTime.now().difference(_lastAutoSync!).inMinutes < 30) {
@@ -258,6 +290,9 @@ class SyncService {
       } catch (e) {
         if (force) rethrow;
       }
+      try {
+        await autoLinkRuns();
+      } catch (_) {}
     } finally {
       _busy = false;
     }

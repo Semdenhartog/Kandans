@@ -50,9 +50,20 @@ class RunWiseRepository {
     await _db.from('activities').delete().eq('id', id);
   }
 
-  /// Koppelt een run aan een route (of los met null).
+  /// Koppelt een run aan een route (of los met null), door de gebruiker zelf.
+  /// Daarna koppelt RunWise deze run niet meer automatisch.
   Future<void> setActivityRoute(String activityId, String? routeId) async {
-    await _db.from('activities').update({'route_id': routeId}).eq('id', activityId);
+    await _db.from('activities').update({'route_id': routeId, 'route_link_locked': true}).eq('id', activityId);
+  }
+
+  /// Automatische koppeling (blijft aanpasbaar door de gebruiker).
+  Future<void> autoLinkActivity(String activityId, String routeId) async {
+    await _db
+        .from('activities')
+        .update({'route_id': routeId})
+        .eq('id', activityId)
+        .isFilter('route_id', null)
+        .eq('route_link_locked', false);
   }
 
   // ---------- Routes ----------

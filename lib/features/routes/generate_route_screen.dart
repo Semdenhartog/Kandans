@@ -9,6 +9,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/route_generator_service.dart';
+import '../../data/services/sync_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/gpx_parser.dart';
 import '../../domain/route_direction.dart';
@@ -149,8 +150,14 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
     try {
       final id = await ref.read(repositoryProvider).addRoute(c.route);
       ref.invalidate(routesProvider);
+      final linked = await ref.read(syncServiceProvider).autoLinkRuns().catchError((_) => 0);
       if (!mounted) return;
-      showMessage(context, 'Route opgeslagen.');
+      showMessage(
+        context,
+        linked > 0
+            ? 'Route opgeslagen. $linked eerdere ${linked == 1 ? 'run' : 'runs'} op dit rondje gekoppeld.'
+            : 'Route opgeslagen.',
+      );
       context.go('/routes/$id');
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
