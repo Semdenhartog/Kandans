@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/services/route_photos_service.dart';
@@ -13,17 +14,20 @@ String _km(double m) => 'km ${(m / 1000).toStringAsFixed(1).replaceAll('.', ',')
 
 /// Foto met nette laad- en foutweergave.
 class NetPhoto extends StatelessWidget {
-  const NetPhoto(this.url, {super.key, this.fit = BoxFit.cover});
+  const NetPhoto(this.url, {super.key, this.fit = BoxFit.cover, this.cacheKey});
   final String url;
   final BoxFit fit;
 
+  /// Vaste sleutel voor de schijfcache (links van Mapillary veranderen steeds).
+  final String? cacheKey;
+
   @override
-  Widget build(BuildContext context) => Image.network(
-        url,
+  Widget build(BuildContext context) => Image(
+        image: CachedNetImage(url, cacheKey: cacheKey),
         fit: fit,
         gaplessPlayback: true,
-        loadingBuilder: (context, child, progress) =>
-            progress == null ? child : Container(color: RwColors.surfaceHigh),
+        frameBuilder: (context, child, frame, sync) =>
+            sync || frame != null ? child : Container(color: RwColors.surfaceHigh),
         errorBuilder: (context, _, _) => Container(
           color: RwColors.surfaceHigh,
           alignment: Alignment.center,
@@ -130,7 +134,7 @@ class RoutePhotosCard extends ConsumerWidget {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                ExcludeSemantics(child: NetPhoto(p.thumb)),
+                                ExcludeSemantics(child: NetPhoto(p.thumb, cacheKey: '${p.link ?? p.thumb}#thumb')),
                                 const DecoratedBox(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -239,7 +243,9 @@ class _PhotoViewerState extends State<PhotoViewer> {
               },
               itemBuilder: (context, i) => InteractiveViewer(
                 maxScale: 4,
-                child: Center(child: NetPhoto(widget.photos[i].url, fit: BoxFit.contain)),
+                child: Center(
+                    child: NetPhoto(widget.photos[i].url,
+                        fit: BoxFit.contain, cacheKey: '${widget.photos[i].link ?? widget.photos[i].url}#full')),
               ),
             ),
           ),
@@ -299,7 +305,7 @@ class RouteThumb extends ConsumerWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ExcludeSemantics(child: NetPhoto(cover.thumb)),
+                  ExcludeSemantics(child: NetPhoto(cover.thumb, cacheKey: '${cover.link ?? cover.thumb}#thumb')),
                   Positioned(
                     right: 4,
                     bottom: 4,

@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/geo.dart';
@@ -61,6 +62,17 @@ const _dimPhoto = ColorFilter.matrix(<double>[
   0.02, 0.04, 0.74, 0, 0, //
   0, 0, 0, 1, 0,
 ]);
+
+/// Kaarttegels via de schijfcache: eerder bekeken stukken laden direct, ook zonder internet.
+class CachedTileProvider extends TileProvider {
+  CachedTileProvider();
+
+  @override
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
+      CachedNetImage(getTileUrl(coordinates, options), headers: headers);
+}
+
+final _tiles = CachedTileProvider();
 
 Color windColor(WindClass c) => switch (c) {
       WindClass.head => RwColors.danger,
@@ -218,6 +230,7 @@ class _RouteMapState extends State<RouteMap> {
                 urlTemplate: photo ? _photoTiles : _greyTiles,
                 userAgentPackageName: 'nl.runwise.app',
                 maxNativeZoom: 19,
+                tileProvider: _tiles,
                 tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: photo ? _dimPhoto : _darkMap, child: tile),
               ),
               PolylineLayer(
@@ -676,6 +689,7 @@ Widget _baseTiles(bool photo) => TileLayer(
       urlTemplate: photo ? _photoTiles : _greyTiles,
       userAgentPackageName: 'nl.runwise.app',
       maxNativeZoom: 19,
+      tileProvider: _tiles,
       tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: photo ? _dimPhoto : _darkMap, child: tile),
     );
 
@@ -881,3 +895,8 @@ class DrawRouteMap extends StatelessWidget {
     );
   }
 }
+
+/// Voor andere kaarten in de app: dezelfde ondergrond (donker of luchtfoto) en wissel-knop.
+Widget baseTileLayer(bool photo) => _baseTiles(photo);
+Widget mapAttribution(bool photo) => _attribution(photo);
+Widget mapLayerToggle(MapLayer layer) => _LayerToggle(layer: layer, onChanged: mapLayerNotifier.choose);

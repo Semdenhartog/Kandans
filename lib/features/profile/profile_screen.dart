@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config.dart';
+import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
@@ -186,6 +187,7 @@ class ProfileScreen extends ConsumerWidget {
                   title: const Text('Uitloggen'),
                   onTap: () async {
                     await OfflineCache.clear();
+                    await DiskImageCache.instance.clear();
                     await ref.read(supabaseProvider).auth.signOut();
                   },
                 ),

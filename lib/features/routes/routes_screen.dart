@@ -15,6 +15,7 @@ import '../../domain/gpx_parser.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'route_photos_strip.dart';
+import 'routes_overview_map.dart';
 
 class RoutesScreen extends ConsumerStatefulWidget {
   const RoutesScreen({super.key});
@@ -25,6 +26,7 @@ class RoutesScreen extends ConsumerStatefulWidget {
 
 class _RoutesScreenState extends ConsumerState<RoutesScreen> {
   bool _importing = false;
+  bool _mapView = false;
 
   /// Gemiddeld tempo van recente runs, voor de geschatte duur van een route.
   double _typicalPace() {
@@ -80,6 +82,11 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
         title: const Text('Mijn routes'),
         actions: [
           IconButton(
+            tooltip: _mapView ? 'Toon als lijst' : 'Toon op de kaart',
+            onPressed: () => setState(() => _mapView = !_mapView),
+            icon: Icon(_mapView ? Icons.view_list_outlined : Icons.map_outlined),
+          ),
+          IconButton(
             tooltip: 'Zelf een route tekenen',
             onPressed: () => context.go('/routes/tekenen'),
             icon: const Icon(Icons.draw_outlined),
@@ -93,7 +100,9 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _mapView
+          ? null
+          : FloatingActionButton.extended(
         heroTag: 'route-maken',
         onPressed: () => context.go('/routes/maken'),
         icon: const Icon(Icons.auto_awesome),
@@ -116,6 +125,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
               onAction: () => context.go('/routes/maken'),
             );
           }
+          if (_mapView) return RoutesOverviewMap(routes: list, bests: bests);
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             itemCount: list.length,

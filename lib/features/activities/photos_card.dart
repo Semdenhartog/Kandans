@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/disk_image_cache.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -91,7 +92,7 @@ class _PhotosCardState extends ConsumerState<PhotosCard> {
                       ? null
                       : () => Navigator.of(context).push(MaterialPageRoute<void>(
                             fullscreenDialog: true,
-                            builder: (_) => _Viewer(urls: [for (final x in paths) urls[x] ?? ''], initial: i),
+                            builder: (_) => _Viewer(urls: [for (final x in paths) urls[x] ?? ''], keys: paths, initial: i),
                           )),
                   onLongPress: () => _remove(p),
                   child: Semantics(
@@ -102,8 +103,11 @@ class _PhotosCardState extends ConsumerState<PhotosCard> {
                         width: 110,
                         child: urls[p] == null
                             ? Container(color: RwColors.surfaceHigh)
-                            : Image.network(urls[p]!, fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Container(color: RwColors.surfaceHigh)),
+                            : Image(
+                                image: CachedNetImage(urls[p]!, cacheKey: 'run-photo:$p'),
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => Container(color: RwColors.surfaceHigh),
+                              ),
                       ),
                     ),
                   ),
@@ -144,8 +148,9 @@ class _PhotosCardState extends ConsumerState<PhotosCard> {
 }
 
 class _Viewer extends StatelessWidget {
-  const _Viewer({required this.urls, required this.initial});
+  const _Viewer({required this.urls, required this.keys, required this.initial});
   final List<String> urls;
+  final List<String> keys;
   final int initial;
 
   @override
@@ -155,10 +160,14 @@ class _Viewer extends StatelessWidget {
         body: PageView(
           controller: PageController(initialPage: initial),
           children: [
-            for (final u in urls)
+            for (final (i, u) in urls.indexed)
               InteractiveViewer(
                 maxScale: 4,
-                child: Center(child: u.isEmpty ? const SizedBox.shrink() : Image.network(u, fit: BoxFit.contain)),
+                child: Center(
+                  child: u.isEmpty
+                      ? const SizedBox.shrink()
+                      : Image(image: CachedNetImage(u, cacheKey: 'run-photo:${keys[i]}'), fit: BoxFit.contain),
+                ),
               ),
           ],
         ),

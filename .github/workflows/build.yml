@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       # Ondertekeningssleutel voor de Play Store (staat in GitHub Secrets, nooit in de code).
       HAS_UPLOAD_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
@@ -322,7 +322,7 @@ jobs:
           }
 
       - name: APK bouwen
-        run: flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }}
+        run: flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }}
 
       - name: APK beschikbaar maken
         uses: actions/upload-artifact@v5
@@ -331,9 +331,29 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
 
+      - name: Emulator klaarzetten (alleen op main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: App opstarten op een Android-emulator (test)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: flutter test integration_test/app_test.dart --dart-define-from-file=app_config.json
+
       - name: App bundle voor de Play Store bouwen
         if: env.HAS_UPLOAD_KEY == 'true'
-        run: flutter build appbundle --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }}
+        run: flutter build appbundle --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }}
 
       - name: App bundle beschikbaar maken
         if: env.HAS_UPLOAD_KEY == 'true'
