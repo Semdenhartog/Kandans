@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,11 +10,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config.dart';
 import 'core/theme.dart';
+import 'data/services/notification_service.dart';
 import 'shared/config_missing_app.dart';
 
 void main() {
   runZonedGuarded(() {
     WidgetsFlutterBinding.ensureInitialized();
+    // Licenties van de meegeleverde lettertypes (SIL Open Font License).
+    LicenseRegistry.addLicense(() async* {
+      yield LicenseEntryWithLineBreaks(['Saira'], await rootBundle.loadString('assets/fonts/OFL-Saira.txt'));
+      yield LicenseEntryWithLineBreaks(['DM Sans'], await rootBundle.loadString('assets/fonts/OFL-DMSans.txt'));
+    });
 
     // Toon fouten in schermen als leesbare tekst (in plaats van een leeg/grijs scherm).
     ErrorWidget.builder = (details) => _ErrorText(details.exceptionAsString());
@@ -41,6 +49,7 @@ class _BootstrapState extends State<_Bootstrap> {
 
   Future<void> _start() async {
     await initializeDateFormatting('nl_NL');
+    await NotificationService.instance.init().catchError((_) {});
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       publishableKey: AppConfig.supabaseAnonKey,

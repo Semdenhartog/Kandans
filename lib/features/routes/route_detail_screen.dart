@@ -11,6 +11,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
+import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import 'route_shape.dart';
@@ -75,6 +76,8 @@ class RouteDetailScreen extends ConsumerWidget {
         final rw = (w != null && w.windDirection != null)
             ? routeWind(segments, w.windSpeed, w.windDirection!)
             : null;
+
+        final advice = w == null ? null : adviseDirection(track, w.windSpeed, w.windDirection);
 
         return Scaffold(
           appBar: AppBar(
@@ -146,6 +149,21 @@ class RouteDetailScreen extends ConsumerWidget {
                         style: const TextStyle(height: 1.5),
                       ),
               ),
+              if (advice != null) ...[
+                const SizedBox(height: 12),
+                RwCard(
+                  title: 'LOOPRICHTING, NU',
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(advice.bestLabel == 'linksom' ? Icons.rotate_left : Icons.rotate_right,
+                          color: RwColors.accent),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text(advice.text, style: const TextStyle(height: 1.5))),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
               if (r.points.length > 1)
                 RwCard(
@@ -183,7 +201,7 @@ class _KmRow extends StatelessWidget {
         color = RwColors.warning;
       } else if (comp < -3) {
         windText = 'rugwind ${(-comp).round()}';
-        color = RwColors.accent;
+        color = RwColors.good;
       } else {
         windText = 'zijwind';
       }

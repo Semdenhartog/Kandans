@@ -115,6 +115,38 @@ jobs:
           print("::notice::Health Connect en Strava-terugkeer ingesteld")
           EOF2
 
+      - name: Meldingen instellen (dagelijkse melding)
+        run: |
+          python3 - <<'EOF2'
+          import re
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "POST_NOTIFICATIONS" not in s:
+              s = s.replace("<application", (
+                  '<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n'
+                  '    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n'
+                  '    <application'), 1)
+              s = s.replace("</application>", (
+                  '    <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />\n'
+                  '        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="android.intent.action.BOOT_COMPLETED"/>\n'
+                  '                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>\n'
+                  '                <action android:name="android.intent.action.QUICKBOOT_POWERON" />\n'
+                  '            </intent-filter>\n'
+                  '        </receiver>\n'
+                  '    </application>'), 1)
+              open(p, "w").write(s)
+          g = "android/app/build.gradle.kts"
+          t = open(g).read()
+          if "isCoreLibraryDesugaringEnabled" not in t:
+              t2 = t.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true", 1)
+              assert t2 != t, "compileOptions niet gevonden"
+              t2 += '\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n'
+              open(g, "w").write(t2)
+          print("::notice::Meldingen ingesteld (rechten, ontvangers, desugaring)")
+          EOF2
+
       - name: Code-inkorting (R8) veilig instellen
         run: |
           cat > android/app/proguard-rules.pro <<'EOF2'

@@ -11,9 +11,12 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/notification_service.dart';
 import '../../data/services/rain_service.dart';
 import '../../data/services/weather_service.dart';
+import '../../domain/clothing.dart';
 import '../../domain/geo.dart';
+import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import 'dashboard_providers.dart';
@@ -34,6 +37,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    NotificationService.instance.lastTrainingType().then((t) {
+      if (mounted) setState(() => _type = t);
+    });
     // Live: elke 5 minuten de buienradar en de berekening verversen.
     _live = Timer.periodic(const Duration(minutes: 5), (_) {
       if (mounted) ref.invalidate(rainNowcastProvider);
@@ -44,6 +50,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void dispose() {
     _live?.cancel();
     super.dispose();
+  }
+
+  /// Plant de dagelijkse melding opnieuw in met de nieuwste verwachting.
+  void _rescheduleReminder() {
+    final f = ref.read(forecastProvider).value;
+    if (f == null || f.hours.isEmpty) return;
+    final routes = ref.read(routesProvider).value ?? const <RunRoute>[];
+    final route = routes.where((r) => r.id == _routeId).firstOrNull;
+    NotificationService.instance
+        .reschedule(
+          forecast: f,
+          profile: ref.read(insightsProvider),
+          track: route == null ? const [] : decodePolyline(route.polyline),
+          durationMinutes: _durationMinutes,
+          rain: ref.read(rainNowcastProvider).value,
+        )
+        .ignore();
   }
 
   Future<void> _refresh() async {
@@ -75,6 +98,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         );
     final insights = ref.watch(insightsProvider);
     final rain = ref.watch(rainNowcastProvider).value;
+    ref.listen(forecastProvider, (_, next) {
+      if (next.hasValue) _rescheduleReminder();
+    });
 
     final name = profile.when(
       data: (p) => p?.displayName ?? 'loper',
@@ -98,7 +124,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Text(
                 '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display),
               ),
               const SizedBox(height: 4),
               Text(
@@ -110,7 +136,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 style: const TextStyle(color: RwColors.subtle),
               ),
               const SizedBox(height: 20),
-              _TypePicker(value: _type, onChanged: (t) => setState(() => _type = t)),
+              _TypePicker(
+                value: _type,
+                onChanged: (t) {
+                  setState(() => _type = t);
+                  NotificationService.instance.rememberTrainingType(t).then((_) => _rescheduleReminder()).ignore();
+                },
+              ),
               const SizedBox(height: 12),
               _RouteAndDuration(
                 routes: routes,
@@ -300,6 +332,11 @@ class _ResultsState extends State<_Results> {
       children: [
         _BestCard(score: shown, isBest: isBest),
         const SizedBox(height: 12),
+        _ClothingCard(
+          advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes),
+          at: shown.start,
+        ),
+        const SizedBox(height: 12),
         if (widget.rain != null && widget.rain!.points.isNotEmpty) ...[
           _RainCard(rain: widget.rain!),
           const SizedBox(height: 12),
@@ -320,7 +357,7 @@ class _ResultsState extends State<_Results> {
         ),
         if (shown.routeWind != null) ...[
           const SizedBox(height: 12),
-          _RouteWindCard(score: shown),
+          _RouteWindCard(score: shown, track: widget.planner.track),
         ],
         const SizedBox(height: 12),
         Text(
@@ -389,6 +426,7 @@ class _BestCard extends StatelessWidget {
             Fmt.time(score.start),
             style: const TextStyle(
               fontSize: 64,
+              fontFamily: RwFonts.display,
               fontWeight: FontWeight.w800,
               color: RwColors.accent,
               height: 1.05,
@@ -467,7 +505,7 @@ class _NowCard extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             '${now.score}',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: _scoreColor(now.score)),
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: _scoreColor(now.score), fontFamily: RwFonts.display),
           ),
         ],
       ),
@@ -549,8 +587,9 @@ class _HourBars extends StatelessWidget {
 }
 
 class _RouteWindCard extends StatelessWidget {
-  const _RouteWindCard({required this.score});
+  const _RouteWindCard({required this.score, required this.track});
   final StartTimeScore score;
+  final List<LatLng> track;
 
   @override
   Widget build(BuildContext context) {
@@ -568,9 +607,80 @@ class _RouteWindCard extends StatelessWidget {
     } else {
       text = 'De tegenwind is gelijk verdeeld over je route (gem. ${rw.headwindAvg.round()} km/u).';
     }
+    final w = score.weather;
+    final advice = adviseDirection(track, w.windSpeed, w.windDirection);
     return RwCard(
       title: 'WIND OP JE ROUTE',
-      child: Text(text, style: const TextStyle(height: 1.5)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (advice != null) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  advice.bestLabel == 'linksom' ? Icons.rotate_left : Icons.rotate_right,
+                  color: RwColors.accent,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(advice.text, style: const TextStyle(height: 1.5, fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+          Text(text, style: const TextStyle(height: 1.5, color: RwColors.muted)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Wat je aantrekt voor het gekozen vertrekmoment.
+class _ClothingCard extends StatelessWidget {
+  const _ClothingCard({required this.advice, required this.at});
+  final ClothingAdvice advice;
+  final DateTime at;
+
+  @override
+  Widget build(BuildContext context) {
+    return RwCard(
+      title: 'AANTREKKEN OM ${Fmt.time(at)}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(advice.summary, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final item in advice.items)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: RwColors.surfaceHigh,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(item, style: const TextStyle(fontSize: 13)),
+                ),
+            ],
+          ),
+          for (final tip in advice.extras)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline, size: 16, color: RwColors.accent),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(tip, style: const TextStyle(color: RwColors.muted, height: 1.4))),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/core/format.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/services/rain_service.dart';
+import 'package:runwise/domain/clothing.dart';
 import 'package:runwise/domain/geo.dart';
+import 'package:runwise/domain/route_direction.dart';
 import 'package:runwise/domain/gpx_parser.dart';
 import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
@@ -194,6 +196,50 @@ void main() {
       );
       final best = planner.bestPrecise(TrainingType.easy, from: now, horizon: const Duration(hours: 2))!;
       expect(best.start, DateTime(2030, 6, 1, 14, 35));
+    });
+  });
+
+  group('kledingadvies', () {
+    test('koud: lange tight, jack en handschoenen', () {
+      final a = clothingFor(hour(DateTime(2030, 1, 10, 8), temp: -2, wind: 10), TrainingType.easy);
+      expect(a.items.join(' '), contains('Handschoenen'));
+      expect(a.items.join(' '), contains('tight'));
+    });
+    test('warm: korte broek, en drinken bij een lange run', () {
+      final a = clothingFor(hour(DateTime(2030, 7, 10, 18), temp: 24), TrainingType.long, durationMinutes: 100);
+      expect(a.items, contains('Korte broek'));
+      expect(a.extras.join(' '), contains('drinken'));
+    });
+    test('donker en regen geven extra tips', () {
+      final a = clothingFor(hour(DateTime(2030, 11, 10, 19), temp: 8, rain: 80, day: false), TrainingType.easy);
+      expect(a.extras.join(' '), contains('Regenjack'));
+      expect(a.extras.join(' '), contains('lampje'));
+    });
+  });
+
+  group('looprichting', () {
+    // Driehoek: A -> 2 km oost -> 2 km noord -> terug naar A (linksom).
+    const a = LatLng(52.0, 5.0);
+    const b = LatLng(52.0, 5.0292);
+    const c = LatLng(52.018, 5.0292);
+    final loop = [a, b, c, a];
+
+    test('rondje herkennen en richting bepalen', () {
+      expect(isLoop(loop), isTrue);
+      expect(signedArea(loop) > 0, isTrue); // tegen de klok in
+      expect(isLoop([a, b]), isFalse);
+    });
+
+    test('wind uit het noorden: rechtsom geeft minder tegenwind op het eind', () {
+      final adv = adviseDirection(loop, 20, 0)!;
+      expect(adv.reverse, isTrue);
+      expect(adv.bestLabel, 'rechtsom');
+      expect(adv.endHeadwind, lessThan(adv.otherEndHeadwind));
+    });
+
+    test('geen advies bij weinig wind of heen-en-terug', () {
+      expect(adviseDirection(loop, 4, 0), isNull);
+      expect(adviseDirection([a, b, a], 20, 90), isNull);
     });
   });
 }

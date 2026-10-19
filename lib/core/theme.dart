@@ -26,6 +26,13 @@ class RwColors {
   static const warning = Color(0xFFF5C542);
 }
 
+/// Lettertypes: Saira voor koppen en grote getallen (past bij het logo),
+/// DM Sans voor alle gewone tekst. Meegeleverd in assets/fonts (OFL-licentie).
+class RwFonts {
+  static const display = 'Saira';
+  static const body = 'DMSans';
+}
+
 ThemeData buildTheme() {
   final scheme = ColorScheme.fromSeed(
     seedColor: RwColors.accent,
@@ -44,13 +51,21 @@ ThemeData buildTheme() {
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: RwColors.background,
+    fontFamily: RwFonts.body,
   );
+  TextStyle? display(TextStyle? s) => s?.copyWith(fontFamily: RwFonts.display, fontWeight: FontWeight.w800);
 
   return base.copyWith(
-    textTheme: base.textTheme.apply(
-      bodyColor: RwColors.text,
-      displayColor: RwColors.text,
-    ),
+    textTheme: base.textTheme
+        .copyWith(
+          displayLarge: display(base.textTheme.displayLarge),
+          displayMedium: display(base.textTheme.displayMedium),
+          displaySmall: display(base.textTheme.displaySmall),
+          headlineLarge: display(base.textTheme.headlineLarge),
+          headlineMedium: display(base.textTheme.headlineMedium),
+          headlineSmall: display(base.textTheme.headlineSmall),
+        )
+        .apply(bodyColor: RwColors.text, displayColor: RwColors.text),
     appBarTheme: const AppBarTheme(
       backgroundColor: RwColors.background,
       foregroundColor: RwColors.text,

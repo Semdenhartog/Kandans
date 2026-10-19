@@ -15,6 +15,7 @@ import '../../domain/performance_model.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'connections_card.dart';
+import 'reminder_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -73,7 +74,7 @@ class ProfileScreen extends ConsumerWidget {
                       loading: () => '',
                       error: (_, _) => '?',
                     ),
-                    style: const TextStyle(color: RwColors.accentDark, fontSize: 22, fontWeight: FontWeight.w800),
+                    style: const TextStyle(color: RwColors.accentDark, fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -100,6 +101,8 @@ class ProfileScreen extends ConsumerWidget {
           _InsightsCard(insights: insights),
           const SizedBox(height: 12),
           const ConnectionsCard(),
+          const SizedBox(height: 12),
+          const Card(child: ReminderTile()),
           const SizedBox(height: 12),
           Card(
             child: Column(

@@ -200,7 +200,7 @@ class _Intro extends StatelessWidget {
         const Icon(Icons.auto_awesome, color: RwColors.accent, size: 40),
         const SizedBox(height: 12),
         const Text('Je persoonlijke hardloopcoach',
-            textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display)),
         const SizedBox(height: 8),
         Text(
           'De coach kijkt mee naar je runs, je wedstrijden en het weer. '
