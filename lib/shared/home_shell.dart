@@ -6,6 +6,7 @@ import '../core/theme.dart';
 import '../data/services/location_service.dart';
 import '../data/services/offline_cache.dart';
 import '../data/services/sync_service.dart';
+import '../features/lock/app_lock_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
 
 /// Onderste navigatiebalk met de vijf hoofdtabbladen.
@@ -44,6 +45,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
 
   Future<void> _onboarding() async {
     final next = await showOnboardingIfNeeded(context);
+    if (mounted) await maybeOfferFingerprint(context);
     if (next == null || !mounted) return;
     // Na de rondleiding kan er locatie zijn: weer opnieuw ophalen.
     ref.invalidate(weatherLocationProvider);

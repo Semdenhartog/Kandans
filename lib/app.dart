@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router.dart';
 import 'core/theme.dart';
+import 'features/lock/app_lock_gate.dart';
 
 class RunWiseApp extends ConsumerWidget {
   const RunWiseApp({super.key});
@@ -22,7 +23,7 @@ class RunWiseApp extends ConsumerWidget {
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.35)),
-          child: child ?? const SizedBox.shrink(),
+          child: AppLockGate(child: child ?? const SizedBox.shrink()),
         );
       },
       locale: const Locale('nl', 'NL'),

@@ -13,6 +13,7 @@ import 'core/error_reporter.dart';
 import 'core/theme.dart';
 import 'data/services/notification_service.dart';
 import 'shared/config_missing_app.dart';
+import 'data/services/app_lock_service.dart';
 
 void main() {
   runZonedGuarded(() {
@@ -54,6 +55,7 @@ class _BootstrapState extends State<_Bootstrap> {
   Future<void> _start() async {
     await initializeDateFormatting('nl_NL');
     await NotificationService.instance.init().catchError((_) {});
+    await AppLockService.instance.load();
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       publishableKey: AppConfig.supabaseAnonKey,

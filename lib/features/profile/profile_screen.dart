@@ -18,6 +18,7 @@ import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'connections_card.dart';
+import 'fingerprint_tile.dart';
 import 'reminder_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -106,6 +107,8 @@ class ProfileScreen extends ConsumerWidget {
           const ConnectionsCard(),
           const SizedBox(height: 12),
           const Card(child: ReminderTile()),
+          const SizedBox(height: 12),
+          const Card(child: FingerprintTile()),
           const SizedBox(height: 12),
           Card(
             child: Column(

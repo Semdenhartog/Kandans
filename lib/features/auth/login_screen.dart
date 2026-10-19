@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
+import '../../data/services/app_lock_service.dart';
 import '../../shared/widgets.dart';
 import 'auth_widgets.dart';
 
@@ -41,6 +43,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: email,
             password: _password.text,
           );
+      // Laat de telefoon aanbieden om het wachtwoord te bewaren (Google of Samsung Pass).
+      TextInput.finishAutofillContext();
+      AppLockService.instance.offerAfterLogin = true;
       // De router stuurt automatisch door naar /today.
     } on AuthException catch (e) {
       if (e.message.toLowerCase().contains('not confirmed') && mounted) {
@@ -80,13 +85,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children: [
         Form(
           key: _form,
-          child: Column(
+          child: AutofillGroup(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
+                autofillHints: const [AutofillHints.email, AutofillHints.username],
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(labelText: 'E-mailadres'),
                 validator: (v) => (v ?? '').contains('@') ? null : 'Vul een geldig e-mailadres in',
               ),
@@ -114,6 +121,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: const Text('Nieuw hier? Account aanmaken'),
               ),
             ],
+          ),
           ),
         ),
       ],
