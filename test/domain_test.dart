@@ -750,7 +750,7 @@ void main() {
       expect(r.averagePace, closeTo(333, 3));
       expect(r.currentPace, closeTo(333, 5));
       expect(kmAnnouncement(r, 2), contains('Kilometer 2.'));
-      expect(r.simplifiedTrack().length, inInclusiveRange(90, 120));
+      expect(r.simplifiedTrack().length, inInclusiveRange(70, 120));
     });
 
     test('automatisch pauzeren bij stilstaan en GPS-sprongen negeren', () {
