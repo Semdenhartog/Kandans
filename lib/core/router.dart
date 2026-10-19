@@ -21,6 +21,7 @@ import '../features/profile/strava_return_screen.dart';
 import '../features/races/add_race_screen.dart';
 import '../features/races/race_detail_screen.dart';
 import '../features/races/races_screen.dart';
+import '../features/routes/draw_route_screen.dart';
 import '../features/routes/generate_route_screen.dart';
 import '../features/routes/route_detail_screen.dart';
 import '../features/routes/routes_screen.dart';
@@ -110,6 +111,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'maken',
                   builder: (c, s) => const GenerateRouteScreen(),
+                ),
+                GoRoute(
+                  path: 'tekenen',
+                  builder: (c, s) => const DrawRouteScreen(),
                 ),
                 GoRoute(
                   path: ':id',

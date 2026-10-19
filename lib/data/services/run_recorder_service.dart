@@ -5,6 +5,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../domain/geo.dart';
+import '../../domain/intervals.dart';
 import '../../domain/run_recorder.dart';
 import 'live_share_service.dart';
 
@@ -20,6 +21,15 @@ class RecorderView {
     this.km = 0,
     this.gpsAccuracy,
     this.error,
+    this.track = const [],
+    this.position,
+    this.step,
+    this.nextStep,
+    this.stepRemaining = 0,
+    this.stepProgress = 0,
+    this.workNumber = 0,
+    this.reps = 0,
+    this.intervalsDone = false,
   });
 
   final RecorderStatus status;
@@ -30,6 +40,21 @@ class RecorderView {
   final int km;
   final double? gpsAccuracy;
   final String? error;
+
+  /// Gelopen spoor (voor de kaart tijdens het lopen).
+  final List<LatLng> track;
+  final LatLng? position;
+
+  /// Intervallen: huidige en volgende stap, wat er nog over is (s of m) en voortgang 0..1.
+  final IntervalStep? step;
+  final IntervalStep? nextStep;
+  final double stepRemaining;
+  final double stepProgress;
+  final int workNumber;
+  final int reps;
+  final bool intervalsDone;
+
+  bool get hasIntervals => step != null || intervalsDone;
 
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
@@ -47,6 +72,8 @@ class RunRecorderService {
   FlutterTts? _tts;
   bool voice = true;
   bool shareLive = false;
+  IntervalTracker? _intervals;
+  LatLng? _position;
 
   RunRecording? get recording => _rec;
   bool get isRecording => _rec != null && _rec!.status != RecorderStatus.finished;
@@ -87,23 +114,32 @@ class RunRecorderService {
     _sub = Geolocator.getPositionStream(locationSettings: settings).listen(_onPosition, onError: (Object _) {
       view.value = _snapshot(error: 'GPS-signaal kwijt. We proberen het opnieuw.');
     });
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) => view.value = _snapshot());
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      _checkIntervals();
+      view.value = _snapshot();
+    });
   }
 
-  Future<void> start({bool voice = true, bool shareLive = false, String name = ''}) async {
-    this.voice = voice;
+  Future<void> start({bool voice = true, bool shareLive = false, String name = '', IntervalPlan? intervals}) async {
+    this.voice = voice || intervals != null;
     this.shareLive = shareLive;
     if (_sub == null) await warmUp();
     _rec ??= RunRecording();
     _rec!.start(DateTime.now());
-    if (voice) {
+    if (this.voice) {
       _tts ??= FlutterTts();
       try {
         await _tts!.setLanguage('nl-NL');
         await _tts!.setSpeechRate(0.5);
+        // Achter elkaar uitspreken in plaats van elkaar af te kappen, en muziek even zachter zetten.
+        await _tts!.setQueueMode(1);
+        await _tts!.setAudioAttributesForNavigation();
       } catch (_) {}
-      _say('Run gestart. Succes!');
+      _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
     }
+    _intervals = intervals == null ? null : IntervalTracker(intervals);
+    final first = _intervals?.start(0, 0);
+    if (first != null) _say(first.text);
     if (shareLive) {
       try {
         await LiveShareService.instance.start(name: name, duration: const Duration(hours: 4), ownStream: false);
@@ -134,25 +170,53 @@ class RunRecorderService {
     final km = r.add(GpsFix(LatLng(p.latitude, p.longitude), p.timestamp, accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null));
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
     if (before == RecorderStatus.autoPaused && r.status == RecorderStatus.running) _say('Verder.');
-    if (km != null) _say(kmAnnouncement(r, km));
+    // Tijdens intervallen geen lange kilometer-melding, die zit de aanwijzingen in de weg.
+    if (km != null && _intervals == null) _say(kmAnnouncement(r, km));
+    _position = LatLng(p.latitude, p.longitude);
+    _checkIntervals();
     if (shareLive && r.isActive) LiveShareService.instance.feed(p);
     view.value = _snapshot(accuracy: p.accuracy);
   }
 
+  void _checkIntervals() {
+    final it = _intervals, r = _rec;
+    if (it == null || r == null || !r.isActive || it.finished) return;
+    final cue = it.update(_movingNow(), r.distance);
+    if (cue != null) _say(cue.text);
+  }
+
+  /// Sla de huidige intervalstap over (bijv. als je eerder klaar bent met inlopen).
+  void skipStep() {
+    final it = _intervals, r = _rec;
+    if (it == null || r == null) return;
+    final cue = it.skip(_movingNow(), r.distance);
+    if (cue != null) _say(cue.text);
+    view.value = _snapshot();
+  }
+
   void _say(String text) {
     if (!voice || _tts == null) return;
-    _tts!.speak(text).catchError((_) => 0);
+    _tts!.speak(text, focus: true).catchError((_) => 0);
+  }
+
+  /// Bewegende tijd inclusief de seconden sinds de laatste GPS-meting (hooguit 5 s).
+  double _movingNow() {
+    final r = _rec;
+    if (r == null) return 0;
+    var moving = r.movingSeconds;
+    if (r.status == RecorderStatus.running && _lastFixAt != null) {
+      final since = DateTime.now().difference(_lastFixAt!).inMilliseconds / 1000;
+      if (since < 5) moving += since;
+    }
+    return moving;
   }
 
   RecorderView _snapshot({double? accuracy, String? error}) {
     final r = _rec;
     if (r == null) return const RecorderView();
     // Tussen twee GPS-metingen de klok laten doorlopen (hooguit 5 s).
-    var moving = r.movingSeconds;
-    if (r.status == RecorderStatus.running && _lastFixAt != null) {
-      final since = DateTime.now().difference(_lastFixAt!).inMilliseconds / 1000;
-      if (since < 5) moving += since;
-    }
+    final moving = _movingNow();
+    final it = _intervals;
     return RecorderView(
       status: r.status,
       distance: r.distance,
@@ -162,6 +226,15 @@ class RunRecorderService {
       km: r.kmTimes.length,
       gpsAccuracy: accuracy ?? view.value.gpsAccuracy,
       error: error,
+      track: r.track,
+      position: _position,
+      step: it?.current,
+      nextStep: it?.next,
+      stepRemaining: it == null ? 0 : it.remaining(moving, r.distance),
+      stepProgress: it == null ? 0 : it.progress(moving, r.distance),
+      workNumber: it?.workNumber ?? 0,
+      reps: it?.plan.reps ?? 0,
+      intervalsDone: it?.finished ?? false,
     );
   }
 
@@ -177,6 +250,8 @@ class RunRecorderService {
     if (r != null && r.distance > 0) _say('Run gestopt. ${(r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',')} kilometer.');
     view.value = const RecorderView(status: RecorderStatus.finished);
     _rec = null;
+    _intervals = null;
+    _position = null;
     return r;
   }
 

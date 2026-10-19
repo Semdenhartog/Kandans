@@ -667,3 +667,217 @@ class PoiIcon extends StatelessWidget {
         ),
       );
 }
+
+// ---------------------------------------------------------------------------
+// Kaart tijdens het lopen en kaart om zelf een route te tekenen
+// ---------------------------------------------------------------------------
+
+Widget _baseTiles(bool photo) => TileLayer(
+      urlTemplate: photo ? _photoTiles : _greyTiles,
+      userAgentPackageName: 'nl.runwise.app',
+      maxNativeZoom: 19,
+      tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: photo ? _dimPhoto : _darkMap, child: tile),
+    );
+
+Widget _attribution(bool photo) => Positioned(
+      right: 0,
+      bottom: 0,
+      child: IgnorePointer(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          color: Colors.black.withValues(alpha: 0.55),
+          child: Text(
+            photo ? 'Luchtfoto © Beeldmateriaal.nl, PDOK' : 'Kaart © Kadaster, PDOK',
+            style: const TextStyle(fontSize: 9, color: Colors.white70),
+          ),
+        ),
+      ),
+    );
+
+Widget _dot(Color c, {double size = 20}) => Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: c,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6)],
+      ),
+    );
+
+/// Je gelopen spoor en waar je nu bent; volgt je, tenzij je zelf de kaart verschuift.
+class LiveTrackMap extends StatefulWidget {
+  const LiveTrackMap({super.key, required this.track, this.position});
+  final List<LatLng> track;
+  final LatLng? position;
+
+  @override
+  State<LiveTrackMap> createState() => _LiveTrackMapState();
+}
+
+class _LiveTrackMapState extends State<LiveTrackMap> {
+  final _map = MapController();
+  bool _follow = true;
+  bool _ready = false;
+
+  @override
+  void didUpdateWidget(covariant LiveTrackMap old) {
+    super.didUpdateWidget(old);
+    final p = widget.position;
+    if (_ready && _follow && p != null && (old.position == null || distanceMeters(old.position!, p) > 1)) {
+      _map.move(_ll(p), _map.camera.zoom);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pos = widget.position ?? (widget.track.isEmpty ? null : widget.track.last);
+    final pts = [for (final p in widget.track) _ll(p)];
+    return ValueListenableBuilder<MapLayer>(
+      valueListenable: mapLayerNotifier,
+      builder: (context, layer, _) {
+        final photo = layer == MapLayer.satelliet;
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              FlutterMap(
+                mapController: _map,
+                options: MapOptions(
+                  initialCenter: pos == null ? const ll.LatLng(52.15, 5.4) : _ll(pos),
+                  initialZoom: pos == null ? 7 : 16,
+                  backgroundColor: const Color(0xFF17171A),
+                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                  onMapReady: () => _ready = true,
+                  onPositionChanged: (_, hasGesture) {
+                    if (hasGesture && _follow) setState(() => _follow = false);
+                  },
+                ),
+                children: [
+                  _baseTiles(photo),
+                  if (pts.length >= 2)
+                    PolylineLayer(polylines: [
+                      Polyline(points: pts, strokeWidth: 9, color: Colors.black.withValues(alpha: 0.8)),
+                      Polyline(points: pts, strokeWidth: 5.5, color: RwColors.accent),
+                    ]),
+                  MarkerLayer(markers: [
+                    if (pts.isNotEmpty) Marker(point: pts.first, width: 28, height: 28, child: const _Pin(icon: Icons.flag, color: RwColors.accent)),
+                    if (pos != null) Marker(point: _ll(pos), width: 22, height: 22, child: _dot(const Color(0xFF4C8DFF))),
+                  ]),
+                ],
+              ),
+              Positioned(top: 10, left: 10, child: _LayerToggle(layer: layer, onChanged: mapLayerNotifier.choose)),
+              if (!_follow && pos != null)
+                Positioned(
+                  right: 10,
+                  bottom: 24,
+                  child: _RoundButton(
+                    icon: Icons.my_location,
+                    tooltip: 'Volg mij weer',
+                    onTap: () {
+                      setState(() => _follow = true);
+                      _map.move(_ll(pos), math.max(_map.camera.zoom, 15));
+                    },
+                  ),
+                ),
+              _attribution(photo),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Kaart om een route te tekenen: tik punten, de route volgt paden en wegen.
+class DrawRouteMap extends StatelessWidget {
+  const DrawRouteMap({
+    super.key,
+    required this.controller,
+    required this.center,
+    required this.taps,
+    required this.routed,
+    required this.onTap,
+    this.onMoveTap,
+  });
+
+  final MapController controller;
+  final LatLng center;
+  final List<LatLng> taps;
+
+  /// De gevolgde route (leeg zolang er nog niets is berekend).
+  final List<LatLng> routed;
+  final ValueChanged<LatLng> onTap;
+
+  /// Lang drukken op een punt: verwijderen.
+  final ValueChanged<int>? onMoveTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final line = [for (final p in routed) _ll(p)];
+    final straight = [for (final p in taps) _ll(p)];
+    return ValueListenableBuilder<MapLayer>(
+      valueListenable: mapLayerNotifier,
+      builder: (context, layer, _) {
+        final photo = layer == MapLayer.satelliet;
+        return Stack(
+          children: [
+            FlutterMap(
+              mapController: controller,
+              options: MapOptions(
+                initialCenter: _ll(center),
+                initialZoom: 15,
+                minZoom: 6,
+                maxZoom: 19,
+                backgroundColor: const Color(0xFF17171A),
+                interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                onTap: (_, p) => onTap(LatLng(p.latitude, p.longitude)),
+              ),
+              children: [
+                _baseTiles(photo),
+                PolylineLayer(polylines: [
+                  if (line.length < 2 && straight.length >= 2)
+                    Polyline(
+                      points: straight,
+                      strokeWidth: 3,
+                      color: RwColors.accent.withValues(alpha: 0.6),
+                      pattern: StrokePattern.dashed(segments: const [10, 8]),
+                    ),
+                  if (line.length >= 2) ...[
+                    Polyline(points: line, strokeWidth: 9, color: Colors.black.withValues(alpha: 0.8)),
+                    Polyline(points: line, strokeWidth: 5.5, color: RwColors.accent),
+                  ],
+                ]),
+                MarkerLayer(markers: [
+                  for (final (i, p) in taps.indexed)
+                    Marker(
+                      point: _ll(p),
+                      width: i == 0 ? 30 : 22,
+                      height: i == 0 ? 30 : 22,
+                      child: GestureDetector(
+                        onLongPress: onMoveTap == null ? null : () => onMoveTap!(i),
+                        child: i == 0
+                            ? const _Pin(icon: Icons.flag, color: RwColors.accent)
+                            : Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: RwColors.background,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: RwColors.accent, width: 3),
+                                ),
+                                child: Text('$i', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800)),
+                              ),
+                      ),
+                    ),
+                ]),
+                const _MyLocationLayer(),
+              ],
+            ),
+            Positioned(top: 10, right: 10, child: _LayerToggle(layer: layer, onChanged: mapLayerNotifier.choose)),
+            _attribution(photo),
+          ],
+        );
+      },
+    );
+  }
+}

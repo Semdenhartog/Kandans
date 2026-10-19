@@ -80,6 +80,11 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
         title: const Text('Mijn routes'),
         actions: [
           IconButton(
+            tooltip: 'Zelf een route tekenen',
+            onPressed: () => context.go('/routes/tekenen'),
+            icon: const Icon(Icons.draw_outlined),
+          ),
+          IconButton(
             tooltip: 'GPX importeren',
             onPressed: _importing ? null : _importGpx,
             icon: _importing
@@ -106,7 +111,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
               icon: Icons.route_outlined,
               title: 'Nog geen routes',
               message: 'Laat RunWise een rondje maken vanaf je huis of een adres, op de afstand of tijd die jij wilt. '
-                  'Of importeer een GPX-bestand van je vaste rondje (rechtsboven).',
+                  'Of teken zelf een route (potloodje rechtsboven) of importeer een GPX-bestand van je vaste rondje.',
               actionLabel: 'Route maken',
               onAction: () => context.go('/routes/maken'),
             );
