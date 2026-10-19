@@ -100,7 +100,8 @@ class RunRecording {
 
     distance += d;
     movingSeconds += dt;
-    if (d >= 3) track.add(fix.point);
+    // Punt bewaren zodra je minstens 3 m van het vorige bewaarde punt bent.
+    if (track.isEmpty || distanceMeters(track.last, fix.point) >= 3) track.add(fix.point);
     _recent.add((meters: d, seconds: dt));
     var sum = 0.0;
     for (var i = _recent.length - 1; i >= 0; i--) {
