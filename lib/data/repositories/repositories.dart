@@ -113,6 +113,36 @@ class RunWiseRepository {
     await _db.from('routes').delete().eq('id', id);
   }
 
+  // ---------- Maanduitdaging ----------
+
+  static String _monthKey(DateTime m) =>
+      '${m.year.toString().padLeft(4, '0')}-${m.month.toString().padLeft(2, '0')}-01';
+
+  /// Doel (km) voor de maand van [month], of null als er nog geen is.
+  Future<double?> monthlyGoal(DateTime month) async {
+    final row = await _db
+        .from('monthly_goals')
+        .select('target_km')
+        .eq('user_id', _uid)
+        .eq('month', _monthKey(month))
+        .maybeSingle();
+    final v = row?['target_km'];
+    return v == null ? null : (v as num).toDouble();
+  }
+
+  Future<void> setMonthlyGoal(DateTime month, double km) async {
+    await _db.from('monthly_goals').upsert({
+      'user_id': _uid,
+      'month': _monthKey(month),
+      'target_km': km,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
+  Future<void> deleteMonthlyGoal(DateTime month) async {
+    await _db.from('monthly_goals').delete().eq('user_id', _uid).eq('month', _monthKey(month));
+  }
+
   // ---------- Wedstrijden ----------
 
   Future<List<RaceEvent>> races() async {
@@ -199,6 +229,7 @@ class RunWiseRepository {
     final routes = await _db.from('routes').select().eq('user_id', uid);
     final races = await _db.from('race_events').select().eq('user_id', uid);
     final coach = await _db.from('coach_messages').select().eq('user_id', uid);
+    final goals = await _db.from('monthly_goals').select().eq('user_id', uid);
     return {
       'exported_at': DateTime.now().toUtc().toIso8601String(),
       'email': _db.auth.currentUser?.email,
@@ -207,6 +238,7 @@ class RunWiseRepository {
       'routes': routes,
       'race_events': races,
       'coach_messages': coach,
+      'monthly_goals': goals,
     };
   }
 

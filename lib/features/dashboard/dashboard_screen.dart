@@ -19,6 +19,8 @@ import '../../domain/geo.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
+import '../live/live_share_screen.dart';
+import 'month_challenge_card.dart';
 import 'dashboard_providers.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -189,6 +191,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 12),
+              const MonthChallengeCard(),
+              const SizedBox(height: 12),
+              const LiveShareEntryCard(),
             ],
           ),
         ),

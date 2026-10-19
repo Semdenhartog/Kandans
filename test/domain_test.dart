@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/core/format.dart';
 import 'package:runwise/data/models/models.dart';
+import 'package:runwise/data/services/live_share_service.dart';
 import 'package:runwise/data/services/rain_service.dart';
 import 'package:runwise/data/services/route_generator_service.dart';
 import 'package:runwise/domain/clothing.dart';
@@ -8,6 +9,7 @@ import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/route_direction.dart';
 import 'package:runwise/domain/route_geometry.dart';
 import 'package:runwise/domain/gpx_parser.dart';
+import 'package:runwise/domain/monthly_goal.dart';
 import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/poi.dart';
 import 'package:runwise/domain/records.dart';
@@ -424,6 +426,53 @@ void main() {
       final q = overpassQuery(east);
       expect(q, contains('drinking_water'));
       expect(q, contains('51.99700,4.99700,52.00300,5.03220'));
+    });
+  });
+
+  group('maanduitdaging', () {
+    Activity on(DateTime d, double km) => Activity(startedAt: d, distanceMeters: km * 1000, movingTimeSeconds: (km * 330).round());
+
+    test('voorstel uit vorige maanden', () {
+      final runs = [
+        on(DateTime(2026, 9, 3), 40),
+        on(DateTime(2026, 8, 3), 50),
+        on(DateTime(2026, 7, 3), 60),
+        on(DateTime(2026, 6, 3), 500), // te lang geleden
+      ];
+      expect(suggestedGoalKm(runs, DateTime(2026, 10, 17)), 55);
+      expect(suggestedGoalKm(const [], DateTime(2026, 10, 17)), 30);
+      expect(kmInMonth(runs, DateTime(2026, 9, 30)), 40);
+    });
+
+    test('voortgang en schema', () {
+      final p = GoalProgress(targetKm: 62, doneKm: 20, now: DateTime(2026, 10, 17, 12));
+      expect(p.totalDays, 31);
+      expect(p.daysLeft, 15);
+      expect(p.expectedKm, closeTo(32, 0.01));
+      expect(p.aheadKm, closeTo(-12, 0.01));
+      expect(p.statusText, contains('achter'));
+      expect(p.neededPerWeek, closeTo(42 / 15 * 7, 0.01));
+      final done = GoalProgress(targetKm: 50, doneKm: 53.4, now: DateTime(2026, 10, 30));
+      expect(done.achieved, isTrue);
+      expect(done.fraction, 1);
+      expect(done.statusText, 'Gehaald, en 3 km extra!');
+    });
+  });
+
+  group('live delen', () {
+    test('token is lang en zonder rare tekens', () {
+      final a = newLiveToken(), b = newLiveToken();
+      expect(a.length, 32);
+      expect(RegExp(r'^[A-Za-z0-9]{32}$').hasMatch(a), isTrue);
+      expect(a, isNot(b));
+    });
+
+    test('niet te vaak versturen', () {
+      final t0 = DateTime(2026, 10, 19, 10);
+      expect(shouldSend(now: t0), isTrue);
+      expect(shouldSend(now: t0.add(const Duration(seconds: 8)), lastAt: t0, movedMeters: 20), isFalse);
+      expect(shouldSend(now: t0.add(const Duration(seconds: 8)), lastAt: t0, movedMeters: 80), isTrue);
+      expect(shouldSend(now: t0.add(const Duration(seconds: 16)), lastAt: t0, movedMeters: 0), isTrue);
     });
   });
 }

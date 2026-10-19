@@ -122,6 +122,21 @@ jobs:
           print("::notice::Health Connect en Strava-terugkeer ingesteld")
           EOF2
 
+      - name: Live locatie delen (voorgrondservice)
+        run: |
+          python3 - <<'EOF2'
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "FOREGROUND_SERVICE_LOCATION" not in s:
+              s = s.replace("<application", (
+                  '<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n'
+                  '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>\n'
+                  '    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n'
+                  '    <application'), 1)
+              open(p, "w").write(s)
+          print("::notice::Voorgrondservice voor live delen ingesteld")
+          EOF2
+
       - name: Meldingen instellen (dagelijkse melding)
         run: |
           python3 - <<'EOF2'
