@@ -263,7 +263,48 @@ type StravaActivity = {
   trainer?: boolean;
   manual?: boolean;
   start_latlng?: [number, number] | [];
+  map?: { summary_polyline?: string | null };
 };
+
+/// Runs die al vóór deze versie waren opgehaald hebben nog geen GPS-spoor.
+/// Eenmalig ophalen (max. 3 pagina's per sync), zodat ook oude runs aan routes gekoppeld kunnen worden.
+async function backfillTracks(db: SupabaseClient, userId: string, token: string): Promise<number> {
+  const { data: missing } = await db.from("activities")
+    .select("id, external_id, started_at")
+    .eq("user_id", userId).eq("source", "strava").is("track_polyline", null)
+    .order("started_at", { ascending: true })
+    .limit(300);
+  if (!missing || missing.length === 0) return 0;
+
+  const oldest = new Date(missing[0].started_at as string).getTime();
+  const after = Math.floor((oldest - 3600_000) / 1000);
+  const tracks = new Map<string, string>();
+  let complete = true;
+  for (let page = 1; page <= MAX_PAGES_PER_SYNC; page++) {
+    const res = await fetch(
+      `${STRAVA}/api/v3/athlete/activities?after=${after}&per_page=100&page=${page}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) {
+      complete = false;
+      break;
+    }
+    const list = (await res.json()) as StravaActivity[];
+    for (const a of list) tracks.set(String(a.id), a.map?.summary_polyline ?? "");
+    if (list.length < 100) break;
+    if (page === MAX_PAGES_PER_SYNC) complete = false;
+  }
+
+  let updated = 0;
+  await mapLimit(missing, 6, async (m) => {
+    const t = tracks.get(m.external_id as string);
+    // Niet gevonden en we hebben alles bekeken: geen spoor meer op te halen.
+    if (t === undefined && !complete) return;
+    const { error } = await db.from("activities").update({ track_polyline: t ?? "" }).eq("id", m.id);
+    if (!error) updated++;
+  });
+  return updated;
+}
 
 async function sync(db: SupabaseClient, userId: string) {
   const { data: conn } = await db.from("external_connections")
@@ -332,6 +373,8 @@ async function sync(db: SupabaseClient, userId: string) {
         wind_speed_kmh: w?.wind_speed_kmh ?? null,
         wind_direction_degrees: w?.wind_direction_degrees ?? null,
         humidity_pct: w?.humidity_pct ?? null,
+        // GPS-spoor (vereenvoudigd) om de run aan een route te koppelen. "" = geen spoor.
+        track_polyline: a.map?.summary_polyline ?? "",
       };
     });
 
@@ -340,6 +383,11 @@ async function sync(db: SupabaseClient, userId: string) {
         .upsert(rows, { onConflict: "user_id,source,external_id" });
       if (error) throw error;
     }
+
+    const backfilled = await backfillTracks(db, userId, token).catch((e) => {
+      console.error("track backfill failed", e instanceof Error ? e.message : e);
+      return 0;
+    });
 
     const newest = fetched.reduce(
       (max, a) => Math.max(max, new Date(a.start_date).getTime()),
@@ -351,7 +399,7 @@ async function sync(db: SupabaseClient, userId: string) {
       last_synced_at: new Date(Math.max(newest, since.getTime())).toISOString(),
     }).eq("user_id", userId).eq("provider", "strava");
 
-    return json(200, { imported: rows.length, skipped_duplicates: runs.length - fresh.length });
+    return json(200, { imported: rows.length, skipped_duplicates: runs.length - fresh.length, tracks_added: backfilled });
   } catch (e) {
     if (e instanceof ReconnectNeeded) {
       await forgetConnection(db, userId, "Strava-toegang is ingetrokken. Koppel opnieuw.");
