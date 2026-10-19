@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart' as ll;
 
 import '../../core/format.dart';
+import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../domain/geo.dart';
 import '../../domain/route_geometry.dart';
