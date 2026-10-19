@@ -50,6 +50,11 @@ class RunWiseRepository {
     await _db.from('activities').delete().eq('id', id);
   }
 
+  /// Koppelt een run aan een route (of los met null).
+  Future<void> setActivityRoute(String activityId, String? routeId) async {
+    await _db.from('activities').update({'route_id': routeId}).eq('id', activityId);
+  }
+
   // ---------- Routes ----------
 
   Future<List<RunRoute>> routes() async {

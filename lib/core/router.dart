@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../features/activities/activities_screen.dart';
+import '../features/activities/activity_detail_screen.dart';
+import '../features/activities/records_screen.dart';
 import '../features/activities/add_activity_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
@@ -87,6 +89,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'new',
                   builder: (c, s) => const AddActivityScreen(),
+                ),
+                GoRoute(
+                  path: 'records',
+                  builder: (c, s) => const RecordsScreen(),
+                ),
+                GoRoute(
+                  path: ':id',
+                  builder: (c, s) => ActivityDetailScreen(activityId: s.pathParameters['id']!),
                 ),
               ],
             ),

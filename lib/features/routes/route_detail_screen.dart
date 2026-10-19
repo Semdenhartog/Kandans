@@ -12,6 +12,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/route_direction.dart';
+import '../../domain/records.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
@@ -162,6 +163,8 @@ class RouteDetailScreen extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 12),
+              _RouteHistoryCard(routeId: routeId),
+              const SizedBox(height: 12),
               if (r.points.length > 1)
                 RwCard(
                   title: 'PER KILOMETER',
@@ -307,6 +310,129 @@ class _MapAndProfileState extends State<_MapAndProfile> {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Al je runs op deze route naast elkaar, eerlijk vergeleken voor het weer.
+class _RouteHistoryCard extends ConsumerWidget {
+  const _RouteHistoryCard({required this.routeId});
+  final String routeId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final h = routeHistory(all, routeId);
+    if (h.isEmpty) {
+      return const RwCard(
+        title: 'JOUW RUNS OP DEZE ROUTE',
+        child: Text(
+          'Nog geen runs op deze route. Koppel een run aan deze route (open de run bij Runs) '
+          'of kies de route als je een run toevoegt. Dan zie je hier je tijden naast elkaar, gecorrigeerd voor het weer.',
+          style: TextStyle(color: RwColors.muted, height: 1.45),
+        ),
+      );
+    }
+    final fastest = h.fastest!;
+    final fastestW = h.fastestCorrected!;
+    final trend = h.trendSecPerKm;
+    final maxShown = h.runs.take(8).toList();
+    final paces = [for (final r in maxShown) r.correctedPace];
+    final best = paces.reduce(math.min), worst = paces.reduce(math.max);
+
+    return RwCard(
+      title: 'JOUW RUNS OP DEZE ROUTE · ${h.runs.length}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: StatTile(label: 'Snelste tijd', value: Fmt.duration(fastest.activity.movingTimeSeconds))),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Bij ideaal weer', value: Fmt.duration(fastestW.correctedSeconds))),
+            ],
+          ),
+          if (trend != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(
+                  trend < -2 ? Icons.trending_down : trend > 2 ? Icons.trending_up : Icons.trending_flat,
+                  color: trend < -2 ? RwColors.good : trend > 2 ? RwColors.warning : RwColors.muted,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    trend < -2
+                        ? 'Je wordt sneller: ${(-trend).round()} s/km vlotter dan je eerste keren, gecorrigeerd voor het weer.'
+                        : trend > 2
+                            ? 'Iets trager dan je eerste keren (${trend.round()} s/km, gecorrigeerd voor het weer). Rustig aan of moe?'
+                            : 'Je tempo is stabiel op deze route.',
+                    style: const TextStyle(height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
+          for (final r in maxShown)
+            InkWell(
+              onTap: r.activity.id == null ? null : () => context.go('/runs/${r.activity.id}'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 84,
+                      child: Text(Fmt.date(r.activity.startedAt), style: const TextStyle(color: RwColors.muted, fontSize: 13)),
+                    ),
+                    SizedBox(
+                      width: 62,
+                      child: Text(Fmt.duration(r.activity.movingTimeSeconds),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: sameRun(r.activity, fastest.activity) ? RwColors.accent : RwColors.text,
+                          )),
+                    ),
+                    // Balkje: korter = sneller (weergecorrigeerd tempo).
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, c) {
+                          final f = worst - best < 1 ? 1.0 : 1 - (r.correctedPace - best) / (worst - best) * 0.65;
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              height: 8,
+                              width: c.maxWidth * f,
+                              decoration: BoxDecoration(
+                                color: sameRun(r.activity, fastestW.activity) ? RwColors.good : RwColors.bar,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 58,
+                      child: Text(
+                        r.activity.windSpeedKmh == null ? '' : '${r.activity.windSpeedKmh!.round()} km/u',
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 4),
+          const Text(
+            'Balk: tempo gecorrigeerd voor het weer (langer = sneller). Groen = beste prestatie.',
+            style: TextStyle(color: RwColors.subtle, fontSize: 11),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -9,7 +9,9 @@ import 'package:runwise/domain/route_direction.dart';
 import 'package:runwise/domain/route_geometry.dart';
 import 'package:runwise/domain/gpx_parser.dart';
 import 'package:runwise/domain/performance_model.dart';
+import 'package:runwise/domain/records.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
+import 'package:runwise/domain/weather_correction.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -339,6 +341,58 @@ void main() {
       expect(r.elevationProfile.length, greaterThan(30));
       expect(r.toInsert('u')['elevation_profile'], isA<List>());
       expect(r.profileOrKmPoints, isNotEmpty);
+    });
+  });
+
+  group('records en weercorrectie', () {
+    Activity run(String id, double km, int seconds, {double? wind, double? feels, String? route, int daysAgo = 0}) => Activity(
+          id: id,
+          startedAt: DateTime(2026, 10, 1).subtract(Duration(days: daysAgo)),
+          distanceMeters: km * 1000,
+          movingTimeSeconds: seconds,
+          windSpeedKmh: wind,
+          temperatureCelsius: feels,
+          feelsLikeCelsius: feels,
+          routeId: route,
+        );
+
+    test('wind en warmte kosten tijd, windstil en koel niet', () {
+      expect(netWindSecPerKm(20), closeTo(3, 0.01));
+      final storm = weatherCost(run('a', 10, 3000, wind: 30, feels: 10));
+      expect(storm.windSeconds, closeTo(67.5, 0.1));
+      expect(storm.heatSeconds, 0);
+      final hot = weatherCost(run('b', 10, 3000, wind: 0, feels: 25));
+      expect(hot.heatSeconds, closeTo(3000 * 0.035 / 1.035, 0.5));
+      expect(weatherCost(run('c', 10, 3000, wind: 3, feels: 10)).matters, isFalse);
+      expect(correctedSeconds(run('d', 10, 3000, wind: 30, feels: 10)), 2933);
+    });
+
+    test('records per afstand, met weer-record', () {
+      final calm = run('calm', 10.0, 2900, wind: 0, feels: 10);
+      final storm = run('storm', 10.1, 2950, wind: 40, feels: 10);
+      final five = run('five', 5.05, 1400, wind: 10, feels: 12);
+      final r = computeRecords([calm, storm, five, run('kort', 0.5, 200)]);
+      final ten = r.distances.firstWhere((d) => d.distance.meters == 10000);
+      expect(ten.best.id, 'calm');
+      expect(ten.bestSeconds, 2900);
+      expect(ten.bestWeather.id, 'storm');
+      expect(ten.weatherRecordDiffers, isTrue);
+      expect(r.badgesFor(storm), ['Weer-PR 10 km', 'Langste run']);
+      expect(r.badgesFor(calm), ['PR 10 km']);
+      expect(r.distances.map((d) => d.distance.label), ['5 km', '10 km']);
+      expect(scaledSeconds(1400, 5050, 5000), 1386);
+    });
+
+    test('runs op een vaste route met trend', () {
+      final runs = [
+        for (var i = 0; i < 6; i++) run('r$i', 8, 2880 - i * 30, wind: 10, feels: 10, route: 'x', daysAgo: 60 - i * 10),
+        run('ander', 8, 2000, route: 'y'),
+      ];
+      final h = routeHistory(runs, 'x');
+      expect(h.runs.length, 6);
+      expect(h.runs.first.activity.id, 'r5');
+      expect(h.fastest!.activity.id, 'r5');
+      expect(h.trendSecPerKm, lessThan(-5));
     });
   });
 }
