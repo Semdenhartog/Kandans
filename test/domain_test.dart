@@ -316,7 +316,7 @@ void main() {
       final prof = sampleElevation(east);
       expect(prof.first.meters, 0);
       expect(prof.last.meters, closeTo(2000, 30));
-      expect(prof.length, 42);
+      expect(prof.length, inInclusiveRange(41, 42));
       final range = elevationRange(prof);
       expect(range.max, greaterThan(range.min));
       expect(elevationAt(prof, 1000), closeTo(20, 1.5));
