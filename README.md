@@ -84,6 +84,11 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 3. Supabase → **Edge Functions → Secrets**: zet `STRAVA_CLIENT_ID` en `STRAVA_CLIENT_SECRET` (zelf invullen, niet in een chat plakken).
 4. Let op: een nieuwe Strava-app kan eerst maar een beperkt aantal sporters koppelen; meer aanvragen kan bij Strava.
 
+### 3a2. Route maken instellen (openrouteservice, gratis)
+1. Maak een gratis account op https://openrouteservice.org/dev/#/signup en kopieer je **API key** (standaard-abonnement).
+2. Supabase → **Edge Functions → Secrets**: zet `ORS_API_KEY` (zelf invullen, niet in een chat plakken).
+3. Adressen zoeken gaat via PDOK (overheid, gratis, geen sleutel nodig).
+
 ### 3b. AI-coach en Premium instellen
 
 **AI-coach (server-functie `coach`)**

@@ -44,6 +44,24 @@ RunRoute parseGpx(
     throw GpxParseException('Er staan te weinig geldige punten in dit GPX-bestand.');
   }
 
+  final name = doc.findAllElements('name').map((e) => e.innerText.trim()).firstWhere(
+        (n) => n.isNotEmpty,
+        orElse: () => fallbackName ?? 'Nieuwe route',
+      );
+  return buildRoute(raw, name: name, source: 'gpx_upload', estimatedPaceSecPerKm: estimatedPaceSecPerKm);
+}
+
+/// Maakt een route (met punten per kilometer en looprichting) van een lijst GPS-punten.
+/// Gebruikt voor GPX-bestanden en voor routes die RunWise zelf maakt.
+RunRoute buildRoute(
+  List<LatLng> raw, {
+  required String name,
+  required String source,
+  double estimatedPaceSecPerKm = 360,
+}) {
+  if (raw.length < 2) {
+    throw GpxParseException('Er staan te weinig punten in deze route.');
+  }
   // Totale afstand en hoogtemeters (kleine schommelingen < 2 m negeren).
   var total = 0.0;
   var gain = 0.0;
@@ -104,14 +122,9 @@ RunRoute parseGpx(
     }
   }
 
-  final name = doc.findAllElements('name').map((e) => e.innerText.trim()).firstWhere(
-        (n) => n.isNotEmpty,
-        orElse: () => fallbackName ?? 'Nieuwe route',
-      );
-
   return RunRoute(
     name: name.length > 80 ? name.substring(0, 80) : name,
-    source: 'gpx_upload',
+    source: source,
     distanceMeters: double.parse(total.toStringAsFixed(1)),
     elevationGainMeters: double.parse(gain.toStringAsFixed(1)),
     estimatedDurationSeconds: (total / 1000 * estimatedPaceSecPerKm).round(),

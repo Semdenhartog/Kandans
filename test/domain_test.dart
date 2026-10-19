@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/core/format.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/services/rain_service.dart';
+import 'package:runwise/data/services/route_generator_service.dart';
 import 'package:runwise/domain/clothing.dart';
 import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/route_direction.dart';
@@ -240,6 +241,35 @@ void main() {
     test('geen advies bij weinig wind of heen-en-terug', () {
       expect(adviseDirection(loop, 4, 0), isNull);
       expect(adviseDirection([a, b, a], 20, 90), isNull);
+    });
+  });
+
+  group('route maken', () {
+    test('PDOK-adres lezen', () {
+      const body = '{"response":{"docs":[{"weergavenaam":"Stationsweg 1, 3771VE Barneveld","centroide_ll":"POINT(5.5869 52.1419)","type":"adres"}]}}';
+      final p = RouteGeneratorService.parsePdok(body);
+      expect(p.single.label, startsWith('Stationsweg 1'));
+      expect(p.single.lat, closeTo(52.1419, 1e-6));
+      expect(p.single.lon, closeTo(5.5869, 1e-6));
+    });
+
+    test('rondje uit punten bouwen', () {
+      const a = LatLng(52.0, 5.0, 10);
+      const b = LatLng(52.0, 5.0292, 12);
+      const c = LatLng(52.018, 5.0292, 15);
+      final pts = <LatLng>[];
+      for (final (p, q) in [(a, b), (b, c), (c, a)]) {
+        for (var i = 0; i < 20; i++) {
+          final f = i / 20;
+          pts.add(LatLng(p.lat + (q.lat - p.lat) * f, p.lon + (q.lon - p.lon) * f, p.ele));
+        }
+      }
+      pts.add(a);
+      final r = buildRoute(pts, name: 'Test', source: 'generated', estimatedPaceSecPerKm: 360);
+      expect(r.source, 'generated');
+      expect(r.distanceMeters, closeTo(6830, 120));
+      expect(r.points.length, greaterThanOrEqualTo(7));
+      expect(r.estimatedDurationSeconds, closeTo(6.83 * 360, 60));
     });
   });
 }

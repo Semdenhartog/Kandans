@@ -189,6 +189,7 @@ class RunRoute {
   String get sourceLabel => switch (source) {
         'gpx_upload' => 'GPX',
         'strava_import' => 'Strava',
+        'generated' => 'RunWise',
         _ => 'Getekend',
       };
 

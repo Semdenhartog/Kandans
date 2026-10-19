@@ -68,17 +68,23 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
   Widget build(BuildContext context) {
     final routes = ref.watch(routesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mijn routes')),
+      appBar: AppBar(
+        title: const Text('Mijn routes'),
+        actions: [
+          IconButton(
+            tooltip: 'GPX importeren',
+            onPressed: _importing ? null : _importGpx,
+            icon: _importing
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.upload_file),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _importing ? null : _importGpx,
-        icon: _importing
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2, color: RwColors.accentDark),
-              )
-            : const Icon(Icons.upload_file),
-        label: const Text('GPX importeren'),
+        heroTag: 'route-maken',
+        onPressed: () => context.go('/routes/maken'),
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('Route maken'),
       ),
       body: routes.when(
         loading: () => const LoadingView(),
@@ -91,10 +97,10 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             return EmptyState(
               icon: Icons.route_outlined,
               title: 'Nog geen routes',
-              message: 'Importeer een GPX-bestand van je vaste rondje, bijvoorbeeld uit Strava, '
-                  'Garmin of Komoot. RunWise rekent dan met de wind op jouw looprichting.',
-              actionLabel: 'GPX importeren',
-              onAction: _importGpx,
+              message: 'Laat RunWise een rondje maken vanaf je huis of een adres, op de afstand of tijd die jij wilt. '
+                  'Of importeer een GPX-bestand van je vaste rondje (rechtsboven).',
+              actionLabel: 'Route maken',
+              onAction: () => context.go('/routes/maken'),
             );
           }
           return ListView.separated(
