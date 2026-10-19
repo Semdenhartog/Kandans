@@ -15,7 +15,7 @@ import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
-import 'route_shape.dart';
+import 'route_map.dart';
 
 /// Een voorgesteld rondje met het beste vertrekmoment en de beste looprichting.
 class _Candidate {
@@ -322,10 +322,13 @@ class _CandidateCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(
+            height: 200,
+            child: RouteMap(polyline: r.polyline, windFromDegrees: b.weather.windDirection, interactive: false),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
-              SizedBox(width: 96, height: 96, child: RouteShape(polyline: r.polyline, windFromDegrees: b.weather.windDirection)),
-              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

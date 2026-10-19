@@ -14,7 +14,7 @@ import '../../domain/geo.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
-import 'route_shape.dart';
+import 'route_map.dart';
 
 /// Huidig weer bij de start van een route.
 final _routeWeatherProvider = FutureProvider.family<HourWeather?, String>((ref, routeId) async {
@@ -101,7 +101,7 @@ class RouteDetailScreen extends ConsumerWidget {
             children: [
               AspectRatio(
                 aspectRatio: 1.3,
-                child: RouteShape(
+                child: RouteMap(
                   polyline: r.polyline,
                   windFromDegrees: w?.windDirection,
                 ),
