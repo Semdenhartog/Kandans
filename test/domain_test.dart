@@ -538,4 +538,36 @@ void main() {
       expect(ErrorReporter.clip('kort', 2000), 'kort');
     });
   });
+
+  group('privacyzone', () {
+    test('begin en eind worden verborgen', () {
+      final east = [for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + 0.0292 * i / 20)]; // 2 km
+      final trimmed = trimPrivacyZone(east, radius: 300);
+      expect(distanceMeters(trimmed.first, east.first), greaterThanOrEqualTo(300));
+      expect(distanceMeters(trimmed.last, east.last), greaterThanOrEqualTo(300));
+      expect(trimmed.length, lessThan(east.length));
+      // Rondje: start en finish op dezelfde plek, beide kanten weg.
+      final loop = [...east, ...east.reversed.skip(1)];
+      final t2 = trimPrivacyZone(loop, radius: 300);
+      expect(distanceMeters(t2.first, loop.first), greaterThanOrEqualTo(300));
+      expect(distanceMeters(t2.last, loop.first), greaterThanOrEqualTo(300));
+      // Te kort: niets over.
+      expect(trimPrivacyZone(east.sublist(0, 4), radius: 300), isEmpty);
+      expect(trimPrivacyZone(east, radius: 0), east);
+    });
+  });
+
+  group('route naar horloge', () {
+    test('GPX maken en weer inlezen', () {
+      final pts = [for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + 0.0292 * i / 20)];
+      final prof = [const ElevationSample(0, 10), const ElevationSample(2000, 30)];
+      final gpx = buildGpx('Rondje & <test>', pts, profile: prof);
+      expect(gpx, contains('Rondje &amp; &lt;test&gt;'));
+      expect(RegExp('<trkpt').allMatches(gpx).length, 21);
+      expect(gpx, contains('<ele>10.0</ele>'));
+      final back = parseGpx(gpx, fallbackName: 'x');
+      expect(back.distanceMeters, closeTo(2000, 30));
+      expect(back.name, 'Rondje & <test>');
+    });
+  });
 }

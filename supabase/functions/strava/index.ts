@@ -306,6 +306,37 @@ async function backfillTracks(db: SupabaseClient, userId: string, token: string)
   return updated;
 }
 
+/// Dezelfde run kan via het horloge (Health Connect) én via Strava binnenkomen.
+/// De Strava-versie is rijker (GPS-spoor), dus die houden we. Een koppeling met
+/// een route of schoen van de horlogeversie nemen we over.
+async function removeWatchDuplicates(db: SupabaseClient, userId: string): Promise<number> {
+  const since = new Date(Date.now() - (FIRST_SYNC_DAYS + 30) * 86_400_000).toISOString();
+  const cols = "id, started_at, distance_meters, route_id, route_link_locked";
+  const [{ data: watch }, { data: strava }] = await Promise.all([
+    db.from("activities").select(cols).eq("user_id", userId).eq("source", "health_connect").gte("started_at", since),
+    db.from("activities").select(cols).eq("user_id", userId).eq("source", "strava").gte("started_at", since),
+  ]);
+  if (!watch?.length || !strava?.length) return 0;
+  let removed = 0;
+  for (const w of watch) {
+    const wt = new Date(w.started_at as string).getTime();
+    const wd = Number(w.distance_meters);
+    const twin = strava.find((s) => {
+      const dt = Math.abs(new Date(s.started_at as string).getTime() - wt);
+      const sd = Number(s.distance_meters);
+      return dt < 20 * 60_000 && Math.abs(sd - wd) <= Math.max(300, 0.15 * Math.max(sd, wd));
+    });
+    if (!twin) continue;
+    if (w.route_id && !twin.route_id) {
+      await db.from("activities").update({ route_id: w.route_id, route_link_locked: w.route_link_locked })
+        .eq("id", twin.id);
+    }
+    const { error } = await db.from("activities").delete().eq("id", w.id).eq("user_id", userId);
+    if (!error) removed++;
+  }
+  return removed;
+}
+
 async function sync(db: SupabaseClient, userId: string) {
   const { data: conn } = await db.from("external_connections")
     .select("last_synced_at, sync_status, connected_at")
@@ -384,6 +415,11 @@ async function sync(db: SupabaseClient, userId: string) {
       if (error) throw error;
     }
 
+    const deduped = await removeWatchDuplicates(db, userId).catch((e) => {
+      console.error("dedupe failed", e instanceof Error ? e.message : e);
+      return 0;
+    });
+
     const backfilled = await backfillTracks(db, userId, token).catch((e) => {
       console.error("track backfill failed", e instanceof Error ? e.message : e);
       return 0;
@@ -399,7 +435,7 @@ async function sync(db: SupabaseClient, userId: string) {
       last_synced_at: new Date(Math.max(newest, since.getTime())).toISOString(),
     }).eq("user_id", userId).eq("provider", "strava");
 
-    return json(200, { imported: rows.length, skipped_duplicates: runs.length - fresh.length, tracks_added: backfilled });
+    return json(200, { imported: rows.length, skipped_duplicates: runs.length - fresh.length, tracks_added: backfilled, duplicates_removed: deduped });
   } catch (e) {
     if (e instanceof ReconnectNeeded) {
       await forgetConnection(db, userId, "Strava-toegang is ingetrokken. Koppel opnieuw.");

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
@@ -37,6 +38,24 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
   final _key = GlobalKey();
   _CardStyle _style = _CardStyle.donker;
   bool _busy = false;
+
+  /// Privacyzone: begin en eind van de route niet tonen (standaard aan).
+  bool _hideHome = true;
+  static const _prefKey = 'share_hide_home';
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      final v = p.getBool(_prefKey);
+      if (v != null && mounted) setState(() => _hideHome = v);
+    }).catchError((_) {});
+  }
+
+  void _setHideHome(bool v) {
+    setState(() => _hideHome = v);
+    SharedPreferences.getInstance().then((p) => p.setBool(_prefKey, v)).catchError((_) => false);
+  }
 
   Future<void> _share() async {
     setState(() => _busy = true);
@@ -77,6 +96,7 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                         route: widget.route,
                         badges: widget.badges,
                         orange: _style == _CardStyle.oranje,
+                        hideHome: _hideHome,
                       ),
                     ),
                   ),
@@ -96,7 +116,13 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                     selected: {_style},
                     onSelectionChanged: (s) => setState(() => _style = s.first),
                   ),
-                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _hideHome,
+                    onChanged: _setHideHome,
+                    title: const Text('Verberg waar je woont'),
+                    subtitle: const Text('Laat de eerste en laatste 300 m van je route weg'),
+                  ),
                   FilledButton.icon(
                     onPressed: _busy ? null : _share,
                     icon: _busy
@@ -120,11 +146,21 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
 
 /// De deelkaart zelf: 360 × 450 (wordt 1080 × 1350 px, het staande Instagram-formaat).
 class RunShareCard extends StatelessWidget {
-  const RunShareCard({super.key, required this.activity, this.route, this.badges = const [], this.orange = false});
+  const RunShareCard({
+    super.key,
+    required this.activity,
+    this.route,
+    this.badges = const [],
+    this.orange = false,
+    this.hideHome = true,
+  });
   final Activity activity;
   final RunRoute? route;
   final List<String> badges;
   final bool orange;
+
+  /// Privacyzone: begin en eind van de route weglaten.
+  final bool hideHome;
 
   /// Kop boven de afstand: record, of het verhaal van het weer.
   String? _headline() {
@@ -154,7 +190,9 @@ class RunShareCard extends StatelessWidget {
     ].join(' · ');
     // Liever het echte GPS-spoor van de run, anders de gekoppelde route.
     final line = a.hasTrack ? a.trackPolyline! : route?.polyline;
-    final track = line == null ? null : RouteTrack(decodePolyline(line));
+    final raw = line == null ? const <LatLng>[] : decodePolyline(line);
+    final shown = hideHome ? trimPrivacyZone(raw, radius: 300) : raw;
+    final track = shown.length < 2 ? null : RouteTrack(shown);
 
     return SizedBox(
       width: 360,
@@ -217,6 +255,7 @@ class RunShareCard extends StatelessWidget {
                               windSpeed: a.windSpeedKmh,
                               windFrom: a.windDirectionDegrees,
                               orange: orange,
+                              showStart: !hideHome,
                             ),
                           )
                         : Align(
@@ -317,7 +356,14 @@ class RunShareCard extends StatelessWidget {
 
 /// Tekent de route als lijn, gekleurd op de wind tijdens de run.
 class _ShareRoutePainter extends CustomPainter {
-  _ShareRoutePainter({required this.track, required this.windSpeed, required this.windFrom, required this.orange});
+  _ShareRoutePainter({
+    required this.track,
+    required this.windSpeed,
+    required this.windFrom,
+    required this.orange,
+    this.showStart = true,
+  });
+  final bool showStart;
   final RouteTrack track;
   final double? windSpeed;
   final double? windFrom;
@@ -380,11 +426,13 @@ class _ShareRoutePainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round,
       );
     }
-    final start = map(pts.first);
-    canvas.drawCircle(start, 7, Paint()..color = orange ? RwColors.accentDark : RwColors.text);
-    canvas.drawCircle(start, 3, Paint()..color = orange ? RwColors.accent : RwColors.background);
+    if (showStart) {
+      final start = map(pts.first);
+      canvas.drawCircle(start, 7, Paint()..color = orange ? RwColors.accentDark : RwColors.text);
+      canvas.drawCircle(start, 3, Paint()..color = orange ? RwColors.accent : RwColors.background);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _ShareRoutePainter old) => old.track != track || old.orange != orange;
+  bool shouldRepaint(covariant _ShareRoutePainter old) => old.track != track || old.orange != orange || old.showStart != showStart;
 }

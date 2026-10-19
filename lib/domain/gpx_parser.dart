@@ -136,3 +136,37 @@ RunRoute buildRoute(
     elevationProfile: sampleElevation(raw),
   );
 }
+
+String _xml(String s) => s
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+
+/// Maakt een GPX-bestand van een route, om op je horloge te volgen
+/// (Garmin Connect, Coros, Suunto, Komoot). Als [profile] er is, krijgt elk
+/// punt ook een hoogte.
+String buildGpx(String name, List<LatLng> points, {List<ElevationSample> profile = const []}) {
+  final b = StringBuffer()
+    ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
+    ..writeln('<gpx version="1.1" creator="RunWise" xmlns="http://www.topografix.com/GPX/1/1">')
+    ..writeln('  <metadata><name>${_xml(name)}</name></metadata>')
+    ..writeln('  <trk>')
+    ..writeln('    <name>${_xml(name)}</name>')
+    ..writeln('    <type>running</type>')
+    ..writeln('    <trkseg>');
+  final track = RouteTrack(points);
+  final scale = profile.isEmpty || track.length <= 0 ? 0.0 : profile.last.meters / track.length;
+  for (var i = 0; i < points.length; i++) {
+    final p = points[i];
+    final ele = p.ele ?? (profile.isEmpty ? null : elevationAt(profile, track.cumulative[i] * scale));
+    b.write('      <trkpt lat="${p.lat.toStringAsFixed(6)}" lon="${p.lon.toStringAsFixed(6)}">');
+    if (ele != null) b.write('<ele>${ele.toStringAsFixed(1)}</ele>');
+    b.writeln('</trkpt>');
+  }
+  b
+    ..writeln('    </trkseg>')
+    ..writeln('  </trk>')
+    ..writeln('</gpx>');
+  return b.toString();
+}

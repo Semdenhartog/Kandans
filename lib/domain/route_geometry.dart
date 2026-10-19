@@ -269,3 +269,21 @@ double profileAscent(List<ElevationSample> profile) {
   }
   return gain;
 }
+
+/// Privacyzone: haalt het begin en eind van een track weg (binnen [radius] meter
+/// van de start en van de finish), zodat een gedeelde kaart niet laat zien waar je woont.
+/// Leeg als er dan te weinig over is.
+List<LatLng> trimPrivacyZone(List<LatLng> track, {double radius = 300}) {
+  if (track.length < 2 || radius <= 0) return track;
+  final start = track.first, end = track.last;
+  var from = 0;
+  while (from < track.length && distanceMeters(track[from], start) < radius) {
+    from++;
+  }
+  var to = track.length - 1;
+  while (to > from && distanceMeters(track[to], end) < radius) {
+    to--;
+  }
+  if (to - from < 1) return const [];
+  return track.sublist(from, to + 1);
+}
