@@ -71,7 +71,7 @@ async function buildContext(db: SupabaseClient, userId: string, profile: Record<
   const since = new Date(Date.now() - RUNS_WEEKS * 7 * 86_400_000).toISOString();
   const [{ data: runs }, { data: races }, { data: perf }] = await Promise.all([
     db.from("activities")
-      .select("started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, wind_speed_kmh")
+      .select("started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, wind_speed_kmh, feel, note")
       .eq("user_id", userId).neq("source", "strava").gte("started_at", since)
       .order("started_at", { ascending: false }).limit(60),
     db.from("race_events")
@@ -112,6 +112,8 @@ async function buildContext(db: SupabaseClient, userId: string, profile: Record<
         r.elevation_gain_meters ? `${Math.round(Number(r.elevation_gain_meters))} hm` : null,
         r.temperature_celsius != null ? `${Math.round(Number(r.temperature_celsius))}°C` : null,
         r.wind_speed_kmh != null ? `wind ${Math.round(Number(r.wind_speed_kmh))} km/u` : null,
+        r.feel ? `voelde ${["", "zwaar", "oké", "top"][Number(r.feel)] ?? ""}` : null,
+        r.note ? `notitie: "${String(r.note).slice(0, 200).replace(/\s+/g, " ")}"` : null,
       ].filter(Boolean).join(", ");
       lines.push(`- ${amsterdamDate(new Date(r.started_at))}: ${km.toFixed(2)} km in ${fmtDuration(Number(r.moving_time_seconds))} (${fmtPace(pace)})${extra ? `, ${extra}` : ""}`);
     }

@@ -10,9 +10,11 @@ import '../../core/config.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
+import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
 import '../../data/services/offline_cache.dart';
+import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'connections_card.dart';
@@ -108,6 +110,27 @@ class ProfileScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                Consumer(builder: (context, ref, _) {
+                  final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
+                  final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+                  final worn = shoes.where((s) => !s.retired && shoeWornOut(s, runs)).toList();
+                  final d = defaultShoe(shoes);
+                  return ListTile(
+                    leading: Icon(Icons.directions_walk, color: worn.isEmpty ? RwColors.accent : RwColors.danger),
+                    title: const Text('Mijn schoenen'),
+                    subtitle: Text(
+                      worn.isNotEmpty
+                          ? '${worn.first.name} is aan vervanging toe'
+                          : d == null
+                              ? 'Houd bij hoeveel km je schoenen hebben'
+                              : '${d.name} \u00b7 ${shoeKm(d, runs).round()} km',
+                      style: TextStyle(color: worn.isEmpty ? null : RwColors.danger),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.go('/me/shoes'),
+                  );
+                }),
+                const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.flag_outlined, color: RwColors.accent),
                   title: const Text('Wedstrijden'),

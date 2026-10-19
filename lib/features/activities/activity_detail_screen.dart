@@ -11,6 +11,7 @@ import '../../data/services/sync_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/gpx_parser.dart';
 import '../../domain/records.dart';
+import '../../domain/shoes.dart';
 import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
@@ -224,6 +225,10 @@ class ActivityDetailScreen extends ConsumerWidget {
                     ],
                   ),
           ),
+          if (a.id != null) ...[
+            const SizedBox(height: 12),
+            _FeelCard(activity: a),
+          ],
           const SizedBox(height: 12),
           RwCard(
             title: 'ROUTE',
@@ -374,6 +379,105 @@ class RecordBadge extends StatelessWidget {
               color: weather ? RwColors.good : RwColors.accent,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hoe voelde het, een notitie en welke schoen. De coach gebruikt dit ook.
+class _FeelCard extends ConsumerStatefulWidget {
+  const _FeelCard({required this.activity});
+  final Activity activity;
+
+  @override
+  ConsumerState<_FeelCard> createState() => _FeelCardState();
+}
+
+class _FeelCardState extends ConsumerState<_FeelCard> {
+  late final _note = TextEditingController(text: widget.activity.note ?? '');
+  late int? _feel = widget.activity.feel;
+  bool _dirtyNote = false;
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save({int? feel, bool clearFeel = false}) async {
+    final a = widget.activity;
+    final next = clearFeel ? null : (feel ?? _feel);
+    setState(() {
+      _feel = next;
+      _dirtyNote = false;
+    });
+    try {
+      await ref.read(repositoryProvider).setActivityFeel(a.id!, feel: next, note: _note.text);
+      ref.invalidate(activitiesProvider);
+    } catch (e) {
+      if (mounted) showMessage(context, friendlyError(e), error: true);
+    }
+  }
+
+  Future<void> _setShoe(String? id) async {
+    try {
+      await ref.read(repositoryProvider).setActivityShoe(widget.activity.id!, id);
+      ref.invalidate(activitiesProvider);
+    } catch (e) {
+      if (mounted) showMessage(context, friendlyError(e), error: true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shoes = (ref.watch(shoesProvider).value ?? const <Shoe>[]).where((s) => !s.retired).toList();
+    final current = shoeFor(widget.activity, shoes);
+    Widget chip(int v, String label, IconData icon) => ChoiceChip(
+          avatar: Icon(icon, size: 18),
+          label: Text(label),
+          selected: _feel == v,
+          onSelected: (on) => on ? _save(feel: v) : _save(clearFeel: true),
+        );
+    return RwCard(
+      title: 'HOE VOELDE HET?',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            chip(1, 'Zwaar', Icons.sentiment_dissatisfied_outlined),
+            chip(2, 'Oké', Icons.sentiment_neutral_outlined),
+            chip(3, 'Top', Icons.sentiment_very_satisfied_outlined),
+          ]),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _note,
+            maxLength: 500,
+            minLines: 1,
+            maxLines: 4,
+            textCapitalization: TextCapitalization.sentences,
+            onChanged: (_) {
+              if (!_dirtyNote) setState(() => _dirtyNote = true);
+            },
+            decoration: InputDecoration(
+              hintText: 'Notitie, bijv. kuiten stijf of lekker gelopen',
+              counterText: '',
+              suffixIcon: _dirtyNote
+                  ? IconButton(tooltip: 'Notitie opslaan', icon: const Icon(Icons.check), onPressed: () => _save())
+                  : null,
+            ),
+          ),
+          if (shoes.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String?>(
+              initialValue: widget.activity.shoeId ?? current?.id,
+              decoration: const InputDecoration(labelText: 'Schoen'),
+              items: [
+                for (final s in shoes) DropdownMenuItem(value: s.id, child: Text(s.name)),
+              ],
+              onChanged: (v) => _setShoe(v),
+            ),
+          ],
         ],
       ),
     );

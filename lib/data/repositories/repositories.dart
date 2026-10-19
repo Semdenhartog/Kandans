@@ -79,6 +79,45 @@ class RunWiseRepository {
         .eq('route_link_locked', false);
   }
 
+  /// Hoe voelde de run (1 zwaar, 2 oké, 3 top) en een notitie.
+  Future<void> setActivityFeel(String id, {int? feel, String? note}) async {
+    await _db.from('activities').update({'feel': feel, 'note': (note ?? '').trim().isEmpty ? null : note!.trim()}).eq('id', id);
+  }
+
+  Future<void> setActivityShoe(String id, String? shoeId) async {
+    await _db.from('activities').update({'shoe_id': shoeId}).eq('id', id);
+  }
+
+  // ---------- Schoenen ----------
+
+  Future<List<Shoe>> shoes() async {
+    final uid = _uid;
+    final rows = await _rows('shoes', () => _db.from('shoes').select().eq('user_id', uid).order('created_at'));
+    return rows.map(Shoe.fromJson).toList();
+  }
+
+  Future<void> addShoe(Shoe s) async {
+    if (s.isDefault) await _clearDefaultShoe();
+    await _db.from('shoes').insert(s.toInsert());
+  }
+
+  Future<void> _clearDefaultShoe() async {
+    await _db.from('shoes').update({'is_default': false}).eq('user_id', _uid).eq('is_default', true);
+  }
+
+  Future<void> setDefaultShoe(String id) async {
+    await _clearDefaultShoe();
+    await _db.from('shoes').update({'is_default': true, 'retired': false}).eq('id', id);
+  }
+
+  Future<void> retireShoe(String id, bool retired) async {
+    await _db.from('shoes').update({'retired': retired, if (retired) 'is_default': false}).eq('id', id);
+  }
+
+  Future<void> deleteShoe(String id) async {
+    await _db.from('shoes').delete().eq('id', id);
+  }
+
   // ---------- Routes ----------
 
   Future<List<RunRoute>> routes() async {
@@ -257,6 +296,7 @@ class RunWiseRepository {
     final races = await _db.from('race_events').select().eq('user_id', uid);
     final coach = await _db.from('coach_messages').select().eq('user_id', uid);
     final goals = await _db.from('monthly_goals').select().eq('user_id', uid);
+    final shoes = await _db.from('shoes').select().eq('user_id', uid);
     return {
       'exported_at': DateTime.now().toUtc().toIso8601String(),
       'email': _db.auth.currentUser?.email,
@@ -266,6 +306,7 @@ class RunWiseRepository {
       'race_events': races,
       'coach_messages': coach,
       'monthly_goals': goals,
+      'shoes': shoes,
     };
   }
 
@@ -318,6 +359,11 @@ final routesProvider = FutureProvider<List<RunRoute>>((ref) {
 final routeDetailProvider = FutureProvider.family<RunRoute, String>(
   (ref, id) => ref.watch(repositoryProvider).routeWithPoints(id),
 );
+
+final shoesProvider = FutureProvider<List<Shoe>>((ref) {
+  ref.watch(currentUserProvider);
+  return ref.watch(repositoryProvider).shoes();
+});
 
 final racesProvider = FutureProvider<List<RaceEvent>>((ref) {
   ref.watch(currentUserProvider);

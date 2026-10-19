@@ -16,6 +16,7 @@ import '../features/coach/coach_screen.dart';
 import '../features/coach/paywall_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/profile/shoes_screen.dart';
 import '../features/profile/strava_return_screen.dart';
 import '../features/races/add_race_screen.dart';
 import '../features/races/race_detail_screen.dart';
@@ -126,6 +127,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               path: '/me',
               builder: (c, s) => const ProfileScreen(),
               routes: [
+                GoRoute(path: 'shoes', builder: (c, s) => const ShoesScreen()),
                 GoRoute(
                   path: 'races',
                   builder: (c, s) => const RacesScreen(),

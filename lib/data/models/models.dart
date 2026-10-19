@@ -86,6 +86,9 @@ class Activity {
     this.humidityPct,
     this.trackPolyline,
     this.routeLinkLocked = false,
+    this.shoeId,
+    this.feel,
+    this.note,
   });
 
   final String? id;
@@ -110,6 +113,13 @@ class Activity {
 
   bool get hasTrack => (trackPolyline ?? '').isNotEmpty;
 
+  /// Schoen waarop je liep (null = je standaardschoen, als je die hebt).
+  final String? shoeId;
+
+  /// Hoe voelde het: 1 = zwaar, 2 = oké, 3 = top.
+  final int? feel;
+  final String? note;
+
   /// Automatisch aan de route gekoppeld (niet door de gebruiker gekozen).
   bool get autoLinked => routeId != null && !routeLinkLocked && source != 'manual';
 
@@ -132,6 +142,9 @@ class Activity {
         humidityPct: _dn(j['humidity_pct']),
         trackPolyline: j['track_polyline'] as String?,
         routeLinkLocked: (j['route_link_locked'] as bool?) ?? false,
+        shoeId: j['shoe_id'] as String?,
+        feel: _in(j['feel']),
+        note: j['note'] as String?,
       );
 
   Map<String, dynamic> toInsert(String userId) => {
@@ -486,4 +499,46 @@ class RainNowcast {
   DateTime? get firstDry => points.where((p) => p.mmPerHour < 0.1).map((p) => p.time).firstOrNull;
 
   bool get rainingNow => points.isNotEmpty && points.first.mmPerHour >= 0.1;
+}
+
+/// Een paar hardloopschoenen.
+class Shoe {
+  Shoe({
+    this.id,
+    required this.name,
+    this.startKm = 0,
+    this.limitKm = 700,
+    this.isDefault = false,
+    this.retired = false,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  final String? id;
+  final String name;
+
+  /// Kilometers die er al op zaten toen je de schoen toevoegde.
+  final double startKm;
+
+  /// Na hoeveel km je een seintje wilt (meestal 600 tot 800).
+  final int limitKm;
+  final bool isDefault;
+  final bool retired;
+  final DateTime createdAt;
+
+  factory Shoe.fromJson(Map<String, dynamic> j) => Shoe(
+        id: j['id'] as String?,
+        name: j['name'] as String,
+        startKm: _d(j['start_km']),
+        limitKm: _in(j['limit_km']) ?? 700,
+        isDefault: (j['is_default'] as bool?) ?? false,
+        retired: (j['retired'] as bool?) ?? false,
+        createdAt: DateTime.parse(j['created_at'] as String),
+      );
+
+  Map<String, dynamic> toInsert() => {
+        'name': name,
+        'start_km': startKm,
+        'limit_km': limitKm,
+        'is_default': isDefault,
+      };
 }

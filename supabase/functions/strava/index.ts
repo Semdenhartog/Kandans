@@ -311,7 +311,7 @@ async function backfillTracks(db: SupabaseClient, userId: string, token: string)
 /// een route of schoen van de horlogeversie nemen we over.
 async function removeWatchDuplicates(db: SupabaseClient, userId: string): Promise<number> {
   const since = new Date(Date.now() - (FIRST_SYNC_DAYS + 30) * 86_400_000).toISOString();
-  const cols = "id, started_at, distance_meters, route_id, route_link_locked";
+  const cols = "id, started_at, distance_meters, route_id, route_link_locked, shoe_id, feel, note";
   const [{ data: watch }, { data: strava }] = await Promise.all([
     db.from("activities").select(cols).eq("user_id", userId).eq("source", "health_connect").gte("started_at", since),
     db.from("activities").select(cols).eq("user_id", userId).eq("source", "strava").gte("started_at", since),
@@ -327,9 +327,17 @@ async function removeWatchDuplicates(db: SupabaseClient, userId: string): Promis
       return dt < 20 * 60_000 && Math.abs(sd - wd) <= Math.max(300, 0.15 * Math.max(sd, wd));
     });
     if (!twin) continue;
+    // Wat je bij de horlogeversie invulde (route, schoen, gevoel) gaat mee naar de Strava-versie.
+    const carry: Record<string, unknown> = {};
     if (w.route_id && !twin.route_id) {
-      await db.from("activities").update({ route_id: w.route_id, route_link_locked: w.route_link_locked })
-        .eq("id", twin.id);
+      carry.route_id = w.route_id;
+      carry.route_link_locked = w.route_link_locked;
+    }
+    if (w.shoe_id && !twin.shoe_id) carry.shoe_id = w.shoe_id;
+    if (w.feel && !twin.feel) carry.feel = w.feel;
+    if (w.note && !twin.note) carry.note = w.note;
+    if (Object.keys(carry).length > 0) {
+      await db.from("activities").update(carry).eq("id", twin.id);
     }
     const { error } = await db.from("activities").delete().eq("id", w.id).eq("user_id", userId);
     if (!error) removed++;
