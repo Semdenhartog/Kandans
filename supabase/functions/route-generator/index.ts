@@ -49,11 +49,21 @@ async function roundTrip(key: string, lat: number, lon: number, length: number, 
   };
 }
 
+function readKey(): string {
+  for (const n of ["ORS_API_KEY", "API_ROUTES", "api_routes", "api routes", "API routes", "Api routes"]) {
+    try {
+      const v = (Deno.env.get(n) ?? "").trim();
+      if (v) return v;
+    } catch (_) { /* ongeldige naam: overslaan */ }
+  }
+  return "";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json(405, { error: "Alleen POST is toegestaan." });
 
-  const key = Deno.env.get("ORS_API_KEY") ?? "";
+  const key = readKey();
   if (!key) return json(503, { error: "Routes maken is nog niet ingesteld op de server." });
 
   const body = await req.json().catch(() => ({}));
