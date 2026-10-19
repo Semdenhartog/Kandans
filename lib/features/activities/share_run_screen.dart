@@ -1,10 +1,12 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
@@ -21,7 +23,7 @@ void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<Strin
   ));
 }
 
-enum _CardStyle { donker, oranje }
+enum _CardStyle { donker, oranje, foto }
 
 /// Maakt een mooie afbeelding van je run om te delen (Instagram, WhatsApp, ...).
 class ShareRunScreen extends StatefulWidget {
@@ -43,9 +45,23 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
   bool _hideHome = true;
   static const _prefKey = 'share_hide_home';
 
+  /// Eerste foto bij de run, als achtergrond voor de deelkaart.
+  Uint8List? _photo;
+
   @override
   void initState() {
     super.initState();
+    final photos = widget.activity.photos;
+    if (photos.isNotEmpty) {
+      Supabase.instance.client.storage.from('run-photos').download(photos.first).then((b) {
+        if (mounted) {
+          setState(() {
+            _photo = b;
+            _style = _CardStyle.foto;
+          });
+        }
+      }).catchError((Object _) {});
+    }
     SharedPreferences.getInstance().then((p) {
       final v = p.getBool(_prefKey);
       if (v != null && mounted) setState(() => _hideHome = v);
@@ -97,6 +113,7 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                         badges: widget.badges,
                         orange: _style == _CardStyle.oranje,
                         hideHome: _hideHome,
+                        photo: _style == _CardStyle.foto ? _photo : null,
                       ),
                     ),
                   ),
@@ -109,9 +126,10 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SegmentedButton<_CardStyle>(
-                    segments: const [
-                      ButtonSegment(value: _CardStyle.donker, label: Text('Donker')),
-                      ButtonSegment(value: _CardStyle.oranje, label: Text('Oranje')),
+                    segments: [
+                      const ButtonSegment(value: _CardStyle.donker, label: Text('Donker')),
+                      const ButtonSegment(value: _CardStyle.oranje, label: Text('Oranje')),
+                      if (_photo != null) const ButtonSegment(value: _CardStyle.foto, label: Text('Foto')),
                     ],
                     selected: {_style},
                     onSelectionChanged: (s) => setState(() => _style = s.first),
@@ -153,11 +171,15 @@ class RunShareCard extends StatelessWidget {
     this.badges = const [],
     this.orange = false,
     this.hideHome = true,
+    this.photo,
   });
   final Activity activity;
   final RunRoute? route;
   final List<String> badges;
   final bool orange;
+
+  /// Eigen foto als achtergrond (donker gemaakt zodat de tekst leesbaar blijft).
+  final Uint8List? photo;
 
   /// Privacyzone: begin en eind van de route weglaten.
   final bool hideHome;
@@ -213,7 +235,21 @@ class RunShareCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            if (!orange)
+            if (photo != null) ...[
+              Positioned.fill(child: Image.memory(photo!, fit: BoxFit.cover)),
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x99000000), Color(0x33000000), Color(0xE6000000)],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (!orange && photo == null)
               Positioned(
                 right: -120,
                 top: -120,

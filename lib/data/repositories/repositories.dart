@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -103,8 +105,49 @@ class RunWiseRepository {
   }
 
   Future<void> deleteActivity(String id) async {
+    // Eerst de foto's bij deze run uit de opslag halen.
+    try {
+      final row = await _db.from('activities').select('photos').eq('id', id).maybeSingle();
+      final photos = (row?['photos'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
+      if (photos.isNotEmpty) await _db.storage.from(_photoBucket).remove(photos);
+    } catch (_) {}
     await _db.from('activities').delete().eq('id', id);
   }
+
+  // ---------- Foto's bij runs ----------
+
+  static const _photoBucket = 'run-photos';
+
+  /// Slaat een foto op bij een run en geeft het pad terug.
+  Future<String> addActivityPhoto(String activityId, Uint8List jpeg) async {
+    final uid = _db.auth.currentUser!.id;
+    final path = '$uid/$activityId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    await _db.storage.from(_photoBucket).uploadBinary(
+          path,
+          jpeg,
+          fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: false),
+        );
+    final row = await _db.from('activities').select('photos').eq('id', activityId).single();
+    final list = [...((row['photos'] as List?) ?? const []).map((e) => e.toString()), path];
+    await _db.from('activities').update({'photos': list}).eq('id', activityId);
+    return path;
+  }
+
+  Future<void> removeActivityPhoto(String activityId, String path) async {
+    await _db.storage.from(_photoBucket).remove([path]);
+    final row = await _db.from('activities').select('photos').eq('id', activityId).single();
+    final list = [...((row['photos'] as List?) ?? const []).map((e) => e.toString())]..remove(path);
+    await _db.from('activities').update({'photos': list}).eq('id', activityId);
+  }
+
+  /// Tijdelijke links (1 uur) om foto's te tonen.
+  Future<Map<String, String>> photoUrls(List<String> paths) async {
+    if (paths.isEmpty) return const {};
+    final signed = await _db.storage.from(_photoBucket).createSignedUrls(paths, 3600);
+    return {for (final s in signed) s.path: s.signedUrl};
+  }
+
+  Future<Uint8List> downloadPhoto(String path) => _db.storage.from(_photoBucket).download(path);
 
   /// Koppelt een run aan een route (of los met null), door de gebruiker zelf.
   /// Daarna koppelt RunWise deze run niet meer automatisch.
@@ -416,6 +459,12 @@ final routeDetailProvider = FutureProvider.family<RunRoute, String>(
 );
 
 /// Verloop van een run (alleen runs uit Strava).
+/// Links naar de foto's van een run (sleutel: paden gescheiden door komma's).
+final activityPhotoUrlsProvider = FutureProvider.family<Map<String, String>, String>((ref, joined) {
+  if (joined.isEmpty) return const {};
+  return ref.watch(repositoryProvider).photoUrls(joined.split(','));
+});
+
 final activityStreamsProvider = FutureProvider.family<Map<String, dynamic>?, String>(
   (ref, id) => ref.watch(repositoryProvider).activityStreams(id),
 );

@@ -1,6 +1,7 @@
 // Edge Function: delete-account
 // Verwijdert het account van de ingelogde gebruiker definitief (AVG: recht op vergetelheid).
-// Alle eigen data (profiel, runs, routes, wedstrijden) verdwijnt via "on delete cascade".
+// Alle eigen data (profiel, runs, routes, wedstrijden) verdwijnt via "on delete cascade"; foto's bij runs
+// worden eerst uit de opslag gewist.
 //
 // Deze functie gebruikt de service-role key. Die staat automatisch als geheime
 // omgevingsvariabele klaar in Supabase Edge Functions en komt NOOIT in de app.
@@ -51,6 +52,23 @@ Deno.serve(async (req) => {
     }
   } catch (_) {
     // Niet fataal: de tokens verdwijnen hoe dan ook met het account.
+  }
+
+  // Foto's bij runs verwijderen (map <user_id>/<activity_id>/...).
+  try {
+    const bucket = admin.storage.from("run-photos");
+    const uid = data.user.id;
+    const { data: folders } = await bucket.list(uid, { limit: 1000 });
+    const paths: string[] = [];
+    for (const f of folders ?? []) {
+      const { data: files } = await bucket.list(`${uid}/${f.name}`, { limit: 1000 });
+      for (const file of files ?? []) paths.push(`${uid}/${f.name}/${file.name}`);
+    }
+    for (let i = 0; i < paths.length; i += 100) {
+      await bucket.remove(paths.slice(i, i + 100));
+    }
+  } catch (e) {
+    console.error("delete-account photos", e instanceof Error ? e.message : e);
   }
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(data.user.id);
