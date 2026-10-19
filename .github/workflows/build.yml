@@ -120,6 +120,8 @@ jobs:
           g = "android/app/build.gradle.kts"
           t = open(g).read()
           t2 = re.sub(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 26", t)
+          # Bluetooth (hartslagband) en rechten-plugin vragen een nieuwere Android-SDK om mee te bouwen.
+          t2 = re.sub(r"compileSdk\s*=\s*flutter\.compileSdkVersion", "compileSdk = 37", t2)
           assert t2 != t or "minSdk = 26" in t, "minSdk niet gevonden"
           open(g, "w").write(t2)
           print("::notice::Health Connect en Strava-terugkeer ingesteld")
