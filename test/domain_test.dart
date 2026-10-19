@@ -31,6 +31,7 @@ import 'package:runwise/domain/run_export.dart';
 import 'package:runwise/domain/route_drawing.dart';
 import 'package:runwise/domain/route_photos.dart';
 import 'package:runwise/domain/best_efforts.dart';
+import 'package:runwise/domain/heart_rate.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -1018,6 +1019,22 @@ void main() {
       expect(parsed.totalDistance, closeTo(1200, 15));
       expect(splitsOf(parsed).first.paceSecPerKm, closeTo(333, 5));
       expect(r.averageHeartRate, inInclusiveRange(140, 144));
+    });
+  });
+
+  group('hartslagband', () {
+    test('meting lezen (8 en 16 bits)', () {
+      expect(parseHeartRateMeasurement([0x00, 142]), 142);
+      expect(parseHeartRateMeasurement([0x01, 0x2C, 0x01]), 300);
+      expect(parseHeartRateMeasurement([0x16, 75, 0x10, 0x03]), 75);
+      expect(parseHeartRateMeasurement([0x01, 5]), isNull);
+    });
+    test('zones', () {
+      expect(heartRateZone(110, 190), 1);
+      expect(heartRateZone(125, 190), 2);
+      expect(heartRateZone(150, 190), 3);
+      expect(heartRateZone(160, 190), 4);
+      expect(heartRateZone(180, 190), 5);
     });
   });
 }

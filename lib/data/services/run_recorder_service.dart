@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../domain/geo.dart';
 import '../../domain/intervals.dart';
 import '../../domain/run_recorder.dart';
+import 'heart_rate_service.dart';
 import 'live_share_service.dart';
 
 /// Wat het opnamescherm laat zien.
@@ -31,6 +32,8 @@ class RecorderView {
     this.workNumber = 0,
     this.reps = 0,
     this.intervalsDone = false,
+    this.heartRate,
+    this.hrStatus = HrStatus.off,
   });
 
   final RecorderStatus status;
@@ -56,6 +59,10 @@ class RecorderView {
   final bool intervalsDone;
 
   bool get hasIntervals => step != null || intervalsDone;
+
+  /// Live hartslag van je band (null = geen band of geen signaal).
+  final int? heartRate;
+  final HrStatus hrStatus;
 
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
@@ -99,6 +106,8 @@ class RunRecorderService {
     await _ensurePermission();
     _rec = RunRecording();
     _listen();
+    // Onthouden hartslagband alvast verbinden.
+    HeartRateService.instance.autoConnect().catchError((Object _) {});
   }
 
   void _listen() {
@@ -172,6 +181,7 @@ class RunRecorderService {
     if (r == null) return;
     _lastFixAt = DateTime.now();
     final before = r.status;
+    r.heartRate = HeartRateService.instance.bpm.value;
     final km = r.add(GpsFix(LatLng(p.latitude, p.longitude), p.timestamp,
         accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null, altitude: p.altitude == 0 ? null : p.altitude));
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
@@ -265,6 +275,8 @@ class RunRecorderService {
       workNumber: it?.workNumber ?? 0,
       reps: it?.plan.reps ?? 0,
       intervalsDone: it?.finished ?? false,
+      heartRate: HeartRateService.instance.bpm.value,
+      hrStatus: HeartRateService.instance.status.value,
     );
   }
 
@@ -279,6 +291,7 @@ class RunRecorderService {
     if (shareLive) await LiveShareService.instance.stop();
     if (r != null && r.distance > 0) _say('Run gestopt. ${(r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',')} kilometer.');
     view.value = const RecorderView(status: RecorderStatus.finished);
+    HeartRateService.instance.disconnect().catchError((Object _) {});
     _rec = null;
     _intervals = null;
     _position = null;

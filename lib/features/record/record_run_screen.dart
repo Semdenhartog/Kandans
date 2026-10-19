@@ -11,11 +11,13 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/heart_rate_service.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sync_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
+import '../../domain/heart_rate.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
 import '../../domain/run_recorder.dart';
@@ -271,6 +273,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             Expanded(child: _Big(label: 'Gemiddeld', value: v.averagePace <= 0 ? '–' : Fmt.pace(v.averagePace).replaceAll(' /km', ''))),
           ],
         ),
+        if (v.heartRate != null || v.hrStatus == HrStatus.connecting || v.hrStatus == HrStatus.lost) ...[
+          const SizedBox(height: 18),
+          _HeartRow(view: v),
+        ],
         const Spacer(),
       ],
     );
@@ -674,4 +680,61 @@ class _Big extends StatelessWidget {
           Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
         ],
       );
+}
+
+/// Live hartslag met de zone als gekleurde balk.
+class _HeartRow extends StatelessWidget {
+  const _HeartRow({required this.view});
+  final RecorderView view;
+
+  static const _zoneColors = {
+    1: Color(0xFF8D8D98),
+    2: Color(0xFF5AA9FF),
+    3: RwColors.good,
+    4: RwColors.warning,
+    5: RwColors.danger,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final bpm = view.heartRate;
+    final max = HeartRateService.instance.maxHr.value;
+    final zone = bpm == null ? 0 : heartRateZone(bpm, max);
+    final color = _zoneColors[zone] ?? RwColors.subtle;
+    return Semantics(
+      label: bpm == null ? 'Hartslagband verbinden' : 'Hartslag $bpm, zone $zone',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(14)),
+        child: Row(
+          children: [
+            Icon(Icons.favorite, color: bpm == null ? RwColors.subtle : RwColors.danger),
+            const SizedBox(width: 10),
+            Text(bpm == null ? (view.hrStatus == HrStatus.lost ? 'Band kwijt…' : 'Band verbinden…') : '$bpm',
+                style: TextStyle(fontFamily: RwFonts.display, fontSize: bpm == null ? 16 : 28, fontWeight: FontWeight.w800)),
+            if (bpm != null) const Text('  bpm', style: TextStyle(color: RwColors.muted)),
+            const Spacer(),
+            if (zone > 0)
+              Row(
+                children: [
+                  for (var z = 1; z <= 5; z++)
+                    Container(
+                      width: 14,
+                      height: z == zone ? 18 : 10,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        color: z <= zone ? _zoneColors[z] : RwColors.bar,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  Text('Zone $zone', style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

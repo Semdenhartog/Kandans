@@ -19,6 +19,7 @@ import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'connections_card.dart';
 import 'fingerprint_tile.dart';
+import 'heart_rate_screen.dart';
 import 'reminder_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -109,6 +110,16 @@ class ProfileScreen extends ConsumerWidget {
           const Card(child: ReminderTile()),
           const SizedBox(height: 12),
           const Card(child: FingerprintTile()),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.monitor_heart_outlined),
+              title: const Text('Hartslagband'),
+              subtitle: const Text('Koppel een Bluetooth-band voor live hartslag en zones'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openHeartRateScreen(context),
+            ),
+          ),
           const SizedBox(height: 12),
           Card(
             child: Column(
