@@ -8,6 +8,7 @@ import '../../core/format.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../domain/geo.dart';
+import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
 import '../../shared/widgets.dart';
 import 'elevation_profile.dart';
@@ -23,6 +24,7 @@ class RouteMapData {
     this.windFromDegrees,
     this.reversed = false,
     this.profile = const [],
+    this.pois = const [],
   });
 
   final String title;
@@ -34,6 +36,7 @@ class RouteMapData {
 
   /// Al in de getoonde looprichting.
   final List<ElevationSample> profile;
+  final List<RoutePoi> pois;
 }
 
 void openRouteMap(BuildContext context, RouteMapData data) {
@@ -141,6 +144,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
                       highlightFraction: _highlight,
                       borderRadius: 0,
                       overlayPadding: EdgeInsets.only(top: top + 52),
+                      pois: d.pois,
                     ),
                   ),
                   // Titelbalk over de kaart.

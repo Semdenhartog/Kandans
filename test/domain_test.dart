@@ -9,6 +9,7 @@ import 'package:runwise/domain/route_direction.dart';
 import 'package:runwise/domain/route_geometry.dart';
 import 'package:runwise/domain/gpx_parser.dart';
 import 'package:runwise/domain/performance_model.dart';
+import 'package:runwise/domain/poi.dart';
 import 'package:runwise/domain/records.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
 import 'package:runwise/domain/weather_correction.dart';
@@ -393,6 +394,36 @@ void main() {
       expect(h.runs.first.activity.id, 'r5');
       expect(h.fastest!.activity.id, 'r5');
       expect(h.trendSecPerKm, lessThan(-5));
+    });
+  });
+
+  group('water en toilet langs de route', () {
+    final east = [for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + 0.0292 * i / 20)];
+
+    test('Overpass lezen en privé overslaan', () {
+      const body = '{"elements":['
+          '{"type":"node","lat":52.0005,"lon":5.0146,"tags":{"amenity":"drinking_water"}},'
+          '{"type":"node","lat":52.0003,"lon":5.0147,"tags":{"amenity":"drinking_water"}},'
+          '{"type":"node","lat":52.0,"lon":5.02,"tags":{"amenity":"toilets","fee":"yes","name":"Bezoekerscentrum"}},'
+          '{"type":"node","lat":52.0,"lon":5.01,"tags":{"amenity":"toilets","access":"private"}},'
+          '{"type":"node","lat":52.01,"lon":5.01,"tags":{"amenity":"drinking_water"}}'
+          ']}';
+      final raw = parseOverpass(body);
+      expect(raw.length, 4);
+      final along = poisAlongRoute(raw, RouteTrack(east));
+      // Dubbele kraan samengevoegd, punt 1 km van de route valt af.
+      expect(along.length, 2);
+      expect(along.first.kind, PoiKind.water);
+      expect(along.first.alongMeters, closeTo(1000, 30));
+      expect(along.first.offsetMeters, closeTo(55, 10));
+      expect(along.last.label, 'Toilet (betaald)');
+      expect(along.last.name, 'Bezoekerscentrum');
+    });
+
+    test('zoekopdracht bevat het gebied', () {
+      final q = overpassQuery(east);
+      expect(q, contains('drinking_water'));
+      expect(q, contains('51.99700,4.99700,52.00300,5.03220'));
     });
   });
 }

@@ -9,8 +9,10 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/poi_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
+import '../../domain/poi.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/records.dart';
 import '../../domain/route_geometry.dart';
@@ -234,7 +236,7 @@ class _KmRow extends StatelessWidget {
 }
 
 /// Kaart met daaronder het hoogteprofiel; slepen over het profiel toont de plek op de kaart.
-class _MapAndProfile extends StatefulWidget {
+class _MapAndProfile extends ConsumerStatefulWidget {
   const _MapAndProfile({
     required this.route,
     required this.windSpeedKmh,
@@ -250,10 +252,10 @@ class _MapAndProfile extends StatefulWidget {
   final String? directionLabel;
 
   @override
-  State<_MapAndProfile> createState() => _MapAndProfileState();
+  ConsumerState<_MapAndProfile> createState() => _MapAndProfileState();
 }
 
-class _MapAndProfileState extends State<_MapAndProfile> {
+class _MapAndProfileState extends ConsumerState<_MapAndProfile> {
   final _highlight = ValueNotifier<double?>(null);
 
   @override
@@ -267,6 +269,8 @@ class _MapAndProfileState extends State<_MapAndProfile> {
     final r = widget.route;
     final base = r.profileOrKmPoints;
     final profile = widget.reversed ? reverseProfile(base) : base;
+    final poisAsync = ref.watch(routePoisProvider(r.polyline));
+    final pois = poisAsync.value ?? const <RoutePoi>[];
     void expand() => openRouteMap(
           context,
           RouteMapData(
@@ -277,6 +281,7 @@ class _MapAndProfileState extends State<_MapAndProfile> {
             windFromDegrees: widget.windFromDegrees,
             reversed: widget.reversed,
             profile: profile,
+            pois: pois,
           ),
         );
 
@@ -292,6 +297,7 @@ class _MapAndProfileState extends State<_MapAndProfile> {
             reversed: widget.reversed,
             highlightFraction: _highlight,
             onExpand: expand,
+            pois: pois,
           ),
         ),
         const SizedBox(height: 8),
@@ -309,6 +315,15 @@ class _MapAndProfileState extends State<_MapAndProfile> {
             child: ElevationProfileChart(profile: profile, highlight: _highlight),
           ),
         ],
+        const SizedBox(height: 12),
+        _PoiCard(
+          pois: pois,
+          loading: poisAsync.isLoading,
+          failed: poisAsync.hasError && pois.isEmpty,
+          reversed: widget.reversed,
+          length: r.distanceMeters,
+          onRetry: () => ref.invalidate(routePoisProvider(r.polyline)),
+        ),
       ],
     );
   }
@@ -433,6 +448,95 @@ class _RouteHistoryCard extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Watertappunten en toiletten langs de route.
+class _PoiCard extends StatelessWidget {
+  const _PoiCard({
+    required this.pois,
+    required this.loading,
+    required this.failed,
+    required this.reversed,
+    required this.length,
+    required this.onRetry,
+  });
+
+  final List<RoutePoi> pois;
+  final bool loading;
+  final bool failed;
+  final bool reversed;
+  final double length;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final water = pois.where((p) => p.kind == PoiKind.water).length;
+    final toilets = pois.length - water;
+    return RwCard(
+      title: 'ONDERWEG: WATER EN TOILET',
+      child: loading && pois.isEmpty
+          ? const Row(
+              children: [
+                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                SizedBox(width: 10),
+                Text('Zoeken langs je route…', style: TextStyle(color: RwColors.muted)),
+              ],
+            )
+          : failed
+              ? Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Kon de voorzieningen nu niet laden.', style: TextStyle(color: RwColors.muted)),
+                    ),
+                    TextButton(onPressed: onRetry, child: const Text('Opnieuw')),
+                  ],
+                )
+              : pois.isEmpty
+                  ? const Text(
+                      'Geen watertappunten of toiletten gevonden binnen 150 m van je route. Neem bij een lange run zelf drinken mee.',
+                      style: TextStyle(color: RwColors.muted, height: 1.45),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          [
+                            if (water > 0) '$water ${water == 1 ? 'watertappunt' : 'watertappunten'}',
+                            if (toilets > 0) '$toilets ${toilets == 1 ? 'toilet' : 'toiletten'}',
+                          ].join(' en '),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 8),
+                        for (final p in (reversed ? pois.reversed : pois).take(10))
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: Row(
+                              children: [
+                                PoiIcon(p.kind, size: 24),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    '${p.label}${p.name == null ? '' : ' · ${p.name}'}${p.seasonal ? ' · niet het hele jaar' : ''}',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  'km ${((reversed ? length - p.alongMeters : p.alongMeters) / 1000).toStringAsFixed(1).replaceAll('.', ',')}'
+                                  '${p.offsetMeters > 40 ? ' · ${(p.offsetMeters / 10).round() * 10} m' : ''}',
+                                  style: const TextStyle(color: RwColors.subtle, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Bron: OpenStreetMap-bijdragers. Controleer ter plekke of een kraan werkt.',
+                          style: TextStyle(color: RwColors.subtle, fontSize: 11),
+                        ),
+                      ],
+                    ),
     );
   }
 }

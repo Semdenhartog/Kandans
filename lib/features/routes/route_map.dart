@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/geo.dart';
+import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
 
 /// Ondergrond van de kaart.
@@ -88,6 +89,7 @@ class RouteMap extends StatefulWidget {
     this.controller,
     this.overlayPadding = EdgeInsets.zero,
     this.borderRadius = 16,
+    this.pois = const [],
   });
 
   final String polyline;
@@ -114,6 +116,9 @@ class RouteMap extends StatefulWidget {
   /// Ruimte rond de knoppen op de kaart (voor statusbalk of terugknop).
   final EdgeInsets overlayPadding;
   final double borderRadius;
+
+  /// Watertappunten en toiletten langs de route.
+  final List<RoutePoi> pois;
 
   @override
   State<RouteMap> createState() => _RouteMapState();
@@ -231,6 +236,8 @@ class _RouteMapState extends State<RouteMap> {
                     ),
                   for (final k in kms)
                     Marker(point: _ll(k.point), width: 24, height: 24, child: _KmBadge(k.km)),
+                  for (final p in widget.pois)
+                    Marker(point: _ll(p.point), width: 26, height: 26, child: PoiIcon(p.kind)),
                   if (separateFinish)
                     Marker(point: _ll(finish), width: 30, height: 30, child: const _Pin(icon: Icons.sports_score, color: RwColors.text)),
                   Marker(
@@ -623,4 +630,31 @@ class _MyLocationLayerState extends State<_MyLocationLayer> {
       ],
     );
   }
+}
+
+/// Rond icoontje voor een watertappunt of toilet.
+class PoiIcon extends StatelessWidget {
+  const PoiIcon(this.kind, {super.key, this.size = 26});
+  final PoiKind kind;
+  final double size;
+
+  static const waterColor = Color(0xFF38BDF8);
+  static const toiletColor = Color(0xFFA78BFA);
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: kind == PoiKind.water ? waterColor : toiletColor,
+          shape: BoxShape.circle,
+          border: Border.all(color: RwColors.background, width: 2),
+          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4)],
+        ),
+        child: Icon(
+          kind == PoiKind.water ? Icons.water_drop : Icons.wc,
+          size: size * 0.55,
+          color: RwColors.background,
+        ),
+      );
 }
