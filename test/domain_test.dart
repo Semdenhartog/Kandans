@@ -15,6 +15,8 @@ import 'package:runwise/domain/performance_model.dart';
 import 'package:runwise/domain/poi.dart';
 import 'package:runwise/domain/records.dart';
 import 'package:runwise/domain/run_matcher.dart';
+import 'package:runwise/domain/run_warnings.dart';
+import 'package:runwise/data/services/air_quality_service.dart';
 import 'package:runwise/domain/start_time_scoring.dart';
 import 'package:runwise/domain/weather_correction.dart';
 
@@ -568,6 +570,56 @@ void main() {
       final back = parseGpx(gpx, fallbackName: 'x');
       expect(back.distanceMeters, closeTo(2000, 30));
       expect(back.name, 'Rondje & <test>');
+    });
+  });
+
+  group('waarschuwingen', () {
+    final t0 = DateTime(2026, 10, 20, 17, 0);
+    Forecast fc(HourWeather Function(DateTime t) make) => Forecast(
+          latitude: 52,
+          longitude: 5.6,
+          hours: [for (var h = -1; h < 6; h++) make(t0.add(Duration(hours: h)))],
+          quarters: [for (var q = -4; q < 24; q++) make(t0.add(Duration(minutes: 15 * q)))],
+        );
+    HourWeather w(DateTime t, {double temp = 12, double gust = 20, int code = 2, bool day = true, double rain = 0}) =>
+        HourWeather(time: t, temperature: temp, feelsLike: temp, windSpeed: 10, windGusts: gust, weatherCode: code, isDay: day, precipitation: rain);
+
+    test('rustig weer: geen waarschuwingen', () {
+      expect(runWarnings(fc((t) => w(t)), t0, 60), isEmpty);
+    });
+
+    test('onweer, windstoten en hitte', () {
+      final list = runWarnings(fc((t) => w(t, temp: 31, gust: 65, code: 95)), t0, 60);
+      expect(list.map((x) => x.kind), containsAll(['thunder', 'gusts', 'heat']));
+      expect(list.first.level, WarningLevel.danger);
+      expect(list.firstWhere((x) => x.kind == 'heat').text, contains('s/km'));
+    });
+
+    test('glad en donker', () {
+      final ice = runWarnings(fc((t) => w(t, temp: 0.5, rain: 0.4, code: 61)), t0, 45);
+      expect(ice.single.kind, 'ice');
+      expect(ice.single.level, WarningLevel.danger);
+      // Na 17:45 wordt het donker; een run van 60 minuten eindigt in het donker.
+      final dark = runWarnings(fc((t) => w(t, day: t.isBefore(t0.add(const Duration(minutes: 45))))), t0, 60);
+      expect(dark.single.kind, 'dark');
+      expect(dark.single.text, contains('17:45'));
+    });
+
+    test('luchtkwaliteit en pollen', () {
+      final json = {
+        'hourly': {
+          'time': ['2026-10-20T17:00'],
+          'european_aqi': [72],
+          'grass_pollen': [80],
+          'birch_pollen': [12],
+        }
+      };
+      final aq = AirQualityService.parse(json);
+      final at = airAt(aq, t0.add(const Duration(minutes: 20)));
+      expect(at?.europeanAqi, 72);
+      final list = runWarnings(fc((t) => w(t)), t0, 30, air: at);
+      expect(list.map((x) => x.kind), containsAll(['air', 'pollen']));
+      expect(list.firstWhere((x) => x.kind == 'pollen').title, 'Veel graspollen');
     });
   });
 }

@@ -17,6 +17,8 @@ import '../../domain/clothing.dart';
 import '../../domain/geo.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
+import '../../data/services/air_quality_service.dart';
+import '../../domain/run_warnings.dart';
 import '../../shared/alarm.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
@@ -182,6 +184,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     type: _type,
                     insightsPersonal: insights.isPersonal,
                     rain: rain,
+                    air: ref.watch(airQualityProvider).value ?? const [],
                   );
                 },
               ),
@@ -296,11 +299,18 @@ class _RouteAndDuration extends StatelessWidget {
 }
 
 class _Results extends StatefulWidget {
-  const _Results({required this.planner, required this.type, required this.insightsPersonal, this.rain});
+  const _Results({
+    required this.planner,
+    required this.type,
+    required this.insightsPersonal,
+    this.rain,
+    this.air = const [],
+  });
   final StartTimePlanner planner;
   final TrainingType type;
   final bool insightsPersonal;
   final RainNowcast? rain;
+  final List<AirQuality> air;
 
   @override
   State<_Results> createState() => _ResultsState();
@@ -332,6 +342,12 @@ class _ResultsState extends State<_Results> {
       children: [
         _BestCard(score: shown, isBest: isBest),
         const SizedBox(height: 12),
+        if (runWarnings(widget.planner.forecast, shown.start, widget.planner.durationMinutes,
+                air: airAt(widget.air, shown.start))
+            case final warnings when warnings.isNotEmpty) ...[
+          _WarningsCard(warnings: warnings),
+          const SizedBox(height: 12),
+        ],
         _ClothingCard(
           advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes),
           at: shown.start,
@@ -765,6 +781,60 @@ class _RainCard extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: RwColors.subtle, decoration: TextDecoration.underline),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Waarschuwingen voor het gekozen moment: onweer, wind, hitte, gladheid, donker, lucht en pollen.
+class _WarningsCard extends StatelessWidget {
+  const _WarningsCard({required this.warnings});
+  final List<RunWarning> warnings;
+
+  static IconData _icon(String kind) => switch (kind) {
+        'thunder' => Icons.thunderstorm_outlined,
+        'gusts' => Icons.air,
+        'heat' => Icons.local_fire_department_outlined,
+        'ice' => Icons.ac_unit,
+        'dark' => Icons.dark_mode_outlined,
+        'air' => Icons.masks_outlined,
+        'pollen' => Icons.local_florist_outlined,
+        _ => Icons.info_outline,
+      };
+
+  static Color _color(WarningLevel l) => switch (l) {
+        WarningLevel.danger => RwColors.danger,
+        WarningLevel.caution => RwColors.warning,
+        WarningLevel.info => RwColors.muted,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return RwCard(
+      title: 'LET OP',
+      child: Column(
+        children: [
+          for (final (i, w) in warnings.indexed) ...[
+            if (i > 0) const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(_icon(w.kind), color: _color(w.level), size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(w.title, style: TextStyle(fontWeight: FontWeight.w700, color: _color(w.level) == RwColors.muted ? RwColors.text : _color(w.level))),
+                      const SizedBox(height: 2),
+                      Text(w.text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
