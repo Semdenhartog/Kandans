@@ -82,14 +82,12 @@ class _BootstrapState extends State<_Bootstrap> {
                             ),
                           ],
                         )
-                      : const Column(
+                      : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('RunWise',
-                                style: TextStyle(
-                                    fontSize: 34, fontWeight: FontWeight.w800, color: RwColors.accent)),
-                            SizedBox(height: 20),
-                            CircularProgressIndicator(),
+                            Image.asset('assets/logo/logo.png', width: 220, semanticLabel: 'RunWise'),
+                            const SizedBox(height: 28),
+                            const CircularProgressIndicator(),
                           ],
                         ),
                 ),

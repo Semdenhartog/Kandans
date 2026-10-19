@@ -346,7 +346,7 @@ String _dayLabel(DateTime t) {
 }
 
 Color _scoreColor(int score) {
-  if (score >= 70) return RwColors.accent;
+  if (score >= 70) return RwColors.good;
   if (score >= 45) return RwColors.warning;
   return RwColors.danger;
 }

@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 
-/// Kleuren overgenomen van de RunWise-landingspagina.
+/// Kleuren van het RunWise-logo: oranje verloop op bijna-zwart.
 class RwColors {
-  static const background = Color(0xFF0E1714);
-  static const surface = Color(0xFF16231F);
-  static const surfaceHigh = Color(0xFF1D2C27);
-  static const border = Color(0xFF263731);
-  static const accent = Color(0xFFC9F25B);
-  static const accentDark = Color(0xFF0E1714);
-  static const text = Color(0xFFE9EFEA);
-  static const muted = Color(0xFFB7C4BC);
-  static const subtle = Color(0xFF8FA198);
-  static const bar = Color(0xFF2F433B);
-  static const danger = Color(0xFFFF7A6B);
-  static const warning = Color(0xFFFFC857);
+  static const background = Color(0xFF09090B);
+  static const surface = Color(0xFF141417);
+  static const surfaceHigh = Color(0xFF1C1C20);
+  static const border = Color(0xFF29292F);
+
+  /// Logo-oranje (midden van het verloop). Tekst erop: [accentDark].
+  static const accent = Color(0xFFFD8A26);
+
+  /// Begin en eind van het logo-verloop, voor accenten.
+  static const accentDeep = Color(0xFFFD3D22);
+  static const accentLight = Color(0xFFFD9E28);
+  static const accentDark = Color(0xFF09090B);
+
+  static const text = Color(0xFFF4F4F5);
+  static const muted = Color(0xFFBDBDC6);
+  static const subtle = Color(0xFF8D8D98);
+  static const bar = Color(0xFF323238);
+
+  /// Status: goed (groen), let op (geel), slecht (rood). Bewust anders dan het merk-oranje.
+  static const good = Color(0xFF4ADE80);
+  static const danger = Color(0xFFFF5470);
+  static const warning = Color(0xFFF5C542);
 }
 
 ThemeData buildTheme() {

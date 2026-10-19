@@ -190,6 +190,21 @@ jobs:
       - name: Pakketten downloaden
         run: flutter pub get
 
+      - name: App-icoon en donker opstartscherm
+        run: |
+          dart run flutter_launcher_icons
+          for f in android/app/src/main/res/drawable/launch_background.xml android/app/src/main/res/drawable-v21/launch_background.xml; do
+            [ -f "$f" ] || continue
+            cat > "$f" <<'EOF2'
+          <?xml version="1.0" encoding="utf-8"?>
+          <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+              <item><color android:color="#FF09090B" /></item>
+          </layer-list>
+          EOF2
+            sed -i 's/^          //' "$f"
+          done
+          echo "::notice::App-icoon (RunWise-logo) en donker opstartscherm ingesteld"
+
       - name: Analyse-meldingen als annotaties tonen
         run: |
           flutter analyze --format=machine > analyze.txt 2>&1 || true

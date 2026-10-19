@@ -150,7 +150,7 @@ void showMessage(BuildContext context, String message, {bool error = false}) {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
       content: Text(message),
-      backgroundColor: error ? const Color(0xFF4A1F1B) : null,
+      backgroundColor: error ? const Color(0xFF4A1A24) : null,
     ));
 }
 

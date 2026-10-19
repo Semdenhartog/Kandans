@@ -65,27 +65,24 @@ class AuthScaffold extends StatelessWidget {
 }
 
 class RunWiseLogo extends StatelessWidget {
-  const RunWiseLogo({super.key});
+  const RunWiseLogo({super.key, this.height = 30});
+
+  /// Hoogte van het merkteken; het woordmerk schaalt mee.
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: RwColors.accent, width: 2.5),
-          ),
-          child: const Icon(Icons.schedule, size: 18, color: RwColors.accent),
-        ),
-        const SizedBox(width: 10),
-        const Text(
-          'RunWise',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.4),
-        ),
-      ],
+    return Semantics(
+      label: 'RunWise',
+      image: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset('assets/logo/mark.png', height: height, excludeFromSemantics: true),
+          SizedBox(width: height * 0.35),
+          Image.asset('assets/logo/wordmark.png', height: height * 0.62, excludeFromSemantics: true),
+        ],
+      ),
     );
   }
 }
