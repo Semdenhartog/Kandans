@@ -60,8 +60,8 @@ class RunStreams {
 }
 
 /// Eén kilometer (de laatste kan korter zijn).
-class Split {
-  const Split({
+class KmSplit {
+  const KmSplit({
     required this.index,
     required this.meters,
     required this.seconds,
@@ -85,7 +85,7 @@ class Split {
 }
 
 /// Tijden per kilometer. Een laatste stuk korter dan 100 m wordt bij de vorige km geteld.
-List<Split> splitsOf(RunStreams s) {
+List<KmSplit> splitsOf(RunStreams s) {
   final total = s.totalDistance;
   if (total < 200) return const [];
   final marks = <double>[0];
@@ -95,7 +95,7 @@ List<Split> splitsOf(RunStreams s) {
   if (total - marks.last < 100 && marks.length > 1) marks.removeLast();
   marks.add(total);
 
-  final out = <Split>[];
+  final out = <KmSplit>[];
   for (var i = 1; i < marks.length; i++) {
     final a = marks[i - 1], b = marks[i];
     final t = (s.valueAt(s.time, b) ?? 0) - (s.valueAt(s.time, a) ?? 0);
@@ -128,7 +128,7 @@ List<Split> splitsOf(RunStreams s) {
     final pa = s.positionAt(a), pb = s.positionAt(b);
     if (pa != null && pb != null && distanceMeters(pa, pb) > 50) bearing = bearingDegrees(pa, pb);
 
-    out.add(Split(index: i, meters: b - a, seconds: t, heartRate: hr, elevationGain: gain, bearing: bearing));
+    out.add(KmSplit(index: i, meters: b - a, seconds: t, heartRate: hr, elevationGain: gain, bearing: bearing));
   }
   return out;
 }
@@ -153,7 +153,7 @@ List<({double meters, double pace})> paceSeries(RunStreams s, {double window = 2
 }
 
 /// Snelste en langzaamste hele kilometer.
-({Split? fastest, Split? slowest}) extremes(List<Split> splits) {
+({KmSplit? fastest, KmSplit? slowest}) extremes(List<KmSplit> splits) {
   final full = splits.where((x) => !x.partial).toList();
   if (full.isEmpty) return (fastest: null, slowest: null);
   return (

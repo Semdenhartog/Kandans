@@ -90,7 +90,7 @@ class SplitsCard extends ConsumerWidget {
         ]),
       );
 
-  Widget _row(Split sp, ({Split? fastest, Split? slowest}) ex, bool hasHr, bool hasEle) {
+  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle) {
     final a = activity;
     final cls = sp.bearing == null || a.windDirectionDegrees == null || a.windSpeedKmh == null
         ? null
