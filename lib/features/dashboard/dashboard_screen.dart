@@ -559,7 +559,8 @@ String personalLine(RunVerdict v, PlanSession? session, {bool restDay = false}) 
   ];
   final weather = parts.join(', ');
   final cap = weather[0].toUpperCase() + weather.substring(1);
-  final when = v.kind == VerdictKind.goNow ? 'nu' : 'om ${Fmt.time(v.best.start)}';
+  final day = _dayLabel(v.best.start);
+  final when = v.kind == VerdictKind.goNow ? 'nu' : '${day == 'Vandaag' ? '' : '${day.toLowerCase()} '}om ${Fmt.time(v.best.start)}';
   if (session != null && session.kind != SessionKind.race) {
     final what = session.title[0].toLowerCase() + session.title.substring(1);
     return v.kind == VerdictKind.tough
