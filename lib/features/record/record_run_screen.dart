@@ -1544,7 +1544,7 @@ class _GpsRadarState extends State<_GpsRadar> with SingleTickerProviderStateMixi
                 duration: const Duration(milliseconds: 400),
                 transitionBuilder: (c, a) => ScaleTransition(scale: a, child: FadeTransition(opacity: a, child: c)),
                 child: Icon(
-                  ready ? Icons.check_rounded : Icons.satellite_alt_outlined,
+                  ready ? Icons.check_rounded : Icons.my_location,
                   key: ValueKey(ready),
                   size: 40,
                   color: color,
