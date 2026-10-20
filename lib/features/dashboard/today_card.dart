@@ -19,6 +19,7 @@ import '../../domain/weekly_load.dart';
 import '../../domain/weekly_report.dart';
 import '../../shared/widgets.dart';
 import '../activities/fitness_screen.dart';
+import '../activities/year_story_screen.dart';
 import '../planner/training_plan_screen.dart';
 import 'dashboard_providers.dart';
 
@@ -192,12 +193,26 @@ class _ReadinessRow extends ConsumerWidget {
           SizedBox(
             width: 48,
             height: 48,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(value: ready.score / 100, strokeWidth: 5, color: color, backgroundColor: RwColors.bar),
-                Text('${ready.score}', style: TextStyle(fontWeight: FontWeight.w800, color: color)),
-              ],
+            // Ring vult zich en het getal telt op.
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: ready.score.toDouble()),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, _) => Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox.expand(
+                    child: CircularProgressIndicator(
+                      value: v / 100,
+                      strokeWidth: 5,
+                      strokeCap: StrokeCap.round,
+                      color: color,
+                      backgroundColor: RwColors.bar,
+                    ),
+                  ),
+                  Text('${v.round()}', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, color: color, fontSize: 17)),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -497,6 +512,47 @@ class RaceCountdownCard extends ConsumerWidget {
             ),
             const Icon(Icons.chevron_right, color: RwColors.subtle),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// In december en begin januari: je jaar als verhaal staat klaar.
+class YearStoryCard extends ConsumerWidget {
+  const YearStoryCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = DateTime.now();
+    final inSeason = now.month == 12 || (now.month == 1 && now.day <= 15);
+    if (!inSeason) return const SizedBox.shrink();
+    final year = now.month == 1 ? now.year - 1 : now.year;
+    final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final n = runs.where((a) => a.startedAt.toLocal().year == year).length;
+    if (n < 3) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Material(
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => openYearStory(context, year: year),
+          child: Ink(
+            padding: const EdgeInsets.all(18),
+            decoration: const BoxDecoration(gradient: LinearGradient(colors: [RwColors.accentDeep, RwColors.accent])),
+            child: Row(children: [
+              const Icon(Icons.auto_stories, color: Colors.black, size: 32),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Jouw $year in runs', style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20, color: Colors.black)),
+                  Text('$n runs. Bekijk je jaar als verhaal.', style: const TextStyle(color: Colors.black87)),
+                ]),
+              ),
+              const Icon(Icons.play_circle_fill, color: Colors.black, size: 34),
+            ]),
+          ),
         ),
       ),
     );

@@ -30,6 +30,7 @@ import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 import 'fitness_screen.dart';
 import 'run_insights_screens.dart';
+import 'year_story_screen.dart';
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
@@ -190,7 +191,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                 case 'heatmap':
                   openHeatmap(context);
                 case 'year':
-                  openYearRecap(context);
+                  final now = DateTime.now();
+                  openYearStory(context, year: now.month == 1 ? now.year - 1 : now.year);
                 case 'csv':
                   _export(false);
                 case 'gpx':

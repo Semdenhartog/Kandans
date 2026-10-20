@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart' show Color, ValueNotifier;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
@@ -53,15 +54,21 @@ class NotificationService {
   /// Hetzelfde nummer als de melding van de GPS-dienst, zodat we die bijwerken in plaats van een tweede te tonen.
   static const _runId = 75415;
 
+  /// Knoppen in de run-melding: 'pause', 'resume' of 'stop' (met een volgnummer zodat elke tik telt).
+  final runAction = ValueNotifier<({String id, int n})?>(null);
+  int _actions = 0;
+
   /// Live stand tijdens een run (op je vergrendelscherm en in de meldingenbalk).
-  Future<void> showRunProgress(String title, String body) async {
+  /// Met [movingSeconds] en niet gepauzeerd telt de klok in de melding zelf door (Android-chronometer).
+  Future<void> showRunProgress(String title, String body, {double? movingSeconds, bool paused = false}) async {
     if (!_ready) return;
     try {
+      final ticking = movingSeconds != null && !paused;
       await _plugin.show(
         _runId,
         title,
         body,
-        const NotificationDetails(
+        NotificationDetails(
           android: AndroidNotificationDetails(
             'geolocator_channel_01',
             'Run opnemen',
@@ -70,11 +77,21 @@ class NotificationService {
             priority: Priority.low,
             ongoing: true,
             onlyAlertOnce: true,
-            showWhen: false,
+            showWhen: ticking,
+            usesChronometer: ticking,
+            when: ticking ? DateTime.now().millisecondsSinceEpoch - (movingSeconds * 1000).round() : null,
             silent: true,
             playSound: false,
             enableVibration: false,
             visibility: NotificationVisibility.public,
+            color: const Color(0xFFFD8A26),
+            colorized: true,
+            actions: [
+              paused
+                  ? const AndroidNotificationAction('resume', 'Verder', showsUserInterface: true, cancelNotification: false)
+                  : const AndroidNotificationAction('pause', 'Pauze', showsUserInterface: true, cancelNotification: false),
+              const AndroidNotificationAction('stop', 'Stop', showsUserInterface: true, cancelNotification: false),
+            ],
           ),
         ),
       );
@@ -93,6 +110,10 @@ class NotificationService {
     tzdata.initializeTimeZones();
     await _plugin.initialize(
       const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      onDidReceiveNotificationResponse: (r) {
+        final id = r.actionId;
+        if (id == 'pause' || id == 'resume' || id == 'stop') runAction.value = (id: id!, n: ++_actions);
+      },
     );
     _ready = true;
   }

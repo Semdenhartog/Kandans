@@ -100,7 +100,25 @@ class RecorderView {
 
 /// Neemt een run op met GPS. Blijft doorlopen met het scherm uit (Android-melding).
 class RunRecorderService {
-  RunRecorderService._();
+  RunRecorderService._() {
+    NotificationService.instance.runAction.addListener(_onNotificationAction);
+  }
+
+  /// Telt op als je in de melding op Stop tikt; het opnamescherm luistert en rondt de run netjes af.
+  final stopRequested = ValueNotifier<int>(0);
+
+  void _onNotificationAction() {
+    final a = NotificationService.instance.runAction.value;
+    if (a == null || !isRecording) return;
+    switch (a.id) {
+      case 'pause':
+        pause();
+      case 'resume':
+        resume();
+      case 'stop':
+        stopRequested.value++;
+    }
+  }
   static final instance = RunRecorderService._();
 
   final view = ValueNotifier(const RecorderView());
@@ -191,9 +209,6 @@ class RunRecorderService {
   void _updateNotification(RunRecording r) {
     final v = view.value;
     final paused = r.status == RecorderStatus.paused || r.status == RecorderStatus.autoPaused;
-    final title = r.indoor
-        ? 'Loopband · ${Fmt.duration(v.movingSeconds)}'
-        : '${Fmt.km(r.distance, decimals: 2)} · ${Fmt.duration(v.movingSeconds)}';
     final body = paused
         ? 'Gepauzeerd'
         : [
@@ -202,7 +217,11 @@ class RunRecorderService {
             if (v.heartRate != null) '♥ ${v.heartRate}',
             if (v.step != null) '${stepLabel(v.step!.kind, walkRun: v.walkRun)}: nog ${v.step!.byDistance ? '${v.stepRemaining.round()} m' : Fmt.duration(v.stepRemaining)}',
           ].join(' · ');
-    NotificationService.instance.showRunProgress(title, body.isEmpty ? 'RunWise neemt je run op' : body).ignore();
+    NotificationService.instance
+        .showRunProgress(r.indoor ? 'Loopband${r.treadmillKmh == null ? '' : ' · ${Fmt.km(r.distance, decimals: 2)}'}' : Fmt.km(r.distance, decimals: 2),
+            body.isEmpty ? 'RunWise neemt je run op' : body,
+            movingSeconds: v.movingSeconds, paused: paused)
+        .ignore();
   }
 
   void _sayCue(RunRecording r) {

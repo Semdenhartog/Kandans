@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
@@ -110,11 +112,11 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: RwColors.accent),
-            const SizedBox(height: 16),
+            EmptyArt(icon: icon),
+            const SizedBox(height: 18),
             Text(title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
@@ -131,6 +133,96 @@ class EmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Illustratie voor lege schermen: gloed, een gestippeld rondje met start en finish, en het icoon in het midden.
+/// Komt zacht binnen (iets groter worden en de route die zich tekent).
+class EmptyArt extends StatelessWidget {
+  const EmptyArt({super.key, required this.icon, this.size = 168});
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 1100),
+        curve: Curves.easeOutCubic,
+        builder: (_, t, _) => SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(
+            painter: _EmptyArtPainter(t),
+            child: Center(
+              child: Transform.scale(
+                scale: 0.85 + 0.15 * t,
+                child: Container(
+                  width: size * 0.36,
+                  height: size * 0.36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: RwColors.surfaceHigh,
+                    border: Border.all(color: RwColors.accent.withValues(alpha: 0.6), width: 1.5),
+                  ),
+                  child: Icon(icon, size: size * 0.18, color: RwColors.accent),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+class _EmptyArtPainter extends CustomPainter {
+  _EmptyArtPainter(this.t);
+  final double t;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.width / 2;
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..shader = RadialGradient(colors: [
+          RwColors.accent.withValues(alpha: 0.22 * t),
+          RwColors.accentDeep.withValues(alpha: 0.06 * t),
+          Colors.transparent,
+        ], stops: const [0, 0.6, 1])
+            .createShader(Rect.fromCircle(center: c, radius: r)),
+    );
+    // Gestippeld, golvend rondje (een route) dat zich tekent.
+    final path = Path();
+    const n = 120;
+    for (var i = 0; i <= n; i++) {
+      final a = i / n * 2 * math.pi - math.pi / 2;
+      final rr = r * (0.62 + 0.06 * math.sin(a * 3) + 0.03 * math.cos(a * 5));
+      final p = c + Offset(math.cos(a) * rr, math.sin(a) * rr);
+      i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
+    }
+    final metric = path.computeMetrics().first;
+    final len = metric.length * t;
+    final dash = Paint()
+      ..color = RwColors.accent.withValues(alpha: 0.85)
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    for (var d = 0.0; d < len; d += 11) {
+      canvas.drawPath(metric.extractPath(d, math.min(d + 5, len)), dash);
+    }
+    if (t > 0.05) {
+      final start = metric.getTangentForOffset(0)!.position;
+      canvas.drawCircle(start, 5, Paint()..color = RwColors.text);
+      final head = metric.getTangentForOffset(len)?.position;
+      if (head != null) {
+        canvas.drawCircle(head, 9, Paint()..color = RwColors.accent.withValues(alpha: 0.35));
+        canvas.drawCircle(head, 5, Paint()..color = RwColors.accentLight);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _EmptyArtPainter old) => old.t != t;
 }
 
 /// Foutmelding met "Opnieuw proberen".

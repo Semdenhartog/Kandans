@@ -516,6 +516,7 @@ class _ResultsState extends State<_Results> {
         const TodayCard(),
         const RaceCountdownCard(),
         const WeeklyReportCard(),
+        const YearStoryCard(),
         for (final c in widget.layout.visible)
           if (card(c) case final w?) ...[const SizedBox(height: 12), w],
         const SizedBox(height: 12),
@@ -615,7 +616,13 @@ class _HeroCard extends StatelessWidget {
                       )).ignore();
                     },
                   ),
-                  Text('${s.score}', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 22, color: _scoreColor(s.score))),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: s.score.toDouble()),
+                    duration: const Duration(milliseconds: 900),
+                    curve: Curves.easeOutCubic,
+                    builder: (_, v, _) => Text('${v.round()}',
+                        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 22, color: _scoreColor(s.score))),
+                  ),
                   const SizedBox(width: 4),
                   Text(s.verdict, style: TextStyle(color: _scoreColor(s.score), fontWeight: FontWeight.w600)),
                 ],

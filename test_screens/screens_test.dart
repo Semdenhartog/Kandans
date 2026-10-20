@@ -36,6 +36,7 @@ import 'package:runwise/features/activities/activity_detail_screen.dart';
 import 'package:runwise/features/activities/badges_screen.dart';
 import 'package:runwise/features/activities/fitness_screen.dart';
 import 'package:runwise/features/activities/strength_screen.dart';
+import 'package:runwise/features/activities/year_story_screen.dart';
 import 'package:runwise/domain/strength.dart';
 import 'package:runwise/features/coach/coach_screen.dart';
 import 'package:runwise/features/dashboard/dashboard_providers.dart';
@@ -394,6 +395,7 @@ void main() {
       }));
   testWidgets('26 kracht', (t) => _shot(t, '26_kracht', const StrengthScreen(), height: 915));
   testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
+  testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
 

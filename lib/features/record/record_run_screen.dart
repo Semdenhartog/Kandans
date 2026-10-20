@@ -87,6 +87,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   @override
   void initState() {
     super.initState();
+    _svc.stopRequested.addListener(_stopFromNotification);
     final r = widget.initialRoute;
     if (r != null && r.id != null) {
       _route = r;
@@ -131,8 +132,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     }
   }
 
+  void _stopFromNotification() {
+    if (mounted && _svc.isRecording && !_saving) _stop();
+  }
+
   @override
   void dispose() {
+    _svc.stopRequested.removeListener(_stopFromNotification);
     // Weggegaan zonder te starten: GPS weer uit.
     if (_svc.recording?.status == RecorderStatus.idle) _svc.discard();
     _pages.dispose();

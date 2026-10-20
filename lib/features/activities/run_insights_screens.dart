@@ -1,6 +1,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+
+import 'year_story_screen.dart' show openYearStory;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -322,6 +324,12 @@ class _YearRecapScreenState extends ConsumerState<YearRecapScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => openYearStory(context, year: _year),
+                  icon: const Icon(Icons.auto_stories_outlined),
+                  label: const Text('Bekijk als verhaal'),
+                ),
+                const SizedBox(height: 8),
                 FilledButton.icon(
                   onPressed: _busy ? null : () => _share(r),
                   icon: const Icon(Icons.ios_share),
