@@ -177,7 +177,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
             child: Stack(
               children: [
                 if (loc == null && ref.watch(weatherLocationProvider).isLoading)
-                  const LoadingView()
+                  const LoadingView(spinner: true)
                 else
                   DrawRouteMap(
                     controller: _map,

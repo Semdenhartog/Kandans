@@ -31,16 +31,19 @@ import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
 
 /// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
-void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle}) {
+void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle, RunRoute? route}) {
   Navigator.of(context).push(MaterialPageRoute<void>(
     fullscreenDialog: true,
-    builder: (_) => RecordRunScreen(initialPlan: plan, initialTargetPace: targetPace, sessionTitle: sessionTitle),
+    builder: (_) => RecordRunScreen(initialPlan: plan, initialTargetPace: targetPace, sessionTitle: sessionTitle, initialRoute: route),
   ));
 }
 
 /// Een run opnemen met GPS, met stemcoach per kilometer.
 class RecordRunScreen extends ConsumerStatefulWidget {
-  const RecordRunScreen({super.key, this.initialPlan, this.initialTargetPace, this.sessionTitle});
+  const RecordRunScreen({super.key, this.initialPlan, this.initialTargetPace, this.sessionTitle, this.initialRoute});
+
+  /// Vanuit een route: deze route volgen (en tegen je record racen).
+  final RunRoute? initialRoute;
 
   /// Vanuit je trainingsschema: deze training staat al klaar.
   final IntervalPlan? initialPlan;
@@ -78,6 +81,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   @override
   void initState() {
     super.initState();
+    final r = widget.initialRoute;
+    if (r != null && r.id != null) {
+      _route = r;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadGhost(r.id!));
+    }
     SharedPreferences.getInstance().then((p) {
       if (mounted) {
         setState(() {

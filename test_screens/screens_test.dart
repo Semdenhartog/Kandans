@@ -41,6 +41,8 @@ import 'package:runwise/features/dashboard/dashboard_screen.dart';
 import 'package:runwise/features/dashboard/month_challenge_card.dart';
 import 'package:runwise/features/planner/availability_provider.dart';
 import 'package:runwise/features/planner/training_plan_screen.dart';
+import 'package:runwise/features/auth/login_screen.dart';
+import 'package:runwise/features/onboarding/onboarding_screen.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
 import 'package:runwise/features/routes/route_detail_screen.dart';
@@ -334,5 +336,7 @@ void main() {
         );
       }));
   testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));
+  testWidgets('13 inloggen', (t) => _shot(t, '13_inloggen', const LoginScreen(), height: 915));
+  testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }

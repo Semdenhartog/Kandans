@@ -98,6 +98,13 @@ ThemeData buildTheme() {
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: ButtonStyle(
         textStyle: WidgetStateProperty.all(const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600)),
+        backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? RwColors.accent : RwColors.surface),
+        foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? RwColors.accentDark : RwColors.text),
+        iconColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? RwColors.accentDark : RwColors.muted),
+        side: WidgetStateProperty.all(const BorderSide(color: RwColors.border)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(

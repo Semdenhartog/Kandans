@@ -122,7 +122,7 @@ class RaceDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               advice.when(
-                loading: () => const Padding(padding: EdgeInsets.all(40), child: LoadingView()),
+                loading: () => const Padding(padding: EdgeInsets.all(40), child: LoadingView(spinner: true)),
                 error: (e, _) => ErrorView(
                   message: friendlyError(e),
                   onRetry: () => ref.invalidate(_raceAdviceProvider(raceId)),

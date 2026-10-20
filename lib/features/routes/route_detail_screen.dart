@@ -22,6 +22,7 @@ import '../../domain/records.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
+import '../record/record_run_screen.dart';
 import 'elevation_profile.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
@@ -140,6 +141,12 @@ class RouteDetailScreen extends ConsumerWidget {
         final advice = w == null ? null : adviseDirection(track, w.windSpeed, w.windDirection);
 
         return Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            heroTag: 'run-route',
+            onPressed: () => openRecorder(context, route: r),
+            icon: const Icon(Icons.play_arrow),
+            label: const Text('Loop deze route'),
+          ),
           appBar: AppBar(
             title: Text(r.name, overflow: TextOverflow.ellipsis),
             actions: [
@@ -162,16 +169,8 @@ class RouteDetailScreen extends ConsumerWidget {
             ],
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
-              _MapAndProfile(
-                route: r,
-                windSpeedKmh: w?.windSpeed,
-                windFromDegrees: w?.windDirection,
-                reversed: advice?.reverse ?? false,
-                directionLabel: advice?.bestLabel,
-              ),
-              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(r.distanceMeters))),
@@ -192,6 +191,14 @@ class RouteDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              _MapAndProfile(
+                route: r,
+                windSpeedKmh: w?.windSpeed,
+                windFromDegrees: w?.windDirection,
+                reversed: advice?.reverse ?? false,
+                directionLabel: advice?.bestLabel,
               ),
               const SizedBox(height: 12),
               RwCard(

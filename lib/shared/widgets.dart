@@ -152,12 +152,82 @@ class ErrorView extends StatelessWidget {
   }
 }
 
-class LoadingView extends StatelessWidget {
-  const LoadingView({super.key});
+/// Laden: grijze, zacht pulserende kaarten in de vorm van wat er komt (zoals Strava en Garmin),
+/// of een draaiend rondje met [spinner].
+class LoadingView extends StatefulWidget {
+  const LoadingView({super.key, this.spinner = false, this.cards = 3});
+  final bool spinner;
+  final int cards;
 
   @override
-  Widget build(BuildContext context) =>
-      const Center(child: CircularProgressIndicator());
+  State<LoadingView> createState() => _LoadingViewState();
+}
+
+class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Widget _bar(double w, double h) => Container(
+        width: w,
+        height: h,
+        decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(8)),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.spinner) return const Center(child: CircularProgressIndicator());
+    return Semantics(
+      label: 'Laden',
+      child: FadeTransition(
+        opacity: Tween(begin: 0.45, end: 1.0).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < widget.cards; i++)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: RwColors.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: RwColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _bar(140, 14),
+                            const SizedBox(height: 10),
+                            _bar(double.infinity, 10),
+                            const SizedBox(height: 8),
+                            _bar(90, 10),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 void showMessage(BuildContext context, String message, {bool error = false}) {
