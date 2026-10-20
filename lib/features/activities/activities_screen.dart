@@ -342,7 +342,7 @@ class _OverviewState extends State<_Overview> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(onPressed: () => set(() => km = (km - 1).clamp(1, 300)), icon: const Icon(Icons.remove_circle_outline)),
-                  Text('$km km', style: const TextStyle(fontFamily: RwFonts.display, fontSize: 30, fontWeight: FontWeight.w800)),
+                  Text('$km km', style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 30, fontWeight: FontWeight.w800)),
                   IconButton(onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: const Icon(Icons.add_circle_outline)),
                 ],
               ),
@@ -629,7 +629,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Runs filteren', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+              const Text('Runs filteren', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
               _label('AFSTAND'),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 for (final b in DistanceBand.values)
@@ -834,7 +834,7 @@ class _TileStat extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(right: 14),
         child: Text.rich(TextSpan(children: [
-          TextSpan(text: value, style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w700, fontSize: 18)),
+          TextSpan(text: value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w700, fontSize: 18)),
           if (unit.isNotEmpty) TextSpan(text: ' $unit', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
         ])),
       );

@@ -233,7 +233,7 @@ class _ReadinessSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Klaar-score ${ready.score}', style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+            Text('Klaar-score ${ready.score}', style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
             Text(ready.title, style: TextStyle(color: _scoreColor(ready.score), fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             for (final f in ready.factors)
@@ -416,7 +416,7 @@ class _Stat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
-          Text(value, style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 20)),
+          Text(value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20)),
         ],
       );
 }
@@ -469,7 +469,7 @@ class RaceCountdownCard extends ConsumerWidget {
               child: Column(
                 children: [
                   Text(days == 0 ? '!' : '$days',
-                      style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 26, color: RwColors.accent, height: 1)),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 26, color: RwColors.accent, height: 1)),
                   Text(days == 0 ? 'vandaag' : (days == 1 ? 'dag' : 'dagen'), style: const TextStyle(color: RwColors.accent, fontSize: 11)),
                 ],
               ),

@@ -144,7 +144,7 @@ class ActivityDetailScreen extends ConsumerWidget {
         children: [
           Text(
             runTitle(a, routeName: route?.name),
-            style: const TextStyle(fontFamily: RwFonts.display, fontSize: 24, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800),
           ),
           Text(
             '${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}',
@@ -153,7 +153,7 @@ class ActivityDetailScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             Fmt.km(a.distanceMeters),
-            style: const TextStyle(fontFamily: RwFonts.display, fontSize: 48, fontWeight: FontWeight.w800, height: 1.1),
+            style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 48, fontWeight: FontWeight.w800, height: 1.1),
           ),
           if (badges.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -299,7 +299,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                             Text(
                               Fmt.duration(corrected),
                               style: const TextStyle(
-                                fontFamily: RwFonts.display,
+                                fontFamily: RwFonts.display, fontFeatures: rwTnum,
                                 fontSize: 30,
                                 fontWeight: FontWeight.w800,
                                 color: RwColors.accent,

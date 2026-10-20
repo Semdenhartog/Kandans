@@ -198,7 +198,7 @@ class _PlanView extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(race.title, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+              Text(race.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
               Text(
                 daysLeft > 0 ? 'Nog $daysLeft dagen · ${Fmt.dateLong(race.date)}' : (daysLeft == 0 ? 'Vandaag is het zover!' : 'Je schema is afgelopen.'),
@@ -712,7 +712,7 @@ Future<void> showSessionBriefing(BuildContext context, PlanSession session, {int
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     const Text('JOUW TRAINING', style: TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-                    Text(s.title, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15)),
+                    Text(s.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15)),
                   ]),
                 ),
               ]),
@@ -804,7 +804,7 @@ class _PlanReplay extends StatelessWidget {
             const Text('SCHEMA AFGEROND', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 0.6, fontSize: 12)),
             const SizedBox(height: 4),
             Text(doneCount >= sessions.length * 0.8 ? 'Wat een prestatie!' : 'Je bent er doorheen!',
-                style: const TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800)),
+                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
             const SizedBox(height: 12),
             Row(children: [
               Expanded(child: StatTile(label: 'Trainingen', value: '$doneCount/${sessions.length}')),

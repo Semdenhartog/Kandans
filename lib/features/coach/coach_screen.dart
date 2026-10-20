@@ -221,7 +221,7 @@ class _Intro extends StatelessWidget {
         const Icon(Icons.auto_awesome, color: RwColors.accent, size: 40),
         const SizedBox(height: 12),
         const Text('Je persoonlijke hardloopcoach',
-            textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display)),
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
         const SizedBox(height: 8),
         Text(
           'De coach kijkt mee naar je runs, je wedstrijden en het weer. '
@@ -340,7 +340,7 @@ class _RichReply extends StatelessWidget {
         children.add(Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 2),
           child: Text(t.substring(heading.end).replaceAll('**', ''),
-              style: base.copyWith(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 17)),
+              style: base.copyWith(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 17)),
         ));
       } else if (bullet != null || number != null) {
         final m = (bullet ?? number)!;

@@ -89,7 +89,7 @@ class _LockScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               const Text('RunWise is vergrendeld',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800)),
+                  style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
               const Text('Gebruik je vingerafdruk, of de pincode van je telefoon.',
                   textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),

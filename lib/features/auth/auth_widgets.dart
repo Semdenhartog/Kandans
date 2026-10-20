@@ -45,7 +45,7 @@ class AuthScaffold extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontSize: 32,
-                      fontFamily: RwFonts.display,
+                      fontFamily: RwFonts.display, fontFeatures: rwTnum,
                       fontWeight: FontWeight.w800,
                       height: 1.1,
                       letterSpacing: -0.5,

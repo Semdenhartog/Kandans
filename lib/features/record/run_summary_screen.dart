@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +11,7 @@ import '../../data/repositories/repositories.dart';
 import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
 import '../../domain/run_streams.dart';
+import '../../shared/confetti.dart';
 import '../../shared/widgets.dart';
 import '../activities/badges_screen.dart';
 import '../activities/share_run_screen.dart';
@@ -69,16 +71,28 @@ class RunSummaryScreen extends StatelessWidget {
           title: const Text('Run opgeslagen'),
           actions: [IconButton(tooltip: 'Sluiten', onPressed: () => _close(context), icon: const Icon(Icons.close))],
         ),
-        body: ListView(
+        body: Stack(children: [
+          ListView(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
           children: [
-            Text(greeting, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 28, fontWeight: FontWeight.w800)),
+            Text(greeting, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800)),
             Text('${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}', style: const TextStyle(color: RwColors.subtle)),
             const SizedBox(height: 16),
-            Text(
-              (a.distanceMeters / 1000).toStringAsFixed(2).replaceAll('.', ','),
-              style: const TextStyle(
-                  fontFamily: RwFonts.display, fontSize: 72, fontWeight: FontWeight.w800, color: RwColors.accent, height: 1),
+            // Kilometers tellen op tot je afstand.
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: a.distanceMeters / 1000),
+              duration: const Duration(milliseconds: 1400),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, _) => Text(
+                v.toStringAsFixed(2).replaceAll('.', ','),
+                style: const TextStyle(
+                  fontFamily: RwFonts.display, fontFeatures: rwTnum,
+                  fontSize: 72,
+                  fontWeight: FontWeight.w800,
+                  color: RwColors.accent,
+                  height: 1,
+                ),
+              ),
             ),
             const Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
             const SizedBox(height: 16),
@@ -138,6 +152,7 @@ class RunSummaryScreen extends StatelessWidget {
                   windFromDegrees: a.windDirectionDegrees,
                   compact: true,
                   showLegend: false,
+                  animateIn: true,
                 ),
               ),
             ],
@@ -248,6 +263,8 @@ class RunSummaryScreen extends StatelessWidget {
             ),
           ],
         ),
+          if (records.isNotEmpty || badges.isNotEmpty) const Positioned.fill(child: IgnorePointer(child: Confetti())),
+        ]),
       ),
     );
   }
@@ -284,6 +301,7 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
   }
 
   Future<void> _save(int f) async {
+    HapticFeedback.selectionClick();
     setState(() => _feel = f);
     try {
       await ref.read(repositoryProvider).setActivityFeel(widget.activityId, feel: f, note: _note.text);

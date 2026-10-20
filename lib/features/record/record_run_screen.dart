@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -139,6 +140,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   }
 
   Future<void> _start() async {
+    HapticFeedback.heavyImpact();
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
       await _svc.start(
@@ -173,7 +175,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text('Laat RunWise doorlopen op de achtergrond',
-                  style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+                  style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
               const Text(
                 'Om batterij te sparen zetten veel telefoons apps in slaapstand als je scherm uit is. '
@@ -224,6 +226,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   }
 
   Future<void> _stop() async {
+    HapticFeedback.mediumImpact();
     final ok = await confirmDialog(context, title: 'Run stoppen?', message: 'Je run wordt opgeslagen.');
     if (!ok) return;
     double? indoorMeters;
@@ -289,7 +292,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Doeltempo', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+                const Text('Doeltempo', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
                 const Text('De stem zegt het als je langer dan 20 seconden meer dan 15 s/km te snel of te langzaam gaat.',
                     style: TextStyle(color: RwColors.muted, height: 1.4)),
@@ -298,7 +301,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(onPressed: () => set(() => sec = (sec - 5).clamp(180, 600)), icon: const Icon(Icons.remove_circle_outline)),
-                    Text(Fmt.pace(sec), style: const TextStyle(fontFamily: RwFonts.display, fontSize: 34, fontWeight: FontWeight.w800)),
+                    Text(Fmt.pace(sec), style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 34, fontWeight: FontWeight.w800)),
                     IconButton(onPressed: () => set(() => sec = (sec + 5).clamp(180, 600)), icon: const Icon(Icons.add_circle_outline)),
                   ],
                 ),
@@ -335,7 +338,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           children: [
             const Padding(
               padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
-              child: Text('Begeleide runs', style: TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+              child: Text('Begeleide runs', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -385,7 +388,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Stemcoach', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+                const Text('Stemcoach', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -623,7 +626,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             const SizedBox(height: 8),
             Text(
               _indoor ? 'Klaar voor de loopband' : (v.gpsReady ? 'Klaar voor de start' : 'GPS zoeken…'),
-              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800),
+              style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             Text(
@@ -668,7 +671,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               Fmt.duration(v.movingSeconds),
               textAlign: TextAlign.center,
               maxLines: 1,
-              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 80, fontWeight: FontWeight.w800, height: 1),
+              style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 80, fontWeight: FontWeight.w800, height: 1),
             ),
           ),
           if (v.indoor && v.treadmillKmh != null) ...[
@@ -711,7 +714,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
               textAlign: TextAlign.center,
               maxLines: 1,
-              style: TextStyle(fontFamily: RwFonts.display, fontSize: v.hasIntervals ? 72 : 96, fontWeight: FontWeight.w800, height: 1),
+              style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: v.hasIntervals ? 72 : 96, fontWeight: FontWeight.w800, height: 1),
             ),
           ),
         ),
@@ -904,7 +907,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           Expanded(
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(64)),
-                              onPressed: v.status == RecorderStatus.paused ? _svc.resume : _svc.pause,
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                v.status == RecorderStatus.paused ? _svc.resume() : _svc.pause();
+                              },
                               icon: Icon(v.status == RecorderStatus.paused ? Icons.play_arrow : Icons.pause, size: 28),
                               label: Text(v.status == RecorderStatus.paused ? 'Verder' : 'Pauze', style: const TextStyle(fontSize: 17)),
                             ),
@@ -1158,7 +1164,7 @@ class _IntervalPanel extends StatelessWidget {
                           v.workNumber > 0 ? '${stepLabel(step.kind, walkRun: v.walkRun).toUpperCase()} · ${v.workNumber}/${v.reps}' : stepLabel(step.kind, walkRun: v.walkRun).toUpperCase(),
                           style: TextStyle(color: color, fontWeight: FontWeight.w800, letterSpacing: 0.6),
                         ),
-                        Text(left, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 44, fontWeight: FontWeight.w800, height: 1.1)),
+                        Text(left, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 44, fontWeight: FontWeight.w800, height: 1.1)),
                         Text(next == null ? 'Daarna: klaar' : 'Daarna: ${stepLabel(next.kind, walkRun: v.walkRun).toLowerCase()} ${next.amount}',
                             style: const TextStyle(color: RwColors.muted)),
                       ],
@@ -1230,7 +1236,7 @@ class _Big extends StatelessWidget {
           // Altijd op één regel (ook bij runs boven het uur of met grote letters).
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(value, maxLines: 1, style: TextStyle(fontFamily: RwFonts.display, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
+            child: Text(value, maxLines: 1, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(height: 2),
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
@@ -1268,7 +1274,7 @@ class _HeartRow extends StatelessWidget {
             Icon(Icons.favorite, color: bpm == null ? RwColors.subtle : RwColors.danger),
             const SizedBox(width: 10),
             Text(bpm == null ? (view.hrStatus == HrStatus.lost ? 'Band kwijt…' : 'Band verbinden…') : '$bpm',
-                style: TextStyle(fontFamily: RwFonts.display, fontSize: bpm == null ? 16 : 28, fontWeight: FontWeight.w800)),
+                style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: bpm == null ? 16 : 28, fontWeight: FontWeight.w800)),
             if (bpm != null) const Text('  bpm', style: TextStyle(color: RwColors.muted)),
             const Spacer(),
             if (zone > 0)
@@ -1304,7 +1310,10 @@ class _TreadmillSpeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final k = kmh;
-    void set(double v) => onChanged?.call(double.parse(v.clamp(3, 25).toStringAsFixed(1)));
+    void set(double v) {
+      HapticFeedback.selectionClick();
+      onChanged?.call(double.parse(v.clamp(3, 25).toStringAsFixed(1)));
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(999)),
@@ -1321,7 +1330,7 @@ class _TreadmillSpeed extends StatelessWidget {
               child: Column(
                 children: [
                   Text(k == null ? 'Snelheid' : '${k.toStringAsFixed(1).replaceAll('.', ',')} km/u',
-                      style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 22)),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 22)),
                   Text(k == null ? 'tik + of − om in te stellen' : 'van de loopband · tik om uit te zetten',
                       style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
                 ],

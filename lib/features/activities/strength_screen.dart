@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -114,8 +115,10 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
       WakelockPlus.enable().catchError((_) {});
     }
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final before = (_p.index, _p.resting);
       final t = _p.tick(1);
       _say(t);
+      if ((_p.index, _p.resting) != before) HapticFeedback.mediumImpact();
       if (_p.finished) {
         _timer?.cancel();
         _running = false;
@@ -154,7 +157,7 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                 const Icon(Icons.check_circle, color: RwColors.good, size: 72),
                 const SizedBox(height: 12),
                 const Text('Goed gedaan!',
-                    textAlign: TextAlign.center, style: TextStyle(fontFamily: RwFonts.display, fontSize: 32, fontWeight: FontWeight.w800)),
+                    textAlign: TextAlign.center, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 32, fontWeight: FontWeight.w800)),
                 Text('${(widget.routine.totalSeconds / 60).round()} minuten ${widget.routine.title.toLowerCase()}.',
                     textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
               ] else ...[
@@ -164,13 +167,13 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                 const SizedBox(height: 6),
                 Text(_p.resting ? 'Hierna: ${n?.name ?? ''}' : c.name,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontFamily: RwFonts.display, fontSize: 28, fontWeight: FontWeight.w800, height: 1.15)),
+                    style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, height: 1.15)),
                 const SizedBox(height: 10),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(Fmt.duration(_p.remaining.ceil()),
                       style: TextStyle(
-                          fontFamily: RwFonts.display, fontSize: 96, fontWeight: FontWeight.w800, color: _p.resting ? RwColors.good : RwColors.text)),
+                          fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 96, fontWeight: FontWeight.w800, color: _p.resting ? RwColors.good : RwColors.text)),
                 ),
                 const SizedBox(height: 10),
                 Text(_p.resting ? (n?.how ?? '') : c.how,

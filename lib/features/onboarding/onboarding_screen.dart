@@ -225,7 +225,7 @@ class _Page extends StatelessWidget {
                   const SizedBox(height: 36),
                   Text(title,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontFamily: RwFonts.display, fontSize: 32, fontWeight: FontWeight.w800, height: 1.1)),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 32, fontWeight: FontWeight.w800, height: 1.1)),
                   const SizedBox(height: 16),
                   Text(text, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted, fontSize: 16, height: 1.5)),
                   const Spacer(flex: 2),

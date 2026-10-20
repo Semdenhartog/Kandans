@@ -108,7 +108,7 @@ class _Cell extends StatelessWidget {
               Text(label, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
               const SizedBox(height: 4),
               Text(value,
-                  style: TextStyle(fontFamily: RwFonts.display, fontSize: 24, fontWeight: FontWeight.w800, color: color)),
+                  style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800, color: color)),
               Text(sub, style: const TextStyle(fontSize: 12, color: RwColors.muted)),
             ],
           ),

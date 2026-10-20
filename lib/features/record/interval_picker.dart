@@ -79,7 +79,7 @@ class _PickerSheetState extends State<_PickerSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Soort training', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+              const Text('Soort training', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
               const Text(
                 'Bij intervallen zegt de stem wanneer je snel moet en wanneer je mag herstellen, ook met je scherm uit.',

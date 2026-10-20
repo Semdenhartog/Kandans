@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -141,11 +142,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Wat ga je lopen?', style: TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+                  const Text('Wat ga je lopen?', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
                   _TypePicker(
                     value: _type,
                     onChanged: (t) {
+                      HapticFeedback.selectionClick();
                       setState(() => _type = t);
                       setSheet(() {});
                       NotificationService.instance.rememberTrainingType(t).then((_) => _rescheduleReminder()).ignore();
@@ -209,7 +211,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Expanded(
                     child: Text(
                       '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display),
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
                     ),
                   ),
                   IconButton(
@@ -613,7 +615,7 @@ class _HeroCard extends StatelessWidget {
                       )).ignore();
                     },
                   ),
-                  Text('${s.score}', style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 22, color: _scoreColor(s.score))),
+                  Text('${s.score}', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 22, color: _scoreColor(s.score))),
                   const SizedBox(width: 4),
                   Text(s.verdict, style: TextStyle(color: _scoreColor(s.score), fontWeight: FontWeight.w600)),
                 ],
@@ -627,7 +629,7 @@ class _HeroCard extends StatelessWidget {
                   Text(
                     goNowShown ? 'Nu' : Fmt.time(s.start),
                     style: const TextStyle(
-                      fontFamily: RwFonts.display,
+                      fontFamily: RwFonts.display, fontFeatures: rwTnum,
                       fontSize: 64,
                       fontWeight: FontWeight.w800,
                       color: RwColors.text,

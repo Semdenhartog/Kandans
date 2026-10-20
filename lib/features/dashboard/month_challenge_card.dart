@@ -97,7 +97,7 @@ class MonthChallengeCard extends ConsumerWidget {
                     ? const Icon(Icons.emoji_events, color: RwColors.accent, size: 36)
                     : Text(
                         '${(p.fraction * 100).round()}%',
-                        style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800),
+                        style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800),
                       ),
               ),
             ),
@@ -112,11 +112,11 @@ class MonthChallengeCard extends ConsumerWidget {
                   TextSpan(children: [
                     TextSpan(
                       text: done.toStringAsFixed(done < 100 ? 1 : 0).replaceAll('.', ','),
-                      style: const TextStyle(fontFamily: RwFonts.display, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent),
                     ),
                     TextSpan(
                       text: ' / ${target.round()} km',
-                      style: const TextStyle(fontFamily: RwFonts.display, fontSize: 18, fontWeight: FontWeight.w800, color: RwColors.muted),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: RwColors.muted),
                     ),
                   ]),
                 ),
@@ -203,12 +203,12 @@ class _GoalSheetState extends State<_GoalSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Je doel voor ${_monthName(DateTime.now())}',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
             const SizedBox(height: 16),
             Center(
               child: Text(
                 '${_km.round()} km',
-                style: const TextStyle(fontFamily: RwFonts.display, fontSize: 44, fontWeight: FontWeight.w800, color: RwColors.accent),
+                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 44, fontWeight: FontWeight.w800, color: RwColors.accent),
               ),
             ),
             Slider(

@@ -89,7 +89,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                           Icon(Icons.favorite, color: bpm == null ? RwColors.subtle : RwColors.danger, size: 36),
                           const SizedBox(width: 12),
                           Text(bpm == null ? '–' : '$bpm',
-                              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 48, fontWeight: FontWeight.w800)),
+                              style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 48, fontWeight: FontWeight.w800)),
                           const SizedBox(width: 6),
                           const Text('bpm', style: TextStyle(color: RwColors.muted)),
                           const Spacer(),

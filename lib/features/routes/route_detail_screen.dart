@@ -65,7 +65,7 @@ class RouteDetailScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text('Route naar je horloge',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display)),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
               const SizedBox(height: 10),
               const Text(
                 'RunWise maakt een GPX-bestand van deze route. Kies daarna de app van je horloge:\n\n'

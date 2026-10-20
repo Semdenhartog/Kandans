@@ -28,6 +28,9 @@ class RwColors {
 
 /// Lettertypes: Saira voor koppen en grote getallen (past bij het logo),
 /// DM Sans voor alle gewone tekst. Meegeleverd in assets/fonts (OFL-licentie).
+/// Cijfers even breed (Saira heeft 'tnum'), zodat tijden en tempo's niet verspringen als ze veranderen.
+const rwTnum = <FontFeature>[FontFeature.tabularFigures()];
+
 class RwFonts {
   static const display = 'Saira';
   static const body = 'DMSans';
@@ -53,7 +56,7 @@ ThemeData buildTheme() {
     scaffoldBackgroundColor: RwColors.background,
     fontFamily: RwFonts.body,
   );
-  TextStyle? display(TextStyle? s) => s?.copyWith(fontFamily: RwFonts.display, fontWeight: FontWeight.w800);
+  TextStyle? display(TextStyle? s) => s?.copyWith(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontFeatures: rwTnum);
 
   return base.copyWith(
     textTheme: base.textTheme
@@ -75,6 +78,7 @@ ThemeData buildTheme() {
       centerTitle: false,
       titleTextStyle: TextStyle(
         fontFamily: RwFonts.display,
+        fontFeatures: rwTnum,
         fontWeight: FontWeight.w800,
         fontSize: 24,
         color: RwColors.text,
@@ -191,5 +195,10 @@ ThemeData buildTheme() {
       contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: RwColors.text),
     ),
     dividerTheme: const DividerThemeData(color: RwColors.border),
+    // Vloeiende overgangen tussen schermen (vervagen en schuiven, zoals de nieuwste Android-stijl).
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    }),
   );
 }

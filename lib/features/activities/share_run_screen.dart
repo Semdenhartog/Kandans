@@ -325,7 +325,7 @@ class RunShareCard extends StatelessWidget {
                       Text(
                         km,
                         style: TextStyle(
-                          fontFamily: RwFonts.display,
+                          fontFamily: RwFonts.display, fontFeatures: rwTnum,
                           fontSize: 76,
                           fontWeight: FontWeight.w800,
                           height: 1,
@@ -336,7 +336,7 @@ class RunShareCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         'km',
-                        style: TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800, color: fg),
+                        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800, color: fg),
                       ),
                     ],
                   ),
@@ -383,7 +383,7 @@ class RunShareCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,
-              style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800, color: fg),
+              style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800, color: fg),
             ),
           ],
         ),

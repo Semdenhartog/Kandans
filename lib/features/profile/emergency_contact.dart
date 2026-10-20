@@ -115,7 +115,7 @@ Future<void> showSosSheet(BuildContext context) async {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Hulp nodig?', style: TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+            const Text('Hulp nodig?', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
             const SizedBox(height: 12),
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: RwColors.danger, minimumSize: const Size.fromHeight(52)),

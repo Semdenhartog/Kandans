@@ -187,7 +187,7 @@ class _RunCalendarScreenState extends ConsumerState<RunCalendarScreen> {
               ),
               Expanded(
                 child: Text('${_months[_month.month - 1]} ${_month.year}',
-                    textAlign: TextAlign.center, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+                    textAlign: TextAlign.center, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
               ),
               IconButton(
                 tooltip: 'Volgende maand',
@@ -369,7 +369,7 @@ class _RecapCard extends StatelessWidget {
     final maxM = r.perMonthKm.fold<double>(1, (a, b) => a > b ? a : b);
     Widget stat(String v, String l) => Expanded(
           child: Column(children: [
-            Text(v, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800)),
+            Text(v, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
             Text(l, style: const TextStyle(color: RwColors.muted, fontSize: 11)),
           ]),
         );
@@ -391,7 +391,7 @@ class _RecapCard extends StatelessWidget {
           const SizedBox(height: 18),
           const Text('MIJN JAAR IN RUNS', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 1)),
           Text(r.km.round().toString(),
-              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 84, fontWeight: FontWeight.w800, height: 1)),
+              style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 84, fontWeight: FontWeight.w800, height: 1)),
           const Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
           const SizedBox(height: 18),
           Row(children: [

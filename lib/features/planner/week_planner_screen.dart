@@ -229,7 +229,7 @@ class _DayCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(Fmt.time(e.start),
-                    style: const TextStyle(fontFamily: RwFonts.display, fontSize: 24, fontWeight: FontWeight.w800, color: RwColors.accent)),
+                    style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800, color: RwColors.accent)),
                 Text('score ${e.score}', style: TextStyle(color: _color(e.score), fontSize: 12, fontWeight: FontWeight.w700)),
               ],
             ),

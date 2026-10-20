@@ -77,7 +77,7 @@ class StatTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(value, maxLines: 1, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 19, fontWeight: FontWeight.w700)),
+            child: Text(value, maxLines: 1, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 19, fontWeight: FontWeight.w700)),
           ),
         ],
       ),

@@ -99,7 +99,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           const Text(
             'Je eigen AI-hardloopcoach',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, fontFamily: RwFonts.display),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum),
           ),
           const SizedBox(height: 8),
           const Text(

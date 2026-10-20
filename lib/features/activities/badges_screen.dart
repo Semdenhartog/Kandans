@@ -50,7 +50,7 @@ class BadgesScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Text('$earned van ${all.length} verdiend',
-              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 24, fontWeight: FontWeight.w800)),
+              style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           const Text('Tik op een badge voor meer uitleg.', style: TextStyle(color: RwColors.subtle)),
           const SizedBox(height: 16),
@@ -105,7 +105,7 @@ class BadgeTile extends StatelessWidget {
               children: [
                 _Medal(badge: b, size: 96, color: color),
                 const SizedBox(height: 12),
-                Text(b.title, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+                Text(b.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
                 Text(b.description, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
                 const SizedBox(height: 8),

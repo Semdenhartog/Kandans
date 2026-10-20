@@ -253,7 +253,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
                 const SizedBox(height: 16),
                 Text(
                   _byTime ? Fmt.duration(_minutes * 60) : '${_km.toStringAsFixed(_km % 1 == 0 ? 0 : 1).replaceAll('.', ',')} km',
-                  style: const TextStyle(fontFamily: RwFonts.display, fontSize: 40, fontWeight: FontWeight.w800, color: RwColors.accent),
+                  style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 40, fontWeight: FontWeight.w800, color: RwColors.accent),
                 ),
                 Text(
                   _byTime

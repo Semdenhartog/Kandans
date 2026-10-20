@@ -154,7 +154,7 @@ class _ShoeCard extends StatelessWidget {
           Text.rich(TextSpan(children: [
             TextSpan(
               text: '${km.round()}',
-              style: TextStyle(fontFamily: RwFonts.display, fontSize: 30, fontWeight: FontWeight.w800, color: color),
+              style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 30, fontWeight: FontWeight.w800, color: color),
             ),
             TextSpan(text: ' / ${shoe.limitKm} km', style: const TextStyle(color: RwColors.muted)),
           ])),
@@ -205,7 +205,7 @@ class _ShoeSheetState extends State<_ShoeSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Schoen toevoegen', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display)),
+          const Text('Schoen toevoegen', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
           const SizedBox(height: 14),
           TextField(
             controller: _name,

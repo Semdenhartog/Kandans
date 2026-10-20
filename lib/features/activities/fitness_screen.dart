@@ -35,7 +35,7 @@ class FitnessScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(advice.title, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent)),
+                  Text(advice.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent)),
                   const SizedBox(height: 4),
                   Text(advice.text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
                   const SizedBox(height: 14),

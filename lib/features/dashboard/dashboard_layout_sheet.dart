@@ -34,7 +34,7 @@ class _DashLayoutSheet extends ConsumerWidget {
                 children: [
                   const Expanded(
                     child: Text('Indeling van Vandaag',
-                        style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+                        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
                   ),
                   TextButton(onPressed: n.reset, child: const Text('Standaard')),
                 ],

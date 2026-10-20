@@ -102,9 +102,13 @@ class RouteMap extends StatefulWidget {
     this.overlayPadding = EdgeInsets.zero,
     this.borderRadius = 16,
     this.pois = const [],
+    this.animateIn = false,
   });
 
   final String polyline;
+
+  /// De route tekent zich bij het openen vanzelf over de kaart (na je run).
+  final bool animateIn;
   final double? windSpeedKmh;
   final double? windFromDegrees;
 
@@ -136,15 +140,42 @@ class RouteMap extends StatefulWidget {
   State<RouteMap> createState() => _RouteMapState();
 }
 
-class _RouteMapState extends State<RouteMap> {
+class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin {
   late RouteTrack _track;
   late List<ll.LatLng> _pts;
   late List<WindSegment> _segments;
+  AnimationController? _draw;
 
   @override
   void initState() {
     super.initState();
     _prepare();
+    final reduceMotion = WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+    if (widget.animateIn && !reduceMotion && _pts.length >= 2) {
+      _draw = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200))
+        ..addListener(() => setState(() {}));
+      Future<void>.delayed(const Duration(milliseconds: 350), () {
+        if (mounted) _draw?.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _draw?.dispose();
+    super.dispose();
+  }
+
+  List<ll.LatLng> _partial(double t) {
+    final n = (t * (_pts.length - 1)).floor() + 1;
+    return _pts.sublist(0, n.clamp(1, _pts.length));
+  }
+
+  /// 0..1 tijdens het intekenen, null als het klaar is (of er geen animatie is).
+  double? get _drawProgress {
+    final d = _draw;
+    if (d == null || d.isCompleted) return null;
+    return Curves.easeInOutCubic.transform(d.value);
   }
 
   @override
@@ -233,6 +264,32 @@ class _RouteMapState extends State<RouteMap> {
                 tileProvider: _tiles,
                 tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: photo ? _dimPhoto : _darkMap, child: tile),
               ),
+              if (_drawProgress case final t?) ...[
+                // Intekenen: de route groeit van start naar finish, met een gloeiende kop.
+                PolylineLayer(polylines: [
+                  if (_partial(t).length >= 2) ...[
+                    Polyline(points: _partial(t), strokeWidth: line + 10, color: RwColors.accent.withValues(alpha: 0.22)),
+                    Polyline(points: _partial(t), strokeWidth: line + 3.5, color: Colors.black.withValues(alpha: 0.8)),
+                    Polyline(points: _partial(t), strokeWidth: line, color: RwColors.accent),
+                  ],
+                ]),
+                MarkerLayer(markers: [
+                  Marker(point: _pts.first, width: 30, height: 30, child: const _Pin(icon: Icons.flag, color: RwColors.accent)),
+                  Marker(
+                    point: _partial(t).last,
+                    width: 26,
+                    height: 26,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: RwColors.accentLight,
+                        border: Border.all(color: Colors.white, width: 2.5),
+                        boxShadow: [BoxShadow(color: RwColors.accent.withValues(alpha: 0.8), blurRadius: 14, spreadRadius: 2)],
+                      ),
+                    ),
+                  ),
+                ]),
+              ] else ...[
               PolylineLayer(
                 polylines: [
                   // Gloed onder de route.
@@ -270,6 +327,7 @@ class _RouteMapState extends State<RouteMap> {
                   ),
                 ],
               ),
+              ],
               if (widget.highlightFraction != null)
                 ValueListenableBuilder<double?>(
                   valueListenable: widget.highlightFraction!,
@@ -390,7 +448,7 @@ class _KmBadge extends StatelessWidget {
         child: Text(
           '$km',
           style: const TextStyle(
-            fontFamily: RwFonts.display,
+            fontFamily: RwFonts.display, fontFeatures: rwTnum,
             fontWeight: FontWeight.w800,
             fontSize: 11,
             color: RwColors.text,
