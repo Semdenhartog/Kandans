@@ -229,13 +229,13 @@ final _coach = [
       createdAt: _now.subtract(const Duration(minutes: 8))),
 ];
 
-List<Override> _overrides() => [
+List<Override> _overrides({bool emptyPlan = false}) => [
       supabaseProvider.overrideWithValue(SupabaseClient('https://voorbeeld.supabase.co', 'anon')),
       currentUserProvider.overrideWithValue(null),
       profileProvider.overrideWith((ref) => Profile(id: 'u', firstName: 'Sem', homeLatitude: _home.lat, homeLongitude: _home.lon)),
       activitiesProvider.overrideWith((ref) => _runs),
       routesProvider.overrideWith((ref) => _routes),
-      planProvider.overrideWith((ref) => _plan),
+      planProvider.overrideWith((ref) => emptyPlan ? const <PlanSession>[] : _plan),
       shoesProvider.overrideWith((ref) => [Shoe(id: 's1', name: 'Novablast 4', isDefault: true), Shoe(id: 's2', name: 'Endorphin Speed')]),
       racesProvider.overrideWith((ref) => [RaceEvent(id: 'w1', name: 'Singelloop', raceDate: _now.add(const Duration(days: 38)), distanceMeters: 10000, goalTimeSeconds: 2880)]),
       coachMessagesProvider.overrideWith((ref) => _coach),
@@ -255,12 +255,12 @@ List<Override> _overrides() => [
     ];
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false}) async {
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(ProviderScope(
-    overrides: _overrides(),
+    overrides: _overrides(emptyPlan: emptyPlan),
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
@@ -376,5 +376,29 @@ void main() {
         );
       }));
   testWidgets('22 groot runs', (t) => _shot(t, '22_groot_runs', const ActivitiesScreen(), height: 1600, textScale: 1.35));
+  testWidgets('23 schema kiezen', (t) => _shot(t, '23_schema_kiezen', const TrainingPlanScreen(), height: 1900, emptyPlan: true));
+  testWidgets('24 briefing', (t) => _shot(t, '24_briefing', const _OpenBriefing(), height: 1100));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
+}
+
+/// Opent de briefing van de eerstvolgende training (voor de schermafbeelding).
+class _OpenBriefing extends StatefulWidget {
+  const _OpenBriefing();
+
+  @override
+  State<_OpenBriefing> createState() => _OpenBriefingState();
+}
+
+class _OpenBriefingState extends State<_OpenBriefing> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final next = _plan.firstWhere((s) => s.kind == SessionKind.long && !s.date.isBefore(_now));
+      showSessionBriefing(context, next, readinessScore: 57);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
 }
