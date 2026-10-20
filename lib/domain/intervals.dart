@@ -10,6 +10,16 @@ enum StepKind {
   final String label;
 }
 
+/// Naam van een stap; bij lopen/wandelen (beginnersschema) heten de stappen anders.
+String stepLabel(StepKind k, {bool walkRun = false}) => !walkRun
+    ? k.label
+    : switch (k) {
+        StepKind.warmup => 'Inwandelen',
+        StepKind.work => 'Hardlopen',
+        StepKind.rest => 'Wandelen',
+        StepKind.cooldown => 'Uitwandelen',
+      };
+
 /// Eén stap: op tijd (seconden) of op afstand (meters).
 class IntervalStep {
   const IntervalStep(this.kind, {this.seconds, this.meters}) : assert((seconds == null) != (meters == null));
@@ -39,9 +49,29 @@ class IntervalStep {
 String _time(int s) => s < 60 ? '$s s' : (s % 60 == 0 ? '${s ~/ 60} min' : '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}');
 
 class IntervalPlan {
-  const IntervalPlan(this.name, this.steps);
+  const IntervalPlan(this.name, this.steps, {this.walkRun = false});
   final String name;
   final List<IntervalStep> steps;
+
+  /// Afwisselend hardlopen en wandelen (voor beginners): andere woorden voor de stem.
+  final bool walkRun;
+
+  /// Hardlopen/wandelen: [reps] keer [runSeconds] lopen en [walkSeconds] wandelen, met 5 min in- en uitwandelen.
+  factory IntervalPlan.walkRun({required int reps, required int runSeconds, required int walkSeconds, String? name}) {
+    final run = IntervalStep(StepKind.work, seconds: runSeconds);
+    return IntervalPlan(
+      name ?? '$reps × ${run.amount} lopen',
+      [
+        const IntervalStep(StepKind.warmup, seconds: 300),
+        for (var i = 0; i < reps; i++) ...[
+          run,
+          if (i < reps - 1 && walkSeconds > 0) IntervalStep(StepKind.rest, seconds: walkSeconds),
+        ],
+        const IntervalStep(StepKind.cooldown, seconds: 300),
+      ],
+      walkRun: true,
+    );
+  }
 
   int get reps => steps.where((s) => s.kind == StepKind.work).length;
 
@@ -81,13 +111,13 @@ class IntervalPlan {
     ]),
   ];
 
-  Map<String, dynamic> toJson() => {'name': name, 'steps': [for (final s in steps) s.toJson()]};
+  Map<String, dynamic> toJson() => {'name': name, 'steps': [for (final s in steps) s.toJson()], if (walkRun) 'w': true};
 
   static IntervalPlan? fromJson(Object? j) {
     if (j is! Map || j['steps'] is! List) return null;
     final steps = [for (final s in j['steps'] as List) IntervalStep.fromJson(s)].whereType<IntervalStep>().toList();
     if (steps.isEmpty) return null;
-    return IntervalPlan((j['name'] as String?) ?? 'Intervallen', steps);
+    return IntervalPlan((j['name'] as String?) ?? 'Intervallen', steps, walkRun: j['w'] == true);
   }
 }
 
@@ -151,7 +181,14 @@ class IntervalTracker {
     final s = current;
     if (s == null) return const IntervalCue('Intervallen klaar. Goed gedaan! Loop rustig uit of stop je run.', stepChanged: true, finished: true);
     final reps = plan.reps;
-    final text = switch (s.kind) {
+    final text = plan.walkRun
+        ? switch (s.kind) {
+            StepKind.warmup => 'We beginnen met ${s.spokenAmount} stevig wandelen.',
+            StepKind.work => 'Hardlopen! Blok $workNumber van $reps, ${s.spokenAmount}. Rustig tempo, je moet kunnen praten.',
+            StepKind.rest => 'Wandelen. ${s.spokenAmount}, en blijf goed doorstappen.',
+            StepKind.cooldown => 'Klaar met lopen! Nog ${s.spokenAmount} uitwandelen.',
+          }
+        : switch (s.kind) {
       StepKind.warmup => 'Inlopen, ${s.spokenAmount} rustig.',
       StepKind.work => 'Snel! Interval $workNumber van $reps, ${s.spokenAmount}.',
       StepKind.rest => 'Rustig. ${s.spokenAmount} herstellen.',
@@ -172,10 +209,10 @@ class IntervalTracker {
     if (!_warned && total > warnAt * 2 && left <= warnAt) {
       _warned = true;
       final n = next;
-      final then = n == null ? 'daarna klaar' : 'daarna ${n.kind.label.toLowerCase()}';
+      final then = n == null ? 'daarna klaar' : 'daarna ${stepLabel(n.kind, walkRun: plan.walkRun).toLowerCase()}';
       return IntervalCue(s.byDistance ? 'Nog 100 meter, $then.' : 'Nog 10 seconden, $then.');
     }
-    if (!_halfway && s.kind == StepKind.work && total >= (s.byDistance ? 800 : 180) && left <= total / 2) {
+    if (!_halfway && s.kind == StepKind.work && !plan.walkRun && total >= (s.byDistance ? 800 : 180) && left <= total / 2) {
       _halfway = true;
       return const IntervalCue('Halverwege. Hou vol!');
     }

@@ -9,6 +9,11 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../domain/beginner_plan.dart';
+import '../../domain/clothing.dart';
+import '../../domain/start_time_scoring.dart';
+import '../dashboard/dashboard_providers.dart';
+import '../../domain/plan_check.dart';
 import '../../domain/readiness.dart';
 import '../../domain/training_load.dart';
 import '../../domain/training_plan.dart';
@@ -63,6 +68,13 @@ Future<void> _rememberSetup(PlanSetup setup) async {
   } catch (_) {}
 }
 
+Future<void> _forgetSetup() async {
+  try {
+    final p = await SharedPreferences.getInstance();
+    await p.remove(_setupKey);
+  } catch (_) {}
+}
+
 Future<PlanSetup?> _savedSetup() async {
   try {
     final p = await SharedPreferences.getInstance();
@@ -78,7 +90,7 @@ Future<void> recalibrateTrainingPlan(BuildContext context, WidgetRef ref) async 
   final setup = await _savedSetup();
   if (!context.mounted) return;
   if (setup == null) {
-    showMessage(context, 'Dit schema is gemaakt in een oudere versie. Maak een nieuw schema om tempo\'s bij te werken.');
+    showMessage(context, 'Tempo\'s bijwerken werkt bij schema\'s naar een afstand. Een beginnersschema werkt op tijd, niet op tempo.');
     return;
   }
   final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
@@ -180,6 +192,7 @@ class _PlanView extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
       children: [
+        const PlanCheckCard(),
         RwCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +298,7 @@ class _SessionTile extends StatelessWidget {
           if (!s.date.isBefore(today) && s.kind != SessionKind.race) ...[
             const SizedBox(height: 10),
             FilledButton.icon(
-              onPressed: () => startSession(context, s),
+              onPressed: () => showSessionBriefing(context, s),
               icon: const Icon(Icons.play_arrow),
               label: const Text('Start deze training'),
             ),
@@ -314,6 +327,10 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
   int _longDay = 7;
   List<PlanSession>? _preview;
   PlanSetup? _setup;
+
+  /// null = naar een afstand; anders een beginnersschema.
+  BeginnerProgram? _program;
+  int _weeks = BeginnerProgram.start.defaultWeeks;
   bool _saving = false;
 
   @override
@@ -333,6 +350,16 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
   }
 
   void _make() {
+    final program = _program;
+    if (program != null) {
+      final tomorrow = DateTime.now().add(const Duration(days: 1));
+      final plan = buildBeginnerPlan(program, start: tomorrow, runDays: _days.toList(), weeks: _weeks);
+      setState(() {
+        _preview = plan;
+        _setup = null;
+      });
+      return;
+    }
     final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
     final weeks = weeklyTotals(runs, DateTime.now(), weeks: 4);
     final weekly = weeks.fold<double>(0, (s, w) => s + w.km) / 4;
@@ -363,7 +390,11 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
     setState(() => _saving = true);
     try {
       await ref.read(repositoryProvider).savePlan(p);
-      if (_setup != null) await _rememberSetup(_setup!);
+      if (_setup != null) {
+        await _rememberSetup(_setup!);
+      } else {
+        await _forgetSetup();
+      }
       ref.invalidate(planProvider);
       widget.onDone();
       if (mounted) showMessage(context, 'Je schema staat klaar. Je ziet de training van vandaag ook op Vandaag.');
@@ -386,17 +417,65 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
       children: [
-        const Text(
-          'Een schema op maat: rustige duurlopen, intervallen, tempolopen en een lange duurloop, '
-          'geleidelijk opgebouwd naar je doel. De stem in de app begeleidt je bij elke training.',
-          style: TextStyle(color: RwColors.muted, height: 1.4),
-        ),
-        if (races.isNotEmpty) ...[
+        _label('WAT WIL JE?'),
+        for (final (p, title, text, icon) in [
+          (null, 'Naar een afstand', '5 km, 10 km, halve of hele marathon, met tempo\'s en intervallen.', Icons.flag_outlined),
+          (BeginnerProgram.start, BeginnerProgram.start.title, BeginnerProgram.start.description, Icons.directions_walk),
+          (BeginnerProgram.comeback, BeginnerProgram.comeback.title, BeginnerProgram.comeback.description, Icons.healing_outlined),
+        ])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: _program == p ? RwColors.accent : RwColors.border, width: _program == p ? 1.5 : 1),
+              ),
+              child: ListTile(
+                leading: Icon(icon, color: _program == p ? RwColors.accent : RwColors.muted),
+                title: Text(title),
+                subtitle: Text(text),
+                onTap: () => setState(() {
+                  _program = p;
+                  if (p != null) {
+                    _weeks = p.defaultWeeks;
+                    if (_days.length > 4) {
+                      _days
+                        ..clear()
+                        ..addAll({2, 4, 7});
+                    }
+                  }
+                  _preview = null;
+                }),
+              ),
+            ),
+          ),
+        if (_program != null) ...[
+          _label('AANTAL WEKEN'),
+          Row(children: [
+            Expanded(
+              child: Slider(
+                value: _weeks.toDouble(),
+                min: _program!.minWeeks.toDouble(),
+                max: _program!.maxWeeks.toDouble(),
+                divisions: _program!.maxWeeks - _program!.minWeeks,
+                label: '$_weeks weken',
+                onChanged: (v) => setState(() {
+                  _weeks = v.round();
+                  _preview = null;
+                }),
+              ),
+            ),
+            SizedBox(width: 72, child: Text('$_weeks weken', style: const TextStyle(fontWeight: FontWeight.w700))),
+          ]),
+          const Text('Meer weken = rustiger opbouwen. Twijfel je? Kies wat langer.', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+        ],
+        if (_program == null && races.isNotEmpty) ...[
           _label('WEDSTRIJD'),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final r in races) ActionChip(avatar: const Icon(Icons.emoji_events_outlined, size: 18), label: Text(r.name), onPressed: () => _useRace(r)),
           ]),
         ],
+        if (_program == null) ...[
         _label('DOEL'),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final e in _goals.entries)
@@ -431,7 +510,8 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
           keyboardType: TextInputType.datetime,
           onChanged: (_) => _preview = null,
         ),
-        _label('LOOPDAGEN'),
+        ],
+        _label(_program == null ? 'LOOPDAGEN' : 'LOOPDAGEN (3 IS GENOEG)'),
         Wrap(spacing: 6, runSpacing: 6, children: [
           for (var d = 1; d <= 7; d++)
             FilterChip(
@@ -443,14 +523,16 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
               }),
             ),
         ]),
-        _label('LANGE DUURLOOP OP'),
-        Wrap(spacing: 6, children: [
-          for (final d in (_days.toList()..sort()))
-            ChoiceChip(label: Text(_dayNames[d - 1]), selected: _longDay == d, onSelected: (_) => setState(() {
-                  _longDay = d;
-                  _preview = null;
-                })),
-        ]),
+        if (_program == null) ...[
+          _label('LANGE DUURLOOP OP'),
+          Wrap(spacing: 6, children: [
+            for (final d in (_days.toList()..sort()))
+              ChoiceChip(label: Text(_dayNames[d - 1]), selected: _longDay == d, onSelected: (_) => setState(() {
+                    _longDay = d;
+                    _preview = null;
+                  })),
+          ]),
+        ],
         const SizedBox(height: 20),
         Row(children: [
           if (widget.canCancel) ...[
@@ -492,4 +574,187 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
       ],
     );
   }
+}
+
+/// Kaart met hoe je schema loopt, met een knop om bij te sturen (gemist of te veel).
+class PlanCheckCard extends ConsumerWidget {
+  const PlanCheckCard({super.key, this.compact = false});
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plan = ref.watch(planProvider).value ?? const <PlanSession>[];
+    final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final check = checkPlan(
+      plan,
+      [for (final a in runs) (start: a.startedAt, meters: a.distanceMeters, seconds: a.movingTimeSeconds)],
+      DateTime.now(),
+      fixedEnd: plan.isNotEmpty && plan.last.kind == SessionKind.race,
+    );
+    if (check == null || (compact && check.fix == null)) return const SizedBox.shrink();
+    final color = check.warning ? RwColors.warning : (check.fix == null ? RwColors.good : RwColors.accent);
+    Future<void> apply() async {
+      final now = DateTime.now();
+      final next = switch (check.fix!) {
+        PlanFix.repeatWeek => repeatLastWeek(plan, now),
+        PlanFix.lighterWeek => lighterThisWeek(plan, now),
+      };
+      try {
+        await ref.read(repositoryProvider).savePlan(next);
+        ref.invalidate(planProvider);
+        if (context.mounted) showMessage(context, 'Je schema is aangepast.');
+      } catch (e) {
+        if (context.mounted) showMessage(context, friendlyError(e), error: true);
+      }
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(top: compact ? 12 : 0, bottom: compact ? 0 : 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.45)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(children: [
+              Icon(check.warning ? Icons.trending_up : (check.fix == null ? Icons.check_circle_outline : Icons.event_repeat), color: color),
+              const SizedBox(width: 10),
+              Expanded(child: Text(check.title, style: TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 16))),
+            ]),
+            const SizedBox(height: 6),
+            Text(check.text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+            if (check.fix != null) ...[
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                  onPressed: apply,
+                  icon: const Icon(Icons.auto_fix_high, size: 18),
+                  label: Text(check.fix == PlanFix.repeatWeek ? 'Vorige week herhalen' : 'Deze week lichter maken'),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+TrainingType _typeFor(PlanSession s) => switch (s.kind) {
+      SessionKind.long => TrainingType.long,
+      SessionKind.tempo || SessionKind.interval => TrainingType.quality,
+      _ => TrainingType.easy,
+    };
+
+int _minutesOf(PlanSession s) {
+  final ip = s.intervals;
+  if (ip != null && ip.steps.every((x) => x.seconds != null)) {
+    return (ip.steps.fold<int>(0, (a, x) => a + x.seconds!) / 60).round();
+  }
+  if (s.distanceMeters != null && s.targetPace != null) return (s.distanceMeters! / 1000 * s.targetPace! / 60).round();
+  return 45;
+}
+
+/// Briefing vóór je training (zoals Runna's pre-workout briefing), met het weer van nú erbij:
+/// wat je gaat doen, je tempo, wat je aantrekt en een tip. Daarna start je meteen.
+Future<void> showSessionBriefing(BuildContext context, PlanSession session, {int? readinessScore}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (ctx) => Consumer(builder: (ctx, ref, _) {
+      final w = ref.watch(forecastProvider).value?.at(DateTime.now());
+      final s = session;
+      final minutes = _minutesOf(s);
+      final feels = w?.feelsLike ?? w?.temperature;
+      final pace = s.intervals == null || s.intervals!.walkRun ? s.targetPace : null;
+      final hot = pace != null && feels != null ? heatAdjustedPace(pace, feelsLike: feels, humidity: w?.humidity) : null;
+      final clothes = w == null ? null : clothingFor(w, _typeFor(s), durationMinutes: minutes);
+      final walkRun = s.intervals?.walkRun ?? false;
+      final tip = walkRun
+          ? 'Wandelen hoort erbij en is geen falen. Loop zo rustig dat je kunt praten; de stem zegt wanneer je wisselt.'
+          : switch (s.kind) {
+              SessionKind.easy => 'Rustig betekent echt rustig: praten moet kunnen. Hier groeit je conditie.',
+              SessionKind.long => minutes >= 60
+                  ? 'Begin langzamer dan je denkt en neem drinken mee. Zet eventueel de drink- en gelherinnering aan.'
+                  : 'Begin langzamer dan je denkt; aan het eind mag het iets sneller.',
+              SessionKind.tempo => '"Comfortabel zwaar": je kunt nog een paar woorden zeggen, geen zinnen. Goed inlopen voorkomt blessures.',
+              SessionKind.interval => 'Loop de eerste herhaling niet te hard: de laatste moet net zo snel kunnen.',
+              SessionKind.race => 'Start rustig, je wint de race in de tweede helft.',
+            };
+      Widget row(IconData icon, String text) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(icon, size: 20, color: RwColors.accent),
+              const SizedBox(width: 10),
+              Expanded(child: Text(text, style: const TextStyle(height: 1.4))),
+            ]),
+          );
+      return SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(children: [
+                CircleAvatar(
+                  backgroundColor: sessionColor(s.kind).withValues(alpha: 0.18),
+                  child: Icon(sessionIcon(s.kind), color: sessionColor(s.kind)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text('JOUW TRAINING', style: TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    Text(s.title, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15)),
+                  ]),
+                ),
+              ]),
+              const SizedBox(height: 12),
+              Text(s.description, style: const TextStyle(color: RwColors.muted, height: 1.45)),
+              const Divider(height: 28),
+              row(Icons.timer_outlined, 'Ongeveer $minutes minuten${s.distanceMeters != null ? ' · ${Fmt.km(s.distanceMeters!, decimals: 1)}' : ''}'),
+              if (pace != null)
+                row(
+                  Icons.speed,
+                  hot != null && hot - pace >= 3
+                      ? 'Tempo rond ${Fmt.pace(hot)} (aangepast voor ${Fmt.temp(feels)}; normaal ${Fmt.pace(pace)})'
+                      : 'Tempo rond ${Fmt.pace(pace)}',
+                ),
+              if (w != null)
+                row(Icons.wb_sunny_outlined,
+                    'Nu ${Fmt.temp(feels)} gevoel, wind ${Fmt.wind(w.windSpeed)}${w.windDirection == null ? '' : ' uit het ${Fmt.compass(w.windDirection!)}'}, regenkans ${Fmt.pct(w.precipitationProbability)}'),
+              if (clothes != null) row(Icons.checkroom_outlined, 'Aantrekken: ${clothes.summary.toLowerCase()}'),
+              if (readinessScore != null)
+                row(Icons.battery_charging_full,
+                    'Klaar-score $readinessScore${readinessScore < 50 ? ': overweeg de lichtere versie' : ''}'),
+              row(Icons.lightbulb_outline, tip),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  startSession(context, s, weather: w);
+                },
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Start'),
+              ),
+              if (s.kind != SessionKind.race)
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    startSession(context, easierSession(s), weather: w);
+                  },
+                  child: const Text('Ik voel me niet 100%: lichter maken'),
+                ),
+            ],
+          ),
+        ),
+      );
+    }),
+  );
 }

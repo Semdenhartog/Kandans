@@ -46,6 +46,7 @@ class RecorderView {
     this.routeRemaining,
     this.offRoute = false,
     this.ghostDelta,
+    this.walkRun = false,
   });
 
   final RecorderStatus status;
@@ -86,6 +87,9 @@ class RecorderView {
 
   /// Tegen je record op deze route: seconden achter (+) of voor (-). Null = geen record-race.
   final double? ghostDelta;
+
+  /// Lopen/wandelen-schema: stappen heten "Hardlopen" en "Wandelen".
+  final bool walkRun;
 
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
@@ -191,7 +195,7 @@ class RunRecorderService {
             if (!r.indoor && r.currentPace > 0) 'Tempo ${Fmt.pace(r.currentPace)}',
             if (!r.indoor && r.averagePace > 0) 'gem. ${Fmt.pace(r.averagePace)}',
             if (v.heartRate != null) '♥ ${v.heartRate}',
-            if (v.step != null) '${v.step!.kind.label}: nog ${v.step!.byDistance ? '${v.stepRemaining.round()} m' : Fmt.duration(v.stepRemaining)}',
+            if (v.step != null) '${stepLabel(v.step!.kind, walkRun: v.walkRun)}: nog ${v.step!.byDistance ? '${v.stepRemaining.round()} m' : Fmt.duration(v.stepRemaining)}',
           ].join(' · ');
     NotificationService.instance.showRunProgress(title, body.isEmpty ? 'RunWise neemt je run op' : body).ignore();
   }
@@ -425,6 +429,7 @@ class RunRecorderService {
       followRoute: _follower?.track.points ?? const [],
       routeRemaining: _follower?.remaining,
       offRoute: _follower?.offRoute ?? false,
+      walkRun: it?.plan.walkRun ?? false,
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
     );
   }

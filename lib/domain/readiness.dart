@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../data/models/models.dart';
 import 'best_efforts.dart';
+import 'intervals.dart';
 import 'training_plan.dart';
 
 /// Gegevens uit Health Connect (horloge of ring) voor je klaar-score. Alles mag ontbreken.
@@ -94,6 +95,24 @@ Readiness readiness({BodySignals body = const BodySignals(), double recoveryHour
 
 /// Lichtere versie van een training ("ik voel me niet 100%").
 PlanSession easierSession(PlanSession s, {double factor = 0.7}) {
+  final ip = s.intervals;
+  if (ip != null && ip.walkRun) {
+    // Lopen/wandelen: kortere loopstukken, zelfde opbouw.
+    final steps = [
+      for (final st in ip.steps)
+        st.kind == StepKind.work && st.seconds != null
+            ? IntervalStep(StepKind.work, seconds: math.max(60, (st.seconds! * factor / 30).round() * 30))
+            : st,
+    ];
+    return PlanSession(
+      date: s.date,
+      kind: s.kind,
+      week: s.week,
+      title: '${s.title} (aangepast)',
+      description: 'Lichtere versie: kortere stukken hardlopen, verder hetzelfde. Wandelen mag altijd. Voel je je ziek: sla hem over.',
+      intervals: IntervalPlan('${ip.name} (lichter)', steps, walkRun: true),
+    );
+  }
   final km = math.max(3.0, ((s.distanceMeters ?? 5000) / 1000 * factor * 2).round() / 2);
   return PlanSession(
     date: s.date,

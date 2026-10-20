@@ -100,7 +100,8 @@ class TodayCard extends ConsumerWidget {
             if (!doneToday && session.kind != SessionKind.race) ...[
               const SizedBox(height: 10),
               FilledButton.icon(
-                onPressed: () => startSession(context, hardToday && ready.suggestEasy ? easierSession(session) : session, weather: weather),
+                onPressed: () => showSessionBriefing(context, hardToday && ready.suggestEasy ? easierSession(session) : session,
+                    readinessScore: runs.isEmpty ? null : ready.score),
                 icon: const Icon(Icons.play_arrow),
                 label: Text(hardToday && ready.suggestEasy ? 'Start de rustige versie' : 'Start de training van vandaag'),
               ),
@@ -134,6 +135,7 @@ class TodayCard extends ConsumerWidget {
                 label: const Text('Maak een gratis trainingsschema'),
               ),
             ),
+          if (plan.isNotEmpty) const PlanCheckCard(compact: true),
           if (runs.isNotEmpty) ...[
             const Divider(height: 22),
             Row(

@@ -32,7 +32,9 @@ import 'package:runwise/domain/route_drawing.dart';
 import 'package:runwise/domain/route_photos.dart';
 import 'package:runwise/domain/best_efforts.dart';
 import 'package:runwise/domain/heart_rate.dart';
+import 'package:runwise/domain/beginner_plan.dart';
 import 'package:runwise/domain/guided_runs.dart';
+import 'package:runwise/domain/plan_check.dart';
 import 'package:runwise/domain/run_coach.dart';
 import 'package:runwise/domain/run_file_import.dart';
 import 'package:runwise/domain/training_load.dart';
@@ -1422,6 +1424,63 @@ void main() {
           expect(g.cues[i].atMinute, greaterThan(g.cues[i - 1].atMinute));
         }
       }
+    });
+  });
+
+  group('beginners en bijsturen', () {
+    final start = DateTime(2026, 10, 19); // maandag
+    test('van nul naar 5 km: opbouw van lopen/wandelen naar 30 minuten', () {
+      final p = buildBeginnerPlan(BeginnerProgram.start, start: start, runDays: [2, 4, 7], weeks: 9);
+      expect(p.length, 27);
+      expect(p.first.intervals!.walkRun, isTrue);
+      expect(p.first.title, contains('8 × 1 min'));
+      expect(p.last.title, contains('30 minuten'));
+      expect(p.every((s) => !s.date.isBefore(start)), isTrue);
+      // Meer weken: rustiger, dus week 4 is nog lopen/wandelen.
+      final slow = buildBeginnerPlan(BeginnerProgram.start, start: start, runDays: [2, 4, 7], weeks: 16);
+      expect(slow.where((s) => s.week == 4).first.intervals!.steps.where((x) => x.kind == StepKind.rest), isNotEmpty);
+    });
+    test('terugkomen: 4 tot 12 weken, eindigt op 40 minuten', () {
+      final p = buildBeginnerPlan(BeginnerProgram.comeback, start: start, runDays: [1, 3, 6], weeks: 20);
+      expect(p.last.week, 12);
+      expect(p.last.title, contains('40 minuten'));
+    });
+    test('lopen/wandelen: stem zegt hardlopen en wandelen', () {
+      final t = IntervalTracker(IntervalPlan.walkRun(reps: 2, runSeconds: 60, walkSeconds: 90));
+      expect(t.start(0, 0).text, contains('wandelen'));
+      expect(t.update(300, 0)!.text, contains('Hardlopen'));
+      expect(t.update(360, 0)!.text, startsWith('Wandelen'));
+      expect(IntervalPlan.fromJson(t.plan.toJson())!.walkRun, isTrue);
+      expect(stepLabel(StepKind.rest, walkRun: true), 'Wandelen');
+    });
+    test('lichtere versie van lopen/wandelen houdt het lopen/wandelen', () {
+      final s = buildBeginnerPlan(BeginnerProgram.start, start: start, runDays: [2], weeks: 9)[4];
+      final e = easierSession(s);
+      expect(e.intervals!.walkRun, isTrue);
+      expect(e.title, contains('aangepast'));
+    });
+    test('schema-check: gemist, te veel en op schema', () {
+      final plan = buildBeginnerPlan(BeginnerProgram.comeback, start: start, runDays: [1, 3, 5], weeks: 6);
+      final now = DateTime(2026, 10, 28, 12); // woensdag week 2
+      final missed = checkPlan(plan, const [], now, fixedEnd: false)!;
+      expect(missed.fix, PlanFix.repeatWeek);
+      final repeated = repeatLastWeek(plan, now);
+      expect(repeated.length, plan.length + plan.where((s) => s.date.isAfter(DateTime(2026, 10, 20)) && s.date.isBefore(DateTime(2026, 10, 28))).length);
+      expect(repeated.last.date, plan.last.date.add(const Duration(days: 7)));
+      final done = [
+        for (final s in plan)
+          if (s.date.isBefore(DateTime(2026, 10, 28))) (start: DateTime(s.date.year, s.date.month, s.date.day, 8), meters: 5000.0, seconds: 1800),
+      ];
+      expect(checkPlan(plan, done, now, fixedEnd: false)!.fix, isNull);
+      final race = buildPlan(
+          PlanSetup(goalMeters: 10000, raceDate: DateTime(2026, 12, 20), runDays: [2, 4, 7], longRunDay: 7, currentWeeklyKm: 20, thresholdPace: 300),
+          start);
+      final lots = [for (var d = 21; d < 28; d++) (start: DateTime(2026, 10, d, 8), meters: 9000.0, seconds: 2700)];
+      final much = checkPlan(race, lots, now, fixedEnd: true)!;
+      expect(much.warning, isTrue);
+      expect(much.fix, PlanFix.lighterWeek);
+      final lighter = lighterThisWeek(race, now);
+      expect(lighter.where((s) => s.title.contains('aangepast')), isNotEmpty);
     });
   });
 }

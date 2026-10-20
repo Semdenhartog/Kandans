@@ -1086,7 +1086,7 @@ class _IntervalPanel extends StatelessWidget {
     final next = v.nextStep;
     return Semantics(
       container: true,
-      label: '${step.kind.label}${v.workNumber > 0 ? ', interval ${v.workNumber} van ${v.reps}' : ''}, nog $left.',
+      label: '${stepLabel(step.kind, walkRun: v.walkRun)}${v.workNumber > 0 ? ', blok ${v.workNumber} van ${v.reps}' : ''}, nog $left.',
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
         decoration: BoxDecoration(
@@ -1105,11 +1105,11 @@ class _IntervalPanel extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          v.workNumber > 0 ? '${step.kind.label.toUpperCase()} · ${v.workNumber}/${v.reps}' : step.kind.label.toUpperCase(),
+                          v.workNumber > 0 ? '${stepLabel(step.kind, walkRun: v.walkRun).toUpperCase()} · ${v.workNumber}/${v.reps}' : stepLabel(step.kind, walkRun: v.walkRun).toUpperCase(),
                           style: TextStyle(color: color, fontWeight: FontWeight.w800, letterSpacing: 0.6),
                         ),
                         Text(left, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 44, fontWeight: FontWeight.w800, height: 1.1)),
-                        Text(next == null ? 'Daarna: klaar' : 'Daarna: ${next.kind.label.toLowerCase()} ${next.amount}',
+                        Text(next == null ? 'Daarna: klaar' : 'Daarna: ${stepLabel(next.kind, walkRun: v.walkRun).toLowerCase()} ${next.amount}',
                             style: const TextStyle(color: RwColors.muted)),
                       ],
                     ),
