@@ -12,6 +12,7 @@ import '../../domain/route_geometry.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/training_load.dart';
 import '../../domain/zones.dart';
+import '../../shared/reveal.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show windColor;
 
@@ -256,7 +257,7 @@ class _RunChart extends StatelessWidget {
     return Semantics(
       label: 'Grafiek van tempo${streams.altitude != null ? ', hoogte' : ''}${streams.heartRate != null ? ' en hartslag' : ''} over $km kilometer.',
       excludeSemantics: true,
-      child: CustomPaint(painter: _ChartPainter(streams, pace), size: Size.infinite),
+      child: RevealIn(child: CustomPaint(painter: _ChartPainter(streams, pace), size: Size.infinite)),
     );
   }
 }

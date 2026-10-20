@@ -56,7 +56,7 @@ class BadgesScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _Grid(badges: normal),
           const SizedBox(height: 20),
-          const Text('WEERBADGES', style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+          const Text('WEERBADGES', style: RwText.overline),
           const SizedBox(height: 4),
           const Text('Alleen in RunWise: voor lopen in bijzonder weer.', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           const SizedBox(height: 10),
@@ -133,22 +133,54 @@ class BadgeTile extends StatelessWidget {
   }
 }
 
-class _Medal extends StatelessWidget {
+class _Medal extends StatefulWidget {
   const _Medal({required this.badge, required this.size, required this.color});
   final bd.Badge badge;
   final double size;
   final Color color;
 
   @override
+  State<_Medal> createState() => _MedalState();
+}
+
+/// Een echte medaille: geslepen metaal (kegelverloop), een verzonken binnenring,
+/// een gegraveerd icoon en af en toe een lichtglans die eroverheen trekt.
+class _MedalState extends State<_Medal> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 5200));
+
+  @override
+  void initState() {
+    super.initState();
+    final still = WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+    if (widget.badge.earned && !still) {
+      // Iedere medaille op een eigen moment, zodat ze niet allemaal tegelijk glanzen.
+      _c.value = (widget.badge.id.hashCode % 100) / 100;
+      _c.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Color _shade(Color c, double l) {
+    final h = HSLColor.fromColor(c);
+    return h.withLightness((h.lightness + l).clamp(0.0, 1.0)).toColor();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final b = badge;
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          if (!b.earned && b.progress > 0)
+    final b = widget.badge;
+    final size = widget.size;
+    final color = widget.color;
+    if (!b.earned) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(alignment: Alignment.center, children: [
+          if (b.progress > 0)
             SizedBox(
               width: size,
               height: size,
@@ -159,12 +191,64 @@ class _Medal extends StatelessWidget {
             height: size - 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: b.earned ? color.withValues(alpha: 0.18) : RwColors.bar.withValues(alpha: 0.4),
-              border: Border.all(color: b.earned ? color : RwColors.border, width: 2),
+              color: RwColors.bar.withValues(alpha: 0.4),
+              border: Border.all(color: RwColors.border, width: 1.5),
             ),
-            child: Icon(badgeIcon(b.icon), size: size * 0.45, color: b.earned ? color : RwColors.subtle),
+            child: Icon(badgeIcon(b.icon), size: size * 0.42, color: RwColors.subtle),
           ),
-        ],
+        ]),
+      );
+    }
+    final light = _shade(color, 0.28), dark = _shade(color, -0.22), deep = _shade(color, -0.36);
+    final metal = SweepGradient(colors: [light, color, dark, color, light, color, dark, light]);
+    return SizedBox(
+      width: size,
+      height: size,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: size * 0.28, spreadRadius: -2),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 6, offset: const Offset(0, 3)),
+          ],
+        ),
+        child: ClipOval(
+          child: Stack(fit: StackFit.expand, children: [
+            DecoratedBox(decoration: BoxDecoration(gradient: metal)),
+            Padding(
+              padding: EdgeInsets.all(size * 0.1),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(center: const Alignment(-0.3, -0.4), radius: 1.1, colors: [color, dark, deep]),
+                  border: Border.all(color: Colors.black.withValues(alpha: 0.25), width: 1),
+                ),
+                child: Center(
+                  child: Icon(badgeIcon(b.icon), size: size * 0.4, color: Colors.white.withValues(alpha: 0.92), shadows: [
+                    Shadow(color: Colors.black.withValues(alpha: 0.45), offset: const Offset(0, 1.2), blurRadius: 1.5),
+                  ]),
+                ),
+              ),
+            ),
+            AnimatedBuilder(
+              animation: _c,
+              builder: (_, _) {
+                // Glans alleen in het eerste deel van de cyclus.
+                final t = (_c.value / 0.3).clamp(0.0, 1.0);
+                if (t <= 0 || t >= 1) return const SizedBox.shrink();
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment(-1.6 + 3.2 * t, -1),
+                      end: Alignment(-1.0 + 3.2 * t, 1),
+                      colors: [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: 0.45), Colors.white.withValues(alpha: 0)],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ]),
+        ),
       ),
     );
   }

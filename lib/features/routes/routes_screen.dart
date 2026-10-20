@@ -78,6 +78,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
     final routes = ref.watch(routesProvider);
     final bests = ref.watch(routeBestProvider).value ?? const {};
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Mijn routes'),
         actions: [

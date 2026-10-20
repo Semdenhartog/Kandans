@@ -161,6 +161,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
     final records = ref.watch(recordsProvider);
     final active = _filter.activeCount;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Mijn runs'),
         actions: [
@@ -276,7 +277,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                             _filter.isEmpty
                                 ? 'ALLE RUNS · ${list.length}'
                                 : '${shown.length} VAN ${list.length} RUNS · ${Fmt.km(km, decimals: 0)}',
-                            style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4),
+                            style: RwText.overline,
                           ),
                         ),
                         if (!_filter.isEmpty)
@@ -396,7 +397,7 @@ class _OverviewState extends State<_Overview> {
             children: [
               const Expanded(
                 child: Text('DEZE WEEK',
-                    style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+                    style: RwText.overline),
               ),
               Text(Fmt.km(weekKm * 1000, decimals: 1), style: const TextStyle(fontWeight: FontWeight.w700, color: RwColors.accent)),
             ],
@@ -617,7 +618,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
 
   Widget _label(String t) => Padding(
         padding: const EdgeInsets.only(top: 16, bottom: 8),
-        child: Text(t, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+        child: Text(t, style: RwText.overline),
       );
 
   @override
@@ -859,7 +860,7 @@ class _WeekHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+            child: Text(label, style: RwText.overline),
           ),
           Text('${km.toStringAsFixed(1).replaceAll('.', ',')} km · $runs ${runs == 1 ? 'run' : 'runs'}',
               style: const TextStyle(fontSize: 13, color: RwColors.subtle)),

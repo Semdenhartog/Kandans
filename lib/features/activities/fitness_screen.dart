@@ -6,6 +6,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../domain/training_load.dart';
+import '../../shared/reveal.dart';
 import '../../shared/widgets.dart';
 
 void openFitness(BuildContext context) {
@@ -67,7 +68,7 @@ class FitnessScreen extends ConsumerWidget {
                   Semantics(
                     label: 'Grafiek van fitheid en vermoeidheid. Fitheid nu ${today.fitness.round()}, vermoeidheid ${today.fatigue.round()}.',
                     excludeSemantics: true,
-                    child: SizedBox(height: 180, child: CustomPaint(painter: _FitnessPainter(series), size: Size.infinite)),
+                    child: SizedBox(height: 180, child: RevealIn(child: CustomPaint(painter: _FitnessPainter(series), size: Size.infinite))),
                   ),
                   const SizedBox(height: 8),
                   const Wrap(
@@ -196,6 +197,37 @@ class _FitnessPainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round,
       );
     }
+
+    // Zachte oranje vulling onder de fitheidslijn.
+    final fill = Path()..moveTo(x(0), h);
+    for (var i = 0; i < days.length; i++) {
+      fill.lineTo(x(i), y(days[i].fitness));
+    }
+    fill
+      ..lineTo(x(days.length - 1), h)
+      ..close();
+    canvas.drawPath(
+      fill,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [RwColors.accent.withValues(alpha: 0.28), RwColors.accent.withValues(alpha: 0)],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, h)),
+    );
+    // Gloed onder de lijn zelf.
+    final glowPath = Path()..moveTo(x(0), y(days.first.fitness));
+    for (var i = 1; i < days.length; i++) {
+      glowPath.lineTo(x(i), y(days[i].fitness));
+    }
+    canvas.drawPath(
+      glowPath,
+      Paint()
+        ..color = RwColors.accent.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 7
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
 
     line((d) => d.fatigue, const Color(0xFF8D8D98), 1.6);
     line((d) => d.fitness, RwColors.accent, 2.6);

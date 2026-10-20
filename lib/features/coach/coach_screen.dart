@@ -108,6 +108,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     final premium = profile?.isPremium ?? false;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Coach'),
         actions: [

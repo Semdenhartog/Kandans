@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme.dart';
+import 'aura.dart';
 import '../data/services/location_service.dart';
 import '../data/services/offline_cache.dart';
 import '../data/services/sync_service.dart';
@@ -103,22 +105,38 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     final shell = widget.shell;
     return Scaffold(
-      body: shell,
+      // Aura achter de tabbladen; de tabbladen zelf zijn doorzichtig.
+      body: Stack(children: [const Positioned.fill(child: RwAura()), shell]),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const _OfflineBanner(),
-          NavigationBar(
-            selectedIndex: shell.currentIndex,
-            onDestinationSelected: (i) =>
-                shell.goBranch(i, initialLocation: i == shell.currentIndex),
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), label: 'Vandaag'),
-              NavigationDestination(icon: Icon(Icons.directions_run), label: 'Runs'),
-              NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Routes'),
-              NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), label: 'Coach'),
-              NavigationDestination(icon: Icon(Icons.person_outline), label: 'Ik'),
-            ],
+          // Satijnen navigatiebalk: licht doorschijnend, met een fijne lichte rand bovenaan.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [RwColors.surfaceHigh.withValues(alpha: 0.92), RwColors.surface],
+              ),
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.07))),
+            ),
+            child: NavigationBar(
+              backgroundColor: Colors.transparent,
+              selectedIndex: shell.currentIndex,
+              animationDuration: const Duration(milliseconds: 450),
+              onDestinationSelected: (i) {
+                if (i != shell.currentIndex) HapticFeedback.selectionClick();
+                shell.goBranch(i, initialLocation: i == shell.currentIndex);
+              },
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny), label: 'Vandaag'),
+                NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: 'Runs'),
+                NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: 'Routes'),
+                NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Coach'),
+                NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Ik'),
+              ],
+            ),
           ),
         ],
       ),

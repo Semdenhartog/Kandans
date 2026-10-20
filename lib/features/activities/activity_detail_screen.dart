@@ -128,19 +128,8 @@ class ActivityDetailScreen extends ConsumerWidget {
     final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
     final history = a.routeId == null ? null : routeHistory(all, a.routeId!);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(Fmt.date(a.startedAt)),
-        actions: [
-          IconButton(
-            tooltip: 'Delen',
-            icon: const Icon(Icons.ios_share),
-            onPressed: () => openShareRun(context, a, route: route, badges: badges),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+    final list = ListView(
+        padding: EdgeInsets.fromLTRB(16, a.hasTrack ? 0 : 4, 16, 32),
         children: [
           Text(
             runTitle(a, routeName: route?.name),
@@ -184,18 +173,6 @@ class ActivityDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (a.hasTrack) ...[
-                        SizedBox(
-                          height: 180,
-                          child: RouteMap(
-                            polyline: a.trackPolyline!,
-                            windSpeedKmh: a.windSpeedKmh,
-                            windFromDegrees: a.windDirectionDegrees,
-                            compact: true,
-                            interactive: false,
-                            showLayerToggle: false,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
                         const Text(
                           'Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt RunWise je volgende runs hier vanzelf aan.',
                           style: TextStyle(color: RwColors.muted, height: 1.45),
@@ -353,6 +330,71 @@ class ActivityDetailScreen extends ConsumerWidget {
             const Text('Gegevens via Strava', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
         ],
+      );
+    if (!a.hasTrack) {
+      return Scaffold(
+        appBar: AppBar(
+        title: Text(Fmt.date(a.startedAt)),
+        actions: [
+          IconButton(
+            tooltip: 'Delen',
+            icon: const Icon(Icons.ios_share),
+            onPressed: () => openShareRun(context, a, route: route, badges: badges),
+          ),
+        ],
+      ),
+        body: list,
+      );
+    }
+    // Met GPS-spoor: de kaart als grote kop die bij scrollen langzamer meeschuift (parallax)
+    // en onderin wegvloeit in de achtergrond.
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, _) => [
+          SliverAppBar(
+            pinned: true,
+            stretch: true,
+            expandedHeight: 300,
+            backgroundColor: RwColors.background,
+            surfaceTintColor: Colors.transparent,
+            title: Text(Fmt.date(a.startedAt)),
+            actions: [
+              IconButton(
+                tooltip: 'Delen',
+                icon: const Icon(Icons.ios_share),
+                onPressed: () => openShareRun(context, a, route: route, badges: badges),
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.parallax,
+              stretchModes: const [StretchMode.zoomBackground],
+              background: Stack(fit: StackFit.expand, children: [
+                RouteMap(
+                  polyline: a.trackPolyline!,
+                  windSpeedKmh: a.windSpeedKmh,
+                  windFromDegrees: a.windDirectionDegrees,
+                  compact: true,
+                  interactive: false,
+                  showLayerToggle: false,
+                  animateIn: true,
+                ),
+                const IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xCC09090B), Color(0x0009090B), Color(0x0009090B), RwColors.background],
+                        stops: [0, 0.28, 0.62, 1],
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ],
+        body: list,
       ),
     );
   }

@@ -68,11 +68,20 @@ class _BootstrapState extends State<_Bootstrap> {
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: _init,
-      builder: (context, snap) {
+      builder: (context, snap) => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 550),
+        switchInCurve: Curves.easeOut,
+        child: _screen(context, snap),
+      ),
+    );
+  }
+
+  Widget _screen(BuildContext context, AsyncSnapshot<void> snap) {
         if (snap.connectionState == ConnectionState.done && !snap.hasError) {
-          return const ProviderScope(child: RunWiseApp());
+          return const ProviderScope(key: ValueKey('app'), child: RunWiseApp());
         }
         return MaterialApp(
+          key: const ValueKey('start'),
           debugShowCheckedModeBanner: false,
           theme: buildTheme(),
           home: Scaffold(
@@ -99,20 +108,79 @@ class _BootstrapState extends State<_Bootstrap> {
                             ),
                           ],
                         )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset('assets/logo/logo.png', width: 220, semanticLabel: 'RunWise'),
-                            const SizedBox(height: 28),
-                            const CircularProgressIndicator(),
-                          ],
-                        ),
+                      : const _Intro(),
                 ),
               ),
             ),
           ),
         );
-      },
+  }
+}
+
+/// Opstartscherm: logo dat zacht binnenkomt over een ademende gloed, met een dunne laadlijn.
+class _Intro extends StatefulWidget {
+  const _Intro();
+
+  @override
+  State<_Intro> createState() => _IntroState();
+}
+
+class _IntroState extends State<_Intro> with TickerProviderStateMixin {
+  late final _in = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..forward();
+  late final _glow = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _in.dispose();
+    _glow.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appear = CurvedAnimation(parent: _in, curve: Curves.easeOutCubic);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 300,
+          height: 220,
+          child: Stack(alignment: Alignment.center, children: [
+            AnimatedBuilder(
+              animation: _glow,
+              builder: (_, _) => Container(
+                width: 220 + 40 * _glow.value,
+                height: 220 + 40 * _glow.value,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(colors: [
+                    RwColors.accent.withValues(alpha: 0.16 + 0.08 * _glow.value),
+                    RwColors.accent.withValues(alpha: 0),
+                  ]),
+                ),
+              ),
+            ),
+            FadeTransition(
+              opacity: appear,
+              child: ScaleTransition(
+                scale: Tween(begin: 0.92, end: 1.0).animate(appear),
+                child: Image.asset('assets/logo/logo.png', width: 220, semanticLabel: 'RunWise'),
+              ),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 24),
+        FadeTransition(
+          opacity: appear,
+          child: const SizedBox(
+            width: 120,
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(2)),
+              child: LinearProgressIndicator(minHeight: 2, color: RwColors.accent, backgroundColor: RwColors.bar),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

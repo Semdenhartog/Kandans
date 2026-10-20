@@ -27,6 +27,7 @@ import '../../domain/intervals.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/shoes.dart';
+import '../../shared/rolling_text.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
 import 'interval_picker.dart';
@@ -148,7 +149,25 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     super.dispose();
   }
 
+  /// Aftellen 3-2-1 (met tikjes en een belletje), dan starten.
+  int? _countdown;
+
   Future<void> _start() async {
+    if (_countdown != null) return;
+    for (final n in [3, 2, 1]) {
+      if (!mounted) return;
+      setState(() => _countdown = n);
+      HapticFeedback.mediumImpact();
+      await Future<void>.delayed(const Duration(milliseconds: 750));
+    }
+    if (!mounted) return;
+    setState(() => _countdown = 0);
+    await _begin();
+    await Future<void>.delayed(const Duration(milliseconds: 450));
+    if (mounted) setState(() => _countdown = null);
+  }
+
+  Future<void> _begin() async {
     HapticFeedback.heavyImpact();
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
@@ -676,10 +695,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         if (v.indoor || (!_svc.isRecording && _indoor)) ...[
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
+            child: RollingText(
               Fmt.duration(v.movingSeconds),
-              textAlign: TextAlign.center,
-              maxLines: 1,
               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 80, fontWeight: FontWeight.w800, height: 1),
             ),
           ),
@@ -719,10 +736,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
           child: FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
+            child: RollingText(
               (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
-              textAlign: TextAlign.center,
-              maxLines: 1,
               style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: v.hasIntervals ? 72 : 96, fontWeight: FontWeight.w800, height: 1),
             ),
           ),
@@ -974,7 +989,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   ),
               ],
             ),
-            body: SafeArea(
+            body: Stack(children: [
+              SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 child: Column(
@@ -1052,11 +1068,112 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 ),
               ),
             ),
+              Positioned.fill(child: _KmMoment(view: v, kmTimes: _svc.recording?.kmTimes ?? const [])),
+              if (_countdown != null) _Countdown(value: _countdown!),
+            ]),
           ),
         );
       },
     );
   }
+}
+
+/// Bij elke hele kilometer: even groot "KM 5" met je tijd voor die km (zoals een sporthorloge).
+class _KmMoment extends StatefulWidget {
+  const _KmMoment({required this.view, required this.kmTimes});
+  final RecorderView view;
+  final List<double> kmTimes;
+
+  @override
+  State<_KmMoment> createState() => _KmMomentState();
+}
+
+class _KmMomentState extends State<_KmMoment> {
+  int _seen = 0;
+  ({int km, double split, double? prev})? _show;
+
+  @override
+  void initState() {
+    super.initState();
+    _seen = widget.view.km;
+  }
+
+  @override
+  void didUpdateWidget(covariant _KmMoment old) {
+    super.didUpdateWidget(old);
+    final km = widget.view.km;
+    if (km > _seen && km >= 1 && widget.kmTimes.length >= km) {
+      final t = widget.kmTimes;
+      final split = t[km - 1] - (km >= 2 ? t[km - 2] : 0);
+      final prev = km >= 2 ? t[km - 2] - (km >= 3 ? t[km - 3] : 0) : null;
+      _show = (km: km, split: split, prev: prev);
+      Future<void>.delayed(const Duration(milliseconds: 3200), () {
+        if (mounted) setState(() => _show = null);
+      });
+    }
+    _seen = km;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = _show;
+    final diff = s == null || s.prev == null ? null : s.split - s.prev!;
+    return IgnorePointer(
+      child: AnimatedOpacity(
+        opacity: s == null ? 0 : 1,
+        duration: const Duration(milliseconds: 380),
+        child: AnimatedScale(
+          scale: s == null ? 1.06 : 1,
+          duration: const Duration(milliseconds: 420),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            color: RwColors.background.withValues(alpha: 0.88),
+            alignment: Alignment.center,
+            child: s == null
+                ? const SizedBox.shrink()
+                : Column(mainAxisSize: MainAxisSize.min, children: [
+                    const Text('KILOMETER', style: RwText.overline),
+                    Text('${s.km}',
+                        style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 140, fontWeight: FontWeight.w800, color: RwColors.accent, height: 1)),
+                    Text(Fmt.pace(s.split), style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 40, fontWeight: FontWeight.w800)),
+                    if (diff != null && diff.abs() >= 2)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          diff < 0 ? '${diff.abs().round()} s sneller dan je vorige km' : '${diff.round()} s trager dan je vorige km',
+                          style: TextStyle(color: diff < 0 ? RwColors.good : RwColors.muted, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                  ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Aftellen 3-2-1 voor de start, groot en met een tikje per tel.
+class _Countdown extends StatelessWidget {
+  const _Countdown({required this.value});
+  final int value;
+
+  @override
+  Widget build(BuildContext context) => Positioned.fill(
+        child: ColoredBox(
+          color: RwColors.background.withValues(alpha: 0.94),
+          child: Center(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              transitionBuilder: (c, a) => ScaleTransition(scale: Tween(begin: 1.6, end: 1.0).animate(a), child: FadeTransition(opacity: a, child: c)),
+              child: Text(
+                value == 0 ? 'GO' : '$value',
+                key: ValueKey(value),
+                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 180, fontWeight: FontWeight.w800, color: RwColors.accent, height: 1),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 /// Houd 1 seconde ingedrukt om het scherm te ontgrendelen (tegen per ongeluk tikken in je zak).
@@ -1256,7 +1373,7 @@ class _Big extends StatelessWidget {
           // Altijd op één regel (ook bij runs boven het uur of met grote letters).
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(value, maxLines: 1, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
+            child: RollingText(value, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(height: 2),
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),

@@ -195,6 +195,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'start-run-today',
         onPressed: () => openRecorder(context),
@@ -477,7 +478,7 @@ class _ResultsState extends State<_Results> {
                     children: [
                       const Expanded(
                         child: Text('PER UUR',
-                            style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+                            style: RwText.overline),
                       ),
                       FilterChip(
                         label: const Text('Alleen goede uren'),

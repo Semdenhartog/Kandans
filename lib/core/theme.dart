@@ -31,6 +31,27 @@ class RwColors {
 /// Cijfers even breed (Saira heeft 'tnum'), zodat tijden en tempo's niet verspringen als ze veranderen.
 const rwTnum = <FontFeature>[FontFeature.tabularFigures()];
 
+/// Vaste tekststijlen, zodat koppen, labels en cijfers overal hetzelfde zijn.
+class RwText {
+  /// Sectiekop in hoofdletters, met ruime spatiëring (zoals in horloges en luxe-apps).
+  static const overline = TextStyle(
+    fontFamily: RwFonts.body,
+    fontSize: 12,
+    color: RwColors.subtle,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.4,
+  );
+
+  /// Grote kop van een scherm of blad.
+  static const title = TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800, height: 1.15);
+
+  /// Groot getal (afstand, tijd).
+  static const number = TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, height: 1);
+
+  /// Klein label onder een getal.
+  static const label = TextStyle(fontFamily: RwFonts.body, fontSize: 12, color: RwColors.subtle);
+}
+
 class RwFonts {
   static const display = 'Saira';
   static const body = 'DMSans';
@@ -70,7 +91,8 @@ ThemeData buildTheme() {
         )
         .apply(bodyColor: RwColors.text, displayColor: RwColors.text),
     appBarTheme: const AppBarTheme(
-      backgroundColor: RwColors.background,
+      // Doorzichtig, zodat de aura bovenin doorschijnt (de schermen zelf hebben hun eigen achtergrond).
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       foregroundColor: RwColors.text,
       elevation: 0,
@@ -191,8 +213,40 @@ ThemeData buildTheme() {
     ),
     snackBarTheme: const SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: RwColors.surfaceHigh,
-      contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: RwColors.text),
+      backgroundColor: Color(0xFF26262C),
+      elevation: 6,
+      shape: StadiumBorder(side: BorderSide(color: Color(0x1FFFFFFF))),
+      insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 14),
+      contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: RwColors.text, fontWeight: FontWeight.w500),
+    ),
+    // Vernieuwen (omlaag trekken) en laadlijnen in RunWise-kleuren.
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: RwColors.accent,
+      refreshBackgroundColor: RwColors.surfaceHigh,
+      linearTrackColor: RwColors.bar,
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Color(0xFF151518),
+      surfaceTintColor: Colors.transparent,
+      modalBarrierColor: Color(0xB3000000),
+      showDragHandle: true,
+      dragHandleColor: Color(0xFF3A3A42),
+      dragHandleSize: Size(40, 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: Color(0x14FFFFFF)),
+      ),
+    ),
+    dialogTheme: const DialogThemeData(
+      backgroundColor: Color(0xFF17171B),
+      surfaceTintColor: Colors.transparent,
+      barrierColor: Color(0xB3000000),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(26)),
+        side: BorderSide(color: Color(0x14FFFFFF)),
+      ),
+      titleTextStyle: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800, color: RwColors.text),
+      contentTextStyle: TextStyle(fontFamily: RwFonts.body, fontSize: 15, color: RwColors.muted, height: 1.45),
     ),
     dividerTheme: const DividerThemeData(color: RwColors.border),
     // Vloeiende overgangen tussen schermen (vervagen en schuiven, zoals de nieuwste Android-stijl).

@@ -90,29 +90,48 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final billing = ref.watch(billingServiceProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('RunWise Premium')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent),
+      body: Stack(children: [
+        const Positioned.fill(child: _GoldBackdrop()),
+        ListView(
+        padding: EdgeInsets.fromLTRB(22, MediaQuery.paddingOf(context).top + kToolbarHeight, 22, 32),
         children: [
-          const Icon(Icons.auto_awesome, color: RwColors.accent, size: 44),
-          const SizedBox(height: 12),
+          const _Crest(),
+          const SizedBox(height: 18),
+          const Center(
+            child: Text('L I D M A A T S C H A P',
+                style: TextStyle(color: _gold, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2)),
+          ),
+          const SizedBox(height: 8),
+          const _GoldText(
+            'RunWise Premium',
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, height: 1.05),
+          ),
+          const SizedBox(height: 6),
           const Text(
             'Je eigen AI-hardloopcoach',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: RwColors.text),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           const Text(
             'Kent je runs, je wedstrijden en het weer. Vraag wat je deze week moet lopen, '
             'hoe je je 10 km aanpakt of wat je aantrekt bij 3 graden en regen.',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.muted, height: 1.5),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
+          const _GoldRule(),
+          const SizedBox(height: 10),
           const _Benefit(icon: Icons.chat_bubble_outline, text: 'Onbeperkt vragen aan je coach (max. 30 per dag)'),
           const _Benefit(icon: Icons.calendar_month_outlined, text: 'Trainingsweken op maat van je doel'),
           const _Benefit(icon: Icons.flag_outlined, text: 'Wedstrijdplan: tempo, kleding en drinken'),
-          const SizedBox(height: 20),
+          const _Benefit(icon: Icons.insights_outlined, text: 'Na elke run een persoonlijke analyse'),
+          const SizedBox(height: 10),
+          const _GoldRule(),
+          const SizedBox(height: 22),
           if (!billing.isAvailable)
             const RwCard(
               child: Text(
@@ -151,13 +170,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       const SizedBox(height: 10),
                     ],
                     const SizedBox(height: 6),
-                    FilledButton(
+                    _GoldButton(
                       onPressed: _busy ? null : () => _buy(selected),
-                      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
                       child: _busy
-                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
+                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: _ink))
                           : Text(selected.hasFreeTrial ? 'Start 1 maand gratis' : 'Abonneren',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _ink, letterSpacing: 0.3)),
                     ),
                     const SizedBox(height: 10),
                     Text(
@@ -193,8 +211,125 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
         ],
       ),
+      ]),
     );
   }
+}
+
+const _gold = Color(0xFFD9B45A);
+const _goldLight = Color(0xFFF6E3A1);
+const _goldDeep = Color(0xFF9C7A2A);
+const _ink = Color(0xFF1C1405);
+const _goldGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [_goldLight, _gold, _goldDeep, _gold],
+  stops: [0, 0.38, 0.72, 1],
+);
+
+/// Zwart met een warme gouden gloed bovenin en een vleugje korrel.
+class _GoldBackdrop extends StatelessWidget {
+  const _GoldBackdrop();
+
+  @override
+  Widget build(BuildContext context) => const IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0, -1.05),
+              radius: 1.1,
+              colors: [Color(0x40D9B45A), Color(0x0FD9B45A), Color(0x00000000)],
+              stops: [0, 0.45, 1],
+            ),
+          ),
+        ),
+      );
+}
+
+/// Een gouden embleem dat zacht oplicht.
+class _Crest extends StatelessWidget {
+  const _Crest();
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.85, end: 1),
+          duration: const Duration(milliseconds: 900),
+          curve: Curves.easeOutBack,
+          builder: (_, t, child) => Transform.scale(scale: t, child: child),
+          child: Container(
+            width: 92,
+            height: 92,
+            padding: const EdgeInsets.all(2.2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const SweepGradient(colors: [_goldLight, _gold, _goldDeep, _gold, _goldLight]),
+              boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.35), blurRadius: 40, spreadRadius: 2)],
+            ),
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(center: Alignment(-0.3, -0.4), colors: [Color(0xFF231B0B), Color(0xFF0A0804)]),
+              ),
+              child: ShaderMask(
+                shaderCallback: (r) => _goldGradient.createShader(r),
+                child: const Icon(Icons.auto_awesome, size: 40, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+class _GoldText extends StatelessWidget {
+  const _GoldText(this.text, {required this.style});
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => ShaderMask(
+        shaderCallback: (r) => _goldGradient.createShader(r),
+        child: Text(text, textAlign: TextAlign.center, style: style.copyWith(color: Colors.white)),
+      );
+}
+
+class _GoldRule extends StatelessWidget {
+  const _GoldRule();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 1,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [_gold.withValues(alpha: 0), _gold.withValues(alpha: 0.55), _gold.withValues(alpha: 0)]),
+        ),
+      );
+}
+
+class _GoldButton extends StatelessWidget {
+  const _GoldButton({required this.onPressed, required this.child});
+  final VoidCallback? onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: _goldGradient,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 8))],
+        ),
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            foregroundColor: _ink,
+            minimumSize: const Size.fromHeight(56),
+            shape: const StadiumBorder(),
+          ),
+          child: child,
+        ),
+      );
 }
 
 class _Benefit extends StatelessWidget {
@@ -207,7 +342,7 @@ class _Benefit extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
-            Icon(icon, color: RwColors.accent, size: 20),
+            Icon(icon, color: _gold, size: 20),
             const SizedBox(width: 12),
             Expanded(child: Text(text, style: const TextStyle(height: 1.4))),
           ],
@@ -229,28 +364,40 @@ class _PlanTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: RwColors.surface,
+          color: selected ? const Color(0xFF15110A) : const Color(0xFF0E0E10),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: selected ? RwColors.accent : RwColors.border, width: selected ? 2 : 1),
+          border: Border.all(color: selected ? _gold : const Color(0x22FFFFFF), width: selected ? 1.6 : 1),
+          boxShadow: selected ? [BoxShadow(color: _gold.withValues(alpha: 0.18), blurRadius: 20)] : null,
         ),
         child: Row(
           children: [
             Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? RwColors.accent : RwColors.subtle),
+                color: selected ? _gold : RwColors.subtle),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(plan.isYearly ? 'Per jaar' : 'Per maand',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                  Row(children: [
+                    Text(plan.isYearly ? 'Per jaar' : 'Per maand',
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    if (plan.isYearly) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(gradient: _goldGradient, borderRadius: BorderRadius.circular(20)),
+                        child: const Text('BESTE KEUZE',
+                            style: TextStyle(color: _ink, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                      ),
+                    ],
+                  ]),
                   if (plan.isYearly)
-                    const Text('Voordeligst: 4 maanden gratis vergeleken met per maand',
-                        style: TextStyle(color: RwColors.accent, fontSize: 12)),
+                    const Text('4 maanden gratis vergeleken met per maand',
+                        style: TextStyle(color: _gold, fontSize: 12)),
                 ],
               ),
             ),
-            Text(plan.price, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            Text(plan.price, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
           ],
         ),
       ),

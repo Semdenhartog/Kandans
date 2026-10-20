@@ -408,7 +408,7 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
 
   Widget _label(String t) => Padding(
         padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(t, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+        child: Text(t, style: RwText.overline),
       );
 
   @override

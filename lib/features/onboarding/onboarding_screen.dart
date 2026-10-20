@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -142,7 +144,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     return Scaffold(
-      body: SafeArea(
+      body: Stack(children: [
+        // Een route die zich met elke pagina verder intekent, met een lopende stip aan de kop.
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _pages,
+              builder: (_, _) {
+                final page = _pages.hasClients && _pages.position.haveDimensions ? (_pages.page ?? 0) : _page.toDouble();
+                return TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 1400),
+                  curve: Curves.easeOutCubic,
+                  builder: (_, intro, _) => CustomPaint(
+                    painter: _RouteBackdrop(progress: intro * (0.38 + page * 0.31).clamp(0.0, 1.0)),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        SafeArea(
         child: Column(
           children: [
             Align(
@@ -184,8 +206,72 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ],
         ),
       ),
+      ]),
     );
   }
+}
+
+class _RouteBackdrop extends CustomPainter {
+  _RouteBackdrop({required this.progress});
+  final double progress;
+
+  Path _route(Size s) {
+    final w = s.width, h = s.height;
+    return Path()
+      ..moveTo(w * 0.08, h * 0.86)
+      ..cubicTo(w * 0.30, h * 0.92, w * 0.18, h * 0.62, w * 0.42, h * 0.60)
+      ..cubicTo(w * 0.70, h * 0.58, w * 0.95, h * 0.70, w * 0.88, h * 0.46)
+      ..cubicTo(w * 0.80, h * 0.20, w * 0.48, h * 0.34, w * 0.36, h * 0.18)
+      ..cubicTo(w * 0.26, h * 0.05, w * 0.62, h * 0.02, w * 0.80, h * 0.08);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = _route(size);
+    final metric = path.computeMetrics().first;
+    // Hele route heel zacht als "nog te lopen".
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..color = Colors.white.withValues(alpha: 0.05),
+    );
+    final len = metric.length * progress.clamp(0.0, 1.0);
+    if (len <= 1) return;
+    final done = metric.extractPath(0, len);
+    final shader = ui.Gradient.linear(
+      Offset(0, size.height),
+      Offset(size.width, 0),
+      [RwColors.accentDeep.withValues(alpha: 0.15), RwColors.accent.withValues(alpha: 0.55)],
+    );
+    canvas.drawPath(
+      done,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 10
+        ..strokeCap = StrokeCap.round
+        ..color = RwColors.accent.withValues(alpha: 0.10)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+    );
+    canvas.drawPath(
+      done,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round
+        ..shader = shader,
+    );
+    final tip = metric.getTangentForOffset(len)?.position;
+    if (tip != null) {
+      canvas.drawCircle(tip, 14, Paint()..color = RwColors.accent.withValues(alpha: 0.18));
+      canvas.drawCircle(tip, 5.5, Paint()..color = RwColors.accent);
+      canvas.drawCircle(tip, 2.2, Paint()..color = Colors.white);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RouteBackdrop old) => old.progress != progress;
 }
 
 class _Page extends StatelessWidget {

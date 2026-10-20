@@ -39,6 +39,7 @@ import 'package:runwise/features/activities/strength_screen.dart';
 import 'package:runwise/features/activities/year_story_screen.dart';
 import 'package:runwise/domain/strength.dart';
 import 'package:runwise/features/coach/coach_screen.dart';
+import 'package:runwise/features/coach/paywall_screen.dart';
 import 'package:runwise/features/dashboard/dashboard_providers.dart';
 import 'package:runwise/features/dashboard/dashboard_screen.dart';
 import 'package:runwise/features/dashboard/month_challenge_card.dart';
@@ -274,7 +275,7 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
       home: nav ? _FakeShell(child: screen) : screen,
     ),
   ));
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < 14; i++) {
     await tester.pump(const Duration(milliseconds: 120));
   }
   if (after != null) {
@@ -396,6 +397,7 @@ void main() {
   testWidgets('26 kracht', (t) => _shot(t, '26_kracht', const StrengthScreen(), height: 915));
   testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
   testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
+  testWidgets('29 premium', (t) => _shot(t, '29_premium', const PaywallScreen(), height: 1300));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
 

@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 
-/// Kaart met optionele titel, in RunWise-stijl.
-class RwCard extends StatelessWidget {
+/// Kaart met optionele titel, in RunWise-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
+/// en als je erop kunt tikken veert hij een fractie in.
+class RwCard extends StatefulWidget {
   const RwCard({super.key, this.title, required this.child, this.padding, this.onTap, this.trailing});
 
   final String? title;
@@ -17,37 +19,71 @@ class RwCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<RwCard> createState() => _RwCardState();
+}
+
+class _RwCardState extends State<RwCard> {
+  bool _down = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: padding ?? const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (title != null) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: RwColors.subtle,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                    if (trailing != null) trailing!,
-                  ],
-                ),
-                SizedBox(height: trailing == null ? 10 : 2),
+    final w = widget;
+    final content = Padding(
+      padding: w.padding ?? const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (w.title != null) ...[
+            Row(
+              children: [
+                Expanded(child: Text(w.title!, style: RwText.overline)),
+                if (w.trailing != null) w.trailing!,
               ],
-              child,
-            ],
+            ),
+            SizedBox(height: w.trailing == null ? 12 : 2),
+          ],
+          w.child,
+        ],
+      ),
+    );
+    return AnimatedScale(
+      scale: _down ? 0.985 : 1,
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      child: DecoratedBox(
+        // Rand: licht aan de bovenkant, wegvallend naar onder.
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white.withValues(alpha: 0.11), RwColors.border.withValues(alpha: 0.6), RwColors.border.withValues(alpha: 0.35)],
+            stops: const [0, 0.35, 1],
+          ),
+          boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 10), spreadRadius: -8)],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(1),
+          child: Material(
+            color: RwColors.surface,
+            borderRadius: BorderRadius.circular(19),
+            clipBehavior: Clip.antiAlias,
+            child: Ink(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF18181C), RwColors.surface],
+                ),
+              ),
+              child: w.onTap == null
+                  ? content
+                  : InkWell(
+                      onTap: w.onTap,
+                      onHighlightChanged: (v) => setState(() => _down = v),
+                      child: content,
+                    ),
+            ),
           ),
         ),
       ),
@@ -256,7 +292,7 @@ class LoadingView extends StatefulWidget {
 }
 
 class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat();
 
   @override
   void dispose() {
@@ -264,10 +300,25 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
     super.dispose();
   }
 
-  Widget _bar(double w, double h) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(8)),
+  /// Grijze balk met een glanzende streep die eroverheen schuift.
+  Widget _bar(double w, double h, {double radius = 8}) => AnimatedBuilder(
+        animation: _c,
+        builder: (_, _) {
+          final t = _c.value * 3 - 1; // -1..2
+          return Container(
+            width: w,
+            height: h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(radius),
+              gradient: LinearGradient(
+                begin: Alignment(-1 + t * 2 - 1, 0),
+                end: Alignment(1 + t * 2 - 1, 0),
+                colors: const [RwColors.surfaceHigh, Color(0xFF2C2C33), RwColors.surfaceHigh],
+                stops: const [0.25, 0.5, 0.75],
+              ),
+            ),
+          );
+        },
       );
 
   @override
@@ -275,8 +326,7 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
     if (widget.spinner) return const Center(child: CircularProgressIndicator());
     return Semantics(
       label: 'Laden',
-      child: FadeTransition(
-        opacity: Tween(begin: 0.45, end: 1.0).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut)),
+      child: KeyedSubtree(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -293,11 +343,7 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
-                      ),
+                      _bar(56, 56, radius: 14),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -322,12 +368,18 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
   }
 }
 
+/// Zwevende melding als pil, met een icoon en een tikje.
 void showMessage(BuildContext context, String message, {bool error = false}) {
+  error ? HapticFeedback.mediumImpact() : HapticFeedback.lightImpact();
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: error ? const Color(0xFF4A1A24) : null,
+      content: Row(children: [
+        Icon(error ? Icons.error_outline : Icons.check_circle_outline, color: error ? RwColors.danger : RwColors.good, size: 20),
+        const SizedBox(width: 10),
+        Expanded(child: Text(message)),
+      ]),
+      backgroundColor: error ? const Color(0xFF3A1820) : null,
     ));
 }
 

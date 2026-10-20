@@ -26,6 +26,7 @@ import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
 import '../planner/training_plan_screen.dart';
 import 'heart_rate_screen.dart';
+import 'member_card.dart';
 import 'reminder_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -69,69 +70,39 @@ class ProfileScreen extends ConsumerWidget {
     final insights = ref.watch(insightsProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('Ik')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          RwCard(
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: RwColors.accent,
-                  child: Text(
-                    profile.when(
-                      data: (p) => (p?.displayName ?? '?').characters.first.toUpperCase(),
-                      loading: () => '',
-                      error: (_, _) => '?',
-                    ),
-                    style: const TextStyle(color: RwColors.accentDark, fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        profile.when(
-                          data: (p) => p?.displayName ?? '',
-                          loading: () => '',
-                          error: (_, _) => '',
-                        ),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                      ),
-                      Text(user?.email ?? '', style: const TextStyle(color: RwColors.subtle)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
           Consumer(builder: (context, ref, _) {
             final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
             final km = runs.fold<double>(0, (s, a) => s + a.distanceMeters / 1000);
             final badges = computeBadges(runs).where((b) => b.earned).length;
+            DateTime? since;
+            for (final r in runs) {
+              if (since == null || r.startedAt.isBefore(since)) since = r.startedAt;
+            }
+            final p = profile.value;
+            final name = (p?.fullName?.trim().isNotEmpty ?? false) ? p!.fullName!.trim() : (p?.displayName ?? '');
             return Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Expanded(child: StatTile(label: 'Runs', value: '${runs.length}')),
-                  const SizedBox(width: 8),
-                  Expanded(child: StatTile(label: 'Totaal', value: '${km.round()} km')),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => openBadges(context),
-                      child: StatTile(label: 'Badges', value: '$badges'),
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: MemberCard(
+                name: name,
+                email: user?.email ?? '',
+                runs: runs.length,
+                km: km,
+                badges: badges,
+                since: since?.toLocal(),
+                premium: p?.isPremium ?? false,
+                onBadges: () => openBadges(context),
               ),
             );
           }),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, left: 4),
+            child: Text(user?.email ?? '', style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
+          ),
           const _SectionTitle('TRAINING'),
           Card(
             child: Column(
@@ -418,6 +389,6 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 24, 4, 8),
-        child: Text(text, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+        child: Text(text, style: RwText.overline),
       );
 }
