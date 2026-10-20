@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
+import '../data/services/sound_service.dart';
 
 /// Een korte regen van confetti in RunWise-kleuren (bij een record of nieuwe badge). Eén keer, ~2,5 s.
 class Confetti extends StatefulWidget {
@@ -42,6 +43,7 @@ class _ConfettiState extends State<Confetti> with SingleTickerProviderStateMixin
       Future<void>.delayed(const Duration(milliseconds: 500), () {
         if (!mounted) return;
         HapticFeedback.heavyImpact();
+        SoundService.instance.play(RwSound.record).ignore();
         _c.forward();
       });
     }

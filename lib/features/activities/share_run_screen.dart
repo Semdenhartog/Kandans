@@ -23,7 +23,7 @@ void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<Strin
   ));
 }
 
-enum _CardStyle { donker, oranje, foto }
+enum _CardStyle { donker, oranje, foto, sticker }
 
 /// Maakt een mooie afbeelding van je run om te delen (Instagram, WhatsApp, ...).
 class ShareRunScreen extends StatefulWidget {
@@ -105,7 +105,19 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                 child: Center(
                   child: FittedBox(
-                    child: RepaintBoundary(
+                    // Bij de sticker een gestreepte achtergrond in het voorbeeld, zodat je ziet wat doorzichtig is.
+                    child: Container(
+                      decoration: _style == _CardStyle.sticker
+                          ? BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2E3A46), Color(0xFF4A3A2E)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            )
+                          : null,
+                      child: RepaintBoundary(
                       key: _key,
                       child: RunShareCard(
                         activity: widget.activity,
@@ -114,7 +126,9 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                         orange: _style == _CardStyle.oranje,
                         hideHome: _hideHome,
                         photo: _style == _CardStyle.foto ? _photo : null,
+                        sticker: _style == _CardStyle.sticker,
                       ),
+                    ),
                     ),
                   ),
                 ),
@@ -130,6 +144,7 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                       const ButtonSegment(value: _CardStyle.donker, label: Text('Donker')),
                       const ButtonSegment(value: _CardStyle.oranje, label: Text('Oranje')),
                       if (_photo != null) const ButtonSegment(value: _CardStyle.foto, label: Text('Foto')),
+                      const ButtonSegment(value: _CardStyle.sticker, label: Text('Sticker')),
                     ],
                     selected: {_style},
                     onSelectionChanged: (s) => setState(() => _style = s.first),
@@ -172,8 +187,12 @@ class RunShareCard extends StatelessWidget {
     this.orange = false,
     this.hideHome = true,
     this.photo,
+    this.sticker = false,
   });
   final Activity activity;
+
+  /// Doorzichtige achtergrond, om op je eigen foto te plakken (Instagram-story).
+  final bool sticker;
   final RunRoute? route;
   final List<String> badges;
   final bool orange;
@@ -201,8 +220,8 @@ class RunShareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final a = activity;
-    final fg = orange ? RwColors.accentDark : RwColors.text;
-    final muted = orange ? RwColors.accentDark.withValues(alpha: 0.7) : RwColors.muted;
+    final fg = orange ? RwColors.accentDark : (sticker ? Colors.white : RwColors.text);
+    final muted = orange ? RwColors.accentDark.withValues(alpha: 0.7) : (sticker ? Colors.white.withValues(alpha: 0.85) : RwColors.muted);
     final cost = weatherCost(a);
     final headline = _headline();
     final km = (a.distanceMeters / 1000).toStringAsFixed(2).replaceAll('.', ',');
@@ -220,7 +239,9 @@ class RunShareCard extends StatelessWidget {
       width: 360,
       height: 450,
       child: DecoratedBox(
-        decoration: BoxDecoration(
+        decoration: sticker
+            ? const BoxDecoration()
+            : BoxDecoration(
           gradient: orange
               ? const LinearGradient(
                   begin: Alignment.topLeft,
@@ -249,7 +270,7 @@ class RunShareCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (!orange && photo == null)
+            if (!orange && photo == null && !sticker)
               Positioned(
                 right: -120,
                 top: -120,
@@ -266,7 +287,10 @@ class RunShareCard extends StatelessWidget {
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
-              child: Column(
+              child: DefaultTextStyle.merge(
+                // Sticker: zachte schaduw, zodat de tekst op elke foto leesbaar is.
+                style: TextStyle(shadows: sticker ? const [Shadow(color: Color(0x99000000), blurRadius: 8, offset: Offset(0, 1))] : null),
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -360,6 +384,7 @@ class RunShareCard extends StatelessWidget {
                     Text('Gegevens via Strava', style: TextStyle(color: muted, fontSize: 9)),
                   ],
                 ],
+              ),
               ),
             ),
           ],

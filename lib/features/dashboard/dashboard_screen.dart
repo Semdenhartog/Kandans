@@ -30,11 +30,13 @@ import '../planner/availability_provider.dart';
 import '../planner/week_planner_screen.dart';
 import '../record/record_run_screen.dart';
 import '../../domain/dashboard_layout.dart';
+import '../../domain/training_plan.dart';
 import '../../domain/verdict.dart';
 import 'dashboard_layout_sheet.dart';
 import 'month_challenge_card.dart';
 import 'today_card.dart';
 import 'dashboard_providers.dart';
+import 'weather_ambience.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -509,6 +511,19 @@ class _ResultsState extends State<_Results> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Consumer(builder: (context, ref, _) {
+          final plan = ref.watch(planProvider).value ?? const <PlanSession>[];
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final session = plan.where((x) => x.date == today).firstOrNull;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Text(
+              personalLine(verdict, session, restDay: plan.isNotEmpty && session == null),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, height: 1.35),
+            ),
+          );
+        }),
         widget.settings,
         const SizedBox(height: 12),
         _HeroCard(verdict: verdict, shown: shown, isBest: isBest, onShowBest: () => setState(() => _selected = null)),
@@ -530,6 +545,34 @@ class _ResultsState extends State<_Results> {
       ],
     );
   }
+}
+
+/// Eén persoonlijke zin over je dag: het weer op je beste moment, gekoppeld aan je training.
+String personalLine(RunVerdict v, PlanSession? session, {bool restDay = false}) {
+  final w = v.best.weather;
+  final feels = (w.feelsLike ?? w.temperature).round();
+  final rain = w.precipitationProbability ?? 0;
+  final parts = <String>[
+    if (rain < 20) 'droog' else if (rain < 50) 'kans op een bui' else 'regenachtig',
+    '$feels°',
+    if (w.windSpeed < 12) 'weinig wind' else if (w.windSpeed >= 28) 'stevige wind',
+  ];
+  final weather = parts.join(', ');
+  final cap = weather[0].toUpperCase() + weather.substring(1);
+  final when = v.kind == VerdictKind.goNow ? 'nu' : 'om ${Fmt.time(v.best.start)}';
+  if (session != null && session.kind != SessionKind.race) {
+    final what = session.title[0].toLowerCase() + session.title.substring(1);
+    return v.kind == VerdictKind.tough
+        ? 'Lastig weer vandaag. Je $what kan het best $when, of maak hem lichter.'
+        : '$cap $when: mooi voor je $what.';
+  }
+  if (session?.kind == SessionKind.race) return 'Wedstrijddag! $cap. Start rustig, je wint hem in de tweede helft.';
+  if (restDay) return 'Rustdag in je schema. Zin om toch te bewegen? $cap $when.';
+  return switch (v.kind) {
+    VerdictKind.goNow => '$cap: nu is het goed loopweer.',
+    VerdictKind.later => '$cap $when: dan loop je het lekkerst.',
+    VerdictKind.tough => 'Lastig loopweer vandaag. Het beste moment is $when.',
+  };
 }
 
 String _dayLabel(DateTime t) {
@@ -589,6 +632,10 @@ class _HeroCard extends StatelessWidget {
             stops: const [0, 0.7],
           ),
         ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(children: [
+          Positioned.fill(child: WeatherAmbience(weather: w)),
+          Padding(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -750,6 +797,8 @@ class _HeroCard extends StatelessWidget {
               ),
           ],
         ),
+          ),
+        ]),
       ),
     );
   }

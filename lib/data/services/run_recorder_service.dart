@@ -16,6 +16,7 @@ import '../../domain/run_recorder.dart';
 import 'heart_rate_service.dart';
 import 'live_share_service.dart';
 import 'notification_service.dart';
+import 'sound_service.dart';
 import 'recording_store.dart';
 
 /// Wat het opnamescherm laat zien.
@@ -195,7 +196,10 @@ class RunRecorderService {
     final r = _rec;
     if (r != null && r.indoor) {
       final km = r.tick(1);
-      if (km != null) _buzz(const [0, 180, 140, 180]);
+      if (km != null) {
+        _buzz(const [0, 180, 140, 180]);
+        SoundService.instance.play(RwSound.km).ignore();
+      }
       if (r.isActive) _sayCue(r);
     }
     _checkIntervals();
@@ -291,6 +295,7 @@ class RunRecorderService {
         await _tts!.setQueueMode(1);
         await _tts!.setAudioAttributesForNavigation();
       } catch (_) {}
+      SoundService.instance.play(RwSound.start).ignore();
       if (_guided == null) _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
       final g0 = _guided?.update(0);
       if (g0 != null) _say(g0);
@@ -346,7 +351,10 @@ class RunRecorderService {
         accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null, altitude: p.altitude == 0 ? null : p.altitude));
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
     if (before == RecorderStatus.autoPaused && r.status == RecorderStatus.running) _say('Verder.');
-    if (km != null) _buzz(const [0, 180, 140, 180]);
+    if (km != null) {
+      _buzz(const [0, 180, 140, 180]);
+      SoundService.instance.play(RwSound.km).ignore();
+    }
     final follower = _follower;
     if (follower != null && r.isActive) {
       final c = follower.update(LatLng(p.latitude, p.longitude));
@@ -388,6 +396,7 @@ class RunRecorderService {
   }
 
   void _buzzFor(IntervalCue cue, IntervalTracker it) {
+    SoundService.instance.play(cue.finished ? RwSound.finish : RwSound.interval).ignore();
     if (!cue.stepChanged) {
       _buzz(const [0, 120]);
     } else if (cue.finished) {
@@ -471,6 +480,7 @@ class RunRecorderService {
 
   /// Stopt de opname en geeft de run terug om op te slaan (of null als er niets is).
   Future<RunRecording?> stop() async {
+    SoundService.instance.play(RwSound.finish).ignore();
     final r = _rec;
     await _sub?.cancel();
     _sub = null;

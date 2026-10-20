@@ -14,6 +14,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../data/services/run_recorder_service.dart';
+import '../../data/services/sound_service.dart';
 import '../../data/services/sync_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/badges.dart' as bd;
@@ -65,6 +66,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _haptics = true;
   bool _batteryDone = true;
   bool _indoor = false;
+  bool _sounds = true;
 
   /// Loopbandsnelheid (km/u) om mee te starten; null = alleen de klok.
   double? _tmKmh;
@@ -99,6 +101,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _haptics = p.getBool('rec_haptics') ?? true;
           _indoor = p.getBool('rec_indoor') ?? false;
           _tmKmh = p.getDouble('rec_tm_kmh');
+          _sounds = p.getBool('sounds_on') ?? true;
           final tp = p.getDouble('rec_target_pace');
           _targetPace = tp == null || tp <= 0 ? null : tp;
           try {
@@ -832,6 +835,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         tooltip: 'Elke kilometer je tijd en tempo, ook met je scherm uit. Muziek gaat even zachter.',
                         selected: _voice || _plan != null,
                         onSelected: _plan != null ? null : (x) => setState(() => _voice = x),
+                      ),
+                      FilterChip(
+                        avatar: const Icon(Icons.music_note_outlined, size: 18),
+                        label: const Text('Geluidjes'),
+                        tooltip: 'Een zacht belletje bij de start, elke km en intervalwissels',
+                        selected: _sounds,
+                        onSelected: (x) {
+                          setState(() => _sounds = x);
+                          SoundService.instance.setEnabled(x).ignore();
+                          if (x) SoundService.instance.play(RwSound.km).ignore();
+                        },
                       ),
                       FilterChip(
                         avatar: const Icon(Icons.vibration, size: 18),
