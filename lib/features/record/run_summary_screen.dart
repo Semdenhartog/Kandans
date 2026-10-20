@@ -109,28 +109,7 @@ class RunSummaryScreen extends StatelessWidget {
             ),
             if (records.isNotEmpty) ...[
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: RwColors.accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: RwColors.accent.withValues(alpha: 0.5)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.emoji_events, color: RwColors.accent, size: 36),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        records.length == 1
-                            ? 'Nieuw record op ${records.first.label}: ${Fmt.duration(records.first.seconds)}!'
-                            : '${records.length} nieuwe records: ${records.map((r) => r.label).join(', ')}!',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _RecordPlaque(records: [for (final r in records) (label: r.label, seconds: r.seconds)]),
             ],
             if (a.id != null) ...[
               const SizedBox(height: 16),
@@ -360,4 +339,69 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
       ),
     );
   }
+}
+
+
+/// Gouden plaquette met je nieuwe records, elk op een eigen regel met de tijd ernaast.
+class _RecordPlaque extends StatelessWidget {
+  const _RecordPlaque({required this.records});
+  final List<({String label, num seconds})> records;
+
+  static const _gold = Color(0xFFD9B45A);
+  static const _goldGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF6E3A1), Color(0xFFD9B45A), Color(0xFF9C7A2A), Color(0xFFE9CF7A)],
+  );
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(1.4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: _goldGradient,
+          boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.25), blurRadius: 26, spreadRadius: -4)],
+        ),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(21),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF221A0B), Color(0xFF110D06)],
+            ),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: _goldGradient),
+                child: const Icon(Icons.emoji_events, color: Color(0xFF1C1405), size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(records.length == 1 ? 'NIEUW RECORD' : '${records.length} NIEUWE RECORDS',
+                      style: const TextStyle(color: _gold, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.8)),
+                  const Text('Persoonlijk beste', style: TextStyle(fontFamily: RwFonts.display, fontSize: 18, fontWeight: FontWeight.w800)),
+                ]),
+              ),
+            ]),
+            const SizedBox(height: 10),
+            for (final (i, r) in records.indexed) ...[
+              if (i > 0) Container(height: 1, color: _gold.withValues(alpha: 0.14)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(children: [
+                  Expanded(child: Text(r.label, style: const TextStyle(fontWeight: FontWeight.w600))),
+                  Text(Fmt.duration(r.seconds),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFF2D892))),
+                ]),
+              ),
+            ],
+          ]),
+        ),
+      );
 }

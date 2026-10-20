@@ -40,6 +40,8 @@ class ActivitiesScreen extends ConsumerStatefulWidget {
 }
 
 class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
+  /// Moment dat de lijst verscheen (voor de instap-animatie).
+  final _since = DateTime.now();
   RunFilter _filter = const RunFilter();
 
   Future<void> _delete(Activity a) async {
@@ -298,7 +300,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                   onTap: a.id == null ? null : () => context.go('/runs/${a.id}'),
                   onDelete: () => _delete(a),
                 );
-              },
+              })),
             ),
           );
         },

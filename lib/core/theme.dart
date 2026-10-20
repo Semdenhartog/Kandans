@@ -170,21 +170,49 @@ ThemeData buildTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: RwColors.surfaceHigh,
+      // Veld licht iets op zodra je erin typt.
+      fillColor: WidgetStateColor.resolveWith(
+        (st) => st.contains(WidgetState.focused) ? const Color(0xFF221D1A) : RwColors.surfaceHigh,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       labelStyle: const TextStyle(color: RwColors.muted),
+      floatingLabelStyle: WidgetStateTextStyle.resolveWith(
+        (st) => TextStyle(
+          color: st.contains(WidgetState.error)
+              ? RwColors.danger
+              : (st.contains(WidgetState.focused) ? RwColors.accent : RwColors.muted),
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
+        ),
+      ),
       hintStyle: const TextStyle(color: RwColors.subtle),
+      prefixIconColor: WidgetStateColor.resolveWith((st) => st.contains(WidgetState.focused) ? RwColors.accent : RwColors.subtle),
+      suffixIconColor: WidgetStateColor.resolveWith((st) => st.contains(WidgetState.focused) ? RwColors.accent : RwColors.subtle),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: RwColors.border),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: RwColors.border),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: RwColors.accent, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: RwColors.accent, width: 1.6),
       ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: RwColors.danger.withValues(alpha: 0.7)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: RwColors.danger, width: 1.6),
+      ),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: RwColors.accent,
+      selectionColor: RwColors.accent.withValues(alpha: 0.3),
+      selectionHandleColor: RwColors.accent,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(

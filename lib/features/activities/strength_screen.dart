@@ -40,8 +40,8 @@ class StrengthScreen extends StatelessWidget {
               style: TextStyle(color: RwColors.muted, height: 1.45),
             ),
             const SizedBox(height: 16),
-            for (final r in Routine.all)
-              Padding(
+            for (final (i, r) in Routine.all.indexed)
+              StaggerIn(index: i, child: Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Card(
                   child: ListTile(
@@ -58,7 +58,7 @@ class StrengthScreen extends StatelessWidget {
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RoutinePlayerScreen(routine: r))),
                   ),
                 ),
-              ),
+              )),
             const SizedBox(height: 8),
             const Text('Pijn bij een oefening? Stop ermee. Twijfel je, vraag een fysiotherapeut.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),

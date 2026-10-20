@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
+import '../../shared/aura.dart';
+import '../../shared/route_backdrop.dart';
 
 /// Gemeenschappelijke opmaak voor login, registratie en activatie.
 class AuthScaffold extends StatelessWidget {
@@ -20,7 +22,10 @@ class AuthScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: Stack(children: [
+        const Positioned.fill(child: RwAura()),
+        const Positioned.fill(child: DrawnRoute(top: true)),
+        SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -29,8 +34,8 @@ class AuthScaffold extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const RunWiseLogo(),
-                  const SizedBox(height: 36),
+                  const _GlowLogo(),
+                  const SizedBox(height: 40),
                   Text(
                     eyebrow.toUpperCase(),
                     style: const TextStyle(
@@ -61,8 +66,42 @@ class AuthScaffold extends StatelessWidget {
           ),
         ),
       ),
+      ]),
     );
   }
+}
+
+/// Logo dat bij openen zacht invaagt, met een lichtkrans erachter.
+class _GlowLogo extends StatelessWidget {
+  const _GlowLogo();
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeOutCubic,
+        builder: (_, t, child) => Opacity(
+          opacity: t,
+          child: Transform.translate(offset: Offset(0, 10 * (1 - t)), child: child),
+        ),
+        child: Stack(clipBehavior: Clip.none, alignment: Alignment.centerLeft, children: [
+          Positioned(
+            left: -50,
+            top: -50,
+            child: IgnorePointer(
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(colors: [RwColors.accent.withValues(alpha: 0.28), RwColors.accent.withValues(alpha: 0)]),
+                ),
+              ),
+            ),
+          ),
+          const RunWiseLogo(height: 38),
+        ]),
+      );
 }
 
 class RunWiseLogo extends StatelessWidget {

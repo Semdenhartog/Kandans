@@ -650,7 +650,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(_indoor ? Icons.fitness_center : Icons.directions_run, size: 56, color: RwColors.accent),
+            if (_indoor)
+              const Icon(Icons.fitness_center, size: 56, color: RwColors.accent)
+            else
+              _GpsRadar(accuracy: v.gpsAccuracy, ready: v.gpsReady),
             const SizedBox(height: 8),
             Text(
               _indoor ? 'Klaar voor de loopband' : (v.gpsReady ? 'Klaar voor de start' : 'GPS zoeken…'),
@@ -925,11 +928,14 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(64)),
-                    onPressed: !_indoor && _error != null && !v.gpsReady ? null : _start,
-                    icon: const Icon(Icons.play_arrow, size: 30),
-                    label: Text(_indoor || v.gpsReady ? 'Start' : 'Start (GPS zoekt nog)', style: const TextStyle(fontSize: 18)),
+                  _GlowPulse(
+                    active: _indoor || v.gpsReady,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(64)),
+                      onPressed: !_indoor && _error != null && !v.gpsReady ? null : _start,
+                      icon: const Icon(Icons.play_arrow, size: 30),
+                      label: Text(_indoor || v.gpsReady ? 'Start' : 'Start (GPS zoekt nog)', style: const TextStyle(fontSize: 18)),
+                    ),
                   ),
                 ],
               )
@@ -1483,4 +1489,196 @@ class _TreadmillSpeed extends StatelessWidget {
       ),
     );
   }
+}
+
+
+/// Radar die pulseert zolang de GPS zoekt; wordt een rustige groene ring met vinkje als hij klaar is.
+/// Onderaan signaalbalkjes en de nauwkeurigheid in meters.
+class _GpsRadar extends StatefulWidget {
+  const _GpsRadar({required this.accuracy, required this.ready});
+  final double? accuracy;
+  final bool ready;
+
+  @override
+  State<_GpsRadar> createState() => _GpsRadarState();
+}
+
+class _GpsRadarState extends State<_GpsRadar> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
+
+  @override
+  void initState() {
+    super.initState();
+    if (!WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) _c.repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  int get _bars {
+    final a = widget.accuracy;
+    if (a == null) return 0;
+    if (a <= 8) return 4;
+    if (a <= 15) return 3;
+    if (a <= 30) return 2;
+    return 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ready = widget.ready;
+    final color = ready ? RwColors.good : RwColors.accent;
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      SizedBox(
+        width: 150,
+        height: 150,
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (_, _) => CustomPaint(
+            painter: _RadarPainter(t: _c.value, color: color, ready: ready),
+            child: Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                transitionBuilder: (c, a) => ScaleTransition(scale: a, child: FadeTransition(opacity: a, child: c)),
+                child: Icon(
+                  ready ? Icons.check_rounded : Icons.satellite_alt_outlined,
+                  key: ValueKey(ready),
+                  size: 40,
+                  color: color,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: 6),
+      Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
+        for (var i = 0; i < 4; i++)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 1.5),
+            width: 5,
+            height: 6.0 + i * 4,
+            decoration: BoxDecoration(
+              color: i < _bars ? color : RwColors.bar,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        const SizedBox(width: 8),
+        Text(
+          widget.accuracy == null ? 'Geen signaal' : '± ${widget.accuracy!.round()} m',
+          style: const TextStyle(color: RwColors.subtle, fontSize: 12, fontFeatures: rwTnum),
+        ),
+      ]),
+    ]);
+  }
+}
+
+class _RadarPainter extends CustomPainter {
+  _RadarPainter({required this.t, required this.color, required this.ready});
+  final double t;
+  final Color color;
+  final bool ready;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.width / 2;
+    canvas.drawCircle(c, r * 0.36, Paint()..color = color.withValues(alpha: 0.12));
+    canvas.drawCircle(
+      c,
+      r * 0.36,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = color.withValues(alpha: 0.6),
+    );
+    if (ready) {
+      // Rustige, ademende ring.
+      final b = 0.5 + 0.5 * (1 - (2 * t - 1).abs());
+      canvas.drawCircle(
+        c,
+        r * (0.52 + 0.04 * b),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = color.withValues(alpha: 0.25 + 0.2 * b),
+      );
+      return;
+    }
+    for (var i = 0; i < 3; i++) {
+      final p = (t + i / 3) % 1;
+      canvas.drawCircle(
+        c,
+        r * (0.36 + 0.64 * p),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6
+          ..color = color.withValues(alpha: (1 - p) * 0.5),
+      );
+    }
+    // Draaiende veeg, zoals een echte radar.
+    final rect = Rect.fromCircle(center: c, radius: r);
+    canvas.drawArc(
+      rect.deflate(r * 0.02),
+      t * 6.283 - 0.9,
+      0.9,
+      true,
+      Paint()
+        ..shader = SweepGradient(
+          startAngle: 0,
+          endAngle: 6.283,
+          transform: GradientRotation(t * 6.283 - 0.9),
+          colors: [color.withValues(alpha: 0), color.withValues(alpha: 0.18)],
+          stops: const [0, 0.1432],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RadarPainter old) => old.t != t || old.ready != ready || old.color != color;
+}
+
+/// Zachte, ademende gloed rond een knop (alleen als [active]).
+class _GlowPulse extends StatefulWidget {
+  const _GlowPulse({required this.active, required this.child});
+  final bool active;
+  final Widget child;
+
+  @override
+  State<_GlowPulse> createState() => _GlowPulseState();
+}
+
+class _GlowPulseState extends State<_GlowPulse> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800));
+
+  @override
+  void initState() {
+    super.initState();
+    if (!WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) _c.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _c,
+        child: widget.child,
+        builder: (_, child) => DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            boxShadow: widget.active
+                ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.18 + 0.22 * _c.value), blurRadius: 14 + 16 * _c.value, spreadRadius: -2)]
+                : const [],
+          ),
+          child: child,
+        ),
+      );
 }

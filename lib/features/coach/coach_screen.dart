@@ -38,6 +38,9 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   bool _sending = false;
   int? _freeLeft;
 
+  /// Antwoorden die al woord voor woord zijn verschenen (niet nog eens animeren).
+  final _typed = <CoachMessage>{};
+
   @override
   void dispose() {
     _input.dispose();
@@ -113,9 +116,9 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         title: const Text('Coach'),
         actions: [
           if (!premium)
-            TextButton(
-              onPressed: () => context.push('/premium'),
-              child: const Text('Premium'),
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: _GoldPill(onTap: () => context.push('/premium')),
             ),
           IconButton(
             tooltip: 'Gesprek wissen',
@@ -142,7 +145,15 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                   itemCount: all.length + (_sending ? 1 : 0),
                   itemBuilder: (context, i) {
                     if (i == all.length) return const _Typing();
-                    return _Bubble(message: all[i]);
+                    final m = all[i];
+                    final fresh = !m.isUser && _pending.contains(m) && !_typed.contains(m);
+                    return _Bubble(
+                      key: ObjectKey(m),
+                      message: m,
+                      fresh: fresh,
+                      onTyped: () => _typed.add(m),
+                      onGrow: _scrollDown,
+                    );
                   },
                 );
               },
@@ -219,8 +230,8 @@ class _Intro extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
       children: [
-        const Icon(Icons.auto_awesome, color: RwColors.accent, size: 40),
-        const SizedBox(height: 12),
+        const Center(child: _CoachMark(size: 64)),
+        const SizedBox(height: 16),
         const Text('Je persoonlijke hardloopcoach',
             textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
         const SizedBox(height: 8),
@@ -255,52 +266,229 @@ class _Intro extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message});
+  const _Bubble({super.key, required this.message, this.fresh = false, this.onTyped, this.onGrow});
   final CoachMessage message;
+  final bool fresh;
+  final VoidCallback? onTyped;
+  final VoidCallback? onGrow;
 
   @override
   Widget build(BuildContext context) {
     final user = message.isUser;
-    return Align(
-      alignment: user ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
-        decoration: BoxDecoration(
-          color: user ? RwColors.accent : RwColors.surfaceHigh,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(user ? 18 : 4),
-            bottomRight: Radius.circular(user ? 4 : 18),
-          ),
+    final maxW = MediaQuery.of(context).size.width * (user ? 0.8 : 0.74);
+    final bubble = Container(
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      constraints: BoxConstraints(maxWidth: maxW),
+      decoration: BoxDecoration(
+        gradient: user
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF4A2A10), Color(0xFF2E1A0B)],
+              )
+            : const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF1E1E23), Color(0xFF17171B)],
+              ),
+        border: Border.all(color: user ? RwColors.accent.withValues(alpha: 0.35) : const Color(0x14FFFFFF)),
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(20),
+          topRight: const Radius.circular(20),
+          bottomLeft: Radius.circular(user ? 20 : 6),
+          bottomRight: Radius.circular(user ? 6 : 20),
         ),
-        child: user
-            ? SelectableText(message.content, style: const TextStyle(color: RwColors.accentDark, height: 1.45))
-            : SelectionArea(child: _RichReply(message.content)),
       ),
+      child: user
+          ? SelectableText(message.content, style: const TextStyle(color: RwColors.text, height: 1.45))
+          : fresh
+              ? _TypeOut(text: message.content, onDone: onTyped, onGrow: onGrow)
+              : SelectionArea(child: _RichReply(message.content)),
+    );
+    if (user) return Align(alignment: Alignment.centerRight, child: bubble);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        const Padding(padding: EdgeInsets.only(bottom: 6, right: 8), child: _CoachMark(size: 28)),
+        Flexible(child: bubble),
+      ],
     );
   }
 }
 
-class _Typing extends StatelessWidget {
+/// Het embleem van de coach: een gloeiende cirkel met sterretjes.
+class _CoachMark extends StatelessWidget {
+  const _CoachMark({this.size = 28});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
+          ),
+          boxShadow: [BoxShadow(color: RwColors.accent.withValues(alpha: 0.35), blurRadius: size * 0.5)],
+        ),
+        child: Icon(Icons.auto_awesome, size: size * 0.55, color: RwColors.accentDark),
+      );
+}
+
+/// Laat een nieuw antwoord woord voor woord verschijnen, in een rustig leestempo.
+class _TypeOut extends StatefulWidget {
+  const _TypeOut({required this.text, this.onDone, this.onGrow});
+  final String text;
+  final VoidCallback? onDone;
+  final VoidCallback? onGrow;
+
+  @override
+  State<_TypeOut> createState() => _TypeOutState();
+}
+
+class _TypeOutState extends State<_TypeOut> with SingleTickerProviderStateMixin {
+  late final List<int> _ends;
+  late final AnimationController _c;
+  int _shown = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ends = [for (final m in RegExp(r'\S+\s*').allMatches(widget.text)) m.end];
+    final ms = (_ends.length * 32).clamp(500, 4500);
+    _c = AnimationController(vsync: this, duration: Duration(milliseconds: ms))
+      ..addListener(() {
+        final n = (_c.value * _ends.length).ceil();
+        if (n != _shown) {
+          final grewLine = n ~/ 12 != _shown ~/ 12;
+          setState(() => _shown = n);
+          if (grewLine) widget.onGrow?.call();
+        }
+      })
+      ..addStatusListener((st) {
+        if (st == AnimationStatus.completed) {
+          widget.onDone?.call();
+          widget.onGrow?.call();
+        }
+      });
+    if (WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations || _ends.isEmpty) {
+      _c.value = 1;
+    } else {
+      _c.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_c.isCompleted) return SelectionArea(child: _RichReply(widget.text));
+    final cut = _shown == 0 ? 0 : _ends[(_shown - 1).clamp(0, _ends.length - 1)];
+    // De volledige tekst onzichtbaar eronder houdt de ballon meteen op zijn eindgrootte: geen verspringen.
+    return Stack(children: [
+      Opacity(opacity: 0, child: _RichReply(widget.text)),
+      _RichReply(widget.text.substring(0, cut)),
+    ]);
+  }
+}
+
+/// Gouden "Premium"-label in de balk, passend bij de Premium-pagina.
+class _GoldPill extends StatelessWidget {
+  const _GoldPill({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(colors: [Color(0xFFF6E3A1), Color(0xFFD9B45A), Color(0xFF9C7A2A)]),
+              boxShadow: [BoxShadow(color: const Color(0xFFD9B45A).withValues(alpha: 0.3), blurRadius: 12)],
+            ),
+            child: const Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.workspace_premium, size: 16, color: Color(0xFF1C1405)),
+              SizedBox(width: 4),
+              Text('Premium', style: TextStyle(color: Color(0xFF1C1405), fontWeight: FontWeight.w800, fontSize: 13)),
+            ]),
+          ),
+        ),
+      );
+}
+
+class _Typing extends StatefulWidget {
   const _Typing();
 
   @override
-  Widget build(BuildContext context) => const Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-              SizedBox(width: 10),
-              Text('Coach denkt na…', style: TextStyle(color: RwColors.subtle)),
-            ],
+  State<_Typing> createState() => _TypingState();
+}
+
+/// Drie stipjes die om de beurt opveren, naast het coach-embleem.
+class _TypingState extends State<_Typing> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(children: [
+          const _CoachMark(size: 28),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1B1B20),
+              border: Border.all(color: const Color(0x14FFFFFF)),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+                bottomLeft: Radius.circular(6),
+              ),
+            ),
+            child: AnimatedBuilder(
+              animation: _c,
+              builder: (_, _) => Row(mainAxisSize: MainAxisSize.min, children: [
+                for (var i = 0; i < 3; i++)
+                  Builder(builder: (_) {
+                    final p = ((_c.value - i * 0.15) % 1);
+                    final up = p < 0.4 ? (p < 0.2 ? p / 0.2 : (0.4 - p) / 0.2) : 0.0;
+                    return Transform.translate(
+                      offset: Offset(0, -4 * up),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color.lerp(RwColors.subtle, RwColors.accent, up),
+                        ),
+                      ),
+                    );
+                  }),
+              ]),
+            ),
           ),
-        ),
+          const SizedBox(width: 10),
+          const Text('Coach denkt na…', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
+        ]),
       );
 }
 

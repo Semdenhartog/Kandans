@@ -23,15 +23,23 @@ class RouteShape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pts = decodePolyline(polyline);
-    return CustomPaint(
-      painter: _RoutePainter(pts, strokeWidth, windFromDegrees),
-      size: Size.infinite,
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    // Tekent zich bij verschijnen in, als een lopertje dat de route aflegt.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: still ? 1 : 0, end: 1),
+      duration: const Duration(milliseconds: 1100),
+      curve: Curves.easeInOutCubic,
+      builder: (_, t, _) => CustomPaint(
+        painter: _RoutePainter(pts, strokeWidth, windFromDegrees, t),
+        size: Size.infinite,
+      ),
     );
   }
 }
 
 class _RoutePainter extends CustomPainter {
-  _RoutePainter(this.points, this.strokeWidth, this.windFrom);
+  _RoutePainter(this.points, this.strokeWidth, this.windFrom, [this.progress = 1]);
+  final double progress;
 
   final List<LatLng> points;
   final double strokeWidth;
@@ -73,8 +81,30 @@ class _RoutePainter extends CustomPainter {
       final o = map(p);
       path.lineTo(o.dx, o.dy);
     }
+    var drawn = path;
+    Offset? tip;
+    if (progress < 1) {
+      drawn = Path();
+      for (final m in path.computeMetrics()) {
+        final len = m.length * progress;
+        drawn.addPath(m.extractPath(0, len), Offset.zero);
+        tip = m.getTangentForOffset(len)?.position;
+        break;
+      }
+    }
+    // Zachte gloed onder de lijn.
     canvas.drawPath(
-      path,
+      drawn,
+      Paint()
+        ..color = RwColors.accent.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth * 3
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, strokeWidth * 1.6),
+    );
+    canvas.drawPath(
+      drawn,
       Paint()
         ..color = RwColors.accent
         ..style = PaintingStyle.stroke
@@ -83,7 +113,12 @@ class _RoutePainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
     canvas.drawCircle(map(points.first), strokeWidth * 2, Paint()..color = RwColors.text);
-    canvas.drawCircle(map(points.last), strokeWidth * 1.5, Paint()..color = RwColors.danger);
+    if (tip != null) {
+      canvas.drawCircle(tip, strokeWidth * 2.2, Paint()..color = RwColors.accent.withValues(alpha: 0.3));
+      canvas.drawCircle(tip, strokeWidth * 1.2, Paint()..color = RwColors.text);
+    } else {
+      canvas.drawCircle(map(points.last), strokeWidth * 1.5, Paint()..color = RwColors.danger);
+    }
 
     final wf = windFrom;
     if (wf != null) {
@@ -106,5 +141,5 @@ class _RoutePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RoutePainter old) =>
-      old.points != points || old.windFrom != windFrom || old.strokeWidth != strokeWidth;
+      old.points != points || old.windFrom != windFrom || old.strokeWidth != strokeWidth || old.progress != progress;
 }

@@ -25,6 +25,8 @@ class RoutesScreen extends ConsumerStatefulWidget {
 }
 
 class _RoutesScreenState extends ConsumerState<RoutesScreen> {
+  /// Moment dat de lijst verscheen (voor de instap-animatie).
+  final _since = DateTime.now();
   bool _importing = false;
   bool _mapView = false;
 
@@ -182,7 +184,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                   ],
                 ),
               );
-            },
+            })),
           );
         },
       ),

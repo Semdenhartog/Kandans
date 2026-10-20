@@ -406,3 +406,48 @@ Future<bool> confirmDialog(
   );
   return result ?? false;
 }
+
+/// Laat lijstonderdelen bij openen één voor één invliegen (schuiven + vagen).
+/// [since] is het moment dat de lijst verscheen: daarna (bij terugscrollen) geen animatie meer.
+class StaggerIn extends StatefulWidget {
+  const StaggerIn({super.key, required this.index, required this.child, this.since});
+  final int index;
+  final DateTime? since;
+  final Widget child;
+
+  @override
+  State<StaggerIn> createState() => _StaggerInState();
+}
+
+class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 460));
+
+  @override
+  void initState() {
+    super.initState();
+    final late = widget.since != null && DateTime.now().difference(widget.since!) > const Duration(milliseconds: 1400);
+    final still = WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+    if (late || still || widget.index > 9) {
+      _c.value = 1;
+    } else {
+      Future<void>.delayed(Duration(milliseconds: 55 * widget.index), () {
+        if (mounted) _c.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final a = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+    return FadeTransition(
+      opacity: a,
+      child: SlideTransition(position: Tween(begin: const Offset(0, 0.12), end: Offset.zero).animate(a), child: widget.child),
+    );
+  }
+}
