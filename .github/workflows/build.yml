@@ -157,15 +157,23 @@ jobs:
                   "        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {",
                   "            compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)",
                   "        }",
-                  "        tasks.withType<JavaCompile>().configureEach {",
-                  "            sourceCompatibility = \"17\"",
-                  "            targetCompatibility = \"17\"",
+                  "        plugins.withId(\"com.android.library\") {",
+                  "            extensions.configure<com.android.build.gradle.LibraryExtension> {",
+                  "                compileOptions {",
+                  "                    sourceCompatibility = JavaVersion.VERSION_17",
+                  "                    targetCompatibility = JavaVersion.VERSION_17",
+                  "                }",
+                  "            }",
                   "        }",
                   "    }",
                   "}",
                   "",
               ])
               open(rg, "w").write(rt)
+          gp = "android/gradle.properties"
+          gt = open(gp).read()
+          if "kotlin.jvm.target.validation.mode" not in gt:
+              open(gp, "a").write("\nkotlin.jvm.target.validation.mode=warning\n")
 
           # 3) Health Connect werkt vanaf Android 8 (API 26)
           g = "android/app/build.gradle.kts"

@@ -254,7 +254,8 @@ List<Override> _overrides() => [
       routeDetailProvider('r1').overrideWith((ref) => _routes.first),
     ];
 
-Future<void> _shot(WidgetTester tester, String name, Widget screen, {double height = 2400, bool nav = false, void Function()? after}) async {
+Future<void> _shot(WidgetTester tester, String name, Widget screen,
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1}) async {
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
@@ -263,6 +264,10 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen, {double heig
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+        child: child!,
+      ),
       home: nav ? _FakeShell(child: screen) : screen,
     ),
   ));
@@ -356,5 +361,20 @@ void main() {
         ),
         height: 2600);
   });
+  testWidgets('20 groot vandaag', (t) => _shot(t, '20_groot_vandaag', const DashboardScreen(), height: 3200, nav: true, textScale: 1.35));
+  testWidgets('21 groot opnemen', (t) => _shot(t, '21_groot_opnemen', const RecordRunScreen(), height: 915, textScale: 1.35, after: () {
+        RunRecorderService.instance.view.value = RecorderView(
+          status: RecorderStatus.running,
+          distance: 15230,
+          movingSeconds: 5652,
+          currentPace: 309,
+          averagePace: 316,
+          km: 15,
+          gpsAccuracy: 4,
+          heartRate: 152,
+          hrStatus: HrStatus.connected,
+        );
+      }));
+  testWidgets('22 groot runs', (t) => _shot(t, '22_groot_runs', const ActivitiesScreen(), height: 1600, textScale: 1.35));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
