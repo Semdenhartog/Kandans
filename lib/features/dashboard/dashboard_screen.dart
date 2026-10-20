@@ -516,6 +516,22 @@ class _ResultsState extends State<_Results> {
   }
 }
 
+String _dayLabel(DateTime t) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(t.year, t.month, t.day);
+  final diff = day.difference(today).inDays;
+  if (diff == 0) return 'Vandaag';
+  if (diff == 1) return 'Morgen';
+  return Fmt.date(t);
+}
+
+Color _scoreColor(int score) {
+  if (score >= 70) return RwColors.good;
+  if (score >= 45) return RwColors.warning;
+  return RwColors.danger;
+}
+
 /// Hoofdkaart: één oordeel, het beste moment en het weer dan (vervangt de losse oordeel-, beste- en nu-kaarten).
 class _HeroCard extends StatelessWidget {
   const _HeroCard({required this.verdict, required this.shown, required this.isBest, required this.onShowBest});
