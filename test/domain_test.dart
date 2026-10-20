@@ -37,6 +37,7 @@ import 'package:runwise/domain/run_file_import.dart';
 import 'package:runwise/domain/training_load.dart';
 import 'package:runwise/domain/training_plan.dart';
 import 'package:runwise/domain/zones.dart';
+import 'package:runwise/domain/year_recap.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -1272,6 +1273,28 @@ void main() {
       expect(half.length, 22);
       expect(half.last.meters, closeTo(97.5, 0.01));
       expect(half.first.pace, closeTo(half.last.pace, 0.01));
+    });
+  });
+
+  group('jaaroverzicht', () {
+    test('totalen, favorieten en reeks', () {
+      final runs = [
+        for (var w = 0; w < 6; w++)
+          Activity(id: 'r$w', startedAt: DateTime(2026, 3, 2 + w * 7, 7), distanceMeters: 8000, movingTimeSeconds: 2700,
+              bestEfforts: {'5000': 1500.0 - w}),
+        Activity(startedAt: DateTime(2026, 6, 10, 19), distanceMeters: 21100, movingTimeSeconds: 7200, elevationGainMeters: 40),
+        Activity(startedAt: DateTime(2025, 6, 10, 19), distanceMeters: 5000, movingTimeSeconds: 1500),
+      ];
+      final r = yearRecap(runs, 2026)!;
+      expect(r.runs, 7);
+      expect(r.km, closeTo(69.1, 0.01));
+      expect(r.bestMonth, 3);
+      expect(r.favouriteWeekday, 1);
+      expect(r.favouritePartOfDay, 'ochtend');
+      expect(r.longestStreakWeeks, 6);
+      expect(r.longest!.distanceMeters, 21100);
+      expect(r.fastest[5000], 1495);
+      expect(yearRecap(runs, 2024), isNull);
     });
   });
 }

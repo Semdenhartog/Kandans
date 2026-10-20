@@ -28,6 +28,7 @@ import '../record/record_run_screen.dart';
 import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 import 'fitness_screen.dart';
+import 'run_insights_screens.dart';
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
@@ -183,6 +184,12 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                   context.go('/runs/new');
                 case 'import':
                   _import();
+                case 'calendar':
+                  openCalendar(context);
+                case 'heatmap':
+                  openHeatmap(context);
+                case 'year':
+                  openYearRecap(context);
                 case 'csv':
                   _export(false);
                 case 'gpx':
@@ -190,6 +197,10 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               }
             },
             itemBuilder: (_) => const [
+              PopupMenuItem(value: 'calendar', child: ListTile(leading: Icon(Icons.calendar_month_outlined), title: Text('Kalender'))),
+              PopupMenuItem(value: 'heatmap', child: ListTile(leading: Icon(Icons.map_outlined), title: Text('Mijn heatmap'))),
+              PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text('Jaaroverzicht'))),
+              PopupMenuDivider(),
               PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
               PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX)'))),
               PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
