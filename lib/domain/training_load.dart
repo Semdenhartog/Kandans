@@ -86,3 +86,37 @@ List<FitnessDay> fitnessSeries(List<Activity> runs, DateTime today, {int days = 
   }
   return (title: 'Overbelast', text: 'Veel meer gelopen dan je gewend bent. Pas op voor blessures en neem echt rust.');
 }
+
+/// Verdeling rustig/stevig (de 80/20-regel: zo'n 80% van je tijd rustig, 20% stevig).
+class IntensityBalance {
+  const IntensityBalance(this.easySeconds, this.hardSeconds);
+  final double easySeconds;
+  final double hardSeconds;
+  double get easyShare => easySeconds + hardSeconds <= 0 ? 0 : easySeconds / (easySeconds + hardSeconds);
+
+  String get advice {
+    final p = (easyShare * 100).round();
+    if (easyShare >= 0.75) return '$p% rustig: precies goed. Rustige kilometers bouwen je conditie, de stevige maken je snel.';
+    if (easyShare >= 0.6) return '$p% rustig: net iets te veel stevig. Loop je rustige runs echt rustig (je moet kunnen praten).';
+    return 'Maar $p% rustig: je loopt bijna alles stevig. Dat geeft meer kans op blessures en minder vooruitgang. Maak de meeste runs rustiger.';
+  }
+}
+
+/// Over de laatste [days] dagen; null als er te weinig is gelopen (minder dan een half uur).
+IntensityBalance? intensityBalance(List<Activity> runs, {required DateTime now, int days = 28, int? maxHr}) {
+  final threshold = estimateThresholdPace(runs);
+  var easy = 0.0, hard = 0.0;
+  for (final a in runs) {
+    final age = now.difference(a.startedAt);
+    if (age.isNegative || age.inDays >= days) continue;
+    final hr = a.averageHeartRate;
+    final isEasy = hr != null && maxHr != null ? hr < maxHr * 0.8 : a.paceSecondsPerKm >= threshold * 1.12;
+    if (isEasy) {
+      easy += a.movingTimeSeconds;
+    } else {
+      hard += a.movingTimeSeconds;
+    }
+  }
+  if (easy + hard < 1800) return null;
+  return IntensityBalance(easy, hard);
+}

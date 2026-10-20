@@ -92,6 +92,43 @@ class PlanSetup {
   /// Drempeltempo (s/km), uit je runs geschat.
   final double thresholdPace;
   final int? goalTimeSeconds;
+
+  PlanSetup copyWith({double? thresholdPace, double? currentWeeklyKm}) => PlanSetup(
+        goalMeters: goalMeters,
+        raceDate: raceDate,
+        runDays: runDays,
+        longRunDay: longRunDay,
+        currentWeeklyKm: currentWeeklyKm ?? this.currentWeeklyKm,
+        thresholdPace: thresholdPace ?? this.thresholdPace,
+        goalTimeSeconds: goalTimeSeconds,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'g': goalMeters,
+        'd': raceDate.toIso8601String(),
+        'days': runDays,
+        'long': longRunDay,
+        'km': currentWeeklyKm,
+        't': thresholdPace,
+        if (goalTimeSeconds != null) 'goal': goalTimeSeconds,
+      };
+
+  static PlanSetup? fromJson(Object? j) {
+    if (j is! Map) return null;
+    try {
+      return PlanSetup(
+        goalMeters: (j['g'] as num).toDouble(),
+        raceDate: DateTime.parse(j['d'] as String),
+        runDays: [for (final d in j['days'] as List) (d as num).toInt()],
+        longRunDay: (j['long'] as num).toInt(),
+        currentWeeklyKm: (j['km'] as num).toDouble(),
+        thresholdPace: (j['t'] as num).toDouble(),
+        goalTimeSeconds: (j['goal'] as num?)?.toInt(),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 String _pace(double s) {

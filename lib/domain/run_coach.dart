@@ -4,6 +4,7 @@ import 'geo.dart';
 import 'route_geometry.dart';
 import 'route_photos.dart' show projectOnTrack;
 import 'run_recorder.dart';
+import 'run_streams.dart';
 
 /// Hoe vaak de stem iets zegt.
 enum CueEvery {
@@ -181,5 +182,40 @@ class RouteFollower {
       return 'Nog 300 meter tot het einde van je route.';
     }
     return null;
+  }
+}
+
+/// Race tegen je eigen record op een route (zoals Apple's Race Route): hoeveel seconden je
+/// voor of achter ligt op je snelste keer, op hetzelfde punt van de route.
+class GhostRace {
+  GhostRace(this.best, {this.every = 1000});
+
+  /// Verloop van je snelste run op deze route.
+  final RunStreams best;
+  final double every;
+  int _said = 0;
+
+  /// Tijd die je record nodig had tot [meters] op de route.
+  double? bestTimeAt(double meters) {
+    if (meters <= 0 || meters > best.totalDistance) return null;
+    return best.valueAt(best.time, meters);
+  }
+
+  /// Seconden achter (positief) of voor (negatief) op je record.
+  double? delta(double progress, double movingSeconds) {
+    final t = bestTimeAt(progress);
+    return t == null ? null : movingSeconds - t;
+  }
+
+  /// Elke kilometer van de route: zeg hoe je ervoor staat.
+  String? update(double progress, double movingSeconds) {
+    final n = (progress / every).floor();
+    if (n <= _said || n == 0) return null;
+    _said = n;
+    final d = delta(progress, movingSeconds);
+    if (d == null) return null;
+    final s = d.abs().round();
+    if (s < 3) return 'Je loopt precies gelijk met je record.';
+    return d < 0 ? 'Je ligt $s seconden voor op je record. Hou vast!' : 'Je ligt $s seconden achter op je record.';
   }
 }

@@ -38,6 +38,9 @@ import 'package:runwise/domain/training_load.dart';
 import 'package:runwise/domain/training_plan.dart';
 import 'package:runwise/domain/zones.dart';
 import 'package:runwise/domain/year_recap.dart';
+import 'package:runwise/domain/readiness.dart';
+import 'package:runwise/domain/badges.dart';
+import 'package:runwise/domain/weekly_report.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -1295,6 +1298,89 @@ void main() {
       expect(r.longest!.distanceMeters, 21100);
       expect(r.fastest[5000], 1495);
       expect(yearRecap(runs, 2024), isNull);
+    });
+  });
+
+  group('ronde 4', () {
+    test('klaar-score', () {
+      final good = readiness(
+        body: const BodySignals(sleepHours: 8.2, sleepAvgHours: 7.5, restingHr: 50, restingHrBaseline: 52, hrv: 70, hrvBaseline: 62),
+      );
+      expect(good.score, greaterThanOrEqualTo(75));
+      final bad = readiness(
+        body: const BodySignals(sleepHours: 5, sleepAvgHours: 7.5, restingHr: 60, restingHrBaseline: 52, hrv: 45, hrvBaseline: 62),
+        recoveryHours: 30,
+      );
+      expect(bad.score, lessThan(30));
+      expect(bad.suggestEasy, isTrue);
+      expect(bad.factors.map((f) => f.label), containsAll(['Slaap', 'Rusthartslag', 'HRV', 'Herstel']));
+      expect(readiness().score, 75); // alleen 'hersteld'
+    });
+
+    test('lichtere training, warmte en nieuwe tempo\'s', () {
+      final s = PlanSession(date: DateTime(2026, 10, 21), kind: SessionKind.interval, title: 'Intervallen', description: '', targetPace: 280);
+      final e = easierSession(s);
+      expect(e.kind, SessionKind.easy);
+      expect(e.distanceMeters, 3500);
+      expect(heatAdjustedPace(300, feelsLike: 15), 300);
+      expect(heatAdjustedPace(300, feelsLike: 25), closeTo(310.5, 0.1));
+      final now = DateTime(2026, 10, 20);
+      final runs = [Activity(id: 'a', startedAt: now.subtract(const Duration(days: 3)), distanceMeters: 5000, movingTimeSeconds: 1250, bestEfforts: {'5000': 1250.0})];
+      expect(recalibratedThreshold(runs, now, fallback: 330), closeTo(260, 0.1));
+      expect(recalibratedThreshold(const [], now, fallback: 330), 330);
+      final setup = PlanSetup(goalMeters: 10000, raceDate: DateTime(2026, 12, 20), runDays: const [2, 4, 7], longRunDay: 7, currentWeeklyKm: 20, thresholdPace: 300);
+      expect(PlanSetup.fromJson(setup.toJson())!.raceDate, setup.raceDate);
+      final plan = buildPlan(setup, DateTime(2026, 10, 19));
+      final re = recalibratePlan(plan, setup.copyWith(thresholdPace: 280), DateTime(2026, 11, 2));
+      expect(re.where((x) => x.date.isBefore(DateTime(2026, 11, 2))).length, plan.where((x) => x.date.isBefore(DateTime(2026, 11, 2))).length);
+      expect(re.last.kind, SessionKind.race);
+      expect(re.map((x) => x.date).toSet().length, re.length);
+    });
+
+    test('race tegen je record', () {
+      final best = RunStreams(time: [for (var i = 0; i <= 700; i++) i.toDouble()], distance: [for (var i = 0; i <= 700; i++) i * 3.0]);
+      final g = GhostRace(best);
+      expect(g.delta(1500, 490), closeTo(-10, 0.5));
+      expect(g.update(900, 290), isNull);
+      expect(g.update(1005, 345), contains('achter'));
+      expect(g.update(1500, 400), isNull);
+      expect(g.update(2001, 650), contains('voor'));
+    });
+
+    test('badges', () {
+      final runs = [
+        Activity(startedAt: DateTime(2026, 1, 5, 6, 30), distanceMeters: 5200, movingTimeSeconds: 1700, windSpeedKmh: 35),
+        Activity(startedAt: DateTime(2026, 7, 1, 19), distanceMeters: 10100, movingTimeSeconds: 3300, temperatureCelsius: 27),
+      ];
+      final b = {for (final x in computeBadges(runs)) x.id: x};
+      expect(b['first']!.earned, isTrue);
+      expect(b['10k']!.earnedAt, DateTime(2026, 7, 1, 19));
+      expect(b['early']!.earned, isTrue);
+      expect(b['wind']!.earned, isTrue);
+      expect(b['heat']!.earned, isTrue);
+      expect(b['half']!.earned, isFalse);
+      expect(b['km100']!.progress, closeTo(0.153, 0.001));
+      final fresh = newBadges(runs.sublist(0, 1), runs);
+      expect(fresh.map((x) => x.id), containsAll(['10k', 'heat']));
+      expect(fresh.map((x) => x.id), isNot(contains('first')));
+    });
+
+    test('weekrapport en 80/20', () {
+      final now = DateTime(2026, 10, 20, 9); // dinsdag
+      final runs = [
+        Activity(startedAt: DateTime(2026, 10, 13, 7), distanceMeters: 8000, movingTimeSeconds: 8 * 360),
+        Activity(startedAt: DateTime(2026, 10, 15, 7), distanceMeters: 6000, movingTimeSeconds: 6 * 290),
+        Activity(startedAt: DateTime(2026, 10, 18, 9), distanceMeters: 14000, movingTimeSeconds: 14 * 370),
+        Activity(startedAt: DateTime(2026, 10, 6, 7), distanceMeters: 10000, movingTimeSeconds: 3500),
+      ];
+      final r = weeklyReport(runs, now);
+      expect(r.runs, 3);
+      expect(r.km, closeTo(28, 0.01));
+      expect(r.longest!.distanceMeters, 14000);
+      expect(r.avgKmBefore, closeTo(2.5, 0.01));
+      final bal = intensityBalance(runs, now: now)!;
+      expect(bal.easyShare, greaterThan(0.6));
+      expect(bal.advice, contains('%'));
     });
   });
 }
