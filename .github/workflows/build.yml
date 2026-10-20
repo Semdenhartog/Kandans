@@ -186,7 +186,14 @@ jobs:
           gp = "android/gradle.properties"
           gt = open(gp).read()
           if "kotlin.jvm.target.validation.mode" not in gt:
-              open(gp, "a").write("\nkotlin.jvm.target.validation.mode=warning\n")
+              gt += "\nkotlin.jvm.target.validation.mode=warning\n"
+          # Geheugen begrenzen: de cloudmachine heeft 16 GB; Gradle (8 GB) + Kotlin + R8 tegelijk liep eroverheen (exit 143).
+          gt = re.sub(r"(?m)^org\.gradle\.jvmargs=.*$", "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError", gt)
+          if "org.gradle.jvmargs" not in gt:
+              gt += "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g\n"
+          if "org.gradle.workers.max" not in gt:
+              gt += "org.gradle.workers.max=3\nkotlin.daemon.jvmargs=-Xmx2g\n"
+          open(gp, "w").write(gt)
 
           # 3) Health Connect werkt vanaf Android 8 (API 26)
           g = "android/app/build.gradle.kts"
