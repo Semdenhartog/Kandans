@@ -10,6 +10,9 @@ on:
       - '.github/workflows/screens.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   screens:
     runs-on: ubuntu-latest
@@ -39,3 +42,13 @@ jobs:
             test_screens/goldens/*.png
             screens.txt
           retention-days: 14
+      - name: Plaatjes in branch 'schermen' zetten
+        if: always()
+        run: |
+          mkdir -p /tmp/out && cp test_screens/goldens/*.png screens.txt /tmp/out/ 2>/dev/null || true
+          cd /tmp/out
+          git init -q -b schermen
+          git config user.name "RunWise CI"
+          git config user.email "ci@runwise.invalid"
+          git add -A && git commit -qm "Schermen ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" schermen
