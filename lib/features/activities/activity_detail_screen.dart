@@ -227,7 +227,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                     ],
                   ),
           ),
-          if (a.id != null && (a.source == 'strava' || a.source == 'runwise')) ...[
+          if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
             const SizedBox(height: 12),
             SplitsCard(activity: a),
           ],

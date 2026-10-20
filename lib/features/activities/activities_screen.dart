@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -13,12 +15,19 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
+import '../../data/services/weather_service.dart';
+import '../../domain/best_efforts.dart';
+import '../../domain/geo.dart';
 import '../../domain/run_export.dart';
+import '../../domain/run_file_import.dart';
+import '../../domain/run_streams.dart';
+import '../../domain/shoes.dart';
 import '../../domain/run_filter.dart';
 import '../../domain/weekly_load.dart';
 import '../record/record_run_screen.dart';
 import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
+import 'fitness_screen.dart';
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
@@ -80,6 +89,58 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
     }
   }
 
+  /// Een run uit een bestand (horloge, andere app) toevoegen, met tijden per km.
+  Future<void> _import() async {
+    try {
+      final file = await FilePicker.pickFile(type: FileType.any);
+      if (file == null) return;
+      final lower = file.name.toLowerCase();
+      if (!lower.endsWith('.gpx') && !lower.endsWith('.tcx')) {
+        throw RunFileException('Kies een .gpx- of .tcx-bestand.');
+      }
+      final run = parseRunFile(utf8.decode(await file.readAsBytes(), allowMalformed: true));
+      final existing = ref.read(activitiesProvider).value ?? const <Activity>[];
+      if (existing.any((a) => a.startedAt.difference(run.start).inMinutes.abs() < 20)) {
+        if (mounted) showMessage(context, 'Deze run staat er al in (rond hetzelfde tijdstip).');
+        return;
+      }
+      if (mounted) showMessage(context, 'Run importeren…');
+      HourWeather? w;
+      final first = run.track.isNotEmpty ? run.track.first : null;
+      if (first != null) w = await ref.read(weatherServiceProvider).historical(first.lat, first.lon, run.start);
+      final shoes = ref.read(shoesProvider).value ?? const <Shoe>[];
+      final repo = ref.read(repositoryProvider);
+      final id = await repo.addActivityReturningId(Activity(
+        startedAt: run.start,
+        distanceMeters: double.parse(run.distanceMeters.toStringAsFixed(1)),
+        movingTimeSeconds: run.movingSeconds,
+        source: 'manual',
+        averageHeartRate: run.averageHeartRate,
+        elevationGainMeters: run.elevationGain,
+        temperatureCelsius: w?.temperature,
+        feelsLikeCelsius: w?.feelsLike,
+        windSpeedKmh: w?.windSpeed,
+        windDirectionDegrees: w?.windDirection,
+        humidityPct: w?.humidity,
+        trackPolyline: run.track.length >= 2 ? encodePolyline(run.track) : null,
+        shoeId: defaultShoe(shoes)?.id,
+      ));
+      final streams = RunStreams.fromJson(run.streams);
+      await repo
+          .setActivityStreams(id, run.streams, bestEfforts: streams == null ? null : bestEffortsToJson(bestEfforts(streams)))
+          .catchError((Object _) {});
+      ref.invalidate(activitiesProvider);
+      await ref.read(syncServiceProvider).autoLinkRuns().catchError((_) => 0);
+      if (!mounted) return;
+      showMessage(context, 'Run van ${Fmt.date(run.start)} toegevoegd (${Fmt.km(run.distanceMeters, decimals: 2)}).');
+      context.go('/runs/$id');
+    } on RunFileException catch (e) {
+      if (mounted) showMessage(context, e.message, error: true);
+    } catch (e) {
+      if (mounted) showMessage(context, 'Importeren is niet gelukt: ${friendlyError(e)}', error: true);
+    }
+  }
+
   Future<void> _openFilter() async {
     final f = await showModalBottomSheet<RunFilter>(
       context: context,
@@ -119,6 +180,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               switch (v) {
                 case 'new':
                   context.go('/runs/new');
+                case 'import':
+                  _import();
                 case 'csv':
                   _export(false);
                 case 'gpx':
@@ -127,6 +190,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             },
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
+              PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX)'))),
               PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
               PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text('Exporteer GPS-sporen (GPX)'))),
             ],
@@ -219,6 +283,51 @@ class _Overview extends StatefulWidget {
 
 class _OverviewState extends State<_Overview> {
   Period _period = Period.week;
+  double? _goalKm;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      final g = p.getDouble('week_goal_km');
+      if (mounted && g != null && g > 0) setState(() => _goalKm = g);
+    }).ignore();
+  }
+
+  Future<void> _setGoal() async {
+    var km = (_goalKm ?? 20).round();
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: const Text('Weekdoel'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Hoeveel kilometer wil je per week lopen?', style: TextStyle(color: RwColors.muted)),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(onPressed: () => set(() => km = (km - 1).clamp(1, 300)), icon: const Icon(Icons.remove_circle_outline)),
+                  Text('$km km', style: const TextStyle(fontFamily: RwFonts.display, fontSize: 30, fontWeight: FontWeight.w800)),
+                  IconButton(onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: const Icon(Icons.add_circle_outline)),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, 0), child: const Text('Geen doel')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, km), child: const Text('Opslaan')),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+    setState(() => _goalKm = result == 0 ? null : result.toDouble());
+    final p = await SharedPreferences.getInstance();
+    await p.setDouble('week_goal_km', result.toDouble());
+  }
 
   static const _months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
   static const _days = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'];
@@ -297,6 +406,55 @@ class _OverviewState extends State<_Overview> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          if (_goalKm == null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _setGoal,
+                icon: const Icon(Icons.flag_outlined, size: 18),
+                label: const Text('Stel een weekdoel in'),
+              ),
+            )
+          else
+            InkWell(
+              onTap: _setGoal,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            weekKm >= _goalKm!
+                                ? 'Weekdoel gehaald! ${Fmt.km(weekKm * 1000, decimals: 1)} van ${_goalKm!.round()} km'
+                                : 'Weekdoel: ${Fmt.km(weekKm * 1000, decimals: 1)} van ${_goalKm!.round()} km',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Text(
+                          weekKm >= _goalKm! ? '🎉' : 'nog ${(_goalKm! - weekKm).toStringAsFixed(1).replaceAll('.', ',')} km',
+                          style: const TextStyle(color: RwColors.muted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: (weekKm / _goalKm!).clamp(0, 1).toDouble(),
+                        minHeight: 8,
+                        color: weekKm >= _goalKm! ? RwColors.good : RwColors.accent,
+                        backgroundColor: RwColors.bar,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (streak >= 2) ...[
             const SizedBox(height: 12),
             Row(
@@ -323,6 +481,12 @@ class _OverviewState extends State<_Overview> {
               ],
             ),
           ],
+          const SizedBox(height: 4),
+          OutlinedButton.icon(
+            onPressed: () => openFitness(context),
+            icon: const Icon(Icons.show_chart),
+            label: const Text('Fitheid en vorm'),
+          ),
           const Divider(height: 28),
           SegmentedButton<Period>(
             showSelectedIcon: false,
