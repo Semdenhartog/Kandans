@@ -35,6 +35,8 @@ import 'package:runwise/features/activities/activities_screen.dart';
 import 'package:runwise/features/activities/activity_detail_screen.dart';
 import 'package:runwise/features/activities/badges_screen.dart';
 import 'package:runwise/features/activities/fitness_screen.dart';
+import 'package:runwise/features/activities/strength_screen.dart';
+import 'package:runwise/domain/strength.dart';
 import 'package:runwise/features/coach/coach_screen.dart';
 import 'package:runwise/features/dashboard/dashboard_providers.dart';
 import 'package:runwise/features/dashboard/dashboard_screen.dart';
@@ -378,6 +380,20 @@ void main() {
   testWidgets('22 groot runs', (t) => _shot(t, '22_groot_runs', const ActivitiesScreen(), height: 1600, textScale: 1.35));
   testWidgets('23 schema kiezen', (t) => _shot(t, '23_schema_kiezen', const TrainingPlanScreen(), height: 1900, emptyPlan: true));
   testWidgets('24 briefing', (t) => _shot(t, '24_briefing', const _OpenBriefing(), height: 1100));
+  testWidgets('25 loopband', (t) => _shot(t, '25_loopband', const RecordRunScreen(), height: 915, after: () {
+        RunRecorderService.instance.view.value = RecorderView(
+          status: RecorderStatus.running,
+          distance: 4120,
+          movingSeconds: 1236,
+          km: 4,
+          indoor: true,
+          treadmillKmh: 12,
+          heartRate: 148,
+          hrStatus: HrStatus.connected,
+        );
+      }));
+  testWidgets('26 kracht', (t) => _shot(t, '26_kracht', const StrengthScreen(), height: 915));
+  testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
 
