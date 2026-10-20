@@ -145,6 +145,27 @@ jobs:
               open(m, "w").write(k)
               print("::notice::MainActivity aangepast:", m)
 
+          # 2b) home_widget bouwt standaard voor Java 8, maar gebruikt onderdelen voor Java 11+: op 17 zetten.
+          rg = "android/build.gradle.kts"
+          rt = open(rg).read()
+          if "home_widget-jvm" not in rt:
+              rt += '''
+
+// home_widget-jvm: plugin met Java 17 bouwen (anders 'Cannot inline bytecode built with JVM target 11').
+subprojects {
+    if (name == "home_widget") {
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+        tasks.withType<JavaCompile>().configureEach {
+            sourceCompatibility = "17"
+            targetCompatibility = "17"
+        }
+    }
+}
+'''
+              open(rg, "w").write(rt)
+
           # 3) Health Connect werkt vanaf Android 8 (API 26)
           g = "android/app/build.gradle.kts"
           t = open(g).read()
