@@ -196,32 +196,45 @@ class _Page extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 12, 28, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 24),
-            Center(
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(colors: [RwColors.accent.withValues(alpha: 0.35), RwColors.accent.withValues(alpha: 0.05)]),
-                ),
-                child: Icon(icon, size: 56, color: RwColors.accent),
+  Widget build(BuildContext context) => LayoutBuilder(
+        // Tekst bovenaan, knoppen onderaan binnen bereik van je duim; scrollt op kleine schermen.
+        builder: (context, box) => SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(28, 0, 28, 12),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: box.maxHeight - 12),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Spacer(),
+                  Center(
+                    child: Container(
+                      width: 168,
+                      height: 168,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(colors: [
+                          RwColors.accent.withValues(alpha: 0.35),
+                          RwColors.accentDeep.withValues(alpha: 0.08),
+                          Colors.transparent,
+                        ], stops: const [0, 0.7, 1]),
+                      ),
+                      child: Icon(icon, size: 76, color: RwColors.accent),
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                  Text(title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontFamily: RwFonts.display, fontSize: 32, fontWeight: FontWeight.w800, height: 1.1)),
+                  const SizedBox(height: 16),
+                  Text(text, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted, fontSize: 16, height: 1.5)),
+                  const Spacer(flex: 2),
+                  const SizedBox(height: 24),
+                  ...children,
+                ],
               ),
             ),
-            const SizedBox(height: 36),
-            Text(title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: RwFonts.display, fontSize: 32, fontWeight: FontWeight.w800, height: 1.1)),
-            const SizedBox(height: 16),
-            Text(text, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted, fontSize: 16, height: 1.5)),
-            const SizedBox(height: 32),
-            ...children,
-          ],
+          ),
         ),
       );
 }
