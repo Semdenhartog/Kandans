@@ -45,6 +45,10 @@ import 'package:runwise/features/auth/login_screen.dart';
 import 'package:runwise/features/onboarding/onboarding_screen.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
+import 'package:runwise/features/record/run_summary_screen.dart';
+import 'package:runwise/domain/badges.dart' as bd;
+import 'package:runwise/domain/best_efforts.dart';
+import 'package:runwise/domain/run_streams.dart';
 import 'package:runwise/features/routes/route_detail_screen.dart';
 import 'package:runwise/features/routes/routes_screen.dart';
 
@@ -233,7 +237,7 @@ List<Override> _overrides() => [
       routesProvider.overrideWith((ref) => _routes),
       planProvider.overrideWith((ref) => _plan),
       shoesProvider.overrideWith((ref) => [Shoe(id: 's1', name: 'Novablast 4', isDefault: true), Shoe(id: 's2', name: 'Endorphin Speed')]),
-      racesProvider.overrideWith((ref) => const <RaceEvent>[]),
+      racesProvider.overrideWith((ref) => [RaceEvent(id: 'w1', name: 'Singelloop', raceDate: _now.add(const Duration(days: 38)), distanceMeters: 10000, goalTimeSeconds: 2880)]),
       coachMessagesProvider.overrideWith((ref) => _coach),
       forecastProvider.overrideWith((ref) => _forecast),
       weekForecastProvider.overrideWith((ref) => _forecast),
@@ -338,5 +342,19 @@ void main() {
   testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));
   testWidgets('13 inloggen', (t) => _shot(t, '13_inloggen', const LoginScreen(), height: 915));
   testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
+  testWidgets('15 na je run', (t) {
+    final st = RunStreams.fromJson(_streams)!;
+    return _shot(
+        t,
+        '15_na_je_run',
+        RunSummaryScreen(
+          activity: _runs.first,
+          streams: st,
+          efforts: bestEfforts(st),
+          previousBest: const {1000: (seconds: 999.0, activityId: 'x')},
+          badges: bd.computeBadges(_runs).where((b) => b.earned).take(2).toList(),
+        ),
+        height: 2600);
+  });
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
