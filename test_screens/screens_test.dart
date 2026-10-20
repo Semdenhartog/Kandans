@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -258,7 +260,9 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen, {double heig
   await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
   // Timers en animaties opruimen.
   await tester.pumpWidget(const SizedBox());
-  await tester.pump(const Duration(minutes: 6));
+  for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(minutes: 2));
+  }
 }
 
 /// Zelfde onderbalk als de echte app (zonder router).
@@ -285,6 +289,9 @@ class _FakeShell extends StatelessWidget {
 void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
+    await initializeDateFormatting('nl_NL');
+    await initializeDateFormatting('nl');
+    Intl.defaultLocale = 'nl_NL';
     await _loadFonts();
   });
 
