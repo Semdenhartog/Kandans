@@ -1,0 +1,41 @@
+# Maakt schermafbeeldingen van de belangrijkste schermen (met voorbeeldgegevens),
+# zodat de layout bekeken kan worden zonder telefoon. Plaatjes staan bij de run onder "Artifacts".
+name: Schermen
+
+on:
+  push:
+    paths:
+      - 'lib/**'
+      - 'test_screens/**'
+      - '.github/workflows/screens.yml'
+  workflow_dispatch:
+
+jobs:
+  screens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Schermafbeeldingen maken
+        run: flutter test test_screens --update-goldens --reporter expanded 2>&1 | tee screens.txt
+        continue-on-error: true
+      - name: Fouten tonen
+        if: always()
+        run: |
+          grep -E "EXCEPTION CAUGHT|══╡|was thrown|overflowed|Error:|\[E\]" -A3 screens.txt | head -80 | while IFS= read -r line; do
+            echo "::warning title=Schermen::$line"
+          done
+          ls -la test_screens/goldens || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: schermen
+          path: |
+            test_screens/goldens/*.png
+            screens.txt
+          retention-days: 14
