@@ -92,16 +92,29 @@ List<double> interpolateElevation(List<double> distance, List<int> idx, List<dou
 /// Hoogtemeters omhoog, kleine schommelingen (< 2 m) genegeerd.
 double elevationGain(List<double> ele) {
   if (ele.isEmpty) return 0;
+  // Van dal naar top tellen; pas een klim als die minstens 2 m is (tegen ruis).
   var gain = 0.0;
-  var ref = ele.first;
+  var low = ele.first, high = ele.first;
+  var up = false;
   for (final e in ele.skip(1)) {
-    if (e - ref >= 2) {
-      gain += e - ref;
-      ref = e;
-    } else if (ref - e >= 2) {
-      ref = e;
+    if (!up) {
+      if (e < low) {
+        low = e;
+      } else if (e - low >= 2) {
+        up = true;
+        high = e;
+      }
+    } else {
+      if (e > high) {
+        high = e;
+      } else if (high - e >= 2) {
+        gain += high - low;
+        up = false;
+        low = e;
+      }
     }
   }
+  if (up) gain += high - low;
   return gain;
 }
 
