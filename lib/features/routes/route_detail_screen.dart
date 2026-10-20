@@ -223,7 +223,10 @@ class RouteDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 12),
+              if (r.polyline.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _SurfaceCard(routeId: routeId, polyline: r.polyline),
+              ],              const SizedBox(height: 12),
               _RouteHistoryCard(routeId: routeId),
               const SizedBox(height: 12),
               if (r.points.length > 1)
@@ -603,6 +606,75 @@ class _PoiCard extends StatelessWidget {
                         ),
                       ],
                     ),
+    );
+  }
+}
+
+/// Ondergrond van de route (zoals de padtypes bij Komoot en Strava), uit OpenStreetMap.
+class _SurfaceCard extends ConsumerWidget {
+  const _SurfaceCard({required this.routeId, required this.polyline});
+  final String routeId;
+  final String polyline;
+
+  static const _order = ['verhard', 'klinkers', 'halfverhard', 'onverhard', 'onbekend'];
+  static const _labels = {
+    'verhard': 'Asfalt / verhard',
+    'klinkers': 'Klinkers / tegels',
+    'halfverhard': 'Gravel / halfverhard',
+    'onverhard': 'Onverhard (zand, gras, bospad)',
+    'onbekend': 'Onbekend',
+  };
+  static const _colors = {
+    'verhard': Color(0xFF8D8D98),
+    'klinkers': Color(0xFFC77D4A),
+    'halfverhard': Color(0xFFD9B44A),
+    'onverhard': Color(0xFF5BAE6B),
+    'onbekend': Color(0xFF4A4A55),
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(routeSurfaceProvider((id: routeId, polyline: polyline)));
+    return RwCard(
+      title: 'ONDERGROND',
+      child: s.when(
+        loading: () => const Text('Ondergrond wordt geladen…', style: TextStyle(color: RwColors.muted)),
+        error: (_, _) => const Text('Ondergrond is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted)),
+        data: (m) {
+          final total = m.values.fold<double>(0, (a, b) => a + b);
+          if (total <= 0) return const Text('Geen gegevens over de ondergrond voor deze route.', style: TextStyle(color: RwColors.muted));
+          final types = [for (final t in _order) if ((m[t] ?? 0) > 0) t];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: SizedBox(
+                  height: 14,
+                  child: Row(children: [
+                    for (final t in types)
+                      Expanded(flex: math.max(1, (m[t]! / total * 1000).round()), child: Container(color: _colors[t])),
+                  ]),
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final t in types)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(children: [
+                    Container(width: 10, height: 10, decoration: BoxDecoration(color: _colors[t], shape: BoxShape.circle)),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(_labels[t] ?? t)),
+                    Text('${(m[t]! / total * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w700)),
+                  ]),
+                ),
+              const SizedBox(height: 4),
+              const Text('Bron: OpenStreetMap via openrouteservice. Niet overal is de ondergrond bekend.',
+                  style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+            ],
+          );
+        },
+      ),
     );
   }
 }

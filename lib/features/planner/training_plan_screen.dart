@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../domain/readiness.dart';
 import '../../domain/training_load.dart';
 import '../../domain/training_plan.dart';
 import '../../domain/weekly_load.dart';
@@ -35,8 +39,73 @@ Color sessionColor(SessionKind k) => switch (k) {
     };
 
 /// Start een training uit het schema met de juiste instellingen.
-void startSession(BuildContext context, PlanSession s) {
-  openRecorder(context, plan: s.intervals, targetPace: s.intervals == null ? s.targetPace : null, sessionTitle: s.title);
+/// Met [weather] wordt het doeltempo aangepast als het warm is (zoals Runna's "Adapt for Heat").
+void startSession(BuildContext context, PlanSession s, {HourWeather? weather}) {
+  var pace = s.intervals == null ? s.targetPace : null;
+  final feels = weather?.feelsLike ?? weather?.temperature;
+  if (pace != null && feels != null) {
+    final adjusted = heatAdjustedPace(pace, feelsLike: feels, humidity: weather?.humidity);
+    if (adjusted - pace >= 3) {
+      showMessage(context,
+          'Het is ${Fmt.temp(feels)} (gevoel). Je doeltempo is aangepast naar ${Fmt.pace(adjusted)} in plaats van ${Fmt.pace(pace)}.');
+      pace = adjusted;
+    }
+  }
+  openRecorder(context, plan: s.intervals, targetPace: pace, sessionTitle: s.title);
+}
+
+const _setupKey = 'plan_setup';
+
+Future<void> _rememberSetup(PlanSetup setup) async {
+  try {
+    final p = await SharedPreferences.getInstance();
+    await p.setString(_setupKey, jsonEncode(setup.toJson()));
+  } catch (_) {}
+}
+
+Future<PlanSetup?> _savedSetup() async {
+  try {
+    final p = await SharedPreferences.getInstance();
+    final raw = p.getString(_setupKey);
+    return raw == null ? null : PlanSetup.fromJson(jsonDecode(raw));
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Tempo's in je schema bijwerken op basis van je recente runs (zoals Runna's pace-recalibratie).
+Future<void> recalibrateTrainingPlan(BuildContext context, WidgetRef ref) async {
+  final setup = await _savedSetup();
+  if (!context.mounted) return;
+  if (setup == null) {
+    showMessage(context, 'Dit schema is gemaakt in een oudere versie. Maak een nieuw schema om tempo\'s bij te werken.');
+    return;
+  }
+  final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+  final plan = ref.read(planProvider).value ?? const <PlanSession>[];
+  final now = DateTime.now();
+  final fresh = recalibratedThreshold(runs, now, fallback: estimateThresholdPace(runs));
+  final weeks = weeklyTotals(runs, now, weeks: 4);
+  final weekly = weeks.fold<double>(0, (s, w) => s + w.km) / 4;
+  final diff = fresh - setup.thresholdPace;
+  final ok = await confirmDialog(
+    context,
+    title: 'Tempo\'s bijwerken?',
+    message: diff.abs() < 2
+        ? 'Je drempeltempo is gelijk gebleven (${Fmt.pace(fresh)}). De komende trainingen worden opnieuw ingedeeld met je huidige weekomvang.'
+        : 'Je drempeltempo is ${diff < 0 ? 'sneller' : 'langzamer'} geworden: ${Fmt.pace(fresh)} (was ${Fmt.pace(setup.thresholdPace)}). '
+            'De trainingen vanaf vandaag krijgen nieuwe tempo\'s. Wat je al deed blijft staan.',
+  );
+  if (!ok || !context.mounted) return;
+  final next = setup.copyWith(thresholdPace: fresh, currentWeeklyKm: weekly);
+  try {
+    await ref.read(repositoryProvider).savePlan(recalibratePlan(plan, next, now));
+    await _rememberSetup(next);
+    ref.invalidate(planProvider);
+    if (context.mounted) showMessage(context, 'Je schema is bijgewerkt.');
+  } catch (e) {
+    if (context.mounted) showMessage(context, friendlyError(e), error: true);
+  }
 }
 
 /// Trainingsschema naar je wedstrijd of afstand (zoals Runna), gratis.
@@ -61,6 +130,7 @@ class _TrainingPlanScreenState extends ConsumerState<TrainingPlanScreen> {
             PopupMenuButton<String>(
               onSelected: (v) async {
                 if (v == 'new') setState(() => _editing = true);
+                if (v == 'recal') await recalibrateTrainingPlan(context, ref);
                 if (v == 'delete') {
                   final ok = await confirmDialog(context, title: 'Schema verwijderen?', message: 'Je trainingsschema wordt verwijderd. Je runs blijven staan.');
                   if (!ok) return;
@@ -69,6 +139,7 @@ class _TrainingPlanScreenState extends ConsumerState<TrainingPlanScreen> {
                 }
               },
               itemBuilder: (_) => const [
+                PopupMenuItem(value: 'recal', child: Text('Tempo\'s bijwerken')),
                 PopupMenuItem(value: 'new', child: Text('Nieuw schema maken')),
                 PopupMenuItem(value: 'delete', child: Text('Schema verwijderen')),
               ],
@@ -213,6 +284,7 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
   final Set<int> _days = {2, 4, 7};
   int _longDay = 7;
   List<PlanSession>? _preview;
+  PlanSetup? _setup;
   bool _saving = false;
 
   @override
@@ -236,23 +308,24 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
     final weeks = weeklyTotals(runs, DateTime.now(), weeks: 4);
     final weekly = weeks.fold<double>(0, (s, w) => s + w.km) / 4;
     final goalSeconds = Fmt.parseDuration(_goalTime.text);
-    final plan = buildPlan(
-      PlanSetup(
-        goalMeters: _goal,
-        raceDate: _date,
-        runDays: _days.toList(),
-        longRunDay: _days.contains(_longDay) ? _longDay : (_days.toList()..sort()).last,
-        currentWeeklyKm: weekly,
-        thresholdPace: estimateThresholdPace(runs),
-        goalTimeSeconds: goalSeconds,
-      ),
-      DateTime.now(),
+    final setup = PlanSetup(
+      goalMeters: _goal,
+      raceDate: _date,
+      runDays: _days.toList(),
+      longRunDay: _days.contains(_longDay) ? _longDay : (_days.toList()..sort()).last,
+      currentWeeklyKm: weekly,
+      thresholdPace: estimateThresholdPace(runs),
+      goalTimeSeconds: goalSeconds,
     );
+    final plan = buildPlan(setup, DateTime.now());
     if (plan.isEmpty) {
       showMessage(context, 'Kies een datum die minstens een week weg is, en minstens één loopdag.');
       return;
     }
-    setState(() => _preview = plan);
+    setState(() {
+      _preview = plan;
+      _setup = setup;
+    });
   }
 
   Future<void> _save() async {
@@ -261,6 +334,7 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
     setState(() => _saving = true);
     try {
       await ref.read(repositoryProvider).savePlan(p);
+      if (_setup != null) await _rememberSetup(_setup!);
       ref.invalidate(planProvider);
       widget.onDone();
       if (mounted) showMessage(context, 'Je schema staat klaar. Je ziet de training van vandaag ook op Vandaag.');

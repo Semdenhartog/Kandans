@@ -4,9 +4,12 @@ import '../core/theme.dart';
 
 /// Kaart met optionele titel, in RunWise-stijl.
 class RwCard extends StatelessWidget {
-  const RwCard({super.key, this.title, required this.child, this.padding, this.onTap});
+  const RwCard({super.key, this.title, required this.child, this.padding, this.onTap, this.trailing});
 
   final String? title;
+
+  /// Knopje rechts naast de titel (bijv. sluiten).
+  final Widget? trailing;
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
@@ -23,16 +26,23 @@ class RwCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (title != null) ...[
-                Text(
-                  title!,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: RwColors.subtle,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.4,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: RwColors.subtle,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                    if (trailing != null) trailing!,
+                  ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: trailing == null ? 10 : 2),
               ],
               child,
             ],

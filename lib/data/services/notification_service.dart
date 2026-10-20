@@ -191,5 +191,39 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     }
+    await scheduleWeeklyReport();
+  }
+
+  static const _weeklyId = 103;
+
+  /// Elke maandag om 8:00 een seintje dat je weekoverzicht klaarstaat (alleen als meldingen aan staan).
+  Future<void> scheduleWeeklyReport() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final s = await settings();
+      await init();
+      await _plugin.cancel(_weeklyId);
+      if (!s.enabled) return;
+      final now = DateTime.now();
+      var at = DateTime(now.year, now.month, now.day, 8);
+      while (at.weekday != DateTime.monday || !at.isAfter(now)) {
+        at = DateTime(at.year, at.month, at.day + 1, 8);
+      }
+      await _plugin.zonedSchedule(
+        _weeklyId,
+        'Je week in RunWise',
+        'Je weekoverzicht staat klaar: kilometers, schema en tips voor deze week.',
+        tz.TZDateTime.from(at.toUtc(), tz.UTC),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'weekoverzicht',
+            'Weekoverzicht',
+            channelDescription: 'Elke maandag je week in het kort',
+            importance: Importance.defaultImportance,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (_) {}
   }
 }

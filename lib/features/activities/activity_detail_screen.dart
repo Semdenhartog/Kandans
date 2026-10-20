@@ -239,6 +239,10 @@ class ActivityDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             _FeelCard(activity: a),
           ],
+          if (a.id != null && a.source != 'strava') ...[
+            const SizedBox(height: 12),
+            _CoachSummaryCard(activity: a),
+          ],
           const SizedBox(height: 12),
           RwCard(
             title: 'ROUTE',
@@ -487,6 +491,75 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
               ],
               onChanged: (v) => _setShoe(v),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Korte analyse van de coach (zoals Strava's Athlete Intelligence), met je schema en het weer erbij.
+class _CoachSummaryCard extends ConsumerStatefulWidget {
+  const _CoachSummaryCard({required this.activity});
+  final Activity activity;
+
+  @override
+  ConsumerState<_CoachSummaryCard> createState() => _CoachSummaryCardState();
+}
+
+class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
+  late String? _text = widget.activity.aiSummary;
+  bool _busy = false;
+  String? _error;
+
+  Future<void> _ask() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final t = await ref.read(repositoryProvider).summarizeRun(widget.activity.id!);
+      if (!mounted) return;
+      setState(() => _text = t);
+      ref.invalidate(activitiesProvider);
+    } on PaywallRequired {
+      if (mounted) context.push('/premium');
+    } catch (e) {
+      if (mounted) setState(() => _error = friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = _text;
+    return RwCard(
+      title: 'COACH',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (t != null)
+            Text(t, style: const TextStyle(height: 1.45))
+          else ...[
+            const Text('Laat de coach in een paar zinnen vertellen wat goed ging, wat het weer deed en wat je volgende keer kunt doen.',
+                style: TextStyle(color: RwColors.muted)),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _ask,
+              icon: _busy
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.auto_awesome_outlined),
+              label: Text(_busy ? 'De coach kijkt…' : 'Laat de coach je run bekijken'),
+            ),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!, style: const TextStyle(color: RwColors.danger)),
+          ],
+          if (t != null) ...[
+            const SizedBox(height: 6),
+            const Text('Gemaakt door AI; kan fouten bevatten.', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
           ],
         ],
       ),

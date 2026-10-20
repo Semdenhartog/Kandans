@@ -91,6 +91,7 @@ class Activity {
     this.note,
     this.bestEfforts,
     this.photos = const [],
+    this.aiSummary,
   });
 
   final String? id;
@@ -128,6 +129,9 @@ class Activity {
   /// Foto's bij deze run (paden in de opslag 'run-photos').
   final List<String> photos;
 
+  /// Korte analyse van de coach (eenmalig gemaakt, daarna bewaard).
+  final String? aiSummary;
+
   /// Automatisch aan de route gekoppeld (niet door de gebruiker gekozen).
   bool get autoLinked => routeId != null && !routeLinkLocked && source != 'manual';
 
@@ -160,6 +164,7 @@ class Activity {
               }
             : null,
         photos: j['photos'] is List ? [for (final p in j['photos'] as List) p.toString()] : const [],
+        aiSummary: j['ai_summary'] as String?,
       );
 
   Map<String, dynamic> toInsert(String userId) => {

@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/config.dart';
 import '../../core/supabase.dart';
 import '../../domain/geo.dart';
+import '../../domain/readiness.dart';
 import '../../domain/run_matcher.dart';
 import '../models/models.dart';
 import '../repositories/repositories.dart';
@@ -118,6 +119,95 @@ class SyncService {
       _healthTypes,
       permissions: _healthTypes.map((_) => HealthDataAccess.READ).toList(),
     );
+  }
+
+  // ---------- Slaap, rusthartslag en HRV (voor je klaar-score) ----------
+
+  static const _bodyTypes = [
+    HealthDataType.SLEEP_SESSION,
+    HealthDataType.RESTING_HEART_RATE,
+    HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
+  ];
+  static const _bodyKey = 'health_body_signals';
+
+  Future<bool> bodySignalsEnabled() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      return p.getBool(_bodyKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Vraagt toestemming om slaap, rusthartslag en HRV te lezen (van je horloge of ring).
+  Future<bool> connectBody() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      await _configureHealth();
+      final ok = await _health.requestAuthorization(
+        _bodyTypes,
+        permissions: _bodyTypes.map((_) => HealthDataAccess.READ).toList(),
+      );
+      final p = await SharedPreferences.getInstance();
+      await p.setBool(_bodyKey, ok);
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Afgelopen nacht en je normaal (gemiddelde van de 14 dagen ervoor). Null als niets gekoppeld is.
+  Future<BodySignals?> bodySignals() async {
+    if (!Platform.isAndroid || !await bodySignalsEnabled()) return null;
+    try {
+      await _configureHealth();
+      final now = DateTime.now();
+      final points = await _health.getHealthDataFromTypes(
+        types: _bodyTypes,
+        startTime: now.subtract(const Duration(days: 15)),
+        endTime: now,
+      );
+      // Slaap per nacht (de dag waarop je wakker werd).
+      final sleepPerDay = <DateTime, double>{};
+      final rhrPerDay = <DateTime, List<double>>{};
+      final hrvPerDay = <DateTime, List<double>>{};
+      for (final p in points) {
+        final d = DateTime(p.dateTo.year, p.dateTo.month, p.dateTo.day);
+        if (p.type == HealthDataType.SLEEP_SESSION) {
+          final h = p.dateTo.difference(p.dateFrom).inMinutes / 60;
+          if (h > 0 && h < 16) sleepPerDay[d] = (sleepPerDay[d] ?? 0) + h;
+        } else if (p.value is NumericHealthValue) {
+          final v = (p.value as NumericHealthValue).numericValue.toDouble();
+          if (p.type == HealthDataType.RESTING_HEART_RATE && v > 25 && v < 120) (rhrPerDay[d] ??= []).add(v);
+          if (p.type == HealthDataType.HEART_RATE_VARIABILITY_RMSSD && v > 3 && v < 300) (hrvPerDay[d] ??= []).add(v);
+        }
+      }
+      final today = DateTime(now.year, now.month, now.day);
+      double avg(Iterable<double> xs) => xs.reduce((a, b) => a + b) / xs.length;
+      double? latest(Map<DateTime, double> m) {
+        final yesterday = today.subtract(const Duration(days: 1));
+        return m[today] ?? m[yesterday];
+      }
+
+      double? baseline(Map<DateTime, double> m) {
+        final older = [for (final e in m.entries) if (e.key.isBefore(today.subtract(const Duration(days: 1)))) e.value];
+        return older.length < 3 ? null : avg(older);
+      }
+
+      final rhr = {for (final e in rhrPerDay.entries) e.key: avg(e.value)};
+      final hrv = {for (final e in hrvPerDay.entries) e.key: avg(e.value)};
+      final s = BodySignals(
+        sleepHours: latest(sleepPerDay),
+        sleepAvgHours: baseline(sleepPerDay),
+        restingHr: latest(rhr),
+        restingHrBaseline: baseline(rhr),
+        hrv: latest(hrv),
+        hrvBaseline: baseline(hrv),
+      );
+      return s;
+    } catch (_) {
+      return null;
+    }
   }
 
   // ---------- Runs naar Health Connect (Samsung Health, Google Fit) ----------
@@ -360,4 +450,10 @@ final stravaConnectionProvider = FutureProvider<StravaConnection?>((ref) {
 final healthStatusProvider = FutureProvider<HealthStatus>((ref) {
   ref.watch(currentUserProvider);
   return ref.watch(syncServiceProvider).healthStatus();
+});
+
+/// Slaap, rusthartslag en HRV uit Health Connect (null als niet gekoppeld).
+final bodySignalsProvider = FutureProvider<BodySignals?>((ref) {
+  ref.watch(currentUserProvider);
+  return ref.watch(syncServiceProvider).bodySignals();
 });

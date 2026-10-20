@@ -8,6 +8,7 @@ import '../models/models.dart';
 import '../services/elevation_service.dart';
 import '../services/offline_cache.dart';
 import '../../domain/best_efforts.dart';
+import '../../domain/geo.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/training_plan.dart';
 
@@ -22,7 +23,7 @@ class RunWiseRepository {
   static const _activityColumns =
       'id, started_at, distance_meters, moving_time_seconds, source, route_id, average_heart_rate, '
       'elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, wind_direction_degrees, '
-      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos';
+      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos, ai_summary';
 
   /// Verloop van een run (tijden per km, grafiek). Eigen opnames hebben het al; bij Strava-runs
   /// wordt het eenmalig bij Strava opgehaald. De snelste stukken worden er meteen bij berekend.
@@ -411,6 +412,50 @@ class RunWiseRepository {
     }
   }
 
+  /// Korte analyse van één run door de coach (wordt op de server bewaard).
+  Future<String> summarizeRun(String activityId) async {
+    try {
+      final res = await _db.functions.invoke('coach', body: {'mode': 'summary', 'activity_id': activityId});
+      final data = (res.data as Map).cast<String, dynamic>();
+      return data['summary'] as String;
+    } on FunctionException catch (e) {
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (e.status == 402 || details['paywall'] == true) throw const PaywallRequired();
+      throw Exception(details['error'] ?? 'De coach is even niet bereikbaar. Probeer het zo opnieuw.');
+    }
+  }
+
+  /// Ondergrond langs een route (asfalt, klinkers, halfverhard, onverhard), in meters per soort.
+  /// Eenmaal opgehaald wordt het op de telefoon bewaard (een route verandert niet).
+  Future<Map<String, double>> routeSurface(String routeId, String polyline) async {
+    final key = 'surface_${routeId}_${polyline.length}';
+    Map<String, double> decode(Object? d) => {for (final e in (d as Map).entries) e.key.toString(): (e.value as num).toDouble()};
+    final cached = await OfflineCache.load(key);
+    if (cached != null) return decode(cached.data);
+    final pts = decodePolyline(polyline);
+    if (pts.length < 2) return <String, double>{};
+    final step = (pts.length / 49).ceil().clamp(1, pts.length);
+    final sample = [for (var i = 0; i < pts.length; i += step) pts[i]];
+    if (sample.last != pts.last) sample.add(pts.last);
+    try {
+      final res = await _db.functions.invoke('route-generator', body: {
+        'mode': 'surface',
+        'points': [
+          for (final p in sample.take(50)) [p.lat, p.lon],
+        ],
+      });
+      final list = ((res.data as Map)['surface'] as List?) ?? const [];
+      final out = {
+        for (final e in list.cast<Map>()) e['type'].toString(): (e['meters'] as num).toDouble(),
+      };
+      if (out.isNotEmpty) await OfflineCache.save(key, out);
+      return out;
+    } on FunctionException catch (e) {
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      throw Exception(details['error'] ?? 'Ondergrond ophalen is niet gelukt.');
+    }
+  }
+
   Future<void> clearCoachChat() async {
     await _db.from('coach_messages').delete().eq('user_id', _uid);
   }
@@ -523,4 +568,9 @@ final raceDetailProvider = FutureProvider.family<RaceEvent, String>(
 final coachMessagesProvider = FutureProvider<List<CoachMessage>>((ref) {
   ref.watch(currentUserProvider);
   return ref.watch(repositoryProvider).coachMessages();
+});
+
+/// Ondergrond per route (sleutel: "routeId|polyline").
+final routeSurfaceProvider = FutureProvider.family<Map<String, double>, ({String id, String polyline})>((ref, r) {
+  return ref.watch(repositoryProvider).routeSurface(r.id, r.polyline);
 });

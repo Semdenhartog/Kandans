@@ -10,6 +10,7 @@ import '../../core/format.dart';
 import '../../domain/intervals.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_coach.dart';
+import '../../domain/run_streams.dart';
 import '../../domain/run_recorder.dart';
 import 'heart_rate_service.dart';
 import 'live_share_service.dart';
@@ -43,6 +44,7 @@ class RecorderView {
     this.followRoute = const [],
     this.routeRemaining,
     this.offRoute = false,
+    this.ghostDelta,
   });
 
   final RecorderStatus status;
@@ -81,6 +83,9 @@ class RecorderView {
   final double? routeRemaining;
   final bool offRoute;
 
+  /// Tegen je record op deze route: seconden achter (+) of voor (-). Null = geen record-race.
+  final double? ghostDelta;
+
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
 
@@ -105,6 +110,7 @@ class RunRecorderService {
   CueScheduler? _cues;
   PaceCoach? _coach;
   RouteFollower? _follower;
+  GhostRace? _ghost;
   int _ticks = 0;
 
   /// Doeltempo van de huidige run (s/km), of null.
@@ -203,6 +209,7 @@ class RunRecorderService {
     CueSettings cues = const CueSettings(),
     double? targetPace,
     List<LatLng> followRoute = const [],
+    RunStreams? ghost,
   }) async {
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
@@ -230,6 +237,7 @@ class RunRecorderService {
     _cues = CueScheduler(indoor && cues.every.meters != null ? cues.copyWith(every: CueEvery.fiveMin) : cues);
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
+    _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
     _rec!.start(DateTime.now());
     if (this.voice) {
       _tts ??= FlutterTts();
@@ -291,6 +299,11 @@ class RunRecorderService {
       if (c != null) {
         _say(c);
         _buzz(follower.offRoute ? const [0, 500, 200, 500] : const [0, 150]);
+      }
+      final g = _ghost;
+      if (g != null && !follower.offRoute) {
+        final gc = g.update(follower.progress, r.movingSeconds);
+        if (gc != null) _say(gc);
       }
     }
     if (r.status == RecorderStatus.running) {
@@ -396,6 +409,7 @@ class RunRecorderService {
       followRoute: _follower?.track.points ?? const [],
       routeRemaining: _follower?.remaining,
       offRoute: _follower?.offRoute ?? false,
+      ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
     );
   }
 
@@ -416,6 +430,7 @@ class RunRecorderService {
     _cues = null;
     _coach = null;
     _follower = null;
+    _ghost = null;
     _rec = null;
     _intervals = null;
     _position = null;

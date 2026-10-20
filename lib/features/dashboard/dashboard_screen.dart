@@ -469,6 +469,7 @@ class _ResultsState extends State<_Results> {
         _VerdictBanner(verdict: verdict, onShowBest: () => setState(() => _selected = null)),
         const SizedBox(height: 12),
         const TodayCard(),
+        const WeeklyReportCard(),
         const SizedBox(height: 16),
         widget.settings,
         const SizedBox(height: 16),

@@ -84,6 +84,9 @@ jobs:
                   '    <uses-permission android:name="android.permission.health.WRITE_EXERCISE"/>\n'
                   '    <uses-permission android:name="android.permission.health.WRITE_DISTANCE"/>\n'
                   '    <uses-permission android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_SLEEP"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE"/>\n'
+                  '    <uses-permission android:name="android.permission.health.READ_HEART_RATE_VARIABILITY"/>\n'
                   '    <application')
               s = s.replace("<application", perms, 1)
               filters = (

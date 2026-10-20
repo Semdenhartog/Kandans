@@ -15,6 +15,7 @@ import '../../data/services/heart_rate_service.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sync_service.dart';
 import '../../data/services/weather_service.dart';
+import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
 import '../../domain/heart_rate.dart';
@@ -26,6 +27,7 @@ import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
 import 'interval_picker.dart';
+import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
 
 /// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
@@ -63,6 +65,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   String? _shoeId;
   bool _shoeChosen = false;
   RunRoute? _route;
+  RunStreams? _ghost;
+  int? _ghostTime;
+  bool _raceGhost = true;
   String? _error;
   IntervalPlan? _plan;
   final _pages = PageController();
@@ -132,6 +137,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         cues: _cues,
         targetPace: _targetPace,
         followRoute: _route == null ? const [] : decodePolyline(_route!.polyline),
+        ghost: _raceGhost ? _ghost : null,
       );
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
@@ -384,7 +390,32 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       ),
     );
     if (picked == null) return;
-    setState(() => _route = picked.isEmpty ? null : routes.where((r) => r.id == picked).firstOrNull);
+    setState(() {
+      _route = picked.isEmpty ? null : routes.where((r) => r.id == picked).firstOrNull;
+      _ghost = null;
+      _ghostTime = null;
+    });
+    if (picked.isNotEmpty) _loadGhost(picked);
+  }
+
+  /// Je snelste eerdere run op deze route, om tegen te racen (zoals Apple's Race Route).
+  Future<void> _loadGhost(String routeId) async {
+    final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+    final route = _route;
+    final same = [
+      for (final a in runs)
+        if (a.id != null && a.routeId == routeId && route != null && (a.distanceMeters - route.distanceMeters).abs() < route.distanceMeters * 0.15) a,
+    ]..sort((a, b) => a.movingTimeSeconds.compareTo(b.movingTimeSeconds));
+    if (same.isEmpty) return;
+    try {
+      final json = await ref.read(repositoryProvider).activityStreams(same.first.id!);
+      final st = json == null ? null : RunStreams.fromJson(json);
+      if (!mounted || st == null || _route?.id != routeId) return;
+      setState(() {
+        _ghost = st;
+        _ghostTime = same.first.movingTimeSeconds;
+      });
+    } catch (_) {}
   }
 
   Future<void> _chooseShoe(List<Shoe> shoes) async {
@@ -490,6 +521,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           efforts: efforts,
           previousBest: previousBest,
           healthWritten: written,
+          badges: bd.newBadges(before, [...before, saved]),
         ),
       ));
     } catch (e) {
@@ -589,6 +621,21 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
+                if (v.ghostDelta != null && !v.offRoute)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text('vs record', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+                      Text(
+                        '${v.ghostDelta! <= 0 ? '−' : '+'}${Fmt.duration(v.ghostDelta!.abs().round())}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          color: v.ghostDelta! <= 0 ? RwColors.good : RwColors.danger,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -687,6 +734,14 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           label: Text(_route == null ? 'Route volgen' : _route!.name, overflow: TextOverflow.ellipsis),
                           onPressed: () => _chooseRoute(routes),
                         ),
+                      if (!_indoor && _route != null && _ghost != null)
+                        FilterChip(
+                          avatar: const Icon(Icons.flag_outlined, size: 18),
+                          label: Text('Race tegen record${_ghostTime == null ? '' : ' (${Fmt.duration(_ghostTime!)})'}'),
+                          tooltip: 'De stem zegt elke km of je voor of achter ligt op je snelste run hier',
+                          selected: _raceGhost,
+                          onSelected: (x) => setState(() => _raceGhost = x),
+                        ),
                       if (shoes.isNotEmpty)
                         ActionChip(
                           avatar: const Icon(Icons.directions_run, size: 18),
@@ -747,6 +802,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               title: Text(widget.sessionTitle ?? 'Run opnemen', overflow: TextOverflow.ellipsis),
               automaticallyImplyLeading: !started,
               actions: [
+                if (started)
+                  IconButton(
+                    tooltip: 'SOS',
+                    icon: const Icon(Icons.sos, color: RwColors.danger),
+                    onPressed: () => showSosSheet(context),
+                  ),
                 if (started)
                   IconButton(
                     tooltip: _locked ? 'Scherm is vergrendeld' : 'Scherm vergrendelen',

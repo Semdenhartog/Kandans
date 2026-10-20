@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
+import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/widgets.dart';
+import '../activities/badges_screen.dart';
 import '../activities/share_run_screen.dart';
 import '../routes/route_map.dart';
 
@@ -19,7 +21,11 @@ class RunSummaryScreen extends StatelessWidget {
     this.efforts = const [],
     this.previousBest = const {},
     this.healthWritten = false,
+    this.badges = const [],
   });
+
+  /// Badges die je met deze run voor het eerst hebt verdiend.
+  final List<bd.Badge> badges;
 
   final Activity activity;
   final RunStreams? streams;
@@ -107,6 +113,10 @@ class RunSummaryScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ],
+            if (badges.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              NewBadgesBanner(badges: badges),
             ],
             if (a.hasTrack) ...[
               const SizedBox(height: 16),
@@ -210,7 +220,7 @@ class RunSummaryScreen extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                    onPressed: () => openShareRun(context, a, badges: [for (final r in records) 'Record ${r.label}']),
+                    onPressed: () => openShareRun(context, a, badges: [for (final r in records) 'Record ${r.label}', for (final b in badges) b.title]),
                     icon: const Icon(Icons.ios_share),
                     label: const Text('Delen'),
                   ),

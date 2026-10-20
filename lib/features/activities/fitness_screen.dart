@@ -81,6 +81,44 @@ class FitnessScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            if (intensityBalance(runs, now: DateTime.now(), maxHr: HeartRateService.instance.maxHr.value) case final b?) ...[
+              const SizedBox(height: 12),
+              RwCard(
+                title: 'RUSTIG EN STEVIG · 4 WEKEN',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        height: 14,
+                        child: Row(
+                          children: [
+                            Expanded(flex: (b.easyShare * 100).round().clamp(1, 99), child: Container(color: RwColors.good)),
+                            Expanded(flex: (100 - b.easyShare * 100).round().clamp(1, 99), child: Container(color: RwColors.warning)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text('Rustig ${(b.easyShare * 100).round()}%', style: const TextStyle(color: RwColors.good, fontWeight: FontWeight.w600)),
+                        const Spacer(),
+                        Text('Stevig ${(100 - b.easyShare * 100).round()}%', style: const TextStyle(color: RwColors.warning, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(b.advice, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Goede lopers doen zo\'n 80% van hun tijd rustig. Rustig = onder 80% van je maximale hartslag, of zonder hartslag duidelijk trager dan je drempeltempo.',
+                      style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             const RwCard(
               title: 'HOE WERKT DIT?',

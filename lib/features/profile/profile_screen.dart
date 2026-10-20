@@ -18,7 +18,9 @@ import '../../data/services/offline_cache.dart';
 import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
+import '../activities/badges_screen.dart';
 import 'connections_card.dart';
+import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
 import '../planner/training_plan_screen.dart';
 import 'heart_rate_screen.dart';
@@ -120,6 +122,18 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () => openTrainingPlan(context),
             ),
           ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.military_tech_outlined, color: RwColors.accent),
+              title: const Text('Badges'),
+              subtitle: const Text('Je mijlpalen, en weerbadges voor lopen in wind, hitte en vorst'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openBadges(context),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Card(child: EmergencyContactTile()),
           const SizedBox(height: 12),
           const Card(child: FingerprintTile()),
           const SizedBox(height: 12),
