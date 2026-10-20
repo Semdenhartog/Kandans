@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
+import '../../core/supabase.dart';
 import '../../data/models/models.dart';
+import '../../data/repositories/repositories.dart';
 import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
 import '../../domain/run_streams.dart';
@@ -113,6 +116,10 @@ class RunSummaryScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ],
+            if (a.id != null) ...[
+              const SizedBox(height: 16),
+              _QuickFeel(activityId: a.id!),
             ],
             if (badges.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -238,6 +245,97 @@ class RunSummaryScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Meteen na je run: hoe voelde het? (zoals Strava's "ervaren inspanning"). Helpt de coach en je klaar-score.
+class _QuickFeel extends ConsumerStatefulWidget {
+  const _QuickFeel({required this.activityId});
+  final String activityId;
+
+  @override
+  ConsumerState<_QuickFeel> createState() => _QuickFeelState();
+}
+
+class _QuickFeelState extends ConsumerState<_QuickFeel> {
+  int? _feel;
+  final _note = TextEditingController();
+  late final RunWiseRepository _repo;
+
+  @override
+  void initState() {
+    super.initState();
+    _repo = ref.read(repositoryProvider);
+  }
+
+  @override
+  void dispose() {
+    // Notitie bewaren als je weggaat zonder op Enter te drukken.
+    if (_note.text.trim().isNotEmpty) {
+      _repo.setActivityFeel(widget.activityId, feel: _feel, note: _note.text).ignore();
+    }
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save(int f) async {
+    setState(() => _feel = f);
+    try {
+      await ref.read(repositoryProvider).setActivityFeel(widget.activityId, feel: f, note: _note.text);
+      ref.invalidate(activitiesProvider);
+    } catch (e) {
+      if (mounted) showMessage(context, friendlyError(e), error: true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const options = [(1, 'Zwaar', Icons.sentiment_dissatisfied), (2, 'Oké', Icons.sentiment_neutral), (3, 'Top', Icons.sentiment_very_satisfied)];
+    return RwCard(
+      title: 'HOE VOELDE HET?',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              for (final (v, label, icon) in options)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => _save(v),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _feel == v ? RwColors.accent : RwColors.surfaceHigh,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(icon, size: 30, color: _feel == v ? RwColors.accentDark : RwColors.muted),
+                            const SizedBox(height: 4),
+                            Text(label,
+                                style: TextStyle(fontWeight: FontWeight.w700, color: _feel == v ? RwColors.accentDark : RwColors.text)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _note,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(hintText: 'Notitie (optioneel), bijv. zware benen', isDense: true),
+            onSubmitted: (_) => _feel == null ? null : _save(_feel!),
+          ),
+        ],
       ),
     );
   }

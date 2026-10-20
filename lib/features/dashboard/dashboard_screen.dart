@@ -9,6 +9,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/home_widget_service.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/notification_service.dart';
 import '../../data/services/rain_service.dart';
@@ -439,6 +440,15 @@ class _ResultsState extends State<_Results> {
     final now = widget.planner.scoreAt(nowStart, widget.type);
     final verdict = runVerdict(now, best,
         nowAllowed: widget.planner.availability.allows(nowStart, widget.planner.durationMinutes), time: Fmt.time);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      HomeWidgetService.instance
+          .update(
+            label: switch (verdict.kind) { VerdictKind.goNow => 'NU LOPEN', VerdictKind.later => 'BESTE MOMENT', VerdictKind.tough => 'LASTIGE DAG' },
+            time: verdict.kind == VerdictKind.goNow ? 'Nu' : Fmt.time(best.start),
+            detail: '${_dayLabel(best.start)} · ${Fmt.temp(best.weather.feelsLike ?? best.weather.temperature)} · wind ${Fmt.wind(best.weather.windSpeed)} · score ${best.score}',
+          )
+          .ignore();
+    });
     final shown = _selected == null
         ? best
         : all.firstWhere((s) => s.start == _selected, orElse: () => best);
@@ -501,6 +511,7 @@ class _ResultsState extends State<_Results> {
         _HeroCard(verdict: verdict, shown: shown, isBest: isBest, onShowBest: () => setState(() => _selected = null)),
         const SizedBox(height: 12),
         const TodayCard(),
+        const RaceCountdownCard(),
         const WeeklyReportCard(),
         for (final c in widget.layout.visible)
           if (card(c) case final w?) ...[const SizedBox(height: 12), w],

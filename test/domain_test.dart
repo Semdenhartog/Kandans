@@ -1383,4 +1383,22 @@ void main() {
       expect(bal.advice, contains('%'));
     });
   });
+
+  group('ronde 6', () {
+    test('drink- en gelherinnering', () {
+      final f = FuelReminder();
+      expect(f.update(10 * 60), isNull);
+      expect(f.update(25 * 60), contains('drinken'));
+      expect(f.update(26 * 60), isNull);
+      expect(f.update(45 * 60), contains('gel'));
+      expect(f.update(46 * 60), isNull); // drinken van 45 min zat al bij de gel
+      expect(f.update(65 * 60), contains('drinken'));
+      expect(f.update(80 * 60), contains('gel'));
+    });
+    test('stemcoach-instellingen bewaren de herinnering', () {
+      final c = const CueSettings().copyWith(fuel: true);
+      expect(CueSettings.fromJson(c.toJson()).fuel, isTrue);
+      expect(CueSettings.fromJson({'e': 'km'}).fuel, isFalse);
+    });
+  });
 }

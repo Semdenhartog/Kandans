@@ -111,6 +111,7 @@ class RunRecorderService {
   PaceCoach? _coach;
   RouteFollower? _follower;
   GhostRace? _ghost;
+  FuelReminder? _fuel;
   int _ticks = 0;
 
   /// Doeltempo van de huidige run (s/km), of null.
@@ -194,6 +195,11 @@ class RunRecorderService {
   }
 
   void _sayCue(RunRecording r) {
+    final f = _fuel?.update(r.movingSeconds);
+    if (f != null) {
+      _say(f);
+      _buzz(const [0, 200, 120, 200]);
+    }
     if (_intervals != null && !_intervals!.finished) return;
     final c = _cues?.update(r, heartRate: HeartRateService.instance.bpm.value);
     if (c != null) _say(c);
@@ -235,6 +241,7 @@ class RunRecorderService {
     }
     // Op de loopband melden we op tijd (afstand weten we niet).
     _cues = CueScheduler(indoor && cues.every.meters != null ? cues.copyWith(every: CueEvery.fiveMin) : cues);
+    _fuel = cues.fuel ? FuelReminder() : null;
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
@@ -431,6 +438,7 @@ class RunRecorderService {
     _coach = null;
     _follower = null;
     _ghost = null;
+    _fuel = null;
     _rec = null;
     _intervals = null;
     _position = null;

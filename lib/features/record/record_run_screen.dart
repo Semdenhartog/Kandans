@@ -354,6 +354,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   value: c.heartRate,
                   onChanged: (v) => set(() => c = c.copyWith(heartRate: v)),
                 ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Drink- en gelherinnering'),
+                  subtitle: const Text('Voor lange runs: drinken elke 20 min, een gel elke 35 min vanaf 45 min'),
+                  value: c.fuel,
+                  onChanged: (v) => set(() => c = c.copyWith(fuel: v)),
+                ),
                 const SizedBox(height: 8),
                 FilledButton(onPressed: () => Navigator.pop(ctx, c), child: const Text('Klaar')),
               ],

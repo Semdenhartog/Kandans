@@ -28,9 +28,13 @@ class CueSettings {
     this.average = true,
     this.total = true,
     this.heartRate = true,
+    this.fuel = false,
   });
 
   final CueEvery every;
+
+  /// Herinneringen om te drinken en (bij lange runs) een gel te nemen.
+  final bool fuel;
 
   /// Tempo van het laatste stuk.
   final bool lap;
@@ -38,15 +42,16 @@ class CueSettings {
   final bool total;
   final bool heartRate;
 
-  CueSettings copyWith({CueEvery? every, bool? lap, bool? average, bool? total, bool? heartRate}) => CueSettings(
+  CueSettings copyWith({CueEvery? every, bool? lap, bool? average, bool? total, bool? heartRate, bool? fuel}) => CueSettings(
         every: every ?? this.every,
         lap: lap ?? this.lap,
         average: average ?? this.average,
         total: total ?? this.total,
         heartRate: heartRate ?? this.heartRate,
+        fuel: fuel ?? this.fuel,
       );
 
-  Map<String, dynamic> toJson() => {'e': every.name, 'l': lap, 'a': average, 't': total, 'h': heartRate};
+  Map<String, dynamic> toJson() => {'e': every.name, 'l': lap, 'a': average, 't': total, 'h': heartRate, 'f': fuel};
 
   static CueSettings fromJson(Object? j) {
     if (j is! Map) return const CueSettings();
@@ -56,7 +61,32 @@ class CueSettings {
       average: j['a'] as bool? ?? true,
       total: j['t'] as bool? ?? true,
       heartRate: j['h'] as bool? ?? true,
+      fuel: j['f'] as bool? ?? false,
     );
+  }
+}
+
+/// Drink- en gelherinneringen voor lange runs (zoals Garmin en Coros):
+/// drinken elke 20 minuten vanaf 25 minuten, een gel elke 35 minuten vanaf 45 minuten.
+class FuelReminder {
+  FuelReminder({this.drinkFirst = 25, this.drinkEvery = 20, this.gelFirst = 45, this.gelEvery = 35});
+  final int drinkFirst, drinkEvery, gelFirst, gelEvery;
+  int _drinks = 0, _gels = 0;
+
+  String? update(double movingSeconds) {
+    final min = movingSeconds / 60;
+    final drinkDue = min >= drinkFirst + _drinks * drinkEvery;
+    final gelDue = min >= gelFirst + _gels * gelEvery;
+    if (gelDue) {
+      _gels++;
+      if (drinkDue) _drinks++;
+      return 'Tijd voor een gel of iets zoets, met een paar slokken water.';
+    }
+    if (drinkDue) {
+      _drinks++;
+      return 'Tijd om even te drinken.';
+    }
+    return null;
   }
 }
 

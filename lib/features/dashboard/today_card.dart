@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
@@ -10,6 +11,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../data/services/sync_service.dart';
+import '../../domain/race_forecast.dart';
 import '../../domain/readiness.dart';
 import '../../domain/training_load.dart';
 import '../../domain/training_plan.dart';
@@ -434,4 +436,67 @@ class _Line extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Aftellen naar je volgende wedstrijd, met verwachte tijd tegenover je doel (zoals de wedstrijdwidget van Garmin).
+class RaceCountdownCard extends ConsumerWidget {
+  const RaceCountdownCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final races = ref.watch(racesProvider).value ?? const <RaceEvent>[];
+    final upcoming = races.where((r) => r.daysUntil >= 0 && r.daysUntil <= 120).toList()
+      ..sort((a, b) => a.raceDate.compareTo(b.raceDate));
+    if (upcoming.isEmpty) return const SizedBox.shrink();
+    final race = upcoming.first;
+    final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final advice = adviseRace(race: race, activities: runs, profile: ref.watch(insightsProvider));
+    final predicted = advice.baseFinishSeconds;
+    final diff = predicted - race.goalTimeSeconds;
+    final days = race.daysUntil;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: RwCard(
+        onTap: race.id == null ? null : () => context.go('/me/races/${race.id}'),
+        child: Row(
+          children: [
+            Container(
+              width: 64,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
+              child: Column(
+                children: [
+                  Text(days == 0 ? '!' : '$days',
+                      style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 26, color: RwColors.accent, height: 1)),
+                  Text(days == 0 ? 'vandaag' : (days == 1 ? 'dag' : 'dagen'), style: const TextStyle(color: RwColors.accent, fontSize: 11)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(race.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                  Text('${Fmt.km(race.distanceMeters, decimals: 1)} · ${Fmt.date(race.raceDate)}', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                  const SizedBox(height: 6),
+                  Text.rich(TextSpan(children: [
+                    const TextSpan(text: 'Verwacht ', style: TextStyle(color: RwColors.muted)),
+                    TextSpan(text: Fmt.duration(predicted), style: const TextStyle(fontWeight: FontWeight.w800)),
+                    TextSpan(
+                      text: diff.abs() < 15
+                          ? ' · precies je doel'
+                          : (diff < 0 ? ' · ${Fmt.duration(-diff)} sneller dan je doel' : ' · ${Fmt.duration(diff)} boven je doel'),
+                      style: TextStyle(color: diff <= 15 ? RwColors.good : RwColors.warning, fontWeight: FontWeight.w600),
+                    ),
+                  ])),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: RwColors.subtle),
+          ],
+        ),
+      ),
+    );
+  }
 }

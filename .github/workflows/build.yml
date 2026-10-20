@@ -117,6 +117,26 @@ jobs:
               s = s.replace("<queries>", '<queries>\n        <package android:name="com.google.android.apps.healthdata" />', 1)
           open(p, "w").write(s)
 
+          # 1b) Startscherm-widget (bestanden in android_extra/)
+          import shutil, os
+          if "BestMomentWidget" not in s:
+              s = s.replace("</application>", (
+                  '    <receiver android:name=".BestMomentWidget" android:exported="true">\n'
+                  '            <intent-filter>\n'
+                  '                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />\n'
+                  '            </intent-filter>\n'
+                  '            <meta-data android:name="android.appwidget.provider" android:resource="@xml/best_moment_widget_info" />\n'
+                  '        </receiver>\n'
+                  '    </application>'), 1)
+              open(p, "w").write(s)
+          kdir = os.path.dirname(glob.glob("android/app/src/main/kotlin/**/MainActivity.kt", recursive=True)[0])
+          shutil.copy("android_extra/kotlin/BestMomentWidget.kt", kdir)
+          for sub in ("layout", "xml", "drawable", "values"):
+              os.makedirs(f"android/app/src/main/res/{sub}", exist_ok=True)
+              for f in glob.glob(f"android_extra/res/{sub}/*.xml"):
+                  shutil.copy(f, f"android/app/src/main/res/{sub}/")
+          print("::notice::Widget toegevoegd in", kdir)
+
           # 2) MainActivity moet een FlutterFragmentActivity zijn (vereist door Health Connect)
           for m in glob.glob("android/app/src/main/kotlin/**/MainActivity.kt", recursive=True):
               k = open(m).read()
