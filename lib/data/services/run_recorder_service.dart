@@ -9,6 +9,7 @@ import '../../domain/geo.dart';
 import '../../core/format.dart';
 import '../../domain/intervals.dart';
 import '../../domain/route_geometry.dart';
+import '../../domain/guided_runs.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/run_recorder.dart';
@@ -112,6 +113,7 @@ class RunRecorderService {
   RouteFollower? _follower;
   GhostRace? _ghost;
   FuelReminder? _fuel;
+  GuidedPlayer? _guided;
   int _ticks = 0;
 
   /// Doeltempo van de huidige run (s/km), of null.
@@ -195,6 +197,8 @@ class RunRecorderService {
   }
 
   void _sayCue(RunRecording r) {
+    final g = _guided?.update(r.movingSeconds);
+    if (g != null) _say(g);
     final f = _fuel?.update(r.movingSeconds);
     if (f != null) {
       _say(f);
@@ -216,6 +220,7 @@ class RunRecorderService {
     double? targetPace,
     List<LatLng> followRoute = const [],
     RunStreams? ghost,
+    GuidedRun? guided,
   }) async {
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
@@ -242,6 +247,8 @@ class RunRecorderService {
     // Op de loopband melden we op tijd (afstand weten we niet).
     _cues = CueScheduler(indoor && cues.every.meters != null ? cues.copyWith(every: CueEvery.fiveMin) : cues);
     _fuel = cues.fuel ? FuelReminder() : null;
+    _guided = guided == null ? null : GuidedPlayer(guided);
+    if (guided != null) this.voice = true;
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
@@ -255,7 +262,9 @@ class RunRecorderService {
         await _tts!.setQueueMode(1);
         await _tts!.setAudioAttributesForNavigation();
       } catch (_) {}
-      _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
+      if (_guided == null) _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
+      final g0 = _guided?.update(0);
+      if (g0 != null) _say(g0);
     }
     _intervals = intervals == null ? null : IntervalTracker(intervals);
     final first = _intervals?.start(0, 0);
@@ -439,6 +448,7 @@ class RunRecorderService {
     _follower = null;
     _ghost = null;
     _fuel = null;
+    _guided = null;
     _rec = null;
     _intervals = null;
     _position = null;

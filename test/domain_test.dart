@@ -32,6 +32,7 @@ import 'package:runwise/domain/route_drawing.dart';
 import 'package:runwise/domain/route_photos.dart';
 import 'package:runwise/domain/best_efforts.dart';
 import 'package:runwise/domain/heart_rate.dart';
+import 'package:runwise/domain/guided_runs.dart';
 import 'package:runwise/domain/run_coach.dart';
 import 'package:runwise/domain/run_file_import.dart';
 import 'package:runwise/domain/training_load.dart';
@@ -1399,6 +1400,28 @@ void main() {
       final c = const CueSettings().copyWith(fuel: true);
       expect(CueSettings.fromJson(c.toJson()).fuel, isTrue);
       expect(CueSettings.fromJson({'e': 'km'}).fuel, isFalse);
+    });
+  });
+
+  group('begeleide runs', () {
+    test('teksten op tijd, sprongen geven alleen de laatste', () {
+      final p = GuidedPlayer(GuidedRun.all.first);
+      expect(p.update(0), isNotNull);
+      expect(p.update(30), isNull);
+      expect(p.update(2 * 60), contains('adem'));
+      expect(p.update(12 * 60), isNotNull); // 5, 8 en 10 min tegelijk: één tekst
+      expect(p.update(12 * 60 + 5), isNull);
+      p.update(25 * 60);
+      expect(p.finished, isTrue);
+    });
+    test('elke begeleide run begint op 0 en eindigt op zijn duur', () {
+      for (final g in GuidedRun.all) {
+        expect(g.cues.first.atMinute, 0);
+        expect(g.cues.last.atMinute, g.minutes);
+        for (var i = 1; i < g.cues.length; i++) {
+          expect(g.cues[i].atMinute, greaterThan(g.cues[i - 1].atMinute));
+        }
+      }
     });
   });
 }

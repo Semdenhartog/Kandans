@@ -18,6 +18,7 @@ import '../../data/services/weather_service.dart';
 import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
+import '../../domain/guided_runs.dart';
 import '../../domain/heart_rate.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
@@ -71,6 +72,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   RunStreams? _ghost;
   int? _ghostTime;
   bool _raceGhost = true;
+  GuidedRun? _guided;
   String? _error;
   IntervalPlan? _plan;
   final _pages = PageController();
@@ -146,6 +148,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         targetPace: _targetPace,
         followRoute: _route == null ? const [] : decodePolyline(_route!.polyline),
         ghost: _raceGhost ? _ghost : null,
+        guided: _guided,
       );
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
@@ -205,7 +208,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     final chosen = await pickIntervalPlan(context, current: _plan);
     if (chosen == null) return;
     final plan = chosen.plan;
-    setState(() => _plan = plan);
+    setState(() {
+      _plan = plan;
+      if (plan != null) _guided = null;
+    });
     try {
       final p = await SharedPreferences.getInstance();
       plan == null ? await p.remove(_planKey) : await p.setString(_planKey, jsonEncode(plan.toJson()));
@@ -305,6 +311,56 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     setState(() => _targetPace = result == 0 ? null : result.toDouble());
     final p = await SharedPreferences.getInstance();
     await p.setDouble('rec_target_pace', result.toDouble());
+  }
+
+  /// Begeleide run kiezen (de coach praat je erdoorheen).
+  Future<void> _chooseGuided() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
+              child: Text('Begeleide runs', style: TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800)),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Text('De coach praat je door je run heen, met tips op het juiste moment. Doe je oortjes in.',
+                  style: TextStyle(color: RwColors.muted)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Geen begeleiding'),
+              onTap: () => Navigator.pop(ctx, ''),
+            ),
+            for (final g in GuidedRun.all)
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: RwColors.accent.withValues(alpha: 0.15),
+                  child: Text('${g.minutes}', style: const TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800)),
+                ),
+                title: Text(g.title),
+                subtitle: Text('${g.minutes} min · ${g.subtitle}'),
+                trailing: _guided?.id == g.id ? const Icon(Icons.check, color: RwColors.accent) : null,
+                onTap: () => Navigator.pop(ctx, g.id),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _guided = picked.isEmpty ? null : GuidedRun.all.firstWhere((g) => g.id == picked);
+      if (_guided != null) {
+        _plan = null;
+        _voice = true;
+      }
+    });
   }
 
   Future<void> _chooseCues() async {
@@ -736,6 +792,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           selected: _share,
                           onSelected: (x) => setState(() => _share = x),
                         ),
+                      ActionChip(
+                        avatar: Icon(Icons.record_voice_over_outlined, size: 18, color: _guided == null ? null : RwColors.accentDark),
+                        backgroundColor: _guided == null ? null : RwColors.accent,
+                        label: Text(_guided == null ? 'Begeleide run' : _guided!.title,
+                            style: TextStyle(color: _guided == null ? null : RwColors.accentDark)),
+                        onPressed: _chooseGuided,
+                      ),
                       ActionChip(
                         avatar: const Icon(Icons.tune, size: 18),
                         label: Text('Stem: ${_cues.every.label.toLowerCase()}'),
