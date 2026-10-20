@@ -8,6 +8,7 @@ import '../models/models.dart';
 import '../services/offline_cache.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/run_streams.dart';
+import '../../domain/training_plan.dart';
 
 /// Alle database-toegang via Supabase. Row Level Security zorgt ervoor
 /// dat elke gebruiker alleen zijn eigen rijen kan zien en wijzigen.
@@ -112,6 +113,24 @@ class RunWiseRepository {
       if (photos.isNotEmpty) await _db.storage.from(_photoBucket).remove(photos);
     } catch (_) {}
     await _db.from('activities').delete().eq('id', id);
+  }
+
+  // ---------- Trainingsschema ----------
+
+  Future<List<PlanSession>> planSessions() async {
+    final rows = await _rows('plan', () async {
+      final r = await _db.from('plan_sessions').select().order('session_date');
+      return List<Map<String, dynamic>>.from(r);
+    });
+    return [for (final r in rows) PlanSession.fromRow(r)].whereType<PlanSession>().toList();
+  }
+
+  /// Vervangt het hele schema.
+  Future<void> savePlan(List<PlanSession> sessions) async {
+    final uid = _db.auth.currentUser!.id;
+    await _db.from('plan_sessions').delete().eq('user_id', uid);
+    if (sessions.isEmpty) return;
+    await _db.from('plan_sessions').insert([for (final s in sessions) s.toRow(uid)]);
   }
 
   // ---------- Foto's bij runs ----------
@@ -463,6 +482,11 @@ final routeDetailProvider = FutureProvider.family<RunRoute, String>(
 final activityPhotoUrlsProvider = FutureProvider.family<Map<String, String>, String>((ref, joined) {
   if (joined.isEmpty) return const {};
   return ref.watch(repositoryProvider).photoUrls(joined.split(','));
+});
+
+final planProvider = FutureProvider<List<PlanSession>>((ref) {
+  ref.watch(currentUserProvider);
+  return ref.watch(repositoryProvider).planSessions();
 });
 
 final activityStreamsProvider = FutureProvider.family<Map<String, dynamic>?, String>(

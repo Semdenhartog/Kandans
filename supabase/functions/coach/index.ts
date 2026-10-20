@@ -69,7 +69,10 @@ function amsterdamDate(d: Date) {
 /** Maakt een korte samenvatting van de loper voor de AI. */
 async function buildContext(db: SupabaseClient, userId: string, profile: Record<string, unknown>) {
   const since = new Date(Date.now() - RUNS_WEEKS * 7 * 86_400_000).toISOString();
-  const [{ data: runs }, { data: races }, { data: perf }] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+  const inTwoWeeks = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
+  const [{ data: runs }, { data: races }, { data: perf }, { data: plan }] = await Promise.all([
     db.from("activities")
       .select("started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, wind_speed_kmh, feel, note")
       .eq("user_id", userId).neq("source", "strava").gte("started_at", since)
@@ -79,6 +82,9 @@ async function buildContext(db: SupabaseClient, userId: string, profile: Record<
       .eq("user_id", userId).gte("race_date", new Date().toISOString().slice(0, 10))
       .order("race_date").limit(5),
     db.from("performance_profile").select("*").eq("user_id", userId).maybeSingle(),
+    db.from("plan_sessions").select("session_date, kind, title, description, week")
+      .eq("user_id", userId).gte("session_date", weekAgo).lte("session_date", inTwoWeeks)
+      .order("session_date").limit(30),
   ]);
 
   const lines: string[] = [];
@@ -122,6 +128,16 @@ async function buildContext(db: SupabaseClient, userId: string, profile: Record<
   if (perf && (perf.sample_size ?? 0) >= 8) {
     lines.push(`Loopprofiel (${perf.sample_size} runs): snelst tussen ${perf.optimal_temp_min_celsius}–${perf.optimal_temp_max_celsius}°C` +
       (perf.preferred_time_of_day ? `, voorkeur ${perf.preferred_time_of_day}` : ""));
+  }
+
+  if ((plan ?? []).length > 0) {
+    lines.push(`Trainingsschema in RunWise (vorige week t/m komende 2 weken; vergelijk met de runs hierboven om te zien wat gedaan is):`);
+    for (const p of plan!) {
+      const mark = p.session_date === today ? " (VANDAAG)" : p.session_date < today ? " (verleden)" : "";
+      lines.push(`- ${p.session_date}${mark}, week ${p.week}: ${p.title}. ${String(p.description ?? "").slice(0, 160)}`);
+    }
+  } else {
+    lines.push(`Trainingsschema: geen. Je kunt voorstellen er een te maken via Ik → Trainingsschema.`);
   }
 
   if ((races ?? []).length > 0) {

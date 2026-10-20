@@ -28,13 +28,22 @@ import '../routes/route_map.dart' show LiveTrackMap;
 import 'interval_picker.dart';
 import 'run_summary_screen.dart';
 
-void openRecorder(BuildContext context) {
-  Navigator.of(context).push(MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const RecordRunScreen()));
+/// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
+void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle}) {
+  Navigator.of(context).push(MaterialPageRoute<void>(
+    fullscreenDialog: true,
+    builder: (_) => RecordRunScreen(initialPlan: plan, initialTargetPace: targetPace, sessionTitle: sessionTitle),
+  ));
 }
 
 /// Een run opnemen met GPS, met stemcoach per kilometer.
 class RecordRunScreen extends ConsumerStatefulWidget {
-  const RecordRunScreen({super.key});
+  const RecordRunScreen({super.key, this.initialPlan, this.initialTargetPace, this.sessionTitle});
+
+  /// Vanuit je trainingsschema: deze training staat al klaar.
+  final IntervalPlan? initialPlan;
+  final double? initialTargetPace;
+  final String? sessionTitle;
 
   @override
   ConsumerState<RecordRunScreen> createState() => _RecordRunScreenState();
@@ -77,6 +86,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           } catch (_) {}
           _batteryDone = !Platform.isAndroid || (p.getBool('battery_explained') ?? false);
         });
+      }
+      if (widget.sessionTitle != null) {
+        // Training uit je schema gaat voor de laatst gebruikte instellingen.
+        if (mounted) {
+          setState(() {
+            _plan = widget.initialPlan;
+            _targetPace = widget.initialTargetPace;
+            _indoor = false;
+          });
+        }
+        return;
       }
       final raw = p.getString(_planKey);
       if (raw == null || !mounted) return;
@@ -722,7 +742,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           },
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Run opnemen'),
+              title: Text(widget.sessionTitle ?? 'Run opnemen', overflow: TextOverflow.ellipsis),
               automaticallyImplyLeading: !started,
               actions: [
                 if (started)

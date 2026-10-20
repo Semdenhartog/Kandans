@@ -35,6 +35,7 @@ import 'package:runwise/domain/heart_rate.dart';
 import 'package:runwise/domain/run_coach.dart';
 import 'package:runwise/domain/run_file_import.dart';
 import 'package:runwise/domain/training_load.dart';
+import 'package:runwise/domain/training_plan.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -1180,6 +1181,54 @@ void main() {
       }
       expect(said, ['Let op, je bent van je route af.', 'Je bent weer op je route.', 'Nog 300 meter tot het einde van je route.']);
       expect(f.remaining, closeTo(100, 10));
+    });
+  });
+
+  group('trainingsschema', () {
+    final start = DateTime(2026, 10, 19); // maandag
+    PlanSetup setup({double goal = 10000, int days = 3, List<int>? on}) => PlanSetup(
+          goalMeters: goal,
+          raceDate: DateTime(2026, 12, 20), // zondag, 9 weken
+          runDays: on ?? (days == 3 ? [2, 4, 7] : [1, 2, 4, 6, 7]),
+          longRunDay: 7,
+          currentWeeklyKm: 15,
+          thresholdPace: 300,
+          goalTimeSeconds: 50 * 60,
+        );
+
+    test('schema tot de wedstrijd met opbouw en afbouw', () {
+      final plan = buildPlan(setup(), start);
+      expect(plan.last.kind, SessionKind.race);
+      expect(plan.last.date, DateTime(2026, 12, 20));
+      expect(plan.where((p) => p.kind == SessionKind.long).length, greaterThanOrEqualTo(7));
+      expect(plan.where((p) => p.kind == SessionKind.interval || p.kind == SessionKind.tempo), isNotEmpty);
+      // Alleen op de gekozen dagen.
+      expect(plan.every((p) => [2, 4, 7].contains(p.date.weekday)), isTrue);
+      // Geen kwaliteitstraining op de dag na de lange duurloop (maandag is geen loopdag, dus ok) en geen dubbele dagen.
+      expect(plan.map((p) => p.date).toSet().length, plan.length);
+      double week(int w) => plan.where((p) => p.week == w).fold(0.0, (s, p) => s + (p.distanceMeters ?? 8000)) / 1000;
+      expect(week(6), greaterThan(week(1)));
+      expect(week(9), lessThan(week(7)));
+      final longs = plan.where((p) => p.kind == SessionKind.long).map((p) => p.distanceMeters!).toList();
+      expect(longs.reduce((a, b) => a > b ? a : b), lessThanOrEqualTo(16000));
+    });
+
+    test('opslaan en terug lezen', () {
+      final plan = buildPlan(setup(days: 5), start);
+      final iv = plan.firstWhere((p) => p.intervals != null);
+      final back = PlanSession.fromRow(iv.toRow('u'))!;
+      expect(back.date, iv.date);
+      expect(back.intervals!.steps.length, iv.intervals!.steps.length);
+      expect(back.kind, iv.kind);
+    });
+
+    test('gedaan en herstel', () {
+      final s = PlanSession(date: DateTime(2026, 10, 21), kind: SessionKind.easy, title: '', description: '', distanceMeters: 8000);
+      expect(sessionDone(s, [(start: DateTime(2026, 10, 21, 7), meters: 5000.0, seconds: 1700)]), isTrue);
+      expect(sessionDone(s, [(start: DateTime(2026, 10, 22, 7), meters: 8000.0, seconds: 2700)]), isFalse);
+      final now = DateTime(2026, 10, 21, 12);
+      expect(recoveryHours([(end: DateTime(2026, 10, 21, 8), load: 100.0)], now), closeTo(41, 0.1));
+      expect(recoveryHours([(end: DateTime(2026, 10, 18, 8), load: 100.0)], now), 0);
     });
   });
 }

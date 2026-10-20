@@ -30,6 +30,7 @@ import '../../domain/dashboard_layout.dart';
 import '../../domain/verdict.dart';
 import 'dashboard_layout_sheet.dart';
 import 'month_challenge_card.dart';
+import 'today_card.dart';
 import 'dashboard_providers.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -466,6 +467,8 @@ class _ResultsState extends State<_Results> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _VerdictBanner(verdict: verdict, onShowBest: () => setState(() => _selected = null)),
+        const SizedBox(height: 12),
+        const TodayCard(),
         const SizedBox(height: 16),
         widget.settings,
         const SizedBox(height: 16),

@@ -20,6 +20,7 @@ import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'connections_card.dart';
 import 'fingerprint_tile.dart';
+import '../planner/training_plan_screen.dart';
 import 'heart_rate_screen.dart';
 import 'reminder_tile.dart';
 
@@ -109,6 +110,16 @@ class ProfileScreen extends ConsumerWidget {
           const ConnectionsCard(),
           const SizedBox(height: 12),
           const Card(child: ReminderTile()),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.calendar_month_outlined),
+              title: const Text('Trainingsschema'),
+              subtitle: const Text('Een schema op maat naar je wedstrijd of afstand'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openTrainingPlan(context),
+            ),
+          ),
           const SizedBox(height: 12),
           const Card(child: FingerprintTile()),
           const SizedBox(height: 12),
