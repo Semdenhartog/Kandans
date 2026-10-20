@@ -266,7 +266,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               itemCount: rows.length + 2,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (context, i) {
+              itemBuilder: (context, i) => StaggerIn(index: i, since: _since, child: Builder(builder: (context) {
                 if (i == 0) return _Overview(activities: list);
                 if (i == 1) {
                   if (_filter.isEmpty) return const SizedBox.shrink();

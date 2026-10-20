@@ -133,7 +133,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             itemCount: list.length,
             separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, i) {
+            itemBuilder: (context, i) => StaggerIn(index: i, since: _since, child: Builder(builder: (context) {
               final r = list[i];
               return RwCard(
                 onTap: () => context.go('/routes/${r.id}'),
