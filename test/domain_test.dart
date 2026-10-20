@@ -1157,4 +1157,29 @@ void main() {
       expect(() => parseRunFile('<foo/>'), throwsA(isA<RunFileException>()));
     });
   });
+
+  group('route volgen', () {
+    test('van de route af en weer terug', () {
+      // Route 2 km naar het oosten.
+      final route = RouteTrack([for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + i * 100 / 68540)]);
+      final f = RouteFollower(route);
+      final said = <String>[];
+      for (var m = 0; m <= 600; m += 10) {
+        if (f.update(LatLng(52.0, 5.0 + m / 68540)) case final c?) said.add(c);
+      }
+      expect(f.progress, closeTo(600, 5));
+      // 100 m naar het noorden lopen.
+      for (var i = 0; i < 4; i++) {
+        if (f.update(LatLng(52.0009, 5.0 + 600 / 68540)) case final c?) said.add(c);
+      }
+      expect(f.offRoute, isTrue);
+      if (f.update(LatLng(52.0, 5.0 + 620 / 68540)) case final c?) said.add(c);
+      expect(f.offRoute, isFalse);
+      for (var m = 620; m <= 1900; m += 10) {
+        if (f.update(LatLng(52.0, 5.0 + m / 68540)) case final c?) said.add(c);
+      }
+      expect(said, ['Let op, je bent van je route af.', 'Je bent weer op je route.', 'Nog 300 meter tot het einde van je route.']);
+      expect(f.remaining, closeTo(100, 10));
+    });
+  });
 }

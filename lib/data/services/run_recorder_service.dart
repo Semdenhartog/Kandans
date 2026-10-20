@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../domain/geo.dart';
 import '../../core/format.dart';
 import '../../domain/intervals.dart';
+import '../../domain/route_geometry.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_recorder.dart';
 import 'heart_rate_service.dart';
@@ -39,6 +40,9 @@ class RecorderView {
     this.heartRate,
     this.hrStatus = HrStatus.off,
     this.indoor = false,
+    this.followRoute = const [],
+    this.routeRemaining,
+    this.offRoute = false,
   });
 
   final RecorderStatus status;
@@ -72,6 +76,11 @@ class RecorderView {
   /// Loopband (geen GPS).
   final bool indoor;
 
+  /// Route die je volgt (leeg = geen), wat er nog over is en of je ervan af bent.
+  final List<LatLng> followRoute;
+  final double? routeRemaining;
+  final bool offRoute;
+
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
 
@@ -95,6 +104,7 @@ class RunRecorderService {
   LatLng? _position;
   CueScheduler? _cues;
   PaceCoach? _coach;
+  RouteFollower? _follower;
   int _ticks = 0;
 
   /// Doeltempo van de huidige run (s/km), of null.
@@ -192,6 +202,7 @@ class RunRecorderService {
     bool indoor = false,
     CueSettings cues = const CueSettings(),
     double? targetPace,
+    List<LatLng> followRoute = const [],
   }) async {
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
@@ -218,6 +229,7 @@ class RunRecorderService {
     // Op de loopband melden we op tijd (afstand weten we niet).
     _cues = CueScheduler(indoor && cues.every.meters != null ? cues.copyWith(every: CueEvery.fiveMin) : cues);
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
+    _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _rec!.start(DateTime.now());
     if (this.voice) {
       _tts ??= FlutterTts();
@@ -273,6 +285,14 @@ class RunRecorderService {
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
     if (before == RecorderStatus.autoPaused && r.status == RecorderStatus.running) _say('Verder.');
     if (km != null) _buzz(const [0, 180, 140, 180]);
+    final follower = _follower;
+    if (follower != null && r.isActive) {
+      final c = follower.update(LatLng(p.latitude, p.longitude));
+      if (c != null) {
+        _say(c);
+        _buzz(follower.offRoute ? const [0, 500, 200, 500] : const [0, 150]);
+      }
+    }
     if (r.status == RecorderStatus.running) {
       _sayCue(r);
       final coach = _coach;
@@ -373,6 +393,9 @@ class RunRecorderService {
       heartRate: HeartRateService.instance.bpm.value,
       hrStatus: HeartRateService.instance.status.value,
       indoor: r.indoor,
+      followRoute: _follower?.track.points ?? const [],
+      routeRemaining: _follower?.remaining,
+      offRoute: _follower?.offRoute ?? false,
     );
   }
 
@@ -392,6 +415,7 @@ class RunRecorderService {
     NotificationService.instance.cancelRunProgress().ignore();
     _cues = null;
     _coach = null;
+    _follower = null;
     _rec = null;
     _intervals = null;
     _position = null;

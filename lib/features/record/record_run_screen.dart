@@ -53,6 +53,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   CueSettings _cues = const CueSettings();
   String? _shoeId;
   bool _shoeChosen = false;
+  RunRoute? _route;
   String? _error;
   IntervalPlan? _plan;
   final _pages = PageController();
@@ -110,6 +111,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         indoor: _indoor,
         cues: _cues,
         targetPace: _targetPace,
+        followRoute: _route == null ? const [] : decodePolyline(_route!.polyline),
       );
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
@@ -332,6 +334,39 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     await p.setString('rec_cues', jsonEncode(result.toJson()));
   }
 
+  Future<void> _chooseRoute(List<RunRoute> routes) async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.explore_outlined),
+                title: const Text('Vrij lopen (geen route)'),
+                onTap: () => Navigator.pop(ctx, ''),
+              ),
+              for (final r in routes)
+                ListTile(
+                  leading: const Icon(Icons.route_outlined, color: RwColors.accent),
+                  title: Text(r.name),
+                  subtitle: Text(Fmt.km(r.distanceMeters, decimals: 1)),
+                  trailing: r.id == _route?.id ? const Icon(Icons.check, color: RwColors.accent) : null,
+                  onTap: () => Navigator.pop(ctx, r.id),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    setState(() => _route = picked.isEmpty ? null : routes.where((r) => r.id == picked).firstOrNull);
+  }
+
   Future<void> _chooseShoe(List<Shoe> shoes) async {
     final picked = await showModalBottomSheet<String>(
       context: context,
@@ -514,6 +549,28 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           const SizedBox(height: 18),
           _HeartRow(view: v),
         ],
+        if (v.routeRemaining != null) ...[
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: (v.offRoute ? RwColors.warning : RwColors.accent).withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Icon(v.offRoute ? Icons.wrong_location_outlined : Icons.route, color: v.offRoute ? RwColors.warning : RwColors.accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    v.offRoute ? 'Je bent van je route af. Veeg naar de kaart.' : 'Nog ${Fmt.km(v.routeRemaining!, decimals: 1)} van je route',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const Spacer(),
         ],
       ],
@@ -527,6 +584,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       builder: (context, v, _) {
         final started = v.status != RecorderStatus.idle && v.status != RecorderStatus.finished;
         final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
+        final routes = ref.watch(routesProvider).value ?? const <RunRoute>[];
         final controls = !started
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -600,6 +658,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           avatar: const Icon(Icons.speed, size: 18),
                           label: Text(_targetPace == null ? 'Doeltempo' : 'Doel ${Fmt.pace(_targetPace!)}'),
                           onPressed: _chooseTargetPace,
+                        ),
+                      if (!_indoor && routes.isNotEmpty)
+                        ActionChip(
+                          avatar: const Icon(Icons.route_outlined, size: 18),
+                          label: Text(_route == null ? 'Route volgen' : _route!.name, overflow: TextOverflow.ellipsis),
+                          onPressed: () => _chooseRoute(routes),
                         ),
                       if (shoes.isNotEmpty)
                         ActionChip(
@@ -694,7 +758,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.stretch,
                                             children: [
-                                              Expanded(child: LiveTrackMap(track: v.track, position: v.position)),
+                                              Expanded(child: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute)),
                                               const SizedBox(height: 10),
                                               Row(
                                                 children: [

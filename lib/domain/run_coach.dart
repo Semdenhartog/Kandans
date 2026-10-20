@@ -1,3 +1,8 @@
+import 'dart:math' as math;
+
+import 'geo.dart';
+import 'route_geometry.dart';
+import 'route_photos.dart' show projectOnTrack;
 import 'run_recorder.dart';
 
 /// Hoe vaak de stem iets zegt.
@@ -133,5 +138,48 @@ class PaceCoach {
     return dir > 0
         ? 'Iets sneller. Je loopt ${spokenPace(pace)}, je doel is ${spokenPace(targetSecPerKm)}.'
         : 'Rustiger aan. Je loopt ${spokenPace(pace)}, je doel is ${spokenPace(targetSecPerKm)}.';
+  }
+}
+
+/// Route volgen tijdens het lopen: waar ben je op de route en ben je ervan af?
+class RouteFollower {
+  RouteFollower(this.track, {this.offAfter = 45, this.backWithin = 25});
+  final RouteTrack track;
+
+  /// Verder dan zoveel meter van de route = eraf (na 3 metingen achter elkaar).
+  final double offAfter;
+  final double backWithin;
+
+  double progress = 0;
+  bool offRoute = false;
+  int _offCount = 0;
+  bool _nearFinishSaid = false;
+
+  double get remaining => (track.length - progress).clamp(0, double.infinity).toDouble();
+
+  /// Verwerkt je positie. Geeft een tekst voor de stem als er iets verandert.
+  String? update(LatLng p) {
+    if (!track.isValid) return null;
+    final pr = projectOnTrack(track, p);
+    // Vooruitgang alleen vooruit (een stukje terug telt niet), en niet verspringen naar het einde van een rondje.
+    if (pr.off < backWithin * 2 && pr.meters > progress - 150 && pr.meters < progress + 400) {
+      progress = math.max(progress, pr.meters);
+    }
+    if (!offRoute) {
+      _offCount = pr.off > offAfter ? _offCount + 1 : 0;
+      if (_offCount >= 3) {
+        offRoute = true;
+        return 'Let op, je bent van je route af.';
+      }
+    } else if (pr.off < backWithin) {
+      offRoute = false;
+      _offCount = 0;
+      return 'Je bent weer op je route.';
+    }
+    if (!_nearFinishSaid && track.length > 1000 && remaining < 300 && progress > track.length * 0.7) {
+      _nearFinishSaid = true;
+      return 'Nog 300 meter tot het einde van je route.';
+    }
+    return null;
   }
 }

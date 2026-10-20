@@ -721,9 +721,12 @@ Widget _dot(Color c, {double size = 20}) => Container(
 
 /// Je gelopen spoor en waar je nu bent; volgt je, tenzij je zelf de kaart verschuift.
 class LiveTrackMap extends StatefulWidget {
-  const LiveTrackMap({super.key, required this.track, this.position});
+  const LiveTrackMap({super.key, required this.track, this.position, this.planned = const []});
   final List<LatLng> track;
   final LatLng? position;
+
+  /// Route die je volgt (onder je spoor getekend).
+  final List<LatLng> planned;
 
   @override
   State<LiveTrackMap> createState() => _LiveTrackMapState();
@@ -758,7 +761,9 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
               FlutterMap(
                 mapController: _map,
                 options: MapOptions(
-                  initialCenter: pos == null ? const ll.LatLng(52.15, 5.4) : _ll(pos),
+                  initialCenter: pos == null
+                      ? (widget.planned.isNotEmpty ? _ll(widget.planned.first) : const ll.LatLng(52.15, 5.4))
+                      : _ll(pos),
                   initialZoom: pos == null ? 7 : 16,
                   backgroundColor: const Color(0xFF17171A),
                   interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
@@ -769,6 +774,10 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                 ),
                 children: [
                   _baseTiles(photo),
+                  if (widget.planned.length >= 2)
+                    PolylineLayer(polylines: [
+                      Polyline(points: [for (final p in widget.planned) _ll(p)], strokeWidth: 8, color: Colors.white.withValues(alpha: 0.35)),
+                    ]),
                   if (pts.length >= 2)
                     PolylineLayer(polylines: [
                       Polyline(points: pts, strokeWidth: 9, color: Colors.black.withValues(alpha: 0.8)),
