@@ -264,6 +264,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               itemBuilder: (context, i) {
                 if (i == 0) return _Overview(activities: list);
                 if (i == 1) {
+                  if (_filter.isEmpty) return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Row(

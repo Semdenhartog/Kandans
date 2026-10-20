@@ -15,6 +15,7 @@ import '../../domain/shoes.dart';
 import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
+import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
 import 'share_run_screen.dart';
 import 'photos_card.dart';
@@ -142,6 +143,10 @@ class ActivityDetailScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
         children: [
           Text(
+            runTitle(a, routeName: route?.name),
+            style: const TextStyle(fontFamily: RwFonts.display, fontSize: 24, fontWeight: FontWeight.w800),
+          ),
+          Text(
             '${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}',
             style: const TextStyle(color: RwColors.subtle),
           ),
@@ -171,78 +176,6 @@ class ActivityDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          RwCard(
-            title: 'HET WEER TIJDENS JE RUN',
-            child: a.temperatureCelsius == null && a.windSpeedKmh == null
-                ? const Text('Geen weergegevens bij deze run.', style: TextStyle(color: RwColors.muted))
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        [
-                          if (a.temperatureCelsius != null) Fmt.temp(a.temperatureCelsius),
-                          if (a.feelsLikeCelsius != null) 'voelt als ${Fmt.temp(a.feelsLikeCelsius)}',
-                          if (a.windSpeedKmh != null)
-                            'wind ${Fmt.wind(a.windSpeedKmh)}${a.windDirectionDegrees == null ? '' : ' uit het ${Fmt.compass(a.windDirectionDegrees!)}'}',
-                        ].join(' · '),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 12),
-                      if (cost.matters) ...[
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              Fmt.duration(corrected),
-                              style: const TextStyle(
-                                fontFamily: RwFonts.display,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w800,
-                                color: RwColors.accent,
-                                height: 1,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 3),
-                              child: Text(
-                                'bij ideaal weer · ${Fmt.pace(corrected / (a.distanceMeters / 1000))}',
-                                style: const TextStyle(color: RwColors.muted),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Het weer kostte je ongeveer ${Fmt.duration(cost.totalSeconds)} (${cost.explanation}). '
-                          'Zo vergelijk je runs eerlijk, ook als het hard waaide.',
-                          style: const TextStyle(color: RwColors.muted, height: 1.45),
-                        ),
-                      ] else
-                        const Text(
-                          'Prima loopweer: het weer had nauwelijks invloed op je tijd.',
-                          style: TextStyle(color: RwColors.muted),
-                        ),
-                    ],
-                  ),
-          ),
-          if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
-            const SizedBox(height: 12),
-            SplitsCard(activity: a),
-          ],
-          if (a.id != null) ...[
-            const SizedBox(height: 12),
-            PhotosCard(activity: a),
-          ],
-          if (a.id != null) ...[
-            const SizedBox(height: 12),
-            _FeelCard(activity: a),
-          ],
-          if (a.id != null && a.source != 'strava') ...[
-            const SizedBox(height: 12),
-            _CoachSummaryCard(activity: a),
-          ],
           const SizedBox(height: 12),
           RwCard(
             title: 'ROUTE',
@@ -337,6 +270,78 @@ class ActivityDetailScreen extends ConsumerWidget {
                     ],
                   ),
           ),
+          if (a.id != null && a.source != 'strava') ...[
+            const SizedBox(height: 12),
+            _CoachSummaryCard(activity: a),
+          ],
+          const SizedBox(height: 12),
+          RwCard(
+            title: 'HET WEER TIJDENS JE RUN',
+            child: a.temperatureCelsius == null && a.windSpeedKmh == null
+                ? const Text('Geen weergegevens bij deze run.', style: TextStyle(color: RwColors.muted))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        [
+                          if (a.temperatureCelsius != null) Fmt.temp(a.temperatureCelsius),
+                          if (a.feelsLikeCelsius != null) 'voelt als ${Fmt.temp(a.feelsLikeCelsius)}',
+                          if (a.windSpeedKmh != null)
+                            'wind ${Fmt.wind(a.windSpeedKmh)}${a.windDirectionDegrees == null ? '' : ' uit het ${Fmt.compass(a.windDirectionDegrees!)}'}',
+                        ].join(' · '),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 12),
+                      if (cost.matters) ...[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              Fmt.duration(corrected),
+                              style: const TextStyle(
+                                fontFamily: RwFonts.display,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w800,
+                                color: RwColors.accent,
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 3),
+                              child: Text(
+                                'bij ideaal weer · ${Fmt.pace(corrected / (a.distanceMeters / 1000))}',
+                                style: const TextStyle(color: RwColors.muted),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Het weer kostte je ongeveer ${Fmt.duration(cost.totalSeconds)} (${cost.explanation}). '
+                          'Zo vergelijk je runs eerlijk, ook als het hard waaide.',
+                          style: const TextStyle(color: RwColors.muted, height: 1.45),
+                        ),
+                      ] else
+                        const Text(
+                          'Prima loopweer: het weer had nauwelijks invloed op je tijd.',
+                          style: TextStyle(color: RwColors.muted),
+                        ),
+                    ],
+                  ),
+          ),
+          if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
+            const SizedBox(height: 12),
+            SplitsCard(activity: a),
+          ],
+          if (a.id != null) ...[
+            const SizedBox(height: 12),
+            PhotosCard(activity: a),
+          ],
+          if (a.id != null) ...[
+            const SizedBox(height: 12),
+            _FeelCard(activity: a),
+          ],
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => openShareRun(context, a, route: route, badges: badges),

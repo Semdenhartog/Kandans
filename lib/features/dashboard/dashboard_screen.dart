@@ -221,9 +221,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Text(
                 () {
                   final nowW = forecast.value?.at(DateTime.now());
-                  final place = location.when(data: (l) => l.label, loading: () => 'locatie bepalen…', error: (_, _) => 'locatie onbekend');
+                  final place = location.when(data: (l) => l.label, loading: () => '', error: (_, _) => '');
                   final weather = nowW == null ? '' : ' · ${Fmt.temp(nowW.temperature)}, ${weatherLabel(nowW.weatherCode).toLowerCase()}';
-                  return '${Fmt.dateLong(DateTime.now())}$weather · $place';
+                  final where = place.isEmpty || place == 'je locatie' ? '' : ' · $place';
+                  return '${Fmt.date(DateTime.now())}$weather$where';
                 }(),
                 style: const TextStyle(color: RwColors.subtle),
               ),
@@ -553,6 +554,12 @@ class _HeroCard extends StatelessWidget {
     final goNowShown = isBest && v.kind == VerdictKind.goNow;
     final remindAt = s.start.subtract(const Duration(minutes: 15));
     final gain = v.best.score - v.now.score;
+    // Redenen die nog niet in de tekst hierboven staan.
+    final shownText = isBest ? v.detail.toLowerCase() : '';
+    final extraReasons = [
+      for (final r in s.reasons)
+        if (!r.startsWith('Prima') && !shownText.contains(r.toLowerCase())) r,
+    ];
     return Semantics(
       container: true,
       label: '${v.title}. ${v.detail}',
@@ -633,9 +640,9 @@ class _HeroCard extends StatelessWidget {
                 Expanded(child: _HeroStat(icon: Icons.water_drop_outlined, label: 'Regen', value: Fmt.pct(w.precipitationProbability))),
               ],
             ),
-            if (s.reasons.isNotEmpty && !(s.reasons.length == 1 && s.reasons.first.startsWith('Prima'))) ...[
+            if (extraReasons.isNotEmpty) ...[
               const SizedBox(height: 12),
-              for (final r in s.reasons.take(2))
+              for (final r in extraReasons.take(2))
                 Padding(
                   padding: const EdgeInsets.only(top: 3),
                   child: Row(
@@ -809,8 +816,11 @@ class _HourBars extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    newDay ? _dayLabel(s.start).substring(0, 2) : '',
-                    style: const TextStyle(fontSize: 10, color: RwColors.subtle),
+                    newDay ? (_dayLabel(s.start) == 'Vandaag' ? 'nu' : _dayLabel(s.start).toLowerCase()) : '',
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
+                    style: const TextStyle(fontSize: 10, color: RwColors.accent, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Expanded(
