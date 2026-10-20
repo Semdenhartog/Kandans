@@ -599,10 +599,14 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         ] else ...[
         Semantics(
           label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
-          child: Text(
-            (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
-            textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: RwFonts.display, fontSize: v.hasIntervals ? 72 : 96, fontWeight: FontWeight.w800, height: 1),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              style: TextStyle(fontFamily: RwFonts.display, fontSize: v.hasIntervals ? 72 : 96, fontWeight: FontWeight.w800, height: 1),
+            ),
           ),
         ),
         const Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 18)),
@@ -1110,9 +1114,13 @@ class _Big extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
         children: [
-          Text(value, style: TextStyle(fontFamily: RwFonts.display, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
+          // Altijd op één regel (ook bij runs boven het uur of met grote letters).
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value, maxLines: 1, style: TextStyle(fontFamily: RwFonts.display, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
+          ),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
         ],
       );
 }

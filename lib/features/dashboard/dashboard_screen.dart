@@ -471,7 +471,7 @@ class _ResultsState extends State<_Results> {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text('LOOPOMSTANDIGHEDEN PER UUR',
+                        child: Text('PER UUR',
                             style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
                       ),
                       FilterChip(

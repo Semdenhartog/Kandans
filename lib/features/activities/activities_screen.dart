@@ -548,7 +548,8 @@ class _OverviewState extends State<_Overview> {
                 '${totals.map((w) => w.km.round()).join(', ')}. Laatste is $periodWord.',
             excludeSemantics: true,
             child: SizedBox(
-              height: 96,
+              // Meegroeien met grotere letters, anders vallen de labels eraf.
+              height: 60 + 36 * MediaQuery.textScalerOf(context).scale(10) / 10,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -796,12 +797,16 @@ class _ActivityTile extends StatelessWidget {
                     Text('${Fmt.date(a.startedAt)} · ${Fmt.time(a.startedAt)}${weather.isEmpty ? '' : ' · $weather'}',
                         maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
                     const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        _TileStat(Fmt.km(a.distanceMeters).replaceAll(' km', ''), 'km'),
-                        _TileStat(Fmt.pace(a.paceSecondsPerKm).replaceAll(' /km', ''), '/km'),
-                        _TileStat(Fmt.duration(a.movingTimeSeconds), ''),
-                      ],
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
+                          _TileStat(Fmt.km(a.distanceMeters).replaceAll(' km', ''), 'km'),
+                          _TileStat(Fmt.pace(a.paceSecondsPerKm).replaceAll(' /km', ''), '/km'),
+                          _TileStat(Fmt.duration(a.movingTimeSeconds), ''),
+                        ],
+                      ),
                     ),
                     if (badges.isNotEmpty) ...[
                       const SizedBox(height: 6),
