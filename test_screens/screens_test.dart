@@ -22,7 +22,10 @@ import 'package:runwise/data/repositories/repositories.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
 import 'package:runwise/data/services/location_service.dart';
 import 'package:runwise/data/services/rain_service.dart';
+import 'package:runwise/data/services/heart_rate_service.dart';
+import 'package:runwise/data/services/run_recorder_service.dart';
 import 'package:runwise/data/services/sync_service.dart';
+import 'package:runwise/domain/run_recorder.dart';
 import 'package:runwise/domain/availability.dart';
 import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/readiness.dart';
@@ -39,6 +42,8 @@ import 'package:runwise/features/dashboard/month_challenge_card.dart';
 import 'package:runwise/features/planner/availability_provider.dart';
 import 'package:runwise/features/planner/training_plan_screen.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
+import 'package:runwise/features/record/record_run_screen.dart';
+import 'package:runwise/features/routes/route_detail_screen.dart';
 import 'package:runwise/features/routes/routes_screen.dart';
 
 const _w = 412.0;
@@ -240,9 +245,10 @@ List<Override> _overrides() => [
       stravaConnectionProvider.overrideWith((ref) => null),
       monthlyGoalProvider.overrideWith((ref) => 120.0),
       activityStreamsProvider(_runs.first.id!).overrideWith((ref) => _streams),
+      routeDetailProvider('r1').overrideWith((ref) => _routes.first),
     ];
 
-Future<void> _shot(WidgetTester tester, String name, Widget screen, {double height = 2400, bool nav = false}) async {
+Future<void> _shot(WidgetTester tester, String name, Widget screen, {double height = 2400, bool nav = false, void Function()? after}) async {
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
@@ -256,6 +262,12 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen, {double heig
   ));
   for (var i = 0; i < 8; i++) {
     await tester.pump(const Duration(milliseconds: 120));
+  }
+  if (after != null) {
+    after();
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
   }
   await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
   // Timers en animaties opruimen.
@@ -304,5 +316,23 @@ void main() {
   testWidgets('06 ik', (t) => _shot(t, '06_ik', const ProfileScreen(), height: 2600));
   testWidgets('07 fitheid', (t) => _shot(t, '07_fitheid', const FitnessScreen(), height: 1800));
   testWidgets('08 badges', (t) => _shot(t, '08_badges', const BadgesScreen(), height: 1900));
+  testWidgets('10 opnemen start', (t) => _shot(t, '10_opnemen_start', const RecordRunScreen(), height: 915));
+  testWidgets('11 opnemen bezig', (t) => _shot(t, '11_opnemen_bezig', const RecordRunScreen(), height: 915, after: () {
+        RunRecorderService.instance.view.value = RecorderView(
+          status: RecorderStatus.running,
+          distance: 5230,
+          movingSeconds: 1652,
+          currentPace: 309,
+          averagePace: 316,
+          km: 5,
+          gpsAccuracy: 4,
+          heartRate: 152,
+          hrStatus: HrStatus.connected,
+          followRoute: decodePolyline(_routes.first.polyline),
+          routeRemaining: 2970,
+          ghostDelta: -12,
+        );
+      }));
+  testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
