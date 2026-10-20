@@ -114,7 +114,7 @@ class NotificationService {
       final granted = await android?.requestNotificationsPermission() ?? true;
       if (!granted) return false;
     } else {
-      for (final id in _ids) {
+      for (final id in [..._ids, _soonId]) {
         await _plugin.cancel(id);
       }
     }
@@ -164,6 +164,27 @@ class NotificationService {
     );
 
     final now = DateTime.now();
+    await _plugin.cancel(_soonId);
+    // Seintje 30 minuten voor het beste moment van vandaag (alleen als het een goed moment is).
+    try {
+      final until = DateTime(now.year, now.month, now.day, 22);
+      if (until.isAfter(now)) {
+        final best = planner.bestPrecise(type, from: now, horizon: until.difference(now));
+        final at = best?.start.subtract(const Duration(minutes: 30));
+        if (best != null && best.score >= 70 && at != null && at.isAfter(now.add(const Duration(minutes: 2)))) {
+          final w = best.weather;
+          await _plugin.zonedSchedule(
+            _soonId,
+            'Over 30 minuten: je beste loopmoment',
+            'Om ${Fmt.time(best.start)} · ${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${w.windSpeed.round()} km/u'
+                '${(w.precipitationProbability ?? 0) < 20 ? ', droog' : ''} · score ${best.score}. Schoenen aan!',
+            tz.TZDateTime.from(at.toUtc(), tz.UTC),
+            _details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          );
+        }
+      }
+    } catch (_) {}
     for (var day = 0; day < _ids.length; day++) {
       final id = _ids[day];
       await _plugin.cancel(id);
@@ -195,6 +216,7 @@ class NotificationService {
   }
 
   static const _weeklyId = 103;
+  static const _soonId = 104;
 
   /// Elke maandag om 8:00 een seintje dat je weekoverzicht klaarstaat (alleen als meldingen aan staan).
   Future<void> scheduleWeeklyReport() async {

@@ -703,6 +703,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
 
 String runTitle(Activity a, {String? routeName}) {
   if (routeName != null) return routeName;
+  // Opgenomen zonder GPS-spoor en zonder weer: loopband.
+  if (a.source == 'runwise' && !a.hasTrack && a.temperatureCelsius == null) return 'Loopbandrun';
   final h = a.startedAt.toLocal().hour;
   if (h < 6) return 'Nachtrun';
   if (h < 12) return 'Ochtendrun';

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
@@ -599,6 +600,19 @@ class _HeroCard extends StatelessWidget {
                         style: const TextStyle(color: RwColors.background, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.6)),
                   ),
                   const Spacer(),
+                  IconButton(
+                    tooltip: 'Nodig iemand uit om mee te lopen',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.group_add_outlined, size: 20, color: RwColors.muted),
+                    onPressed: () {
+                      final when = goNowShown ? 'nu meteen' : '${_dayLabel(s.start).toLowerCase()} om ${Fmt.time(s.start)}';
+                      SharePlus.instance.share(ShareParams(
+                        text: 'Zin om mee te lopen? Volgens RunWise is $when het beste moment: '
+                            '${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}'
+                            '${(w.precipitationProbability ?? 0) < 20 ? ', droog' : ', regenkans ${Fmt.pct(w.precipitationProbability)}'}. Doe je mee?',
+                      )).ignore();
+                    },
+                  ),
                   Text('${s.score}', style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 22, color: _scoreColor(s.score))),
                   const SizedBox(width: 4),
                   Text(s.verdict, style: TextStyle(color: _scoreColor(s.score), fontWeight: FontWeight.w600)),

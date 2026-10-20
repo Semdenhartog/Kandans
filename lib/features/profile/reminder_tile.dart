@@ -85,8 +85,8 @@ class _ReminderTileState extends ConsumerState<ReminderTile> {
           subtitle: Text(s == null
               ? ''
               : s.enabled
-                  ? 'Elke dag om ${s.timeLabel}: je beste moment van die dag'
-                  : 'Krijg elke ochtend je beste vertrektijd'),
+                  ? 'Om ${s.timeLabel} je beste moment, en een seintje 30 min ervoor als het een goed moment is'
+                  : 'Krijg elke ochtend je beste vertrektijd, en een seintje vlak ervoor'),
           value: s?.enabled ?? false,
           onChanged: s == null ? null : _toggle,
         ),

@@ -13,6 +13,7 @@ import '../../domain/run_streams.dart';
 import '../../shared/widgets.dart';
 import '../activities/badges_screen.dart';
 import '../activities/share_run_screen.dart';
+import '../activities/strength_screen.dart';
 import '../routes/route_map.dart';
 
 /// Direct na het opslaan: je run in één oogopslag, met snelste stukken en records.
@@ -121,6 +122,8 @@ class RunSummaryScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _QuickFeel(activityId: a.id!),
             ],
+            const SizedBox(height: 12),
+            const CooldownTip(),
             if (badges.isNotEmpty) ...[
               const SizedBox(height: 16),
               NewBadgesBanner(badges: badges),

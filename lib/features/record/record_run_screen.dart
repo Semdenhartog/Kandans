@@ -64,6 +64,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _haptics = true;
   bool _batteryDone = true;
   bool _indoor = false;
+
+  /// Loopbandsnelheid (km/u) om mee te starten; null = alleen de klok.
+  double? _tmKmh;
   double? _targetPace;
   CueSettings _cues = const CueSettings();
   String? _shoeId;
@@ -93,6 +96,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
           _indoor = p.getBool('rec_indoor') ?? false;
+          _tmKmh = p.getDouble('rec_tm_kmh');
           final tp = p.getDouble('rec_target_pace');
           _targetPace = tp == null || tp <= 0 ? null : tp;
           try {
@@ -149,6 +153,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         followRoute: _route == null ? const [] : decodePolyline(_route!.polyline),
         ghost: _raceGhost ? _ghost : null,
         guided: _guided,
+        treadmillKmh: _indoor ? _tmKmh : null,
       );
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
@@ -223,7 +228,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     if (!ok) return;
     double? indoorMeters;
     if (_svc.recording?.indoor ?? false) {
-      indoorMeters = await _askDistance();
+      indoorMeters = await _askDistance(estimate: _svc.recording!.distance);
       if (indoorMeters == null) return; // Toch nog niet stoppen.
     }
     final rec = await _svc.stop();
@@ -239,8 +244,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   }
 
   /// Loopband: afstand van het display van de loopband invullen.
-  Future<double?> _askDistance() async {
-    final c = TextEditingController();
+  Future<double?> _askDistance({double estimate = 0}) async {
+    final c = TextEditingController(text: estimate >= 100 ? (estimate / 1000).toStringAsFixed(2).replaceAll('.', ',') : '');
     final km = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -249,7 +254,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           controller: c,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(labelText: 'Afstand in km (van de loopband)', hintText: 'bijv. 5,2'),
+          decoration: InputDecoration(
+            labelText: 'Afstand in km (van de loopband)',
+            hintText: 'bijv. 5,2',
+            helperText: estimate >= 100 ? 'Geschat uit je snelheid. Klopt het display anders? Pas het aan.' : null,
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Terug')),
@@ -619,11 +628,24 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             const SizedBox(height: 4),
             Text(
               _indoor
-                  ? 'De klok loopt; na afloop vul je de afstand in.'
+                  ? 'Stel de snelheid van de band in, dan zie je je afstand en tempo live. Je kunt hem onderweg aanpassen.'
                   : 'Kies je opties en druk op Start. Je scherm mag uit.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: RwColors.muted),
             ),
+            if (_indoor) ...[
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _TreadmillSpeed(
+                  kmh: _tmKmh,
+                  onChanged: (k) {
+                    setState(() => _tmKmh = k);
+                    SharedPreferences.getInstance().then((p) => k == null ? p.remove('rec_tm_kmh') : p.setDouble('rec_tm_kmh', k)).ignore();
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -640,13 +662,41 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         ],
         const Spacer(),
         if (v.indoor || (!_svc.isRecording && _indoor)) ...[
-          Text(
-            Fmt.duration(v.movingSeconds),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontFamily: RwFonts.display, fontSize: 80, fontWeight: FontWeight.w800, height: 1),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              Fmt.duration(v.movingSeconds),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 80, fontWeight: FontWeight.w800, height: 1),
+            ),
           ),
-          const Text('loopband · de afstand vul je na afloop in',
-              textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
+          if (v.indoor && v.treadmillKmh != null) ...[
+            const SizedBox(height: 18),
+            Row(children: [
+              Expanded(child: _Big(label: 'Afstand (geschat)', value: Fmt.km(v.distance, decimals: 2))),
+              Expanded(child: _Big(label: 'Tempo', value: Fmt.pace(3600 / v.treadmillKmh!).replaceAll(' /km', ''))),
+            ]),
+          ] else
+            Text(
+              v.indoor ? 'loopband · stel je snelheid in, of vul de afstand na afloop in' : 'loopband',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: RwColors.muted, fontSize: 16),
+            ),
+          const SizedBox(height: 16),
+          _TreadmillSpeed(
+            kmh: v.indoor ? v.treadmillKmh : _tmKmh,
+            onChanged: _locked
+                ? null
+                : (k) {
+                    if (v.indoor) {
+                      _svc.setTreadmillSpeed(k);
+                    } else {
+                      setState(() => _tmKmh = k);
+                    }
+                    SharedPreferences.getInstance().then((p) => k == null ? p.remove('rec_tm_kmh') : p.setDouble('rec_tm_kmh', k)).ignore();
+                  },
+          ),
           if (v.heartRate != null || v.hrStatus == HrStatus.connecting || v.hrStatus == HrStatus.lost) ...[
             const SizedBox(height: 18),
             _HeartRow(view: v),
@@ -1240,6 +1290,50 @@ class _HeartRow extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Snelheid van de loopband instellen (stappen van 0,5 km/u), zoals op het display.
+class _TreadmillSpeed extends StatelessWidget {
+  const _TreadmillSpeed({required this.kmh, required this.onChanged});
+  final double? kmh;
+  final ValueChanged<double?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final k = kmh;
+    void set(double v) => onChanged?.call(double.parse(v.clamp(3, 25).toStringAsFixed(1)));
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(999)),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: 'Langzamer',
+            onPressed: onChanged == null ? null : () => set((k ?? 10.5) - 0.5),
+            icon: const Icon(Icons.remove_circle_outline, size: 30),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: onChanged == null || k == null ? null : () => onChanged!(null),
+              child: Column(
+                children: [
+                  Text(k == null ? 'Snelheid' : '${k.toStringAsFixed(1).replaceAll('.', ',')} km/u',
+                      style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 22)),
+                  Text(k == null ? 'tik + of − om in te stellen' : 'van de loopband · tik om uit te zetten',
+                      style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Sneller',
+            onPressed: onChanged == null ? null : () => set((k ?? 10.0) + 0.5),
+            icon: const Icon(Icons.add_circle_outline, size: 30),
+          ),
+        ],
       ),
     );
   }

@@ -35,6 +35,7 @@ import 'package:runwise/domain/heart_rate.dart';
 import 'package:runwise/domain/beginner_plan.dart';
 import 'package:runwise/domain/guided_runs.dart';
 import 'package:runwise/domain/plan_check.dart';
+import 'package:runwise/domain/strength.dart';
 import 'package:runwise/domain/run_coach.dart';
 import 'package:runwise/domain/run_file_import.dart';
 import 'package:runwise/domain/training_load.dart';
@@ -1481,6 +1482,66 @@ void main() {
       expect(much.fix, PlanFix.lighterWeek);
       final lighter = lighterThisWeek(race, now);
       expect(lighter.where((s) => s.title.contains('aangepast')), isNotEmpty);
+    });
+  });
+
+  group('loopband met snelheid', () {
+    test('afstand, km-tijden en tempo uit de snelheid; afstand achteraf schaalt het verloop', () {
+      final r = RunRecording(indoor: true)..treadmillKmh = 12;
+      r.start(DateTime(2026, 10, 20, 12));
+      int? km;
+      for (var i = 0; i < 400; i++) {
+        km = r.tick(1) ?? km;
+      }
+      expect(r.distance, closeTo(1333.3, 0.5));
+      expect(km, 1);
+      expect(r.kmTimes.single, closeTo(300, 1));
+      expect(r.currentPace, closeTo(300, 1));
+      final st = r.streamsJson()!;
+      expect(st.containsKey('ll'), isFalse);
+      expect(st['src'], 'loopband');
+      r.setIndoorDistance(1466.7);
+      expect(r.samples.last.d, closeTo(1466.7 * r.samples.last.t / 400, 5));
+      final back = RunRecording.fromSnapshot(r.toSnapshot())!;
+      expect(back.treadmillKmh, 12);
+    });
+    test('zonder snelheid alleen de klok', () {
+      final r = RunRecording(indoor: true);
+      r.start(DateTime(2026, 10, 20, 12));
+      for (var i = 0; i < 60; i++) {
+        r.tick(1);
+      }
+      expect(r.distance, 0);
+      expect(r.movingSeconds, 60);
+    });
+  });
+
+  group('kracht en mobiliteit', () {
+    test('routines: links/rechts uitgeschreven en een redelijke duur', () {
+      for (final r in Routine.all) {
+        expect(r.blocks.length, greaterThanOrEqualTo(r.exercises.length));
+        expect(r.totalSeconds, inInclusiveRange(4 * 60, 20 * 60));
+      }
+    });
+    test('speler: oefening, pauze, volgende, klaar', () {
+      final r = Routine.all.firstWhere((x) => x.id == 'strength');
+      final p = RoutinePlayer(r);
+      expect(p.intro, contains('Squat'));
+      String? said;
+      for (var i = 0; i < 40; i++) {
+        said = p.tick(1) ?? said;
+      }
+      expect(p.resting, isTrue);
+      expect(said, contains('Bilbrug'));
+      for (var i = 0; i < 15; i++) {
+        p.tick(1);
+      }
+      expect(p.resting, isFalse);
+      expect(p.current!.name, 'Bilbrug');
+      while (!p.finished) {
+        p.skip();
+      }
+      expect(p.finished, isTrue);
     });
   });
 }

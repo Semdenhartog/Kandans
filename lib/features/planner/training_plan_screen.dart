@@ -192,6 +192,7 @@ class _PlanView extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
       children: [
+        if (daysLeft < 0) _PlanReplay(sessions: sessions, runs: runs),
         const PlanCheckCard(),
         RwCard(
           child: Column(
@@ -757,4 +758,71 @@ Future<void> showSessionBriefing(BuildContext context, PlanSession session, {int
       );
     }),
   );
+}
+
+/// Terugblik als je schema klaar is (zoals Runna's Plan Replay).
+class _PlanReplay extends StatelessWidget {
+  const _PlanReplay({required this.sessions, required this.runs});
+  final List<PlanSession> sessions;
+  final List<Activity> runs;
+
+  @override
+  Widget build(BuildContext context) {
+    final from = sessions.first.date, to = sessions.last.date.add(const Duration(days: 1));
+    final inPlan = runs.where((a) {
+      final t = a.startedAt.toLocal();
+      return !t.isBefore(from) && t.isBefore(to);
+    }).toList();
+    final done = [for (final a in runs) (start: a.startedAt, meters: a.distanceMeters, seconds: a.movingTimeSeconds)];
+    final doneCount = sessions.where((s) => sessionDone(s, done)).length;
+    final km = inPlan.fold<double>(0, (a, r) => a + r.distanceMeters / 1000);
+    final secs = inPlan.fold<int>(0, (a, r) => a + r.movingTimeSeconds);
+    Activity? longest;
+    for (final a in inPlan) {
+      if (longest == null || a.distanceMeters > longest.distanceMeters) longest = a;
+    }
+    final firstWeek = inPlan.where((a) => a.startedAt.isBefore(from.add(const Duration(days: 14)))).toList();
+    final lastWeeks = inPlan.where((a) => a.startedAt.isAfter(to.subtract(const Duration(days: 14)))).toList();
+    double avgPace(List<Activity> l) {
+      final d = l.fold<double>(0, (a, r) => a + r.distanceMeters);
+      return d <= 0 ? 0 : l.fold<int>(0, (a, r) => a + r.movingTimeSeconds) / (d / 1000);
+    }
+
+    final p0 = avgPace(firstWeek), p1 = avgPace(lastWeeks);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(colors: [RwColors.accent.withValues(alpha: 0.25), RwColors.surface], begin: Alignment.topLeft, end: Alignment.bottomRight),
+          border: Border.all(color: RwColors.accent.withValues(alpha: 0.4)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('SCHEMA AFGEROND', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 0.6, fontSize: 12)),
+            const SizedBox(height: 4),
+            Text(doneCount >= sessions.length * 0.8 ? 'Wat een prestatie!' : 'Je bent er doorheen!',
+                style: const TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: StatTile(label: 'Trainingen', value: '$doneCount/${sessions.length}')),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Kilometers', value: km.round().toString())),
+              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: 'Tijd', value: '${(secs / 3600).toStringAsFixed(0)} u')),
+            ]),
+            const SizedBox(height: 10),
+            if (longest != null)
+              Text('Langste run: ${Fmt.km(longest.distanceMeters, decimals: 1)} op ${Fmt.date(longest.startedAt)}.', style: const TextStyle(color: RwColors.muted)),
+            if (p0 > 0 && p1 > 0 && p0 - p1 >= 3)
+              Text('Je gemiddelde tempo ging van ${Fmt.pace(p0)} naar ${Fmt.pace(p1)}.', style: const TextStyle(color: RwColors.good, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            const Text('Klaar voor het volgende doel? Kies rechtsboven "Nieuw schema maken".', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
 }

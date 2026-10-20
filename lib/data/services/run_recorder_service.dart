@@ -47,6 +47,7 @@ class RecorderView {
     this.offRoute = false,
     this.ghostDelta,
     this.walkRun = false,
+    this.treadmillKmh,
   });
 
   final RecorderStatus status;
@@ -90,6 +91,9 @@ class RecorderView {
 
   /// Lopen/wandelen-schema: stappen heten "Hardlopen" en "Wandelen".
   final bool walkRun;
+
+  /// Ingestelde loopbandsnelheid (km/u), of null.
+  final double? treadmillKmh;
 
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
@@ -172,7 +176,8 @@ class RunRecorderService {
   void _onTick() {
     final r = _rec;
     if (r != null && r.indoor) {
-      r.tick(1);
+      final km = r.tick(1);
+      if (km != null) _buzz(const [0, 180, 140, 180]);
       if (r.isActive) _sayCue(r);
     }
     _checkIntervals();
@@ -225,6 +230,7 @@ class RunRecorderService {
     List<LatLng> followRoute = const [],
     RunStreams? ghost,
     GuidedRun? guided,
+    double? treadmillKmh,
   }) async {
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
@@ -235,7 +241,7 @@ class RunRecorderService {
       // Geen GPS-opname: de klok telt. Als de GPS al zocht, die stoppen.
       await _sub?.cancel();
       _sub = null;
-      _rec = RunRecording(indoor: true);
+      _rec = RunRecording(indoor: true)..treadmillKmh = treadmillKmh;
       try {
         await _ensurePermission();
         _listen(indoor: true);
@@ -281,6 +287,15 @@ class RunRecorderService {
       }
     }
     view.value = _snapshot();
+  }
+
+  /// Loopband: snelheid van de band doorgeven (km/u), dan telt de afstand live mee.
+  void setTreadmillSpeed(double? kmh) {
+    final r = _rec;
+    if (r == null || !r.indoor) return;
+    r.treadmillKmh = kmh == null || kmh <= 0 ? null : kmh;
+    view.value = _snapshot();
+    RecordingStore.save(r).ignore();
   }
 
   void pause() {
@@ -430,6 +445,7 @@ class RunRecorderService {
       routeRemaining: _follower?.remaining,
       offRoute: _follower?.offRoute ?? false,
       walkRun: it?.plan.walkRun ?? false,
+      treadmillKmh: r.treadmillKmh,
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
     );
   }

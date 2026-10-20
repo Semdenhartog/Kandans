@@ -20,6 +20,7 @@ import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../activities/badges_screen.dart';
+import '../activities/strength_screen.dart';
 import 'connections_card.dart';
 import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
@@ -157,6 +158,14 @@ class ProfileScreen extends ConsumerWidget {
                   subtitle: const Text('Mijlpalen en weerbadges'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => openBadges(context),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const Icon(Icons.fitness_center, color: RwColors.accent),
+                  title: const Text('Kracht en mobiliteit'),
+                  subtitle: const Text('Warming-up, kracht voor lopers en rekken, met de stem erbij'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => openStrength(context),
                 ),
                 const Divider(height: 1, indent: 56),
                 Consumer(builder: (context, ref, _) {

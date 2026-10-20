@@ -173,15 +173,50 @@ class RunRecording {
     return null;
   }
 
-  /// Loopband: de klok loopt door zolang je niet op pauze staat.
-  void tick(double seconds) {
-    if (!indoor || status != RecorderStatus.running) return;
+  /// Loopband-snelheid (km/u) zoals op het display van de band; null = onbekend (alleen de klok).
+  double? treadmillKmh;
+
+  /// Loopband: de klok loopt door zolang je niet op pauze staat. Met een snelheid telt ook de afstand mee.
+  /// Geeft een nieuwe hele km terug als die net is bereikt.
+  int? tick(double seconds) {
+    if (!indoor || status != RecorderStatus.running) return null;
     movingSeconds += seconds;
+    final hr = heartRate;
+    if (hr != null && hr > 30 && hr < 240) {
+      _hrSum += hr;
+      _hrCount++;
+    }
+    final kmh = treadmillKmh;
+    if (kmh == null || kmh <= 0) return null;
+    final d = kmh / 3.6 * seconds;
+    distance += d;
+    _recent.add((meters: d, seconds: seconds));
+    while (_recent.length > 1 && _recent.fold<double>(0, (a, r) => a + r.meters) - _recent.first.meters > 300) {
+      _recent.removeAt(0);
+    }
+    if (samples.isEmpty || movingSeconds - samples.last.t >= 3) {
+      samples.add(RunSample(movingSeconds, distance, const LatLng(0, 0), hr: hr));
+    }
+    final km = (distance / 1000).floor();
+    if (km > kmTimes.length) {
+      final over = distance - km * 1000;
+      kmTimes.add(movingSeconds - (d > 0 ? seconds * over / d : 0));
+      return km;
+    }
+    return null;
   }
 
-  /// Loopband: afstand na afloop invullen.
+  /// Loopband: afstand na afloop invullen. Wijkt die af van de schatting, dan schalen we het verloop mee
+  /// (zodat de tijden per km kloppen met de afstand van de band).
   void setIndoorDistance(double meters) {
     if (!indoor) return;
+    if (distance > 100 && meters > 0 && samples.isNotEmpty) {
+      final f = meters / distance;
+      for (var i = 0; i < samples.length; i++) {
+        final x = samples[i];
+        samples[i] = RunSample(x.t, x.d * f, x.point, alt: x.alt, hr: x.hr);
+      }
+    }
     distance = meters;
   }
 
@@ -189,6 +224,7 @@ class RunRecording {
   Map<String, dynamic> toSnapshot() => {
         'v': 1,
         'indoor': indoor,
+        if (treadmillKmh != null) 'tm': treadmillKmh,
         'auto': autoPause,
         'started': startedAt?.toIso8601String(),
         'dist': distance,
@@ -209,6 +245,7 @@ class RunRecording {
     try {
       final r = RunRecording(autoPause: j['auto'] as bool? ?? true, indoor: j['indoor'] as bool? ?? false);
       r.startedAt = j['started'] == null ? null : DateTime.parse(j['started'] as String);
+      r.treadmillKmh = (j['tm'] as num?)?.toDouble();
       r.distance = (j['dist'] as num).toDouble();
       r.movingSeconds = (j['moving'] as num).toDouble();
       r.kmTimes.addAll([for (final k in j['km'] as List) (k as num).toDouble()]);
@@ -293,10 +330,10 @@ class RunRecording {
     return {
       't': t,
       'd': d,
-      'll': ll,
+      if (!indoor) 'll': ll,
       if (alt != null) 'alt': smooth(alt, 3),
       if (hr != null) 'hr': hr,
-      'src': 'runwise',
+      'src': indoor ? 'loopband' : 'runwise',
     };
   }
 
