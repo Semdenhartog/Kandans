@@ -5,6 +5,8 @@
 //   POST { lat, lon, distance_m, count? }  ->  { routes: [{ coordinates: [[lon,lat,ele]], distance_m, ascent_m }] }
 //   POST { mode: "path", points: [[lat,lon], ...] }  ->  { route: { coordinates, distance_m, ascent_m } }
 //        (zelf getekende route: volgt paden en wegen langs de punten die je tikt)
+//   POST { mode: "surface", points: [[lat,lon], ...] }  ->  { surface: [{ type, meters }] }
+//        (ondergrond langs een route: asfalt, klinkers, halfverhard, onverhard)
 //
 // Geheim (Supabase -> Edge Functions -> Secrets): ORS_API_KEY
 // Routes © openrouteservice.org (HeiGIT) | kaartdata © OpenStreetMap-bijdragers.
@@ -78,6 +80,43 @@ async function path(key: string, points: number[][]) {
   };
 }
 
+// openrouteservice-ondergrondcodes -> onze groepen.
+const SURFACE: Record<number, string> = {
+  1: "verhard", 3: "verhard", 4: "verhard", 6: "verhard",
+  5: "klinkers", 14: "klinkers", 18: "klinkers",
+  8: "halfverhard", 9: "halfverhard", 10: "halfverhard",
+  2: "onverhard", 11: "onverhard", 12: "onverhard", 15: "onverhard", 16: "onverhard", 17: "onverhard", 7: "onverhard",
+  0: "onbekend", 13: "onbekend",
+};
+
+async function surface(key: string, points: number[][]) {
+  const res = await fetch("https://api.openrouteservice.org/v2/directions/foot-walking/json", {
+    method: "POST",
+    headers: { Authorization: key, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      coordinates: points.map(([lat, lon]) => [lon, lat]),
+      instructions: false,
+      geometry: false,
+      extra_info: ["surface"],
+      radiuses: points.map(() => 100),
+    }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (res.status === 429) throw new Error("rate_limit");
+  if (!res.ok) {
+    console.error("ors surface error", res.status, (await res.text()).slice(0, 300));
+    return null;
+  }
+  const data = await res.json();
+  const summary = (data.routes?.[0]?.extras?.surface?.summary ?? []) as { value: number; distance: number }[];
+  const out = new Map<string, number>();
+  for (const s of summary) {
+    const t = SURFACE[s.value] ?? "onbekend";
+    out.set(t, (out.get(t) ?? 0) + Number(s.distance));
+  }
+  return [...out.entries()].map(([type, meters]) => ({ type, meters: Math.round(meters) }));
+}
+
 function readKey(): string {
   for (const n of ["ORS_API_KEY", "API_ROUTES", "api_routes", "api routes", "API routes", "Api routes"]) {
     try {
@@ -96,6 +135,21 @@ Deno.serve(async (req) => {
   if (!key) return json(503, { error: "Routes maken is nog niet ingesteld op de server." });
 
   const body = await req.json().catch(() => ({}));
+
+  if (body.mode === "surface") {
+    const pts = (Array.isArray(body.points) ? body.points : []).slice(0, 50)
+      .map((p: unknown) => Array.isArray(p) ? [Number(p[0]), Number(p[1])] : [NaN, NaN])
+      .filter((p: number[]) => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+    if (pts.length < 2) return json(400, { error: "Te weinig punten." });
+    try {
+      const r = await surface(key, pts);
+      if (!r) return json(502, { error: "Ondergrond ophalen is niet gelukt." });
+      return json(200, { surface: r });
+    } catch (e) {
+      if (e instanceof Error && e.message === "rate_limit") return json(429, { error: "Het is even druk." });
+      return json(502, { error: "Ondergrond ophalen is niet gelukt." });
+    }
+  }
 
   if (body.mode === "path") {
     const pts = Array.isArray(body.points) ? body.points : [];

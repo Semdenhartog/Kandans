@@ -2,6 +2,7 @@
 // AI-hardloopcoach. Alleen voor premium (met een paar gratis proefvragen).
 //
 //   POST { message: "..." }  -> { reply, premium, free_left }
+//   POST { mode: "summary", activity_id }  -> { summary, premium, free_left }
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets):
 //   ANTHROPIC_API_KEY   verplicht
@@ -192,6 +193,82 @@ async function config(db: SupabaseClient) {
   };
 }
 
+/** Korte analyse van één eigen run (zoals Strava's Athlete Intelligence, maar met je schema, doelen en het weer). */
+async function summarize(
+  db: SupabaseClient, userId: string, profile: Record<string, unknown>, activityId: string,
+  apiKey: string, premium: boolean, freeUsed: number, freeLimit: number,
+) {
+  const { data: a } = await db.from("activities")
+    .select("id, user_id, source, started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, humidity_pct, feel, note, best_efforts, streams, ai_summary")
+    .eq("id", activityId).maybeSingle();
+  if (!a || a.user_id !== userId) return json(404, { error: "Run niet gevonden." });
+  if (a.source === "strava") return json(400, { error: "Runs uit Strava kunnen we niet door de coach laten bekijken (voorwaarden van Strava)." });
+  if (a.ai_summary) return json(200, { summary: a.ai_summary, premium, free_left: null });
+
+  // Tijden per km uit het verloop (als dat er is).
+  const splits: string[] = [];
+  const st = a.streams as { t?: number[]; d?: number[]; hr?: number[] } | null;
+  if (st?.t && st?.d && st.t.length === st.d.length) {
+    let lastT = 0, next = 1000, j = 0;
+    for (let i = 1; i < st.d.length && splits.length < 45; i++) {
+      if (st.d[i] >= next) {
+        const sec = st.t[i] - lastT;
+        let hrSum = 0, n = 0;
+        if (st.hr) for (; j <= i; j++) { if (st.hr[j] > 40) { hrSum += st.hr[j]; n++; } }
+        splits.push(`km ${next / 1000}: ${fmtPace(sec)}${n ? `, hartslag ${Math.round(hrSum / n)}` : ""}`);
+        lastT = st.t[i];
+        next += 1000;
+      }
+    }
+  }
+  const day = String(a.started_at).slice(0, 10);
+  const { data: session } = await db.from("plan_sessions").select("title, description")
+    .eq("user_id", userId).eq("session_date", day).maybeSingle();
+
+  const km = Number(a.distance_meters) / 1000;
+  const run = [
+    `Run: ${amsterdamDate(new Date(a.started_at))}, ${km.toFixed(2)} km in ${fmtDuration(Number(a.moving_time_seconds))} (${fmtPace(Number(a.moving_time_seconds) / km)})`,
+    a.average_heart_rate ? `Gemiddelde hartslag ${a.average_heart_rate}` : null,
+    a.elevation_gain_meters ? `${Math.round(Number(a.elevation_gain_meters))} hoogtemeters` : null,
+    a.temperature_celsius != null ? `Weer: ${Math.round(Number(a.temperature_celsius))}°C (gevoel ${Math.round(Number(a.feels_like_celsius ?? a.temperature_celsius))}°C), wind ${Math.round(Number(a.wind_speed_kmh ?? 0))} km/u, luchtvochtigheid ${Math.round(Number(a.humidity_pct ?? 0))}%` : null,
+    a.feel ? `Gevoel volgens de loper: ${["", "zwaar", "oké", "top"][Number(a.feel)]}` : null,
+    a.note ? `Notitie van de loper: "${String(a.note).slice(0, 300)}"` : null,
+    a.best_efforts ? `Snelste stukken (meters: seconden): ${JSON.stringify(a.best_efforts)}` : null,
+    splits.length ? `Per kilometer:\n${splits.join("\n")}` : null,
+    session ? `Gepland in het schema voor deze dag: ${session.title}. ${session.description}` : "Geen geplande training in het schema voor deze dag.",
+  ].filter(Boolean).join("\n");
+
+  const context = await buildContext(db, userId, profile);
+  const ai = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({
+      model: env("COACH_MODEL") || "claude-haiku-5-5",
+      max_tokens: 450,
+      system: `${SYSTEM_PROMPT}\n\nGegevens van de loper (uit RunWise):\n${context}`,
+      messages: [{
+        role: "user",
+        content: `Bekijk deze run en schrijf een korte analyse van hooguit 5 zinnen, zonder kopjes of opsommingstekens. ` +
+          `Noem 1 ding dat goed ging, wat het weer deed, hoe het past in mijn schema of weekomvang, en 1 concreet tip voor de volgende run. ` +
+          `Verzin niets dat hier niet staat.\n\n${run}`,
+      }],
+    }),
+    signal: AbortSignal.timeout(45_000),
+  }).catch(() => null);
+  if (!ai || !ai.ok) return json(502, { error: "De coach is even niet bereikbaar. Probeer het zo opnieuw." });
+  const result = await ai.json();
+  const text = ((result.content ?? []) as { type: string; text?: string }[])
+    .filter((c) => c.type === "text").map((c) => c.text).join("\n").trim();
+  if (!text) return json(502, { error: "De coach gaf geen antwoord. Probeer het opnieuw." });
+  await db.from("activities").update({ ai_summary: text.slice(0, 2000) }).eq("id", activityId);
+  let freeLeft: number | null = null;
+  if (!premium) {
+    await db.from("profiles").update({ coach_free_questions_used: freeUsed + 1 }).eq("id", userId);
+    freeLeft = Math.max(0, freeLimit - freeUsed - 1);
+  }
+  return json(200, { summary: text, premium, free_left: freeLeft });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json(405, { error: "Alleen POST is toegestaan." });
@@ -210,8 +287,9 @@ Deno.serve(async (req) => {
   const userId = auth.user.id;
 
   const body = await req.json().catch(() => ({}));
-  const message = String(body.message ?? "").trim();
-  if (!message) return json(400, { error: "Typ eerst een vraag." });
+  const summaryOf = body.mode === "summary" ? String(body.activity_id ?? "") : "";
+  const message = summaryOf ? "" : String(body.message ?? "").trim();
+  if (!message && !summaryOf) return json(400, { error: "Typ eerst een vraag." });
   if (message.length > MAX_MESSAGE_CHARS) {
     return json(400, { error: `Je vraag is te lang (maximaal ${MAX_MESSAGE_CHARS} tekens).` });
   }
@@ -235,6 +313,10 @@ Deno.serve(async (req) => {
     if ((count ?? 0) >= limits.daily) {
       return json(429, { error: `Je hebt vandaag al ${limits.daily} vragen gesteld. Morgen kun je weer verder.` });
     }
+  }
+
+  if (summaryOf) {
+    return await summarize(db, userId, profile, summaryOf, apiKey, premium, freeUsed, limits.free);
   }
 
   // Eerdere berichten zodat de coach het gesprek kent.
