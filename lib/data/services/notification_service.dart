@@ -50,6 +50,44 @@ class NotificationService {
     ),
   );
 
+  /// Hetzelfde nummer als de melding van de GPS-dienst, zodat we die bijwerken in plaats van een tweede te tonen.
+  static const _runId = 75415;
+
+  /// Live stand tijdens een run (op je vergrendelscherm en in de meldingenbalk).
+  Future<void> showRunProgress(String title, String body) async {
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        _runId,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'geolocator_channel_01',
+            'Run opnemen',
+            channelDescription: 'Je afstand, tijd en tempo terwijl je loopt',
+            importance: Importance.low,
+            priority: Priority.low,
+            ongoing: true,
+            onlyAlertOnce: true,
+            showWhen: false,
+            silent: true,
+            playSound: false,
+            enableVibration: false,
+            visibility: NotificationVisibility.public,
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> cancelRunProgress() async {
+    if (!_ready) return;
+    try {
+      await _plugin.cancel(_runId);
+    } catch (_) {}
+  }
+
   Future<void> init() async {
     if (_ready || !Platform.isAndroid) return;
     tzdata.initializeTimeZones();

@@ -8,6 +8,10 @@ import '../data/services/offline_cache.dart';
 import '../data/services/sync_service.dart';
 import '../features/lock/app_lock_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../core/format.dart';
+import '../data/services/recording_store.dart';
+import '../data/services/run_recorder_service.dart';
+import '../features/record/record_run_screen.dart';
 
 /// Onderste navigatiebalk met de vijf hoofdtabbladen.
 /// Haalt bij het openen (en terugkomen in) de app automatisch nieuwe runs op
@@ -45,6 +49,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
 
   Future<void> _onboarding() async {
     final next = await showOnboardingIfNeeded(context);
+    if (mounted) await _offerRestore();
     if (mounted) await maybeOfferFingerprint(context);
     if (next == null || !mounted) return;
     // Na de rondleiding kan er locatie zijn: weer opnieuw ophalen.
@@ -56,6 +61,36 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         context.go('/routes/maken');
       case OnboardingNext.today:
         context.go('/today');
+    }
+  }
+
+  /// Was er een run bezig toen de app werd afgesloten? Dan kun je hem afmaken of opslaan.
+  Future<void> _offerRestore() async {
+    final svc = RunRecorderService.instance;
+    if (svc.isRecording) return;
+    final r = await RecordingStore.load();
+    if (r == null || !mounted) return;
+    final when = r.startedAt == null ? '' : ' van ${Fmt.time(r.startedAt!)}';
+    final what = r.indoor ? Fmt.duration(r.movingSeconds) : '${Fmt.km(r.distance, decimals: 2)} in ${Fmt.duration(r.movingSeconds)}';
+    final choice = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.restore, size: 36),
+        title: const Text('Je run is onderbroken'),
+        content: Text('Je run$when is gestopt doordat de app werd afgesloten ($what). '
+            'Je kunt verder lopen of hem opslaan.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Weggooien')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Verder of opslaan')),
+        ],
+      ),
+    );
+    if (choice == true) {
+      await svc.restore(r);
+      if (mounted) openRecorder(context);
+    } else if (choice == false) {
+      await RecordingStore.clear();
     }
   }
 

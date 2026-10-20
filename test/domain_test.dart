@@ -32,6 +32,9 @@ import 'package:runwise/domain/route_drawing.dart';
 import 'package:runwise/domain/route_photos.dart';
 import 'package:runwise/domain/best_efforts.dart';
 import 'package:runwise/domain/heart_rate.dart';
+import 'package:runwise/domain/run_coach.dart';
+import 'package:runwise/domain/run_file_import.dart';
+import 'package:runwise/domain/training_load.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -1035,6 +1038,123 @@ void main() {
       expect(heartRateZone(150, 190), 3);
       expect(heartRateZone(160, 190), 4);
       expect(heartRateZone(180, 190), 5);
+    });
+  });
+
+  group('ronde 2: opname veilig, coach, belasting, import', () {
+    final t0 = DateTime(2026, 10, 20, 18);
+    RunRecording sampleRun(int seconds) {
+      final r = RunRecording()..start(t0);
+      for (var s = 0; s <= seconds; s++) {
+        r.add(GpsFix(LatLng(52.0, 5.0 + s * 3.0 / 68540), t0.add(Duration(seconds: s)), accuracy: 5, altitude: 10));
+      }
+      return r;
+    }
+
+    test('onderbroken run terughalen', () {
+      final r = sampleRun(400);
+      final back = RunRecording.fromSnapshot(r.toSnapshot())!;
+      expect(back.distance, closeTo(r.distance, 0.01));
+      expect(back.movingSeconds, closeTo(r.movingSeconds, 0.01));
+      expect(back.samples.length, r.samples.length);
+      expect(back.track.length, r.track.length);
+      expect(back.status, RecorderStatus.paused);
+      expect(back.startedAt, t0);
+      expect(RunRecording.fromSnapshot({'v': 9}), isNull);
+    });
+
+    test('loopband: klok zonder GPS', () {
+      final r = RunRecording(indoor: true)..start(t0);
+      for (var i = 0; i < 600; i++) {
+        r.tick(1);
+      }
+      r.pause();
+      r.tick(100);
+      r.setIndoorDistance(1800);
+      expect(r.movingSeconds, 600);
+      expect(r.averagePace, closeTo(333, 1));
+    });
+
+    test('stemmeldingen op afstand en op tijd', () {
+      final r = RunRecording()..start(t0);
+      final km = CueScheduler(const CueSettings());
+      final min5 = CueScheduler(const CueSettings(every: CueEvery.fiveMin));
+      final kmCues = <String>[], timeCues = <String>[];
+      for (var s = 0; s <= 700; s++) {
+        r.add(GpsFix(LatLng(52.0, 5.0 + s * 3.0 / 68540), t0.add(Duration(seconds: s)), accuracy: 5));
+        if (km.update(r, heartRate: 150) case final c?) kmCues.add(c);
+        if (min5.update(r) case final c?) timeCues.add(c);
+      }
+      expect(kmCues.length, 2);
+      expect(kmCues.first, startsWith('1 kilometer.'));
+      expect(kmCues.first, contains('Hartslag 150.'));
+      expect(timeCues.length, 2);
+      expect(timeCues.first, startsWith('5 minuten.'));
+      expect(const CueSettings(every: CueEvery.twoKm).toJson()['e'], 'twoKm');
+      expect(CueSettings.fromJson({'e': 'halfKm', 'h': false}).heartRate, isFalse);
+    });
+
+    test('doeltempo-coach', () {
+      final c = PaceCoach(330);
+      final said = <String>[];
+      // 60 s te langzaam (6:00), dan op tempo.
+      for (var t = 0; t < 60; t++) {
+        if (c.update(t.toDouble(), 360) case final s?) said.add(s);
+      }
+      for (var t = 60; t < 90; t++) {
+        if (c.update(t.toDouble(), 332) case final s?) said.add(s);
+      }
+      expect(said.first, startsWith('Iets sneller'));
+      expect(said.where((s) => s.startsWith('Iets sneller')).length, 1);
+      expect(said.last, startsWith('Mooi'));
+      expect(PaceCoach(330).update(30, 290), isNull);
+    });
+
+    test('fitheid en vorm', () {
+      final now = DateTime(2026, 10, 20);
+      final runs = [
+        for (var i = 1; i <= 60; i++)
+          if (i % 2 == 0)
+            Activity(startedAt: now.subtract(Duration(days: i)), distanceMeters: 8000, movingTimeSeconds: 8 * 330),
+      ];
+      final series = fitnessSeries(runs, now, days: 30);
+      expect(series.length, 30);
+      expect(series.last.fitness, greaterThan(10));
+      expect(estimateThresholdPace(runs), closeTo(340, 5));
+      final hard = [...runs, for (var i = 0; i < 6; i++) Activity(startedAt: now.subtract(Duration(days: i)), distanceMeters: 15000, movingTimeSeconds: 15 * 300)];
+      expect(fitnessSeries(hard, now, days: 10).last.form, lessThan(series.last.form));
+      expect(formAdvice(FitnessDay(now, 0, 2, 1)).title, 'Opbouwen');
+      final withHr = Activity(startedAt: now, distanceMeters: 10000, movingTimeSeconds: 3600, averageHeartRate: 165);
+      expect(runLoad(withHr, thresholdPace: 330, maxHr: 190), inInclusiveRange(60, 140));
+    });
+
+    test('run uit GPX en TCX importeren', () {
+      final gpx = StringBuffer('<?xml version="1.0"?><gpx xmlns="http://www.topografix.com/GPX/1/1" '
+          'xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><trk><name>Ochtendrun</name><trkseg>');
+      for (var s = 0; s <= 400; s += 2) {
+        final time = t0.toUtc().add(Duration(seconds: s)).toIso8601String();
+        gpx.write('<trkpt lat="52.0" lon="${5.0 + s * 3.0 / 68540}"><ele>${10 + s % 5}</ele><time>$time</time>'
+            '<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>${140 + s % 10}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions></trkpt>');
+      }
+      gpx.write('</trkseg></trk></gpx>');
+      final r = parseRunFile(gpx.toString());
+      expect(r.distanceMeters, closeTo(1200, 15));
+      expect(r.movingSeconds, closeTo(400, 3));
+      expect(r.averageHeartRate, inInclusiveRange(140, 150));
+      expect(r.name, 'Ochtendrun');
+      expect(RunStreams.fromJson(r.streams)!.heartRate, isNotNull);
+
+      final tcx = StringBuffer('<?xml version="1.0"?><TrainingCenterDatabase><Activities><Activity Sport="Running"><Lap><Track>');
+      for (var s = 0; s <= 400; s += 5) {
+        tcx.write('<Trackpoint><Time>${t0.toUtc().add(Duration(seconds: s)).toIso8601String()}</Time>'
+            '<DistanceMeters>${s * 3}</DistanceMeters><HeartRateBpm><Value>150</Value></HeartRateBpm></Trackpoint>');
+      }
+      tcx.write('</Track></Lap></Activity></Activities></TrainingCenterDatabase>');
+      final r2 = parseRunFile(tcx.toString());
+      expect(r2.distanceMeters, closeTo(1200, 1));
+      expect(r2.track, isEmpty);
+      expect(r2.averageHeartRate, 150);
+      expect(() => parseRunFile('<foo/>'), throwsA(isA<RunFileException>()));
     });
   });
 }

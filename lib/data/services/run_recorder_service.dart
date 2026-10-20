@@ -6,10 +6,14 @@ import 'package:vibration/vibration.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../domain/geo.dart';
+import '../../core/format.dart';
 import '../../domain/intervals.dart';
+import '../../domain/run_coach.dart';
 import '../../domain/run_recorder.dart';
 import 'heart_rate_service.dart';
 import 'live_share_service.dart';
+import 'notification_service.dart';
+import 'recording_store.dart';
 
 /// Wat het opnamescherm laat zien.
 @immutable
@@ -34,6 +38,7 @@ class RecorderView {
     this.intervalsDone = false,
     this.heartRate,
     this.hrStatus = HrStatus.off,
+    this.indoor = false,
   });
 
   final RecorderStatus status;
@@ -64,6 +69,9 @@ class RecorderView {
   final int? heartRate;
   final HrStatus hrStatus;
 
+  /// Loopband (geen GPS).
+  final bool indoor;
+
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
 
@@ -85,6 +93,12 @@ class RunRecorderService {
   bool haptics = true;
   IntervalTracker? _intervals;
   LatLng? _position;
+  CueScheduler? _cues;
+  PaceCoach? _coach;
+  int _ticks = 0;
+
+  /// Doeltempo van de huidige run (s/km), of null.
+  double? targetPace;
 
   RunRecording? get recording => _rec;
   bool get isRecording => _rec != null && _rec!.status != RecorderStatus.finished;
@@ -110,12 +124,13 @@ class RunRecorderService {
     HeartRateService.instance.autoConnect().catchError((Object _) {});
   }
 
-  void _listen() {
+  void _listen({bool indoor = false}) {
+    // Binnen (loopband) hebben we geen nauwkeurige GPS nodig; de dienst houdt de app wel wakker.
     final LocationSettings settings = defaultTargetPlatform == TargetPlatform.android
         ? AndroidSettings(
-            accuracy: LocationAccuracy.bestForNavigation,
-            distanceFilter: 0,
-            intervalDuration: const Duration(seconds: 1),
+            accuracy: indoor ? LocationAccuracy.lowest : LocationAccuracy.bestForNavigation,
+            distanceFilter: indoor ? 500 : 0,
+            intervalDuration: Duration(seconds: indoor ? 30 : 1),
             foregroundNotificationConfig: const ForegroundNotificationConfig(
               notificationTitle: 'RunWise neemt je run op',
               notificationText: 'Tik om je run te zien of te stoppen.',
@@ -127,18 +142,82 @@ class RunRecorderService {
     _sub = Geolocator.getPositionStream(locationSettings: settings).listen(_onPosition, onError: (Object _) {
       view.value = _snapshot(error: 'GPS-signaal kwijt. We proberen het opnieuw.');
     });
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
-      _checkIntervals();
-      view.value = _snapshot();
-    });
+    _tick?.cancel();
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
   }
 
-  Future<void> start({bool voice = true, bool shareLive = false, String name = '', IntervalPlan? intervals, bool haptics = true}) async {
+  void _onTick() {
+    final r = _rec;
+    if (r != null && r.indoor) {
+      r.tick(1);
+      if (r.isActive) _sayCue(r);
+    }
+    _checkIntervals();
+    view.value = _snapshot();
+    if (r == null || !isRecording || r.status == RecorderStatus.idle) return;
+    _ticks++;
+    if (_ticks % 5 == 0) _updateNotification(r);
+    if (_ticks % 15 == 0) RecordingStore.save(r).ignore();
+  }
+
+  void _updateNotification(RunRecording r) {
+    final v = view.value;
+    final paused = r.status == RecorderStatus.paused || r.status == RecorderStatus.autoPaused;
+    final title = r.indoor
+        ? 'Loopband · ${Fmt.duration(v.movingSeconds)}'
+        : '${Fmt.km(r.distance, decimals: 2)} · ${Fmt.duration(v.movingSeconds)}';
+    final body = paused
+        ? 'Gepauzeerd'
+        : [
+            if (!r.indoor && r.currentPace > 0) 'Tempo ${Fmt.pace(r.currentPace)}',
+            if (!r.indoor && r.averagePace > 0) 'gem. ${Fmt.pace(r.averagePace)}',
+            if (v.heartRate != null) '♥ ${v.heartRate}',
+            if (v.step != null) '${v.step!.kind.label}: nog ${v.step!.byDistance ? '${v.stepRemaining.round()} m' : Fmt.duration(v.stepRemaining)}',
+          ].join(' · ');
+    NotificationService.instance.showRunProgress(title, body.isEmpty ? 'RunWise neemt je run op' : body).ignore();
+  }
+
+  void _sayCue(RunRecording r) {
+    if (_intervals != null && !_intervals!.finished) return;
+    final c = _cues?.update(r, heartRate: HeartRateService.instance.bpm.value);
+    if (c != null) _say(c);
+  }
+
+  Future<void> start({
+    bool voice = true,
+    bool shareLive = false,
+    String name = '',
+    IntervalPlan? intervals,
+    bool haptics = true,
+    bool indoor = false,
+    CueSettings cues = const CueSettings(),
+    double? targetPace,
+  }) async {
     this.haptics = haptics;
-    this.voice = voice || intervals != null;
-    this.shareLive = shareLive;
-    if (_sub == null) await warmUp();
-    _rec ??= RunRecording();
+    this.voice = voice || intervals != null || targetPace != null;
+    this.shareLive = shareLive && !indoor;
+    this.targetPace = targetPace;
+    _ticks = 0;
+    if (indoor) {
+      // Geen GPS-opname: de klok telt. Als de GPS al zocht, die stoppen.
+      await _sub?.cancel();
+      _sub = null;
+      _rec = RunRecording(indoor: true);
+      try {
+        await _ensurePermission();
+        _listen(indoor: true);
+      } catch (_) {
+        _tick?.cancel();
+        _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
+      }
+      HeartRateService.instance.autoConnect().catchError((Object _) {});
+    } else {
+      if (_sub == null) await warmUp();
+      _rec ??= RunRecording();
+    }
+    // Op de loopband melden we op tijd (afstand weten we niet).
+    _cues = CueScheduler(indoor && cues.every.meters != null ? cues.copyWith(every: CueEvery.fiveMin) : cues);
+    _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
     _rec!.start(DateTime.now());
     if (this.voice) {
       _tts ??= FlutterTts();
@@ -165,20 +244,27 @@ class RunRecorderService {
   }
 
   void pause() {
-    _rec?.pause();
+    final r = _rec;
+    r?.pause();
     _say('Gepauzeerd.');
     view.value = _snapshot();
+    if (r != null) {
+      RecordingStore.save(r).ignore();
+      _updateNotification(r);
+    }
   }
 
   void resume() {
-    _rec?.resume();
+    final r = _rec;
+    r?.resume();
     _say('We gaan weer.');
     view.value = _snapshot();
+    if (r != null) _updateNotification(r);
   }
 
   void _onPosition(Position p) {
     final r = _rec;
-    if (r == null) return;
+    if (r == null || r.indoor) return;
     _lastFixAt = DateTime.now();
     final before = r.status;
     r.heartRate = HeartRateService.instance.bpm.value;
@@ -186,9 +272,18 @@ class RunRecorderService {
         accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null, altitude: p.altitude == 0 ? null : p.altitude));
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
     if (before == RecorderStatus.autoPaused && r.status == RecorderStatus.running) _say('Verder.');
-    // Tijdens intervallen geen lange kilometer-melding, die zit de aanwijzingen in de weg.
-    if (km != null && _intervals == null) _say(kmAnnouncement(r, km));
     if (km != null) _buzz(const [0, 180, 140, 180]);
+    if (r.status == RecorderStatus.running) {
+      _sayCue(r);
+      final coach = _coach;
+      if (coach != null && (_intervals == null || _intervals!.finished)) {
+        final c = coach.update(r.movingSeconds, r.currentPace);
+        if (c != null) {
+          _say(c);
+          _buzz(const [0, 90, 90, 90]);
+        }
+      }
+    }
     _position = LatLng(p.latitude, p.longitude);
     _checkIntervals();
     if (shareLive && r.isActive) LiveShareService.instance.feed(p);
@@ -277,6 +372,7 @@ class RunRecorderService {
       intervalsDone: it?.finished ?? false,
       heartRate: HeartRateService.instance.bpm.value,
       hrStatus: HeartRateService.instance.status.value,
+      indoor: r.indoor,
     );
   }
 
@@ -292,10 +388,39 @@ class RunRecorderService {
     if (r != null && r.distance > 0) _say('Run gestopt. ${(r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',')} kilometer.');
     view.value = const RecorderView(status: RecorderStatus.finished);
     HeartRateService.instance.disconnect().catchError((Object _) {});
+    RecordingStore.clear().ignore();
+    NotificationService.instance.cancelRunProgress().ignore();
+    _cues = null;
+    _coach = null;
     _rec = null;
     _intervals = null;
     _position = null;
     return r;
+  }
+
+  /// Een onderbroken run terugzetten (op pauze), zodat je verder kunt lopen of hem kunt opslaan.
+  Future<void> restore(RunRecording r, {bool voice = true}) async {
+    await _sub?.cancel();
+    _sub = null;
+    _rec = r;
+    this.voice = voice;
+    _cues = CueScheduler(const CueSettings());
+    try {
+      await _ensurePermission();
+      _listen(indoor: r.indoor);
+    } catch (_) {
+      _tick?.cancel();
+      _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
+    }
+    if (voice) {
+      _tts ??= FlutterTts();
+      try {
+        await _tts!.setLanguage('nl-NL');
+        await _tts!.setQueueMode(1);
+        await _tts!.setAudioAttributesForNavigation();
+      } catch (_) {}
+    }
+    view.value = _snapshot();
   }
 
   /// Annuleert zonder op te slaan.

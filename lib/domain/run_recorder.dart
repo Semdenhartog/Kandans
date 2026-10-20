@@ -33,9 +33,12 @@ class RunSample {
 /// Houdt een run bij: afstand, bewegende tijd, automatisch pauzeren en kilometertijden.
 /// Bevat geen GPS of timers zelf, zodat het goed te testen is.
 class RunRecording {
-  RunRecording({this.autoPause = true});
+  RunRecording({this.autoPause = true, this.indoor = false});
 
   final bool autoPause;
+
+  /// Loopband of binnen: geen GPS, alleen de klok. De afstand vul je na afloop in.
+  final bool indoor;
 
   RecorderStatus status = RecorderStatus.idle;
   DateTime? startedAt;
@@ -168,6 +171,67 @@ class RunRecording {
       return km;
     }
     return null;
+  }
+
+  /// Loopband: de klok loopt door zolang je niet op pauze staat.
+  void tick(double seconds) {
+    if (!indoor || status != RecorderStatus.running) return;
+    movingSeconds += seconds;
+  }
+
+  /// Loopband: afstand na afloop invullen.
+  void setIndoorDistance(double meters) {
+    if (!indoor) return;
+    distance = meters;
+  }
+
+  /// Tussenstand om op te slaan, zodat een run niet verloren gaat als de app wordt afgesloten.
+  Map<String, dynamic> toSnapshot() => {
+        'v': 1,
+        'indoor': indoor,
+        'auto': autoPause,
+        'started': startedAt?.toIso8601String(),
+        'dist': distance,
+        'moving': movingSeconds,
+        'km': kmTimes,
+        'hrSum': _hrSum,
+        'hrN': _hrCount,
+        'track': [for (final p in track) [p.lat, p.lon]],
+        'samples': [
+          for (final x in samples) [x.t, x.d, x.point.lat, x.point.lon, x.alt, x.hr],
+        ],
+        'saved': DateTime.now().toIso8601String(),
+      };
+
+  /// Een onderbroken run terughalen. Staat daarna op pauze.
+  static RunRecording? fromSnapshot(Object? j) {
+    if (j is! Map || j['v'] != 1) return null;
+    try {
+      final r = RunRecording(autoPause: j['auto'] as bool? ?? true, indoor: j['indoor'] as bool? ?? false);
+      r.startedAt = j['started'] == null ? null : DateTime.parse(j['started'] as String);
+      r.distance = (j['dist'] as num).toDouble();
+      r.movingSeconds = (j['moving'] as num).toDouble();
+      r.kmTimes.addAll([for (final k in j['km'] as List) (k as num).toDouble()]);
+      r._hrSum = (j['hrSum'] as num?)?.toInt() ?? 0;
+      r._hrCount = (j['hrN'] as num?)?.toInt() ?? 0;
+      for (final p in j['track'] as List) {
+        r.track.add(LatLng(((p as List)[0] as num).toDouble(), (p[1] as num).toDouble()));
+      }
+      for (final x in j['samples'] as List) {
+        final l = x as List;
+        r.samples.add(RunSample(
+          (l[0] as num).toDouble(),
+          (l[1] as num).toDouble(),
+          LatLng((l[2] as num).toDouble(), (l[3] as num).toDouble()),
+          alt: (l[4] as num?)?.toDouble(),
+          hr: (l[5] as num?)?.toInt(),
+        ));
+      }
+      r.status = RecorderStatus.paused;
+      return r;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Gemiddeld tempo (s/km).

@@ -20,6 +20,7 @@ import '../../domain/geo.dart';
 import '../../domain/heart_rate.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
+import '../../domain/run_coach.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
@@ -47,6 +48,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _locked = false;
   bool _haptics = true;
   bool _batteryDone = true;
+  bool _indoor = false;
+  double? _targetPace;
+  CueSettings _cues = const CueSettings();
+  String? _shoeId;
+  bool _shoeChosen = false;
   String? _error;
   IntervalPlan? _plan;
   final _pages = PageController();
@@ -61,6 +67,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (mounted) {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
+          _indoor = p.getBool('rec_indoor') ?? false;
+          final tp = p.getDouble('rec_target_pace');
+          _targetPace = tp == null || tp <= 0 ? null : tp;
+          try {
+            final c = p.getString('rec_cues');
+            if (c != null) _cues = CueSettings.fromJson(jsonDecode(c));
+          } catch (_) {}
           _batteryDone = !Platform.isAndroid || (p.getBool('battery_explained') ?? false);
         });
       }
@@ -88,7 +101,16 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   Future<void> _start() async {
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
-      await _svc.start(voice: _voice, shareLive: _share, name: name == 'loper' ? '' : name, intervals: _plan, haptics: _haptics);
+      await _svc.start(
+        voice: _voice,
+        shareLive: _share,
+        name: name == 'loper' ? '' : name,
+        intervals: _plan,
+        haptics: _haptics,
+        indoor: _indoor,
+        cues: _cues,
+        targetPace: _targetPace,
+      );
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
     }
@@ -157,7 +179,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   Future<void> _stop() async {
     final ok = await confirmDialog(context, title: 'Run stoppen?', message: 'Je run wordt opgeslagen.');
     if (!ok) return;
+    double? indoorMeters;
+    if (_svc.recording?.indoor ?? false) {
+      indoorMeters = await _askDistance();
+      if (indoorMeters == null) return; // Toch nog niet stoppen.
+    }
     final rec = await _svc.stop();
+    if (indoorMeters != null) rec?.setIndoorDistance(indoorMeters);
     if (rec == null || rec.distance < 200 || rec.movingSeconds < 60) {
       if (mounted) {
         showMessage(context, 'Te kort om op te slaan (minder dan 200 m of 1 minuut).');
@@ -166,6 +194,174 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       return;
     }
     await _save(rec);
+  }
+
+  /// Loopband: afstand van het display van de loopband invullen.
+  Future<double?> _askDistance() async {
+    final c = TextEditingController();
+    final km = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hoe ver liep je?'),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(labelText: 'Afstand in km (van de loopband)', hintText: 'bijv. 5,2'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Terug')),
+          FilledButton(
+            onPressed: () {
+              final v = double.tryParse(c.text.trim().replaceAll(',', '.'));
+              if (v != null && v > 0 && v < 100) Navigator.pop(ctx, v);
+            },
+            child: const Text('Opslaan'),
+          ),
+        ],
+      ),
+    );
+    c.dispose();
+    return km == null ? null : km * 1000;
+  }
+
+  Future<void> _chooseTargetPace() async {
+    var sec = (_targetPace ?? 330).round();
+    final result = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Doeltempo', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                const Text('De stem zegt het als je langer dan 20 seconden meer dan 15 s/km te snel of te langzaam gaat.',
+                    style: TextStyle(color: RwColors.muted, height: 1.4)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(onPressed: () => set(() => sec = (sec - 5).clamp(180, 600)), icon: const Icon(Icons.remove_circle_outline)),
+                    Text(Fmt.pace(sec), style: const TextStyle(fontFamily: RwFonts.display, fontSize: 34, fontWeight: FontWeight.w800)),
+                    IconButton(onPressed: () => set(() => sec = (sec + 5).clamp(180, 600)), icon: const Icon(Icons.add_circle_outline)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, 0), child: const Text('Geen doeltempo'))),
+                    const SizedBox(width: 12),
+                    Expanded(child: FilledButton(onPressed: () => Navigator.pop(ctx, sec), child: const Text('Gebruiken'))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (result == null) return;
+    setState(() => _targetPace = result == 0 ? null : result.toDouble());
+    final p = await SharedPreferences.getInstance();
+    await p.setDouble('rec_target_pace', result.toDouble());
+  }
+
+  Future<void> _chooseCues() async {
+    var c = _cues;
+    final result = await showModalBottomSheet<CueSettings>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Stemcoach', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final e in CueEvery.values)
+                      ChoiceChip(label: Text(e.label), selected: c.every == e, onSelected: (_) => set(() => c = c.copyWith(every: e))),
+                  ],
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Tempo van het laatste stuk'),
+                  value: c.lap,
+                  onChanged: (v) => set(() => c = c.copyWith(lap: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Gemiddeld tempo'),
+                  value: c.average,
+                  onChanged: (v) => set(() => c = c.copyWith(average: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Totale tijd'),
+                  value: c.total,
+                  onChanged: (v) => set(() => c = c.copyWith(total: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Hartslag (met hartslagband)'),
+                  value: c.heartRate,
+                  onChanged: (v) => set(() => c = c.copyWith(heartRate: v)),
+                ),
+                const SizedBox(height: 8),
+                FilledButton(onPressed: () => Navigator.pop(ctx, c), child: const Text('Klaar')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (result == null) return;
+    setState(() => _cues = result);
+    final p = await SharedPreferences.getInstance();
+    await p.setString('rec_cues', jsonEncode(result.toJson()));
+  }
+
+  Future<void> _chooseShoe(List<Shoe> shoes) async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final s in shoes.where((s) => !s.retired))
+              ListTile(
+                leading: const Icon(Icons.directions_run),
+                title: Text(s.name),
+                subtitle: Text('${shoeKm(s, ref.read(activitiesProvider).value ?? const <Activity>[]).round()} km'),
+                trailing: s.id == (_shoeChosen ? _shoeId : defaultShoe(shoes)?.id) ? const Icon(Icons.check, color: RwColors.accent) : null,
+                onTap: () => Navigator.pop(ctx, s.id),
+              ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: const Text('Geen schoen'),
+              onTap: () => Navigator.pop(ctx, ''),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _shoeChosen = true;
+      _shoeId = picked.isEmpty ? null : picked;
+    });
   }
 
   Future<void> _save(RunRecording rec) async {
@@ -200,7 +396,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         windDirectionDegrees: w?.windDirection,
         humidityPct: w?.humidity,
         trackPolyline: track.length >= 2 ? encodePolyline(track) : '',
-        shoeId: defaultShoe(shoes)?.id,
+        shoeId: _shoeChosen ? _shoeId : defaultShoe(shoes)?.id,
       );
       final id = await repo.addActivityReturningId(activity);
       if (streamsJson != null) {
@@ -247,6 +443,33 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     }
   }
 
+  /// Voor de start: compact, zodat alle opties passen (ook op een klein scherm).
+  Widget _preStats(RecorderView v) {
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(_indoor ? Icons.fitness_center : Icons.directions_run, size: 56, color: RwColors.accent),
+            const SizedBox(height: 8),
+            Text(
+              _indoor ? 'Klaar voor de loopband' : (v.gpsReady ? 'Klaar voor de start' : 'GPS zoeken…'),
+              style: const TextStyle(fontFamily: RwFonts.display, fontSize: 26, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _indoor
+                  ? 'De klok loopt; na afloop vul je de afstand in.'
+                  : 'Kies je opties en druk op Start. Je scherm mag uit.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: RwColors.muted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _stats(RecorderView v) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -256,6 +479,20 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _IntervalPanel(view: v, onSkip: _locked ? null : _svc.skipStep),
         ],
         const Spacer(),
+        if (v.indoor || (!_svc.isRecording && _indoor)) ...[
+          Text(
+            Fmt.duration(v.movingSeconds),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontFamily: RwFonts.display, fontSize: 80, fontWeight: FontWeight.w800, height: 1),
+          ),
+          const Text('loopband · de afstand vul je na afloop in',
+              textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
+          if (v.heartRate != null || v.hrStatus == HrStatus.connecting || v.hrStatus == HrStatus.lost) ...[
+            const SizedBox(height: 18),
+            _HeartRow(view: v),
+          ],
+          const Spacer(),
+        ] else ...[
         Semantics(
           label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
           child: Text(
@@ -278,6 +515,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _HeartRow(view: v),
         ],
         const Spacer(),
+        ],
       ],
     );
   }
@@ -288,10 +526,23 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       valueListenable: _svc.view,
       builder: (context, v, _) {
         final started = v.status != RecorderStatus.idle && v.status != RecorderStatus.finished;
+        final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
         final controls = !started
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  SegmentedButton<bool>(
+                    showSelectedIcon: false,
+                    segments: const [
+                      ButtonSegment(value: false, icon: Icon(Icons.terrain_outlined), label: Text('Buiten')),
+                      ButtonSegment(value: true, icon: Icon(Icons.fitness_center), label: Text('Loopband')),
+                    ],
+                    selected: {_indoor},
+                    onSelectionChanged: (x) {
+                      setState(() => _indoor = x.first);
+                      SharedPreferences.getInstance().then((p) => p.setBool('rec_indoor', x.first)).ignore();
+                    },
+                  ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.timer_outlined, color: RwColors.accent),
@@ -331,21 +582,43 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           SharedPreferences.getInstance().then((p) => p.setBool('rec_haptics', x)).ignore();
                         },
                       ),
-                      FilterChip(
-                        avatar: const Icon(Icons.share_location_outlined, size: 18),
-                        label: const Text('Live delen'),
-                        tooltip: 'Iemand thuis kan meekijken via een link',
-                        selected: _share,
-                        onSelected: (x) => setState(() => _share = x),
+                      if (!_indoor)
+                        FilterChip(
+                          avatar: const Icon(Icons.share_location_outlined, size: 18),
+                          label: const Text('Live delen'),
+                          tooltip: 'Iemand thuis kan meekijken via een link',
+                          selected: _share,
+                          onSelected: (x) => setState(() => _share = x),
+                        ),
+                      ActionChip(
+                        avatar: const Icon(Icons.tune, size: 18),
+                        label: Text('Stem: ${_cues.every.label.toLowerCase()}'),
+                        onPressed: _chooseCues,
                       ),
+                      if (!_indoor)
+                        ActionChip(
+                          avatar: const Icon(Icons.speed, size: 18),
+                          label: Text(_targetPace == null ? 'Doeltempo' : 'Doel ${Fmt.pace(_targetPace!)}'),
+                          onPressed: _chooseTargetPace,
+                        ),
+                      if (shoes.isNotEmpty)
+                        ActionChip(
+                          avatar: const Icon(Icons.directions_run, size: 18),
+                          label: Text(() {
+                            final id = _shoeChosen ? _shoeId : defaultShoe(shoes)?.id;
+                            final name = shoes.where((x) => x.id == id).map((x) => x.name).firstOrNull;
+                            return name == null ? 'Geen schoen' : name;
+                          }()),
+                          onPressed: () => _chooseShoe(shoes),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(64)),
-                    onPressed: _error != null && !v.gpsReady ? null : _start,
+                    onPressed: !_indoor && _error != null && !v.gpsReady ? null : _start,
                     icon: const Icon(Icons.play_arrow, size: 30),
-                    label: Text(v.gpsReady ? 'Start' : 'Start (GPS zoekt nog)', style: const TextStyle(fontSize: 18)),
+                    label: Text(_indoor || v.gpsReady ? 'Start' : 'Start (GPS zoekt nog)', style: const TextStyle(fontSize: 18)),
                   ),
                 ],
               )
@@ -405,7 +678,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     _StatusBar(view: v, error: _error),
                     Expanded(
                       child: !started
-                          ? _stats(v)
+                          ? _preStats(v)
                           : AbsorbPointer(
                               absorbing: _locked,
                               child: Column(
