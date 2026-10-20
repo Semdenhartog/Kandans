@@ -35,6 +35,17 @@ jobs:
       - name: Flutter-versie
         run: flutter --version
 
+      - name: RevenueCat-sleutel invullen (uit GitHub Secrets, als die er is)
+        env:
+          RC_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+        run: |
+          if [ -n "$RC_KEY" ]; then
+            python3 -c "import json,os; p='app_config.json'; d=json.load(open(p)); d['REVENUECAT_ANDROID_KEY']=os.environ['RC_KEY']; json.dump(d, open(p,'w'), indent=2)"
+            echo "::notice::RevenueCat-sleutel ingevuld: Premium kan gekocht worden"
+          else
+            echo "::warning::Geen REVENUECAT_ANDROID_KEY in GitHub Secrets: Premium kopen werkt nog niet"
+          fi
+
       - name: Android-projectbestanden aanmaken
         run: |
           set -o pipefail
