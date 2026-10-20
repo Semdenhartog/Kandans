@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase.dart';
 import '../models/models.dart';
+import '../services/elevation_service.dart';
 import '../services/offline_cache.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/run_streams.dart';
@@ -195,6 +196,18 @@ class RunWiseRepository {
       'streams': streams,
       if (bestEfforts != null) 'best_efforts': bestEfforts,
     }).eq('id', id);
+  }
+
+  Future<void> setActivityElevation(String id, Map<String, dynamic> streams, double gain) async {
+    await _db.from('activities').update({'streams': streams, 'elevation_gain_meters': double.parse(gain.toStringAsFixed(1))}).eq('id', id);
+  }
+
+  /// Hoogte van een run verbeteren met de hoogtekaart (op de achtergrond, fouten zijn niet erg).
+  Future<void> improveElevation(String id, Map<String, dynamic> streams) async {
+    try {
+      final r = await ElevationService().correct(streams);
+      if (r != null) await setActivityElevation(id, r.streams, r.gain);
+    } catch (_) {}
   }
 
   Future<void> setActivityBestEfforts(String id, Map<String, double> bestEfforts) async {

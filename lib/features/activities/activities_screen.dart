@@ -129,6 +129,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
       await repo
           .setActivityStreams(id, run.streams, bestEfforts: streams == null ? null : bestEffortsToJson(bestEfforts(streams)))
           .catchError((Object _) {});
+      if (run.track.isNotEmpty && run.elevationGain == null) repo.improveElevation(id, run.streams).ignore();
       ref.invalidate(activitiesProvider);
       await ref.read(syncServiceProvider).autoLinkRuns().catchError((_) => 0);
       if (!mounted) return;

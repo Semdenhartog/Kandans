@@ -36,6 +36,7 @@ import 'package:runwise/domain/run_coach.dart';
 import 'package:runwise/domain/run_file_import.dart';
 import 'package:runwise/domain/training_load.dart';
 import 'package:runwise/domain/training_plan.dart';
+import 'package:runwise/domain/zones.dart';
 
 HourWeather hour(DateTime t,
         {double temp = 12, double wind = 5, double dir = 270, double rain = 0, bool day = true}) =>
@@ -1229,6 +1230,48 @@ void main() {
       final now = DateTime(2026, 10, 21, 12);
       expect(recoveryHours([(end: DateTime(2026, 10, 21, 8), load: 100.0)], now), closeTo(41, 0.1));
       expect(recoveryHours([(end: DateTime(2026, 10, 18, 8), load: 100.0)], now), 0);
+    });
+  });
+
+  group('zones, hoogte en tempoplan', () {
+    test('tijd in hartslag- en tempozones', () {
+      final t = [for (var i = 0; i <= 600; i++) i.toDouble()];
+      final d = [for (var i = 0; i <= 600; i++) i * 3.0];
+      final hr = [for (var i = 0; i <= 600; i++) i < 300 ? 120.0 : 165.0];
+      final s = RunStreams(time: t, distance: d, heartRate: hr);
+      final z = heartRateZoneTimes(s, 190)!;
+      expect(z.seconds[1], closeTo(300, 2)); // 120/190 = 63% -> zone 2
+      expect(z.seconds[3], closeTo(300, 2)); // 165/190 = 87% -> zone 4
+      final p = paceZoneTimes(RunStreams(time: t, distance: d), 300)!;
+      // 333 s/km / 300 = 1,11 -> zone 3 (duurtempo)
+      expect(p.seconds[2], greaterThan(p.total * 0.9));
+    });
+
+    test('hoogte verdelen en hoogtemeters', () {
+      final d = [for (var i = 0; i <= 100; i++) i * 10.0];
+      final idx = elevationSampleIndices(d, every: 100);
+      expect(idx.first, 0);
+      expect(idx.last, 100);
+      expect(idx.length, 11);
+      final ele = [for (var k = 0; k < idx.length; k++) k.isEven ? 10.0 : 15.0];
+      final alt = interpolateElevation(d, idx, ele);
+      expect(alt[5], closeTo(12.5, 0.01));
+      expect(elevationGain(alt), closeTo(25, 0.5));
+      expect(elevationGain([10, 11, 10, 11, 10]), 0);
+    });
+
+    test('tempoplan komt precies op de doeltijd uit', () {
+      for (final st in PacingStrategy.values) {
+        final plan = pacingPlan(10000, 50 * 60, st);
+        expect(plan.length, 10);
+        expect(plan.last.cumulative, closeTo(3000, 0.01));
+      }
+      final neg = pacingPlan(10000, 3000, PacingStrategy.negative);
+      expect(neg.first.pace, greaterThan(neg.last.pace));
+      final half = pacingPlan(21097.5, 6600, PacingStrategy.even);
+      expect(half.length, 22);
+      expect(half.last.meters, closeTo(97.5, 0.01));
+      expect(half.first.pace, closeTo(half.last.pace, 0.01));
     });
   });
 }

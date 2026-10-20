@@ -12,6 +12,7 @@ import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/race_forecast.dart';
 import '../../domain/start_time_scoring.dart';
+import '../../domain/zones.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 
@@ -205,6 +206,8 @@ class _AdviceView extends StatelessWidget {
         const SizedBox(height: 12),
         _AdviceCard(icon: Icons.speed, title: 'Tempo', text: advice.pacing),
         const SizedBox(height: 12),
+        _PacingCard(race: race),
+        const SizedBox(height: 12),
         _AdviceCard(icon: Icons.checkroom_outlined, title: 'Kleding', text: advice.clothing),
         const SizedBox(height: 12),
         _AdviceCard(icon: Icons.water_drop_outlined, title: 'Drinken en energie', text: advice.hydration),
@@ -265,4 +268,64 @@ class _AdviceCard extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Tempoplan: tijd per kilometer om precies op je doeltijd uit te komen.
+class _PacingCard extends StatefulWidget {
+  const _PacingCard({required this.race});
+  final RaceEvent race;
+
+  @override
+  State<_PacingCard> createState() => _PacingCardState();
+}
+
+class _PacingCardState extends State<_PacingCard> {
+  PacingStrategy _strategy = PacingStrategy.easyStart;
+  bool _all = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.race;
+    final plan = pacingPlan(r.distanceMeters, r.goalTimeSeconds, _strategy);
+    if (plan.isEmpty) return const SizedBox.shrink();
+    final shown = _all || plan.length <= 12 ? plan : [...plan.take(5), ...plan.skip(plan.length - 3)];
+    return RwCard(
+      title: 'TEMPOPLAN PER KM',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedButton<PacingStrategy>(
+            showSelectedIcon: false,
+            segments: [for (final p in PacingStrategy.values) ButtonSegment(value: p, label: Text(p.label, style: const TextStyle(fontSize: 12)))],
+            selected: {_strategy},
+            onSelectionChanged: (x) => setState(() => _strategy = x.first),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            switch (_strategy) {
+              PacingStrategy.even => 'Elke kilometer even snel. Simpel, maar zwaar als je te snel start.',
+              PacingStrategy.negative => 'Eerste helft iets rustiger, tweede helft iets sneller. Vaak het snelst.',
+              PacingStrategy.easyStart => 'De eerste 2 km rustiger (in de drukte), daarna op doeltempo.',
+            },
+            style: const TextStyle(color: RwColors.muted, fontSize: 13),
+          ),
+          const SizedBox(height: 10),
+          for (final (i, sp) in shown.indexed) ...[
+            if (!_all && plan.length > 12 && i == 5)
+              const Padding(padding: EdgeInsets.symmetric(vertical: 2), child: Text('…', style: TextStyle(color: RwColors.subtle))),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(children: [
+                SizedBox(width: 56, child: Text(sp.meters < 999 ? '${(sp.km - 1 + sp.meters / 1000).toStringAsFixed(1).replaceAll('.', ',')}' : 'km ${sp.km}', style: const TextStyle(color: RwColors.subtle))),
+                Expanded(child: Text(Fmt.pace(sp.pace), style: const TextStyle(fontWeight: FontWeight.w700))),
+                Text(Fmt.duration(sp.cumulative.round()), style: const TextStyle(color: RwColors.muted)),
+              ]),
+            ),
+          ],
+          if (plan.length > 12)
+            TextButton(onPressed: () => setState(() => _all = !_all), child: Text(_all ? 'Minder tonen' : 'Alle ${plan.length} km tonen')),
+        ],
+      ),
+    );
+  }
 }

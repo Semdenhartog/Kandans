@@ -458,6 +458,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         await repo
             .setActivityStreams(id, streamsJson, bestEfforts: bestEffortsToJson(efforts))
             .catchError((Object _) {}); // Het verloop is een extraatje; de run zelf staat er al.
+        // Hoogte verbeteren met de hoogtekaart (op de achtergrond).
+        if (!rec.indoor) repo.improveElevation(id, streamsJson).then((_) => ref.invalidate(activitiesProvider)).ignore();
       }
       final sync = ref.read(syncServiceProvider);
       final written = await sync.writeRunToHealth(activity);

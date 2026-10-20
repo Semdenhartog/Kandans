@@ -6,9 +6,12 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/heart_rate_service.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_streams.dart';
+import '../../domain/training_load.dart';
+import '../../domain/zones.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show windColor;
 
@@ -74,6 +77,7 @@ class SplitsCard extends ConsumerWidget {
               Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met RunWise' }}. Wind = het weer bij de start van je run.',
                   style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
               ..._efforts(s, ref),
+              ..._zones(s, ref),
             ],
           );
         },
@@ -112,6 +116,52 @@ class SplitsCard extends ConsumerWidget {
             ],
           ),
         ),
+    ];
+  }
+
+  static const _zoneColors = [Color(0xFF8D8D98), Color(0xFF5AA9FF), RwColors.good, RwColors.warning, RwColors.danger];
+
+  /// Hoeveel tijd je in elke zone liep (hartslag als die er is, anders tempo).
+  List<Widget> _zones(RunStreams s, WidgetRef ref) {
+    final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final z = heartRateZoneTimes(s, HeartRateService.instance.maxHr.value) ?? paceZoneTimes(s, estimateThresholdPace(all));
+    if (z == null) return const [];
+    final total = z.total;
+    return [
+      const Divider(height: 28),
+      Text('TIJD IN ZONES · ${z.byHeartRate ? 'HARTSLAG' : 'TEMPO'}', style: _head),
+      const SizedBox(height: 10),
+      Semantics(
+        label: [for (var i = 0; i < 5; i++) '${z.names[i]} ${Fmt.duration(z.seconds[i])}'].join(', '),
+        excludeSemantics: true,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 14,
+            child: Row(children: [
+              for (var i = 0; i < 5; i++)
+                if (z.seconds[i] > 0) Expanded(flex: (z.seconds[i] / total * 1000).round().clamp(1, 1000), child: Container(color: _zoneColors[i])),
+            ]),
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      for (var i = 4; i >= 0; i--)
+        if (z.seconds[i] >= 30)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(children: [
+              Container(width: 10, height: 10, decoration: BoxDecoration(color: _zoneColors[i], shape: BoxShape.circle)),
+              const SizedBox(width: 8),
+              SizedBox(width: 30, child: Text('Z${i + 1}', style: const TextStyle(color: RwColors.subtle))),
+              Expanded(child: Text(z.names[i])),
+              Text(Fmt.duration(z.seconds[i]), style: const TextStyle(fontWeight: FontWeight.w600)),
+              SizedBox(
+                width: 44,
+                child: Text('${(z.seconds[i] / total * 100).round()}%', textAlign: TextAlign.right, style: const TextStyle(color: RwColors.muted)),
+              ),
+            ]),
+          ),
     ];
   }
 
