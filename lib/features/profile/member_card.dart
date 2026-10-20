@@ -115,8 +115,8 @@ class _MemberCardState extends State<MemberCard> {
                     ),
               border: Border.all(color: gold ? const Color(0x66FFFFFF) : const Color(0x1FFFFFFF)),
               boxShadow: [
-                BoxShadow(color: (gold ? const Color(0xFFD4AF37) : RwColors.accent).withValues(alpha: 0.18), blurRadius: 30, offset: const Offset(0, 14)),
-                BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 16, offset: const Offset(0, 8)),
+                BoxShadow(color: (gold ? const Color(0xFFD4AF37) : RwColors.accent).withValues(alpha: 0.10), blurRadius: 40, spreadRadius: -6),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.45), blurRadius: 28, spreadRadius: -8, offset: const Offset(0, 12)),
               ],
             ),
             child: ClipRRect(
@@ -225,7 +225,7 @@ class _CardArt extends CustomPainter {
     final p = Path();
     for (var i = 0; i <= 60; i++) {
       final x = i / 60 * size.width;
-      final y = size.height * (0.52 + 0.08 * math.sin(i * 0.31) + 0.05 * math.sin(i * 0.9 + 1) - 0.12 * math.exp(-math.pow((i - 38) / 7, 2)));
+      final y = size.height * (0.44 + 0.04 * math.sin(i * 0.31) + 0.025 * math.sin(i * 0.9 + 1) - 0.07 * math.exp(-math.pow((i - 38) / 7, 2)));
       i == 0 ? p.moveTo(x, y) : p.lineTo(x, y);
     }
     canvas.drawPath(

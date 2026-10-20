@@ -218,11 +218,12 @@ class _RouteBackdrop extends CustomPainter {
   Path _route(Size s) {
     final w = s.width, h = s.height;
     return Path()
-      ..moveTo(w * 0.08, h * 0.86)
-      ..cubicTo(w * 0.30, h * 0.92, w * 0.18, h * 0.62, w * 0.42, h * 0.60)
-      ..cubicTo(w * 0.70, h * 0.58, w * 0.95, h * 0.70, w * 0.88, h * 0.46)
-      ..cubicTo(w * 0.80, h * 0.20, w * 0.48, h * 0.34, w * 0.36, h * 0.18)
-      ..cubicTo(w * 0.26, h * 0.05, w * 0.62, h * 0.02, w * 0.80, h * 0.08);
+      // Blijft buiten de tekstband in het midden: onderlangs, rechts omhoog, bovenlangs.
+      ..moveTo(w * 0.04, h * 0.84)
+      ..cubicTo(w * 0.20, h * 0.70, w * 0.55, h * 0.78, w * 0.80, h * 0.71)
+      ..cubicTo(w * 1.02, h * 0.64, w * 0.98, h * 0.42, w * 0.93, h * 0.30)
+      ..cubicTo(w * 0.86, h * 0.12, w * 0.55, h * 0.18, w * 0.40, h * 0.10)
+      ..cubicTo(w * 0.28, h * 0.04, w * 0.12, h * 0.10, w * 0.06, h * 0.20);
   }
 
   @override

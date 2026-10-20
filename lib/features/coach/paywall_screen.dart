@@ -195,10 +195,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           const SizedBox(height: 16),
           if (billing.isAvailable)
             TextButton(
+              style: TextButton.styleFrom(foregroundColor: _gold),
               onPressed: _busy ? null : _restore,
               child: const Text('Aankoop terugzetten'),
             ),
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: _gold),
             onPressed: () => launchUrl(
               Uri.parse('https://play.google.com/store/account/subscriptions'),
               mode: LaunchMode.externalApplication,
@@ -206,6 +208,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             child: const Text('Abonnement beheren in Google Play'),
           ),
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: _gold),
             onPressed: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
             child: const Text('Privacyverklaring'),
           ),

@@ -369,7 +369,10 @@ class ActivityDetailScreen extends ConsumerWidget {
               collapseMode: CollapseMode.parallax,
               stretchModes: const [StretchMode.zoomBackground],
               background: Stack(fit: StackFit.expand, children: [
-                RouteMap(
+                Padding(
+                  // Ruimte voor titel en knoppen, zodat ze niet over de kaartknoppen vallen.
+                  padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + kToolbarHeight - 6),
+                  child: RouteMap(
                   polyline: a.trackPolyline!,
                   windSpeedKmh: a.windSpeedKmh,
                   windFromDegrees: a.windDirectionDegrees,
@@ -377,6 +380,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                   interactive: false,
                   showLayerToggle: false,
                   animateIn: true,
+                  ),
                 ),
                 const IgnorePointer(
                   child: DecoratedBox(
