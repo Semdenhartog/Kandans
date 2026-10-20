@@ -205,7 +205,7 @@ class _FitnessPainter extends CustomPainter {
     for (var i = 0; i < days.length; i++) {
       if (days[i].day.day != 1) continue;
       final tp = TextPainter(
-        text: TextSpan(text: months[days[i].day.month - 1], style: const TextStyle(color: RwColors.subtle, fontSize: 10)),
+        text: TextSpan(text: months[days[i].day.month - 1], style: const TextStyle(fontFamily: RwFonts.body, color: RwColors.subtle, fontSize: 10)),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset((x(i) - tp.width / 2).clamp(0, size.width - tp.width), h + 3));

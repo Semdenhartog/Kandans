@@ -68,9 +68,43 @@ ThemeData buildTheme() {
         .apply(bodyColor: RwColors.text, displayColor: RwColors.text),
     appBarTheme: const AppBarTheme(
       backgroundColor: RwColors.background,
+      surfaceTintColor: Colors.transparent,
       foregroundColor: RwColors.text,
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: false,
+      titleTextStyle: TextStyle(
+        fontFamily: RwFonts.display,
+        fontWeight: FontWeight.w800,
+        fontSize: 24,
+        color: RwColors.text,
+        letterSpacing: -0.3,
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      iconColor: RwColors.muted,
+      titleTextStyle: TextStyle(fontFamily: RwFonts.body, fontSize: 16, fontWeight: FontWeight.w600, color: RwColors.text),
+      subtitleTextStyle: TextStyle(fontFamily: RwFonts.body, fontSize: 13, color: RwColors.subtle, height: 1.35),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: RwColors.surfaceHigh,
+      selectedColor: RwColors.accent,
+      side: const BorderSide(color: RwColors.border),
+      labelStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.text),
+      secondaryLabelStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.accentDark),
+      shape: const StadiumBorder(),
+      showCheckmark: false,
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        textStyle: WidgetStateProperty.all(const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: RwColors.accent,
+        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, fontSize: 15),
+      ),
     ),
     cardTheme: CardThemeData(
       color: RwColors.surface,
@@ -91,9 +125,15 @@ ThemeData buildTheme() {
               : RwColors.muted,
         ),
       ),
-      labelTextStyle: WidgetStateProperty.all(
-        const TextStyle(fontSize: 12, color: RwColors.muted),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => TextStyle(
+          fontFamily: RwFonts.body,
+          fontSize: 12,
+          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
+          color: states.contains(WidgetState.selected) ? RwColors.text : RwColors.muted,
+        ),
       ),
+      height: 68,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -119,7 +159,7 @@ ThemeData buildTheme() {
         foregroundColor: RwColors.accentDark,
         minimumSize: const Size.fromHeight(52),
         shape: const StadiumBorder(),
-        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, fontSize: 16),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -128,16 +168,20 @@ ThemeData buildTheme() {
         minimumSize: const Size.fromHeight(52),
         shape: const StadiumBorder(),
         side: const BorderSide(color: RwColors.border, width: 1.5),
+        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: RwColors.accent,
       foregroundColor: RwColors.accentDark,
+      elevation: 2,
+      highlightElevation: 4,
+      extendedTextStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 16),
     ),
     snackBarTheme: const SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: RwColors.surfaceHigh,
-      contentTextStyle: TextStyle(color: RwColors.text),
+      contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: RwColors.text),
     ),
     dividerTheme: const DividerThemeData(color: RwColors.border),
   );

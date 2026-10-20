@@ -3,7 +3,6 @@ enum DashCard {
   warnings('Waarschuwingen', 'Onweer, hitte, gladheid, lucht en pollen'),
   clothing('Aantrekken', 'Kledingadvies voor het gekozen moment'),
   rain('Buien komende 2 uur', 'Live van Buienradar'),
-  now('Nu vertrekken', 'Vergelijking met het beste moment'),
   hours('Per uur', 'De loopomstandigheden per uur'),
   routeWind('Wind op je route', 'Alleen als je een route kiest'),
   planner('Weekplanner', 'De beste momenten deze week'),

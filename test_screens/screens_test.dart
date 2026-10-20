@@ -148,7 +148,7 @@ final _runs = () {
       trackPolyline: route.polyline,
       feel: 1 + rnd.nextInt(3),
       bestEfforts: {'1000': pace * 0.92, '5000': pace * 5 * 0.97, if (km >= 10) '10000': pace * 10},
-      aiSummary: d == 1
+      aiSummary: out.isEmpty
           ? 'Mooi gelijkmatig gelopen: je laatste kilometers waren zelfs iets sneller dan de eerste. '
               'De wind uit het zuidwesten kostte je op de terugweg zo\'n 8 seconden per km. '
               'Deze run past goed in je opbouw van deze week. Tip: houd je volgende rustige run echt rustig, onder 145 hartslag.'
@@ -239,7 +239,7 @@ List<Override> _overrides() => [
       healthStatusProvider.overrideWith((ref) => HealthStatus.connected),
       stravaConnectionProvider.overrideWith((ref) => null),
       monthlyGoalProvider.overrideWith((ref) => 120.0),
-      activityStreamsProvider('a1').overrideWith((ref) => _streams),
+      activityStreamsProvider(_runs.first.id!).overrideWith((ref) => _streams),
     ];
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen, {double height = 2400, bool nav = false}) async {
@@ -295,10 +295,10 @@ void main() {
     await _loadFonts();
   });
 
-  testWidgets('01 vandaag', (t) => _shot(t, '01_vandaag', const DashboardScreen(), height: 3800, nav: true));
+  testWidgets('01 vandaag', (t) => _shot(t, '01_vandaag', const DashboardScreen(), height: 2600, nav: true));
   testWidgets('01b vandaag boven', (t) => _shot(t, '01b_vandaag_boven', const DashboardScreen(), height: 915, nav: true));
   testWidgets('02 runs', (t) => _shot(t, '02_runs', const ActivitiesScreen(), height: 1800));
-  testWidgets('03 run detail', (t) => _shot(t, '03_run_detail', const ActivityDetailScreen(activityId: 'a1'), height: 3200));
+  testWidgets('03 run detail', (t) => _shot(t, '03_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3200));
   testWidgets('04 routes', (t) => _shot(t, '04_routes', const RoutesScreen(), height: 1600));
   testWidgets('05 coach', (t) => _shot(t, '05_coach', const CoachScreen(), height: 915));
   testWidgets('06 ik', (t) => _shot(t, '06_ik', const ProfileScreen(), height: 2600));

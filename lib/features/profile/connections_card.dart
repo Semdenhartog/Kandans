@@ -157,8 +157,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
                 '${conn.lastSyncedAt == null ? '' : ' · bijgewerkt ${Fmt.date(conn.lastSyncedAt!)}'}';
 
     return RwCard(
-      title: 'KOPPELINGEN',
-      padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
+      padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
       child: Column(
         children: [
           ListTile(

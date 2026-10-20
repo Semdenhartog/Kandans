@@ -78,7 +78,7 @@ class _Grid extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.82,
+        childAspectRatio: 1.0,
         children: [for (final b in badges) BadgeTile(badge: b)],
       );
 }

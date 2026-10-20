@@ -25,6 +25,7 @@ import '../../domain/shoes.dart';
 import '../../domain/run_filter.dart';
 import '../../domain/weekly_load.dart';
 import '../record/record_run_screen.dart';
+import '../routes/route_shape.dart';
 import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 import 'fitness_screen.dart';
@@ -233,6 +234,19 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
           }
           final shown = _filter.apply(list);
           final km = shown.fold<double>(0, (s, a) => s + a.distanceMeters);
+          final routeNames = {for (final r in ref.watch(routesProvider).value ?? const <RunRoute>[]) if (r.id != null) r.id!: r.name};
+          // Runs per week, met een kopje per week.
+          final rows = <Object>[];
+          DateTime? week;
+          for (final a in shown) {
+            final w = weekStart(a.startedAt);
+            if (w != week) {
+              week = w;
+              final inWeek = shown.where((x) => weekStart(x.startedAt) == w);
+              rows.add((start: w, km: inWeek.fold<double>(0, (s, x) => s + x.distanceMeters / 1000), runs: inWeek.length));
+            }
+            rows.add(a);
+          }
           return RefreshIndicator(
             onRefresh: () async {
               try {
@@ -245,8 +259,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             },
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              itemCount: shown.length + 2,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemCount: rows.length + 2,
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 if (i == 0) return _Overview(activities: list);
                 if (i == 1) {
@@ -268,9 +282,14 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                     ),
                   );
                 }
-                final a = shown[i - 2];
+                final row = rows[i - 2];
+                if (row is ({DateTime start, double km, int runs})) {
+                  return _WeekHeader(start: row.start, km: row.km, runs: row.runs);
+                }
+                final a = row as Activity;
                 return _ActivityTile(
                   activity: a,
+                  routeName: a.routeId == null ? null : routeNames[a.routeId],
                   badges: records.badgesFor(a),
                   onTap: a.id == null ? null : () => context.go('/runs/${a.id}'),
                   onDelete: () => _delete(a),
@@ -680,59 +699,161 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   }
 }
 
+String runTitle(Activity a, {String? routeName}) {
+  if (routeName != null) return routeName;
+  final h = a.startedAt.toLocal().hour;
+  if (h < 6) return 'Nachtrun';
+  if (h < 12) return 'Ochtendrun';
+  if (h < 17) return 'Middagrun';
+  if (h < 22) return 'Avondrun';
+  return 'Nachtrun';
+}
+
 class _ActivityTile extends StatelessWidget {
-  const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete});
+  const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete, this.routeName});
   final Activity activity;
   final List<String> badges;
   final VoidCallback? onTap;
   final VoidCallback onDelete;
+  final String? routeName;
+
+  Future<void> _menu(BuildContext context) async {
+    final del = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            leading: const Icon(Icons.open_in_new),
+            title: const Text('Openen'),
+            onTap: () => Navigator.pop(ctx, false),
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_outline, color: RwColors.danger),
+            title: const Text('Verwijderen', style: TextStyle(color: RwColors.danger)),
+            onTap: () => Navigator.pop(ctx, true),
+          ),
+        ]),
+      ),
+    );
+    if (del == true) {
+      onDelete();
+    } else if (del == false) {
+      onTap?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final a = activity;
     final weather = [
       if (a.temperatureCelsius != null) Fmt.temp(a.temperatureCelsius),
-      if (a.windSpeedKmh != null) Fmt.wind(a.windSpeedKmh),
+      if (a.windSpeedKmh != null) 'wind ${Fmt.wind(a.windSpeedKmh)}',
     ].join(' · ');
+    final sourceIcon = switch (a.source) {
+      'strava' => Icons.sync,
+      'health_connect' => Icons.watch_outlined,
+      'runwise' => Icons.gps_fixed,
+      _ => Icons.edit_note,
+    };
     return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: CircleAvatar(
-          backgroundColor: RwColors.surfaceHigh,
-          child: Icon(
-            switch (a.source) {
-              'strava' => Icons.sync,
-              'health_connect' => Icons.watch_outlined,
-              'runwise' => Icons.gps_fixed,
-              _ => Icons.directions_run,
-            },
-            color: RwColors.accent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: () => _menu(context),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
+                child: a.hasTrack
+                    ? RouteShape(polyline: a.trackPolyline!, strokeWidth: 2.2)
+                    : Icon(sourceIcon, color: RwColors.accent, size: 28),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(runTitle(a, routeName: routeName),
+                              maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                        ),
+                        if (a.feel != null)
+                          Icon(
+                            switch (a.feel) { 1 => Icons.sentiment_dissatisfied, 3 => Icons.sentiment_very_satisfied, _ => Icons.sentiment_neutral },
+                            size: 18,
+                            color: switch (a.feel) { 1 => RwColors.warning, 3 => RwColors.good, _ => RwColors.subtle },
+                          ),
+                      ],
+                    ),
+                    Text('${Fmt.date(a.startedAt)} · ${Fmt.time(a.startedAt)}${weather.isEmpty ? '' : ' · $weather'}',
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        _TileStat(Fmt.km(a.distanceMeters).replaceAll(' km', ''), 'km'),
+                        _TileStat(Fmt.pace(a.paceSecondsPerKm).replaceAll(' /km', ''), '/km'),
+                        _TileStat(Fmt.duration(a.movingTimeSeconds), ''),
+                      ],
+                    ),
+                    if (badges.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 6, runSpacing: 4, children: [for (final b in badges.take(2)) RecordBadge(b, small: true)]),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        onTap: onTap,
-        title: Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              '${Fmt.km(a.distanceMeters)} · ${Fmt.pace(a.paceSecondsPerKm)}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            for (final b in badges.take(2)) RecordBadge(b, small: true),
-          ],
-        ),
-        subtitle: Text(
-          '${Fmt.date(a.startedAt)} ${Fmt.time(a.startedAt)} · ${Fmt.duration(a.movingTimeSeconds)}'
-          '${weather.isEmpty ? '' : '\n$weather'}',
-          style: const TextStyle(color: RwColors.subtle),
-        ),
-        isThreeLine: weather.isNotEmpty,
-        trailing: IconButton(
-          tooltip: 'Verwijderen',
-          icon: const Icon(Icons.delete_outline, color: RwColors.subtle),
-          onPressed: onDelete,
-        ),
+      ),
+    );
+  }
+}
+
+class _TileStat extends StatelessWidget {
+  const _TileStat(this.value, this.unit);
+  final String value;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(right: 14),
+        child: Text.rich(TextSpan(children: [
+          TextSpan(text: value, style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w700, fontSize: 18)),
+          if (unit.isNotEmpty) TextSpan(text: ' $unit', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+        ])),
+      );
+}
+
+/// Kopje boven de runs van één week.
+class _WeekHeader extends StatelessWidget {
+  const _WeekHeader({required this.start, required this.km, required this.runs});
+  final DateTime start;
+  final double km;
+  final int runs;
+
+  @override
+  Widget build(BuildContext context) {
+    final thisWeek = weekStart(DateTime.now());
+    final diff = (thisWeek.difference(start).inHours / 24 / 7).round();
+    final label = diff == 0 ? 'DEZE WEEK' : (diff == 1 ? 'VORIGE WEEK' : 'WEEK VAN ${Fmt.date(start).toUpperCase()}');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4)),
+          ),
+          Text('${km.toStringAsFixed(1).replaceAll('.', ',')} km · $runs ${runs == 1 ? 'run' : 'runs'}',
+              style: const TextStyle(fontSize: 13, color: RwColors.subtle)),
+        ],
       ),
     );
   }

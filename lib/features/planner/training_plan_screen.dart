@@ -175,6 +175,8 @@ class _PlanView extends ConsumerWidget {
       weeks.putIfAbsent(s.week, () => []).add(s);
     }
     final daysLeft = race.date.difference(today).inDays;
+    // De schemaweek waar vandaag in valt (of de eerstvolgende).
+    final currentWeek = sessions.where((s) => !s.date.isBefore(today)).firstOrNull?.week;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
       children: [
@@ -200,16 +202,43 @@ class _PlanView extends ConsumerWidget {
             ],
           ),
         ),
-        for (final e in weeks.entries) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 18, 4, 6),
-            child: Text(
-              'WEEK ${e.key}${e.value.any((s) => weekStart(s.date) == weekStart(today)) ? ' · DEZE WEEK' : ''}',
-              style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.4),
+        for (final e in weeks.entries)
+          if (e.value.every((s) => s.date.isBefore(today)))
+            // Voorbije weken ingeklapt, zodat je meteen bij deze week bent.
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Card(
+                child: ExpansionTile(
+                  shape: const Border(),
+                  leading: CircleAvatar(
+                    backgroundColor: RwColors.surfaceHigh,
+                    child: Text('${e.key}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                  title: Text('Week ${e.key}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(
+                    '${e.value.where((s) => sessionDone(s, done)).length} van ${e.value.length} gedaan',
+                    style: const TextStyle(color: RwColors.subtle),
+                  ),
+                  childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  children: [for (final s in e.value) _SessionTile(session: s, done: sessionDone(s, done), today: today)],
+                ),
+              ),
+            )
+          else ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 18, 4, 6),
+              child: Text(
+                'WEEK ${e.key}${e.key == currentWeek ? ' · NU' : ''}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: e.key == currentWeek ? RwColors.accent : RwColors.subtle,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
+              ),
             ),
-          ),
-          for (final s in e.value) _SessionTile(session: s, done: sessionDone(s, done), today: today),
-        ],
+            for (final s in e.value) _SessionTile(session: s, done: sessionDone(s, done), today: today),
+          ],
         const SizedBox(height: 12),
         const Text(
           'Het schema bouwt geleidelijk op, met elke 4e week wat rustiger en de laatste 2 weken afbouwen. '

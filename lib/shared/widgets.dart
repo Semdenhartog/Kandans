@@ -71,9 +71,14 @@ class StatTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+          // Altijd op één regel: lange waarden (bijv. "0,0 km") worden iets kleiner in plaats van af te breken.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(value, maxLines: 1, style: const TextStyle(fontFamily: RwFonts.display, fontSize: 19, fontWeight: FontWeight.w700)),
+          ),
         ],
       ),
     );

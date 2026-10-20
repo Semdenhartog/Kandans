@@ -337,7 +337,7 @@ class _ChartPainter extends CustomPainter {
     final kmStep = total <= 8000 ? 1000.0 : total <= 21000 ? 5000.0 : 10000.0;
     for (var m = kmStep; m < total; m += kmStep) {
       final tp = TextPainter(
-        text: TextSpan(text: '${(m / 1000).round()}', style: const TextStyle(color: RwColors.subtle, fontSize: 10)),
+        text: TextSpan(text: '${(m / 1000).round()}', style: const TextStyle(fontFamily: RwFonts.body, color: RwColors.subtle, fontSize: 10)),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset(x(m) - tp.width / 2, h + 2));

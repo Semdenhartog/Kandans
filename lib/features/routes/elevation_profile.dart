@@ -213,7 +213,7 @@ class _ProfilePainter extends CustomPainter {
 
   void _text(Canvas canvas, String s, Offset at, Color color, double size) {
     final tp = TextPainter(
-      text: TextSpan(text: s, style: TextStyle(color: color, fontSize: size)),
+      text: TextSpan(text: s, style: TextStyle(fontFamily: RwFonts.body, color: color, fontSize: size)),
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(canvas, at);

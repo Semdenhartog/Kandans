@@ -15,6 +15,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
 import '../../data/services/offline_cache.dart';
+import '../../domain/badges.dart' show computeBadges;
 import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
@@ -106,50 +107,58 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          _InsightsCard(insights: insights),
-          const SizedBox(height: 12),
-          const ConnectionsCard(),
-          const SizedBox(height: 12),
-          const Card(child: ReminderTile()),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.calendar_month_outlined),
-              title: const Text('Trainingsschema'),
-              subtitle: const Text('Een schema op maat naar je wedstrijd of afstand'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => openTrainingPlan(context),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.military_tech_outlined, color: RwColors.accent),
-              title: const Text('Badges'),
-              subtitle: const Text('Je mijlpalen, en weerbadges voor lopen in wind, hitte en vorst'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => openBadges(context),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Card(child: EmergencyContactTile()),
-          const SizedBox(height: 12),
-          const Card(child: FingerprintTile()),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.monitor_heart_outlined),
-              title: const Text('Hartslagband'),
-              subtitle: const Text('Koppel een Bluetooth-band voor live hartslag en zones'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => openHeartRateScreen(context),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
+          Consumer(builder: (context, ref, _) {
+            final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+            final km = runs.fold<double>(0, (s, a) => s + a.distanceMeters / 1000);
+            final badges = computeBadges(runs).where((b) => b.earned).length;
+            return Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  Expanded(child: StatTile(label: 'Runs', value: '${runs.length}')),
+                  const SizedBox(width: 8),
+                  Expanded(child: StatTile(label: 'Totaal', value: '${km.round()} km')),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => openBadges(context),
+                      child: StatTile(label: 'Badges', value: '$badges'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const _SectionTitle('TRAINING'),
           Card(
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.calendar_month_outlined, color: RwColors.accent),
+                  title: const Text('Trainingsschema'),
+                  subtitle: const Text('Een schema op maat naar je wedstrijd of afstand'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => openTrainingPlan(context),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const Icon(Icons.flag_outlined, color: RwColors.accent),
+                  title: const Text('Wedstrijden'),
+                  subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.go('/me/races'),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const Icon(Icons.military_tech_outlined, color: RwColors.accent),
+                  title: const Text('Badges'),
+                  subtitle: const Text('Mijlpalen en weerbadges'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => openBadges(context),
+                ),
+                const Divider(height: 1, indent: 56),
                 Consumer(builder: (context, ref, _) {
                   final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
                   final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
@@ -170,43 +179,62 @@ class ProfileScreen extends ConsumerWidget {
                     onTap: () => context.go('/me/shoes'),
                   );
                 }),
-                const Divider(height: 1),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          _InsightsCard(insights: insights),
+          const _SectionTitle('APPARATEN EN KOPPELINGEN'),
+          const ConnectionsCard(),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.monitor_heart_outlined),
+              title: const Text('Hartslagband'),
+              subtitle: const Text('Live hartslag en zones via Bluetooth'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => openHeartRateScreen(context),
+            ),
+          ),
+          const _SectionTitle('MELDINGEN EN VEILIGHEID'),
+          const Card(
+            child: Column(
+              children: [
+                ReminderTile(),
+                Divider(height: 1, indent: 56),
+                EmergencyContactTile(),
+                Divider(height: 1, indent: 56),
+                FingerprintTile(),
+              ],
+            ),
+          ),
+          const _SectionTitle('ACCOUNT'),
+          Card(
+            child: Column(
+              children: [
                 ListTile(
-                  leading: const Icon(Icons.flag_outlined, color: RwColors.accent),
-                  title: const Text('Wedstrijden'),
-                  subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.go('/me/races'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.workspace_premium_outlined),
+                  leading: const Icon(Icons.workspace_premium_outlined, color: RwColors.accent),
                   title: const Text('RunWise Premium'),
                   subtitle: Text(
                     profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
                   ),
+                  trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/premium'),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Column(
-              children: [
+                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: const Text('Privacyverklaring'),
                   onTap: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.download_outlined),
                   title: const Text('Mijn gegevens kopiëren'),
                   subtitle: const Text('Al je gegevens als tekst (AVG)'),
                   onTap: () => _export(context, ref),
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.logout),
                   title: const Text('Uitloggen'),
@@ -216,7 +244,7 @@ class ProfileScreen extends ConsumerWidget {
                     await ref.read(supabaseProvider).auth.signOut();
                   },
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.delete_forever_outlined, color: RwColors.danger),
                   title: const Text('Account verwijderen', style: TextStyle(color: RwColors.danger)),
@@ -372,4 +400,15 @@ class _BucketChart extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 24, 4, 8),
+        child: Text(text, style: const TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+      );
 }

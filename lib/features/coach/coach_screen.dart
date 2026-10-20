@@ -15,6 +15,13 @@ const _suggestions = [
   'Wat trek ik aan bij het weer van morgen?',
 ];
 
+const _followUps = [
+  'Wat loop ik vandaag?',
+  'Hoe ging mijn week?',
+  'Is mijn schema nog goed?',
+  'Wat trek ik aan?',
+];
+
 class CoachScreen extends ConsumerStatefulWidget {
   const CoachScreen({super.key});
 
@@ -140,6 +147,20 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               },
             ),
           ),
+          if (!_sending && (history.value ?? const []).length + _pending.length > 0)
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                itemCount: _followUps.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, i) => ActionChip(
+                  label: Text(_followUps[i]),
+                  onPressed: () => _send(_followUps[i]),
+                ),
+              ),
+            ),
           if (!premium && _freeLeft != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
@@ -254,11 +275,9 @@ class _Bubble extends StatelessWidget {
             bottomRight: Radius.circular(user ? 4 : 18),
           ),
         ),
-        child: SelectableText(
-          // Simpele opmaak: **vet** weghalen, lijstjes blijven leesbaar.
-          message.content.replaceAll('**', ''),
-          style: TextStyle(color: user ? RwColors.accentDark : RwColors.text, height: 1.45),
-        ),
+        child: user
+            ? SelectableText(message.content, style: const TextStyle(color: RwColors.accentDark, height: 1.45))
+            : SelectionArea(child: _RichReply(message.content)),
       ),
     );
   }
@@ -282,4 +301,68 @@ class _Typing extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// Eenvoudige opmaak van coach-antwoorden: kopjes, opsommingen, nummering en **vet**.
+class _RichReply extends StatelessWidget {
+  const _RichReply(this.text);
+  final String text;
+
+  static final _bold = RegExp(r'\*\*(.+?)\*\*');
+
+  List<InlineSpan> _inline(String line, TextStyle base) {
+    final spans = <InlineSpan>[];
+    var i = 0;
+    for (final m in _bold.allMatches(line)) {
+      if (m.start > i) spans.add(TextSpan(text: line.substring(i, m.start)));
+      spans.add(TextSpan(text: m.group(1), style: const TextStyle(fontWeight: FontWeight.w700)));
+      i = m.end;
+    }
+    if (i < line.length) spans.add(TextSpan(text: line.substring(i)));
+    return spans;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const base = TextStyle(fontFamily: RwFonts.body, color: RwColors.text, height: 1.45, fontSize: 15);
+    final children = <Widget>[];
+    for (final raw in text.trim().split('\n')) {
+      final line = raw.trimRight();
+      if (line.trim().isEmpty) {
+        children.add(const SizedBox(height: 8));
+        continue;
+      }
+      final t = line.trimLeft();
+      final heading = RegExp(r'^#{1,4}\s+').firstMatch(t);
+      final bullet = RegExp(r'^[-*•]\s+').firstMatch(t);
+      final number = RegExp(r'^(\d+)[.)]\s+').firstMatch(t);
+      if (heading != null) {
+        children.add(Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 2),
+          child: Text(t.substring(heading.end).replaceAll('**', ''),
+              style: base.copyWith(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 17)),
+        ));
+      } else if (bullet != null || number != null) {
+        final m = (bullet ?? number)!;
+        final indent = line.length - t.length > 1 ? 16.0 : 0.0;
+        children.add(Padding(
+          padding: EdgeInsets.only(left: indent, top: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 20,
+                child: Text(number != null ? '${number.group(1)}.' : '•',
+                    style: base.copyWith(color: RwColors.accent, fontWeight: FontWeight.w700)),
+              ),
+              Expanded(child: Text.rich(TextSpan(style: base, children: _inline(t.substring(m.end), base)))),
+            ],
+          ),
+        ));
+      } else {
+        children.add(Text.rich(TextSpan(style: base, children: _inline(t, base))));
+      }
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: children);
+  }
 }
