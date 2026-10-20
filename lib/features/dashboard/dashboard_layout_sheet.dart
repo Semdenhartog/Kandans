@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme.dart';
-import '../../domain/dashboard_layout.dart';
 import 'dashboard_providers.dart';
 
 /// Kaarten op Vandaag ordenen (slepen) en aan- of uitzetten.

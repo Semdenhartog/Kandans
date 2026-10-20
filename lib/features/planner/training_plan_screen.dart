@@ -206,7 +206,7 @@ class _PlanSetupView extends ConsumerStatefulWidget {
 }
 
 class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
-  static const _goals = {5000.0: '5 km', 10000.0: '10 km', 21097.5: 'Halve marathon', 42195.0: 'Marathon'};
+  static final _goals = <double, String>{5000.0: '5 km', 10000.0: '10 km', 21097.5: 'Halve marathon', 42195.0: 'Marathon'};
   double _goal = 10000;
   late DateTime _date = DateTime.now().add(const Duration(days: 70));
   final _goalTime = TextEditingController();
