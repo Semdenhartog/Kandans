@@ -1,0 +1,33 @@
+# Snelle controle (een paar minuten): code nakijken en tests draaien, zonder APK te bouwen.
+# Handig tussendoor; de volledige build (build.yml) maakt daarna de APK.
+name: Snelle controle
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Code controleren
+        run: |
+          set -o pipefail
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee analyze.txt || {
+            grep -E "error •|warning •" analyze.txt | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          }
+          grep -E "warning •" analyze.txt | head -40 | while IFS= read -r line; do echo "::warning::$line"; done
+      - name: Tests
+        run: |
+          set -o pipefail
+          flutter test --reporter expanded 2>&1 | tee tests.txt || {
+            grep -E "\[E\]|Expected:|  Actual:|Which:|Error:" tests.txt | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          }

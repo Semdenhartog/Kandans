@@ -14,7 +14,10 @@ import '../../domain/run_coach.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/route_turns.dart';
+import '../../domain/route_heads_up.dart';
+import '../../domain/poi.dart';
 import 'heart_rate_service.dart';
+import 'metronome_service.dart';
 import 'live_share_service.dart';
 import 'notification_service.dart';
 import 'sound_service.dart';
@@ -149,9 +152,17 @@ class RunRecorderService {
   RouteFollower? _follower;
   GhostRace? _ghost;
   TurnGuide? _turns;
+  RouteHeadsUp? _headsUp;
+  List<RouteClimb> _climbs = const [];
+  List<RoutePoi> _pois = const [];
+  DaylightWarner? _daylight;
+  bool _daylightChecked = false;
 
   /// Afslagen aankondigen (stem, trillen en een melding die ook op je horloge komt).
   bool turnByTurn = true;
+
+  /// Cadans-tik in stappen per minuut (null = uit).
+  int? cadence;
   FuelReminder? _fuel;
   GuidedPlayer? _guided;
   int _ticks = 0;
@@ -366,6 +377,7 @@ class RunRecorderService {
     CueSettings cues = const CueSettings(),
     double? targetPace,
     List<LatLng> followRoute = const [],
+    List<ElevationSample> followProfile = const [],
     RunStreams? ghost,
     GuidedRun? guided,
     double? treadmillKmh,
@@ -401,6 +413,9 @@ class RunRecorderService {
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
     _turns = _follower == null ? null : TurnGuide(detectTurns(_follower!.track));
+    _climbs = _follower == null ? const [] : detectClimbs(followProfile, trackLength: _follower!.track.length);
+    _headsUp = _follower == null ? null : RouteHeadsUp.build(climbs: _climbs, pois: _pois);
+    _daylightChecked = indoor;
     _rec!.start(DateTime.now());
     if (this.voice) {
       _tts ??= FlutterTts();
@@ -416,6 +431,8 @@ class RunRecorderService {
       final g0 = _guided?.update(0);
       if (g0 != null) _say(g0);
     }
+    final spm = cadence;
+    if (spm != null) MetronomeService.instance.start(spm).ignore();
     _intervals = intervals == null ? null : IntervalTracker(intervals);
     final first = _intervals?.start(0, 0);
     if (first != null) _say(first.text);
@@ -427,6 +444,12 @@ class RunRecorderService {
       }
     }
     view.value = _snapshot();
+  }
+
+  /// Water en toiletten langs de route (komen binnen terwijl je al loopt): dan ook aankondigen.
+  void setRoutePois(List<RoutePoi> pois) {
+    _pois = pois;
+    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: pois);
   }
 
   /// Loopband: snelheid van de band doorgeven (km/u), dan telt de afstand live mee.
@@ -441,6 +464,7 @@ class RunRecorderService {
   void pause() {
     final r = _rec;
     r?.pause();
+    MetronomeService.instance.pause().ignore();
     _say('Gepauzeerd.');
     view.value = _snapshot();
     if (r != null) {
@@ -452,6 +476,7 @@ class RunRecorderService {
   void resume() {
     final r = _rec;
     r?.resume();
+    MetronomeService.instance.resume().ignore();
     _say('We gaan weer.');
     view.value = _snapshot();
     if (r != null) _updateNotification(r);
@@ -495,13 +520,24 @@ class RunRecorderService {
               .ignore();
         }
       }
+      final h = follower.offRoute ? null : _headsUp?.update(follower.progress);
+      if (h != null) _say(h);
       final g = _ghost;
       if (g != null && !follower.offRoute) {
         final gc = g.update(follower.progress, r.movingSeconds);
         if (gc != null) _say(gc);
       }
     }
+    if (!_daylightChecked) {
+      _daylightChecked = true;
+      _daylight = DaylightWarner(sunTimes(DateTime.now(), p.latitude, p.longitude).sunset);
+    }
     if (r.status == RecorderStatus.running) {
+      final dl = _daylight?.update(DateTime.now());
+      if (dl != null) {
+        _say(dl);
+        _buzz(const [0, 200, 120, 200]);
+      }
       _sayCue(r);
       final coach = _coach;
       if (coach != null && (_intervals == null || _intervals!.finished)) {
@@ -616,6 +652,7 @@ class RunRecorderService {
   /// Stopt de opname en geeft de run terug om op te slaan (of null als er niets is).
   Future<RunRecording?> stop() async {
     SoundService.instance.play(RwSound.finish).ignore();
+    MetronomeService.instance.stop().ignore();
     final r = _rec;
     await _sub?.cancel();
     _sub = null;
@@ -633,6 +670,11 @@ class RunRecorderService {
     _follower = null;
     _ghost = null;
     _turns = null;
+    _headsUp = null;
+    _climbs = const [];
+    _pois = const [];
+    _daylight = null;
+    _daylightChecked = false;
     NotificationService.instance.cancelTurn().ignore();
     _fuel = null;
     _guided = null;

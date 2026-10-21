@@ -6,6 +6,7 @@ import 'package:quick_actions/quick_actions.dart';
 
 import '../core/theme.dart';
 import 'aura.dart';
+import 'whats_new.dart';
 import '../data/services/location_service.dart';
 import '../data/services/offline_cache.dart';
 import '../data/services/sync_service.dart';
@@ -84,6 +85,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     final next = await showOnboardingIfNeeded(context);
     if (mounted) await _offerRestore();
     if (mounted) await maybeOfferFingerprint(context);
+    if (mounted) await showWhatsNewIfNeeded(context, skip: next != null);
     if (next == null || !mounted) return;
     // Na de rondleiding kan er locatie zijn: weer opnieuw ophalen.
     ref.invalidate(weatherLocationProvider);

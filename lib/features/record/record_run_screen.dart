@@ -16,6 +16,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
+import '../../data/services/poi_service.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sound_service.dart';
 import '../../data/services/sync_service.dart';
@@ -77,6 +78,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   /// Afslagen aankondigen bij het volgen van een route.
   bool _turnByTurn = true;
+
+  /// Cadans-tik (stappen per minuut), null = uit.
+  int? _cadence;
   bool _batteryDone = true;
   bool _indoor = false;
   bool _sounds = true;
@@ -128,6 +132,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
           _turnByTurn = p.getBool('rec_turns') ?? true;
+          final cad = p.getInt('rec_cadence');
+          _cadence = cad == null || cad <= 0 ? null : cad;
           _indoor = widget.initialIndoor ?? p.getBool('rec_indoor') ?? false;
           final tk = p.getDouble('rec_target_km');
           _targetKm = tk == null || tk <= 0 ? null : tk;
@@ -280,11 +286,52 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     if (mounted) setState(() => _countdown = null);
   }
 
+  Future<void> _pickCadence() async {
+    const options = [0, 160, 165, 170, 175, 180, 185, 190];
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: RwColors.surface,
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
+                child: Text('Cadans-tik', style: RwText.title),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(
+                  'Loop mee op de tik. Weet je het niet? Begin met 5 stappen boven wat je nu loopt; '
+                  'de meeste lopers zitten tussen 165 en 180.',
+                  style: TextStyle(color: RwColors.muted, height: 1.4),
+                ),
+              ),
+              for (final o in options)
+                ListTile(
+                  title: Text(o == 0 ? 'Uit' : '$o stappen per minuut'),
+                  trailing: (o == 0 ? _cadence == null : _cadence == o) ? const Icon(Icons.check, color: RwColors.accent) : null,
+                  onTap: () => Navigator.pop(ctx, o),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _cadence = picked == 0 ? null : picked);
+    SharedPreferences.getInstance().then((p) => p.setInt('rec_cadence', picked)).ignore();
+  }
+
   Future<void> _begin() async {
     HapticFeedback.heavyImpact();
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
       _svc.turnByTurn = _turnByTurn;
+      _svc.cadence = _cadence;
       await _svc.start(
         voice: _voice,
         shareLive: _share,
@@ -295,10 +342,16 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         cues: _cues,
         targetPace: _targetPace,
         followRoute: _route == null ? const [] : decodePolyline(_route!.polyline),
+        followProfile: _route == null ? const [] : _route!.profileOrKmPoints,
         ghost: _raceGhost ? _ghost : null,
         guided: _guided,
         treadmillKmh: _indoor ? _tmKmh : null,
       );
+      final route = _route;
+      if (route != null && !_indoor && route.polyline.isNotEmpty) {
+        // Water en toiletten onderweg aankondigen (ophalen kan even duren; de run loopt al).
+        ref.read(routePoisProvider(route.polyline).future).then(_svc.setRoutePois).catchError((Object _) {});
+      }
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
     }
@@ -1045,6 +1098,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           setState(() => _haptics = x);
                           SharedPreferences.getInstance().then((p) => p.setBool('rec_haptics', x)).ignore();
                         },
+                      ),
+                      FilterChip(
+                        avatar: const Icon(Icons.graphic_eq, size: 18),
+                        label: Text(_cadence == null ? 'Cadans-tik' : 'Cadans $_cadence'),
+                        tooltip: 'Een zachte tik op je stappen per minuut. Helpt je kortere, lichtere passen te maken.',
+                        selected: _cadence != null,
+                        onSelected: (_) => _pickCadence(),
                       ),
                       if (!_indoor && _route != null)
                         FilterChip(
