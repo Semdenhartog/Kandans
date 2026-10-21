@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
@@ -110,7 +112,11 @@ class StatTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(label, maxLines: 1, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
+          ),
           const SizedBox(height: 4),
           // Altijd op één regel: lange waarden (bijv. "0,0 km") worden iets kleiner in plaats van af te breken.
           FittedBox(
@@ -531,4 +537,84 @@ class _OdometerInState extends State<OdometerIn> {
 
   @override
   Widget build(BuildContext context) => RollingText(_shown, style: widget.style, duration: const Duration(milliseconds: 650));
+}
+
+/// Hoofdknop (zwevend) in oranje verloop met gloed. Klapt in tot alleen het icoon
+/// zodra je naar beneden scrolt, zodat hij geen inhoud bedekt; komt terug bij omhoog scrollen.
+class RwFab extends StatelessWidget {
+  const RwFab({super.key, required this.label, required this.icon, required this.onPressed, required this.extended, this.heroTag});
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final ValueListenable<bool> extended;
+  final Object? heroTag;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+        valueListenable: extended,
+        builder: (context, ext, _) => DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
+            ),
+            boxShadow: [
+              BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 22, spreadRadius: -4, offset: const Offset(0, 8)),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                onPressed();
+              },
+              child: Semantics(
+                button: true,
+                label: label,
+                excludeSemantics: true,
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  child: SizedBox(
+                    height: 56,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: ext ? 20 : 16),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(icon, color: RwColors.accentDark),
+                        if (ext) ...[
+                          const SizedBox(width: 8),
+                          Text(label,
+                              style: const TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                        ],
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Zet [extended] op false bij naar beneden scrollen en weer op true bij omhoog scrollen.
+class FabScrollWatcher extends StatelessWidget {
+  const FabScrollWatcher({super.key, required this.extended, required this.child});
+  final ValueNotifier<bool> extended;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => NotificationListener<UserScrollNotification>(
+        onNotification: (n) {
+          if (n.depth != 0) return false;
+          if (n.direction == ScrollDirection.reverse) extended.value = false;
+          if (n.direction == ScrollDirection.forward) extended.value = true;
+          return false;
+        },
+        child: child,
+      );
 }

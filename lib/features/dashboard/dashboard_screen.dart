@@ -48,6 +48,9 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  /// Startknop uitgeklapt (boven in de lijst) of ingeklapt tot icoon (tijdens scrollen).
+  final _fabExtended = ValueNotifier(true);
+
   TrainingType _type = TrainingType.easy;
   String? _routeId;
   int _durationMinutes = 45;
@@ -68,6 +71,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void dispose() {
     _live?.cancel();
+    _fabExtended.dispose();
     super.dispose();
   }
 
@@ -198,33 +202,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      // Startknop in een oranje verloop met zachte gloed.
-      floatingActionButton: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
-          ),
-          boxShadow: [
-            BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 22, spreadRadius: -4, offset: const Offset(0, 8)),
-          ],
-        ),
-        child: FloatingActionButton.extended(
-          heroTag: 'start-run-today',
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          highlightElevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          onPressed: () => openRecorder(context),
-          icon: const Icon(Icons.play_arrow),
-          label: const Text('Start run'),
-        ),
+      floatingActionButton: RwFab(
+        heroTag: 'start-run-today',
+        label: 'Start run',
+        icon: Icons.play_arrow,
+        extended: _fabExtended,
+        onPressed: () => openRecorder(context),
       ),
       body: SafeArea(
+        child: FabScrollWatcher(
+        extended: _fabExtended,
         child: RefreshIndicator(
           onRefresh: _refresh,
           child: ListView(
@@ -309,6 +296,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -780,14 +768,20 @@ class _HeroCard extends StatelessWidget {
                   )
                 else if (remindAt.isAfter(DateTime.now()))
                   Expanded(
+                    // Secundair (glas met oranje rand): de oranje hoofdknop is "Start run".
                     child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.black.withValues(alpha: 0.32),
+                        foregroundColor: RwColors.text,
+                        side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
+                      ),
                       onPressed: () async {
                         final ok = await setAlarm(remindAt, 'RunWise: om ${Fmt.time(s.start)} lopen');
                         if (!ok && context.mounted) {
                           showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
                         }
                       },
-                      icon: const Icon(Icons.alarm_add_outlined),
+                      icon: const Icon(Icons.alarm_add_outlined, color: RwColors.accentLight),
                       label: Text('Wekker ${Fmt.time(remindAt)}'),
                     ),
                   )
@@ -852,7 +846,7 @@ class _HeroStat extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
-                Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(value, maxLines: 2, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.2)),
               ],
             ),
           ),

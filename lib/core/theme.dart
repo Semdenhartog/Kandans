@@ -143,9 +143,10 @@ ThemeData buildTheme() {
       color: RwColors.surface,
       elevation: 0,
       margin: EdgeInsets.zero,
+      // Zelfde rand als RwCard, zodat lijstkaarten (Ik, schema) en RwCards één familie zijn.
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: RwColors.border),
+        side: const BorderSide(color: Color(0x14FFFFFF)),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(

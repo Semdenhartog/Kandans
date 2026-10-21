@@ -76,7 +76,7 @@ class FitnessScreen extends ConsumerWidget {
                     children: [
                       _Legend(color: RwColors.accent, label: 'Fitheid'),
                       _Legend(color: Color(0xFF8D8D98), label: 'Vermoeidheid'),
-                      _Legend(color: Color(0xFF5AA9FF), label: 'Belasting per dag'),
+                      _Legend(color: Color(0xFF6E6E78), label: 'Belasting per dag'),
                     ],
                   ),
                 ],
@@ -176,7 +176,8 @@ class _FitnessPainter extends CustomPainter {
     canvas.drawLine(Offset(0, h), Offset(size.width, h), grid);
 
     // Belasting per dag als dunne staafjes.
-    final bar = Paint()..color = const Color(0xFF5AA9FF).withValues(alpha: 0.5);
+    // Neutraal grijs: de oranje fitheidslijn is waar het om draait.
+    final bar = Paint()..color = const Color(0xFF6E6E78).withValues(alpha: 0.45);
     final w = (size.width / days.length).clamp(1.0, 4.0);
     for (var i = 0; i < days.length; i++) {
       if (days[i].load <= 0) continue;

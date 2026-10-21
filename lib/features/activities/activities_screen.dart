@@ -42,6 +42,14 @@ class ActivitiesScreen extends ConsumerStatefulWidget {
 class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
   /// Moment dat de lijst verscheen (voor de instap-animatie).
   final _since = DateTime.now();
+
+  final _fabExtended = ValueNotifier(true);
+
+  @override
+  void dispose() {
+    _fabExtended.dispose();
+    super.dispose();
+  }
   RunFilter _filter = const RunFilter();
 
   Future<void> _delete(Activity a) async {
@@ -215,13 +223,16 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: RwFab(
         heroTag: 'start-run',
+        label: 'Start run',
+        icon: Icons.play_arrow,
+        extended: _fabExtended,
         onPressed: () => openRecorder(context),
-        icon: const Icon(Icons.play_arrow),
-        label: const Text('Start run'),
       ),
-      body: activities.when(
+      body: FabScrollWatcher(
+        extended: _fabExtended,
+        child: activities.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(
           message: friendlyError(e),
@@ -304,6 +315,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }
@@ -530,12 +542,21 @@ class _OverviewState extends State<_Overview> {
             ),
           ],
           const SizedBox(height: 4),
-          OutlinedButton.icon(
-            onPressed: () => openFitness(context),
-            icon: const Icon(Icons.show_chart),
-            label: const Text('Fitheid en vorm'),
+          // Slanke doorklikregel i.p.v. een grote knop: rustiger in de weekkaart.
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => openFitness(context),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Row(children: [
+                Icon(Icons.show_chart, color: RwColors.accent, size: 20),
+                SizedBox(width: 10),
+                Expanded(child: Text('Fitheid en vorm', style: TextStyle(fontWeight: FontWeight.w600))),
+                Icon(Icons.chevron_right, color: RwColors.subtle),
+              ]),
+            ),
           ),
-          const Divider(height: 28),
+          const Divider(height: 20),
           SegmentedButton<Period>(
             showSelectedIcon: false,
             segments: const [

@@ -100,18 +100,25 @@ class TodayCard extends ConsumerWidget {
             ],
             if (!doneToday && session.kind != SessionKind.race) ...[
               const SizedBox(height: 10),
+              // Tonaal: oranje tint i.p.v. vol oranje, zodat er per scherm één hoofdknop is.
               FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: RwColors.accent.withValues(alpha: 0.16),
+                  foregroundColor: RwColors.accentLight,
+                  side: BorderSide(color: RwColors.accent.withValues(alpha: 0.35)),
+                ),
                 onPressed: () => showSessionBriefing(context, hardToday && ready.suggestEasy ? easierSession(session) : session,
                     readinessScore: runs.isEmpty ? null : ready.score),
                 icon: const Icon(Icons.play_arrow),
-                label: Text(hardToday && ready.suggestEasy ? 'Start de rustige versie' : 'Start de training van vandaag'),
+                label: Text(hardToday && ready.suggestEasy ? 'Start de rustige versie' : 'Start je training'),
               ),
               if (session.kind != SessionKind.easy || !(hardToday && ready.suggestEasy))
                 TextButton(
                   onPressed: () => hardToday && ready.suggestEasy
                       ? startSession(context, session, weather: weather)
                       : startSession(context, easierSession(session), weather: weather),
-                  child: Text(hardToday && ready.suggestEasy ? 'Toch de gewone training' : 'Ik voel me niet 100%: maak het lichter'),
+                  style: TextButton.styleFrom(foregroundColor: RwColors.muted),
+                  child: Text(hardToday && ready.suggestEasy ? 'Toch de gewone training' : 'Niet helemaal fit? Maak het lichter'),
                 ),
             ],
           ] else if (plan.isNotEmpty)
