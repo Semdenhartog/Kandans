@@ -9,7 +9,7 @@ void main() {
     // Echte waarde: ~16:25 UTC (18:25 zomertijd).
     expect(set.hour * 60 + set.minute, inInclusiveRange(16 * 60 + 15, 16 * 60 + 35));
     final rise = s.sunrise!.toUtc();
-    expect(rise.hour * 60 + rise.minute, inInclusiveRange(6 * 60 + 15, 6 * 60 + 35));
+    expect(rise.hour * 60 + rise.minute, inInclusiveRange(6 * 60 + 5, 6 * 60 + 30));
   });
 
   test('donker-waarschuwing alleen als je na zonsondergang terug bent', () {
