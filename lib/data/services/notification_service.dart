@@ -98,6 +98,28 @@ class NotificationService {
     } catch (_) {}
   }
 
+  /// Mag RunWise meldingen tonen? (Android 13+ vraagt hier apart om.)
+  Future<bool> allowed() async {
+    await init();
+    try {
+      final android = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      return await android?.areNotificationsEnabled() ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Vraagt toestemming voor meldingen. Geeft true als het mag.
+  Future<bool> requestPermission() async {
+    await init();
+    try {
+      final android = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      return await android?.requestNotificationsPermission() ?? true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static const _turnId = 75416;
 
   /// Afslag-melding tijdens het volgen van een route. Gewone (niet vaste) meldingen komen

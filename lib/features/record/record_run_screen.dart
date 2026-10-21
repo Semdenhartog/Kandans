@@ -16,6 +16,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
+import '../../data/services/notification_service.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sound_service.dart';
@@ -287,6 +288,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   Future<void> _start() async {
     if (_countdown != null) return;
+    await _askTurnNotifications();
+    if (!mounted) return;
     if (_sunMode) setMaxBrightness(true);
     if (_nightMode) setNightBrightness(true);
     for (final n in [3, 2, 1]) {
@@ -340,6 +343,32 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     if (picked == null || !mounted) return;
     setState(() => _cadence = picked == 0 ? null : picked);
     SharedPreferences.getInstance().then((p) => p.setInt('rec_cadence', picked)).ignore();
+  }
+
+  /// Afslagen ook op je horloge: daarvoor moet RunWise meldingen mogen tonen. Eén keer uitleggen en vragen.
+  Future<void> _askTurnNotifications() async {
+    if (_route == null || _indoor || !_turnByTurn) return;
+    final n = NotificationService.instance;
+    if (await n.allowed()) return;
+    final p = await SharedPreferences.getInstance();
+    if (p.getBool('turn_notif_asked') ?? false) return;
+    await p.setBool('turn_notif_asked', true);
+    if (!mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.watch_outlined),
+        title: const Text('Afslagen op je horloge?'),
+        content: const Text(
+            'RunWise kan bij elke afslag een melding sturen. Die komt ook op je horloge, dat dan trilt en de richting laat zien.\n\n'
+            'Daarvoor vraagt je telefoon zo of RunWise meldingen mag sturen. Je krijgt alleen meldingen over je run.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Niet nu')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Ja, graag')),
+        ],
+      ),
+    );
+    if (ok == true) await n.requestPermission();
   }
 
   Future<void> _begin() async {
@@ -1701,7 +1730,11 @@ class _Big extends StatelessWidget {
   final bool small;
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) => Semantics(
+        // Schermlezer (TalkBack): lees "Tempo nu 5:30" in één keer voor, niet cijfer voor cijfer.
+        label: '$label $value',
+        excludeSemantics: true,
+        child: Column(
         children: [
           // Altijd op één regel (ook bij runs boven het uur of met grote letters).
           FittedBox(
@@ -1711,6 +1744,7 @@ class _Big extends StatelessWidget {
           const SizedBox(height: 2),
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
         ],
+      ),
       );
 }
 

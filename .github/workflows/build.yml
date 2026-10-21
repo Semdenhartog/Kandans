@@ -11,6 +11,9 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -409,25 +412,34 @@ jobs:
 
       - name: Horloge-bestand (FIT) controleren met de officiële Garmin-lezer
         run: |
-          python3 -m pip install --quiet garmin-fit-sdk
-          python3 - <<'EOF2'
-          from garmin_fit_sdk import Decoder, Stream
+          python3 -m venv /tmp/fitenv
+          /tmp/fitenv/bin/pip install --quiet garmin-fit-sdk || { echo "::error::garmin-fit-sdk kon niet worden geinstalleerd"; exit 1; }
+          /tmp/fitenv/bin/python - <<'EOF2'
+          import sys, traceback
+          try:
+              from garmin_fit_sdk import Decoder, Stream
+          except Exception as e:
+              print(f"::error::Garmin-lezer niet beschikbaar: {e}"); sys.exit(1)
+          def fail(msg):
+              print(f"::error::FIT-controle: {msg}"); sys.exit(1)
           stream = Stream.from_file("build/test_course.fit")
           decoder = Decoder(stream)
-          assert decoder.is_fit(), "geen FIT-bestand"
-          assert decoder.check_integrity(), "controlegetal klopt niet"
+          if not decoder.is_fit(): fail("geen FIT-bestand")
+          if not decoder.check_integrity(): fail("controlegetal klopt niet")
           messages, errors = decoder.read()
-          assert not errors, f"leesfouten: {errors}"
+          if errors: fail(f"leesfouten: {errors}")
           points = messages.get("course_point_mesgs", [])
           records = messages.get("record_mesgs", [])
-          course = messages["course_mesgs"][0]
-          expected = open("build/test_course_turns.txt").read().strip()
+          courses = messages.get("course_mesgs", [])
+          if not courses: fail(f"geen course-bericht; gevonden: {list(messages.keys())}")
+          course = courses[0]
+          expected = [x for x in open("build/test_course_turns.txt").read().strip().split(",") if x]
           print(f"::notice::FIT-koers '{course.get('name')}' ({course.get('sport')}): {len(records)} punten, afslagen: {[p.get('type') for p in points]}")
-          assert messages["file_id_mesgs"][0]["type"] == "course"
-          assert course.get("sport") == "running"
-          assert len(points) == len([x for x in expected.split(",") if x]), "aantal afslagen klopt niet"
-          assert all(isinstance(p.get("type"), str) for p in points), "onbekend afslagtype"
-          assert len(records) > 10
+          if messages["file_id_mesgs"][0].get("type") != "course": fail(f"bestandstype {messages['file_id_mesgs'][0]}")
+          if course.get("sport") != "running": fail(f"sport {course}")
+          if len(points) != len(expected): fail(f"{len(points)} afslagen in bestand, {len(expected)} verwacht")
+          if not all(isinstance(p.get("type"), str) for p in points): fail(f"onbekend afslagtype: {points}")
+          if len(records) <= 10: fail("te weinig punten")
           EOF2
 
       - name: APK bouwen
@@ -449,6 +461,21 @@ jobs:
           name: runwise-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
+
+      # Vaste downloadlink: elke geslaagde build van main komt als runwise.apk bij de release "laatste".
+      # Link voor je telefoon: https://github.com/Semdenhartog/Runwise/releases/download/laatste/runwise.apk
+      - name: APK op de vaste downloadlink zetten
+        if: ${{ !inputs.snel && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk runwise.apk
+          if ! gh release view laatste >/dev/null 2>&1; then
+            gh release create laatste --title "RunWise – nieuwste testversie" --notes "Altijd de nieuwste APK van main. Download op je telefoon: runwise.apk" --prerelease
+          fi
+          gh release upload laatste runwise.apk --clobber
+          gh release edit laatste --notes "Versie 1.1.${{ github.run_number }} – $(git log -1 --pretty=%s | head -c 200)"
+          echo "::notice::APK staat klaar op https://github.com/${GITHUB_REPOSITORY}/releases/download/laatste/runwise.apk"
 
       - name: Emulator klaarzetten (alleen bij handmatig starten)
         if: ${{ !inputs.snel && (github.event_name == 'workflow_dispatch') }}

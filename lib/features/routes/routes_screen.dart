@@ -12,6 +12,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../domain/gpx_parser.dart';
+import '../../domain/route_filter.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'route_photos_strip.dart';
@@ -29,6 +30,82 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
   final _since = DateTime.now();
   bool _importing = false;
   bool _mapView = false;
+
+  // Zoeken en filteren (alleen zichtbaar vanaf 4 routes).
+  String _query = '';
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+  bool _favOnly = false;
+  RouteLength _length = RouteLength.all;
+  RouteSort _sort = RouteSort.recent;
+
+  Widget _filters(int total, int shown) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          decoration: InputDecoration(
+            hintText: 'Zoek een route',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _query.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Wissen',
+                    icon: const Icon(Icons.close),
+                    onPressed: () => setState(() {
+                      _query = '';
+                      _search.clear();
+                    }),
+                  ),
+            isDense: true,
+          ),
+          controller: _search,
+          textInputAction: TextInputAction.search,
+          onChanged: (v) => setState(() => _query = v),
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              FilterChip(
+                avatar: const Icon(Icons.star_outline, size: 18),
+                label: const Text('Favorieten'),
+                selected: _favOnly,
+                onSelected: (v) => setState(() => _favOnly = v),
+              ),
+              const SizedBox(width: 8),
+              for (final l in RouteLength.values.skip(1)) ...[
+                ChoiceChip(
+                  label: Text(l.label),
+                  selected: _length == l,
+                  onSelected: (v) => setState(() => _length = v ? l : RouteLength.all),
+                ),
+                const SizedBox(width: 8),
+              ],
+              PopupMenuButton<RouteSort>(
+                tooltip: 'Sorteren',
+                initialValue: _sort,
+                onSelected: (v) => setState(() => _sort = v),
+                itemBuilder: (_) => [for (final o in RouteSort.values) PopupMenuItem(value: o, child: Text(o.label))],
+                child: Chip(avatar: const Icon(Icons.sort, size: 18), label: Text(_sort.label)),
+              ),
+            ],
+          ),
+        ),
+        if (shown != total)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text('$shown van $total routes', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+          ),
+      ],
+    );
+  }
 
   /// Gemiddeld tempo van recente runs, voor de geschatte duur van een route.
   double _typicalPace() {
@@ -129,12 +206,34 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             );
           }
           if (_mapView) return RoutesOverviewMap(routes: list, bests: bests);
+          final withFilters = list.length >= 4;
+          final shown = withFilters
+              ? filterRoutes<RunRoute>(list,
+                  name: (r) => r.name,
+                  meters: (r) => r.distanceMeters,
+                  favorite: (r) => r.isFavorite,
+                  query: _query,
+                  favoritesOnly: _favOnly,
+                  length: _length,
+                  sort: _sort)
+              : list;
+          final head = withFilters ? 1 : 0;
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-            itemCount: list.length,
+            itemCount: shown.length + head + (withFilters && shown.isEmpty ? 1 : 0),
             separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, i) => StaggerIn(index: i, since: _since, child: Builder(builder: (context) {
-              final r = list[i];
+            itemBuilder: (context, index) {
+              if (withFilters && index == 0) return _filters(list.length, shown.length);
+              if (shown.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Text('Geen routes gevonden. Pas je zoekopdracht of filter aan.',
+                      textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
+                );
+              }
+              final i = index - head;
+              return StaggerIn(index: i, since: _since, child: Builder(builder: (context) {
+              final r = shown[i];
               return RwCard(
                 onTap: () => context.go('/routes/${r.id}'),
                 child: Row(
@@ -184,7 +283,8 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                   ],
                 ),
               );
-            })),
+            }));
+            },
           );
         },
       ),
