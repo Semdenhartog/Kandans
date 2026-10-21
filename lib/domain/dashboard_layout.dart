@@ -5,6 +5,7 @@ enum DashCard {
   rain('Buien komende 2 uur', 'Live van Buienradar'),
   hours('Per uur', 'De loopomstandigheden per uur'),
   routeWind('Wind op je route', 'Alleen als je een route kiest'),
+  bestRoute('Beste route met deze wind', 'Welke van je routes nu de minste tegenwind heeft'),
   planner('Weekplanner', 'De beste momenten deze week'),
   month('Maanduitdaging', 'Je doel voor deze maand'),
   live('Veilig onderweg', 'Live je locatie delen');

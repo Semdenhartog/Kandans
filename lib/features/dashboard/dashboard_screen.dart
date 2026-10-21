@@ -37,6 +37,7 @@ import '../../domain/dashboard_layout.dart';
 import '../../domain/training_plan.dart';
 import '../../domain/verdict.dart';
 import 'dashboard_layout_sheet.dart';
+import 'best_route_card.dart';
 import 'month_challenge_card.dart';
 import 'today_card.dart';
 import 'dashboard_providers.dart';
@@ -196,6 +197,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       DashCard.planner: WeekPlannerEntry(),
       DashCard.month: MonthChallengeCard(),
       DashCard.live: LiveShareEntryCard(),
+      DashCard.bestRoute: BestRouteNowCard(),
     };
     final extrasOnly = [
       for (final c in layout.visible)

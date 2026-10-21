@@ -163,6 +163,18 @@ class RunRecorderService {
 
   /// Cadans-tik in stappen per minuut (null = uit).
   int? cadence;
+
+  /// Spreektempo van de stem (0.4 = rustig, 0.5 = normaal, 0.6 = vlot).
+  double speechRate = 0.5;
+
+  /// Laat de stem iets zeggen met het gekozen tempo (om uit te proberen).
+  Future<void> previewVoice(String text) async {
+    await _ensureTts();
+    try {
+      await _tts!.setSpeechRate(speechRate);
+      await _tts!.speak(text);
+    } catch (_) {}
+  }
   FuelReminder? _fuel;
   GuidedPlayer? _guided;
   int _ticks = 0;
@@ -197,7 +209,7 @@ class RunRecorderService {
     _tts = FlutterTts();
     try {
       await _tts!.setLanguage('nl-NL');
-      await _tts!.setSpeechRate(0.5);
+      await _tts!.setSpeechRate(speechRate);
       await _tts!.setQueueMode(1);
       await _tts!.setAudioAttributesForNavigation();
     } catch (_) {}
@@ -421,7 +433,7 @@ class RunRecorderService {
       _tts ??= FlutterTts();
       try {
         await _tts!.setLanguage('nl-NL');
-        await _tts!.setSpeechRate(0.5);
+        await _tts!.setSpeechRate(speechRate);
         // Achter elkaar uitspreken in plaats van elkaar af te kappen, en muziek even zachter zetten.
         await _tts!.setQueueMode(1);
         await _tts!.setAudioAttributesForNavigation();

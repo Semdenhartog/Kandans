@@ -92,6 +92,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   /// Zonmodus: pikzwart, scherm op volle helderheid en grotere cijfers.
   bool _sunMode = false;
 
+  /// Nachtmodus: rood en gedimd beeld tijdens het lopen in het donker.
+  bool _nightMode = false;
+
   /// Start ingedrukt terwijl de GPS nog zoekt: begint vanzelf zodra hij klaar is.
   bool _armed = false;
 
@@ -132,12 +135,15 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
           _turnByTurn = p.getBool('rec_turns') ?? true;
+          final sr = p.getDouble('rec_speech_rate');
+          if (sr != null && sr >= 0.3 && sr <= 0.7) _svc.speechRate = sr;
           final cad = p.getInt('rec_cadence');
           _cadence = cad == null || cad <= 0 ? null : cad;
           _indoor = widget.initialIndoor ?? p.getBool('rec_indoor') ?? false;
           final tk = p.getDouble('rec_target_km');
           _targetKm = tk == null || tk <= 0 ? null : tk;
           _sunMode = p.getBool('rec_sun_mode') ?? false;
+          _nightMode = !_sunMode && (p.getBool('rec_night') ?? false);
           _tmKmh = p.getDouble('rec_tm_kmh');
           _sounds = p.getBool('sounds_on') ?? true;
           final tp = p.getDouble('rec_target_pace');
@@ -182,6 +188,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     _svc.stopRequested.removeListener(_stopFromNotification);
     _svc.view.removeListener(_onView);
     if (_sunMode) setMaxBrightness(false);
+    if (_nightMode) setNightBrightness(false);
     // Weggegaan zonder te starten: GPS weer uit.
     if (_svc.recording?.status == RecorderStatus.idle) _svc.discard();
     _pages.dispose();
@@ -262,9 +269,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   }
 
   void _toggleSunMode(bool on) {
+    if (on && _nightMode) _toggleNightMode(false);
     setState(() => _sunMode = on);
     setMaxBrightness(on);
     SharedPreferences.getInstance().then((p) => p.setBool('rec_sun_mode', on)).ignore();
+  }
+
+  void _toggleNightMode(bool on) {
+    if (on && _sunMode) _toggleSunMode(false);
+    setState(() => _nightMode = on);
+    if (!on || _svc.isRecording) setNightBrightness(on);
+    SharedPreferences.getInstance().then((p) => p.setBool('rec_night', on)).ignore();
   }
 
   /// Aftellen 3-2-1 (met tikjes en een belletje), dan starten.
@@ -273,6 +288,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   Future<void> _start() async {
     if (_countdown != null) return;
     if (_sunMode) setMaxBrightness(true);
+    if (_nightMode) setNightBrightness(true);
     for (final n in [3, 2, 1]) {
       if (!mounted) return;
       setState(() => _countdown = n);
@@ -572,6 +588,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   Future<void> _chooseCues() async {
     var c = _cues;
+    var rate = _svc.speechRate;
     final result = await showModalBottomSheet<CueSettings>(
       context: context,
       showDragHandle: true,
@@ -625,6 +642,29 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   onChanged: (v) => set(() => c = c.copyWith(fuel: v)),
                 ),
                 const SizedBox(height: 8),
+                const Text('Spreektempo', style: TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SegmentedButton<double>(
+                        segments: const [
+                          ButtonSegment(value: 0.4, label: Text('Rustig')),
+                          ButtonSegment(value: 0.5, label: Text('Normaal')),
+                          ButtonSegment(value: 0.6, label: Text('Vlot')),
+                        ],
+                        selected: {rate},
+                        onSelectionChanged: (v) {
+                          set(() => rate = v.first);
+                          _svc.speechRate = rate;
+                          SharedPreferences.getInstance().then((p) => p.setDouble('rec_speech_rate', rate)).ignore();
+                          _svc.previewVoice('Over 100 meter rechtsaf. Kilometer 3 in 5 minuten 30.').ignore();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 FilledButton(onPressed: () => Navigator.pop(ctx, c), child: const Text('Klaar')),
               ],
             ),
@@ -1150,6 +1190,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         selected: _sunMode,
                         onSelected: _toggleSunMode,
                       ),
+                      FilterChip(
+                        avatar: const Icon(Icons.nightlight_outlined, size: 18),
+                        label: const Text('Nachtmodus'),
+                        tooltip: 'Rood en gedimd beeld: je ogen blijven aan het donker gewend en je verblindt niemand',
+                        selected: _nightMode,
+                        onSelected: _toggleNightMode,
+                      ),
                       if (!_indoor)
                         ActionChip(
                           avatar: const Icon(Icons.speed, size: 18),
@@ -1248,7 +1295,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 ? MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(MediaQuery.textScalerOf(context).scale(1) * 1.12))
                 : MediaQuery.of(context),
             child: Scaffold(
-            backgroundColor: _sunMode && started ? Colors.black : null,
+            backgroundColor: (_sunMode || _nightMode) && started ? Colors.black : null,
             appBar: AppBar(
               title: Text(widget.sessionTitle ?? 'Run opnemen', overflow: TextOverflow.ellipsis),
               automaticallyImplyLeading: !started,
@@ -1267,8 +1314,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   ),
               ],
             ),
-            body: Stack(children: [
-              if (started && !_sunMode) Positioned.fill(child: _ZoneGlow(view: v)),
+            body: ColorFiltered(
+              // Nachtmodus: alles in rood (helderheid blijft, kleur gaat eruit).
+              colorFilter: _nightMode && started
+                  ? const ColorFilter.matrix([0.5, 0.4, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
+                  : const ColorFilter.mode(Colors.transparent, BlendMode.dst),
+              child: Stack(children: [
+              if (started && !_sunMode && !_nightMode) Positioned.fill(child: _ZoneGlow(view: v)),
               SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -1350,6 +1402,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               Positioned.fill(child: _KmMoment(view: v, kmTimes: _svc.recording?.kmTimes ?? const [])),
               if (_countdown != null) _Countdown(value: _countdown!),
             ]),
+            ),
           ),
           ),
         );

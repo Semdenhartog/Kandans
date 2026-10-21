@@ -134,9 +134,9 @@ List<RouteTurn> detectTurns(
     samples.add((m: m, angle: headingChange(bearingDegrees(from, here), bearingDegrees(here, to))));
   }
 
-  // Groepjes punten achter elkaar die dezelfde kant op draaien: één afslag.
+  // Groepjes punten achter elkaar die dezelfde kant op draaien: één draaiing.
   final startAt = minAngle * 0.6;
-  final raw = <RouteTurn>[];
+  final groups = <({double m, double angle})>[];
   var i = 0;
   while (i < samples.length) {
     if (samples[i].angle.abs() < startAt) {
@@ -157,34 +157,27 @@ List<RouteTurn> detectTurns(
       bearingDegrees(st.at(to), st.at(math.min(st.length, to + window))),
     );
     if (angle.sign != sign || angle.abs() < best.angle.abs()) angle = best.angle;
-    if (angle.abs() >= minAngle) {
-      final m = original(best.m);
-      raw.add(RouteTurn(meters: m, point: track.at(m), kind: classifyTurn(angle), angle: angle));
-    }
+    groups.add((m: best.m, angle: angle));
     i = math.max(j, i + 1);
   }
 
-  // 3) Afslagen vlak achter elkaar samenvoegen.
-  final out = <RouteTurn>[];
-  for (final t in raw) {
-    if (out.isNotEmpty && t.meters - out.last.meters < minGap) {
-      final prev = out.removeLast();
-      final sum = prev.angle + t.angle;
-      if (prev.angle.sign != t.angle.sign && sum.abs() < minAngle) {
-        continue; // Links-rechts verspringen (bijv. even oversteken): geen afslag.
-      }
-      if (prev.angle.sign == t.angle.sign) {
-        // Twee halve bochten = één echte afslag.
-        final angle = sum.clamp(-179.0, 179.0).toDouble();
-        out.add(RouteTurn(meters: prev.meters, point: prev.point, kind: classifyTurn(angle), angle: angle));
-      } else {
-        out.add(prev.angle.abs() >= t.angle.abs() ? prev : t);
-      }
-      continue;
+  // 3) Draaiingen vlak achter elkaar optellen: links-rechts (even oversteken) valt weg,
+  //    twee halve bochten worden één afslag. Pas daarna kijken of het een echte afslag is.
+  final merged = <({double m, double angle})>[];
+  for (final g in groups) {
+    if (merged.isNotEmpty && g.m - merged.last.m < minGap) {
+      final p = merged.removeLast();
+      final sum = (p.angle + g.angle).clamp(-179.0, 179.0).toDouble();
+      merged.add((m: p.angle.abs() >= g.angle.abs() ? p.m : g.m, angle: sum));
+    } else {
+      merged.add(g);
     }
-    out.add(t);
   }
-  return out;
+  return [
+    for (final g in merged)
+      if (g.angle.abs() >= minAngle)
+        RouteTurn(meters: original(g.m), point: track.at(original(g.m)), kind: classifyTurn(g.angle), angle: g.angle),
+  ];
 }
 
 /// Tekst om uit te spreken, bijv. "Over 100 meter rechtsaf".
