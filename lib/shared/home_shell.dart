@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:quick_actions/quick_actions.dart';
 
 import '../core/theme.dart';
 import 'aura.dart';
@@ -35,7 +36,37 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _autoSync();
       _onboarding();
+      _setupShortcuts();
     });
+  }
+
+  /// Lang drukken op het app-icoon: Start run, Loopband, Beste moment.
+  void _setupShortcuts() {
+    try {
+      const qa = QuickActions();
+      qa.initialize((type) {
+        if (!mounted) return;
+        if (RunRecorderService.instance.isRecording) {
+          openRecorder(context);
+          return;
+        }
+        switch (type) {
+          case 'run':
+            openRecorder(context);
+          case 'treadmill':
+            openRecorder(context, indoor: true);
+          case 'best':
+            context.go('/today');
+        }
+      });
+      qa.setShortcutItems(const [
+        ShortcutItem(type: 'run', localizedTitle: 'Start run'),
+        ShortcutItem(type: 'treadmill', localizedTitle: 'Loopband'),
+        ShortcutItem(type: 'best', localizedTitle: 'Beste moment'),
+      ]).ignore();
+    } catch (_) {
+      // Snelkoppelingen zijn een extraatje.
+    }
   }
 
   @override

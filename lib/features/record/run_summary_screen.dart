@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
@@ -16,6 +17,7 @@ import '../../shared/widgets.dart';
 import '../activities/badges_screen.dart';
 import '../activities/share_run_screen.dart';
 import '../activities/strength_screen.dart';
+import '../profile/emergency_contact.dart';
 import '../routes/route_map.dart';
 
 /// Direct na het opslaan: je run in één oogopslag, met snelste stukken en records.
@@ -117,6 +119,7 @@ class RunSummaryScreen extends StatelessWidget {
             ],
             const SizedBox(height: 12),
             const CooldownTip(),
+            const _HomeSafe(),
             if (badges.isNotEmpty) ...[
               const SizedBox(height: 16),
               NewBadgesBanner(badges: badges),
@@ -259,6 +262,7 @@ class _QuickFeel extends ConsumerStatefulWidget {
 }
 
 class _QuickFeelState extends ConsumerState<_QuickFeel> {
+  static const _tags = ['Zware benen', 'Lekker ritme', 'Warm', 'Koud', 'Moe', 'Pijntje', 'Topdag', 'Met muziek'];
   int? _feel;
   final _note = TextEditingController();
   late final RunWiseRepository _repo;
@@ -328,6 +332,23 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                 ),
             ],
           ),
+          const SizedBox(height: 10),
+          // Snelle tags: één tik in plaats van typen.
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            for (final t in _tags)
+              FilterChip(
+                label: Text(t),
+                selected: _note.text.contains(t),
+                visualDensity: VisualDensity.compact,
+                onSelected: (on) {
+                  HapticFeedback.selectionClick();
+                  final parts = _note.text.split(',').map((x) => x.trim()).where((x) => x.isNotEmpty).toList();
+                  on ? parts.add(t) : parts.remove(t);
+                  setState(() => _note.text = parts.join(', '));
+                  _repo.setActivityFeel(widget.activityId, feel: _feel, note: _note.text).then((_) => ref.invalidate(activitiesProvider)).ignore();
+                },
+              ),
+          ]),
           const SizedBox(height: 10),
           TextField(
             controller: _note,
@@ -404,4 +425,48 @@ class _RecordPlaque extends StatelessWidget {
           ]),
         ),
       );
+}
+
+
+/// Eén tik: je noodcontact laten weten dat je weer veilig thuis bent (sms, of de app die je kiest).
+class _HomeSafe extends StatefulWidget {
+  const _HomeSafe();
+
+  @override
+  State<_HomeSafe> createState() => _HomeSafeState();
+}
+
+class _HomeSafeState extends State<_HomeSafe> {
+  EmergencyContact? _c;
+
+  @override
+  void initState() {
+    super.initState();
+    EmergencyContact.load().then((c) {
+      if (mounted) setState(() => _c = c);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _c;
+    if (c == null) return const SizedBox.shrink();
+    final who = c.name.isEmpty ? 'je noodcontact' : c.name;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: OutlinedButton.icon(
+        icon: const Icon(Icons.home_outlined),
+        label: Text('Laat $who weten dat je thuis bent'),
+        onPressed: () async {
+          HapticFeedback.selectionClick();
+          final uri = Uri(scheme: 'sms', path: c.phone, queryParameters: {'body': 'Ik ben weer thuis van mijn run 👍'});
+          try {
+            if (!await launchUrl(uri) && context.mounted) showMessage(context, 'Kon je berichten-app niet openen.', error: true);
+          } catch (_) {
+            if (context.mounted) showMessage(context, 'Kon je berichten-app niet openen.', error: true);
+          }
+        },
+      ),
+    );
+  }
 }

@@ -24,6 +24,8 @@ import '../../domain/start_time_scoring.dart';
 import '../../data/services/air_quality_service.dart';
 import '../../domain/run_warnings.dart';
 import '../../shared/alarm.dart';
+import '../../domain/run_helpers.dart';
+import '../../shared/calendar.dart';
 import '../../shared/shine_text.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
@@ -543,7 +545,15 @@ class _ResultsState extends State<_Results> {
         }),
         widget.settings,
         const SizedBox(height: 12),
-        _HeroCard(verdict: verdict, shown: shown, isBest: isBest, onShowBest: () => setState(() => _selected = null)),
+        _HeroCard(
+          verdict: verdict,
+          shown: shown,
+          isBest: isBest,
+          onShowBest: () => setState(() => _selected = null),
+          durationMinutes: widget.planner.durationMinutes,
+          lat: widget.planner.forecast.latitude,
+          lon: widget.planner.forecast.longitude,
+        ),
         const SizedBox(height: 12),
         const TodayCard(),
         const RaceCountdownCard(),
@@ -611,7 +621,17 @@ Color _scoreColor(int score) {
 
 /// Hoofdkaart: één oordeel, het beste moment en het weer dan (vervangt de losse oordeel-, beste- en nu-kaarten).
 class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.verdict, required this.shown, required this.isBest, required this.onShowBest});
+  const _HeroCard({
+    required this.verdict,
+    required this.shown,
+    required this.isBest,
+    required this.onShowBest,
+    required this.durationMinutes,
+    required this.lat,
+    required this.lon,
+  });
+  final int durationMinutes;
+  final double lat, lon;
   final RunVerdict verdict;
   final StartTimeScore shown;
   final bool isBest;
@@ -755,7 +775,35 @@ class _HeroCard extends StatelessWidget {
                   ),
                 ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
+            // Wanneer ben je terug, en is het dan nog licht?
+            Builder(builder: (context) {
+              final start = goNowShown ? DateTime.now() : s.start;
+              final back = start.add(Duration(minutes: durationMinutes));
+              final dark = darkWarning(start, Duration(minutes: durationMinutes), lat, lon);
+              return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  const Icon(Icons.home_outlined, size: 16, color: RwColors.subtle),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '${goNowShown ? 'Ga je nu' : 'Ga je om ${Fmt.time(start)}'}, dan ben je rond ${Fmt.time(back)} terug ($durationMinutes min).',
+                      style: const TextStyle(color: RwColors.muted, fontSize: 13),
+                    ),
+                  ),
+                ]),
+                if (dark != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Padding(padding: EdgeInsets.only(top: 1), child: Icon(Icons.nights_stay_outlined, size: 16, color: RwColors.warning)),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(dark, style: const TextStyle(color: RwColors.warning, fontSize: 13, height: 1.35))),
+                    ]),
+                  ),
+              ]);
+            }),
+            const SizedBox(height: 14),
             Row(
               children: [
                 if (goNowShown)
@@ -793,6 +841,25 @@ class _HeroCard extends StatelessWidget {
                       label: const Text('Start run'),
                     ),
                   ),
+                if (!goNowShown) ...[
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
+                    tooltip: 'In je agenda zetten',
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(52, 52),
+                      side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
+                      backgroundColor: Colors.black.withValues(alpha: 0.32),
+                    ),
+                    onPressed: () => addToCalendar(
+                      context,
+                      title: 'Hardlopen (RunWise)',
+                      start: s.start,
+                      minutes: durationMinutes,
+                      details: 'Beste moment volgens RunWise: score ${s.score}. ${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}.',
+                    ),
+                    icon: const Icon(Icons.event_available_outlined, color: RwColors.accentLight),
+                  ),
+                ],
                 if (v.kind == VerdictKind.tough) ...[
                   const SizedBox(width: 10),
                   Expanded(

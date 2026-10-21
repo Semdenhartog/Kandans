@@ -17,7 +17,9 @@ import 'heart_rate_service.dart';
 import 'live_share_service.dart';
 import 'notification_service.dart';
 import 'sound_service.dart';
+import 'rain_service.dart';
 import 'recording_store.dart';
+import '../../domain/run_helpers.dart';
 
 /// Wat het opnamescherm laat zien.
 @immutable
@@ -149,6 +151,107 @@ class RunRecorderService {
   RunRecording? get recording => _rec;
   bool get isRecording => _rec != null && _rec!.status != RecorderStatus.finished;
 
+  /// Seconden op handmatige pauze / stilstaand op automatische pauze (voor de herinneringen).
+  int _pausedSecs = 0;
+  int _stillSecs = 0;
+
+  /// Laatste regenwaarschuwing (niet steeds opnieuw).
+  DateTime? _rainWarnedFor;
+  final _rain = RainService();
+
+  /// Iets laten uitspreken van buiten de service (bijv. "doelafstand bereikt").
+  void say(String text, {bool buzz = false}) {
+    if (buzz) _buzz(const [0, 200, 120, 200]);
+    final wasVoice = voice;
+    voice = true;
+    _ensureTts().then((_) {
+      _say(text);
+      voice = wasVoice;
+    }).ignore();
+  }
+
+  Future<void> _ensureTts() async {
+    if (_tts != null) return;
+    _tts = FlutterTts();
+    try {
+      await _tts!.setLanguage('nl-NL');
+      await _tts!.setSpeechRate(0.5);
+      await _tts!.setQueueMode(1);
+      await _tts!.setAudioAttributesForNavigation();
+    } catch (_) {}
+  }
+
+  /// Tik op je afstand: de stem leest afstand, tijd en tempo voor (en de weg terug als je ver van je start bent).
+  void announceNow() {
+    final r = _rec;
+    if (r == null) return;
+    final v = view.value;
+    final km = (r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',');
+    final t = v.movingSeconds.round();
+    final time = t >= 3600 ? '${t ~/ 3600} uur ${(t % 3600) ~/ 60} minuten' : '${t ~/ 60} minuten ${t % 60} seconden';
+    final parts = <String>[r.indoor && r.treadmillKmh == null ? '' : '$km kilometer', time];
+    if (!r.indoor && r.averagePace > 0) {
+      final p = r.averagePace.round();
+      parts.add('gemiddeld ${p ~/ 60} ${(p % 60).toString().padLeft(2, '0')} per kilometer');
+    }
+    if (v.heartRate != null) parts.add('hartslag ${v.heartRate}');
+    final back = backToStart(r.track);
+    if (back != null && back.meters > 300 && back.relative != null) {
+      parts.add('je start ligt ${(back.meters / 1000).toStringAsFixed(1).replaceAll('.', ',')} kilometer ${directionWords(back.relative!)}');
+    }
+    _buzz(const [0, 60]);
+    say(parts.where((p) => p.isNotEmpty).join('. '));
+  }
+
+  /// Herinneringen tijdens pauze/stilstand en de regenwaarschuwing. Eén keer per seconde.
+  void _watchdog(RunRecording r) {
+    if (r.status == RecorderStatus.paused) {
+      _pausedSecs++;
+      if (_pausedSecs == 120 || _pausedSecs == 300 || _pausedSecs == 600) {
+        _buzz(const [0, 300, 200, 300]);
+        say('Je run staat nog op pauze. Tik op verder als je weer gaat lopen.');
+        NotificationService.instance
+            .showRunProgress(Fmt.km(r.distance, decimals: 2), 'Nog op pauze: tik om verder te gaan', movingSeconds: view.value.movingSeconds, paused: true)
+            .ignore();
+      }
+    } else {
+      _pausedSecs = 0;
+    }
+    if (r.status == RecorderStatus.autoPaused) {
+      _stillSecs++;
+      if (_stillSecs == 300 || (_stillSecs > 300 && _stillSecs % 600 == 300)) {
+        _buzz(const [0, 500, 250, 500]);
+        say('Sta je stil? Je run wordt nog opgenomen. Ben je klaar, stop hem dan.');
+        NotificationService.instance
+            .showRunProgress(Fmt.km(r.distance, decimals: 2), 'Nog aan het lopen? Al ${_stillSecs ~/ 60} minuten stil. Tik op Stop als je klaar bent.',
+                movingSeconds: view.value.movingSeconds, paused: true)
+            .ignore();
+      }
+    } else {
+      _stillSecs = 0;
+    }
+    // Regen: elke 5 minuten de buienradar voor je huidige plek.
+    if (!r.indoor && r.isActive && _ticks % 300 == 150 && _position != null) {
+      _checkRain(_position!).ignore();
+    }
+  }
+
+  Future<void> _checkRain(LatLng at) async {
+    try {
+      final n = await _rain.nowcast(at.lat, at.lon);
+      final first = n.firstRain;
+      if (first == null || n.rainingNow) return;
+      final mins = first.difference(DateTime.now()).inMinutes;
+      if (mins < 3 || mins > 20) return;
+      if (_rainWarnedFor != null && first.difference(_rainWarnedFor!).inMinutes.abs() < 20) return;
+      _rainWarnedFor = first;
+      _buzz(const [0, 150, 100, 150]);
+      say('Let op: over ongeveer $mins minuten begint het te regenen.');
+    } catch (_) {
+      // Geen netwerk onderweg: dan maar geen regenwaarschuwing.
+    }
+  }
+
   Future<void> _ensurePermission() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
       throw Exception('Zet locatie (GPS) aan op je telefoon om je run op te nemen.');
@@ -206,6 +309,7 @@ class RunRecorderService {
     view.value = _snapshot();
     if (r == null || !isRecording || r.status == RecorderStatus.idle) return;
     _ticks++;
+    _watchdog(r);
     if (_ticks % 5 == 0) _updateNotification(r);
     if (_ticks % 15 == 0) RecordingStore.save(r).ignore();
   }

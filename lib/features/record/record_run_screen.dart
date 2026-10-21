@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:io' show Platform;
 
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sound_service.dart';
@@ -26,6 +28,7 @@ import '../../domain/heart_rate.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
 import '../../domain/run_coach.dart';
+import '../../domain/run_helpers.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/shoes.dart';
 import '../../shared/rolling_text.dart';
@@ -36,16 +39,19 @@ import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
 
 /// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
-void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle, RunRoute? route}) {
+void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle, RunRoute? route, bool? indoor}) {
   Navigator.of(context).push(MaterialPageRoute<void>(
     fullscreenDialog: true,
-    builder: (_) => RecordRunScreen(initialPlan: plan, initialTargetPace: targetPace, sessionTitle: sessionTitle, initialRoute: route),
+    builder: (_) => RecordRunScreen(initialPlan: plan, initialTargetPace: targetPace, sessionTitle: sessionTitle, initialRoute: route, initialIndoor: indoor),
   ));
 }
 
 /// Een run opnemen met GPS, met stemcoach per kilometer.
 class RecordRunScreen extends ConsumerStatefulWidget {
-  const RecordRunScreen({super.key, this.initialPlan, this.initialTargetPace, this.sessionTitle, this.initialRoute});
+  const RecordRunScreen({super.key, this.initialPlan, this.initialTargetPace, this.sessionTitle, this.initialRoute, this.initialIndoor});
+
+  /// Vanuit de snelkoppeling "Loopband": meteen binnen-modus.
+  final bool? initialIndoor;
 
   /// Vanuit een route: deze route volgen (en tegen je record racen).
   final RunRoute? initialRoute;
@@ -70,6 +76,19 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _indoor = false;
   bool _sounds = true;
 
+  /// Doelafstand (km): de ring loopt vol naar dit doel. Null = per kilometer.
+  double? _targetKm;
+  bool _targetReached = false;
+
+  /// Zonmodus: pikzwart, scherm op volle helderheid en grotere cijfers.
+  bool _sunMode = false;
+
+  /// Start ingedrukt terwijl de GPS nog zoekt: begint vanzelf zodra hij klaar is.
+  bool _armed = false;
+
+  int? _battery;
+  bool _charging = false;
+
   /// Loopbandsnelheid (km/u) om mee te starten; null = alleen de klok.
   double? _tmKmh;
   double? _targetPace;
@@ -92,6 +111,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   void initState() {
     super.initState();
     _svc.stopRequested.addListener(_stopFromNotification);
+    _svc.view.addListener(_onView);
+    _readBattery();
     final r = widget.initialRoute;
     if (r != null && r.id != null) {
       _route = r;
@@ -101,7 +122,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (mounted) {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
-          _indoor = p.getBool('rec_indoor') ?? false;
+          _indoor = widget.initialIndoor ?? p.getBool('rec_indoor') ?? false;
+          final tk = p.getDouble('rec_target_km');
+          _targetKm = tk == null || tk <= 0 ? null : tk;
+          _sunMode = p.getBool('rec_sun_mode') ?? false;
           _tmKmh = p.getDouble('rec_tm_kmh');
           _sounds = p.getBool('sounds_on') ?? true;
           final tp = p.getDouble('rec_target_pace');
@@ -144,10 +168,91 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   @override
   void dispose() {
     _svc.stopRequested.removeListener(_stopFromNotification);
+    _svc.view.removeListener(_onView);
+    if (_sunMode) setMaxBrightness(false);
     // Weggegaan zonder te starten: GPS weer uit.
     if (_svc.recording?.status == RecorderStatus.idle) _svc.discard();
     _pages.dispose();
     super.dispose();
+  }
+
+  Future<void> _readBattery() async {
+    try {
+      final b = Battery();
+      final level = await b.batteryLevel;
+      final state = await b.batteryState;
+      if (mounted) setState(() {
+        _battery = level;
+        _charging = state == BatteryState.charging || state == BatteryState.full;
+      });
+    } catch (_) {}
+  }
+
+  /// Volgt de opname: start zodra de GPS klaar is (als je dat vroeg) en meldt je doelafstand.
+  void _onView() {
+    final v = _svc.view.value;
+    if (_armed && v.gpsReady && v.status == RecorderStatus.idle && _countdown == null) {
+      setState(() => _armed = false);
+      _start();
+    }
+    final t = _targetKm;
+    if (t != null && !_targetReached && v.distance >= t * 1000 && v.status != RecorderStatus.idle) {
+      _targetReached = true;
+      _svc.say('Je doel van ${_kmWords(t)} kilometer is bereikt. Goed gedaan!', buzz: true);
+    }
+  }
+
+  String _kmWords(double km) => km == km.roundToDouble() ? '${km.round()}' : km.toStringAsFixed(1).replaceAll('.', ',');
+
+  /// Start-knop: GPS klaar (of loopband) → aftellen; GPS zoekt nog → klaarzetten.
+  void _onStartPressed(RecorderView v) {
+    if (_indoor || v.gpsReady) {
+      _start();
+      return;
+    }
+    HapticFeedback.selectionClick();
+    setState(() => _armed = !_armed);
+    if (_armed) showMessage(context, 'Klaar! Je run start vanzelf zodra je GPS goed is. Je mag je telefoon wegstoppen.');
+  }
+
+  Future<void> _chooseTargetKm() async {
+    const options = [3.0, 5.0, 8.0, 10.0, 15.0, 21.1, 42.2];
+    final picked = await showModalBottomSheet<double>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Doelafstand', style: RwText.title),
+            const SizedBox(height: 4),
+            const Text('De ring loopt vol naar je doel en de stem meldt het als je er bent.', style: TextStyle(color: RwColors.muted)),
+            const SizedBox(height: 16),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final o in options)
+                ChoiceChip(
+                  label: Text(o == 21.1 ? 'Halve (21,1)' : (o == 42.2 ? 'Hele (42,2)' : '${o.round()} km')),
+                  selected: _targetKm == o,
+                  onSelected: (_) => Navigator.pop(c, o),
+                ),
+              ChoiceChip(label: const Text('Geen doel'), selected: _targetKm == null, onSelected: (_) => Navigator.pop(c, 0)),
+            ]),
+          ]),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _targetKm = picked <= 0 ? null : picked;
+      _targetReached = false;
+    });
+    SharedPreferences.getInstance().then((p) => p.setDouble('rec_target_km', picked)).ignore();
+  }
+
+  void _toggleSunMode(bool on) {
+    setState(() => _sunMode = on);
+    setMaxBrightness(on);
+    SharedPreferences.getInstance().then((p) => p.setBool('rec_sun_mode', on)).ignore();
   }
 
   /// Aftellen 3-2-1 (met tikjes en een belletje), dan starten.
@@ -155,6 +260,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   Future<void> _start() async {
     if (_countdown != null) return;
+    if (_sunMode) setMaxBrightness(true);
     for (final n in [3, 2, 1]) {
       if (!mounted) return;
       setState(() => _countdown = n);
@@ -752,8 +858,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         ] else ...[
           // De afstand in een ring die per kilometer volloopt.
           Center(
-            child: _KmRing(
-              fraction: (v.distance % 1000) / 1000,
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                _svc.announceNow();
+              },
+              child: _KmRing(
+              fraction: _targetKm == null ? (v.distance % 1000) / 1000 : (v.distance / (_targetKm! * 1000)).clamp(0.0, 1.0),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Semantics(
                   label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
@@ -768,10 +879,20 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 const Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
                 const SizedBox(height: 4),
                 Text(
-                  'nog ${(1000 - v.distance % 1000).round()} m tot km ${(v.distance / 1000).floor() + 1}',
-                  style: const TextStyle(color: RwColors.subtle, fontSize: 12, fontFeatures: rwTnum),
+                  _targetKm != null
+                      ? (v.distance >= _targetKm! * 1000
+                          ? 'Doel ${_kmWords(_targetKm!)} km gehaald!'
+                          : 'nog ${((_targetKm! * 1000 - v.distance) / 1000).toStringAsFixed(1).replaceAll('.', ',')} km tot je doel')
+                      : 'nog ${(1000 - v.distance % 1000).round()} m tot km ${(v.distance / 1000).floor() + 1}',
+                  style: TextStyle(
+                      color: _targetKm != null && v.distance >= _targetKm! * 1000 ? RwColors.good : RwColors.subtle,
+                      fontSize: 12,
+                      fontFeatures: rwTnum),
                 ),
+                const SizedBox(height: 2),
+                const Text('tik om te horen', style: TextStyle(color: RwColors.subtle, fontSize: 10, letterSpacing: 0.4)),
               ]),
+            ),
             ),
           ),
           const SizedBox(height: 20),
@@ -787,6 +908,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           const SizedBox(height: 18),
           _HeartRow(view: v),
         ],
+        if (!v.indoor && v.routeRemaining == null) _BackToStart(track: v.track),
         if (v.routeRemaining != null) ...[
           const SizedBox(height: 14),
           Container(
@@ -862,6 +984,15 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _choosePlan,
                   ),
+                  if (_battery != null && _battery! < 20 && !_charging)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.battery_1_bar, color: RwColors.danger),
+                      title: Text('Batterij $_battery%'),
+                      subtitle: Text(_battery! < 10
+                          ? 'Te weinig voor een run met GPS. Laad eerst even op.'
+                          : 'Genoeg voor ongeveer ${(_battery! * 3).round()} minuten met GPS. Zet zonmodus uit en houd het kort.'),
+                    ),
                   if (!_batteryDone)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -926,6 +1057,19 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                       ),
                       if (!_indoor)
                         ActionChip(
+                          avatar: const Icon(Icons.flag_outlined, size: 18),
+                          label: Text(_targetKm == null ? 'Doelafstand' : 'Doel ${_kmWords(_targetKm!)} km'),
+                          onPressed: _chooseTargetKm,
+                        ),
+                      FilterChip(
+                        avatar: const Icon(Icons.wb_sunny_outlined, size: 18),
+                        label: const Text('Zonmodus'),
+                        tooltip: 'Pikzwart, volle helderheid en grotere cijfers: leesbaar in fel zonlicht',
+                        selected: _sunMode,
+                        onSelected: _toggleSunMode,
+                      ),
+                      if (!_indoor)
+                        ActionChip(
                           avatar: const Icon(Icons.speed, size: 18),
                           label: Text(_targetPace == null ? 'Doeltempo' : 'Doel ${Fmt.pace(_targetPace!)}'),
                           onPressed: _chooseTargetPace,
@@ -961,11 +1105,22 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     active: _indoor || v.gpsReady,
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(64)),
-                      onPressed: !_indoor && _error != null && !v.gpsReady ? null : _start,
-                      icon: const Icon(Icons.play_arrow, size: 30),
-                      label: Text(_indoor || v.gpsReady ? 'Start' : 'Start (GPS zoekt nog)', style: const TextStyle(fontSize: 18)),
+                      onPressed: !_indoor && _error != null && !v.gpsReady ? null : () => _onStartPressed(v),
+                      icon: Icon(_armed ? Icons.hourglass_top : Icons.play_arrow, size: 30),
+                      label: Text(
+                        _indoor || v.gpsReady ? 'Start' : (_armed ? 'Start zodra GPS klaar is' : 'Start (begint als GPS klaar is)'),
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ),
                   ),
+                  if (_armed && !_indoor && !v.gpsReady)
+                    TextButton(
+                      onPressed: () {
+                        setState(() => _armed = false);
+                        _start();
+                      },
+                      child: const Text('Nu toch starten (minder nauwkeurig)'),
+                    ),
                 ],
               )
             : _saving
@@ -1005,7 +1160,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) showMessage(context, 'Je run loopt nog. Stop eerst, of ga met de thuisknop naar een andere app.');
           },
-          child: Scaffold(
+          child: MediaQuery(
+            // Zonmodus: tijdens het lopen alles een maat groter.
+            data: _sunMode && started
+                ? MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(MediaQuery.textScalerOf(context).scale(1) * 1.12))
+                : MediaQuery.of(context),
+            child: Scaffold(
+            backgroundColor: _sunMode && started ? Colors.black : null,
             appBar: AppBar(
               title: Text(widget.sessionTitle ?? 'Run opnemen', overflow: TextOverflow.ellipsis),
               automaticallyImplyLeading: !started,
@@ -1025,7 +1186,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               ],
             ),
             body: Stack(children: [
-              if (started) Positioned.fill(child: _ZoneGlow(view: v)),
+              if (started && !_sunMode) Positioned.fill(child: _ZoneGlow(view: v)),
               SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -1107,6 +1268,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               Positioned.fill(child: _KmMoment(view: v, kmTimes: _svc.recording?.kmTimes ?? const [])),
               if (_countdown != null) _Countdown(value: _countdown!),
             ]),
+          ),
           ),
         );
       },
@@ -1874,6 +2036,49 @@ class _ZoneGlow extends StatelessWidget {
               colors: [(c ?? color).withValues(alpha: 0.13), (c ?? color).withValues(alpha: 0)],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Pijl en afstand terug naar je startpunt (zichtbaar zodra je meer dan 300 m van je start bent).
+class _BackToStart extends StatelessWidget {
+  const _BackToStart({required this.track});
+  final List<LatLng> track;
+
+  @override
+  Widget build(BuildContext context) {
+    final b = backToStart(track);
+    if (b == null || b.meters < 300) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Semantics(
+        label: 'Je start ligt ${Fmt.km(b.meters, decimals: 1)} ${b.relative == null ? '' : directionWords(b.relative!)}',
+        excludeSemantics: true,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
+          child: Row(children: [
+            if (b.relative != null)
+              TweenAnimationBuilder<double>(
+                tween: Tween(end: b.relative!),
+                duration: const Duration(milliseconds: 500),
+                builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
+                child: const Icon(Icons.navigation, color: RwColors.accent),
+              )
+            else
+              const Icon(Icons.home_outlined, color: RwColors.accent),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                b.relative == null ? 'Terug naar start' : 'Terug naar start: ${directionWords(b.relative!)}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            Text(Fmt.km(b.meters, decimals: 1), style: const TextStyle(fontWeight: FontWeight.w800, fontFeatures: rwTnum)),
+          ]),
         ),
       ),
     );

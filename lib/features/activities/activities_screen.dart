@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -23,6 +24,7 @@ import '../../domain/run_file_import.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/shoes.dart';
 import '../../domain/run_filter.dart';
+import '../../domain/run_helpers.dart';
 import '../../domain/weekly_load.dart';
 import '../record/record_run_screen.dart';
 import '../routes/route_shape.dart';
@@ -30,6 +32,7 @@ import 'activity_detail_screen.dart';
 import 'activity_providers.dart';
 import 'fitness_screen.dart';
 import 'run_insights_screens.dart';
+import 'share_run_screen.dart';
 import 'year_story_screen.dart';
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
@@ -52,18 +55,45 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
   }
   RunFilter _filter = const RunFilter();
 
+  /// Runs die net "verwijderd" zijn maar nog terug kunnen (5 seconden).
+  final _hidden = <String>{};
+
+  /// Zoekterm (leeg = alles) en of het zoekveld open staat.
+  String _query = '';
+  bool _searching = false;
+
+  /// Verwijderen zonder vraag vooraf: de run verdwijnt meteen, met 5 seconden om het ongedaan te maken.
   Future<void> _delete(Activity a) async {
-    final ok = await confirmDialog(
-      context,
-      title: 'Run verwijderen?',
-      message: 'Deze run van ${Fmt.date(a.startedAt)} wordt definitief verwijderd.',
-    );
-    if (!ok) return;
+    final id = a.id;
+    if (id == null) return;
+    HapticFeedback.mediumImpact();
+    setState(() => _hidden.add(id));
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    var undone = false;
+    final bar = messenger.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 5),
+      content: Text('Run van ${Fmt.date(a.startedAt)} verwijderd'),
+      action: SnackBarAction(
+        label: 'Ongedaan maken',
+        onPressed: () {
+          undone = true;
+          if (mounted) setState(() => _hidden.remove(id));
+        },
+      ),
+    ));
+    await bar.closed;
+    if (undone) return;
     try {
-      await ref.read(repositoryProvider).deleteActivity(a.id!);
+      await ref.read(repositoryProvider).deleteActivity(id);
       ref.invalidate(activitiesProvider);
     } catch (e) {
-      if (mounted) showMessage(context, friendlyError(e), error: true);
+      if (mounted) {
+        setState(() => _hidden.remove(id));
+        showMessage(context, friendlyError(e), error: true);
+      }
+    } finally {
+      _hidden.remove(id);
     }
   }
 
@@ -173,8 +203,32 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Mijn runs'),
+        title: _searching
+            ? TextField(
+                autofocus: true,
+                textInputAction: TextInputAction.search,
+                decoration: const InputDecoration(
+                  hintText: 'Zoek op naam, route, notitie of datum',
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                style: const TextStyle(fontSize: 17),
+                onChanged: (v) => setState(() => _query = v),
+              )
+            : const Text('Mijn runs'),
         actions: [
+          IconButton(
+            tooltip: _searching ? 'Zoeken sluiten' : 'Zoeken',
+            icon: Icon(_searching ? Icons.close : Icons.search),
+            onPressed: () => setState(() {
+              _searching = !_searching;
+              if (!_searching) _query = '';
+            }),
+          ),
+          if (!_searching)
           IconButton(
             tooltip: active == 0 ? 'Runs filteren' : 'Filters ($active aan)',
             icon: Badge(
@@ -248,7 +302,22 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               onAction: () => context.go('/runs/new'),
             );
           }
-          final shown = _filter.apply(list);
+          final q = _query.trim().toLowerCase();
+          final routeList = ref.watch(routesProvider).value ?? const <RunRoute>[];
+          final routesById = {for (final r in routeList) if (r.id != null) r.id!: r};
+          final shown = _filter.apply(list).where((a) {
+            if (_hidden.contains(a.id)) return false;
+            if (q.isEmpty) return true;
+            final rn = a.routeId == null ? '' : (routesById[a.routeId]?.name ?? '');
+            final hay = [
+              runTitle(a, routeName: rn.isEmpty ? null : rn),
+              rn,
+              a.note ?? '',
+              Fmt.date(a.startedAt),
+              Fmt.dateLong(a.startedAt),
+            ].join(' ').toLowerCase();
+            return q.split(' ').where((w) => w.isNotEmpty).every(hay.contains);
+          }).toList();
           final km = shown.fold<double>(0, (s, a) => s + a.distanceMeters);
           final routeNames = {for (final r in ref.watch(routesProvider).value ?? const <RunRoute>[]) if (r.id != null) r.id!: r.name};
           // Runs per week, met een kopje per week.
@@ -304,12 +373,15 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                   return _WeekHeader(start: row.start, km: row.km, runs: row.runs);
                 }
                 final a = row as Activity;
+                final route = a.routeId == null ? null : routesById[a.routeId];
                 return _ActivityTile(
                   activity: a,
                   routeName: a.routeId == null ? null : routeNames[a.routeId],
                   badges: records.badgesFor(a),
                   onTap: a.id == null ? null : () => context.go('/runs/${a.id}'),
                   onDelete: () => _delete(a),
+                  onRunAgain: route == null ? null : () => openRecorder(context, route: route),
+                  onShare: () => openShareRun(context, a, route: route, badges: records.badgesFor(a)),
                 );
               })),
             ),
@@ -344,7 +416,16 @@ class _OverviewState extends State<_Overview> {
   }
 
   Future<void> _setGoal() async {
-    var km = (_goalKm ?? 20).round();
+    // Gemiddelde van de laatste 4 hele weken, voor de voorstellen.
+    final now = DateTime.now();
+    final weekStart = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+    final from = weekStart.subtract(const Duration(days: 28));
+    final avg = widget.activities
+            .where((a) => !a.startedAt.toLocal().isBefore(from) && a.startedAt.toLocal().isBefore(weekStart))
+            .fold<double>(0, (t, a) => t + a.distanceMeters / 1000) /
+        4;
+    final ideas = weekGoalSuggestions(avg);
+    var km = (_goalKm ?? (avg >= 3 ? ideas[1] : 20)).round();
     final result = await showDialog<int>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -363,6 +444,21 @@ class _OverviewState extends State<_Overview> {
                   IconButton(onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: const Icon(Icons.add_circle_outline)),
                 ],
               ),
+              const SizedBox(height: 8),
+              Text(avg >= 3 ? 'Je liep de laatste 4 weken gemiddeld ${avg.toStringAsFixed(1).replaceAll('.', ',')} km. Voorstellen:' : 'Voorstellen om mee te beginnen:',
+                  textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+              const SizedBox(height: 8),
+              Wrap(spacing: 8, alignment: WrapAlignment.center, children: [
+                for (final (i, g) in ideas.indexed)
+                  ChoiceChip(
+                    label: Text('${g.round()} km${i == 0 ? ' · rustig' : (i == 1 ? ' · gewoon' : ' · groeien')}'),
+                    selected: km == g.round(),
+                    onSelected: (_) {
+                      HapticFeedback.selectionClick();
+                      set(() => km = g.round());
+                    },
+                  ),
+              ]),
             ],
           ),
           actions: [
@@ -767,15 +863,19 @@ String runTitle(Activity a, {String? routeName}) {
 }
 
 class _ActivityTile extends StatelessWidget {
-  const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete, this.routeName});
+  const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete, this.routeName, this.onRunAgain, this.onShare});
+  final VoidCallback? onRunAgain;
+  final VoidCallback? onShare;
   final Activity activity;
   final List<String> badges;
   final VoidCallback? onTap;
   final VoidCallback onDelete;
   final String? routeName;
 
+  /// Snelmenu bij lang drukken: openen, opnieuw lopen, delen, verwijderen.
   Future<void> _menu(BuildContext context) async {
-    final del = await showModalBottomSheet<bool>(
+    HapticFeedback.mediumImpact();
+    final pick = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
@@ -783,20 +883,39 @@ class _ActivityTile extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.open_in_new),
             title: const Text('Openen'),
-            onTap: () => Navigator.pop(ctx, false),
+            onTap: () => Navigator.pop(ctx, 'open'),
           ),
+          if (onRunAgain != null)
+            ListTile(
+              leading: const Icon(Icons.replay, color: RwColors.accent),
+              title: Text('Loop ${routeName ?? 'deze route'} opnieuw'),
+              subtitle: const Text('Met de route op je scherm en tegen je record'),
+              onTap: () => Navigator.pop(ctx, 'again'),
+            ),
+          if (onShare != null)
+            ListTile(
+              leading: const Icon(Icons.ios_share),
+              title: const Text('Delen'),
+              onTap: () => Navigator.pop(ctx, 'share'),
+            ),
           ListTile(
             leading: const Icon(Icons.delete_outline, color: RwColors.danger),
             title: const Text('Verwijderen', style: TextStyle(color: RwColors.danger)),
-            onTap: () => Navigator.pop(ctx, true),
+            subtitle: const Text('Je kunt het nog 5 seconden ongedaan maken'),
+            onTap: () => Navigator.pop(ctx, 'delete'),
           ),
         ]),
       ),
     );
-    if (del == true) {
-      onDelete();
-    } else if (del == false) {
-      onTap?.call();
+    switch (pick) {
+      case 'open':
+        onTap?.call();
+      case 'again':
+        onRunAgain?.call();
+      case 'share':
+        onShare?.call();
+      case 'delete':
+        onDelete();
     }
   }
 

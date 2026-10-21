@@ -14,6 +14,7 @@ import '../../domain/records.dart';
 import '../../domain/shoes.dart';
 import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
+import '../record/record_run_screen.dart';
 import '../routes/route_map.dart';
 import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
@@ -238,7 +239,17 @@ class ActivityDetailScreen extends ConsumerWidget {
                           style: const TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ],
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 10),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: RwColors.accent.withValues(alpha: 0.16),
+                          foregroundColor: RwColors.accentLight,
+                          side: BorderSide(color: RwColors.accent.withValues(alpha: 0.35)),
+                        ),
+                        onPressed: () => openRecorder(context, route: route),
+                        icon: const Icon(Icons.replay),
+                        label: const Text('Loop deze route opnieuw'),
+                      ),
                       TextButton.icon(
                         onPressed: () => context.go('/routes/${route!.id}'),
                         icon: const Icon(Icons.timeline),
