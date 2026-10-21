@@ -10,6 +10,7 @@ import '../../core/theme.dart';
 import '../../domain/geo.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
+import '../../shared/permission_primer.dart';
 import '../../shared/widgets.dart';
 import 'elevation_profile.dart';
 import 'route_map.dart';
@@ -100,6 +101,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       if (!await Geolocator.isLocationServiceEnabled()) {
         throw Exception('Zet locatie aan op je telefoon om jezelf op de kaart te zien.');
       }
+      await explainLocationFirst(context, why: 'Zo kan RunWise laten zien waar jij nu bent op de kaart.');
       var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
       if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {

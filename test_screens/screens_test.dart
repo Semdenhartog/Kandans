@@ -26,6 +26,7 @@ import 'package:runwise/data/services/heart_rate_service.dart';
 import 'package:runwise/data/services/run_recorder_service.dart';
 import 'package:runwise/data/services/sync_service.dart';
 import 'package:runwise/domain/run_recorder.dart';
+import 'package:runwise/domain/route_turns.dart';
 import 'package:runwise/domain/availability.dart';
 import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/readiness.dart';
@@ -350,6 +351,23 @@ void main() {
           followRoute: decodePolyline(_routes.first.polyline),
           routeRemaining: 2970,
           ghostDelta: -12,
+          nextTurn: const RouteTurn(meters: 2400, point: LatLng(52.15, 5.6), kind: TurnKind.left, angle: -90),
+          nextTurnIn: 120,
+        );
+      }));
+  testWidgets('11b afslag nu, groot', (t) => _shot(t, '11b_afslag_groot', const RecordRunScreen(), height: 915, textScale: 1.35, after: () {
+        RunRecorderService.instance.view.value = RecorderView(
+          status: RecorderStatus.running,
+          distance: 5230,
+          movingSeconds: 1652,
+          currentPace: 309,
+          averagePace: 316,
+          km: 5,
+          gpsAccuracy: 4,
+          followRoute: decodePolyline(_routes.first.polyline),
+          routeRemaining: 2970,
+          nextTurn: const RouteTurn(meters: 2400, point: LatLng(52.15, 5.6), kind: TurnKind.sharpRight, angle: 130),
+          nextTurnIn: 15,
         );
       }));
   testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));

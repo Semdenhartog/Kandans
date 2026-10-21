@@ -426,7 +426,8 @@ jobs:
           decoder = Decoder(stream)
           if not decoder.is_fit(): fail("geen FIT-bestand")
           if not decoder.check_integrity(): fail("controlegetal klopt niet")
-          messages, errors = decoder.read()
+          # Opnieuw openen: de controle hierboven leest het bestand al helemaal door.
+          messages, errors = Decoder(Stream.from_file("build/test_course.fit")).read()
           if errors: fail(f"leesfouten: {errors}")
           points = messages.get("course_point_mesgs", [])
           records = messages.get("record_mesgs", [])

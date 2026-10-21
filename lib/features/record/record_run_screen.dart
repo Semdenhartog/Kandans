@@ -34,6 +34,7 @@ import '../../domain/run_helpers.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/route_turns.dart';
 import '../../domain/shoes.dart';
+import '../../shared/permission_primer.dart';
 import '../../shared/rolling_text.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
@@ -174,8 +175,15 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       } catch (_) {}
     }).ignore();
     if (!_svc.isRecording) {
-      _svc.warmUp().catchError((Object e) {
-        if (mounted) setState(() => _error = friendlyError(e));
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!_indoor) {
+          await explainLocationFirst(context,
+              why: 'Om je run op te nemen meet RunWise met GPS waar je loopt: afstand, tempo en je route op de kaart.');
+        }
+        if (!mounted) return;
+        _svc.warmUp().catchError((Object e) {
+          if (mounted) setState(() => _error = friendlyError(e));
+        });
       });
     }
   }
