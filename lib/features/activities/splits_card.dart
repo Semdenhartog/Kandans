@@ -190,7 +190,38 @@ class SplitsCard extends ConsumerWidget {
       null => '',
     };
     final isFast = identical(sp, ex.fastest), isSlow = identical(sp, ex.slowest);
-    return Padding(
+    // Balkje achter de regel: hoe langer, hoe sneller deze kilometer (snelste in goud).
+    final fastP = ex.fastest?.paceSecPerKm, slowP = ex.slowest?.paceSecPerKm;
+    final rel = fastP == null || slowP == null || slowP - fastP < 1 ? 0.6 : ((slowP - sp.paceSecPerKm) / (slowP - fastP)).clamp(0.0, 1.0);
+    return Stack(children: [
+      Positioned.fill(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 36, top: 2, bottom: 2),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: (0.3 + 0.7 * rel).toDouble()),
+              duration: Duration(milliseconds: 700 + 40 * sp.index.clamp(0, 15)),
+              curve: Curves.easeOutCubic,
+              builder: (_, w, _) => FractionallySizedBox(
+                widthFactor: w,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    gradient: LinearGradient(
+                      colors: isFast
+                          ? [const Color(0x00D9B45A), const Color(0x40D9B45A)]
+                          : [RwColors.accent.withValues(alpha: 0), RwColors.accent.withValues(alpha: 0.13)],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
@@ -206,9 +237,9 @@ class SplitsCard extends ConsumerWidget {
               Text(Fmt.pace(sp.paceSecPerKm).replaceAll(' /km', ''),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: isFast ? RwColors.good : (isSlow ? RwColors.warning : RwColors.text),
+                    color: isFast ? const Color(0xFFF2D892) : (isSlow ? RwColors.warning : RwColors.text),
                   )),
-              if (isFast) const Text('  snelst', style: TextStyle(color: RwColors.good, fontSize: 12)),
+              if (isFast) const Text('  snelst', style: TextStyle(color: Color(0xFFD9B45A), fontSize: 12, fontWeight: FontWeight.w700)),
             ]),
           ),
           if (hasHr)
@@ -241,7 +272,8 @@ class SplitsCard extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),
+    ]);
   }
 }
 

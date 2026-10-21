@@ -27,7 +27,18 @@ class NetPhoto extends StatelessWidget {
         fit: fit,
         gaplessPlayback: true,
         frameBuilder: (context, child, frame, sync) =>
-            sync || frame != null ? child : Container(color: RwColors.surfaceHigh),
+            sync
+                ? child
+                // Foto vaagt zacht in over de laadglans.
+                : Stack(fit: StackFit.passthrough, children: [
+                    const Positioned.fill(child: ShimmerBox(radius: 0)),
+                    AnimatedOpacity(
+                      opacity: frame == null ? 0 : 1,
+                      duration: const Duration(milliseconds: 450),
+                      curve: Curves.easeOut,
+                      child: child,
+                    ),
+                  ]),
         errorBuilder: (context, _, _) => Container(
           color: RwColors.surfaceHigh,
           alignment: Alignment.center,
@@ -65,10 +76,7 @@ class RoutePhotosCard extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             itemCount: 3,
             separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (_, _) => Container(
-              width: 200,
-              decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
-            ),
+            itemBuilder: (_, _) => const ShimmerBox(width: 200),
           ),
         ),
         error: (e, _) => Row(

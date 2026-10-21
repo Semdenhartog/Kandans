@@ -426,9 +426,20 @@ class _OverviewState extends State<_Overview> {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: d.runs > 0 ? RwColors.accent : (d.isFuture ? Colors.transparent : RwColors.surfaceHigh),
+                            color: d.runs > 0 ? null : (d.isFuture ? Colors.transparent : RwColors.surfaceHigh),
+                            // Gelopen dagen als kleine oranje munten met gloed; vandaag met een lichtrand.
+                            gradient: d.runs > 0
+                                ? const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
+                                  )
+                                : null,
+                            boxShadow: d.runs > 0
+                                ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.35), blurRadius: 10, spreadRadius: -2)]
+                                : (d.isToday ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.25), blurRadius: 12)] : null),
                             border: Border.all(
-                              color: d.isToday ? RwColors.text : (d.runs > 0 ? RwColors.accent : RwColors.border),
+                              color: d.isToday ? (d.runs > 0 ? RwColors.text : RwColors.accent) : (d.runs > 0 ? Colors.white.withValues(alpha: 0.25) : RwColors.border),
                               width: d.isToday ? 2 : 1,
                             ),
                           ),

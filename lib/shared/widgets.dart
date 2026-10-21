@@ -451,3 +451,49 @@ class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMix
     );
   }
 }
+
+/// Vlak met een lichtglans die eroverheen trekt: tijdelijke plek voor iets dat nog laadt.
+class ShimmerBox extends StatefulWidget {
+  const ShimmerBox({super.key, this.radius = 14, this.width, this.height});
+  final double radius;
+  final double? width, height;
+
+  @override
+  State<ShimmerBox> createState() => _ShimmerBoxState();
+}
+
+class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+
+  @override
+  void initState() {
+    super.initState();
+    if (!WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) _c.repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _c,
+        builder: (_, _) {
+          final x = -1.5 + 3 * _c.value;
+          return Container(
+            width: widget.width,
+            height: widget.height,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.radius),
+              gradient: LinearGradient(
+                begin: Alignment(x - 1, -0.3),
+                end: Alignment(x + 1, 0.3),
+                colors: const [RwColors.surfaceHigh, Color(0xFF26262C), RwColors.surfaceHigh],
+              ),
+            ),
+          );
+        },
+      );
+}

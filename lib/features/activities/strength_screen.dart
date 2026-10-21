@@ -118,7 +118,11 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
       final before = (_p.index, _p.resting);
       final t = _p.tick(1);
       _say(t);
-      if ((_p.index, _p.resting) != before) HapticFeedback.mediumImpact();
+      if ((_p.index, _p.resting) != before) {
+        HapticFeedback.mediumImpact();
+      } else if (_p.remaining <= 3 && _p.remaining > 0) {
+        HapticFeedback.selectionClick();
+      }
       if (_p.finished) {
         _timer?.cancel();
         _running = false;
@@ -169,11 +173,18 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, height: 1.15)),
                 const SizedBox(height: 10),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(Fmt.duration(_p.remaining.ceil()),
-                      style: TextStyle(
-                          fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 96, fontWeight: FontWeight.w800, color: _p.resting ? RwColors.good : RwColors.text)),
+                Center(
+                  child: _CountdownRing(
+                    fraction: _p.remaining / (_p.resting ? widget.routine.rest : c.seconds).clamp(1, 9999),
+                    color: _p.resting ? RwColors.good : (_p.remaining <= 5 ? RwColors.danger : RwColors.accent),
+                    running: _running,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(Fmt.duration(_p.remaining.ceil()),
+                          style: TextStyle(
+                              fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 72, fontWeight: FontWeight.w800, color: _p.resting ? RwColors.good : RwColors.text)),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(_p.resting ? (n?.how ?? '') : c.how,
@@ -227,4 +238,67 @@ class CooldownTip extends StatelessWidget {
           Icon(Icons.chevron_right, color: RwColors.subtle),
         ]),
       );
+}
+
+
+/// Aftelring rond de klok: loopt soepel leeg en kleurt rood in de laatste seconden.
+class _CountdownRing extends StatelessWidget {
+  const _CountdownRing({required this.fraction, required this.color, required this.running, required this.child});
+  final double fraction;
+  final Color color;
+  final bool running;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, box) {
+        final size = box.maxWidth.clamp(0.0, 230.0);
+        return TweenAnimationBuilder<double>(
+          tween: Tween(end: fraction.clamp(0.0, 1.0)),
+          // Elke tik duurt een seconde: de ring loopt zo zonder schokken leeg.
+          duration: running ? const Duration(seconds: 1) : const Duration(milliseconds: 300),
+          builder: (_, f, child) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: color),
+            duration: const Duration(milliseconds: 400),
+            builder: (_, col, _) => CustomPaint(
+              painter: _CountdownPainter(f, col ?? color),
+              child: SizedBox(width: size, height: size, child: Center(child: Padding(padding: const EdgeInsets.all(28), child: child))),
+            ),
+          ),
+          child: child,
+        );
+      });
+}
+
+class _CountdownPainter extends CustomPainter {
+  _CountdownPainter(this.f, this.color);
+  final double f;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2 - 10;
+    final rect = Rect.fromCircle(center: c, radius: r);
+    canvas.drawCircle(c, r, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..color = Colors.white.withValues(alpha: 0.06));
+    if (f <= 0.001) return;
+    const start = -1.5707963;
+    final sweep = 6.2831853 * f;
+    canvas.drawArc(rect, start, sweep, false, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 16
+      ..strokeCap = StrokeCap.round
+      ..color = color.withValues(alpha: 0.2)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9));
+    canvas.drawArc(rect, start, sweep, false, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CountdownPainter old) => old.f != f || old.color != color;
 }

@@ -268,9 +268,13 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
-        child: child!,
+      // Zelfde donkere ondergrond als de app (anders kleuren doorzichtige schermen vreemd in de PNG).
+      builder: (context, child) => ColoredBox(
+        color: RwColors.background,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
       ),
       home: nav ? _FakeShell(child: screen) : screen,
     ),

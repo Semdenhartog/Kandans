@@ -23,6 +23,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../data/services/air_quality_service.dart';
 import '../../domain/run_warnings.dart';
 import '../../shared/alarm.dart';
+import '../../shared/shine_text.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
 import '../../domain/availability.dart';
@@ -682,7 +683,7 @@ class _HeroCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
+                  ShineText(
                     goNowShown ? 'Nu' : Fmt.time(s.start),
                     style: const TextStyle(
                       fontFamily: RwFonts.display, fontFeatures: rwTnum,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:io' show Platform;
 
 import 'package:android_intent_plus/android_intent.dart';
@@ -735,18 +736,46 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           ],
           const Spacer(),
         ] else ...[
-        Semantics(
-          label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: RollingText(
-              (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
-              style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: v.hasIntervals ? 72 : 96, fontWeight: FontWeight.w800, height: 1),
+        if (v.hasIntervals) ...[
+          Semantics(
+            label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: RollingText(
+                (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
+                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 72, fontWeight: FontWeight.w800, height: 1),
+              ),
             ),
           ),
-        ),
-        const Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 18)),
-        const SizedBox(height: 28),
+          const Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 18)),
+          const SizedBox(height: 28),
+        ] else ...[
+          // De afstand in een ring die per kilometer volloopt.
+          Center(
+            child: _KmRing(
+              fraction: (v.distance % 1000) / 1000,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Semantics(
+                  label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: RollingText(
+                      (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
+                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 84, fontWeight: FontWeight.w800, height: 1),
+                    ),
+                  ),
+                ),
+                const Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
+                const SizedBox(height: 4),
+                Text(
+                  'nog ${(1000 - v.distance % 1000).round()} m tot km ${(v.distance / 1000).floor() + 1}',
+                  style: const TextStyle(color: RwColors.subtle, fontSize: 12, fontFeatures: rwTnum),
+                ),
+              ]),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
         Row(
           children: [
             Expanded(child: _Big(label: 'Tijd', value: Fmt.duration(v.movingSeconds))),
@@ -996,6 +1025,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               ],
             ),
             body: Stack(children: [
+              if (started) Positioned.fill(child: _ZoneGlow(view: v)),
               SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -1414,7 +1444,7 @@ class _HeartRow extends StatelessWidget {
         decoration: BoxDecoration(color: color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(14)),
         child: Row(
           children: [
-            Icon(Icons.favorite, color: bpm == null ? RwColors.subtle : RwColors.danger),
+            _BeatingHeart(bpm: bpm),
             const SizedBox(width: 10),
             Text(bpm == null ? (view.hrStatus == HrStatus.lost ? 'Band kwijt…' : 'Band verbinden…') : '$bpm',
                 style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: bpm == null ? 16 : 28, fontWeight: FontWeight.w800)),
@@ -1681,4 +1711,171 @@ class _GlowPulseState extends State<_GlowPulse> with SingleTickerProviderStateMi
           child: child,
         ),
       );
+}
+
+
+/// Ring rond de afstand die per kilometer volloopt, met een gloeiend kopje.
+class _KmRing extends StatelessWidget {
+  const _KmRing({required this.fraction, required this.child});
+  final double fraction;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
+        final size = math.min(280.0, c.maxWidth);
+        return TweenAnimationBuilder<double>(
+          tween: Tween(end: fraction),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (_, f, child) => CustomPaint(
+            painter: _KmRingPainter(f),
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Padding(padding: EdgeInsets.all(size * 0.12), child: Center(child: child)),
+            ),
+          ),
+          child: child,
+        );
+      });
+}
+
+class _KmRingPainter extends CustomPainter {
+  _KmRingPainter(this.f);
+  final double f;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2 - 8;
+    final rect = Rect.fromCircle(center: c, radius: r);
+    canvas.drawCircle(c, r, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..color = Colors.white.withValues(alpha: 0.06));
+    // Fijne streepjes per 100 m.
+    final tick = Paint()
+      ..color = Colors.white.withValues(alpha: 0.12)
+      ..strokeWidth = 1.5;
+    for (var i = 0; i < 10; i++) {
+      final a = -math.pi / 2 + i * math.pi / 5;
+      final d = Offset(math.cos(a), math.sin(a));
+      canvas.drawLine(c + d * (r - 12), c + d * (r - 7), tick);
+    }
+    if (f <= 0.002) return;
+    final sweep = 2 * math.pi * f.clamp(0.0, 1.0);
+    final shader = SweepGradient(
+      startAngle: 0,
+      endAngle: 2 * math.pi,
+      transform: const GradientRotation(-math.pi / 2),
+      colors: const [RwColors.accentDeep, RwColors.accent, RwColors.accentLight],
+      stops: [0, f * 0.7, f],
+    ).createShader(rect);
+    canvas.drawArc(rect, -math.pi / 2, sweep, false, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 14
+      ..strokeCap = StrokeCap.round
+      ..color = RwColors.accent.withValues(alpha: 0.18)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
+    canvas.drawArc(rect, -math.pi / 2, sweep, false, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round
+      ..shader = shader);
+    final a = -math.pi / 2 + sweep;
+    final tip = c + Offset(math.cos(a), math.sin(a)) * r;
+    canvas.drawCircle(tip, 9, Paint()..color = RwColors.accent.withValues(alpha: 0.3));
+    canvas.drawCircle(tip, 4.5, Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(covariant _KmRingPainter old) => old.f != f;
+}
+
+/// Hartje dat op het ritme van je eigen hartslag klopt.
+class _BeatingHeart extends StatefulWidget {
+  const _BeatingHeart({required this.bpm});
+  final int? bpm;
+
+  @override
+  State<_BeatingHeart> createState() => _BeatingHeartState();
+}
+
+class _BeatingHeartState extends State<_BeatingHeart> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+
+  void _sync() {
+    final b = widget.bpm;
+    if (b == null || b < 30 || WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+      _c.stop();
+      _c.value = 0;
+      return;
+    }
+    _c.duration = Duration(milliseconds: (60000 / b.clamp(30, 230)).round());
+    _c.repeat();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant _BeatingHeart old) {
+    super.didUpdateWidget(old);
+    // Alleen bij een merkbare verandering opnieuw starten, anders hapert het ritme.
+    if ((old.bpm == null) != (widget.bpm == null) || ((old.bpm ?? 0) - (widget.bpm ?? 0)).abs() >= 4) _sync();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _c,
+        builder: (_, _) {
+          // "Lub-dub": twee korte tikken aan het begin van elke slag.
+          final t = _c.value;
+          final beat = t < 0.12 ? math.sin(t / 0.12 * math.pi) : (t > 0.18 && t < 0.28 ? 0.6 * math.sin((t - 0.18) / 0.1 * math.pi) : 0.0);
+          return Transform.scale(
+            scale: 1 + 0.2 * beat,
+            child: Icon(Icons.favorite, color: widget.bpm == null ? RwColors.subtle : RwColors.danger, shadows: [
+              if (widget.bpm != null) Shadow(color: RwColors.danger.withValues(alpha: 0.6 * beat), blurRadius: 12),
+            ]),
+          );
+        },
+      );
+}
+
+/// Zachte gloed bovenin het scherm in de kleur van je hartslagzone (of oranje zonder band).
+class _ZoneGlow extends StatelessWidget {
+  const _ZoneGlow({required this.view});
+  final RecorderView view;
+
+  @override
+  Widget build(BuildContext context) {
+    final bpm = view.heartRate;
+    final zone = bpm == null ? 0 : heartRateZone(bpm, HeartRateService.instance.maxHr.value);
+    final color = _HeartRow._zoneColors[zone] ?? RwColors.accent;
+    final paused = view.status == RecorderStatus.paused;
+    return IgnorePointer(
+      child: TweenAnimationBuilder<Color?>(
+        tween: ColorTween(end: paused ? RwColors.subtle : color),
+        duration: const Duration(milliseconds: 1200),
+        builder: (_, c, _) => DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0, -0.75),
+              radius: 1.0,
+              colors: [(c ?? color).withValues(alpha: 0.13), (c ?? color).withValues(alpha: 0)],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
