@@ -795,12 +795,50 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
   bool _follow = true;
   bool _ready = false;
 
+  /// Kaart draait mee: jouw looprichting wijst altijd naar boven (zoals een navigatie-app).
+  bool _headingUp = false;
+  double _heading = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      if (mounted) setState(() => _headingUp = p.getBool('map_heading_up') ?? false);
+    }).catchError((Object _) {});
+  }
+
+  /// Looprichting uit de laatste ~25 meter van je spoor (minder schokkerig dan per GPS-punt).
+  double? _currentHeading() {
+    final t = widget.track;
+    if (t.length < 2) return null;
+    final last = t.last;
+    for (var i = t.length - 2; i >= 0; i--) {
+      if (distanceMeters(t[i], last) >= 25) return bearingDegrees(t[i], last);
+    }
+    return null;
+  }
+
+  void _toggleHeadingUp() {
+    setState(() => _headingUp = !_headingUp);
+    SharedPreferences.getInstance().then((p) => p.setBool('map_heading_up', _headingUp)).ignore();
+    if (!_ready) return;
+    final pos = widget.position ?? (widget.track.isEmpty ? null : widget.track.last);
+    if (pos == null) return;
+    _map.moveAndRotate(_ll(pos), _map.camera.zoom, _headingUp ? -_heading : 0);
+  }
+
   @override
   void didUpdateWidget(covariant LiveTrackMap old) {
     super.didUpdateWidget(old);
     final p = widget.position;
+    final h = _currentHeading();
+    if (h != null) _heading = h;
     if (_ready && _follow && p != null && (old.position == null || distanceMeters(old.position!, p) > 1)) {
-      _map.move(_ll(p), _map.camera.zoom);
+      if (_headingUp) {
+        _map.moveAndRotate(_ll(p), _map.camera.zoom, -_heading);
+      } else {
+        _map.move(_ll(p), _map.camera.zoom);
+      }
     }
   }
 
@@ -843,11 +881,29 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                     ]),
                   MarkerLayer(markers: [
                     if (pts.isNotEmpty) Marker(point: pts.first, width: 28, height: 28, child: const _Pin(icon: Icons.flag, color: RwColors.accent)),
-                    if (pos != null) Marker(point: _ll(pos), width: 22, height: 22, child: _dot(const Color(0xFF4C8DFF))),
+                    if (pos != null && !_headingUp) Marker(point: _ll(pos), width: 22, height: 22, child: _dot(const Color(0xFF4C8DFF))),
+                    if (pos != null && _headingUp)
+                      Marker(
+                        point: _ll(pos),
+                        width: 34,
+                        height: 34,
+                        // Rechtop houden t.o.v. het scherm: de kaart draait al mee, dus omhoog = jouw looprichting.
+                        rotate: true,
+                        child: const Icon(Icons.navigation, color: Color(0xFF4C8DFF), size: 30, shadows: [Shadow(blurRadius: 6)]),
+                      ),
                   ]),
                 ],
               ),
               Positioned(top: 10, left: 10, child: _LayerToggle(layer: layer, onChanged: mapLayerNotifier.choose)),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: _RoundButton(
+                  icon: _headingUp ? Icons.explore : Icons.explore_outlined,
+                  tooltip: _headingUp ? 'Noorden boven' : 'Looprichting boven (kaart draait mee)',
+                  onTap: _toggleHeadingUp,
+                ),
+              ),
               if (!_follow && pos != null)
                 Positioned(
                   right: 10,

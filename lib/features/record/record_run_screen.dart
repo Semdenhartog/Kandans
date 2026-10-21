@@ -2291,12 +2291,14 @@ class _NextTurnCard extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: Text(turn.kind.label,
+                  maxLines: 2,
                   style: TextStyle(
                       fontFamily: RwFonts.display,
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       color: soon ? RwColors.accentDark : RwColors.text)),
             ),
+            const SizedBox(width: 10),
             Text(dist,
                 style: TextStyle(
                     fontFamily: RwFonts.display,

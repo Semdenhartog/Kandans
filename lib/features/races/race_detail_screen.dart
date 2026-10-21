@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -15,6 +16,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../domain/zones.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
+import 'pace_band.dart';
 
 /// Alles wat nodig is voor het wedstrijdadvies.
 final _raceAdviceProvider = FutureProvider.family<RaceAdvice, String>((ref, raceId) async {
@@ -283,6 +285,23 @@ class _PacingCardState extends State<_PacingCard> {
   PacingStrategy _strategy = PacingStrategy.easyStart;
   bool _all = false;
 
+  Future<void> _shareBand(List<PlannedSplit> plan) async {
+    final r = widget.race;
+    try {
+      final png = await paceBandPng(
+        title: r.name,
+        subtitle: '${Fmt.km(r.distanceMeters, decimals: 1)} · doel ${Fmt.duration(r.goalTimeSeconds)} · ${_strategy.label.toLowerCase()}',
+        plan: plan,
+      );
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(png, mimeType: 'image/png', name: 'tempoband.png')],
+        subject: 'Tempoband ${r.name}',
+      ));
+    } catch (_) {
+      if (mounted) showMessage(context, 'Het tempobandje kon niet worden gemaakt.', error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final r = widget.race;
@@ -324,6 +343,12 @@ class _PacingCardState extends State<_PacingCard> {
           ],
           if (plan.length > 12)
             TextButton(onPressed: () => setState(() => _all = !_all), child: Text(_all ? 'Minder tonen' : 'Alle ${plan.length} km tonen')),
+          const SizedBox(height: 4),
+          OutlinedButton.icon(
+            onPressed: () => _shareBand(plan),
+            icon: const Icon(Icons.print_outlined),
+            label: const Text('Tempobandje delen of printen'),
+          ),
         ],
       ),
     );
