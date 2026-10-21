@@ -584,11 +584,27 @@ class _OverviewState extends State<_Overview> {
                                       fontWeight: FontWeight.w600)),
                             ),
                             const SizedBox(height: 3),
-                            Container(
-                              height: maxKm <= 0 ? 3 : 3 + 54 * (w.km / maxKm),
-                              decoration: BoxDecoration(
-                                color: i == totals.length - 1 ? RwColors.accent : RwColors.bar,
-                                borderRadius: BorderRadius.circular(5),
+                            // Groeit bij openen omhoog; huidige periode in oranje verloop met gloed.
+                            TweenAnimationBuilder<double>(
+                              key: ValueKey('$_period$i'),
+                              tween: Tween(begin: 3, end: maxKm <= 0 ? 3 : 3 + 54 * (w.km / maxKm)),
+                              duration: Duration(milliseconds: 550 + 45 * i),
+                              curve: Curves.easeOutCubic,
+                              builder: (_, h, _) => Container(
+                                height: h,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: i == totals.length - 1
+                                        ? const [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
+                                        : const [Color(0xFF34343B), RwColors.bar],
+                                  ),
+                                  boxShadow: i == totals.length - 1 && w.km > 0
+                                      ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.4), blurRadius: 10, spreadRadius: -2)]
+                                      : null,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 4),

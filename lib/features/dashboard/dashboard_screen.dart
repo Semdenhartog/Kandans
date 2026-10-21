@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -197,11 +198,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'start-run-today',
-        onPressed: () => openRecorder(context),
-        icon: const Icon(Icons.play_arrow),
-        label: const Text('Start run'),
+      // Startknop in een oranje verloop met zachte gloed.
+      floatingActionButton: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
+          ),
+          boxShadow: [
+            BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 22, spreadRadius: -4, offset: const Offset(0, 8)),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          heroTag: 'start-run-today',
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          focusElevation: 0,
+          hoverElevation: 0,
+          highlightElevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          onPressed: () => openRecorder(context),
+          icon: const Icon(Icons.play_arrow),
+          label: const Text('Start run'),
+        ),
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -213,9 +234,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+                    child: StaggerIn(
+                      index: 0,
+                      child: Text(
+                        '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+                      ),
                     ),
                   ),
                   IconButton(
@@ -226,7 +250,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ],
               ),
               const SizedBox(height: 2),
-              Text(
+              StaggerIn(
+                index: 2,
+                child: Text(
                 () {
                   final nowW = forecast.value?.at(DateTime.now());
                   final place = location.when(data: (l) => l.label, loading: () => '', error: (_, _) => '');
@@ -235,6 +261,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   return '${Fmt.date(DateTime.now())}$weather$where';
                 }(),
                 style: const TextStyle(color: RwColors.subtle),
+              ),
               ),
               const SizedBox(height: 18),
               ...forecast.when<List<Widget>>(
@@ -717,6 +744,7 @@ class _HeroCard extends StatelessWidget {
                 Expanded(
                   child: _HeroStat(
                     icon: Icons.air,
+                    lead: w.windDirection == null ? null : _WindNeedle(fromDegrees: w.windDirection!),
                     label: 'Wind',
                     value: w.windDirection == null ? Fmt.wind(w.windSpeed) : '${Fmt.wind(w.windSpeed)} ${Fmt.compass(w.windDirection!)}',
                   ),
@@ -808,15 +836,16 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _HeroStat extends StatelessWidget {
-  const _HeroStat({required this.icon, required this.label, required this.value});
+  const _HeroStat({required this.icon, required this.label, required this.value, this.lead});
   final IconData icon;
+  final Widget? lead;
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) => Row(
         children: [
-          Icon(icon, size: 18, color: RwColors.subtle),
+          lead ?? Icon(icon, size: 18, color: RwColors.subtle),
           const SizedBox(width: 6),
           Flexible(
             child: Column(
@@ -912,14 +941,25 @@ class _HourBars extends StatelessWidget {
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: FractionallySizedBox(
-                        heightFactor: (s.score.clamp(5, 100)) / 100,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isBest
-                                ? RwColors.accent
-                                : (isSel ? RwColors.muted : RwColors.bar),
-                            borderRadius: BorderRadius.circular(6),
+                      // Staafjes groeien bij openen één voor één omhoog; het beste uur gloeit.
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: (s.score.clamp(5, 100)) / 100),
+                        duration: Duration(milliseconds: 500 + 35 * i.clamp(0, 16)),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, h, _) => FractionallySizedBox(
+                          heightFactor: h,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: isBest
+                                    ? const [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
+                                    : (isSel ? const [Color(0xFFB5B5BE), RwColors.muted] : const [Color(0xFF34343B), RwColors.bar]),
+                              ),
+                              boxShadow: isBest ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 12, spreadRadius: -2)] : null,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                           ),
                         ),
                       ),
@@ -1016,12 +1056,17 @@ class _ClothingCard extends StatelessWidget {
             children: [
               for (final item in advice.items)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
                   decoration: BoxDecoration(
-                    color: RwColors.surfaceHigh,
+                    gradient: const LinearGradient(colors: [Color(0xFF232328), RwColors.surfaceHigh]),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: Text(item, style: const TextStyle(fontSize: 13)),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(_clothingIcon(item), size: 16, color: RwColors.accentLight),
+                    const SizedBox(width: 6),
+                    Text(item, style: const TextStyle(fontSize: 13)),
+                  ]),
                 ),
             ],
           ),
@@ -1167,4 +1212,37 @@ class _WarningsCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+/// Kompasnaaldje dat de kant op wijst waar de wind naartoe waait; draait bij openen in.
+class _WindNeedle extends StatelessWidget {
+  const _WindNeedle({required this.fromDegrees});
+  final double fromDegrees;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.18))),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: fromDegrees - 140, end: fromDegrees + 180),
+          duration: const Duration(milliseconds: 1400),
+          curve: Curves.elasticOut,
+          builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
+          child: const Icon(Icons.navigation, size: 13, color: RwColors.accentLight),
+        ),
+      );
+}
+
+
+/// Passend icoontje bij een kledingstuk.
+IconData _clothingIcon(String item) {
+  final i = item.toLowerCase();
+  if (i.contains('muts') || i.contains('pet')) return Icons.face_retouching_natural;
+  if (i.contains('handschoen')) return Icons.back_hand_outlined;
+  if (i.contains('jack')) return Icons.dry_cleaning_outlined;
+  if (i.contains('tight') || i.contains('broek')) return Icons.straighten;
+  if (i.contains('singlet') || i.contains('shirt')) return Icons.checkroom;
+  return Icons.checkroom;
 }

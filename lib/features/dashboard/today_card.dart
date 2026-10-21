@@ -431,7 +431,7 @@ class _Stat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
-          Text(value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20)),
+          OdometerIn(value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20)),
         ],
       );
 }
@@ -477,18 +477,12 @@ class RaceCountdownCard extends ConsumerWidget {
         onTap: race.id == null ? null : () => context.go('/me/races/${race.id}'),
         child: Row(
           children: [
-            Container(
-              width: 64,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-              child: Column(
-                children: [
-                  Text(days == 0 ? '!' : '$days',
-                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 26, color: RwColors.accent, height: 1)),
-                  Text(days == 0 ? 'vandaag' : (days == 1 ? 'dag' : 'dagen'), style: const TextStyle(color: RwColors.accent, fontSize: 11)),
-                ],
-              ),
-            ),
+            Column(mainAxisSize: MainAxisSize.min, children: [
+              _FlipDigits(text: days == 0 ? '!' : '$days'),
+              const SizedBox(height: 4),
+              Text(days == 0 ? 'vandaag' : (days == 1 ? 'dag' : 'dagen'),
+                  style: const TextStyle(color: RwColors.accent, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+            ]),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -557,4 +551,42 @@ class YearStoryCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+
+/// Aftelling als een klapbord: elk cijfer op een eigen tegeltje met een naad in het midden.
+class _FlipDigits extends StatelessWidget {
+  const _FlipDigits({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final ch in text.split(''))
+            Container(
+              width: 28,
+              height: 40,
+              margin: const EdgeInsets.symmetric(horizontal: 1.5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7),
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF2C2620), Color(0xFF221D18), Color(0xFF151210), Color(0xFF1B1714)],
+                  stops: [0, 0.499, 0.501, 1],
+                ),
+                border: Border.all(color: RwColors.accent.withValues(alpha: 0.25)),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 6, offset: const Offset(0, 3))],
+              ),
+              child: Stack(alignment: Alignment.center, children: [
+                Text(ch,
+                    style: const TextStyle(
+                        fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 26, color: RwColors.accent, height: 1)),
+                // De naad van het klapbord.
+                Positioned(left: 0, right: 0, child: Container(height: 1.2, color: Colors.black.withValues(alpha: 0.7))),
+              ]),
+            ),
+        ],
+      );
 }

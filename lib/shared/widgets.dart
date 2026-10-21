@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
+import 'rolling_text.dart';
 
 /// Kaart met optionele titel, in RunWise-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
 /// en als je erop kunt tikken veert hij een fractie in.
@@ -115,7 +116,7 @@ class StatTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(value, maxLines: 1, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 19, fontWeight: FontWeight.w700)),
+            child: OdometerIn(value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 19, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -496,4 +497,38 @@ class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateM
           );
         },
       );
+}
+
+
+/// Getal dat bij verschijnen als een kilometerteller vanaf nul naar zijn waarde rolt.
+/// Daarna rolt het gewoon mee bij elke verandering.
+class OdometerIn extends StatefulWidget {
+  const OdometerIn(this.text, {super.key, required this.style});
+  final String text;
+  final TextStyle style;
+
+  @override
+  State<OdometerIn> createState() => _OdometerInState();
+}
+
+class _OdometerInState extends State<OdometerIn> {
+  late String _shown = widget.text.replaceAll(RegExp(r'[0-9]'), '0');
+
+  @override
+  void initState() {
+    super.initState();
+    if (_shown == widget.text) return;
+    Future<void>.delayed(const Duration(milliseconds: 180), () {
+      if (mounted) setState(() => _shown = widget.text);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant OdometerIn old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) _shown = widget.text;
+  }
+
+  @override
+  Widget build(BuildContext context) => RollingText(_shown, style: widget.style, duration: const Duration(milliseconds: 650));
 }

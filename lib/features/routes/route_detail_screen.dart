@@ -482,7 +482,7 @@ class _RouteHistoryCard extends ConsumerWidget {
                       child: Text(Fmt.duration(r.activity.movingTimeSeconds),
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: sameRun(r.activity, fastest.activity) ? RwColors.accent : RwColors.text,
+                            color: sameRun(r.activity, fastest.activity) ? const Color(0xFFF2D892) : RwColors.text,
                           )),
                     ),
                     // Balkje: korter = sneller (weergecorrigeerd tempo).
@@ -490,16 +490,29 @@ class _RouteHistoryCard extends ConsumerWidget {
                       child: LayoutBuilder(
                         builder: (context, c) {
                           final f = worst - best < 1 ? 1.0 : 1 - (r.correctedPace - best) / (worst - best) * 0.65;
+                          final top = sameRun(r.activity, fastestW.activity);
                           return Align(
                             alignment: Alignment.centerLeft,
-                            child: Container(
-                              height: 8,
-                              width: c.maxWidth * f,
-                              decoration: BoxDecoration(
-                                color: sameRun(r.activity, fastestW.activity) ? RwColors.good : RwColors.bar,
-                                borderRadius: BorderRadius.circular(4),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [
+                              TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0, end: (c.maxWidth - (top ? 20 : 0)).clamp(0.0, double.infinity) * f),
+                                duration: const Duration(milliseconds: 900),
+                                curve: Curves.easeOutCubic,
+                                builder: (_, w, _) => Container(
+                                  height: 8,
+                                  width: w,
+                                  decoration: BoxDecoration(
+                                    gradient: top
+                                        ? const LinearGradient(colors: [Color(0xFF9C7A2A), Color(0xFFD9B45A), Color(0xFFF6E3A1)])
+                                        : null,
+                                    color: top ? null : RwColors.bar,
+                                    boxShadow: top ? [BoxShadow(color: const Color(0xFFD9B45A).withValues(alpha: 0.4), blurRadius: 8)] : null,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (top) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.workspace_premium, size: 16, color: Color(0xFFD9B45A))),
+                            ]),
                           );
                         },
                       ),
@@ -519,7 +532,7 @@ class _RouteHistoryCard extends ConsumerWidget {
             ),
           const SizedBox(height: 4),
           const Text(
-            'Balk: tempo gecorrigeerd voor het weer (langer = sneller). Groen = beste prestatie.',
+            'Balk: tempo gecorrigeerd voor het weer (langer = sneller). Goud = beste prestatie.',
             style: TextStyle(color: RwColors.subtle, fontSize: 11),
           ),
         ],

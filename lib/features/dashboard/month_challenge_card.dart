@@ -90,15 +90,21 @@ class MonthChallengeCard extends ConsumerWidget {
             child: SizedBox(
             width: 92,
             height: 92,
-            child: CustomPaint(
-              painter: _RingPainter(fraction: p.fraction, expected: p.expectedKm / target, achieved: p.achieved),
-              child: Center(
-                child: p.achieved
-                    ? const Icon(Icons.emoji_events, color: RwColors.accent, size: 36)
-                    : Text(
-                        '${(p.fraction * 100).round()}%',
-                        style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800),
-                      ),
+            // Ring loopt bij openen vol tot je stand; het percentage telt mee op.
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: p.fraction),
+              duration: const Duration(milliseconds: 1300),
+              curve: Curves.easeOutCubic,
+              builder: (_, f, _) => CustomPaint(
+                painter: _RingPainter(fraction: f, expected: p.expectedKm / target, achieved: p.achieved),
+                child: Center(
+                  child: p.achieved
+                      ? const Icon(Icons.emoji_events, color: RwColors.accent, size: 36)
+                      : Text(
+                          '${(f * 100).round()}%',
+                          style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800),
+                        ),
+                ),
               ),
             ),
           ),
@@ -110,9 +116,13 @@ class MonthChallengeCard extends ConsumerWidget {
               children: [
                 Text.rich(
                   TextSpan(children: [
-                    TextSpan(
-                      text: done.toStringAsFixed(done < 100 ? 1 : 0).replaceAll('.', ','),
-                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: OdometerIn(
+                        done.toStringAsFixed(done < 100 ? 1 : 0).replaceAll('.', ','),
+                        style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent),
+                      ),
                     ),
                     TextSpan(
                       text: ' / ${target.round()} km',
@@ -163,6 +173,11 @@ class _RingPainter extends CustomPainter {
           ..strokeWidth = 10
           ..strokeCap = StrokeCap.round,
       );
+      // Gloeiend kopje aan het eind van de ring.
+      final a = -math.pi / 2 + 2 * math.pi * fraction;
+      final tip = c + Offset(math.cos(a), math.sin(a)) * r;
+      canvas.drawCircle(tip, 9, Paint()..color = RwColors.accent.withValues(alpha: 0.3)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+      canvas.drawCircle(tip, 3.5, Paint()..color = Colors.white);
     }
     // Streepje: waar je volgens schema nu zou moeten zijn.
     if (!achieved && expected > 0 && expected < 1) {
