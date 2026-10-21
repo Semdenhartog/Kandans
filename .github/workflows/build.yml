@@ -5,6 +5,11 @@ name: Build RunWise
 on:
   push:
   workflow_dispatch:
+    inputs:
+      snel:
+        description: 'Alleen code nakijken en testen (geen APK, geen emulator)'
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -426,6 +431,7 @@ jobs:
           EOF2
 
       - name: APK bouwen
+        if: ${{ !inputs.snel }}
         run: |
           set -o pipefail
           flutter build apk --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }} 2>&1 | tee build.txt || {
@@ -437,6 +443,7 @@ jobs:
           }
 
       - name: APK beschikbaar maken
+        if: ${{ !inputs.snel }}
         uses: actions/upload-artifact@v5
         with:
           name: runwise-apk
@@ -444,7 +451,7 @@ jobs:
           retention-days: 14
 
       - name: Emulator klaarzetten (alleen bij handmatig starten)
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ !inputs.snel && (github.event_name == 'workflow_dispatch') }}
         continue-on-error: true
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -452,7 +459,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: App opstarten op een Android-emulator (test)
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ !inputs.snel && (github.event_name == 'workflow_dispatch') }}
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -464,11 +471,11 @@ jobs:
           script: flutter test integration_test/app_test.dart --dart-define-from-file=app_config.json
 
       - name: App bundle voor de Play Store bouwen
-        if: env.HAS_UPLOAD_KEY == 'true'
+        if: ${{ !inputs.snel && (env.HAS_UPLOAD_KEY == 'true') }}
         run: flutter build appbundle --release --dart-define-from-file=app_config.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }}
 
       - name: App bundle beschikbaar maken
-        if: env.HAS_UPLOAD_KEY == 'true'
+        if: ${{ !inputs.snel && (env.HAS_UPLOAD_KEY == 'true') }}
         uses: actions/upload-artifact@v5
         with:
           name: runwise-playstore-aab
@@ -476,5 +483,5 @@ jobs:
           retention-days: 30
 
       - name: Uitleg als de sleutel nog ontbreekt
-        if: env.HAS_UPLOAD_KEY != 'true'
+        if: ${{ !inputs.snel && (env.HAS_UPLOAD_KEY != 'true') }}
         run: echo "::notice::Geen Play Store-bundle gebouwd - voer eerst maak-sleutel.ps1 uit en zet de 4 geheimen in GitHub (zie README)."
