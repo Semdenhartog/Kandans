@@ -402,6 +402,29 @@ jobs:
             exit 1
           }
 
+      - name: Horloge-bestand (FIT) controleren met de officiële Garmin-lezer
+        run: |
+          python3 -m pip install --quiet garmin-fit-sdk
+          python3 - <<'EOF2'
+          from garmin_fit_sdk import Decoder, Stream
+          stream = Stream.from_file("build/test_course.fit")
+          decoder = Decoder(stream)
+          assert decoder.is_fit(), "geen FIT-bestand"
+          assert decoder.check_integrity(), "controlegetal klopt niet"
+          messages, errors = decoder.read()
+          assert not errors, f"leesfouten: {errors}"
+          points = messages.get("course_point_mesgs", [])
+          records = messages.get("record_mesgs", [])
+          course = messages["course_mesgs"][0]
+          expected = open("build/test_course_turns.txt").read().strip()
+          print(f"::notice::FIT-koers '{course.get('name')}' ({course.get('sport')}): {len(records)} punten, afslagen: {[p.get('type') for p in points]}")
+          assert messages["file_id_mesgs"][0]["type"] == "course"
+          assert course.get("sport") == "running"
+          assert len(points) == len([x for x in expected.split(",") if x]), "aantal afslagen klopt niet"
+          assert all(isinstance(p.get("type"), str) for p in points), "onbekend afslagtype"
+          assert len(records) > 10
+          EOF2
+
       - name: APK bouwen
         run: |
           set -o pipefail

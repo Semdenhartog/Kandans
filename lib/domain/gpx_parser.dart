@@ -3,6 +3,7 @@ import 'package:xml/xml.dart';
 import '../data/models/models.dart';
 import 'geo.dart';
 import 'route_geometry.dart';
+import 'route_turns.dart';
 
 class GpxParseException implements Exception {
   GpxParseException(this.message);
@@ -146,11 +147,25 @@ String _xml(String s) => s
 /// Maakt een GPX-bestand van een route, om op je horloge te volgen
 /// (Garmin Connect, Coros, Suunto, Komoot). Als [profile] er is, krijgt elk
 /// punt ook een hoogte.
-String buildGpx(String name, List<LatLng> points, {List<ElevationSample> profile = const []}) {
+///
+/// Met [turns] komt elke afslag er als waypoint in (naam "Linksaf", symbool Left/Right),
+/// zodat horloges en apps die waypoints tonen (Coros, Suunto, Amazfit, Komoot) de afslagen laten zien.
+String buildGpx(
+  String name,
+  List<LatLng> points, {
+  List<ElevationSample> profile = const [],
+  List<RouteTurn> turns = const [],
+}) {
   final b = StringBuffer()
     ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
     ..writeln('<gpx version="1.1" creator="RunWise" xmlns="http://www.topografix.com/GPX/1/1">')
-    ..writeln('  <metadata><name>${_xml(name)}</name></metadata>')
+    ..writeln('  <metadata><name>${_xml(name)}</name></metadata>');
+  for (final t in turns) {
+    b.writeln('  <wpt lat="${t.point.lat.toStringAsFixed(6)}" lon="${t.point.lon.toStringAsFixed(6)}">'
+        '<name>${_xml(t.kind.label)}</name><sym>${t.kind.isLeft ? 'Left' : t.kind == TurnKind.uTurn ? 'U-Turn' : 'Right'}</sym>'
+        '<type>TURN</type></wpt>');
+  }
+  b
     ..writeln('  <trk>')
     ..writeln('    <name>${_xml(name)}</name>')
     ..writeln('    <type>running</type>')

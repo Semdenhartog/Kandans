@@ -30,10 +30,12 @@ import '../../domain/intervals.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_helpers.dart';
 import '../../domain/run_recorder.dart';
+import '../../domain/route_turns.dart';
 import '../../domain/shoes.dart';
 import '../../shared/rolling_text.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
+import '../routes/turn_list_card.dart' show TurnArrow;
 import 'interval_picker.dart';
 import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
@@ -72,6 +74,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _saving = false;
   bool _locked = false;
   bool _haptics = true;
+
+  /// Afslagen aankondigen bij het volgen van een route.
+  bool _turnByTurn = true;
   bool _batteryDone = true;
   bool _indoor = false;
   bool _sounds = true;
@@ -122,6 +127,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (mounted) {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
+          _turnByTurn = p.getBool('rec_turns') ?? true;
           _indoor = widget.initialIndoor ?? p.getBool('rec_indoor') ?? false;
           final tk = p.getDouble('rec_target_km');
           _targetKm = tk == null || tk <= 0 ? null : tk;
@@ -278,6 +284,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     HapticFeedback.heavyImpact();
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
+      _svc.turnByTurn = _turnByTurn;
       await _svc.start(
         voice: _voice,
         shareLive: _share,
@@ -909,6 +916,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _HeartRow(view: v),
         ],
         if (!v.indoor && v.routeRemaining == null) _BackToStart(track: v.track),
+        if (v.routeRemaining != null && v.nextTurn != null && !v.offRoute && (v.nextTurnIn ?? 1e9) < 400) ...[
+          const SizedBox(height: 14),
+          _NextTurnCard(turn: v.nextTurn!, inMeters: v.nextTurnIn!),
+        ],
         if (v.routeRemaining != null) ...[
           const SizedBox(height: 14),
           Container(
@@ -1035,6 +1046,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           SharedPreferences.getInstance().then((p) => p.setBool('rec_haptics', x)).ignore();
                         },
                       ),
+                      if (!_indoor && _route != null)
+                        FilterChip(
+                          avatar: const Icon(Icons.turn_right, size: 18),
+                          label: const Text('Afslagen melden'),
+                          tooltip: 'Stem, trillen en een melding op je horloge bij elke afslag. Links: twee tikken, rechts: één lange.',
+                          selected: _turnByTurn,
+                          onSelected: (x) {
+                            setState(() => _turnByTurn = x);
+                            SharedPreferences.getInstance().then((p) => p.setBool('rec_turns', x)).ignore();
+                          },
+                        ),
                       if (!_indoor)
                         FilterChip(
                           avatar: const Icon(Icons.share_location_outlined, size: 18),
@@ -2079,6 +2101,55 @@ class _BackToStart extends StatelessWidget {
             ),
             Text(Fmt.km(b.meters, decimals: 1), style: const TextStyle(fontWeight: FontWeight.w800, fontFeatures: rwTnum)),
           ]),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Grote pijl met de volgende afslag, zoals een navigatie-app.
+class _NextTurnCard extends StatelessWidget {
+  const _NextTurnCard({required this.turn, required this.inMeters});
+  final RouteTurn turn;
+  final double inMeters;
+
+  @override
+  Widget build(BuildContext context) {
+    final soon = inMeters < 40;
+    final dist = inMeters < 20 ? 'Nu' : '${(inMeters >= 150 ? (inMeters / 50).round() * 50 : (inMeters / 10).round() * 10)} m';
+    return Semantics(
+      liveRegion: true,
+      label: '${turn.kind.label}, $dist',
+      excludeSemantics: true,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: soon ? RwColors.accent : RwColors.surfaceHigh,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: RwColors.accent.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            TurnArrow(turn.kind, size: 44, color: soon ? RwColors.accentDark : RwColors.accent),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(turn.kind.label,
+                  style: TextStyle(
+                      fontFamily: RwFonts.display,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: soon ? RwColors.accentDark : RwColors.text)),
+            ),
+            Text(dist,
+                style: TextStyle(
+                    fontFamily: RwFonts.display,
+                    fontFeatures: rwTnum,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: soon ? RwColors.accentDark : RwColors.text)),
+          ],
         ),
       ),
     );

@@ -98,6 +98,44 @@ class NotificationService {
     } catch (_) {}
   }
 
+  static const _turnId = 75416;
+
+  /// Afslag-melding tijdens het volgen van een route. Gewone (niet vaste) meldingen komen
+  /// ook op een gekoppeld horloge (Wear OS, Galaxy Watch, Garmin), zodat dat trilt bij een afslag.
+  Future<void> showTurn(String title, String body) async {
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        _turnId,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'afslagen',
+            'Afslagen tijdens een run',
+            channelDescription: 'Links- of rechtsaf terwijl je een route volgt (ook op je horloge)',
+            importance: Importance.high,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.navigation,
+            timeoutAfter: 25000,
+            autoCancel: true,
+            onlyAlertOnce: false,
+            playSound: false,
+            visibility: NotificationVisibility.public,
+            color: Color(0xFFFD8A26),
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> cancelTurn() async {
+    if (!_ready) return;
+    try {
+      await _plugin.cancel(_turnId);
+    } catch (_) {}
+  }
+
   Future<void> cancelRunProgress() async {
     if (!_ready) return;
     try {

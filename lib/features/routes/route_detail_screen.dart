@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -15,7 +12,6 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
-import '../../domain/gpx_parser.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/records.dart';
@@ -27,6 +23,8 @@ import 'elevation_profile.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
 import 'route_map_screen.dart';
+import 'turn_list_card.dart';
+import 'watch_export.dart';
 
 /// Huidig weer bij de start van een route.
 final _routeWeatherProvider = FutureProvider.family<HourWeather?, String>((ref, routeId) async {
@@ -48,55 +46,6 @@ class RouteDetailScreen extends ConsumerWidget {
       ref.invalidate(routesProvider);
     } catch (e) {
       if (context.mounted) showMessage(context, friendlyError(e), error: true);
-    }
-  }
-
-  /// Deelt de route als GPX-bestand, om op je horloge te zetten.
-  Future<void> _exportGpx(BuildContext context, RunRoute r) async {
-    final go = await showModalBottomSheet<bool>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: RwColors.surface,
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text('Route naar je horloge',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
-              const SizedBox(height: 10),
-              const Text(
-                'RunWise maakt een GPX-bestand van deze route. Kies daarna de app van je horloge:\n\n'
-                '\u2022 Garmin: Garmin Connect \u2192 Koersen \u2192 importeren, dan naar je horloge sturen\n'
-                '\u2022 Coros, Suunto of Polar: open het bestand met hun app\n'
-                '\u2022 Komoot: importeren als tocht\n\n'
-                'Je ziet de route dan op je horloge en krijgt een seintje als je ervan afwijkt.',
-                style: TextStyle(color: RwColors.muted, height: 1.5),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () => Navigator.pop(ctx, true),
-                icon: const Icon(Icons.ios_share),
-                label: const Text('GPX-bestand delen'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (go != true) return;
-    try {
-      final gpx = buildGpx(r.name, decodePolyline(r.polyline), profile: r.profileOrKmPoints);
-      final safe = r.name.replaceAll(RegExp(r'[^A-Za-z0-9 _-]'), '').trim().replaceAll(' ', '-');
-      final file = '${safe.isEmpty ? 'route' : safe}.gpx';
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile.fromData(Uint8List.fromList(utf8.encode(gpx)), mimeType: 'application/gpx+xml', name: file)],
-        subject: r.name,
-      ));
-    } catch (e) {
-      if (context.mounted) showMessage(context, 'Het GPX-bestand kon niet worden gedeeld.', error: true);
     }
   }
 
@@ -157,9 +106,9 @@ class RouteDetailScreen extends ConsumerWidget {
                 onPressed: () => _toggleFavorite(context, ref, r),
               ),
               IconButton(
-                tooltip: 'Naar je horloge (GPX)',
+                tooltip: 'Naar je horloge',
                 icon: const Icon(Icons.watch_outlined),
-                onPressed: () => _exportGpx(context, r),
+                onPressed: () => sendRouteToWatch(context, r, onRunWithPhone: () => openRecorder(context, route: r)),
               ),
               IconButton(
                 tooltip: 'Verwijderen',
@@ -192,6 +141,8 @@ class RouteDetailScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+              _WatchButton(route: r),
               const SizedBox(height: 12),
               _MapAndProfile(
                 route: r,
@@ -230,10 +181,15 @@ class RouteDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ],
+              if (track.length > 1) ...[
+                const SizedBox(height: 12),
+                TurnListCard(track: track),
+              ],
               if (r.polyline.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _SurfaceCard(routeId: routeId, polyline: r.polyline),
-              ],              const SizedBox(height: 12),
+              ],
+              const SizedBox(height: 12),
               _RouteHistoryCard(routeId: routeId),
               const SizedBox(height: 12),
               if (r.points.length > 1)
@@ -695,6 +651,43 @@ class _SurfaceCard extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+
+/// Grote knop: route naar je horloge (laat zien voor welk horloge).
+class _WatchButton extends StatefulWidget {
+  const _WatchButton({required this.route});
+  final RunRoute route;
+
+  @override
+  State<_WatchButton> createState() => _WatchButtonState();
+}
+
+class _WatchButtonState extends State<_WatchButton> {
+  WatchBrand? _brand;
+
+  @override
+  void initState() {
+    super.initState();
+    loadWatchBrand().then((b) {
+      if (mounted) setState(() => _brand = b);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final b = _brand;
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+      onPressed: () async {
+        await sendRouteToWatch(context, widget.route, onRunWithPhone: () => openRecorder(context, route: widget.route));
+        final nb = await loadWatchBrand();
+        if (mounted) setState(() => _brand = nb);
+      },
+      icon: const Icon(Icons.watch_outlined),
+      label: Text(b == null || !b.canImport ? 'Route naar je horloge' : 'Zet op je ${b.label}'),
     );
   }
 }

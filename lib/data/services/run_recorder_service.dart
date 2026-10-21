@@ -13,6 +13,7 @@ import '../../domain/guided_runs.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/run_recorder.dart';
+import '../../domain/route_turns.dart';
 import 'heart_rate_service.dart';
 import 'live_share_service.dart';
 import 'notification_service.dart';
@@ -49,6 +50,8 @@ class RecorderView {
     this.routeRemaining,
     this.offRoute = false,
     this.ghostDelta,
+    this.nextTurn,
+    this.nextTurnIn,
     this.walkRun = false,
     this.treadmillKmh,
   });
@@ -91,6 +94,10 @@ class RecorderView {
 
   /// Tegen je record op deze route: seconden achter (+) of voor (-). Null = geen record-race.
   final double? ghostDelta;
+
+  /// Volgende afslag op je route en hoeveel meter je er nog van af bent.
+  final RouteTurn? nextTurn;
+  final double? nextTurnIn;
 
   /// Lopen/wandelen-schema: stappen heten "Hardlopen" en "Wandelen".
   final bool walkRun;
@@ -141,6 +148,10 @@ class RunRecorderService {
   PaceCoach? _coach;
   RouteFollower? _follower;
   GhostRace? _ghost;
+  TurnGuide? _turns;
+
+  /// Afslagen aankondigen (stem, trillen en een melding die ook op je horloge komt).
+  bool turnByTurn = true;
   FuelReminder? _fuel;
   GuidedPlayer? _guided;
   int _ticks = 0;
@@ -389,6 +400,7 @@ class RunRecorderService {
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
+    _turns = _follower == null ? null : TurnGuide(detectTurns(_follower!.track));
     _rec!.start(DateTime.now());
     if (this.voice) {
       _tts ??= FlutterTts();
@@ -465,6 +477,23 @@ class RunRecorderService {
       if (c != null) {
         _say(c);
         _buzz(follower.offRoute ? const [0, 500, 200, 500] : const [0, 150]);
+      }
+      final tg = _turns;
+      if (tg != null && turnByTurn && !follower.offRoute) {
+        final cue = tg.update(follower.progress);
+        if (cue != null) {
+          _say(cue.text);
+          // Links: twee korte tikken, rechts: één lange. Zo voel je de kant ook zonder oortjes.
+          if (cue.atTurn) {
+            _buzz(cue.turn.kind.isLeft ? const [0, 120, 100, 120] : const [0, 380]);
+          } else {
+            _buzz(const [0, 60]);
+          }
+          NotificationService.instance
+              .showTurn('${cue.turn.kind.arrow} ${cue.atTurn ? 'Nu ${cue.turn.kind.label.toLowerCase()}' : cue.text}',
+                  'RunWise-route · nog ${Fmt.km(follower.remaining, decimals: 1)}')
+              .ignore();
+        }
       }
       final g = _ghost;
       if (g != null && !follower.offRoute) {
@@ -579,6 +608,8 @@ class RunRecorderService {
       walkRun: it?.plan.walkRun ?? false,
       treadmillKmh: r.treadmillKmh,
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
+      nextTurn: turnByTurn ? _turns?.next : null,
+      nextTurnIn: turnByTurn && _follower != null ? _turns?.distanceTo(_follower!.progress) : null,
     );
   }
 
@@ -601,6 +632,8 @@ class RunRecorderService {
     _coach = null;
     _follower = null;
     _ghost = null;
+    _turns = null;
+    NotificationService.instance.cancelTurn().ignore();
     _fuel = null;
     _guided = null;
     _rec = null;
