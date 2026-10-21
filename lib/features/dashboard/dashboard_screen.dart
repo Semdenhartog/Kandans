@@ -808,7 +808,13 @@ class _HeroCard extends StatelessWidget {
               children: [
                 if (goNowShown)
                   Expanded(
+                    // Glas-stijl: de oranje hoofdknop "Start run" zweeft al onderin.
                     child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.black.withValues(alpha: 0.32),
+                        foregroundColor: RwColors.text,
+                        side: BorderSide(color: RwColors.good.withValues(alpha: 0.6)),
+                      ),
                       onPressed: () => openRecorder(context),
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Start run'),
