@@ -1239,10 +1239,10 @@ class _WindNeedle extends StatelessWidget {
 /// Passend icoontje bij een kledingstuk.
 IconData _clothingIcon(String item) {
   final i = item.toLowerCase();
-  if (i.contains('muts') || i.contains('pet')) return Icons.face_retouching_natural;
+  // Material heeft geen broek- of shirt-icoon: daarvoor een kledinghanger, die leest het rustigst.
   if (i.contains('handschoen')) return Icons.back_hand_outlined;
   if (i.contains('jack')) return Icons.dry_cleaning_outlined;
-  if (i.contains('tight') || i.contains('broek')) return Icons.straighten;
-  if (i.contains('singlet') || i.contains('shirt')) return Icons.checkroom;
+  if (i.contains('pet')) return Icons.wb_sunny_outlined;
+  if (i.contains('muts')) return Icons.ac_unit;
   return Icons.checkroom;
 }
