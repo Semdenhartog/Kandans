@@ -2,7 +2,7 @@
 
 Gemaakt op 22-10-2026 na het doorlezen van de code (±38.000 regels Dart, 7 edge functions).
 
-**Let op:** bij het nalopen bleken 10 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
+**Let op:** bij het nalopen bleken 11 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
 
 **Eerlijke conclusie vooraf:** RunWise heeft al meer functies dan de meeste betaalde hardloop-apps.
 De grootste winst zit niet in nóg meer functies, maar in **betrouwbaarheid, testen, eenvoud en de lancering**.
@@ -64,7 +64,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 ## E. Coach en training
 
 37. ✅ **P1 AI-kosten per gebruiker bewaken (stap 1).** De coach logt per vraag het aantal tokens (zonder inhoud) als `coach_usage` in de Supabase-logboeken. Sem: coach-functie opnieuw live zetten. Stap 2 (context inkorten, hergebruik) pas als de cijfers er zijn. Oorspronkelijk: *Waarom:* bij €5/maand moet de coach goedkoper blijven dan wat hij oplevert. *Wat:* kosten per gebruiker loggen, context inkorten, veelgestelde vragen hergebruiken.
-38. ⬜ **P1 Schema past zich aan na gemiste training.** *Wat:* een training overgeslagen? De week schuift slim, zonder twee zware dagen achter elkaar.
+38. ✅ **P1 Schema past zich aan na gemiste training.** *Wat:* een training overgeslagen? De week schuift slim, zonder twee zware dagen achter elkaar. *Bestond al: bij 2 gemiste trainingen biedt de app aan de week te herhalen of lichter te maken.*
 39. ⬜ **P2 Coach onthoudt doelen en klachten.** *Wat:* met toestemming, en altijd te wissen.
 40. ⬜ **P2 Bronnen in het coach-antwoord.** *Wat:* "op basis van je laatste 3 lange runs" met links naar die runs.
 41. ✅ **P2 Te snel opbouwen.** *Wat:* waarschuwing als je weekkilometers > 30% stijgen. *Bestond al: "Je loopt meer dan gepland" met knop om de week lichter te maken.*
