@@ -161,6 +161,12 @@ class RunRecorderService {
   RouteHeadsUp? _headsUp;
   List<RouteClimb> _climbs = const [];
   List<RoutePoi> _pois = const [];
+  List<({double meters, String name})> _landmarks = const [];
+  RecordHunt? _hunt;
+  Turnaround? _turnaround;
+  int _routeTimesBefore = 0;
+  double? _targetMeters;
+  bool _routeDoneSaid = false;
   DaylightWarner? _daylight;
   bool _daylightChecked = false;
 
@@ -466,9 +472,38 @@ class RunRecorderService {
       _say(f);
       _buzz(const [0, 200, 120, 200]);
     }
+    final t = _turnaround?.update(r.movingSeconds);
+    if (t != null) {
+      _say(t);
+      _buzz(const [0, 400, 150, 400]);
+    }
+    final h = _hunt?.update(r.distance, r.movingSeconds, r.currentPace > 0 ? r.currentPace : r.averagePace);
+    if (h != null) {
+      _say(h);
+      if (h.startsWith('Nieuw record') || h.startsWith('Dit is nu')) {
+        SoundService.instance.play(RwSound.finish).ignore();
+        _buzz(const [0, 150, 80, 150, 80, 400]);
+      }
+    }
     if (_intervals != null && !_intervals!.finished) return;
-    final c = _cues?.update(r, heartRate: HeartRateService.instance.bpm.value);
+    final f2 = _follower;
+    final tm = _targetMeters;
+    final remaining = f2 != null
+        ? (!f2.approaching && !f2.offRoute ? f2.remaining : null)
+        : (tm != null && tm > r.distance ? tm - r.distance : null);
+    final c = _cues?.update(r, heartRate: HeartRateService.instance.bpm.value, remainingMeters: remaining);
     if (c != null) _say(c);
+  }
+
+  /// Bezienswaardigheden langs de route (komen binnen terwijl je al loopt): onderweg aankondigen.
+  void setRouteLandmarks(List<({double meters, String name})> landmarks) {
+    final f = _follower;
+    if (f == null) return;
+    final len = f.original.length;
+    _landmarks = f.isLoop && f.joinedAt > 0
+        ? [for (final l in landmarks) (meters: ((l.meters - f.joinedAt) % len + len) % len, name: l.name)]
+        : landmarks;
+    _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois, landmarks: _landmarks);
   }
 
   Future<void> start({
@@ -485,6 +520,13 @@ class RunRecorderService {
     RunStreams? ghost,
     GuidedRun? guided,
     double? treadmillKmh,
+    Map<int, double> bests = const {},
+    Map<int, String> recordLabels = const {},
+    double longestBefore = 0,
+    double? turnaroundMinutes,
+    int routeTimesBefore = 0,
+    String? briefing,
+    double? targetMeters,
   }) async {
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
@@ -518,7 +560,13 @@ class RunRecorderService {
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
     _turns = _follower == null ? null : TurnGuide(detectTurns(_follower!.track));
     _climbs = _follower == null ? const [] : detectClimbs(followProfile, trackLength: _follower!.track.length);
+    _landmarks = const [];
     _headsUp = _follower == null ? null : RouteHeadsUp.build(climbs: _climbs, pois: _pois);
+    _hunt = bests.isEmpty && longestBefore < 3000 ? null : RecordHunt(bests: bests, longestBefore: longestBefore, labels: recordLabels);
+    _turnaround = turnaroundMinutes == null || turnaroundMinutes <= 0 || _follower != null ? null : Turnaround(turnaroundMinutes * 60);
+    _routeTimesBefore = routeTimesBefore;
+    _routeDoneSaid = false;
+    _targetMeters = targetMeters;
     _daylightChecked = indoor;
     _rec!.start(DateTime.now());
     if (this.voice) {
@@ -526,6 +574,8 @@ class RunRecorderService {
       await _configureTts();
       SoundService.instance.play(RwSound.start).ignore();
       if (_guided == null) _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
+      if (briefing != null && briefing.isNotEmpty && _guided == null) _say(briefing);
+      if (_turnaround != null) _say('Heen en terug: halverwege zeg ik wanneer je moet omdraaien.');
       final g0 = _guided?.update(0);
       if (g0 != null) _say(g0);
     }
@@ -548,7 +598,7 @@ class RunRecorderService {
   void setRoutePois(List<RoutePoi> pois) {
     final f = _follower;
     _pois = f != null && f.isLoop && f.joinedAt > 0 ? _shiftPois(pois, f) : pois;
-    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois);
+    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois, landmarks: _landmarks);
   }
 
   /// Loopband: snelheid van de band doorgeven (km/u), dan telt de afstand live mee.
@@ -629,6 +679,19 @@ class RunRecorderService {
               .ignore();
         }
       }
+      if (!_routeDoneSaid &&
+          !follower.approaching &&
+          follower.track.length > 800 &&
+          follower.remaining < 30 &&
+          follower.progress > follower.track.length * 0.9) {
+        _routeDoneSaid = true;
+        final n = _routeTimesBefore + 1;
+        _say(n <= 1
+            ? 'Route voltooid! Je eerste keer op deze route. Mooi gedaan.'
+            : 'Route voltooid! Dit was je ${n}e keer op deze route.');
+        SoundService.instance.play(RwSound.finish).ignore();
+        _buzz(const [0, 150, 80, 150, 80, 500]);
+      }
       final h = follower.offRoute ? null : _headsUp?.update(follower.progress);
       if (h != null) _say(h);
       final g = _ghost;
@@ -696,7 +759,9 @@ class RunRecorderService {
       for (final c in _climbs) RouteClimb(startMeters: shift(c.startMeters), lengthMeters: c.lengthMeters, gainMeters: c.gainMeters),
     ];
     _pois = _shiftPois(_pois, f);
-    _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois);
+    final len2 = f.original.length;
+    _landmarks = [for (final l in _landmarks) (meters: ((l.meters - f.joinedAt) % len2 + len2) % len2, name: l.name)];
+    _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois, landmarks: _landmarks);
     // Je record op deze route is vanaf het echte begin gemeten: dan klopt de vergelijking niet meer.
     _ghost = null;
   }
@@ -821,6 +886,9 @@ class RunRecorderService {
     NotificationService.instance.cancelTurn().ignore();
     _fuel = null;
     _guided = null;
+    _hunt = null;
+    _turnaround = null;
+    _landmarks = const [];
     _rec = null;
     _intervals = null;
     _position = null;

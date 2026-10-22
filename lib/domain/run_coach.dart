@@ -21,6 +21,27 @@ enum CueEvery {
   final int? seconds;
 }
 
+/// Hoe de stemcoach klinkt.
+enum CoachStyle {
+  calm('Rustig', 'Alleen de cijfers, vriendelijk gezegd'),
+  motivating('Motiverend', 'Met een aanmoediging erbij'),
+  short('Kort', 'Alleen afstand en tempo van het laatste stuk');
+
+  const CoachStyle(this.label, this.description);
+  final String label;
+  final String description;
+}
+
+/// Aanmoedigingen voor de motiverende stem (wisselen per melding).
+const motivatingLines = [
+  'Lekker bezig!',
+  'Je loopt sterk.',
+  'Mooi ritme, hou vast.',
+  'Ontspan je schouders en blijf soepel.',
+  'Elke kilometer telt. Ga zo door!',
+  'Dit doe je goed.',
+];
+
 /// Wat de stemcoach zegt en hoe vaak.
 class CueSettings {
   const CueSettings({
@@ -30,9 +51,21 @@ class CueSettings {
     this.total = true,
     this.heartRate = true,
     this.fuel = false,
+    this.style = CoachStyle.calm,
+    this.compare = true,
+    this.finish = true,
   });
 
   final CueEvery every;
+
+  /// Hoe de stem klinkt.
+  final CoachStyle style;
+
+  /// Vergelijken met het vorige stuk ("6 seconden sneller dan de vorige").
+  final bool compare;
+
+  /// Verwachte eindtijd noemen als RunWise weet hoe ver je nog moet (route of heen-en-terug).
+  final bool finish;
 
   /// Herinneringen om te drinken en (bij lange runs) een gel te nemen.
   final bool fuel;
@@ -43,16 +76,40 @@ class CueSettings {
   final bool total;
   final bool heartRate;
 
-  CueSettings copyWith({CueEvery? every, bool? lap, bool? average, bool? total, bool? heartRate, bool? fuel}) => CueSettings(
+  CueSettings copyWith({
+    CueEvery? every,
+    bool? lap,
+    bool? average,
+    bool? total,
+    bool? heartRate,
+    bool? fuel,
+    CoachStyle? style,
+    bool? compare,
+    bool? finish,
+  }) =>
+      CueSettings(
         every: every ?? this.every,
         lap: lap ?? this.lap,
         average: average ?? this.average,
         total: total ?? this.total,
         heartRate: heartRate ?? this.heartRate,
         fuel: fuel ?? this.fuel,
+        style: style ?? this.style,
+        compare: compare ?? this.compare,
+        finish: finish ?? this.finish,
       );
 
-  Map<String, dynamic> toJson() => {'e': every.name, 'l': lap, 'a': average, 't': total, 'h': heartRate, 'f': fuel};
+  Map<String, dynamic> toJson() => {
+        'e': every.name,
+        'l': lap,
+        'a': average,
+        't': total,
+        'h': heartRate,
+        'f': fuel,
+        's': style.name,
+        'c': compare,
+        'fi': finish,
+      };
 
   static CueSettings fromJson(Object? j) {
     if (j is! Map) return const CueSettings();
@@ -63,6 +120,9 @@ class CueSettings {
       total: j['t'] as bool? ?? true,
       heartRate: j['h'] as bool? ?? true,
       fuel: j['f'] as bool? ?? false,
+      style: CoachStyle.values.where((e) => e.name == j['s']).firstOrNull ?? CoachStyle.calm,
+      compare: j['c'] as bool? ?? true,
+      finish: j['fi'] as bool? ?? true,
     );
   }
 }
@@ -103,9 +163,11 @@ class CueScheduler {
   final CueSettings settings;
   int _done = 0;
   double _lastT = 0, _lastD = 0;
+  double? _prevLapPace;
 
   /// Geeft de tekst als het tijd is voor een melding.
-  String? update(RunRecording r, {int? heartRate}) {
+  /// [remainingMeters] = hoeveel je nog moet (route of heen-en-terug), voor de verwachte eindtijd.
+  String? update(RunRecording r, {int? heartRate, double? remainingMeters}) {
     final every = settings.every;
     final n = every.meters != null ? (r.distance / every.meters!).floor() : (r.movingSeconds / every.seconds!).floor();
     if (n <= _done || n == 0) return null;
@@ -113,16 +175,116 @@ class CueScheduler {
     final lapT = r.movingSeconds - _lastT, lapD = r.distance - _lastD;
     _lastT = r.movingSeconds;
     _lastD = r.distance;
+    final lapPace = lapD > 50 && !r.indoor ? lapT / (lapD / 1000) : null;
+    final prev = _prevLapPace;
+    _prevLapPace = lapPace;
+    final head = every.meters != null ? '${_km(n * every.meters!.toDouble())}.' : '${n * every.seconds! ~/ 60} minuten.';
+    if (settings.style == CoachStyle.short) {
+      return [
+        head,
+        if (lapPace != null) '${spokenPace(lapPace)}.',
+        if (every.seconds != null && !r.indoor) '${_km(r.distance)}.',
+      ].join(' ');
+    }
+    String? compare;
+    if (settings.compare && lapPace != null && prev != null && settings.lap) {
+      final d = (lapPace - prev).round();
+      compare = d.abs() < 3
+          ? 'Even snel als het vorige stuk.'
+          : d < 0
+              ? '${d.abs()} seconden sneller dan het vorige stuk.'
+              : '${d.abs()} seconden langzamer dan het vorige stuk.';
+    }
+    String? finish;
+    final rem = remainingMeters;
+    if (settings.finish && rem != null && rem > 300 && r.averagePace > 0 && !r.indoor) {
+      final eta = r.movingSeconds + rem / 1000 * r.averagePace;
+      finish = 'Met dit tempo ben je klaar na ${spokenDuration(eta)}.';
+    }
     final parts = <String>[
-      every.meters != null ? '${_km(n * every.meters!.toDouble())}.' : '${n * every.seconds! ~/ 60} minuten.',
+      head,
       // Op de loopband staan afstand en tempo al op het display: dan alleen tijd (en hartslag).
       if (every.seconds != null && !r.indoor) 'Afstand ${_km(r.distance)}.',
-      if (settings.lap && lapD > 50 && !r.indoor) 'Dit stuk ${spokenPace(lapT / (lapD / 1000))} per kilometer.',
+      if (settings.lap && lapPace != null) 'Dit stuk ${spokenPace(lapPace)} per kilometer.',
+      if (compare != null) compare,
       if (settings.average && r.averagePace > 0 && !r.indoor) 'Gemiddeld ${spokenPace(r.averagePace)}.',
       if (settings.total && every.meters != null) 'Totale tijd ${spokenDuration(r.movingSeconds)}.',
       if (settings.heartRate && heartRate != null) 'Hartslag $heartRate.',
+      if (finish != null) finish,
+      if (settings.style == CoachStyle.motivating) motivatingLines[(n - 1) % motivatingLines.length],
     ];
     return parts.join(' ');
+  }
+}
+
+/// Recordjacht en mijlpalen onderweg: "houd dit tempo vast en je loopt een nieuw 5 km-record",
+/// "nieuw record!" en "dit is nu je langste run ooit".
+class RecordHunt {
+  RecordHunt({required this.bests, this.longestBefore = 0, this.labels = const {}});
+
+  /// Je snelste tijd per afstand (meters → seconden), van vóór deze run.
+  final Map<int, double> bests;
+
+  /// Je langste run tot nu toe (meters).
+  final double longestBefore;
+
+  /// Naam per afstand ("5 km"); anders "5000 meter".
+  final Map<int, String> labels;
+
+  final _hinted = <int>{};
+  final _done = <int>{};
+  bool _longestSaid = false;
+
+  String _label(int m) => labels[m] ?? (m % 1000 == 0 ? '${m ~/ 1000} km' : '$m meter');
+
+  /// [pace] = tempo van het laatste stuk (s/km), om de eindtijd te schatten.
+  String? update(double distance, double moving, double pace) {
+    if (!_longestSaid && longestBefore >= 3000 && distance > longestBefore + 20) {
+      _longestSaid = true;
+      return 'Dit is nu je langste run ooit! Nog nooit liep je zo ver.';
+    }
+    final keys = bests.keys.toList()..sort();
+    for (final m in keys) {
+      if (m < 1000) continue;
+      final best = bests[m]!;
+      if (distance >= m && !_done.contains(m)) {
+        _done.add(m);
+        // Alleen als het hele stuk vanaf de start sneller was (een snel middenstuk zie je na afloop).
+        if (moving + 0.5 < best) {
+          return 'Nieuw record op de ${_label(m)}! ${spokenDuration(moving)}. Wat een run!';
+        }
+        continue;
+      }
+      if (_hinted.contains(m) || distance < m * 0.6 || distance >= m || pace <= 0) continue;
+      final projected = moving + (m - distance) / 1000 * pace;
+      if (projected + 2 < best) {
+        _hinted.add(m);
+        return 'Houd dit tempo vast en je loopt een nieuw ${_label(m)}-record: rond ${spokenDuration(projected)}.';
+      }
+    }
+    return null;
+  }
+}
+
+/// Heen en terug op tijd: halverwege zegt RunWise "draai om".
+class Turnaround {
+  Turnaround(this.totalSeconds);
+  final double totalSeconds;
+  bool _said = false;
+  bool _almost = false;
+
+  String? update(double moving) {
+    final half = totalSeconds / 2;
+    if (!_almost && moving >= half - 60 && moving < half) {
+      _almost = true;
+      return 'Over een minuut ben je halverwege.';
+    }
+    if (!_said && moving >= half) {
+      _said = true;
+      _almost = true;
+      return 'Halverwege! Draai nu om, dan ben je na ${spokenDuration(totalSeconds)} weer terug.';
+    }
+    return null;
   }
 }
 
@@ -179,6 +341,42 @@ String compassWords(double bearing) {
   const names = ['noorden', 'noordoosten', 'oosten', 'zuidoosten', 'zuiden', 'zuidwesten', 'westen', 'noordwesten'];
   final i = (((bearing % 360) + 22.5) ~/ 45) % 8;
   return 'naar het ${names[i]}';
+}
+
+/// Windrichting in woorden ("uit het zuidwesten").
+String windFromWords(double degrees) => compassWords(degrees).replaceFirst('naar', 'uit');
+
+/// Korte briefing bij de start: temperatuur, wind en waar je tegenwind hebt op je route.
+String startBriefing({
+  required double temperature,
+  double? feelsLike,
+  required double windKmh,
+  double? windFrom,
+  double? rainChance,
+  double? firstHalfHead,
+  double? secondHalfHead,
+}) {
+  final t = temperature.round();
+  final parts = <String>[
+    feelsLike != null && (feelsLike - temperature).abs() >= 2
+        ? 'Het is $t graden, het voelt als ${feelsLike.round()}.'
+        : 'Het is $t graden.',
+  ];
+  if (windKmh >= 8 && windFrom != null) {
+    parts.add('Wind ${windKmh.round()} kilometer per uur ${windFromWords(windFrom)}.');
+    final a = firstHalfHead, b = secondHalfHead;
+    if (a != null && b != null) {
+      if (a > 4 && a - b > 3) {
+        parts.add('De eerste helft heb je tegenwind, op de terugweg helpt de wind je.');
+      } else if (b > 4 && b - a > 3) {
+        parts.add('De tweede helft heb je tegenwind. Houd wat over voor het eind.');
+      }
+    }
+  } else {
+    parts.add('Er staat bijna geen wind.');
+  }
+  if (rainChance != null && rainChance >= 50) parts.add('Kans op regen: ${rainChance.round()} procent.');
+  return parts.join(' ');
 }
 
 /// Afstand voor de stem: tot 100 m op 10 m, daarboven op 50 m.

@@ -63,9 +63,19 @@ class RouteHeadsUp {
   factory RouteHeadsUp.build({
     List<RouteClimb> climbs = const [],
     List<RoutePoi> pois = const [],
+    List<({double meters, String name})> landmarks = const [],
     double lead = 150,
   }) {
     final ev = <({double meters, String text})>[];
+    // Bezienswaardigheden: hooguit 8, en minstens 600 m uit elkaar (niet elke minuut iets).
+    var lastLm = -1e9;
+    var lmCount = 0;
+    for (final l in [...landmarks]..sort((a, b) => a.meters.compareTo(b.meters))) {
+      if (lmCount >= 8 || l.meters - lastLm < 600 || l.name.trim().isEmpty) continue;
+      lastLm = l.meters;
+      lmCount++;
+      ev.add((meters: l.meters, text: 'Over ${lead.round()} meter kom je langs ${l.name.trim()}.'));
+    }
     for (final c in climbs) {
       final steep = c.grade >= 6 ? ' Kleine passen en houd je inspanning gelijk.' : ' Rustig aan, korte passen.';
       ev.add((
