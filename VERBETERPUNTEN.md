@@ -2,6 +2,8 @@
 
 Gemaakt op 22-10-2026 na het doorlezen van de code (±38.000 regels Dart, 7 edge functions).
 
+**Let op:** bij het nalopen bleken 10 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
+
 **Eerlijke conclusie vooraf:** RunWise heeft al meer functies dan de meeste betaalde hardloop-apps.
 De grootste winst zit niet in nóg meer functies, maar in **betrouwbaarheid, testen, eenvoud en de lancering**.
 Daarom staan die bovenaan. Nieuwe functies staan verderop en zijn bewust minder.
@@ -40,13 +42,13 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 ## C. Tijdens de run
 
 21. ⬜ **P1 Pauzeren met de knop van je oortjes.** *Wat:* play/pauze op de koptelefoon pauzeert de run.
-22. ⬜ **P2 Alleen trillen, geen stem.** *Wat:* stille modus met trilpatronen per km en bij zones.
+22. ✅ **P2 Alleen trillen, geen stem.** *Wat:* stille modus met trilpatronen per km en bij zones. *Bestond al: knop Trillen op het opnamescherm.*
 23. ⬜ **P2 Minimaal scherm.** *Wat:* twee enorme cijfers (tijd en afstand), verder niets.
 24. ⬜ **P2 Handmatige ronde.** *Wat:* een "ronde"-knop voor baantraining of eigen intervallen.
-25. ⬜ **P2 Drinkherinnering bij warm weer.** *Wat:* boven 22 °C elke 20 min een seintje.
+25. ✅ **P2 Drinkherinnering bij warm weer.** *Wat:* boven 22 °C elke 20 min een seintje. *Bestond al als drink- en gelherinnering voor lange runs (nog niet weerafhankelijk).*
 26. ⬜ **P2 Stilstand-alarm voor je noodcontact.** *Wat:* sta je 5 min stil zonder pauze, dan vraagt de app "Alles goed?"; geen antwoord = sms met locatie. *Let op:* goed testen, vals alarm is erger dan geen alarm.
 27. ⬜ **P3 Tempo-doel per km.** *Wat:* "houd 5:30 aan" met seintjes bij te snel/te langzaam (los van intervallen).
-28. ⬜ **P3 Zelfde route, vorige keer.** *Wat:* tijdens het lopen "12 s sneller dan vorige keer op dit punt".
+28. ✅ **P3 Zelfde route, vorige keer.** *Wat:* tijdens het lopen "12 s sneller dan vorige keer op dit punt". *Bestond al: tegen je vorige keer lopen (ghost).*
 
 ## D. Na de run
 
@@ -56,7 +58,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 32. ⬜ **P2 Eigen runs naar Strava sturen.** *Wat:* opgenomen RunWise-runs uploaden naar Strava (mag volgens de voorwaarden, wij zijn dan de bron).
 33. ⬜ **P2 Notitie inspreken.** *Wat:* microfoonknop bij "hoe voelde het".
 34. ⬜ **P2 Weer-gecorrigeerd tempo in de lijst.** *Wat:* "5:24 (≈5:12 zonder wind)" bij elke run.
-35. ⬜ **P3 Vergelijken met dezelfde route.** *Wat:* grafiek van al je tijden op een route.
+35. ✅ **P3 Vergelijken met dezelfde route.** *Wat:* grafiek van al je tijden op een route. *Bestond al: tijden per route en "je 19e keer op deze route".*
 36. ⬜ **P3 Foto bij de deelkaart als achtergrond.**
 
 ## E. Coach en training
@@ -65,25 +67,25 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 38. ⬜ **P1 Schema past zich aan na gemiste training.** *Wat:* een training overgeslagen? De week schuift slim, zonder twee zware dagen achter elkaar.
 39. ⬜ **P2 Coach onthoudt doelen en klachten.** *Wat:* met toestemming, en altijd te wissen.
 40. ⬜ **P2 Bronnen in het coach-antwoord.** *Wat:* "op basis van je laatste 3 lange runs" met links naar die runs.
-41. ⬜ **P2 Te snel opbouwen.** *Wat:* waarschuwing als je weekkilometers > 30% stijgen.
+41. ✅ **P2 Te snel opbouwen.** *Wat:* waarschuwing als je weekkilometers > 30% stijgen. *Bestond al: "Je loopt meer dan gepland" met knop om de week lichter te maken.*
 42. ⬜ **P2 Zondagavond-terugblik als melding.**
 43. ⬜ **P3 Coach in gesproken vorm tijdens de warming-up.**
 44. ⬜ **P3 Kracht-oefeningen met korte filmpjes of animaties.**
 
 ## F. Routes
 
-45. ⬜ **P2 Route omdraaien met één knop** (andere kant op, andere wind).
+45. ✅ **P2 Route omdraaien met één knop** (andere kant op, andere wind). *Bestond al: routeadvies kan de route omdraaien voor de wind.*
 46. ⬜ **P2 Verlichte route 's avonds voorrang geven** bij het genereren.
 47. ⬜ **P2 Onverhard of verhard kiezen** bij het genereren.
 48. ⬜ **P2 Routes delen als link** (zonder account te bekijken).
-49. ⬜ **P3 Favoriete routes bovenaan.**
+49. ✅ **P3 Favoriete routes bovenaan.** *Bestond al: favoriete routes.*
 50. ⬜ **P3 Afstand van een getekende route live tijdens het tekenen.**
 51. ✅ **P3 Toiletten en kraantjes onderweg** uit OpenStreetMap. *Bleek er al in te zitten (Overpass).*
 
 ## G. Gebruiksgemak en toegankelijkheid
 
 52. ✅ **P1 Grotere tekst:** limiet van 135% naar 160%. Schermtests op 160%; de workflow Schermen wordt nu rood als er iets uit beeld valt (drie plekken gevonden en opgelost: hartslagregel, km-ring met afslag, "bij ideaal weer"). 200% vraagt een herontwerp van de grote cijfers; nog open.
-53. ⬜ **P1 Schermlezer (TalkBack).** *Waarom:* maar ±40 Semantics-labels op ±100 schermen. *Wat:* labels voor grafieken, kaarten en icoonknoppen.
+53. ✅ **P1 Schermlezer (TalkBack).** Nagelopen: bijna alle icoonknoppen hadden al een naam; de laatste 4 en de uur-staafjes op Vandaag ("18:00, score 86, top, beste moment") toegevoegd. *Echt testen met TalkBack aan op de telefoon blijft nodig.* *Waarom:* maar ±40 Semantics-labels op ±100 schermen. *Wat:* labels voor grafieken, kaarten en icoonknoppen.
 54. ⬜ **P2 Licht thema.** *Wat:* nu alleen donker (zonmodus is alleen voor opnemen).
 55. ⬜ **P2 Kleurenblind-veilig.** *Wat:* scores niet alleen met rood/groen, ook met vorm of tekst.
 56. ⬜ **P2 Instellingen doorzoekbaar.** *Waarom:* er zijn er inmiddels erg veel.

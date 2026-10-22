@@ -450,9 +450,9 @@ class _OverviewState extends State<_Overview> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(onPressed: () => set(() => km = (km - 1).clamp(1, 300)), icon: const Icon(Icons.remove_circle_outline)),
+                  IconButton(tooltip: '1 kilometer minder', onPressed: () => set(() => km = (km - 1).clamp(1, 300)), icon: const Icon(Icons.remove_circle_outline)),
                   Text('$km km', style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 30, fontWeight: FontWeight.w800)),
-                  IconButton(onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: const Icon(Icons.add_circle_outline)),
+                  IconButton(tooltip: '1 kilometer meer', onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: const Icon(Icons.add_circle_outline)),
                 ],
               ),
               const SizedBox(height: 8),

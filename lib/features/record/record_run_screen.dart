@@ -680,9 +680,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(onPressed: () => set(() => sec = (sec - 5).clamp(180, 600)), icon: const Icon(Icons.remove_circle_outline)),
+                    IconButton(tooltip: '5 seconden sneller', onPressed: () => set(() => sec = (sec - 5).clamp(180, 600)), icon: const Icon(Icons.remove_circle_outline)),
                     Text(Fmt.pace(sec), style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 34, fontWeight: FontWeight.w800)),
-                    IconButton(onPressed: () => set(() => sec = (sec + 5).clamp(180, 600)), icon: const Icon(Icons.add_circle_outline)),
+                    IconButton(tooltip: '5 seconden langzamer', onPressed: () => set(() => sec = (sec + 5).clamp(180, 600)), icon: const Icon(Icons.add_circle_outline)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -1285,9 +1285,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           const SizedBox(height: 28),
         ] else ...[
           // De afstand in een ring die per kilometer volloopt.
-          // Flexible: krimpt mee als de ruimte krap is (grote letters, afslag-melding erboven).
-          Flexible(
-            child: Center(
+          Center(
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -1324,7 +1322,6 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               ]),
             ),
             ),
-          ),
           ),
           const SizedBox(height: 20),
         ],
@@ -2387,7 +2384,9 @@ class _KmRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
-        final size = math.min(280.0, math.min(c.maxWidth, c.maxHeight.isFinite ? c.maxHeight : double.infinity));
+        // Bij grote letters (telefooninstelling) een kleinere ring, zodat de rest van het scherm past.
+        final text = MediaQuery.textScalerOf(context).scale(1);
+        final size = math.min(280.0, c.maxWidth) / (text > 1.2 ? text / 1.2 : 1);
         return TweenAnimationBuilder<double>(
           tween: Tween(end: fraction),
           duration: const Duration(milliseconds: 600),
@@ -2397,7 +2396,8 @@ class _KmRing extends StatelessWidget {
             child: SizedBox(
               width: size,
               height: size,
-              child: Padding(padding: EdgeInsets.all(size * 0.12), child: Center(child: child)),
+              // FittedBox: de cijfers schalen mee als de ring kleiner is.
+              child: Padding(padding: EdgeInsets.all(size * 0.12), child: Center(child: FittedBox(fit: BoxFit.scaleDown, child: child))),
             ),
           ),
           child: child,

@@ -1037,7 +1037,13 @@ class _HourBars extends StatelessWidget {
           final isSel = s.start == selected;
           final isBest = s.start.day == best.start.day && s.start.hour == best.start.hour;
           final newDay = i == 0 || scores[i - 1].start.day != s.start.day;
-          return GestureDetector(
+          // Voor TalkBack: elk staafje als knop met tijd en score, in plaats van alleen het uur.
+          return Semantics(
+            button: true,
+            selected: isSel,
+            excludeSemantics: true,
+            label: '${_dayLabel(s.start)} ${Fmt.time(s.start)}, score ${s.score}, ${s.verdict.toLowerCase()}${isBest ? ', beste moment' : ''}',
+            child: GestureDetector(
             onTap: () => onTap(s),
             child: SizedBox(
               width: 30,
@@ -1091,6 +1097,7 @@ class _HourBars extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           );
         },
       ),
