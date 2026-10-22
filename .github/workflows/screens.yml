@@ -34,6 +34,21 @@ jobs:
             echo "::warning title=Schermen::$line"
           done
           ls -la test_screens/goldens || true
+      - name: Uit beeld-controle
+        # De schermtests zelf mogen falen (nepdata, geen Supabase), maar tekst of knoppen die
+        # uit beeld vallen (RenderFlex overflowed) zijn echte fouten: dan wordt deze stap rood.
+        if: always()
+        run: |
+          n=$(grep -c "overflowed by" screens.txt || true)
+          if [ "$n" -gt 0 ]; then
+            grep -B30 "overflowed by" screens.txt | grep -E "^[0-9]+:[0-9]+ \+" | sed 's/.*: //' | sort -u | while read -r t; do
+              echo "::error title=Uit beeld::$t"
+            done
+            echo "::error::$n keer valt er iets uit beeld. Zie screens.txt (zoek op 'overflowed')."
+            echo "uitbeeld=1" >> "$GITHUB_ENV"
+          else
+            echo "Niets uit beeld."
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,3 +69,7 @@ jobs:
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" schermen
           # Ook per branch, zodat twee branches elkaars plaatjes niet overschrijven.
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" "schermen:schermen-${GITHUB_REF_NAME}"
+
+      - name: Rood als er iets uit beeld valt
+        if: env.uitbeeld == '1'
+        run: exit 1

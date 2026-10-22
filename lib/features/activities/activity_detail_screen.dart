@@ -304,11 +304,14 @@ class ActivityDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 3),
-                              child: Text(
-                                'bij ideaal weer · ${Fmt.pace(corrected / (a.distanceMeters / 1000))}',
-                                style: const TextStyle(color: RwColors.muted),
+                            // Flexible: bij grote letters loopt de tekst door op de volgende regel.
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 3),
+                                child: Text(
+                                  'bij ideaal weer · ${Fmt.pace(corrected / (a.distanceMeters / 1000))}',
+                                  style: const TextStyle(color: RwColors.muted),
+                                ),
                               ),
                             ),
                           ],

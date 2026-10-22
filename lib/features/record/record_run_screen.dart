@@ -1285,7 +1285,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           const SizedBox(height: 28),
         ] else ...[
           // De afstand in een ring die per kilometer volloopt.
-          Center(
+          // Flexible: krimpt mee als de ruimte krap is (grote letters, afslag-melding erboven).
+          Flexible(
+            child: Center(
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -1322,6 +1324,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               ]),
             ),
             ),
+          ),
           ),
           const SizedBox(height: 20),
         ],
@@ -2101,10 +2104,17 @@ class _HeartRow extends StatelessWidget {
             Text(bpm == null ? (view.hrStatus == HrStatus.lost ? 'Band kwijt…' : 'Band verbinden…') : '$bpm',
                 style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: bpm == null ? 16 : 28, fontWeight: FontWeight.w800)),
             if (bpm != null) const Text('  bpm', style: TextStyle(color: RwColors.muted)),
-            const Spacer(),
-            if (zone > 0)
-              Row(
-                children: [
+            // De zone krimpt mee als er weinig ruimte is (grote letters), in plaats van uit beeld te vallen.
+            Expanded(
+              child: zone <= 0
+                  ? const SizedBox.shrink()
+                  : Align(
+                      alignment: Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                   for (var z = 1; z <= 5; z++)
                     Container(
                       width: 14,
@@ -2117,8 +2127,11 @@ class _HeartRow extends StatelessWidget {
                     ),
                   const SizedBox(width: 8),
                   Text('Zone $zone', style: TextStyle(color: color, fontWeight: FontWeight.w700)),
-                ],
-              ),
+                          ],
+                        ),
+                      ),
+                    ),
+            ),
           ],
         ),
       ),
@@ -2374,7 +2387,7 @@ class _KmRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
-        final size = math.min(280.0, c.maxWidth);
+        final size = math.min(280.0, math.min(c.maxWidth, c.maxHeight.isFinite ? c.maxHeight : double.infinity));
         return TweenAnimationBuilder<double>(
           tween: Tween(end: fraction),
           duration: const Duration(milliseconds: 600),

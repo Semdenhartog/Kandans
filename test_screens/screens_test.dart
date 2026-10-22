@@ -420,8 +420,12 @@ void main() {
   testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
   testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
   testWidgets('29 premium', (t) => _shot(t, '29_premium', const PaywallScreen(), height: 1300));
-  // Grote letters (160%): vallen er onderdelen uit beeld, dan faalt deze test met een overflow-fout.
-  testWidgets('30 groot opnemen start', (t) => _shot(t, '30_groot_opnemen_start', const RecordRunScreen(), height: 915, textScale: 1.6));
+  // Grote letters (160%): valt er iets uit beeld, dan faalt de stap 'Uit beeld-controle' in screens.yml.
+  testWidgets('30 groot opnemen start', (t) {
+    // Vorige tests laten een lopende run achter; voor het startscherm terug naar stilstand.
+    RunRecorderService.instance.view.value = const RecorderView();
+    return _shot(t, '30_groot_opnemen_start', const RecordRunScreen(), height: 915, textScale: 1.6);
+  });
   testWidgets('31 groot run detail', (t) => _shot(t, '31_groot_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3800, textScale: 1.6));
   testWidgets('32 groot routes', (t) => _shot(t, '32_groot_routes', const RoutesScreen(), height: 1900, textScale: 1.6));
   testWidgets('33 groot coach', (t) => _shot(t, '33_groot_coach', const CoachScreen(), height: 915, textScale: 1.6));

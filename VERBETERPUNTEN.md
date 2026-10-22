@@ -82,7 +82,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ## G. Gebruiksgemak en toegankelijkheid
 
-52. ✅ **P1 Grotere tekst:** limiet van 135% naar 160%, met 9 schermtests op 160% die falen als er iets uit beeld valt. 200% vraagt een herontwerp van de grote cijfers; nog open.
+52. ✅ **P1 Grotere tekst:** limiet van 135% naar 160%. Schermtests op 160%; de workflow Schermen wordt nu rood als er iets uit beeld valt (drie plekken gevonden en opgelost: hartslagregel, km-ring met afslag, "bij ideaal weer"). 200% vraagt een herontwerp van de grote cijfers; nog open.
 53. ⬜ **P1 Schermlezer (TalkBack).** *Waarom:* maar ±40 Semantics-labels op ±100 schermen. *Wat:* labels voor grafieken, kaarten en icoonknoppen.
 54. ⬜ **P2 Licht thema.** *Wat:* nu alleen donker (zonmodus is alleen voor opnemen).
 55. ⬜ **P2 Kleurenblind-veilig.** *Wat:* scores niet alleen met rood/groen, ook met vorm of tekst.
