@@ -154,7 +154,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
             for (final d in _found.values)
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.monitor_heart_outlined, color: RwColors.accent),
+                  leading: const TileIcon(Icons.monitor_heart_outlined, color: RwColors.accent),
                   title: Text(d.name.isEmpty ? 'Onbekende band' : d.name),
                   subtitle: Text('Signaal ${d.rssi} dBm'),
                   trailing: const Icon(Icons.chevron_right),

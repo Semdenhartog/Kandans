@@ -242,16 +242,22 @@ class _Intro extends StatelessWidget {
           style: const TextStyle(color: RwColors.muted, height: 1.5),
         ),
         const SizedBox(height: 20),
-        for (final s in _suggestions)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: OutlinedButton(
-              onPressed: () => onPick(s),
-              style: OutlinedButton.styleFrom(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        // Suggesties als kaartjes met een eigen icoon, die één voor één binnenschuiven.
+        for (final (i, s) in _suggestions.indexed)
+          StaggerIn(
+            index: i + 1,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: RwCard(
+                onTap: () => onPick(s),
+                child: Row(children: [
+                  TileIcon(const [Icons.calendar_today_outlined, Icons.flag_outlined, Icons.bolt_outlined, Icons.checkroom][i % 4],
+                      color: RwColors.accent),
+                  const SizedBox(width: 14),
+                  Expanded(child: Text(s, style: const TextStyle(fontWeight: FontWeight.w600, height: 1.3))),
+                  const Icon(Icons.arrow_forward, size: 18, color: RwColors.subtle),
+                ]),
               ),
-              child: Text(s),
             ),
           ),
         const SizedBox(height: 12),

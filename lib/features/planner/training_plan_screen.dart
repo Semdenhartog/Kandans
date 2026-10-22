@@ -226,10 +226,29 @@ class _PlanView extends ConsumerWidget {
               child: Card(
                 child: ExpansionTile(
                   shape: const Border(),
-                  leading: CircleAvatar(
-                    backgroundColor: RwColors.surfaceHigh,
-                    child: Text('${e.key}', style: const TextStyle(fontWeight: FontWeight.w800)),
-                  ),
+                  // Weeknummer in een ring die laat zien hoeveel je van die week deed (vol = alles).
+                  leading: Builder(builder: (context) {
+                    final n = e.value.where((s) => sessionDone(s, done)).length;
+                    final f = e.value.isEmpty ? 0.0 : n / e.value.length;
+                    final c = f >= 1 ? RwColors.good : (f >= 0.6 ? RwColors.accent : RwColors.warning);
+                    return SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Stack(alignment: Alignment.center, children: [
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: f),
+                          duration: const Duration(milliseconds: 900),
+                          curve: Curves.easeOutCubic,
+                          builder: (_, v, _) => SizedBox.expand(
+                            child: CircularProgressIndicator(value: v, strokeWidth: 3.5, strokeCap: StrokeCap.round, color: c, backgroundColor: RwColors.bar),
+                          ),
+                        ),
+                        f >= 1
+                            ? Icon(Icons.check_rounded, size: 20, color: c)
+                            : Text('${e.key}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                      ]),
+                    );
+                  }),
                   title: Text('Week ${e.key}', style: const TextStyle(fontWeight: FontWeight.w600)),
                   subtitle: Text(
                     '${e.value.where((s) => sessionDone(s, done)).length} van ${e.value.length} gedaan',

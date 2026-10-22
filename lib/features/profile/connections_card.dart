@@ -98,12 +98,12 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.sync),
+              leading: const TileIcon(Icons.sync),
               title: const Text('Nu runs ophalen'),
               onTap: () => Navigator.pop(ctx, 'sync'),
             ),
             ListTile(
-              leading: const Icon(Icons.link_off, color: RwColors.danger),
+              leading: const TileIcon(Icons.link_off, color: RwColors.danger),
               title: const Text('Strava ontkoppelen', style: TextStyle(color: RwColors.danger)),
               onTap: () => Navigator.pop(ctx, 'disconnect'),
             ),
@@ -190,7 +190,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             ),
           const Divider(height: 1),
           ListTile(
-            leading: Icon(Icons.link, color: conn == null ? _stravaOrange : RwColors.accent),
+            leading: TileIcon(Icons.link, color: conn == null ? _stravaOrange : RwColors.accent),
             title: Text(
               conn == null ? 'Koppel met Strava' : 'Strava',
               style: TextStyle(color: conn == null ? _stravaOrange : null, fontWeight: FontWeight.w600),

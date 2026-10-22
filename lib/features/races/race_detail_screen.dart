@@ -14,6 +14,7 @@ import '../../domain/geo.dart';
 import '../../domain/race_forecast.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../domain/zones.dart';
+import '../../shared/flip_digits.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'pace_band.dart';
@@ -113,7 +114,21 @@ class RaceDetailScreen extends ConsumerWidget {
                 '${Fmt.dateLong(r.raceDate)}${r.startTime == null ? '' : ' · start ${r.startTime}'}',
                 style: const TextStyle(color: RwColors.muted),
               ),
+              if (r.daysUntil > 0) ...[
+                const SizedBox(height: 14),
+                // Groot klapbord: dagen tot de start.
+                Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                  FlipDigits(text: '${r.daysUntil}', size: 1.7),
+                  const SizedBox(width: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(r.daysUntil == 1 ? 'dag tot de start' : 'dagen tot de start',
+                        style: const TextStyle(color: RwColors.muted, fontWeight: FontWeight.w600)),
+                  ),
+                ]),
+              ] else
               const SizedBox(height: 4),
+              if (r.daysUntil <= 0)
               Text(
                 r.daysUntil > 0
                     ? 'Nog ${r.daysUntil} dagen'

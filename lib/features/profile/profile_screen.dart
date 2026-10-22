@@ -108,7 +108,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.calendar_month_outlined, color: RwColors.accent),
+                  leading: const TileIcon(Icons.calendar_month_outlined, color: RwColors.accent),
                   title: const Text('Trainingsschema'),
                   subtitle: const Text('Een schema op maat naar je wedstrijd of afstand'),
                   trailing: const Icon(Icons.chevron_right),
@@ -116,7 +116,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.flag_outlined, color: RwColors.accent),
+                  leading: const TileIcon(Icons.flag_outlined, color: RwColors.accent),
                   title: const Text('Wedstrijden'),
                   subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
                   trailing: const Icon(Icons.chevron_right),
@@ -124,7 +124,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.military_tech_outlined, color: RwColors.accent),
+                  leading: const TileIcon(Icons.military_tech_outlined, color: RwColors.accent),
                   title: const Text('Badges'),
                   subtitle: const Text('Mijlpalen en weerbadges'),
                   trailing: const Icon(Icons.chevron_right),
@@ -132,7 +132,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.fitness_center, color: RwColors.accent),
+                  leading: const TileIcon(Icons.fitness_center, color: RwColors.accent),
                   title: const Text('Kracht en mobiliteit'),
                   subtitle: const Text('Warming-up, kracht voor lopers en rekken, met de stem erbij'),
                   trailing: const Icon(Icons.chevron_right),
@@ -145,7 +145,7 @@ class ProfileScreen extends ConsumerWidget {
                   final worn = shoes.where((s) => !s.retired && shoeWornOut(s, runs)).toList();
                   final d = defaultShoe(shoes);
                   return ListTile(
-                    leading: Icon(Icons.directions_walk, color: worn.isEmpty ? RwColors.accent : RwColors.danger),
+                    leading: TileIcon(Icons.directions_walk, color: worn.isEmpty ? RwColors.accent : RwColors.danger),
                     title: const Text('Mijn schoenen'),
                     subtitle: Text(
                       worn.isNotEmpty
@@ -169,7 +169,7 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.monitor_heart_outlined),
+              leading: const TileIcon(Icons.monitor_heart_outlined),
               title: const Text('Hartslagband'),
               subtitle: const Text('Live hartslag en zones via Bluetooth'),
               trailing: const Icon(Icons.chevron_right),
@@ -193,7 +193,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.workspace_premium_outlined, color: RwColors.accent),
+                  leading: const TileIcon(Icons.workspace_premium_outlined, color: RwColors.accent),
                   title: const Text('RunWise Premium'),
                   subtitle: Text(
                     profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
@@ -203,20 +203,20 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined),
+                  leading: const TileIcon(Icons.privacy_tip_outlined),
                   title: const Text('Privacyverklaring'),
                   onTap: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.download_outlined),
+                  leading: const TileIcon(Icons.download_outlined),
                   title: const Text('Mijn gegevens kopiëren'),
                   subtitle: const Text('Al je gegevens als tekst (AVG)'),
                   onTap: () => _export(context, ref),
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.logout),
+                  leading: const TileIcon(Icons.logout),
                   title: const Text('Uitloggen'),
                   onTap: () async {
                     await OfflineCache.clear();
@@ -226,7 +226,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever_outlined, color: RwColors.danger),
+                  leading: const TileIcon(Icons.delete_forever_outlined, color: RwColors.danger),
                   title: const Text('Account verwijderen', style: TextStyle(color: RwColors.danger)),
                   onTap: () => _deleteAccount(context, ref),
                 ),

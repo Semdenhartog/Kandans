@@ -621,3 +621,26 @@ class FabScrollWatcher extends StatelessWidget {
         child: child,
       );
 }
+
+/// Icoon in een getint tegeltje (zoals in de instellingen van een iPhone): rustiger en chiquer in lijsten.
+class TileIcon extends StatelessWidget {
+  const TileIcon(this.icon, {super.key, this.color = RwColors.muted});
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(11),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [color.withValues(alpha: 0.26), color.withValues(alpha: 0.10)],
+          ),
+          border: Border.all(color: color.withValues(alpha: 0.22)),
+        ),
+        child: Icon(icon, size: 19, color: color == RwColors.muted ? RwColors.text : color),
+      );
+}

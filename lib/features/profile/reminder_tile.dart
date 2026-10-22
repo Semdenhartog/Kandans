@@ -92,7 +92,7 @@ class _ReminderTileState extends ConsumerState<ReminderTile> {
         ),
         if (s?.enabled ?? false)
           ListTile(
-            leading: const Icon(Icons.schedule),
+            leading: const TileIcon(Icons.schedule),
             title: const Text('Tijdstip melding'),
             trailing: Text(s!.timeLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
             onTap: _pickTime,

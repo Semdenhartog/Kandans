@@ -145,7 +145,7 @@ class _RunCalendarScreenState extends ConsumerState<RunCalendarScreen> {
           children: [
             for (final a in runs)
               ListTile(
-                leading: const Icon(Icons.directions_run, color: RwColors.accent),
+                leading: const TileIcon(Icons.directions_run, color: RwColors.accent),
                 title: Text('${Fmt.km(a.distanceMeters)} · ${Fmt.pace(a.paceSecondsPerKm)}'),
                 subtitle: Text('${Fmt.time(a.startedAt)} · ${Fmt.duration(a.movingTimeSeconds)}'),
                 onTap: a.id == null

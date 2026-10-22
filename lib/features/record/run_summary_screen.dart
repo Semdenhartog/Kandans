@@ -222,6 +222,39 @@ class RunSummaryScreen extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 20),
+            // Voorproefje van je deelkaart: tik om te delen.
+            if (a.hasTrack)
+              RwCard(
+                onTap: () => openShareRun(context, a, badges: [for (final r in records) 'Record ${r.label}', for (final b in badges) b.title]),
+                child: Row(children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: SizedBox(
+                      width: 72,
+                      height: 90,
+                      child: FittedBox(
+                        child: IgnorePointer(
+                          child: RunShareCard(
+                            activity: a,
+                            badges: [for (final r in records) 'Record ${r.label}', for (final b in badges) b.title],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Je deelkaart staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                      SizedBox(height: 2),
+                      Text('Voor Instagram, WhatsApp of je verhaal. Kies kaart, donker, oranje of sticker.',
+                          style: TextStyle(color: RwColors.muted, height: 1.35)),
+                    ]),
+                  ),
+                  const Icon(Icons.ios_share, color: RwColors.accent),
+                ]),
+              ),
+            if (a.hasTrack) const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
