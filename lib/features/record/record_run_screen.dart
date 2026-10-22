@@ -1062,7 +1062,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           const SizedBox(height: 14),
           _NextTurnCard(turn: v.nextTurn!, inMeters: v.nextTurnIn!),
         ],
-        if (v.routeRemaining != null) ...[
+        if (v.routeRemaining != null && (v.offRoute || v.approachingRoute) && v.wayToRoute != null) ...[
+          const SizedBox(height: 14),
+          _WayToRouteCard(way: v.wayToRoute!, approaching: v.approachingRoute),
+        ] else if (v.routeRemaining != null) ...[
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -2274,6 +2277,61 @@ class _BackToStart extends StatelessWidget {
   }
 }
 
+
+/// Je staat (nog) niet op je route: grote pijl en afstand naar de route.
+class _WayToRouteCard extends StatelessWidget {
+  const _WayToRouteCard({required this.way, required this.approaching});
+  final WayToRoute way;
+  final bool approaching;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = approaching ? RwColors.accent : RwColors.warning;
+    final dist = way.meters < 1000 ? '${(way.meters / 10).round() * 10} m' : Fmt.km(way.meters, decimals: 1);
+    final title = approaching ? 'Naar je route' : 'Terug naar je route';
+    return Semantics(
+      liveRegion: true,
+      label: '$title: $dist ${way.words}',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
+        ),
+        child: Row(children: [
+          if (way.relative != null)
+            TweenAnimationBuilder<double>(
+              tween: Tween(end: way.relative!),
+              duration: const Duration(milliseconds: 500),
+              builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
+              child: Icon(Icons.navigation, color: color, size: 40),
+            )
+          else
+            Icon(Icons.explore_outlined, color: color, size: 40),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title, style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+              const SizedBox(height: 2),
+              Text(
+                approaching
+                    ? 'Ligt ${way.words}. Je mag overal instappen.'
+                    : 'Ligt ${way.words}. Volg de pijl.',
+                style: const TextStyle(color: RwColors.muted, height: 1.3),
+              ),
+            ]),
+          ),
+          const SizedBox(width: 10),
+          Text(dist,
+              style: const TextStyle(
+                  fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
+        ]),
+      ),
+    );
+  }
+}
 
 /// Grote pijl met de volgende afslag, zoals een navigatie-app.
 class _NextTurnCard extends StatelessWidget {

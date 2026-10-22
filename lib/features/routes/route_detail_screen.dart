@@ -36,8 +36,11 @@ final _routeWeatherProvider = FutureProvider.family<HourWeather?, String>((ref, 
 });
 
 class RouteDetailScreen extends ConsumerWidget {
-  const RouteDetailScreen({super.key, required this.routeId});
+  const RouteDetailScreen({super.key, required this.routeId, this.isNew = false});
   final String routeId;
+
+  /// Net gemaakt of geïmporteerd: dan bieden we meteen aan om hem op je horloge te zetten.
+  final bool isNew;
 
   Future<void> _toggleFavorite(BuildContext context, WidgetRef ref, RunRoute r) async {
     try {
@@ -120,6 +123,10 @@ class RouteDetailScreen extends ConsumerWidget {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
+              if (isNew) ...[
+                _NewRouteCard(route: r),
+                const SizedBox(height: 14),
+              ],
               Row(
                 children: [
                   Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(r.distanceMeters))),
@@ -657,6 +664,36 @@ class _SurfaceCard extends ConsumerWidget {
 
 
 /// Grote knop: route naar je horloge (laat zien voor welk horloge).
+/// Net opgeslagen: één tik om hem op je horloge te zetten.
+class _NewRouteCard extends StatelessWidget {
+  const _NewRouteCard({required this.route});
+  final RunRoute route;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: RwColors.accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: RwColors.accent.withValues(alpha: 0.4)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Row(children: [
+          Icon(Icons.check_circle, color: RwColors.accent),
+          SizedBox(width: 8),
+          Expanded(child: Text('Je route staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
+        ]),
+        const SizedBox(height: 6),
+        const Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: RunWise zegt elke afslag.',
+            style: TextStyle(color: RwColors.muted, height: 1.4)),
+        const SizedBox(height: 10),
+        _WatchButton(route: route),
+      ]),
+    );
+  }
+}
+
 class _WatchButton extends StatefulWidget {
   const _WatchButton({required this.route});
   final RunRoute route;

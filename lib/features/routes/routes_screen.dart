@@ -142,7 +142,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
         'Route "${route.name}" toegevoegd (${Fmt.km(route.distanceMeters, decimals: 1)}).'
         '${linked > 0 ? ' $linked eerdere ${linked == 1 ? 'run' : 'runs'} op deze route gekoppeld.' : ''}',
       );
-      context.go('/routes/$id');
+      context.go('/routes/$id?nieuw=1');
     } on GpxParseException catch (e) {
       if (mounted) showMessage(context, e.message, error: true);
     } catch (e) {

@@ -118,8 +118,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ),
                 GoRoute(
                   path: ':id',
-                  builder: (c, s) =>
-                      RouteDetailScreen(routeId: s.pathParameters['id']!),
+                  builder: (c, s) => RouteDetailScreen(
+                      routeId: s.pathParameters['id']!, isNew: s.uri.queryParameters['nieuw'] == '1'),
                 ),
               ],
             ),

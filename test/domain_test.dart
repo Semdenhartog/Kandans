@@ -1203,8 +1203,71 @@ void main() {
       for (var m = 620; m <= 1900; m += 10) {
         if (f.update(LatLng(52.0, 5.0 + m / 68540)) case final c?) said.add(c);
       }
-      expect(said, ['Let op, je bent van je route af.', 'Je bent weer op je route.', 'Nog 300 meter tot het einde van je route.']);
+      expect(said, [
+        'Let op, je bent van je route af. De route ligt 100 meter achter je.',
+        'Je bent weer op je route.',
+        'Nog 300 meter tot het einde van je route.',
+      ]);
       expect(f.remaining, closeTo(100, 10));
+    });
+
+    test('halverwege instappen op een gewone route', () {
+      final route = RouteTrack([for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + i * 100 / 68540)]);
+      final f = RouteFollower(route);
+      final c = f.update(LatLng(52.0, 5.0 + 800 / 68540), seconds: 0);
+      expect(f.approaching, isFalse);
+      expect(f.progress, closeTo(800, 5));
+      expect(c, contains('Je bent op je route'));
+      expect(f.remaining, closeTo(1200, 10));
+    });
+
+    test('naar de route toe lopen: richting en afstand', () {
+      final route = RouteTrack([for (var i = 0; i <= 20; i++) LatLng(52.0, 5.0 + i * 100 / 68540)]);
+      final f = RouteFollower(route);
+      // 300 m ten zuiden van de route, stilstaand: kompasrichting.
+      final c = f.update(LatLng(52.0 - 300 / 111200, 5.0 + 1000 / 68540), seconds: 0);
+      expect(f.approaching, isTrue);
+      expect(c, 'Je route ligt 300 meter naar het noorden. Loop daarheen, dan begint de begeleiding.');
+      expect(f.way!.meters, closeTo(300, 5));
+      // Niet elke meting herhalen.
+      expect(f.update(LatLng(52.0 - 250 / 111200, 5.0 + 1000 / 68540), seconds: 10), isNull);
+      // Je loopt naar het noorden: de route ligt nu recht voor je.
+      final again = f.update(LatLng(52.0 - 150 / 111200, 5.0 + 1000 / 68540), seconds: 60);
+      expect(again, 'Je route ligt nog 150 meter recht voor je.');
+      final on = f.update(LatLng(52.0, 5.0 + 1000 / 68540), seconds: 90);
+      expect(f.approaching, isFalse);
+      expect(on, contains('Je bent op je route'));
+    });
+
+    test('rondje halverwege oppakken: hele rondje vanaf daar', () {
+      // Vierkant van 4 x 500 m, terug bij het begin.
+      const dLat = 500 / 111200, dLon = 500 / 68540;
+      final pts = <LatLng>[
+        for (var i = 0; i < 5; i++) LatLng(52.0, 5.0 + dLon * i / 5),
+        for (var i = 0; i < 5; i++) LatLng(52.0 + dLat * i / 5, 5.0 + dLon),
+        for (var i = 0; i < 5; i++) LatLng(52.0 + dLat, 5.0 + dLon - dLon * i / 5),
+        for (var i = 0; i <= 5; i++) LatLng(52.0 + dLat - dLat * i / 5, 5.0),
+      ];
+      final route = RouteTrack(pts);
+      final f = RouteFollower(route);
+      expect(f.isLoop, isTrue);
+      final c = f.update(LatLng(52.0 + dLat / 2, 5.0 + dLon), seconds: 0);
+      expect(c, contains('hele rondje'));
+      expect(f.rebased, isTrue);
+      expect(f.progress, 0);
+      expect(f.track.length, closeTo(route.length, 5));
+      expect(f.joinedAt, closeTo(750, 10));
+    });
+
+    test('kompaswoorden en afstanden voor de stem', () {
+      expect(compassWords(0), 'naar het noorden');
+      expect(compassWords(44), 'naar het noordoosten');
+      expect(compassWords(181), 'naar het zuiden');
+      expect(compassWords(350), 'naar het noorden');
+      expect(spokenMeters(4), '10 meter');
+      expect(spokenMeters(63), '60 meter');
+      expect(spokenMeters(340), '350 meter');
+      expect(spokenMeters(1520), '1,5 kilometer');
     });
   });
 

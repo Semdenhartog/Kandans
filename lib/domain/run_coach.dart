@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'geo.dart';
 import 'route_geometry.dart';
 import 'route_photos.dart' show projectOnTrack;
+import 'run_helpers.dart' show directionWords;
 import 'run_recorder.dart';
 import 'run_streams.dart';
 
@@ -173,25 +174,167 @@ class PaceCoach {
   }
 }
 
+/// Kompasrichting in gewone woorden ("naar het noordoosten").
+String compassWords(double bearing) {
+  const names = ['noorden', 'noordoosten', 'oosten', 'zuidoosten', 'zuiden', 'zuidwesten', 'westen', 'noordwesten'];
+  final i = (((bearing % 360) + 22.5) ~/ 45) % 8;
+  return 'naar het ${names[i]}';
+}
+
+/// Afstand voor de stem: tot 100 m op 10 m, daarboven op 50 m.
+String spokenMeters(double m) {
+  if (m >= 1000) return '${(m / 1000).toStringAsFixed(1).replaceAll('.', ',')} kilometer';
+  final r = m >= 100 ? (m / 50).round() * 50 : math.max(10, (m / 10).round() * 10);
+  return '$r meter';
+}
+
+/// Waar de route ligt vanaf waar je nu bent.
+class WayToRoute {
+  const WayToRoute({required this.meters, required this.bearing, this.relative});
+
+  /// Afstand tot het dichtstbijzijnde punt van de route.
+  final double meters;
+
+  /// Kompasrichting naar de route (0 = noord).
+  final double bearing;
+
+  /// Ten opzichte van je looprichting (0 = recht voor je, 90 = rechts). Null = je staat stil.
+  final double? relative;
+
+  String get words => relative != null ? directionWords(relative!) : compassWords(bearing);
+}
+
 /// Route volgen tijdens het lopen: waar ben je op de route en ben je ervan af?
+///
+/// - Je mag overal op de route beginnen: RunWise pakt de route op waar je erop komt.
+///   Bij een rondje draait de route mee, zodat je toch het hele rondje loopt.
+/// - Sta je nog niet op de route, of ben je eraf, dan zegt RunWise welke kant je op moet.
 class RouteFollower {
-  RouteFollower(this.track, {this.offAfter = 45, this.backWithin = 25});
-  final RouteTrack track;
+  RouteFollower(RouteTrack track, {this.offAfter = 45, this.backWithin = 25, this.repeatSeconds = 30})
+      : _track = track,
+        original = track;
+
+  /// De route zoals hij gemaakt is.
+  final RouteTrack original;
+  RouteTrack _track;
+
+  /// De route zoals je hem nu volgt (bij een rondje kan het begin verschoven zijn).
+  RouteTrack get track => _track;
 
   /// Verder dan zoveel meter van de route = eraf (na 3 metingen achter elkaar).
   final double offAfter;
   final double backWithin;
 
+  /// Zo vaak (seconden) herhaalt de stem waar de route ligt als je ernaast loopt.
+  final double repeatSeconds;
+
   double progress = 0;
   bool offRoute = false;
+
+  /// Nog niet op de route geweest (je loopt ernaartoe).
+  bool approaching = true;
+
+  /// Wordt true als de route een nieuw begin kreeg (de recorder rekent dan de afslagen opnieuw uit).
+  bool rebased = false;
+
+  /// Op hoeveel meter van het oorspronkelijke begin je de route oppakte.
+  double joinedAt = 0;
+
+  /// Waar de route ligt (alleen als je er nog niet op bent of ervan af bent).
+  WayToRoute? way;
+
   int _offCount = 0;
   bool _nearFinishSaid = false;
+  LatLng? _last;
+  double? _heading;
+  double? _lastWaySaid;
+  double _clock = 0;
 
   double get remaining => (track.length - progress).clamp(0, double.infinity).toDouble();
 
+  /// Begin en eind liggen vlak bij elkaar: een rondje.
+  bool get isLoop => original.isValid && distanceMeters(original.points.first, original.points.last) < 120;
+
+  void _trackHeading(LatLng p) {
+    final last = _last;
+    if (last == null) {
+      _last = p;
+      return;
+    }
+    if (distanceMeters(last, p) >= 12) {
+      _heading = bearingDegrees(last, p);
+      _last = p;
+    }
+  }
+
+  WayToRoute _wayFrom(LatLng p, RouteTrack t, double meters, double off) {
+    final target = t.at(meters);
+    final b = bearingDegrees(p, target);
+    double? rel;
+    if (_heading != null) {
+      rel = (b - _heading!) % 360;
+      if (rel < 0) rel += 360;
+    }
+    return WayToRoute(meters: off, bearing: b, relative: rel);
+  }
+
+  /// Draai een rondje zo dat het begint op [m] meter.
+  RouteTrack _rotated(double m) {
+    final t = original;
+    final pts = <LatLng>[t.at(m)];
+    for (var i = 0; i < t.points.length; i++) {
+      if (t.cumulative[i] > m) pts.add(t.points[i]);
+    }
+    for (var i = 1; i < t.points.length; i++) {
+      if (t.cumulative[i] <= m) pts.add(t.points[i]);
+    }
+    pts.add(t.at(m));
+    return RouteTrack(pts);
+  }
+
   /// Verwerkt je positie. Geeft een tekst voor de stem als er iets verandert.
-  String? update(LatLng p) {
+  /// [seconds] = tijd sinds de start (voor het herhalen van "de route ligt …").
+  String? update(LatLng p, {double? seconds}) {
     if (!track.isValid) return null;
+    _clock = seconds ?? _clock + 3;
+    _trackHeading(p);
+
+    if (approaching) {
+      // Vlak bij het begin? Dan gewoon vanaf het begin.
+      final startOff = distanceMeters(p, original.points.first);
+      final pr = projectOnTrack(original, p);
+      final joinNearStart = startOff <= backWithin * 1.6;
+      if (joinNearStart || pr.off <= backWithin) {
+        approaching = false;
+        way = null;
+        final at = joinNearStart ? 0.0 : pr.meters;
+        if (at > 50 && (original.length - at) > 50) {
+          joinedAt = at;
+          if (isLoop) {
+            _track = _rotated(at);
+            rebased = true;
+            progress = 0;
+          } else {
+            progress = at;
+          }
+          // Alleen iets zeggen als je eerst naar de route toe moest lopen of halverwege instapt.
+          return isLoop
+              ? 'Je bent op je route. Je loopt het hele rondje vanaf hier.'
+              : 'Je bent op je route. Nog ${spokenMeters(remaining)}.';
+        }
+        return _lastWaySaid != null ? 'Je bent op je route. Veel plezier.' : null;
+      }
+      way = _wayFrom(p, original, pr.meters, pr.off);
+      if (_lastWaySaid == null || _clock - _lastWaySaid! >= repeatSeconds * 1.5) {
+        final first = _lastWaySaid == null;
+        _lastWaySaid = _clock;
+        return first
+            ? 'Je route ligt ${spokenMeters(pr.off)} ${way!.words}. Loop daarheen, dan begint de begeleiding.'
+            : 'Je route ligt nog ${spokenMeters(pr.off)} ${way!.words}.';
+      }
+      return null;
+    }
+
     final pr = projectOnTrack(track, p);
     // Vooruitgang alleen vooruit (een stukje terug telt niet), en niet verspringen naar het einde van een rondje.
     if (pr.off < backWithin * 2 && pr.meters > progress - 150 && pr.meters < progress + 400) {
@@ -201,12 +344,24 @@ class RouteFollower {
       _offCount = pr.off > offAfter ? _offCount + 1 : 0;
       if (_offCount >= 3) {
         offRoute = true;
-        return 'Let op, je bent van je route af.';
+        // Terug naar het punt waar je eraf ging (of verderop als dat dichterbij is).
+        way = _wayFrom(p, track, pr.meters, pr.off);
+        _lastWaySaid = _clock;
+        return 'Let op, je bent van je route af. De route ligt ${spokenMeters(pr.off)} ${way!.words}.';
       }
     } else if (pr.off < backWithin) {
       offRoute = false;
       _offCount = 0;
+      way = null;
+      // Weer op de route: verder tellen vanaf waar je erop kwam (als dat vooruit is).
+      if (pr.meters > progress && pr.meters < progress + 1500) progress = pr.meters;
       return 'Je bent weer op je route.';
+    } else {
+      way = _wayFrom(p, track, pr.meters, pr.off);
+      if (_lastWaySaid == null || _clock - _lastWaySaid! >= repeatSeconds) {
+        _lastWaySaid = _clock;
+        return 'De route ligt ${spokenMeters(pr.off)} ${way!.words}.';
+      }
     }
     if (!_nearFinishSaid && track.length > 1000 && remaining < 300 && progress > track.length * 0.7) {
       _nearFinishSaid = true;

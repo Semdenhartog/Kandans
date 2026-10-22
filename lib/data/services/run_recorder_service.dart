@@ -52,6 +52,8 @@ class RecorderView {
     this.followRoute = const [],
     this.routeRemaining,
     this.offRoute = false,
+    this.approachingRoute = false,
+    this.wayToRoute,
     this.ghostDelta,
     this.nextTurn,
     this.nextTurnIn,
@@ -94,6 +96,10 @@ class RecorderView {
   final List<LatLng> followRoute;
   final double? routeRemaining;
   final bool offRoute;
+
+  /// Nog niet op de route (je loopt ernaartoe) en waar de route ligt.
+  final bool approachingRoute;
+  final WayToRoute? wayToRoute;
 
   /// Tegen je record op deze route: seconden achter (+) of voor (-). Null = geen record-race.
   final double? ghostDelta;
@@ -423,11 +429,33 @@ class RunRecorderService {
             if (v.heartRate != null) '♥ ${v.heartRate}',
             if (v.step != null) '${stepLabel(v.step!.kind, walkRun: v.walkRun)}: nog ${v.step!.byDistance ? '${v.stepRemaining.round()} m' : Fmt.duration(v.stepRemaining)}',
           ].join(' · ');
+    // Volg je een route? Dan staat de volgende afslag bovenaan de melding: die zie je ook op je
+    // Galaxy Watch, Pixel Watch of ander Wear OS-horloge en op je vergrendelscherm.
+    final nav = paused ? null : _navLine(v);
+    final title = r.indoor ? 'Loopband${r.treadmillKmh == null ? '' : ' · ${Fmt.km(r.distance, decimals: 2)}'}' : Fmt.km(r.distance, decimals: 2);
     NotificationService.instance
-        .showRunProgress(r.indoor ? 'Loopband${r.treadmillKmh == null ? '' : ' · ${Fmt.km(r.distance, decimals: 2)}'}' : Fmt.km(r.distance, decimals: 2),
-            body.isEmpty ? 'RunWise neemt je run op' : body,
+        .showRunProgress(nav ?? title,
+            nav == null ? (body.isEmpty ? 'RunWise neemt je run op' : body) : '$title${body.isEmpty ? '' : ' · $body'}',
             movingSeconds: v.movingSeconds, paused: paused)
         .ignore();
+  }
+
+  String _wayLine(WayToRoute w) =>
+      '↩ Route ${w.meters < 1000 ? '${(w.meters / 10).round() * 10} m' : Fmt.km(w.meters, decimals: 1)} ${w.words}';
+
+  /// Eén regel navigatie voor de melding: volgende afslag, of waar de route ligt.
+  String? _navLine(RecorderView v) {
+    if (v.routeRemaining == null) return null;
+    final w = v.wayToRoute;
+    if ((v.offRoute || v.approachingRoute) && w != null) {
+      return _wayLine(w);
+    }
+    final t = v.nextTurn, d = v.nextTurnIn;
+    if (t != null && d != null && d < 1500) {
+      final m = d < 20 ? 'nu' : (d >= 150 ? '${(d / 50).round() * 50} m' : '${(d / 10).round() * 10} m');
+      return '${t.kind.arrow} ${t.kind.label} · $m';
+    }
+    return '↑ Rechtdoor · nog ${Fmt.km(v.routeRemaining!, decimals: 1)}';
   }
 
   void _sayCue(RunRecording r) {
@@ -518,8 +546,9 @@ class RunRecorderService {
 
   /// Water en toiletten langs de route (komen binnen terwijl je al loopt): dan ook aankondigen.
   void setRoutePois(List<RoutePoi> pois) {
-    _pois = pois;
-    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: pois);
+    final f = _follower;
+    _pois = f != null && f.isLoop && f.joinedAt > 0 ? _shiftPois(pois, f) : pois;
+    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois);
   }
 
   /// Loopband: snelheid van de band doorgeven (km/u), dan telt de afstand live mee.
@@ -568,13 +597,23 @@ class RunRecorderService {
     }
     final follower = _follower;
     if (follower != null && r.isActive) {
-      final c = follower.update(LatLng(p.latitude, p.longitude));
+      final wasOff = follower.offRoute || follower.approaching;
+      final c = follower.update(LatLng(p.latitude, p.longitude), seconds: r.movingSeconds);
+      if (follower.rebased) _rebaseRoute(follower);
       if (c != null) {
         _say(c);
-        _buzz(follower.offRoute ? const [0, 500, 200, 500] : const [0, 150]);
+        final nowOff = follower.offRoute || follower.approaching;
+        // Eraf: lang-kort-lang. Nog steeds eraf: één middellange tik. Weer erop: één korte.
+        _buzz(nowOff ? (wasOff ? const [0, 300] : const [0, 500, 200, 500]) : const [0, 150]);
+        if (nowOff && follower.way != null) {
+          NotificationService.instance
+              .showTurn(_wayLine(follower.way!),
+                  follower.approaching ? 'Loop naar je route, dan begint de begeleiding' : 'Je bent van je route af')
+              .ignore();
+        }
       }
       final tg = _turns;
-      if (tg != null && turnByTurn && !follower.offRoute) {
+      if (tg != null && turnByTurn && !follower.offRoute && !follower.approaching) {
         final cue = tg.update(follower.progress);
         if (cue != null) {
           _say(cue.text);
@@ -647,6 +686,37 @@ class RunRecorderService {
     }
   }
 
+  /// Rondje opgepakt halverwege: afslagen, klimmen en tappunten tellen vanaf het nieuwe begin.
+  void _rebaseRoute(RouteFollower f) {
+    f.rebased = false;
+    final len = f.original.length;
+    double shift(double m) => ((m - f.joinedAt) % len + len) % len;
+    _turns = TurnGuide(detectTurns(f.track));
+    _climbs = [
+      for (final c in _climbs) RouteClimb(startMeters: shift(c.startMeters), lengthMeters: c.lengthMeters, gainMeters: c.gainMeters),
+    ];
+    _pois = _shiftPois(_pois, f);
+    _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois);
+    // Je record op deze route is vanaf het echte begin gemeten: dan klopt de vergelijking niet meer.
+    _ghost = null;
+  }
+
+  List<RoutePoi> _shiftPois(List<RoutePoi> pois, RouteFollower f) {
+    final len = f.original.length;
+    double shift(double m) => ((m - f.joinedAt) % len + len) % len;
+    return [
+      for (final p in pois)
+        RoutePoi(
+            kind: p.kind,
+            point: p.point,
+            alongMeters: shift(p.alongMeters),
+            offsetMeters: p.offsetMeters,
+            name: p.name,
+            fee: p.fee,
+            seasonal: p.seasonal),
+    ];
+  }
+
   void _buzz(List<int> pattern) {
     if (!haptics) return;
     Vibration.vibrate(pattern: pattern).catchError((_) {});
@@ -711,6 +781,8 @@ class RunRecorderService {
       followRoute: _follower?.track.points ?? const [],
       routeRemaining: _follower?.remaining,
       offRoute: _follower?.offRoute ?? false,
+      approachingRoute: _follower?.approaching ?? false,
+      wayToRoute: _follower?.way,
       walkRun: it?.plan.walkRun ?? false,
       treadmillKmh: r.treadmillKmh,
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),

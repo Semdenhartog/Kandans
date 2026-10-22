@@ -123,7 +123,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
         context,
         linked > 0 ? 'Route opgeslagen. $linked eerdere ${linked == 1 ? 'run' : 'runs'} op deze route gekoppeld.' : 'Route opgeslagen.',
       );
-      context.go('/routes/$id');
+      context.go('/routes/$id?nieuw=1');
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
     } finally {
