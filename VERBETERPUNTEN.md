@@ -57,7 +57,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 31. ⬜ **P2 Gevoel op schaal 1–10.** *Waarom:* zwaar/oké/top is te grof voor trainingsbelasting. *Wat:* optionele schuif, de drie knoppen blijven.
 32. ⬜ **P2 Eigen runs naar Strava sturen.** *Wat:* opgenomen RunWise-runs uploaden naar Strava (mag volgens de voorwaarden, wij zijn dan de bron).
 33. ⬜ **P2 Notitie inspreken.** *Wat:* microfoonknop bij "hoe voelde het".
-34. ⬜ **P2 Weer-gecorrigeerd tempo in de lijst.** *Wat:* "5:24 (≈5:12 zonder wind)" bij elke run.
+34. ✅ **P2 Weer-gecorrigeerd tempo in de runlijst:** "≈ 5:12 /km bij ideaal weer" onder elke run waar het weer meer dan 5 s kostte.
 35. ✅ **P3 Vergelijken met dezelfde route.** *Wat:* grafiek van al je tijden op een route. *Bestond al: tijden per route en "je 19e keer op deze route".*
 36. ⬜ **P3 Foto bij de deelkaart als achtergrond.**
 

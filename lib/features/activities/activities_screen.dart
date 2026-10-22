@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
+import '../../domain/weather_correction.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -992,6 +993,17 @@ class _ActivityTile extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // Eerlijk vergelijken: wat dit tempo bij ideaal weer was geweest (alleen als het weer echt uitmaakte).
+                    if (a.distanceMeters >= 1000 && weatherCost(a).matters)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          '≈ ${Fmt.pace(correctedSeconds(a) / (a.distanceMeters / 1000))} bij ideaal weer',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                        ),
+                      ),
                     if (badges.isNotEmpty) ...[
                       const SizedBox(height: 6),
                       Wrap(spacing: 6, runSpacing: 4, children: [for (final b in badges.take(2)) RecordBadge(b, small: true)]),
