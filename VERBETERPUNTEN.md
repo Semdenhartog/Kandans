@@ -63,7 +63,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ## E. Coach en training
 
-37. ⬜ **P1 AI-kosten per gebruiker bewaken.** *Waarom:* bij €5/maand moet de coach goedkoper blijven dan wat hij oplevert. *Wat:* kosten per gebruiker loggen, context inkorten, veelgestelde vragen hergebruiken.
+37. ✅ **P1 AI-kosten per gebruiker bewaken (stap 1).** De coach logt per vraag het aantal tokens (zonder inhoud) als `coach_usage` in de Supabase-logboeken. Sem: coach-functie opnieuw live zetten. Stap 2 (context inkorten, hergebruik) pas als de cijfers er zijn. Oorspronkelijk: *Waarom:* bij €5/maand moet de coach goedkoper blijven dan wat hij oplevert. *Wat:* kosten per gebruiker loggen, context inkorten, veelgestelde vragen hergebruiken.
 38. ⬜ **P1 Schema past zich aan na gemiste training.** *Wat:* een training overgeslagen? De week schuift slim, zonder twee zware dagen achter elkaar.
 39. ⬜ **P2 Coach onthoudt doelen en klachten.** *Wat:* met toestemming, en altijd te wissen.
 40. ⬜ **P2 Bronnen in het coach-antwoord.** *Wat:* "op basis van je laatste 3 lange runs" met links naar die runs.

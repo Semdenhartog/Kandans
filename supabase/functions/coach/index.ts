@@ -257,6 +257,7 @@ async function summarize(
   }).catch(() => null);
   if (!ai || !ai.ok) return json(502, { error: "De coach is even niet bereikbaar. Probeer het zo opnieuw." });
   const result = await ai.json();
+  logUsage("run_summary", userId, env("COACH_MODEL") || "claude-haiku-5-5", result);
   const text = ((result.content ?? []) as { type: string; text?: string }[])
     .filter((c) => c.type === "text").map((c) => c.text).join("\n").trim();
   if (!text) return json(502, { error: "De coach gaf geen antwoord. Probeer het opnieuw." });
@@ -267,6 +268,21 @@ async function summarize(
     freeLeft = Math.max(0, freeLimit - freeUsed - 1);
   }
   return json(200, { summary: text, premium, free_left: freeLeft });
+}
+
+/** Verbruik per AI-aanroep in de logboeken (Supabase → Edge Functions → coach → Logs), zonder inhoud
+ *  of persoonsgegevens. Zo zie je wat de coach per gebruiker kost. Zoek op "coach_usage". */
+function logUsage(kind: "chat" | "run_summary", userId: string, model: string, result: Record<string, unknown>) {
+  const u = (result.usage ?? {}) as Record<string, number | undefined>;
+  console.log(JSON.stringify({
+    event: "coach_usage",
+    kind,
+    user: userId.slice(0, 8),
+    model,
+    input_tokens: u.input_tokens ?? null,
+    output_tokens: u.output_tokens ?? null,
+    cache_read_input_tokens: u.cache_read_input_tokens ?? null,
+  }));
 }
 
 Deno.serve(async (req) => {
@@ -362,6 +378,7 @@ Deno.serve(async (req) => {
     return json(502, { error: "De coach is even niet bereikbaar. Probeer het zo opnieuw." });
   }
   const result = await ai.json();
+  logUsage("chat", userId, env("COACH_MODEL") || "claude-haiku-5-5", result);
   const reply = ((result.content ?? []) as { type: string; text?: string }[])
     .filter((c) => c.type === "text").map((c) => c.text).join("\n").trim();
   if (!reply) return json(502, { error: "De coach gaf geen antwoord. Probeer het opnieuw." });
