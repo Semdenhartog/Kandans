@@ -39,7 +39,13 @@ RunVerdict runVerdict(StartTimeScore now, StartTimeScore best, {bool nowAllowed 
   return RunVerdict(
     kind: VerdictKind.later,
     title: 'Later lopen: ${t(best.start)}',
-    detail: gain > 0 ? '$gain punten beter dan nu${why.isEmpty ? '' : '. ${_cap(why)}'}' : (why.isEmpty ? 'Het beste moment binnen je looptijden.' : _cap(why)),
+    detail: gain > 0
+        ? (() {
+            final better = whyBetter(now, best);
+            if (better != null) return '$gain punten beter dan nu: $better.';
+            return '$gain punten beter dan nu${why.isEmpty ? '' : '. ${_cap(why)}'}';
+          })()
+        : (why.isEmpty ? 'Het beste moment binnen je looptijden.' : _cap(why)),
     best: best,
     now: now,
   );
@@ -51,3 +57,28 @@ String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 /// Alleen de goede uren (Runcast-stijl filter).
 List<StartTimeScore> goodHoursOnly(List<StartTimeScore> all, {int minScore = 70}) =>
     all.where((s) => s.score >= minScore).toList();
+
+/// Waarom [best] beter is dan [now], in gewone woorden ("minder warm en droger"),
+/// op basis van de twee grootste verschillen. Null als er geen duidelijk verschil is.
+String? whyBetter(StartTimeScore now, StartTimeScore best, {double minDiff = 3}) {
+  final diffs = <(WeatherFactor, double)>[];
+  for (final f in WeatherFactor.values) {
+    final d = (now.factors[f] ?? 0) - (best.factors[f] ?? 0);
+    if (d >= minDiff) diffs.add((f, d));
+  }
+  if (diffs.isEmpty) return null;
+  diffs.sort((a, b) => b.$2.compareTo(a.$2));
+  const words = {
+    WeatherFactor.warm: 'minder warm',
+    WeatherFactor.cold: 'minder koud',
+    WeatherFactor.rain: 'droger',
+    WeatherFactor.wind: 'minder wind',
+    WeatherFactor.gusts: 'geen harde windstoten',
+    WeatherFactor.dark: 'nog licht',
+    WeatherFactor.uv: 'minder felle zon',
+    WeatherFactor.humid: 'minder benauwd',
+    WeatherFactor.ice: 'geen kans op gladheid',
+  };
+  final parts = [for (final d in diffs.take(2)) words[d.$1]!];
+  return parts.join(' en ');
+}

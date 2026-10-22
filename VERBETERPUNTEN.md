@@ -26,7 +26,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ## B. De kern: beste vertrektijd
 
-11. ⬜ **P1 Uitleg in één zin per uur.** *Waarom:* een score zonder reden voelt willekeurig. *Wat:* "18:00 wint van 17:00: minder tegenwind op de terugweg".
+11. ✅ **P1 Uitleg in één zin:** "11 punten beter dan nu: minder warm en droger." Vergelijkt het beste moment met nu, per soort weer. *Waarom:* een score zonder reden voelt willekeurig. *Wat:* "18:00 wint van 17:00: minder tegenwind op de terugweg".
 12. ⬜ **P1 Voorspelling achteraf controleren.** *Wat:* na de run vergelijken wat voorspeld was met het echte weer; zo zie je of het model klopt ("8 van de 10 keer goed").
 13. ⬜ **P2 Leren van wanneer je echt loopt.** *Wat:* loop je steeds rond 7:00, dan weegt die tijd zwaarder mee in het advies.
 14. ⬜ **P2 KNMI-weeralarm meenemen.** *Wat:* bij code oranje/rood een duidelijke waarschuwing bovenaan Vandaag.

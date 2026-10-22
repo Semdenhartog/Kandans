@@ -856,6 +856,19 @@ void main() {
     test('alleen goede uren', () {
       expect(goodHoursOnly([sc(t, 40), sc(t, 75), sc(t, 90)]).length, 2);
     });
+    test('uitleg: waarom later beter is dan nu', () {
+      final now = StartTimeScore(start: t, score: 50, weather: hour(t), reasons: const ['Warm (26°C gevoel)'],
+          factors: const {WeatherFactor.warm: 30, WeatherFactor.rain: 12, WeatherFactor.wind: 4});
+      final later = StartTimeScore(start: t.add(const Duration(hours: 2)), score: 80, weather: hour(t), reasons: const ['Wind (14 km/u)'],
+          factors: const {WeatherFactor.warm: 8, WeatherFactor.wind: 6});
+      expect(whyBetter(now, later), 'minder warm en droger');
+      expect(runVerdict(now, later).detail, '30 punten beter dan nu: minder warm en droger.');
+      // Geen duidelijk verschil: terug naar de oude uitleg.
+      expect(whyBetter(later, later), isNull);
+      expect(factorOf('Tegenwind op je route (14 km/u)'), WeatherFactor.wind);
+      expect(factorOf('Buien volgens Buienradar (1.2 mm/u)'), WeatherFactor.rain);
+      expect(factorOf('Iets anders'), isNull);
+    });
   });
 
   group('indeling Vandaag', () {

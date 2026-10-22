@@ -83,6 +83,7 @@ class StartTimeScore {
     required this.weather,
     required this.reasons,
     this.routeWind,
+    this.factors = const {},
   });
 
   final DateTime start;
@@ -95,6 +96,10 @@ class StartTimeScore {
   final List<String> reasons;
   final RouteWind? routeWind;
 
+  /// Strafpunten per soort (warm, koud, regen, wind, …), gemiddeld over de looptijd.
+  /// Om twee tijden eerlijk met elkaar te vergelijken.
+  final Map<WeatherFactor, double> factors;
+
   String get verdict {
     if (score >= 85) return 'Top';
     if (score >= 70) return 'Goed';
@@ -102,6 +107,23 @@ class StartTimeScore {
     if (score >= 40) return 'Matig';
     return 'Lastig';
   }
+}
+
+/// Soort weerfactor achter de strafpunten.
+enum WeatherFactor { warm, cold, rain, wind, gusts, dark, uv, humid, ice }
+
+/// Soort bij een uitleg-tekst uit de score (de tekst bevat getallen, de soort niet).
+WeatherFactor? factorOf(String label) {
+  if (label.startsWith('Warm')) return WeatherFactor.warm;
+  if (label.startsWith('Koud')) return WeatherFactor.cold;
+  if (label.startsWith('Buien') || label.startsWith('Kans op regen')) return WeatherFactor.rain;
+  if (label.startsWith('Tegenwind') || label.startsWith('Wind')) return WeatherFactor.wind;
+  if (label.startsWith('Harde windstoten')) return WeatherFactor.gusts;
+  if (label.startsWith('Donker')) return WeatherFactor.dark;
+  if (label.startsWith('Hoge UV')) return WeatherFactor.uv;
+  if (label.startsWith('Benauwd')) return WeatherFactor.humid;
+  if (label.startsWith('Kans op gladheid')) return WeatherFactor.ice;
+  return null;
 }
 
 class StartTimePlanner {
@@ -251,12 +273,17 @@ class StartTimePlanner {
 
     var total = 0.0;
     final reasonWeights = <String, double>{};
+    final factorWeights = <WeatherFactor, double>{};
     RouteWind? mainWind;
     for (final w in slices) {
       final r = _scoreHour(w, type);
       total += r.score;
       mainWind ??= r.wind;
-      r.penalties.forEach((k, v) => reasonWeights[k] = (reasonWeights[k] ?? 0) + v);
+      r.penalties.forEach((k, v) {
+        reasonWeights[k] = (reasonWeights[k] ?? 0) + v;
+        final f = factorOf(k);
+        if (f != null) factorWeights[f] = (factorWeights[f] ?? 0) + v;
+      });
     }
     final score = (total / slices.length).clamp(0, 100).round();
 
@@ -271,6 +298,7 @@ class StartTimePlanner {
       weather: main,
       reasons: texts,
       routeWind: mainWind,
+      factors: {for (final e in factorWeights.entries) e.key: e.value / slices.length},
     );
   }
 
