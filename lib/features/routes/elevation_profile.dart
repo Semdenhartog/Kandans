@@ -93,8 +93,8 @@ class _ElevationProfileChartState extends State<ElevationProfileChart> {
         Text(
           atMeters == null
               ? (range.max - range.min < 8
-                  ? 'Vrijwel vlak: maar ${(range.max - range.min).round()} m verschil. Sleep over het profiel om mee te kijken op de kaart.'
-                  : 'Sleep over het profiel om mee te kijken op de kaart.')
+                  ? 'Vrijwel vlak: maar ${(range.max - range.min).round()} m verschil.${widget.highlight == null ? '' : ' Sleep over het profiel om mee te kijken op de kaart.'}'
+                  : (widget.highlight == null ? 'Sleep over het profiel om de hoogte op elk punt te zien.' : 'Sleep over het profiel om mee te kijken op de kaart.'))
               : '${Fmt.km(atMeters, decimals: 1)} · ${atEle!.round()} m hoog',
           style: TextStyle(
             color: atMeters == null ? RwColors.subtle : RwColors.text,
