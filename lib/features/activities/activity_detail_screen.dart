@@ -18,6 +18,7 @@ import '../record/record_run_screen.dart';
 import '../routes/route_map.dart';
 import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
+import 'run_replay_screen.dart';
 import 'share_run_screen.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
@@ -375,6 +376,12 @@ class ActivityDetailScreen extends ConsumerWidget {
             surfaceTintColor: Colors.transparent,
             title: Text(Fmt.date(a.startedAt)),
             actions: [
+              if (a.hasTrack)
+                IconButton(
+                  tooltip: 'Bekijk je run nog eens',
+                  icon: const Icon(Icons.play_circle_outline),
+                  onPressed: () => openRunReplay(context, a),
+                ),
               IconButton(
                 tooltip: 'Delen',
                 icon: const Icon(Icons.ios_share),

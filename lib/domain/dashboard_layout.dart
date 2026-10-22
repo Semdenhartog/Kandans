@@ -11,6 +11,7 @@ enum DashCard {
   month('Maanduitdaging', 'Je doel voor deze maand'),
   live('Veilig onderweg', 'Live je locatie delen'),
   goldenHour('Gouden uur', 'Het mooiste licht van de dag en het loopweer dan'),
+  weekend('Weekend', 'Vanaf donderdag: beste moment voor je lange duurloop'),
   onThisDay('Op deze dag', 'Wat je een jaar geleden liep'),
   yearGoal('Jaardoel', 'Je kilometers dit jaar en waar je op uitkomt');
 

@@ -10,10 +10,10 @@ import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
 import '../../domain/start_time_scoring.dart';
 
-/// Weersverwachting voor de komende 2 dagen op de weerlocatie.
+/// Weersverwachting voor de komende 4 dagen op de weerlocatie (ook voor de weekendvooruitblik).
 final forecastProvider = FutureProvider<Forecast>((ref) async {
   final loc = await ref.watch(weatherLocationProvider.future);
-  return ref.watch(weatherServiceProvider).forecast(loc.latitude, loc.longitude, days: 2);
+  return ref.watch(weatherServiceProvider).forecast(loc.latitude, loc.longitude, days: 4);
 });
 
 /// Persoonlijk loopprofiel op basis van je runs (standaardwaarden als er te weinig zijn).

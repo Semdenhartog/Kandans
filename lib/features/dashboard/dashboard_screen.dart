@@ -202,6 +202,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       DashCard.bestRoute: BestRouteNowCard(),
       DashCard.again: AgainCard(),
       DashCard.goldenHour: GoldenHourCard(),
+      DashCard.weekend: WeekendCard(),
       DashCard.onThisDay: OnThisDayCard(),
       DashCard.yearGoal: YearGoalCard(),
     };

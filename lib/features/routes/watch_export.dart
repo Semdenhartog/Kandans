@@ -393,3 +393,38 @@ Future<void> _askIfItArrived(BuildContext context, WatchBrand brand) async {
     ),
   );
 }
+
+
+/// Een loopmaatje uitnodigen: tekst met het beste moment en de route als GPX erbij.
+Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, String? weather}) async {
+  try {
+    final pts = decodePolyline(r.polyline);
+    final gpx = buildGpx(r.name, pts, profile: r.profileOrKmPoints, turns: detectTurns(RouteTrack(pts)));
+    final now = DateTime.now();
+    String moment(DateTime t) {
+      final day = t.day == now.day && t.month == now.month
+          ? 'vandaag'
+          : (t.difference(DateTime(now.year, now.month, now.day)).inDays == 1 ? 'morgen' : _weekday(t));
+      final hh = t.hour.toString().padLeft(2, '0'), mm = t.minute.toString().padLeft(2, '0');
+      return '$day om $hh:$mm';
+    }
+
+    final km = (r.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
+    final text = [
+      'Zin om mee te lopen? 🏃',
+      if (when != null) 'Beste moment volgens RunWise: ${moment(when)}${weather == null ? '' : ' ($weather)'}.',
+      'Route: ${r.name}, $km km. Het routebestand zit erbij (open het in je horloge-app of in Komoot).',
+      'Start: https://www.google.com/maps/search/?api=1&query=${r.startLatitude.toStringAsFixed(5)},${r.startLongitude.toStringAsFixed(5)}',
+    ].join('\n');
+    final safe = r.name.replaceAll(RegExp(r'[^A-Za-z0-9 _-]'), '').trim().replaceAll(' ', '-');
+    await SharePlus.instance.share(ShareParams(
+      text: text,
+      subject: 'Samen lopen: ${r.name}',
+      files: [XFile.fromData(Uint8List.fromList(utf8.encode(gpx)), mimeType: 'application/gpx+xml', name: '${safe.isEmpty ? 'route' : safe}.gpx')],
+    ));
+  } catch (_) {
+    if (context.mounted) showMessage(context, 'Uitnodigen is niet gelukt. Probeer het opnieuw.', error: true);
+  }
+}
+
+String _weekday(DateTime t) => const ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][t.weekday - 1];

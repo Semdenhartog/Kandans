@@ -146,6 +146,33 @@ class GoldenHourCard extends ConsumerWidget {
   }
 }
 
+/// Vanaf donderdag: wanneer je in het weekend het best je lange duurloop doet.
+class WeekendCard extends ConsumerWidget {
+  const WeekendCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = DateTime.now();
+    if (!weekendPreviewDay(now)) return const SizedBox.shrink();
+    final f = ref.watch(forecastProvider).value;
+    if (f == null || f.hours.isEmpty) return const SizedBox.shrink();
+    final w = weekendLongRun(
+      StartTimePlanner(forecast: f, profile: ref.watch(insightsProvider), durationMinutes: 90),
+      now,
+    );
+    final text = weekendText(w, Fmt.time);
+    if (text == null) return const SizedBox.shrink();
+    return RwCard(
+      title: 'WEEKEND',
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Icon(Icons.weekend_outlined, color: RwColors.accent),
+        const SizedBox(width: 12),
+        Expanded(child: Text(text, style: const TextStyle(height: 1.45))),
+      ]),
+    );
+  }
+}
+
 /// Jaardoel, op het toestel bewaard.
 final yearGoalProvider = NotifierProvider<YearGoalNotifier, double?>(YearGoalNotifier.new);
 

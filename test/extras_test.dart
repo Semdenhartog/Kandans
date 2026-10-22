@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/domain/extras.dart';
 import 'package:runwise/domain/geo.dart';
+import 'package:runwise/domain/start_time_scoring.dart';
 
 void main() {
   Activity run(DateTime d, double km, {String? route, int? sec}) =>
@@ -96,5 +97,23 @@ void main() {
     expect(m, inInclusiveRange(350, 520));
     expect(newRoadMeters(old, [old]), 0);
     expect(newRoadMeters(old, const []), closeTo(1000, 10));
+  });
+
+  group('weekend', () {
+    test('alleen van donderdag tot en met zaterdag', () {
+      expect(weekendPreviewDay(DateTime(2026, 10, 21)), isFalse); // woensdag
+      expect(weekendPreviewDay(DateTime(2026, 10, 22)), isTrue); // donderdag
+      expect(weekendPreviewDay(DateTime(2026, 10, 24)), isTrue); // zaterdag
+      expect(weekendPreviewDay(DateTime(2026, 10, 25)), isFalse); // zondag
+    });
+
+    test('tekst noemt de beste dag eerst', () {
+      StartTimeScore sc(DateTime t, int score) => StartTimeScore(
+          start: t, score: score, weather: HourWeather(time: t, temperature: 11, windSpeed: 10), reasons: const []);
+      String time(DateTime t) => '${t.hour}:${t.minute.toString().padLeft(2, '0')}';
+      final text = weekendText((saturday: sc(DateTime(2026, 10, 24, 9, 15), 70), sunday: sc(DateTime(2026, 10, 25, 10, 30), 84)), time);
+      expect(text, 'Zondag 10:30 is je beste moment voor een lange duurloop (goed, score 84, 11°). Op zaterdag is 9:15 het best (score 70).');
+      expect(weekendText((saturday: null, sunday: null), time), isNull);
+    });
   });
 }

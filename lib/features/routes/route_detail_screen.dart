@@ -18,12 +18,14 @@ import '../../domain/records.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
+import '../dashboard/dashboard_providers.dart' show routeBestProvider;
 import '../record/record_run_screen.dart';
 import 'elevation_profile.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
 import 'route_map_screen.dart';
 import 'turn_list_card.dart';
+import 'route_poster_screen.dart';
 import 'route_undo.dart';
 import 'watch_export.dart';
 
@@ -94,6 +96,15 @@ class RouteDetailScreen extends ConsumerWidget {
                 onPressed: () => _toggleFavorite(context, ref, r),
               ),
               IconButton(
+                tooltip: 'Deel als poster',
+                icon: const Icon(Icons.image_outlined),
+                onPressed: () {
+                  final runs = (ref.read(activitiesProvider).value ?? const <Activity>[]).where((a) => a.routeId == r.id).toList();
+                  final fastest = runs.isEmpty ? null : runs.map((a) => a.movingTimeSeconds).reduce((a, b) => a < b ? a : b);
+                  openRoutePoster(context, r, fastestSeconds: fastest, timesRun: runs.length);
+                },
+              ),
+              IconButton(
                 tooltip: 'Naar je horloge',
                 icon: const Icon(Icons.watch_outlined),
                 onPressed: () => sendRouteToWatch(context, r, onRunWithPhone: () => openRecorder(context, route: r)),
@@ -135,7 +146,22 @@ class RouteDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _WatchButton(route: r),
-              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: () {
+                  final best = ref.read(routeBestProvider).value?[r.id];
+                  inviteRunBuddy(
+                    context,
+                    r,
+                    when: best?.start,
+                    weather: best == null
+                        ? null
+                        : '${Fmt.temp(best.weather.feelsLike ?? best.weather.temperature)}, wind ${Fmt.wind(best.weather.windSpeed)}',
+                  );
+                },
+                icon: const Icon(Icons.group_add_outlined),
+                label: const Text('Nodig een loopmaatje uit'),
+              ),
+              const SizedBox(height: 4),
               _MapAndProfile(
                 route: r,
                 windSpeedKmh: w?.windSpeed,
@@ -180,6 +206,8 @@ class RouteDetailScreen extends ConsumerWidget {
               if (r.polyline.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _SurfaceCard(routeId: routeId, polyline: r.polyline),
+                const SizedBox(height: 12),
+                _LightingCard(polyline: r.polyline),
               ],
               const SizedBox(height: 12),
               _RouteHistoryCard(routeId: routeId),
@@ -574,6 +602,64 @@ class _PoiCard extends StatelessWidget {
                         ),
                       ],
                     ),
+    );
+  }
+}
+
+/// Straatverlichting langs de route: handig in de donkere maanden.
+class _LightingCard extends ConsumerWidget {
+  const _LightingCard({required this.polyline});
+  final String polyline;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = ref.watch(routeLightingProvider(polyline));
+    return RwCard(
+      title: 'VERLICHTING',
+      child: l.when(
+        loading: () => const Text('Verlichting wordt geladen…', style: TextStyle(color: RwColors.muted)),
+        error: (_, _) => Row(children: [
+          const Expanded(child: Text('Verlichting is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted))),
+          TextButton(onPressed: () => ref.invalidate(routeLightingProvider(polyline)), child: const Text('Opnieuw')),
+        ]),
+        data: (v) {
+          final total = v.lit + v.unlit + v.unknown;
+          if (total <= 0) return const Text('Geen gegevens over verlichting voor deze route.', style: TextStyle(color: RwColors.muted));
+          final lit = (v.lit / total * 100).round();
+          final unlit = (v.unlit / total * 100).round();
+          final unknown = 100 - lit - unlit;
+          final known = v.lit + v.unlit;
+          final litOfKnown = known <= 0 ? null : v.lit / known;
+          final advice = litOfKnown == null
+              ? 'Van de meeste wegen is niet bekend of er verlichting is.'
+              : litOfKnown >= 0.8
+                  ? 'Goed verlicht: prima voor een rondje in het donker.'
+                  : litOfKnown >= 0.5
+                      ? 'Deels verlicht. In het donker: lampje mee en reflecterende kleding.'
+                      : 'Grotendeels onverlicht. In het donker liever een andere route, of met een goede hoofdlamp.';
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                height: 14,
+                child: Row(children: [
+                  if (v.lit > 0) Expanded(flex: math.max(1, (v.lit / total * 1000).round()), child: Container(color: const Color(0xFFFFD166))),
+                  if (v.unlit > 0) Expanded(flex: math.max(1, (v.unlit / total * 1000).round()), child: Container(color: const Color(0xFF2E3A59))),
+                  if (v.unknown > 0)
+                    Expanded(flex: math.max(1, (v.unknown / total * 1000).round()), child: Container(color: const Color(0xFF4A4A55))),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('$lit% verlicht · $unlit% onverlicht · $unknown% onbekend', style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(advice, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+            const SizedBox(height: 4),
+            const Text('Bron: OpenStreetMap. Niet van elke weg is bekend of er lantaarnpalen staan.',
+                style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+          ]);
+        },
+      ),
     );
   }
 }

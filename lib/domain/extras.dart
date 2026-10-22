@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../data/models/models.dart';
 import 'geo.dart';
 import 'run_helpers.dart' show sunTimes;
+import 'start_time_scoring.dart';
 
 // Kleine extra's voor Vandaag en na je run: rekenwerk zonder schermen, zodat het te testen is.
 
@@ -201,4 +202,37 @@ double newRoadMeters(List<LatLng> track, Iterable<List<LatLng>> previous) {
     if (!known(mid)) meters += distanceMeters(a, b);
   }
   return meters;
+}
+
+/// Het komende weekend (zaterdag en zondag), vanaf donderdag te zien.
+bool weekendPreviewDay(DateTime now) => now.weekday >= DateTime.thursday && now.weekday <= DateTime.saturday;
+
+/// Beste moment voor je lange duurloop op zaterdag en zondag (tussen 7:00 en 20:00).
+({StartTimeScore? saturday, StartTimeScore? sunday}) weekendLongRun(StartTimePlanner planner, DateTime now) {
+  final toSat = (DateTime.saturday - now.weekday) % 7;
+  final sat = DateTime(now.year, now.month, now.day + toSat);
+  final sun = DateTime(sat.year, sat.month, sat.day + 1);
+  StartTimeScore? bestOn(DateTime day) {
+    var from = DateTime(day.year, day.month, day.day, 7);
+    final until = DateTime(day.year, day.month, day.day, 20);
+    if (from.isBefore(now)) from = now;
+    if (!until.isAfter(from)) return null;
+    return planner.bestPrecise(TrainingType.long, from: from, horizon: until.difference(from), stepMinutes: 15);
+  }
+
+  return (saturday: bestOn(sat), sunday: bestOn(sun));
+}
+
+/// Tekst voor de weekendvooruitblik ("Zaterdag 9:15 is je beste moment …").
+String? weekendText(({StartTimeScore? saturday, StartTimeScore? sunday}) w, String Function(DateTime) time) {
+  final sat = w.saturday, sun = w.sunday;
+  if (sat == null && sun == null) return null;
+  final best = sat == null ? sun! : (sun == null || sat.score >= sun.score ? sat : sun);
+  final day = identical(best, sat) ? 'Zaterdag' : 'Zondag';
+  final other = identical(best, sat) ? sun : sat;
+  final otherDay = identical(best, sat) ? 'zondag' : 'zaterdag';
+  final t = best.weather.feelsLike ?? best.weather.temperature;
+  return '$day ${time(best.start)} is je beste moment voor een lange duurloop '
+      '(${best.verdict.toLowerCase()}, score ${best.score}, ${t.round()}°).'
+      '${other == null ? '' : ' Op $otherDay is ${time(other.start)} het best (score ${other.score}).'}';
 }
