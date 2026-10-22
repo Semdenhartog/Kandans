@@ -13,9 +13,10 @@ void main() {
     final said = <String>[];
     var d = 0.0;
     var s = 0;
-    for (final v in speeds) {
-      final end = d + 1000;
-      while (d < end + 1) {
+    for (var k = 0; k < speeds.length; k++) {
+      final v = speeds[k];
+      // Per kilometer (gemeten zoals de app meet) een eigen snelheid.
+      while (r.distance < (k + 1) * 1000 + 2) {
         d += v;
         s++;
         r.add(GpsFix(LatLng(52.0, 5.0 + d / 68540), t0.add(Duration(seconds: s)), accuracy: 5));
