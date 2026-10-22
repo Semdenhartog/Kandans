@@ -6,6 +6,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_streams.dart';
+import '../../shared/widgets.dart';
 import '../routes/elevation_profile.dart';
 
 /// Hoogteprofiel van een gelopen run, met een tabel: stijgen, dalen, hoogste en laagste punt,
