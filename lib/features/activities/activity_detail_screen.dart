@@ -24,6 +24,7 @@ import 'share_run_screen.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
 import 'splits_card.dart';
+import 'trim_run_screen.dart';
 
 /// Eén run: tijden, weer, records, route en delen.
 class ActivityDetailScreen extends ConsumerWidget {
@@ -348,6 +349,15 @@ class ActivityDetailScreen extends ConsumerWidget {
             icon: const Icon(Icons.ios_share),
             label: const Text('Deel je run'),
           ),
+          // Alleen eigen opnames: die hebben het verloop per seconde dat nodig is om te knippen.
+          if (a.source == 'runwise' && a.id != null) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => openTrimRun(context, a),
+              icon: const Icon(Icons.content_cut),
+              label: const Text('Run bijsnijden'),
+            ),
+          ],
           if (a.source == 'strava') ...[
             const SizedBox(height: 12),
             const Text('Gegevens via Strava', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),

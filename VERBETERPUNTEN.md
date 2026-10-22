@@ -50,7 +50,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ## D. Na de run
 
-29. ⬜ **P1 Run bijsnijden.** *Waarom:* vergeten te stoppen is de meest voorkomende ergernis. *Wat:* begin en eind wegknippen, afstand en tijd rekenen opnieuw.
+29. ✅ **P1 Run bijsnijden.** Knop in het rundetail van eigen opnames; schuif begin en eind, zie de nieuwe afstand/tijd/tempo en kaart. *Waarom:* vergeten te stoppen is de meest voorkomende ergernis. *Wat:* begin en eind wegknippen, afstand en tijd rekenen opnieuw.
 30. ⬜ **P2 Runs splitsen en samenvoegen.**
 31. ⬜ **P2 Gevoel op schaal 1–10.** *Waarom:* zwaar/oké/top is te grof voor trainingsbelasting. *Wat:* optionele schuif, de drie knoppen blijven.
 32. ⬜ **P2 Eigen runs naar Strava sturen.** *Wat:* opgenomen RunWise-runs uploaden naar Strava (mag volgens de voorwaarden, wij zijn dan de bron).

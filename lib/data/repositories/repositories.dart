@@ -223,6 +223,33 @@ class RunWiseRepository {
     } catch (_) {}
   }
 
+  /// Een eigen opname bijsnijden (vergeten te stoppen): nieuwe afstand, tijd, spoor en verloop.
+  Future<void> saveTrimmedActivity(
+    String id, {
+    required DateTime startedAt,
+    required double distanceMeters,
+    required int movingSeconds,
+    required int? averageHeartRate,
+    required String trackPolyline,
+    required Map<String, dynamic> streams,
+    required Map<String, double> bestEfforts,
+  }) async {
+    await _db.from('activities').update({
+      'started_at': startedAt.toUtc().toIso8601String(),
+      'distance_meters': distanceMeters,
+      'moving_time_seconds': movingSeconds,
+      'average_pace_seconds_per_km':
+          distanceMeters <= 0 ? null : double.parse((movingSeconds / (distanceMeters / 1000)).toStringAsFixed(2)),
+      'average_heart_rate': averageHeartRate,
+      'track_polyline': trackPolyline,
+      'streams': streams,
+      'best_efforts': bestEfforts,
+      // Hoogtemeters en coachanalyse horen bij de oude run; worden opnieuw bepaald.
+      'elevation_gain_meters': null,
+      'ai_summary': null,
+    }).eq('id', id);
+  }
+
   Future<void> setActivityBestEfforts(String id, Map<String, double> bestEfforts) async {
     await _db.from('activities').update({'best_efforts': bestEfforts}).eq('id', id);
   }
