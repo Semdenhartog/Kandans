@@ -13,6 +13,7 @@ import '../../domain/readiness.dart';
 import '../../domain/run_matcher.dart';
 import '../models/models.dart';
 import '../repositories/repositories.dart';
+import 'pending_runs.dart';
 import 'weather_service.dart';
 
 /// Status van de Strava-koppeling (rij in external_connections).
@@ -409,7 +410,17 @@ class SyncService {
     return linked;
   }
 
+  /// Runs die zonder internet zijn opgenomen alsnog versturen.
+  Future<int> flushPendingRuns() async {
+    if (_db.auth.currentUser == null) return 0;
+    final sent = await PendingRunStore.flush(_PendingUploader(_ref));
+    if (sent > 0) _ref.invalidate(activitiesProvider);
+    return sent;
+  }
+
   Future<int> syncAll({bool force = false}) async {
+    // De wachtrij altijd eerst, ook binnen de 30 minuten: dat is je eigen run.
+    await flushPendingRuns().catchError((Object _) => 0);
     if (_busy) return 0;
     if (!force && _lastAutoSync != null && DateTime.now().difference(_lastAutoSync!).inMinutes < 30) {
       return 0;
@@ -437,6 +448,44 @@ class SyncService {
     }
     if (total > 0) _ref.invalidate(activitiesProvider);
     return total;
+  }
+}
+
+class _PendingUploader implements PendingRunUploader {
+  _PendingUploader(this._ref);
+  final Ref _ref;
+
+  @override
+  Future<String> upload(PendingRun run) =>
+      _ref.read(repositoryProvider).addRecordedRun(run.activity, run.localId);
+
+  @override
+  Future<void> afterUpload(String id, PendingRun run) async {
+    final repo = _ref.read(repositoryProvider);
+    final streams = run.streams;
+    if (streams == null) return;
+    await repo.setActivityStreams(id, streams, bestEfforts: run.bestEfforts);
+    if (run.activity.hasTrack) repo.improveElevation(id, streams).ignore();
+  }
+
+  @override
+  Future<Activity?> withWeather(PendingRun run) async {
+    final p = run.startPoint;
+    if (p == null) return null;
+    final w = await _ref
+        .read(weatherServiceProvider)
+        .historical(p.lat, p.lon, run.activity.startedAt)
+        .timeout(const Duration(seconds: 8), onTimeout: () => null);
+    if (w == null) return null;
+    final row = {...run.activity.toInsert('')}
+      ..addAll({
+        'temperature_celsius': w.temperature,
+        'feels_like_celsius': w.feelsLike,
+        'wind_speed_kmh': w.windSpeed,
+        'wind_direction_degrees': w.windDirection,
+        'humidity_pct': w.humidity,
+      });
+    return Activity.fromJson(row);
   }
 }
 

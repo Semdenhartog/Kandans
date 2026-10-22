@@ -10,6 +10,7 @@ import 'aura.dart';
 import 'whats_new.dart';
 import '../data/services/location_service.dart';
 import '../data/services/offline_cache.dart';
+import '../data/services/pending_runs.dart';
 import '../data/services/sync_service.dart';
 import '../features/lock/app_lock_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -36,6 +37,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      PendingRunStore.refreshCount().ignore();
       _autoSync();
       _onboarding();
       _setupShortcuts();
@@ -145,6 +147,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         mainAxisSize: MainAxisSize.min,
         children: [
           const _OfflineBanner(),
+          const _PendingRunsBanner(),
           // Satijnen navigatiebalk: licht doorschijnend, met een fijne lichte rand bovenaan.
           DecoratedBox(
             decoration: BoxDecoration(
@@ -209,6 +212,56 @@ class _OfflineBanner extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Smalle balk zolang er opgenomen runs op de telefoon wachten op internet.
+class _PendingRunsBanner extends ConsumerWidget {
+  const _PendingRunsBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ValueListenableBuilder<int>(
+      valueListenable: PendingRunStore.count,
+      builder: (context, n, _) {
+        if (n <= 0) return const SizedBox.shrink();
+        return Semantics(
+          liveRegion: true,
+          button: true,
+          label: n == 1 ? '1 run wacht op internet. Tik om opnieuw te proberen.' : '$n runs wachten op internet. Tik om opnieuw te proberen.',
+          child: InkWell(
+            onTap: () async {
+              HapticFeedback.selectionClick();
+              final sent = await ref.read(syncServiceProvider).flushPendingRuns().catchError((Object _) => 0);
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(sent > 0
+                    ? (sent == 1 ? 'Je run is opgeslagen.' : '$sent runs opgeslagen.')
+                    : 'Nog geen verbinding. We proberen het vanzelf opnieuw.'),
+              ));
+            },
+            child: Container(
+              width: double.infinity,
+              color: RwColors.surfaceHigh,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.cloud_upload_outlined, size: 16, color: RwColors.warning),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      n == 1 ? '1 run wacht op internet' : '$n runs wachten op internet',
+                      style: const TextStyle(fontSize: 13, color: RwColors.muted),
+                    ),
+                  ),
+                  const Text('Opnieuw', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: RwColors.accent)),
+                ],
+              ),
             ),
           ),
         );

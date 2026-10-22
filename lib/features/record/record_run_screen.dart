@@ -18,6 +18,7 @@ import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../data/services/location_service.dart' show quickPosition;
 import '../../data/services/notification_service.dart';
+import '../../data/services/pending_runs.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/route_photos_service.dart' show routePhotosProvider;
 import '../../data/services/run_recorder_service.dart';
@@ -1029,6 +1030,24 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     });
   }
 
+  /// Opslaan lukte niet (meestal geen internet): bewaren op de telefoon en later versturen.
+  Future<void> _savePending(PendingRun run) async {
+    try {
+      await PendingRunStore.add(run);
+    } catch (e) {
+      // Zelfs lokaal bewaren lukt niet: eerlijk melden, de opname niet stilletjes weggooien.
+      if (mounted) {
+        setState(() => _saving = false);
+        showMessage(context, 'Opslaan is niet gelukt: ${friendlyError(e)}', error: true);
+      }
+      return;
+    }
+    await ref.read(syncServiceProvider).writeRunToHealth(run.activity).catchError((Object _) => false);
+    if (!mounted) return;
+    showMessage(context, 'Geen internet. Je run staat veilig op je telefoon en wordt opgeslagen zodra je weer verbinding hebt.');
+    Navigator.of(context).pop();
+  }
+
   Future<void> _save(RunRecording rec) async {
     setState(() => _saving = true);
     try {
@@ -1036,7 +1055,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       final start = rec.startedAt ?? DateTime.now();
       HourWeather? w;
       if (track.isNotEmpty) {
-        w = await ref.read(weatherServiceProvider).historical(track.first.lat, track.first.lon, start);
+        // Kort wachten: zonder internet wil je niet 15 s naar een draaiend rondje kijken.
+        w = await ref
+            .read(weatherServiceProvider)
+            .historical(track.first.lat, track.first.lon, start)
+            .timeout(const Duration(seconds: 6), onTimeout: () => null);
       }
       final shoes = ref.read(shoesProvider).value ?? const <Shoe>[];
       final repo = ref.read(repositoryProvider);
@@ -1063,7 +1086,21 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         trackPolyline: track.length >= 2 ? encodePolyline(track) : '',
         shoeId: _shoeChosen ? _shoeId : defaultShoe(shoes)?.id,
       );
-      final id = await repo.addActivityReturningId(activity);
+      final localId = PendingRun.newLocalId();
+      final String id;
+      try {
+        id = await repo.addRecordedRun(activity, localId);
+      } catch (_) {
+        // Geen verbinding: de run blijft veilig op de telefoon en gaat later vanzelf mee.
+        await _savePending(PendingRun(
+          localId: localId,
+          activity: activity,
+          createdAt: DateTime.now(),
+          streams: streamsJson,
+          bestEfforts: streamsJson == null ? null : bestEffortsToJson(efforts),
+        ));
+        return;
+      }
       if (streamsJson != null) {
         await repo
             .setActivityStreams(id, streamsJson, bestEfforts: bestEffortsToJson(efforts))

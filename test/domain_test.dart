@@ -800,6 +800,31 @@ void main() {
       expect(r.distance, closeTo(d, 0.01));
     });
 
+    test('één losse sprong negeren, maar niet vastlopen op een fout beginpunt', () {
+      // Losse sprong midden in de run: overslaan, daarna gewoon verder.
+      final r = RunRecording()..start(t0);
+      for (var s = 0; s <= 30; s++) {
+        r.add(at(s, s * 3.0));
+      }
+      final d = r.distance;
+      r.add(at(31, 900)); // sprong
+      for (var s = 32; s <= 40; s++) {
+        r.add(at(s, s * 3.0));
+      }
+      expect(r.distance, closeTo(d + 30, 3));
+
+      // Eerste punt ligt 1 km verkeerd: vroeger werd daarna alles weggegooid.
+      final b = RunRecording()..start(t0);
+      b.add(at(0, 1000));
+      for (var s = 1; s <= 60; s++) {
+        b.add(at(s, s * 3.0));
+      }
+      // Na 3 sprongen opnieuw begonnen; de afstand naar het foute punt telt niet mee.
+      expect(b.distance, greaterThan(150));
+      expect(b.distance, lessThan(190));
+      expect((b.track.first.lon - 5.0) * 68540, lessThan(20), reason: 'fout beginpunt uit het spoor');
+    });
+
     test('stem: tijden uitspreken', () {
       expect(spokenPace(332), '5 minuten 32');
       expect(spokenPace(300), '5 minuten');

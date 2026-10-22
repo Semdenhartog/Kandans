@@ -107,6 +107,18 @@ class RunWiseRepository {
     return row['id'] as String;
   }
 
+  /// Een in RunWise opgenomen run opslaan. Met een vaste [externalId] maakt opnieuw
+  /// versturen (na een verbroken verbinding) nooit een tweede run.
+  Future<String> addRecordedRun(Activity a, String externalId) async {
+    final row = await _db
+        .from('activities')
+        .upsert({...a.toInsert(_uid), 'external_id': externalId}, onConflict: 'user_id,source,external_id')
+        .select('id')
+        .single()
+        .timeout(const Duration(seconds: 20));
+    return row['id'] as String;
+  }
+
   Future<void> deleteActivity(String id) async {
     // Eerst de foto's bij deze run uit de opslag halen.
     try {

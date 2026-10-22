@@ -74,6 +74,10 @@ class RunRecording {
   static const resumeAbove = 1.2; // m/s
   static const jitterFactor = 0.4;
 
+  /// Na zoveel sprongen achter elkaar vertrouwen we het vorige punt niet meer.
+  static const maxJumpsInRow = 3;
+  int _jumps = 0;
+
   void start(DateTime t) {
     status = RecorderStatus.running;
     startedAt = t;
@@ -82,12 +86,14 @@ class RunRecording {
   void pause() {
     if (status == RecorderStatus.running || status == RecorderStatus.autoPaused) status = RecorderStatus.paused;
     _last = null;
+    _jumps = 0;
   }
 
   void resume() {
     if (status == RecorderStatus.paused || status == RecorderStatus.autoPaused) status = RecorderStatus.running;
     _last = null;
     _slowSince = null;
+    _jumps = 0;
   }
 
   void finish() => status = RecorderStatus.finished;
@@ -109,9 +115,28 @@ class RunRecording {
     final d = distanceMeters(prev.point, fix.point);
     final v = fix.speed ?? d / dt;
     if (d / dt > maxSpeed) {
-      _last = prev; // sprong: deze meting overslaan
+      // Sprong: deze meting overslaan. Zijn er meerdere sprongen achter elkaar, dan was
+      // waarschijnlijk het vórige punt fout (bijv. een slecht eerste punt). Dan opnieuw
+      // beginnen vanaf het nieuwe punt, zonder de afstand ertussen mee te tellen.
+      _jumps++;
+      if (_jumps >= maxJumpsInRow) {
+        _jumps = 0;
+        _slowSince = null;
+        // Nog niets afgelegd: het foute beginpunt ook uit het spoor halen.
+        if (distance < 1) {
+          track
+            ..clear()
+            ..add(fix.point);
+          samples
+            ..clear()
+            ..add(RunSample(movingSeconds, distance, fix.point, alt: fix.altitude, hr: heartRate));
+        }
+        return null; // _last is al het nieuwe punt
+      }
+      _last = prev;
       return null;
     }
+    _jumps = 0;
 
     // Automatisch pauzeren bij stilstaan (stoplicht), en weer verder bij lopen.
     if (autoPause) {
