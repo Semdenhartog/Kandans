@@ -1,3 +1,4 @@
+import { checkQuota } from "../_shared/quota.ts";
 // Edge Function: street-photos
 // Zoekt straatfoto's (Mapillary) langs een route, zodat je vooraf ziet waar je langs loopt.
 //
@@ -112,6 +113,9 @@ Deno.serve(async (req) => {
 
   const key = readKey();
   if (!key) return json(503, { error: "Straatfoto's zijn nog niet ingesteld op de server.", code: "not_configured" });
+
+  const quota = await checkQuota(req, "street-photos", 100);
+  if (!quota.ok) return json(quota.status, { error: quota.error, code: quota.status === 429 ? "daily_limit" : "auth" });
 
   const body = await req.json().catch(() => ({}));
   const raw = Array.isArray(body.points) ? body.points : [];

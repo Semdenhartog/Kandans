@@ -1,3 +1,4 @@
+import { checkQuota } from "../_shared/quota.ts";
 // Edge Function: route-generator
 // Maakt rondjes van een gewenste lengte vanaf een startpunt, via openrouteservice
 // (gratis, op basis van OpenStreetMap). De app kiest daarna het rondje met de beste wind.
@@ -133,6 +134,9 @@ Deno.serve(async (req) => {
 
   const key = readKey();
   if (!key) return json(503, { error: "Routes maken is nog niet ingesteld op de server." });
+
+  const quota = await checkQuota(req, "route-generator", 60);
+  if (!quota.ok) return json(quota.status, { error: quota.error, code: quota.status === 429 ? "daily_limit" : "auth" });
 
   const body = await req.json().catch(() => ({}));
 

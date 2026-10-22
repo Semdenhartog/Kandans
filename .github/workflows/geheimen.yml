@@ -1,0 +1,14 @@
+# Controleert bij elke push of er per ongeluk een geheime sleutel in de code staat.
+name: Geheimen-scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Zoeken naar sleutels
+        run: python3 .github/scripts/geheimen_scan.py

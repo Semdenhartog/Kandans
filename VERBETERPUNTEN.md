@@ -7,7 +7,7 @@ De grootste winst zit niet in nóg meer functies, maar in **betrouwbaarheid, tes
 Daarom staan die bovenaan. Nieuwe functies staan verderop en zijn bewust minder.
 
 Legenda: **P1** = eerst doen (risico of grote winst) · **P2** = daarna · **P3** = leuk, niet nodig.
-Status: ✅ gedaan · ⏳ volgende ronde · ⬜ open.
+Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ---
 
@@ -78,7 +78,7 @@ Status: ✅ gedaan · ⏳ volgende ronde · ⬜ open.
 48. ⬜ **P2 Routes delen als link** (zonder account te bekijken).
 49. ⬜ **P3 Favoriete routes bovenaan.**
 50. ⬜ **P3 Afstand van een getekende route live tijdens het tekenen.**
-51. ⬜ **P3 Toiletten en kraantjes onderweg** uit OpenStreetMap.
+51. ✅ **P3 Toiletten en kraantjes onderweg** uit OpenStreetMap. *Bleek er al in te zitten (Overpass).*
 
 ## G. Gebruiksgemak en toegankelijkheid
 
@@ -118,21 +118,21 @@ Status: ✅ gedaan · ⏳ volgende ronde · ⬜ open.
 
 ## J. Privacy en veiligheid
 
-79. ⬜ **P1 Supabase-adviezen nalopen** (RLS en indexen) via de beveiligingscontrole.
-80. ⬜ **P1 Limiet op edge functions.** *Wat:* route-generator en street-photos hebben een maximum per gebruiker per dag nodig (kosten en misbruik).
-81. ⬜ **P1 Account verwijderen controleren:** worden foto's, live-links, coachgesprekken en schoenen ook gewist?
-82. ⬜ **P2 Foutmeldingen automatisch opruimen** na 90 dagen.
+79. ✅ **P1 Supabase-adviezen nagelopen.** Alle tabellen hebben RLS; premium en gratis coachvragen zijn met een trigger afgeschermd. Open voor Sem: *Leaked password protection* aanzetten (Authentication → Policies/Passwords).
+80. ✅ **P1 Limiet op edge functions.** route-generator 60 en street-photos 100 per gebruiker per dag. Code klaar; Sem: migratie 0027 uitvoeren en de functies live zetten.
+81. ✅ **P1 Account verwijderen gecontroleerd:** alle 19 eigen tabellen, Strava-tokens en foto's worden gewist.
+82. ✅ **P2 Foutmeldingen automatisch opruimen** na 60 dagen (zoals de privacyverklaring belooft). In migratie 0027.
 83. ⬜ **P2 Al je gegevens downloaden** (AVG-recht op inzage) als één bestand.
-84. ⬜ **P2 Geheimen-scan in GitHub Actions**, zodat een sleutel nooit per ongeluk in de openbare repo komt.
+84. ✅ **P2 Geheimen-scan in GitHub Actions** (geheimen.yml) bij elke push.
 85. ⬜ **P2 Live-link: zichtbaar wanneer hij verloopt** en met één tik intrekken.
 86. ⬜ **P3 Strava-runs die via Health Connect binnenkomen herkennen**, zodat die ook niet naar de coach gaan.
 
 ## K. Play Store en lancering
 
-87. ⬜ **P1 Interne testtrack** in Play Console met 5–10 testers vóór openbare lancering.
-88. ⬜ **P1 Verklaring voor locatie op de achtergrond.** *Waarom:* Google eist een uitleg en vaak een video voor een voorgrondservice met locatie. Zonder dit wordt de app afgewezen.
-89. ⬜ **P1 Health Connect-aanvraag** bij Google indienen (verplicht voor gezondheidsdata).
-90. ⬜ **P1 Gegevensveiligheid-formulier** in Play Console invullen, gelijk aan de privacyverklaring.
+87. 📄 **P1 Interne testtrack** (stappen in docs/play-store.md) in Play Console met 5–10 testers vóór openbare lancering.
+88. 📄 **P1 Verklaring voor locatie op de achtergrond.** Tekst klaar in docs/play-store.md. *Waarom:* Google eist een uitleg en vaak een video voor een voorgrondservice met locatie. Zonder dit wordt de app afgewezen.
+89. 📄 **P1 Health Connect-aanvraag** (redenen klaar in docs/play-store.md) bij Google indienen (verplicht voor gezondheidsdata).
+90. 📄 **P1 Gegevensveiligheid-formulier** (ingevuld in docs/play-store.md) in Play Console invullen, gelijk aan de privacyverklaring.
 91. ⬜ **P1 Privacyverklaring afmaken** (naam, plaats, e-mail, datum) en Pages aanzetten.
 92. ⬜ **P2 Store-afbeeldingen uit screens.yml** maken (formaat Play Store).
 93. ⬜ **P2 "Feedback sturen"-knop** voor testers, met appversie erbij.
