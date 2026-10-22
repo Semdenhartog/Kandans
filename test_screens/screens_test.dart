@@ -384,6 +384,7 @@ void main() {
           efforts: bestEfforts(st),
           previousBest: const {1000: (seconds: 999.0, activityId: 'x')},
           badges: bd.computeBadges(_runs).where((b) => b.earned).take(2).toList(),
+          batteryUsedPct: 9,
         ),
         height: 2600);
   });

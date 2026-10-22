@@ -96,7 +96,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ## H. Snelheid en accu
 
-61. ⬜ **P1 Accuverbruik per run meten en tonen** ("deze run: 9% accu").
+61. ✅ **P1 Accuverbruik per run** na afloop: "Deze run kostte 9% accu" (niet als de telefoon aan de lader hing). Wordt niet bewaard, alleen getoond.
 62. ⬜ **P1 R8/verkleinen aanzetten.** *Waarom:* `minifyEnabled false` in de release. *Wat:* aanzetten met regels voor Health, RevenueCat en BLE. Kleinere app, sneller. Risico: crashes bij ontbrekende regels, dus eerst op een telefoon testen.
 63. ⬜ **P2 Opstarttijd meten** en Vandaag eerst tonen, de rest later laden.
 64. ⬜ **P2 Kaarttegels bewaren** voor routes die je vaak loopt (minder data, werkt zonder bereik).

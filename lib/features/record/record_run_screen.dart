@@ -227,6 +227,21 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     super.dispose();
   }
 
+  /// Accu bij de start (null = onbekend of aan de lader); om na afloop het verbruik te tonen.
+  int? _batteryAtStart;
+
+  /// Huidige accu in procent, of null als de telefoon laadt of het niet lukt.
+  Future<int?> _batteryLevel() async {
+    try {
+      final b = Battery();
+      final state = await b.batteryState;
+      if (state == BatteryState.charging || state == BatteryState.full) return null;
+      return await b.batteryLevel;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _readBattery() async {
     try {
       final b = Battery();
@@ -472,6 +487,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       final name = ref.read(profileProvider).value?.displayName ?? '';
       _svc.turnByTurn = _turnByTurn;
       _svc.cadence = _cadence;
+      _batteryLevel().then((v) => _batteryAtStart = v).ignore(); // niet wachten: start niet vertragen
       await _svc.start(
         voice: _voice,
         shareLive: _share,
@@ -1114,6 +1130,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       }
       final sync = ref.read(syncServiceProvider);
       final written = await sync.writeRunToHealth(activity);
+      final startPct = _batteryAtStart;
+      final endPct = startPct == null ? null : await _batteryLevel();
+      final batteryUsed = (startPct != null && endPct != null && startPct >= endPct) ? startPct - endPct : null;
       ref.invalidate(activitiesProvider);
       await sync.autoLinkRuns().catchError((_) => 0);
       if (!mounted) return;
@@ -1141,6 +1160,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           efforts: efforts,
           previousBest: previousBest,
           healthWritten: written,
+          batteryUsedPct: batteryUsed,
           badges: bd.newBadges(before, [...before, saved]),
         ),
       ));

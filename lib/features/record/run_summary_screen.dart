@@ -32,7 +32,11 @@ class RunSummaryScreen extends StatelessWidget {
     this.previousBest = const {},
     this.healthWritten = false,
     this.badges = const [],
+    this.batteryUsedPct,
   });
+
+  /// Hoeveel procent accu de run kostte (null = onbekend, of de telefoon laadde).
+  final int? batteryUsedPct;
 
   /// Badges die je met deze run voor het eerst hebt verdiend.
   final List<bd.Badge> badges;
@@ -251,6 +255,21 @@ class RunSummaryScreen extends StatelessWidget {
                   Icon(Icons.check_circle_outline, color: RwColors.good, size: 18),
                   SizedBox(width: 8),
                   Expanded(child: Text('Ook opgeslagen in Health Connect (Samsung Health).', style: TextStyle(color: RwColors.muted))),
+                ],
+              ),
+            ],
+            if (batteryUsedPct != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.battery_std, color: RwColors.subtle, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      batteryUsedPct == 0 ? 'Deze run kostte minder dan 1% accu.' : 'Deze run kostte $batteryUsedPct% accu.',
+                      style: const TextStyle(color: RwColors.muted),
+                    ),
+                  ),
                 ],
               ),
             ],
