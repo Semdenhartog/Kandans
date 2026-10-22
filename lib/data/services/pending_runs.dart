@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/error_reporter.dart';
 import '../../domain/geo.dart';
 import '../models/models.dart';
 
@@ -168,8 +169,9 @@ class PendingRunStore {
         sent++;
         await up.afterUpload(id, toSend).catchError((Object _) {});
       }
-    } catch (_) {
-      // Lezen van de map mislukt: volgende keer opnieuw.
+    } catch (e, st) {
+      // Lezen van de map mislukt: volgende keer opnieuw, maar wel melden.
+      ErrorReporter.report(e, st, context: 'PendingRunStore.flush').ignore();
     } finally {
       _flushing = false;
       await refreshCount();

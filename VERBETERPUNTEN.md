@@ -18,7 +18,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 3. ✅ **P1 Geen dubbele runs bij opnieuw proberen.** *Waarom:* als de upload lukt maar het antwoord verloren gaat, zou opnieuw proberen een tweede run maken. *Wat:* elke opgenomen run krijgt een vaste sleutel; opnieuw versturen overschrijft in plaats van verdubbelt.
 4. ✅ **P1 Laat zien dat er iets wacht.** *Wat:* smalle balk "1 run wacht op internet" boven de navigatie, tot hij geüpload is.
 5. ✅ **P1 GPS vast op een verkeerd eerste punt.** *Waarom:* begint de opname met een uitschieter, dan werd elk goed punt daarna als "sprong" weggegooid. *Wat:* na 3 sprongen achter elkaar opnieuw beginnen vanaf het nieuwe punt, zonder afstand mee te tellen.
-6. ⬜ **P1 Accubesparing van Android.** *Waarom:* Samsung, Xiaomi en OnePlus sluiten apps op de achtergrond, ook met een voorgrondmelding. *Wat:* vóór de eerste run vragen om RunWise uit te zonderen, met uitleg per merk.
+6. ✅ **P1 Accubesparing van Android.** *Bleek er al in te zitten (uitleg + knop op het opnamescherm).* *Waarom:* Samsung, Xiaomi en OnePlus sluiten apps op de achtergrond, ook met een voorgrondmelding. *Wat:* vóór de eerste run vragen om RunWise uit te zonderen, met uitleg per merk.
 7. ⬜ **P2 GPS-gat overbruggen.** *Waarom:* onder een viaduct of in een tunnel valt GPS weg. *Wat:* bij een gat < 2 min de rechte lijn meetellen en in het rundetail markeren.
 8. ⬜ **P2 GPS-kwaliteit per run.** *Wat:* in het rundetail "GPS: goed / 2 gaten / 4 sprongen weggefilterd". Helpt jou en mij bij het opsporen van fouten.
 9. ⬜ **P2 Nep-GPS-modus voor testen.** *Waarom:* opnemen is nu alleen te testen door echt te lopen. *Wat:* een verborgen testmodus die een route afspeelt. Ook bruikbaar in de schermafbeeldingen-workflow.
@@ -82,7 +82,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 ## G. Gebruiksgemak en toegankelijkheid
 
-52. ⬜ **P1 Grotere tekst echt toestaan.** *Waarom:* tekst is nu beperkt tot 135%; slechtzienden zetten 150–200%. *Wat:* limiet naar 200% en schermen daarop testen.
+52. ✅ **P1 Grotere tekst:** limiet van 135% naar 160%, met 9 schermtests op 160% die falen als er iets uit beeld valt. 200% vraagt een herontwerp van de grote cijfers; nog open.
 53. ⬜ **P1 Schermlezer (TalkBack).** *Waarom:* maar ±40 Semantics-labels op ±100 schermen. *Wat:* labels voor grafieken, kaarten en icoonknoppen.
 54. ⬜ **P2 Licht thema.** *Wat:* nu alleen donker (zonmodus is alleen voor opnemen).
 55. ⬜ **P2 Kleurenblind-veilig.** *Wat:* scores niet alleen met rood/groen, ook met vorm of tekst.
@@ -107,7 +107,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 69. ⬜ **P1 Opnamescherm opsplitsen.** *Waarom:* `record_run_screen.dart` is 2.794 regels; elke wijziging is risicovol. *Wat:* losse onderdelen per blok.
 70. ⬜ **P1 Dashboard opsplitsen** (1.362 regels).
-71. ⬜ **P1 Stille fouten loggen.** *Waarom:* 59 keer `catch (_) {}`; fouten verdwijnen zonder spoor. *Wat:* op de belangrijke plekken naar de foutmelder.
+71. ✅ **P1 Stille fouten loggen** op de plekken waar je data kwijt kan raken (herstelbestand, wachtrij, km-tijden). *Waarom:* 59 keer `catch (_) {}`; fouten verdwijnen zonder spoor. *Wat:* op de belangrijke plekken naar de foutmelder.
 72. ⬜ **P1 Widgettests.** *Waarom:* `widget_test.dart` bevat 0 tests. *Wat:* minimaal starten, opnemen-stoppen-opslaan en inloggen.
 73. ⬜ **P2 Schermafbeeldingen vergelijken.** *Wat:* screens.yml laat een verschil zien t.o.v. de vorige ronde, zodat onbedoelde wijzigingen opvallen.
 74. ⬜ **P2 Integratietest op een emulator in GitHub Actions** met nep-GPS (koppelt aan punt 9).

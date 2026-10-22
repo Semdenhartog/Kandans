@@ -18,11 +18,11 @@ class RunWiseApp extends ConsumerWidget {
       theme: buildTheme(),
       routerConfig: router,
       // Grote letters (instelling van de telefoon) volgen, maar niet zo groot
-      // dat de kaarten en grote getallen uit beeld vallen.
+      // dat de kaarten en grote getallen uit beeld vallen (tot 160%; getest in screens.yml).
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         return MediaQuery(
-          data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.35)),
+          data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.6)),
           child: AppLockGate(child: child ?? const SizedBox.shrink()),
         );
       },

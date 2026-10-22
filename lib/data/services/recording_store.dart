@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/error_reporter.dart';
 import '../../domain/run_recorder.dart';
 
 /// Bewaart een lopende opname op de telefoon, zodat je run niet verloren gaat als
@@ -18,7 +19,10 @@ class RecordingStore {
       final tmp = File('${f.path}.tmp');
       await tmp.writeAsString(jsonEncode(r.toSnapshot()), flush: true);
       await tmp.rename(f.path);
-    } catch (_) {}
+    } catch (e, st) {
+      // Mislukt het bewaren, dan kan een run na een crash verloren gaan: wel willen weten.
+      ErrorReporter.report(e, st, context: 'RecordingStore.save').ignore();
+    }
   }
 
   /// Een onderbroken run (of null). Runs ouder dan 2 dagen tellen niet meer.
@@ -36,7 +40,8 @@ class RecordingStore {
         return null;
       }
       return r;
-    } catch (_) {
+    } catch (e, st) {
+      ErrorReporter.report(e, st, context: 'RecordingStore.load').ignore();
       return null;
     }
   }

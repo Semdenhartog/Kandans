@@ -17,6 +17,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../data/services/location_service.dart' show quickPosition;
+import '../../core/error_reporter.dart';
 import '../../data/services/notification_service.dart';
 import '../../data/services/pending_runs.dart';
 import '../../data/services/poi_service.dart';
@@ -1104,7 +1105,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (streamsJson != null) {
         await repo
             .setActivityStreams(id, streamsJson, bestEfforts: bestEffortsToJson(efforts))
-            .catchError((Object _) {}); // Het verloop is een extraatje; de run zelf staat er al.
+            .catchError((Object e, StackTrace st) {
+              // Het verloop is een extraatje; de run zelf staat er al. Wel melden: anders ontbreken stil de km-tijden.
+              ErrorReporter.report(e, st, context: 'setActivityStreams').ignore();
+            });
         // Hoogte verbeteren met de hoogtekaart (op de achtergrond).
         if (!rec.indoor) repo.improveElevation(id, streamsJson).then((_) => ref.invalidate(activitiesProvider)).ignore();
       }

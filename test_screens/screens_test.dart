@@ -355,7 +355,7 @@ void main() {
           nextTurnIn: 120,
         );
       }));
-  testWidgets('11b afslag nu, groot', (t) => _shot(t, '11b_afslag_groot', const RecordRunScreen(), height: 915, textScale: 1.35, after: () {
+  testWidgets('11b afslag nu, groot', (t) => _shot(t, '11b_afslag_groot', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
         RunRecorderService.instance.view.value = RecorderView(
           status: RecorderStatus.running,
           distance: 5230,
@@ -387,8 +387,8 @@ void main() {
         ),
         height: 2600);
   });
-  testWidgets('20 groot vandaag', (t) => _shot(t, '20_groot_vandaag', const DashboardScreen(), height: 3200, nav: true, textScale: 1.35));
-  testWidgets('21 groot opnemen', (t) => _shot(t, '21_groot_opnemen', const RecordRunScreen(), height: 915, textScale: 1.35, after: () {
+  testWidgets('20 groot vandaag', (t) => _shot(t, '20_groot_vandaag', const DashboardScreen(), height: 3200, nav: true, textScale: 1.6));
+  testWidgets('21 groot opnemen', (t) => _shot(t, '21_groot_opnemen', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
         RunRecorderService.instance.view.value = RecorderView(
           status: RecorderStatus.running,
           distance: 15230,
@@ -401,7 +401,7 @@ void main() {
           hrStatus: HrStatus.connected,
         );
       }));
-  testWidgets('22 groot runs', (t) => _shot(t, '22_groot_runs', const ActivitiesScreen(), height: 1600, textScale: 1.35));
+  testWidgets('22 groot runs', (t) => _shot(t, '22_groot_runs', const ActivitiesScreen(), height: 1600, textScale: 1.6));
   testWidgets('23 schema kiezen', (t) => _shot(t, '23_schema_kiezen', const TrainingPlanScreen(), height: 1900, emptyPlan: true));
   testWidgets('24 briefing', (t) => _shot(t, '24_briefing', const _OpenBriefing(), height: 1100));
   testWidgets('25 loopband', (t) => _shot(t, '25_loopband', const RecordRunScreen(), height: 915, after: () {
@@ -420,6 +420,12 @@ void main() {
   testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
   testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
   testWidgets('29 premium', (t) => _shot(t, '29_premium', const PaywallScreen(), height: 1300));
+  // Grote letters (160%): vallen er onderdelen uit beeld, dan faalt deze test met een overflow-fout.
+  testWidgets('30 groot opnemen start', (t) => _shot(t, '30_groot_opnemen_start', const RecordRunScreen(), height: 915, textScale: 1.6));
+  testWidgets('31 groot run detail', (t) => _shot(t, '31_groot_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3800, textScale: 1.6));
+  testWidgets('32 groot routes', (t) => _shot(t, '32_groot_routes', const RoutesScreen(), height: 1900, textScale: 1.6));
+  testWidgets('33 groot coach', (t) => _shot(t, '33_groot_coach', const CoachScreen(), height: 915, textScale: 1.6));
+  testWidgets('34 groot ik', (t) => _shot(t, '34_groot_ik', const ProfileScreen(), height: 3200, textScale: 1.6));
   testWidgets('09 schema', (t) => _shot(t, '09_schema', const TrainingPlanScreen(), height: 1800));
 }
 
