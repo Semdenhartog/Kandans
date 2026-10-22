@@ -926,6 +926,32 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(color: RwColors.muted),
             ),
+            const SizedBox(height: 14),
+            _QuickPresets(
+              show: widget.sessionTitle == null,
+              routeChosen: _route != null,
+              planChosen: _plan != null,
+              onSession: (sess) {
+                HapticFeedback.selectionClick();
+                setState(() {
+                  _plan = sess.intervals;
+                  _targetPace = sess.intervals == null ? sess.targetPace : null;
+                  _indoor = false;
+                });
+                showMessage(context, '${sess.title} staat klaar.');
+              },
+              onRoute: (r) {
+                HapticFeedback.selectionClick();
+                setState(() {
+                  _route = r;
+                  _ghost = null;
+                  _ghostTime = null;
+                  _indoor = false;
+                });
+                if (r.id != null) _loadGhost(r.id!);
+              },
+            ),
+
             if (_indoor) ...[
               const SizedBox(height: 16),
               Padding(
@@ -1120,30 +1146,6 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _QuickPresets(
-                    show: widget.sessionTitle == null,
-                    routeChosen: _route != null,
-                    planChosen: _plan != null,
-                    onSession: (sess) {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _plan = sess.intervals;
-                        _targetPace = sess.intervals == null ? sess.targetPace : null;
-                        _indoor = false;
-                      });
-                      showMessage(context, '${sess.title} staat klaar.');
-                    },
-                    onRoute: (r) {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _route = r;
-                        _ghost = null;
-                        _ghostTime = null;
-                        _indoor = false;
-                      });
-                      if (r.id != null) _loadGhost(r.id!);
-                    },
-                  ),
                   RwSegmented<bool>(
                     items: const [
                       (value: false, label: 'Buiten', icon: Icons.terrain_outlined),
