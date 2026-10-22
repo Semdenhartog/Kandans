@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Live meelopen – RunWise</title>
+<meta name="theme-color" content="#09090B">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --bg:#09090B; --surface:#141417; --surface-high:#1C1C20; --border:#29292F;
+  --accent:#FD8A26; --accent-deep:#FD3D22; --accent-light:#FD9E28;
+  --text:#F4F4F5; --muted:#BDBDC6; --subtle:#8D8D98; --good:#4ADE80; --danger:#FF5470;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+#map{flex:1;min-height:0;background:#17171A}
+.leaflet-tile-pane{filter:invert(1) grayscale(1) brightness(.62) contrast(1.15)}
+.leaflet-container{font-family:inherit}
+.leaflet-control-attribution{background:rgba(0,0,0,.55)!important;color:#bbb!important;font-size:10px}
+.leaflet-control-attribution a{color:#ddd!important}
+.leaflet-bar a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
+header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:10px;pointer-events:none}
+.pill{pointer-events:auto;background:rgba(9,9,11,.9);border:1px solid var(--border);border-radius:999px;padding:8px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(6px)}
+.brand img{height:16px}
+.panel{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.name{font-family:Saira,sans-serif;font-weight:800;font-size:22px;margin:0;line-height:1.1}
+.status{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;border-radius:999px;padding:4px 10px}
+.status.live{background:rgba(74,222,128,.14);color:var(--good)}
+.status.stale{background:rgba(245,197,66,.14);color:#F5C542}
+.status.ended{background:rgba(141,141,152,.16);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.live .dot{animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--surface-high);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-family:Saira,sans-serif;font-weight:800;font-size:20px}
+.stat span{font-size:12px;color:var(--subtle)}
+.note{color:var(--subtle);font-size:12px;margin:10px 0 0}
+.msg{padding:40px 24px;text-align:center;color:var(--muted)}
+.msg h1{font-family:Saira,sans-serif;font-weight:800;color:var(--text);font-size:26px;margin:0 0 8px}
+.runner{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 6px rgba(253,138,38,.3),0 2px 8px rgba(0,0,0,.6)}
+button.follow{pointer-events:auto;margin-left:auto;background:rgba(9,9,11,.9);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
+button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="pill brand"><img src="/mark.png" alt=""><img src="/wordmark.png" alt="RunWise"></div>
+  <button class="follow" id="follow" aria-pressed="true" type="button">Volgen</button>
+</header>
+<div id="map" role="region" aria-label="Kaart met de live locatie"></div>
+<div class="panel" id="panel">
+  <div class="row"><p class="name" id="name">Laden…</p><span class="status ended" id="status"><span class="dot"></span><span id="statusText">verbinden</span></span></div>
+  <div class="stats">
+    <div class="stat"><b id="dist">–</b><span>afgelegd</span></div>
+    <div class="stat"><b id="time">–</b><span>onderweg</span></div>
+    <div class="stat"><b id="seen">–</b><span>laatste update</span></div>
+  </div>
+  <p class="note" id="note">De kaart ververst vanzelf elke 15 seconden.</p>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  var API = 'https://jdswennyfczpqblfkrxt.supabase.co/functions/v1/live-share';
+  var token = new URLSearchParams(location.search).get('t') || '';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function fail(title, text) {
+    document.body.innerHTML = '<div class="msg"><h1>' + title + '</h1><p>' + text + '</p></div>';
+  }
+  if (!/^[A-Za-z0-9]{24,64}$/.test(token)) {
+    fail('Deze link klopt niet', 'Vraag de loper om de link opnieuw te sturen.');
+    return;
+  }
+
+  var map = L.map('map', { zoomControl: true, attributionControl: true }).setView([52.1, 5.3], 8);
+  L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', {
+    maxZoom: 19, minZoom: 6, attribution: 'Kaart © Kadaster / PDOK'
+  }).addTo(map);
+  var glow = L.polyline([], { color: '#FD8A26', weight: 14, opacity: .22 }).addTo(map);
+  var line = L.polyline([], { color: '#FD8A26', weight: 5, opacity: 1, lineJoin: 'round' }).addTo(map);
+  var marker = null, accuracy = null, follow = true, first = true, data = null;
+
+  $('follow').addEventListener('click', function () {
+    follow = !follow;
+    this.setAttribute('aria-pressed', String(follow));
+    if (follow && marker) map.panTo(marker.getLatLng());
+  });
+  map.on('dragstart', function () { follow = false; $('follow').setAttribute('aria-pressed', 'false'); });
+
+  function haversine(a, b) {
+    var R = 6371000, r = Math.PI / 180;
+    var dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  function fmtDuration(ms) {
+    var s = Math.max(0, Math.round(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+    return h > 0 ? h + ':' + String(m).padStart(2, '0') + ' u' : m + ' min';
+  }
+  function fmtAgo(ms) {
+    var s = Math.max(0, Math.round(ms / 1000));
+    if (s < 60) return s + ' s';
+    if (s < 3600) return Math.round(s / 60) + ' min';
+    return Math.round(s / 3600) + ' uur';
+  }
+
+  function render() {
+    if (!data) return;
+    var now = Date.now();
+    $('name').textContent = data.name;
+    document.title = data.name + ' – live meelopen';
+    var trail = (data.trail || []).map(function (p) { return [p[0], p[1]]; });
+    var meters = 0;
+    for (var i = 1; i < trail.length; i++) meters += haversine(trail[i - 1], trail[i]);
+    $('dist').textContent = (meters / 1000).toFixed(1).replace('.', ',') + ' km';
+    $('time').textContent = fmtDuration((data.ended_at ? Date.parse(data.ended_at) : now) - Date.parse(data.started_at));
+
+    var lastAt = data.last && data.last.at ? Date.parse(data.last.at) : null;
+    $('seen').textContent = lastAt ? fmtAgo(now - lastAt) : '–';
+    var st = $('status'), stText = $('statusText');
+    if (!data.active) {
+      st.className = 'status ended';
+      stText.textContent = data.ended_at ? 'run gestopt' : 'delen verlopen';
+      $('note').textContent = 'Het live delen is gestopt. De locatie is niet meer zichtbaar.';
+    } else if (!lastAt || now - lastAt > 3 * 60 * 1000) {
+      st.className = 'status stale';
+      stText.textContent = lastAt ? 'even geen signaal' : 'wacht op locatie';
+      $('note').textContent = 'Geen recente update. Mogelijk slecht bereik of staat de telefoon even stil.';
+    } else {
+      st.className = 'status live';
+      stText.textContent = 'live';
+      $('note').textContent = 'De kaart ververst vanzelf elke 15 seconden.';
+    }
+
+    line.setLatLngs(trail);
+    glow.setLatLngs(trail);
+    if (data.last) {
+      var ll = [data.last.lat, data.last.lon];
+      if (!marker) {
+        marker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="runner"></div>', iconSize: [22, 22], iconAnchor: [11, 11] }) }).addTo(map);
+        accuracy = L.circle(ll, { radius: 1, color: '#FD8A26', weight: 1, opacity: .4, fillOpacity: .1 }).addTo(map);
+      }
+      marker.setLatLng(ll);
+      accuracy.setLatLng(ll).setRadius(Math.min(data.last.accuracy || 0, 200));
+      if (first) { map.setView(ll, 15); first = false; }
+      else if (follow) map.panTo(ll);
+    } else if (!data.active && marker) {
+      map.removeLayer(marker); map.removeLayer(accuracy); marker = null;
+    }
+  }
+
+  function load() {
+    fetch(API + '?t=' + encodeURIComponent(token), { cache: 'no-store' })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) { fail('Niet (meer) beschikbaar', res.j.error || 'Deze link is verlopen.'); clearInterval(timer); return; }
+        data = res.j;
+        render();
+        if (!data.active) clearInterval(timer);
+      })
+      .catch(function () {
+        $('note').textContent = 'Geen verbinding. We proberen het zo opnieuw.';
+      });
+  }
+  var timer = setInterval(load, 15000);
+  setInterval(render, 5000);
+  load();
+})();
+</script>
+</body>
+</html>

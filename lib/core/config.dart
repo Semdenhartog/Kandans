@@ -17,11 +17,11 @@ class AppConfig {
   /// Link naar de privacyverklaring (Play Store vereist er een).
   static const privacyUrl = String.fromEnvironment(
     'PRIVACY_URL',
-    defaultValue: 'https://runwise.netlify.app/privacy.html',
+    defaultValue: 'https://semdenhartog.github.io/Runwise/privacy.html',
   );
 
   /// Website van RunWise (voor de live-meeloop-pagina live.html).
-  static const siteUrl = String.fromEnvironment('SITE_URL', defaultValue: 'https://runwise.netlify.app');
+  static const siteUrl = String.fromEnvironment('SITE_URL', defaultValue: 'https://semdenhartog.github.io/Runwise');
 
   /// Publieke RevenueCat SDK-sleutel voor Android (begint met "goog_").
   /// Leeg = abonnementen nog niet ingesteld; de paywall toont dan "binnenkort".

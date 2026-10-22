@@ -207,12 +207,76 @@ class RunRecorderService {
   Future<void> _ensureTts() async {
     if (_tts != null) return;
     _tts = FlutterTts();
+    await _configureTts();
+  }
+
+  /// Gekozen stem (naam + taal), of null = automatisch de beste Nederlandse stem.
+  ({String name, String locale})? voiceChoice;
+
+  /// Nederlandse stemmen op dit toestel, beste eerst (hoogste kwaliteit, en zonder internet vóór met internet).
+  Future<List<({String name, String locale, bool network, int quality})>> dutchVoices() async {
+    _tts ??= FlutterTts();
     try {
-      await _tts!.setLanguage('nl-NL');
-      await _tts!.setSpeechRate(speechRate);
-      await _tts!.setQueueMode(1);
-      await _tts!.setAudioAttributesForNavigation();
+      final raw = await _tts!.getVoices;
+      final list = <({String name, String locale, bool network, int quality})>[];
+      for (final v in (raw as List? ?? const [])) {
+        if (v is! Map) continue;
+        final name = '${v['name'] ?? ''}';
+        final locale = '${v['locale'] ?? ''}';
+        if (!locale.toLowerCase().startsWith('nl')) continue;
+        final network = '${v['network_required'] ?? ''}' == '1' || '${v['network_required']}' == 'true' || name.contains('network');
+        final quality = int.tryParse('${v['quality'] ?? ''}') ?? (name.contains('network') ? 400 : 300);
+        list.add((name: name, locale: locale, network: network, quality: quality));
+      }
+      list.sort((a, b) {
+        final q = b.quality.compareTo(a.quality);
+        if (q != 0) return q;
+        if (a.network != b.network) return a.network ? 1 : -1;
+        // België (nl-BE) na Nederland (nl-NL).
+        return a.locale.compareTo(b.locale) * -1;
+      });
+      return list;
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Taal, tempo, stem en audio-instellingen op de stem zetten.
+  Future<void> _configureTts() async {
+    final t = _tts;
+    if (t == null) return;
+    try {
+      await t.setLanguage('nl-NL');
+      await t.setSpeechRate(speechRate);
+      await t.setPitch(1.0);
+      final choice = voiceChoice ?? await _autoVoice();
+      if (choice != null) await t.setVoice({'name': choice.name, 'locale': choice.locale});
+      // Achter elkaar uitspreken in plaats van elkaar af te kappen, en muziek even zachter zetten.
+      await t.setQueueMode(1);
+      await t.setAudioAttributesForNavigation();
     } catch (_) {}
+  }
+
+  ({String name, String locale})? _auto;
+  Future<({String name, String locale})?> _autoVoice() async {
+    if (_auto != null) return _auto;
+    final v = await dutchVoices();
+    // Automatisch: de beste stem die zonder internet werkt (onderweg is er niet altijd bereik).
+    final local = v.where((x) => !x.network).toList();
+    final pick = local.isNotEmpty ? local.first : (v.isNotEmpty ? v.first : null);
+    return _auto = pick == null ? null : (name: pick.name, locale: pick.locale);
+  }
+
+  /// Stem kiezen (null = automatisch) en meteen laten horen.
+  Future<void> setVoice(({String name, String locale})? v, {String preview = ''}) async {
+    voiceChoice = v;
+    await _ensureTts();
+    await _configureTts();
+    if (preview.isNotEmpty) {
+      try {
+        await _tts!.speak(preview);
+      } catch (_) {}
+    }
   }
 
   /// Tik op je afstand: de stem leest afstand, tijd en tempo voor (en de weg terug als je ver van je start bent).
@@ -223,7 +287,7 @@ class RunRecorderService {
     final km = (r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',');
     final t = v.movingSeconds.round();
     final time = t >= 3600 ? '${t ~/ 3600} uur ${(t % 3600) ~/ 60} minuten' : '${t ~/ 60} minuten ${t % 60} seconden';
-    final parts = <String>[r.indoor && r.treadmillKmh == null ? '' : '$km kilometer', time];
+    final parts = <String>[r.indoor ? '' : '$km kilometer', time];
     if (!r.indoor && r.averagePace > 0) {
       final p = r.averagePace.round();
       parts.add('gemiddeld ${p ~/ 60} ${(p % 60).toString().padLeft(2, '0')} per kilometer');
@@ -431,13 +495,7 @@ class RunRecorderService {
     _rec!.start(DateTime.now());
     if (this.voice) {
       _tts ??= FlutterTts();
-      try {
-        await _tts!.setLanguage('nl-NL');
-        await _tts!.setSpeechRate(speechRate);
-        // Achter elkaar uitspreken in plaats van elkaar af te kappen, en muziek even zachter zetten.
-        await _tts!.setQueueMode(1);
-        await _tts!.setAudioAttributesForNavigation();
-      } catch (_) {}
+      await _configureTts();
       SoundService.instance.play(RwSound.start).ignore();
       if (_guided == null) _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
       final g0 = _guided?.update(0);
@@ -672,7 +730,8 @@ class RunRecorderService {
     _tick = null;
     r?.finish();
     if (shareLive) await LiveShareService.instance.stop();
-    if (r != null && r.distance > 0) _say('Run gestopt. ${(r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',')} kilometer.');
+    if (r != null && r.distance > 0 && !r.indoor) _say('Run gestopt. ${(r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',')} kilometer.');
+    if (r != null && r.indoor) _say('Training gestopt. Goed gedaan.');
     view.value = const RecorderView(status: RecorderStatus.finished);
     HeartRateService.instance.disconnect().catchError((Object _) {});
     RecordingStore.clear().ignore();
@@ -712,11 +771,7 @@ class RunRecorderService {
     }
     if (voice) {
       _tts ??= FlutterTts();
-      try {
-        await _tts!.setLanguage('nl-NL');
-        await _tts!.setQueueMode(1);
-        await _tts!.setAudioAttributesForNavigation();
-      } catch (_) {}
+      await _configureTts();
     }
     view.value = _snapshot();
   }

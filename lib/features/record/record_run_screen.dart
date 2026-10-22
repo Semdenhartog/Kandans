@@ -139,6 +139,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _turnByTurn = p.getBool('rec_turns') ?? true;
           final sr = p.getDouble('rec_speech_rate');
           if (sr != null && sr >= 0.3 && sr <= 0.7) _svc.speechRate = sr;
+          final vn = p.getString('rec_voice_name'), vl = p.getString('rec_voice_locale');
+          if (vn != null && vl != null) _svc.voiceChoice = (name: vn, locale: vl);
           final cad = p.getInt('rec_cadence');
           _cadence = cad == null || cad <= 0 ? null : cad;
           _indoor = widget.initialIndoor ?? p.getBool('rec_indoor') ?? false;
@@ -475,7 +477,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   Future<void> _stop() async {
     HapticFeedback.mediumImpact();
-    final ok = await confirmDialog(context, title: 'Run stoppen?', message: 'Je run wordt opgeslagen.');
+    final ok = await confirmDialog(
+      context,
+      title: 'Run afronden?',
+      message: 'Je run stopt en wordt opgeslagen.',
+      confirmLabel: 'Afronden en opslaan',
+      destructive: false,
+    );
     if (!ok) return;
     double? indoorMeters;
     if (_svc.recording?.indoor ?? false) {
@@ -701,6 +709,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                const Text('Stem', style: TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                const _VoicePicker(),
                 const SizedBox(height: 12),
                 FilledButton(onPressed: () => Navigator.pop(ctx, c), child: const Text('Klaar')),
               ],
@@ -2310,5 +2322,92 @@ class _NextTurnCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+
+/// Kies welke Nederlandse stem je hoort (met voorbeeld). Toont alleen stemmen die op je toestel staan.
+class _VoicePicker extends StatefulWidget {
+  const _VoicePicker();
+
+  @override
+  State<_VoicePicker> createState() => _VoicePickerState();
+}
+
+class _VoicePickerState extends State<_VoicePicker> {
+  final _svc = RunRecorderService.instance;
+  List<({String name, String locale, bool network, int quality})>? _voices;
+  static const _sample = 'Kilometer 3. Dit stuk 5 minuten 30 per kilometer. Lekker bezig!';
+
+  @override
+  void initState() {
+    super.initState();
+    _svc.dutchVoices().then((v) {
+      if (mounted) setState(() => _voices = v);
+    });
+  }
+
+  String _label(int i, ({String name, String locale, bool network, int quality}) v) {
+    final region = v.locale.toLowerCase().contains('be') ? 'Vlaams' : 'Nederlands';
+    final q = v.quality >= 400 ? 'hoge kwaliteit' : 'standaard';
+    return 'Stem ${i + 1} · $region · $q${v.network ? ' · alleen met internet' : ''}';
+  }
+
+  Future<void> _pick(({String name, String locale})? v) async {
+    HapticFeedback.selectionClick();
+    setState(() {});
+    await _svc.setVoice(v, preview: _sample);
+    final p = await SharedPreferences.getInstance();
+    if (v == null) {
+      await p.remove('rec_voice_name');
+      await p.remove('rec_voice_locale');
+    } else {
+      await p.setString('rec_voice_name', v.name);
+      await p.setString('rec_voice_locale', v.locale);
+    }
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final list = _voices;
+    if (list == null) {
+      return const Padding(padding: EdgeInsets.all(8), child: LinearProgressIndicator());
+    }
+    final chosen = _svc.voiceChoice;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ListTile(
+        contentPadding: EdgeInsets.zero,
+        dense: true,
+        leading: Icon(chosen == null ? Icons.radio_button_checked : Icons.radio_button_off, color: chosen == null ? RwColors.accent : RwColors.subtle),
+        title: const Text('Automatisch (beste stem zonder internet)'),
+        onTap: () => _pick(null),
+      ),
+      for (final (i, v) in list.take(8).indexed)
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          leading: Icon(chosen?.name == v.name ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: chosen?.name == v.name ? RwColors.accent : RwColors.subtle),
+          title: Text(_label(i, v)),
+          trailing: const Icon(Icons.play_circle_outline),
+          onTap: () => _pick((name: v.name, locale: v.locale)),
+        ),
+      if (list.length <= 1)
+        const Text(
+          'Er staat maar één Nederlandse stem op je telefoon. Mooiere stemmen installeer je gratis via de knop hieronder: '
+          'kies Spraakservices van Google → Stemgegevens installeren → Nederlands.',
+          style: TextStyle(color: RwColors.muted, fontSize: 12, height: 1.4),
+        ),
+      if (Platform.isAndroid)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.download_outlined, size: 18),
+            label: const Text('Meer stemmen installeren'),
+            onPressed: () => const AndroidIntent(action: 'com.android.settings.TTS_SETTINGS').launch().catchError((Object _) {}),
+          ),
+        ),
+    ]);
   }
 }

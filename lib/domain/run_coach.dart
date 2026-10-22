@@ -114,9 +114,10 @@ class CueScheduler {
     _lastD = r.distance;
     final parts = <String>[
       every.meters != null ? '${_km(n * every.meters!.toDouble())}.' : '${n * every.seconds! ~/ 60} minuten.',
-      if (every.seconds != null) 'Afstand ${_km(r.distance)}.',
-      if (settings.lap && lapD > 50) 'Dit stuk ${spokenPace(lapT / (lapD / 1000))} per kilometer.',
-      if (settings.average && r.averagePace > 0) 'Gemiddeld ${spokenPace(r.averagePace)}.',
+      // Op de loopband staan afstand en tempo al op het display: dan alleen tijd (en hartslag).
+      if (every.seconds != null && !r.indoor) 'Afstand ${_km(r.distance)}.',
+      if (settings.lap && lapD > 50 && !r.indoor) 'Dit stuk ${spokenPace(lapT / (lapD / 1000))} per kilometer.',
+      if (settings.average && r.averagePace > 0 && !r.indoor) 'Gemiddeld ${spokenPace(r.averagePace)}.',
       if (settings.total && every.meters != null) 'Totale tijd ${spokenDuration(r.movingSeconds)}.',
       if (settings.heartRate && heartRate != null) 'Hartslag $heartRate.',
     ];

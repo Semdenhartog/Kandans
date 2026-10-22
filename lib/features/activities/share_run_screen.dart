@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,7 +17,7 @@ import '../../domain/geo.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
-import '../routes/route_map.dart' show windColor;
+import '../routes/route_map.dart' show windColor, baseTileLayer;
 
 void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<String> badges = const []}) {
   Navigator.of(context).push(MaterialPageRoute<void>(
@@ -23,7 +25,7 @@ void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<Strin
   ));
 }
 
-enum _CardStyle { donker, oranje, foto, sticker }
+enum _CardStyle { kaart, donker, oranje, foto, sticker }
 
 /// Maakt een mooie afbeelding van je run om te delen (Instagram, WhatsApp, ...).
 class ShareRunScreen extends StatefulWidget {
@@ -38,7 +40,8 @@ class ShareRunScreen extends StatefulWidget {
 
 class _ShareRunScreenState extends State<ShareRunScreen> {
   final _key = GlobalKey();
-  _CardStyle _style = _CardStyle.donker;
+  // Met GPS-spoor standaard de echte kaart; anders de donkere kaart.
+  late _CardStyle _style = (widget.activity.hasTrack || widget.route != null) ? _CardStyle.kaart : _CardStyle.donker;
   bool _busy = false;
 
   /// Privacyzone: begin en eind van de route niet tonen (standaard aan).
@@ -127,6 +130,7 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                         hideHome: _hideHome,
                         photo: _style == _CardStyle.foto ? _photo : null,
                         sticker: _style == _CardStyle.sticker,
+                        map: _style == _CardStyle.kaart,
                       ),
                     ),
                     ),
@@ -141,6 +145,8 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                 children: [
                   SegmentedButton<_CardStyle>(
                     segments: [
+                      if (widget.activity.hasTrack || widget.route != null)
+                        const ButtonSegment(value: _CardStyle.kaart, label: Text('Kaart')),
                       const ButtonSegment(value: _CardStyle.donker, label: Text('Donker')),
                       const ButtonSegment(value: _CardStyle.oranje, label: Text('Oranje')),
                       if (_photo != null) const ButtonSegment(value: _CardStyle.foto, label: Text('Foto')),
@@ -188,8 +194,12 @@ class RunShareCard extends StatelessWidget {
     this.hideHome = true,
     this.photo,
     this.sticker = false,
+    this.map = false,
   });
   final Activity activity;
+
+  /// Echte kaart als achtergrond, met je route erop.
+  final bool map;
 
   /// Doorzichtige achtergrond, om op je eigen foto te plakken (Instagram-story).
   final bool sticker;
@@ -256,6 +266,29 @@ class RunShareCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
+            if (map && track != null && track.isValid) ...[
+              Positioned.fill(child: _ShareMap(points: shown)),
+              // Boven en onder donker laten verlopen, zodat de tekst leesbaar blijft.
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xCC09090B), Color(0x0009090B), Color(0x0009090B), Color(0xF209090B)],
+                        stops: [0, 0.2, 0.5, 0.78],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const Positioned(
+                right: 8,
+                bottom: 4,
+                child: Text('Kaart © Kadaster / PDOK', style: TextStyle(color: Color(0x99FFFFFF), fontSize: 7)),
+              ),
+            ],
             if (photo != null) ...[
               Positioned.fill(child: Image.memory(photo!, fit: BoxFit.cover)),
               const Positioned.fill(
@@ -270,7 +303,7 @@ class RunShareCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (!orange && photo == null && !sticker)
+            if (!orange && photo == null && !sticker && !map)
               Positioned(
                 right: -120,
                 top: -120,
@@ -307,7 +340,9 @@ class RunShareCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   Expanded(
-                    child: track != null && track.isValid
+                    child: map && track != null && track.isValid
+                        ? const SizedBox.expand()
+                        : track != null && track.isValid
                         ? CustomPaint(
                             size: Size.infinite,
                             painter: _ShareRoutePainter(
@@ -496,4 +531,40 @@ class _ShareRoutePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ShareRoutePainter old) => old.track != track || old.orange != orange || old.showStart != showStart;
+}
+
+
+/// Stille kaart (niet te bedienen) met je route erop, voor de deelafbeelding.
+class _ShareMap extends StatelessWidget {
+  const _ShareMap({required this.points});
+  final List<LatLng> points;
+
+  @override
+  Widget build(BuildContext context) {
+    final pts = [for (final p in points) ll.LatLng(p.lat, p.lon)];
+    return IgnorePointer(
+      child: FlutterMap(
+        options: MapOptions(
+          // Ruimte boven (logo) en onder (cijfers) vrijlaten, zodat de route in het midden staat.
+          initialCameraFit: CameraFit.coordinates(
+            coordinates: pts,
+            padding: const EdgeInsets.fromLTRB(36, 70, 36, 190),
+            maxZoom: 17,
+          ),
+          interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+          backgroundColor: RwColors.background,
+        ),
+        children: [
+          baseTileLayer(false),
+          PolylineLayer(polylines: [
+            Polyline(points: pts, strokeWidth: 12, color: RwColors.accent.withValues(alpha: 0.25)),
+            Polyline(points: pts, strokeWidth: 4.5, color: RwColors.accent, borderStrokeWidth: 1.5, borderColor: const Color(0xFF7A3300)),
+          ]),
+          CircleLayer(circles: [
+            CircleMarker(point: pts.last, radius: 6, color: Colors.white, borderColor: RwColors.accent, borderStrokeWidth: 3),
+          ]),
+        ],
+      ),
+    );
+  }
 }

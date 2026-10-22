@@ -107,6 +107,8 @@ Future<void> recalibrateTrainingPlan(BuildContext context, WidgetRef ref) async 
         ? 'Je drempeltempo is gelijk gebleven (${Fmt.pace(fresh)}). De komende trainingen worden opnieuw ingedeeld met je huidige weekomvang.'
         : 'Je drempeltempo is ${diff < 0 ? 'sneller' : 'langzamer'} geworden: ${Fmt.pace(fresh)} (was ${Fmt.pace(setup.thresholdPace)}). '
             'De trainingen vanaf vandaag krijgen nieuwe tempo\'s. Wat je al deed blijft staan.',
+    confirmLabel: 'Bijwerken',
+    destructive: false,
   );
   if (!ok || !context.mounted) return;
   final next = setup.copyWith(thresholdPace: fresh, currentWeeklyKm: weekly);

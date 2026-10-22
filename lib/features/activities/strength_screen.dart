@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -88,6 +89,13 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
     super.initState();
     _tts.setLanguage('nl-NL').catchError((_) => null);
     _tts.setSpeechRate(0.5).catchError((_) => null);
+    // Zelfde stem als bij het hardlopen (als je er een koos).
+    SharedPreferences.getInstance().then((p) {
+      final n = p.getString('rec_voice_name'), l = p.getString('rec_voice_locale');
+      final r = p.getDouble('rec_speech_rate');
+      if (n != null && l != null) _tts.setVoice({'name': n, 'locale': l}).catchError((_) => null);
+      if (r != null) _tts.setSpeechRate(r).catchError((_) => null);
+    }).ignore();
   }
 
   @override

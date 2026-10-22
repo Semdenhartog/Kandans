@@ -99,7 +99,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
   }
 
   Future<void> _clear() async {
-    if (_taps.length > 2 && !await confirmDialog(context, title: 'Alles wissen?', message: 'Je getekende punten worden weggehaald.')) {
+    if (_taps.length > 2 && !await confirmDialog(context, title: 'Alles wissen?', message: 'Je getekende punten worden weggehaald.', confirmLabel: 'Wissen')) {
       return;
     }
     _taps.clear();

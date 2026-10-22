@@ -1104,6 +1104,21 @@ void main() {
       expect(CueSettings.fromJson({'e': 'halfKm', 'h': false}).heartRate, isFalse);
     });
 
+    test('loopband: stem noemt alleen de tijd, geen afstand of tempo', () {
+      final r = RunRecording(indoor: true)..treadmillKmh = 12;
+      r.start(t0);
+      final cues = CueScheduler(const CueSettings(every: CueEvery.fiveMin));
+      final said = <String>[];
+      for (var i = 0; i < 601; i++) {
+        r.tick(1);
+        if (cues.update(r, heartRate: 140) case final c?) said.add(c);
+      }
+      expect(said, isNotEmpty);
+      expect(said.first, startsWith('5 minuten.'));
+      expect(said.join(' '), isNot(contains('kilometer')));
+      expect(said.first, contains('Hartslag 140.'));
+    });
+
     test('doeltempo-coach', () {
       final c = PaceCoach(330);
       final said = <String>[];

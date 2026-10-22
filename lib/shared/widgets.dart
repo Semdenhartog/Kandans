@@ -395,6 +395,7 @@ Future<bool> confirmDialog(
   required String title,
   required String message,
   String confirmLabel = 'Verwijderen',
+  bool destructive = true,
 }) async {
   final result = await showDialog<bool>(
     context: context,
@@ -404,10 +405,12 @@ Future<bool> confirmDialog(
       content: Text(message),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuleren')),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: Text(confirmLabel, style: const TextStyle(color: RwColors.danger)),
-        ),
+        destructive
+            ? TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(confirmLabel, style: const TextStyle(color: RwColors.danger)),
+              )
+            : FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(confirmLabel)),
       ],
     ),
   );

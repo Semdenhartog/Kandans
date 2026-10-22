@@ -20,6 +20,7 @@ import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
 import 'share_run_screen.dart';
 import 'photos_card.dart';
+import 'elevation_card.dart';
 import 'splits_card.dart';
 
 /// Eén run: tijden, weer, records, route en delen.
@@ -321,6 +322,10 @@ class ActivityDetailScreen extends ConsumerWidget {
           if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
             const SizedBox(height: 12),
             SplitsCard(activity: a),
+          ],
+          if (a.id != null) ...[
+            const SizedBox(height: 12),
+            ElevationCard(activity: a),
           ],
           if (a.id != null) ...[
             const SizedBox(height: 12),
