@@ -32,7 +32,7 @@ class FlipDigits extends StatelessWidget {
               ),
               child: Stack(alignment: Alignment.center, children: [
                 Text(ch,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 26 * size, color: RwColors.accent, height: 1)),
                 // De naad van het klapbord.
                 Positioned(left: 0, right: 0, child: Container(height: 1.2, color: Colors.black.withValues(alpha: 0.7))),
