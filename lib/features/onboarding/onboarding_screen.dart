@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 import '../../data/services/location_service.dart';
 import '../../shared/route_backdrop.dart';
+import '../routes/watch_export.dart' show WatchBrand, WatchBrandInfo, saveWatchBrand;
 
 const _doneKey = 'onboarding_done_v1';
 
@@ -36,7 +37,7 @@ Future<OnboardingNext?> showOnboardingIfNeeded(BuildContext context) async {
   return next ?? OnboardingNext.today;
 }
 
-/// Rondleiding van drie schermen bij de eerste keer openen.
+/// Rondleiding van vier schermen bij de eerste keer openen.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -49,6 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _page = 0;
   bool _asking = false;
   String? _locationResult;
+  WatchBrand? _brand;
 
   @override
   void dispose() {
@@ -121,6 +123,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       _Page(
         icon: Icons.watch_outlined,
+        title: 'Welk horloge heb je?',
+        text: 'Dan zet RunWise je route met één knop op je horloge, met een trilling bij elke afslag. '
+            'Geen horloge? Dan zegt je telefoon de afslagen.',
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final b in WatchBrand.values)
+                ChoiceChip(
+                  label: Text(b == WatchBrand.wearos ? 'Wear OS (Galaxy, Pixel)' : b.label),
+                  selected: _brand == b,
+                  onSelected: (_) async {
+                    setState(() => _brand = b);
+                    await saveWatchBrand(b);
+                    await Future<void>.delayed(const Duration(milliseconds: 350));
+                    if (mounted) _next();
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextButton(onPressed: _next, child: const Text('Later kiezen')),
+        ],
+      ),
+      _Page(
+        icon: Icons.sync,
         title: 'Je runs vanzelf binnen',
         text: 'Koppel Strava of je horloge (via Health Connect). Dan leert RunWise bij welk weer jij het snelst loopt, '
             'en zie je je records, ook gecorrigeerd voor het weer.',
@@ -156,7 +186,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   duration: const Duration(milliseconds: 1400),
                   curve: Curves.easeOutCubic,
                   builder: (_, intro, _) => CustomPaint(
-                    painter: RouteBackdropPainter(progress: intro * (0.38 + page * 0.31).clamp(0.0, 1.0)),
+                    painter: RouteBackdropPainter(progress: intro * (0.38 + page * 0.21).clamp(0.0, 1.0)),
                   ),
                 );
               },

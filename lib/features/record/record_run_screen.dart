@@ -16,6 +16,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
+import '../../data/services/location_service.dart' show quickPosition;
 import '../../data/services/notification_service.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/run_recorder_service.dart';
@@ -32,7 +33,10 @@ import '../../domain/intervals.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_helpers.dart';
 import '../../domain/run_recorder.dart';
+import '../../domain/route_geometry.dart';
+import '../../domain/route_photos.dart' show projectOnTrack;
 import '../../domain/route_turns.dart';
+import '../../domain/extras.dart' show daysAgoWords, calendarDaysBetween;
 import '../../domain/shoes.dart';
 import '../../shared/permission_primer.dart';
 import '../../shared/rolling_text.dart';
@@ -727,7 +731,51 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     await p.setString('rec_cues', jsonEncode(result.toJson()));
   }
 
-  Future<void> _chooseRoute(List<RunRoute> routes) async {
+  Future<void> _chooseRoute(List<RunRoute> unsorted) async {
+    // Handigste routes bovenaan: favorieten, dan wat dichtbij begint, dan wat je het laatst liep.
+    var here = _svc.view.value.position;
+    if (here == null) {
+      final q = await quickPosition();
+      if (q != null) here = LatLng(q.latitude, q.longitude);
+    }
+    if (!mounted) return;
+    final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+    final lastRun = <String, DateTime>{};
+    for (final a in runs) {
+      final id = a.routeId;
+      if (id == null) continue;
+      final cur = lastRun[id];
+      if (cur == null || a.startedAt.isAfter(cur)) lastRun[id] = a.startedAt;
+    }
+    final near = <String, double>{};
+    if (here != null) {
+      for (final r in unsorted) {
+        final pts = decodePolyline(r.polyline);
+        if (r.id == null || pts.length < 2) continue;
+        near[r.id!] = projectOnTrack(RouteTrack(pts), here).off;
+      }
+    }
+    double rank(RunRoute r) {
+      var v = 0.0;
+      if (r.isFavorite) v -= 1e7;
+      final d = near[r.id];
+      if (d != null) v += d.clamp(0, 50000).toDouble();
+      final last = lastRun[r.id];
+      v += last == null ? 20000 : (DateTime.now().difference(last).inDays * 50).clamp(0, 15000).toDouble();
+      return v;
+    }
+
+    final routes = [...unsorted]..sort((a, b) => rank(a).compareTo(rank(b)));
+    String sub(RunRoute r) {
+      final d = near[r.id];
+      final last = lastRun[r.id];
+      return [
+        Fmt.km(r.distanceMeters, decimals: 1),
+        if (d != null) d < 60 ? 'je staat erop' : 'op ${d < 1000 ? '${(d / 10).round() * 10} m' : Fmt.km(d, decimals: 1)} van je',
+        if (last != null) 'laatst ${daysAgoWords(calendarDaysBetween(last, DateTime.now()))}',
+      ].join(' · ');
+    }
+
     final picked = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -743,11 +791,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 title: const Text('Vrij lopen (geen route)'),
                 onTap: () => Navigator.pop(ctx, ''),
               ),
+              if (routes.isNotEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: Text('Je mag overal op een route instappen. RunWise wijst je de weg ernaartoe.',
+                      style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+                ),
               for (final r in routes)
                 ListTile(
-                  leading: const Icon(Icons.route_outlined, color: RwColors.accent),
+                  leading: Icon(r.isFavorite ? Icons.star : Icons.route_outlined, color: RwColors.accent),
                   title: Text(r.name),
-                  subtitle: Text(Fmt.km(r.distanceMeters, decimals: 1)),
+                  subtitle: Text(sub(r)),
                   trailing: r.id == _route?.id ? const Icon(Icons.check, color: RwColors.accent) : null,
                   onTap: () => Navigator.pop(ctx, r.id),
                 ),

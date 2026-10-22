@@ -15,6 +15,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
+import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/best_efforts.dart';
@@ -284,7 +285,9 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
         extended: _fabExtended,
         onPressed: () => openRecorder(context),
       ),
-      body: FabScrollWatcher(
+      body: Column(children: [
+        const FirstTip(id: 'runs', icon: Icons.directions_run, text: 'Hier staan al je runs. Tik op een run voor kaart, tussentijden en weer. Houd een run ingedrukt om hem te delen of te verwijderen.'),
+        Expanded(child: FabScrollWatcher(
         extended: _fabExtended,
         child: activities.when(
         loading: () => const LoadingView(),
@@ -388,7 +391,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
           );
         },
       ),
-      ),
+      )),
+      ]),
     );
   }
 }

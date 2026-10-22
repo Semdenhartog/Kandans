@@ -26,6 +26,7 @@ import '../features/routes/generate_route_screen.dart';
 import '../features/routes/route_detail_screen.dart';
 import '../features/routes/routes_screen.dart';
 import '../shared/home_shell.dart';
+import '../shared/tab_scroll.dart';
 import 'supabase.dart';
 
 /// Laat GoRouter opnieuw de redirect uitvoeren bij in- of uitloggen.
@@ -79,13 +80,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/today',
-              builder: (c, s) => const DashboardScreen(),
+              builder: (c, s) => const ScrollToTopOnReselect(tab: 0, child: DashboardScreen()),
             ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/runs',
-              builder: (c, s) => const ActivitiesScreen(),
+              builder: (c, s) => const ScrollToTopOnReselect(tab: 1, child: ActivitiesScreen()),
               routes: [
                 GoRoute(
                   path: 'new',
@@ -105,7 +106,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/routes',
-              builder: (c, s) => const RoutesScreen(),
+              builder: (c, s) => const ScrollToTopOnReselect(tab: 2, child: RoutesScreen()),
               routes: [
                 // Vóór ':id', anders wordt 'maken' als route-id gelezen.
                 GoRoute(
@@ -130,7 +131,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/me',
-              builder: (c, s) => const ProfileScreen(),
+              builder: (c, s) => const ScrollToTopOnReselect(tab: 4, child: ProfileScreen()),
               routes: [
                 GoRoute(path: 'shoes', builder: (c, s) => const ShoesScreen()),
                 GoRoute(

@@ -26,6 +26,7 @@ import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
 import '../planner/training_plan_screen.dart';
 import 'heart_rate_screen.dart';
+import 'help_screen.dart';
 import 'member_card.dart';
 import 'reminder_tile.dart';
 
@@ -71,7 +72,21 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('Ik')),
+      appBar: AppBar(
+        title: const Text('Ik'),
+        actions: [
+          IconButton(
+            tooltip: 'Zoeken in Ik',
+            icon: const Icon(Icons.search),
+            onPressed: () => showSettingsSearch(context),
+          ),
+          IconButton(
+            tooltip: 'Hulp',
+            icon: const Icon(Icons.help_outline),
+            onPressed: () => openHelp(context),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
@@ -192,6 +207,14 @@ class ProfileScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.help_outline),
+                  title: const Text('Hulp en veelgestelde vragen'),
+                  subtitle: const Text('Route op je horloge, batterij, woordenlijst'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => openHelp(context),
+                ),
+                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.workspace_premium_outlined, color: RwColors.accent),
                   title: const Text('RunWise Premium'),

@@ -13,9 +13,11 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../domain/gpx_parser.dart';
 import '../../domain/route_filter.dart';
+import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'route_photos_strip.dart';
+import 'route_undo.dart';
 import 'routes_overview_map.dart';
 
 class RoutesScreen extends ConsumerStatefulWidget {
@@ -36,7 +38,18 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
   final _search = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    hiddenRoutes.addListener(_onHidden);
+  }
+
+  void _onHidden() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    hiddenRoutes.removeListener(_onHidden);
     _search.dispose();
     super.dispose();
   }
@@ -188,13 +201,17 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
         icon: const Icon(Icons.auto_awesome),
         label: const Text('Route maken'),
       ),
-      body: routes.when(
+      body: Column(children: [
+        const FirstTip(id: 'routes', icon: Icons.route, text: 'Maak of teken een route en zet hem met één knop op je horloge. Bij het lopen mag je overal instappen: RunWise wijst de weg.'),
+        Expanded(child: routes.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(
           message: friendlyError(e),
           onRetry: () => ref.invalidate(routesProvider),
         ),
-        data: (list) {
+        data: (all) {
+          final hidden = hiddenRoutes.value;
+          final list = hidden.isEmpty ? all : all.where((r) => !hidden.contains(r.id)).toList();
           if (list.isEmpty) {
             return EmptyState(
               icon: Icons.route_outlined,
@@ -218,7 +235,13 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                   sort: _sort)
               : list;
           final head = withFilters ? 1 : 0;
-          return ListView.separated(
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(routesProvider);
+              await ref.read(routesProvider.future).catchError((Object _) => const <RunRoute>[]);
+            },
+            child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             itemCount: shown.length + head + (withFilters && shown.isEmpty ? 1 : 0),
             separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -285,9 +308,11 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
               );
             }));
             },
+          ),
           );
         },
-      ),
+      )),
+      ]),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:quick_actions/quick_actions.dart';
 
 import '../core/theme.dart';
+import 'tab_scroll.dart';
 import 'aura.dart';
 import 'whats_new.dart';
 import '../data/services/location_service.dart';
@@ -160,6 +161,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
               animationDuration: const Duration(milliseconds: 450),
               onDestinationSelected: (i) {
                 if (i != shell.currentIndex) HapticFeedback.selectionClick();
+                if (i == shell.currentIndex) notifyTabReselected(i);
                 shell.goBranch(i, initialLocation: i == shell.currentIndex);
               },
               destinations: const [

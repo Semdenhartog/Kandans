@@ -24,6 +24,7 @@ import 'route_map.dart';
 import 'route_photos_strip.dart';
 import 'route_map_screen.dart';
 import 'turn_list_card.dart';
+import 'route_undo.dart';
 import 'watch_export.dart';
 
 /// Huidig weer bij de start van een route.
@@ -47,22 +48,6 @@ class RouteDetailScreen extends ConsumerWidget {
       await ref.read(repositoryProvider).setFavorite(r.id!, !r.isFavorite);
       ref.invalidate(routeDetailProvider(routeId));
       ref.invalidate(routesProvider);
-    } catch (e) {
-      if (context.mounted) showMessage(context, friendlyError(e), error: true);
-    }
-  }
-
-  Future<void> _delete(BuildContext context, WidgetRef ref, RunRoute r) async {
-    final ok = await confirmDialog(
-      context,
-      title: 'Route verwijderen?',
-      message: '"${r.name}" wordt definitief verwijderd. Runs op deze route blijven bewaard.',
-    );
-    if (!ok) return;
-    try {
-      await ref.read(repositoryProvider).deleteRoute(r.id!);
-      ref.invalidate(routesProvider);
-      if (context.mounted) context.go('/routes');
     } catch (e) {
       if (context.mounted) showMessage(context, friendlyError(e), error: true);
     }
@@ -116,7 +101,7 @@ class RouteDetailScreen extends ConsumerWidget {
               IconButton(
                 tooltip: 'Verwijderen',
                 icon: const Icon(Icons.delete_outline),
-                onPressed: () => _delete(context, ref, r),
+                onPressed: () => deleteRouteWithUndo(context, r),
               ),
             ],
           ),
