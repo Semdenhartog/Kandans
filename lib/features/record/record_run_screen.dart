@@ -94,6 +94,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   double? _targetKm;
   bool _targetReached = false;
 
+  /// Alle opties tonen (anders alleen de meestgebruikte en wat aan staat).
+  bool _moreOpts = false;
+
   /// Zonmodus: pikzwart, scherm op volle helderheid en grotere cijfers.
   bool _sunMode = false;
 
@@ -1216,6 +1219,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           SharedPreferences.getInstance().then((p) => p.setBool('rec_haptics', x)).ignore();
                         },
                       ),
+                      if (_moreOpts || _cadence != null)
                       FilterChip(
                         avatar: const Icon(Icons.graphic_eq, size: 18),
                         label: Text(_cadence == null ? 'Cadans-tik' : 'Cadans $_cadence'),
@@ -1234,7 +1238,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                             SharedPreferences.getInstance().then((p) => p.setBool('rec_turns', x)).ignore();
                           },
                         ),
-                      if (!_indoor)
+                      if (!_indoor && (_moreOpts || _share))
                         FilterChip(
                           avatar: const Icon(Icons.share_location_outlined, size: 18),
                           label: const Text('Live delen'),
@@ -1242,6 +1246,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           selected: _share,
                           onSelected: (x) => setState(() => _share = x),
                         ),
+                      if (_moreOpts || _guided != null)
                       ActionChip(
                         avatar: Icon(Icons.record_voice_over_outlined, size: 18, color: _guided == null ? null : RwColors.accentDark),
                         backgroundColor: _guided == null ? null : RwColors.accent,
@@ -1249,6 +1254,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                             style: TextStyle(color: _guided == null ? null : RwColors.accentDark)),
                         onPressed: _chooseGuided,
                       ),
+                      if (_moreOpts)
                       ActionChip(
                         avatar: const Icon(Icons.tune, size: 18),
                         label: Text('Stem: ${_cues.every.label.toLowerCase()}'),
@@ -1260,6 +1266,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           label: Text(_targetKm == null ? 'Doelafstand' : 'Doel ${_kmWords(_targetKm!)} km'),
                           onPressed: _chooseTargetKm,
                         ),
+                      if (_moreOpts || _sunMode)
                       FilterChip(
                         avatar: const Icon(Icons.wb_sunny_outlined, size: 18),
                         label: const Text('Zonmodus'),
@@ -1267,6 +1274,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         selected: _sunMode,
                         onSelected: _toggleSunMode,
                       ),
+                      if (_moreOpts || _nightMode)
                       FilterChip(
                         avatar: const Icon(Icons.nightlight_outlined, size: 18),
                         label: const Text('Nachtmodus'),
@@ -1274,7 +1282,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         selected: _nightMode,
                         onSelected: _toggleNightMode,
                       ),
-                      if (!_indoor)
+                      if (!_indoor && (_moreOpts || _targetPace != null))
                         ActionChip(
                           avatar: const Icon(Icons.speed, size: 18),
                           label: Text(_targetPace == null ? 'Doeltempo' : 'Doel ${Fmt.pace(_targetPace!)}'),
@@ -1304,6 +1312,15 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           }()),
                           onPressed: () => _chooseShoe(shoes),
                         ),
+                      // Minder gebruikte opties achter "Meer": rustiger scherm, alles nog binnen één tik.
+                      ActionChip(
+                        avatar: Icon(_moreOpts ? Icons.expand_less : Icons.more_horiz, size: 18),
+                        label: Text(_moreOpts ? 'Minder' : 'Meer opties'),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _moreOpts = !_moreOpts);
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
