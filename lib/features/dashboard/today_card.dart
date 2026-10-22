@@ -17,6 +17,7 @@ import '../../domain/training_load.dart';
 import '../../domain/training_plan.dart';
 import '../../domain/weekly_load.dart';
 import '../../domain/weekly_report.dart';
+import '../../shared/flip_digits.dart';
 import '../../shared/widgets.dart';
 import '../activities/fitness_screen.dart';
 import '../activities/year_story_screen.dart';
@@ -485,7 +486,7 @@ class RaceCountdownCard extends ConsumerWidget {
         child: Row(
           children: [
             Column(mainAxisSize: MainAxisSize.min, children: [
-              _FlipDigits(text: days == 0 ? '!' : '$days'),
+              FlipDigits(text: days == 0 ? '!' : '$days'),
               const SizedBox(height: 4),
               Text(days == 0 ? 'vandaag' : (days == 1 ? 'dag' : 'dagen'),
                   style: const TextStyle(color: RwColors.accent, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
@@ -558,42 +559,4 @@ class YearStoryCard extends ConsumerWidget {
       ),
     );
   }
-}
-
-
-/// Aftelling als een klapbord: elk cijfer op een eigen tegeltje met een naad in het midden.
-class _FlipDigits extends StatelessWidget {
-  const _FlipDigits({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final ch in text.split(''))
-            Container(
-              width: 28,
-              height: 40,
-              margin: const EdgeInsets.symmetric(horizontal: 1.5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7),
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2C2620), Color(0xFF221D18), Color(0xFF151210), Color(0xFF1B1714)],
-                  stops: [0, 0.499, 0.501, 1],
-                ),
-                border: Border.all(color: RwColors.accent.withValues(alpha: 0.25)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 6, offset: const Offset(0, 3))],
-              ),
-              child: Stack(alignment: Alignment.center, children: [
-                Text(ch,
-                    style: const TextStyle(
-                        fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 26, color: RwColors.accent, height: 1)),
-                // De naad van het klapbord.
-                Positioned(left: 0, right: 0, child: Container(height: 1.2, color: Colors.black.withValues(alpha: 0.7))),
-              ]),
-            ),
-        ],
-      );
 }

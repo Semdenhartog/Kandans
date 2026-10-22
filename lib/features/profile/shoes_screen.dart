@@ -150,19 +150,46 @@ class _ShoeCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text.rich(TextSpan(children: [
-            TextSpan(
-              text: '${km.round()}',
-              style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 30, fontWeight: FontWeight.w800, color: color),
-            ),
-            TextSpan(text: ' / ${shoe.limitKm} km', style: const TextStyle(color: RwColors.muted)),
-          ])),
           const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(value: f, minHeight: 8, color: color, backgroundColor: RwColors.bar),
-          ),
+          // Levensduur als ring die bij openen volloopt, met wat er nog in de schoen zit.
+          Row(children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: f),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, _) => SizedBox(
+                width: 84,
+                height: 84,
+                child: CustomPaint(
+                  painter: _LifeRingPainter(v),
+                  child: Center(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Text('${((1 - v) * 100).round()}%',
+                          style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+                      const Text('over', style: TextStyle(color: RwColors.subtle, fontSize: 10)),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text.rich(TextSpan(children: [
+                  TextSpan(
+                    text: '${km.round()}',
+                    style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800),
+                  ),
+                  TextSpan(text: ' / ${shoe.limitKm} km', style: const TextStyle(color: RwColors.muted)),
+                ])),
+                const SizedBox(height: 2),
+                Text(
+                  worn ? 'Aan vervanging toe' : 'Nog ongeveer ${(shoe.limitKm - km).clamp(0, 99999).round()} km te gaan',
+                  style: TextStyle(color: worn ? RwColors.danger : RwColors.muted, fontWeight: FontWeight.w600),
+                ),
+              ]),
+            ),
+          ]),
           if (worn) ...[
             const SizedBox(height: 8),
             const Text(
@@ -258,4 +285,36 @@ class _ShoeSheetState extends State<_ShoeSheet> {
       ),
     );
   }
+}
+
+
+/// Levensduurring: groen → oranje → rood naarmate de schoen meer kilometers heeft.
+class _LifeRingPainter extends CustomPainter {
+  _LifeRingPainter(this.f);
+  final double f;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2 - 6;
+    final rect = Rect.fromCircle(center: c, radius: r);
+    canvas.drawCircle(c, r, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..color = RwColors.bar);
+    if (f <= 0.001) return;
+    const start = -1.5707963;
+    canvas.drawArc(rect, start, 6.2831853 * f, false, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..shader = const SweepGradient(
+        transform: GradientRotation(start),
+        colors: [RwColors.good, RwColors.warning, RwColors.danger],
+        stops: [0.0, 0.7, 0.95],
+      ).createShader(rect));
+  }
+
+  @override
+  bool shouldRepaint(covariant _LifeRingPainter old) => old.f != f;
 }

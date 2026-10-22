@@ -49,6 +49,7 @@ class NotificationService {
       channelDescription: 'Elke dag je beste vertrektijd voor een run',
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
+      color: Color(0xFFFD8A26),
     ),
   );
 
@@ -349,6 +350,7 @@ class NotificationService {
             'Weekoverzicht',
             channelDescription: 'Elke maandag je week in het kort',
             importance: Importance.defaultImportance,
+            color: Color(0xFFFD8A26),
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

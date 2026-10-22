@@ -261,9 +261,10 @@ ThemeData buildTheme() {
       showDragHandle: true,
       dragHandleColor: Color(0xFF3A3A42),
       dragHandleSize: Size(40, 4),
+      // Lichte rand langs de bovenkant: het paneel "zweeft" boven de inhoud.
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        side: BorderSide(color: Color(0x14FFFFFF)),
+        side: BorderSide(color: Color(0x22FFFFFF)),
       ),
     ),
     dialogTheme: const DialogThemeData(

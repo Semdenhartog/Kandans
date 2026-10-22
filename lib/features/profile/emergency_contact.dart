@@ -91,7 +91,7 @@ class _EmergencyContactTileState extends State<EmergencyContactTile> {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        leading: const Icon(Icons.sos_outlined, color: RwColors.danger),
+        leading: const TileIcon(Icons.sos_outlined, color: RwColors.danger),
         title: const Text('Noodcontact'),
         subtitle: Text(_c == null
             ? 'Stel iemand in die je met één tik je locatie stuurt'

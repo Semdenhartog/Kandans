@@ -292,11 +292,24 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                             ].join(' · '),
                             style: const TextStyle(color: RwColors.subtle),
                           ),
+                          if (r.profileOrKmPoints.length >= 3) ...[
+                            const SizedBox(height: 6),
+                            // Mini-hoogteprofiel: in één oogopslag vlak of heuvelachtig.
+                            SizedBox(height: 18, child: CustomPaint(size: Size.infinite, painter: _Sparkline(r.profileOrKmPoints))),
+                          ],
                           if (bests[r.id] != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'Beste moment: ${Fmt.time(bests[r.id]!.start)} · score ${bests[r.id]!.score}',
-                              style: const TextStyle(color: RwColors.accent, fontSize: 13, fontWeight: FontWeight.w600),
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: RwColors.accent.withValues(alpha: 0.13),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: RwColors.accent.withValues(alpha: 0.3)),
+                              ),
+                              child: Text(
+                                'Beste moment ${Fmt.time(bests[r.id]!.start)} · ${bests[r.id]!.score}',
+                                style: const TextStyle(color: RwColors.accentLight, fontSize: 12, fontWeight: FontWeight.w700),
+                              ),
                             ),
                           ],
                         ],
@@ -315,4 +328,49 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
       ]),
     );
   }
+}
+
+
+/// Heel klein hoogteprofiel als vlakje (relatief: ook kleine verschillen worden zichtbaar, maar vlak blijft vlak).
+class _Sparkline extends CustomPainter {
+  _Sparkline(this.p);
+  final List<ElevationSample> p;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var lo = p.first.ele, hi = p.first.ele;
+    for (final s in p) {
+      if (s.ele < lo) lo = s.ele;
+      if (s.ele > hi) hi = s.ele;
+    }
+    // Minstens 20 m bereik, zodat een vlakke route er ook vlak uitziet.
+    final span = (hi - lo) < 20 ? 20.0 : hi - lo;
+    final total = p.last.meters <= 0 ? 1.0 : p.last.meters;
+    Offset at(ElevationSample s) => Offset(s.meters / total * size.width, size.height - (s.ele - lo) / span * (size.height - 2) - 1);
+    final line = Path()..moveTo(at(p.first).dx, at(p.first).dy);
+    for (final s in p.skip(1)) {
+      final o = at(s);
+      line.lineTo(o.dx, o.dy);
+    }
+    final fill = Path.from(line)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(
+      fill,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [RwColors.accent.withValues(alpha: 0.35), RwColors.accent.withValues(alpha: 0.02)],
+        ).createShader(Offset.zero & size),
+    );
+    canvas.drawPath(line, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..color = RwColors.accent.withValues(alpha: 0.8));
+  }
+
+  @override
+  bool shouldRepaint(covariant _Sparkline old) => old.p != p;
 }

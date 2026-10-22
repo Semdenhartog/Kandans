@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
@@ -103,15 +106,23 @@ class BadgeTile extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _Medal(badge: b, size: 96, color: color),
-                const SizedBox(height: 12),
+                _MedalShowcase(badge: b, color: color),
+                const SizedBox(height: 8),
                 Text(b.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
                 Text(b.description, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
                 const SizedBox(height: 8),
-                Text(
-                  b.earned ? 'Verdiend op ${Fmt.dateLong(b.earnedAt!)}' : (b.progress > 0 ? '${(b.progress * 100).round()}% op weg' : 'Nog niet verdiend'),
-                  style: TextStyle(color: b.earned ? color : RwColors.subtle, fontWeight: FontWeight.w600),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: (b.earned ? color : RwColors.subtle).withValues(alpha: 0.12),
+                    border: Border.all(color: (b.earned ? color : RwColors.subtle).withValues(alpha: 0.35)),
+                  ),
+                  child: Text(
+                    b.earned ? 'Verdiend op ${Fmt.dateLong(b.earnedAt!)}' : (b.progress > 0 ? '${(b.progress * 100).round()}% op weg' : 'Nog niet verdiend'),
+                    style: TextStyle(color: b.earned ? color : RwColors.subtle, fontWeight: FontWeight.w700, fontSize: 13),
+                  ),
                 ),
               ],
             ),
@@ -272,4 +283,96 @@ class NewBadgesBanner extends StatelessWidget {
           ),
         ),
       );
+}
+
+
+/// De medaille groot in beeld: draait bij openen een keer rond en staat in een stralenkrans.
+class _MedalShowcase extends StatefulWidget {
+  const _MedalShowcase({required this.badge, required this.color});
+  final bd.Badge badge;
+  final Color color;
+
+  @override
+  State<_MedalShowcase> createState() => _MedalShowcaseState();
+}
+
+class _MedalShowcaseState extends State<_MedalShowcase> with SingleTickerProviderStateMixin {
+  late final _rays = AnimationController(vsync: this, duration: const Duration(seconds: 24));
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.badge.earned && !WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+      _rays.repeat();
+      HapticFeedback.mediumImpact();
+    }
+  }
+
+  @override
+  void dispose() {
+    _rays.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final b = widget.badge;
+    return SizedBox(
+      width: 220,
+      height: 190,
+      child: Stack(alignment: Alignment.center, children: [
+        if (b.earned)
+          AnimatedBuilder(
+            animation: _rays,
+            builder: (_, _) => Transform.rotate(
+              angle: _rays.value * 2 * math.pi,
+              child: CustomPaint(size: const Size(220, 220), painter: _RaysPainter(widget.color)),
+            ),
+          ),
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: b.earned ? 0 : 1, end: 1),
+          duration: const Duration(milliseconds: 1400),
+          curve: Curves.easeOutCubic,
+          builder: (_, t, child) => Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0015)
+              ..rotateY((1 - t) * 2 * math.pi)
+              ..scale(0.7 + 0.3 * t, 0.7 + 0.3 * t),
+            child: child,
+          ),
+          child: _Medal(badge: b, size: 130, color: widget.color),
+        ),
+      ]),
+    );
+  }
+}
+
+class _RaysPainter extends CustomPainter {
+  _RaysPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.width / 2;
+    canvas.drawCircle(
+      c,
+      r * 0.75,
+      Paint()..shader = RadialGradient(colors: [color.withValues(alpha: 0.28), color.withValues(alpha: 0)]).createShader(Rect.fromCircle(center: c, radius: r * 0.75)),
+    );
+    final p = Paint()..shader = RadialGradient(colors: [color.withValues(alpha: 0.16), color.withValues(alpha: 0)]).createShader(Rect.fromCircle(center: c, radius: r));
+    for (var i = 0; i < 12; i++) {
+      final a = i * math.pi / 6;
+      final path = Path()
+        ..moveTo(c.dx, c.dy)
+        ..lineTo(c.dx + math.cos(a - 0.09) * r, c.dy + math.sin(a - 0.09) * r)
+        ..lineTo(c.dx + math.cos(a + 0.09) * r, c.dy + math.sin(a + 0.09) * r)
+        ..close();
+      canvas.drawPath(path, p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RaysPainter old) => old.color != color;
 }
