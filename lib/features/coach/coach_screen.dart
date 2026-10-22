@@ -107,6 +107,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   @override
   Widget build(BuildContext context) {
     final history = ref.watch(coachMessagesProvider);
+    final smart = _smartQuestions(ref);
     final profile = ref.watch(profileProvider).value;
     final premium = profile?.isPremium ?? false;
 
@@ -165,11 +166,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                itemCount: _followUps.length,
+                itemCount: smart.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) => ActionChip(
-                  label: Text(_followUps[i]),
-                  onPressed: () => _send(_followUps[i]),
+                  label: Text(smart[i]),
+                  onPressed: () => _send(smart[i]),
                 ),
               ),
             ),
@@ -560,4 +561,34 @@ class _RichReply extends StatelessWidget {
     }
     return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: children);
   }
+}
+
+
+/// Snelle vragen die passen bij je situatie: je laatste run, je wedstrijd, je training van vandaag.
+List<String> _smartQuestions(WidgetRef ref) {
+  final out = <String>[];
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  // De coach kijkt niet naar Strava-runs, dus daar stellen we ook geen vraag over voor.
+  final runs = (ref.watch(activitiesProvider).value ?? const <Activity>[]).where((a) => a.source != 'strava').toList()
+    ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+  if (runs.isNotEmpty) {
+    final d = runs.first.startedAt.toLocal();
+    final day = DateTime(d.year, d.month, d.day);
+    if (day == today) {
+      out.add('Hoe was mijn run van vandaag?');
+    } else if (today.difference(day).inDays == 1) {
+      out.add('Hoe was mijn run van gisteren?');
+    }
+  }
+  final races = ref.watch(racesProvider).value ?? const <RaceEvent>[];
+  final next = races.where((r) => r.daysUntil >= 0 && r.daysUntil <= 21).toList()..sort((a, b) => a.daysUntil.compareTo(b.daysUntil));
+  if (next.isNotEmpty) out.add('Hoe pak ik de ${next.first.name} aan?');
+  final plan = ref.watch(planProvider).value ?? const [];
+  final session = plan.where((s) => s.date == today).firstOrNull;
+  if (session != null) out.add('Hoe loop ik mijn ${session.title.toLowerCase()} vandaag?');
+  for (final f in _followUps) {
+    if (!out.contains(f)) out.add(f);
+  }
+  return out.take(6).toList();
 }

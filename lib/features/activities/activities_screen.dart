@@ -15,6 +15,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
+import '../../shared/segmented.dart';
 import '../../shared/widgets.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/best_efforts.dart';
@@ -26,6 +27,7 @@ import '../../domain/shoes.dart';
 import '../../domain/run_filter.dart';
 import '../../domain/run_helpers.dart';
 import '../../domain/weekly_load.dart';
+import '../record/quick_start.dart';
 import '../record/record_run_screen.dart';
 import '../routes/route_shape.dart';
 import 'activity_detail_screen.dart';
@@ -47,10 +49,12 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
   final _since = DateTime.now();
 
   final _fabExtended = ValueNotifier(true);
+  final _listCtrl = ScrollController();
 
   @override
   void dispose() {
     _fabExtended.dispose();
+    _listCtrl.dispose();
     super.dispose();
   }
   RunFilter _filter = const RunFilter();
@@ -283,6 +287,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
         icon: Icons.play_arrow,
         extended: _fabExtended,
         onPressed: () => openRecorder(context),
+        // Lang drukken: snelmenu (training van vandaag, vast rondje, buiten, loopband).
+        onLongPress: () => showQuickStart(context, ref),
       ),
       body: FabScrollWatcher(
         extended: _fabExtended,
@@ -332,7 +338,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             }
             rows.add(a);
           }
-          return RefreshIndicator(
+          return BackToTop(controller: _listCtrl, child: RefreshIndicator(
             onRefresh: () async {
               try {
                 await ref.read(syncServiceProvider).syncAll(force: true);
@@ -343,6 +349,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               await ref.read(activitiesProvider.future);
             },
             child: ListView.separated(
+              controller: _listCtrl,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               itemCount: rows.length + 2,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -385,7 +392,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                 );
               })),
             ),
-          );
+          ));
         },
       ),
       ),
@@ -653,15 +660,14 @@ class _OverviewState extends State<_Overview> {
             ),
           ),
           const Divider(height: 20),
-          SegmentedButton<Period>(
-            showSelectedIcon: false,
-            segments: const [
-              ButtonSegment(value: Period.week, label: Text('Week')),
-              ButtonSegment(value: Period.month, label: Text('Maand')),
-              ButtonSegment(value: Period.year, label: Text('Jaar')),
+          RwSegmented<Period>(
+            items: const [
+              (value: Period.week, label: 'Week', icon: null),
+              (value: Period.month, label: 'Maand', icon: null),
+              (value: Period.year, label: 'Jaar', icon: null),
             ],
-            selected: {_period},
-            onSelectionChanged: (s) => setState(() => _period = s.first),
+            selected: _period,
+            onChanged: (p) => setState(() => _period = p),
           ),
           const SizedBox(height: 14),
           Row(

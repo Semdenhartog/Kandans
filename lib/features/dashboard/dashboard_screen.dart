@@ -24,6 +24,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../data/services/air_quality_service.dart';
 import '../../domain/run_warnings.dart';
 import '../../shared/alarm.dart';
+import '../../data/services/run_recorder_service.dart';
 import '../../domain/run_helpers.dart';
 import '../../shared/calendar.dart';
 import '../../shared/shine_text.dart';
@@ -32,6 +33,7 @@ import '../live/live_share_screen.dart';
 import '../../domain/availability.dart';
 import '../planner/availability_provider.dart';
 import '../planner/week_planner_screen.dart';
+import '../record/quick_start.dart';
 import '../record/record_run_screen.dart';
 import '../../domain/dashboard_layout.dart';
 import '../../domain/training_plan.dart';
@@ -103,7 +105,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ref.invalidate(activitiesProvider);
     ref.invalidate(routesProvider);
     await ref.read(forecastProvider.future).catchError((_) => Forecast(latitude: 0, longitude: 0, hours: []));
+    HapticFeedback.lightImpact();
+    if (mounted) setState(() => _updatedAt = DateTime.now());
   }
+
+  /// Wanneer het weer en het advies voor het laatst zijn opgehaald.
+  DateTime? _updatedAt;
 
   String _greeting() {
     final h = DateTime.now().hour;
@@ -212,6 +219,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         icon: Icons.play_arrow,
         extended: _fabExtended,
         onPressed: () => openRecorder(context),
+        // Lang drukken: snelmenu (training van vandaag, vast rondje, buiten, loopband).
+        onLongPress: () => showQuickStart(context, ref),
       ),
       body: SafeArea(
         child: FabScrollWatcher(
@@ -249,7 +258,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   final place = location.when(data: (l) => l.label, loading: () => '', error: (_, _) => '');
                   final weather = nowW == null ? '' : ' · ${Fmt.temp(nowW.temperature)}, ${weatherLabel(nowW.weatherCode).toLowerCase()}';
                   final where = place.isEmpty || place == 'je locatie' ? '' : ' · $place';
-                  return '${Fmt.date(DateTime.now())}$weather$where';
+                  final upd = _updatedAt ?? (forecast.hasValue ? DateTime.now() : null);
+                  _updatedAt ??= upd;
+                  return '${Fmt.date(DateTime.now())}$weather$where${upd == null ? '' : ' · bijgewerkt ${Fmt.time(upd)}'}';
                 }(),
                 style: const TextStyle(color: RwColors.subtle),
               ),
@@ -537,12 +548,28 @@ class _ResultsState extends State<_Results> {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final session = plan.where((x) => x.date == today).firstOrNull;
+          final line = personalLine(verdict, session, restDay: plan.isNotEmpty && session == null);
           return Padding(
             padding: const EdgeInsets.only(bottom: 14),
-            child: Text(
-              personalLine(verdict, session, restDay: plan.isNotEmpty && session == null),
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, height: 1.35),
-            ),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(
+                child: Text(line, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, height: 1.35)),
+              ),
+              // Voorlezen: handig terwijl je je omkleedt of je schoenen strikt.
+              IconButton(
+                tooltip: 'Voorlezen',
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.volume_up_outlined, color: RwColors.subtle),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  final w = verdict.best.weather;
+                  RunRecorderService.instance.say(
+                    '$line Het beste moment is om ${Fmt.time(verdict.best.start)}, '
+                    'met ${(w.feelsLike ?? w.temperature).round()} graden gevoel en wind ${w.windSpeed.round()} kilometer per uur.',
+                  );
+                },
+              ),
+            ]),
           );
         }),
         widget.settings,
@@ -891,6 +918,11 @@ class _HeroCard extends StatelessWidget {
                     Expanded(
                       child: Text('Nu vertrekken kan ook: score ${v.now.score} (${gain <= 3 ? 'bijna even goed' : '$gain punten minder'}).',
                           style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accentLight),
+                      onPressed: () => openRecorder(context),
+                      child: const Text('Toch nu'),
                     ),
                   ],
                 ),

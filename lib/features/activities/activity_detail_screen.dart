@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -131,6 +132,8 @@ class ActivityDetailScreen extends ConsumerWidget {
     final history = a.routeId == null ? null : routeHistory(all, a.routeId!);
 
     final list = ListView(
+        // Alles vooraf opbouwen, zodat de spring-chips elk onderdeel kunnen vinden.
+        cacheExtent: 100000,
         padding: EdgeInsets.fromLTRB(16, a.hasTrack ? 0 : 4, 16, 32),
         children: [
           Text(
@@ -167,6 +170,8 @@ class ActivityDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          if (a.id != null) _JumpChips(activity: a),
           const SizedBox(height: 12),
           RwCard(
             title: 'ROUTE',
@@ -261,10 +266,11 @@ class ActivityDetailScreen extends ConsumerWidget {
           ),
           if (a.id != null && a.source != 'strava') ...[
             const SizedBox(height: 12),
-            _CoachSummaryCard(activity: a),
+            KeyedSubtree(key: _sectionKey(a, 'coach'), child: _CoachSummaryCard(activity: a)),
           ],
           const SizedBox(height: 12),
           RwCard(
+            key: _sectionKey(a, 'weer'),
             title: 'HET WEER TIJDENS JE RUN',
             child: a.temperatureCelsius == null && a.windSpeedKmh == null
                 ? const Text('Geen weergegevens bij deze run.', style: TextStyle(color: RwColors.muted))
@@ -321,11 +327,11 @@ class ActivityDetailScreen extends ConsumerWidget {
           ),
           if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
             const SizedBox(height: 12),
-            SplitsCard(activity: a),
+            KeyedSubtree(key: _sectionKey(a, 'splits'), child: SplitsCard(activity: a)),
           ],
           if (a.id != null) ...[
             const SizedBox(height: 12),
-            ElevationCard(activity: a),
+            KeyedSubtree(key: _sectionKey(a, 'hoogte'), child: ElevationCard(activity: a)),
           ],
           if (a.id != null) ...[
             const SizedBox(height: 12),
@@ -629,6 +635,51 @@ class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
             const Text('Gemaakt door AI; kan fouten bevatten.', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
           ],
         ],
+      ),
+    );
+  }
+}
+
+
+/// Vaste sleutels per run en onderdeel, om ernaartoe te kunnen springen.
+final _keys = <String, GlobalKey>{};
+GlobalKey _sectionKey(Activity a, String name) => _keys.putIfAbsent('${a.id}-$name', () => GlobalKey(debugLabel: name));
+
+/// Spring-chips: in één tik naar splits, hoogte, weer of coach (handig in een lange pagina).
+class _JumpChips extends StatelessWidget {
+  const _JumpChips({required this.activity});
+  final Activity activity;
+
+  @override
+  Widget build(BuildContext context) {
+    const items = [
+      ('splits', 'Splits', Icons.format_list_numbered),
+      ('hoogte', 'Hoogte', Icons.terrain_outlined),
+      ('weer', 'Weer', Icons.air),
+      ('coach', 'Coach', Icons.auto_awesome_outlined),
+    ];
+    return SizedBox(
+      height: 38,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          final (id, label, icon) = items[i];
+          return ActionChip(
+            avatar: Icon(icon, size: 16, color: RwColors.accentLight),
+            label: Text(label),
+            onPressed: () {
+              final ctx = _sectionKey(activity, id).currentContext;
+              if (ctx == null) {
+                showMessage(context, '$label is er voor deze run niet.');
+                return;
+              }
+              HapticFeedback.selectionClick();
+              Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic, alignment: 0.05);
+            },
+          );
+        },
       ),
     );
   }

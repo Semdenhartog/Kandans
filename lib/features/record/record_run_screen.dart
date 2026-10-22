@@ -32,14 +32,17 @@ import '../../domain/intervals.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_helpers.dart';
 import '../../domain/run_recorder.dart';
+import '../../domain/training_plan.dart';
 import '../../domain/route_turns.dart';
 import '../../domain/shoes.dart';
 import '../../shared/permission_primer.dart';
 import '../../shared/rolling_text.dart';
+import '../../shared/segmented.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
 import '../routes/turn_list_card.dart' show TurnArrow;
 import 'interval_picker.dart';
+import 'quick_start.dart';
 import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
 
@@ -1117,16 +1120,39 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SegmentedButton<bool>(
-                    showSelectedIcon: false,
-                    segments: const [
-                      ButtonSegment(value: false, icon: Icon(Icons.terrain_outlined), label: Text('Buiten')),
-                      ButtonSegment(value: true, icon: Icon(Icons.fitness_center), label: Text('Loopband')),
+                  _QuickPresets(
+                    show: widget.sessionTitle == null,
+                    routeChosen: _route != null,
+                    planChosen: _plan != null,
+                    onSession: (sess) {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _plan = sess.intervals;
+                        _targetPace = sess.intervals == null ? sess.targetPace : null;
+                        _indoor = false;
+                      });
+                      showMessage(context, '${sess.title} staat klaar.');
+                    },
+                    onRoute: (r) {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _route = r;
+                        _ghost = null;
+                        _ghostTime = null;
+                        _indoor = false;
+                      });
+                      if (r.id != null) _loadGhost(r.id!);
+                    },
+                  ),
+                  RwSegmented<bool>(
+                    items: const [
+                      (value: false, label: 'Buiten', icon: Icons.terrain_outlined),
+                      (value: true, label: 'Loopband', icon: Icons.fitness_center),
                     ],
-                    selected: {_indoor},
-                    onSelectionChanged: (x) {
-                      setState(() => _indoor = x.first);
-                      SharedPreferences.getInstance().then((p) => p.setBool('rec_indoor', x.first)).ignore();
+                    selected: _indoor,
+                    onChanged: (x) {
+                      setState(() => _indoor = x);
+                      SharedPreferences.getInstance().then((p) => p.setBool('rec_indoor', x)).ignore();
                     },
                   ),
                   ListTile(
@@ -2410,4 +2436,70 @@ class _VoicePickerState extends State<_VoicePicker> {
         ),
     ]);
   }
+}
+
+
+/// "Snel starten": kaartjes met je training van vandaag en je vaste rondje. Eén tik en alles staat goed.
+class _QuickPresets extends ConsumerWidget {
+  const _QuickPresets({required this.show, required this.routeChosen, required this.planChosen, required this.onSession, required this.onRoute});
+  final bool show, routeChosen, planChosen;
+  final ValueChanged<PlanSession> onSession;
+  final ValueChanged<RunRoute> onRoute;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!show) return const SizedBox.shrink();
+    final session = todaySession(ref.watch(planProvider).value ?? const <PlanSession>[]);
+    final route = favoriteRoute(ref.watch(activitiesProvider).value ?? const <Activity>[], ref.watch(routesProvider).value ?? const <RunRoute>[]);
+    final cards = <Widget>[
+      if (session != null && !planChosen && session.kind != SessionKind.race)
+        _PresetCard(icon: Icons.event_available_outlined, title: 'Vandaag', subtitle: session.title, onTap: () => onSession(session)),
+      if (route != null && !routeChosen)
+        _PresetCard(icon: Icons.route_outlined, title: 'Vast rondje', subtitle: route.name, onTap: () => onRoute(route)),
+    ];
+    if (cards.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(children: [
+        for (final (i, c) in cards.indexed) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(child: c),
+        ],
+      ]),
+    );
+  }
+}
+
+class _PresetCard extends StatelessWidget {
+  const _PresetCard({required this.icon, required this.title, required this.subtitle, required this.onTap});
+  final IconData icon;
+  final String title, subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(colors: [RwColors.accent.withValues(alpha: 0.18), RwColors.accent.withValues(alpha: 0.06)]),
+              border: Border.all(color: RwColors.accent.withValues(alpha: 0.35)),
+            ),
+            child: Row(children: [
+              Icon(icon, color: RwColors.accentLight, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(title.toUpperCase(), style: const TextStyle(color: RwColors.accentLight, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                  Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                ]),
+              ),
+            ]),
+          ),
+        ),
+      );
 }

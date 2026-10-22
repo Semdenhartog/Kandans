@@ -545,7 +545,8 @@ class _OdometerInState extends State<OdometerIn> {
 /// Hoofdknop (zwevend) in oranje verloop met gloed. Klapt in tot alleen het icoon
 /// zodra je naar beneden scrolt, zodat hij geen inhoud bedekt; komt terug bij omhoog scrollen.
 class RwFab extends StatelessWidget {
-  const RwFab({super.key, required this.label, required this.icon, required this.onPressed, required this.extended, this.heroTag});
+  const RwFab({super.key, required this.label, required this.icon, required this.onPressed, required this.extended, this.heroTag, this.onLongPress});
+  final VoidCallback? onLongPress;
   final String label;
   final IconData icon;
   final VoidCallback onPressed;
@@ -575,6 +576,7 @@ class RwFab extends StatelessWidget {
                 HapticFeedback.mediumImpact();
                 onPressed();
               },
+              onLongPress: onLongPress,
               child: Semantics(
                 button: true,
                 label: label,
@@ -643,4 +645,84 @@ class TileIcon extends StatelessWidget {
         ),
         child: Icon(icon, size: 19, color: color == RwColors.muted ? RwColors.text : color),
       );
+}
+
+/// Zwevend pilletje "Naar boven" bovenin lange lijsten, zodra je ver naar beneden bent.
+class BackToTop extends StatefulWidget {
+  const BackToTop({super.key, required this.controller, required this.child, this.threshold = 1400});
+  final ScrollController controller;
+  final Widget child;
+  final double threshold;
+
+  @override
+  State<BackToTop> createState() => _BackToTopState();
+}
+
+class _BackToTopState extends State<BackToTop> {
+  bool _show = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final c = widget.controller;
+    if (!c.hasClients) return;
+    final pos = c.position;
+    // Alleen tonen als je naar boven scrolt (dan wil je waarschijnlijk terug) en ver genoeg bent.
+    final show = pos.pixels > widget.threshold && pos.userScrollDirection == ScrollDirection.forward;
+    final hide = pos.pixels < widget.threshold || pos.userScrollDirection == ScrollDirection.reverse;
+    if (show && !_show) setState(() => _show = true);
+    if (hide && _show) setState(() => _show = false);
+  }
+
+  @override
+  Widget build(BuildContext context) => Stack(children: [
+        widget.child,
+        Positioned(
+          top: 8,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: AnimatedSlide(
+              offset: _show ? Offset.zero : const Offset(0, -1.6),
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              child: AnimatedOpacity(
+                opacity: _show ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Material(
+                  color: const Color(0xEE1E1E23),
+                  shape: const StadiumBorder(side: BorderSide(color: Color(0x22FFFFFF))),
+                  elevation: 6,
+                  child: InkWell(
+                    customBorder: const StadiumBorder(),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      widget.controller.animateTo(0, duration: const Duration(milliseconds: 600), curve: Curves.easeOutCubic);
+                      setState(() => _show = false);
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.arrow_upward, size: 16, color: RwColors.accentLight),
+                        SizedBox(width: 6),
+                        Text('Naar boven', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ]);
 }
