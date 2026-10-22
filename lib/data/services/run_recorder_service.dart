@@ -52,6 +52,8 @@ class RecorderView {
     this.followRoute = const [],
     this.routeRemaining,
     this.offRoute = false,
+    this.approachingRoute = false,
+    this.wayToRoute,
     this.ghostDelta,
     this.nextTurn,
     this.nextTurnIn,
@@ -94,6 +96,10 @@ class RecorderView {
   final List<LatLng> followRoute;
   final double? routeRemaining;
   final bool offRoute;
+
+  /// Nog niet op de route (je loopt ernaartoe) en waar de route ligt.
+  final bool approachingRoute;
+  final WayToRoute? wayToRoute;
 
   /// Tegen je record op deze route: seconden achter (+) of voor (-). Null = geen record-race.
   final double? ghostDelta;
@@ -155,6 +161,12 @@ class RunRecorderService {
   RouteHeadsUp? _headsUp;
   List<RouteClimb> _climbs = const [];
   List<RoutePoi> _pois = const [];
+  List<({double meters, String name})> _landmarks = const [];
+  RecordHunt? _hunt;
+  Turnaround? _turnaround;
+  int _routeTimesBefore = 0;
+  double? _targetMeters;
+  bool _routeDoneSaid = false;
   DaylightWarner? _daylight;
   bool _daylightChecked = false;
 
@@ -423,11 +435,33 @@ class RunRecorderService {
             if (v.heartRate != null) '♥ ${v.heartRate}',
             if (v.step != null) '${stepLabel(v.step!.kind, walkRun: v.walkRun)}: nog ${v.step!.byDistance ? '${v.stepRemaining.round()} m' : Fmt.duration(v.stepRemaining)}',
           ].join(' · ');
+    // Volg je een route? Dan staat de volgende afslag bovenaan de melding: die zie je ook op je
+    // Galaxy Watch, Pixel Watch of ander Wear OS-horloge en op je vergrendelscherm.
+    final nav = paused ? null : _navLine(v);
+    final title = r.indoor ? 'Loopband${r.treadmillKmh == null ? '' : ' · ${Fmt.km(r.distance, decimals: 2)}'}' : Fmt.km(r.distance, decimals: 2);
     NotificationService.instance
-        .showRunProgress(r.indoor ? 'Loopband${r.treadmillKmh == null ? '' : ' · ${Fmt.km(r.distance, decimals: 2)}'}' : Fmt.km(r.distance, decimals: 2),
-            body.isEmpty ? 'RunWise neemt je run op' : body,
+        .showRunProgress(nav ?? title,
+            nav == null ? (body.isEmpty ? 'RunWise neemt je run op' : body) : '$title${body.isEmpty ? '' : ' · $body'}',
             movingSeconds: v.movingSeconds, paused: paused)
         .ignore();
+  }
+
+  String _wayLine(WayToRoute w) =>
+      '↩ Route ${w.meters < 1000 ? '${(w.meters / 10).round() * 10} m' : Fmt.km(w.meters, decimals: 1)} ${w.words}';
+
+  /// Eén regel navigatie voor de melding: volgende afslag, of waar de route ligt.
+  String? _navLine(RecorderView v) {
+    if (v.routeRemaining == null) return null;
+    final w = v.wayToRoute;
+    if ((v.offRoute || v.approachingRoute) && w != null) {
+      return _wayLine(w);
+    }
+    final t = v.nextTurn, d = v.nextTurnIn;
+    if (t != null && d != null && d < 1500) {
+      final m = d < 20 ? 'nu' : (d >= 150 ? '${(d / 50).round() * 50} m' : '${(d / 10).round() * 10} m');
+      return '${t.kind.arrow} ${t.kind.label} · $m';
+    }
+    return '↑ Rechtdoor · nog ${Fmt.km(v.routeRemaining!, decimals: 1)}';
   }
 
   void _sayCue(RunRecording r) {
@@ -438,9 +472,38 @@ class RunRecorderService {
       _say(f);
       _buzz(const [0, 200, 120, 200]);
     }
+    final t = _turnaround?.update(r.movingSeconds);
+    if (t != null) {
+      _say(t);
+      _buzz(const [0, 400, 150, 400]);
+    }
+    final h = _hunt?.update(r.distance, r.movingSeconds, r.currentPace > 0 ? r.currentPace : r.averagePace);
+    if (h != null) {
+      _say(h);
+      if (h.startsWith('Nieuw record') || h.startsWith('Dit is nu')) {
+        SoundService.instance.play(RwSound.finish).ignore();
+        _buzz(const [0, 150, 80, 150, 80, 400]);
+      }
+    }
     if (_intervals != null && !_intervals!.finished) return;
-    final c = _cues?.update(r, heartRate: HeartRateService.instance.bpm.value);
+    final f2 = _follower;
+    final tm = _targetMeters;
+    final remaining = f2 != null
+        ? (!f2.approaching && !f2.offRoute ? f2.remaining : null)
+        : (tm != null && tm > r.distance ? tm - r.distance : null);
+    final c = _cues?.update(r, heartRate: HeartRateService.instance.bpm.value, remainingMeters: remaining);
     if (c != null) _say(c);
+  }
+
+  /// Bezienswaardigheden langs de route (komen binnen terwijl je al loopt): onderweg aankondigen.
+  void setRouteLandmarks(List<({double meters, String name})> landmarks) {
+    final f = _follower;
+    if (f == null) return;
+    final len = f.original.length;
+    _landmarks = f.isLoop && f.joinedAt > 0
+        ? [for (final l in landmarks) (meters: ((l.meters - f.joinedAt) % len + len) % len, name: l.name)]
+        : landmarks;
+    _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois, landmarks: _landmarks);
   }
 
   Future<void> start({
@@ -457,6 +520,13 @@ class RunRecorderService {
     RunStreams? ghost,
     GuidedRun? guided,
     double? treadmillKmh,
+    Map<int, double> bests = const {},
+    Map<int, String> recordLabels = const {},
+    double longestBefore = 0,
+    double? turnaroundMinutes,
+    int routeTimesBefore = 0,
+    String? briefing,
+    double? targetMeters,
   }) async {
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
@@ -490,7 +560,13 @@ class RunRecorderService {
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
     _turns = _follower == null ? null : TurnGuide(detectTurns(_follower!.track));
     _climbs = _follower == null ? const [] : detectClimbs(followProfile, trackLength: _follower!.track.length);
+    _landmarks = const [];
     _headsUp = _follower == null ? null : RouteHeadsUp.build(climbs: _climbs, pois: _pois);
+    _hunt = bests.isEmpty && longestBefore < 3000 ? null : RecordHunt(bests: bests, longestBefore: longestBefore, labels: recordLabels);
+    _turnaround = turnaroundMinutes == null || turnaroundMinutes <= 0 || _follower != null ? null : Turnaround(turnaroundMinutes * 60);
+    _routeTimesBefore = routeTimesBefore;
+    _routeDoneSaid = false;
+    _targetMeters = targetMeters;
     _daylightChecked = indoor;
     _rec!.start(DateTime.now());
     if (this.voice) {
@@ -498,6 +574,8 @@ class RunRecorderService {
       await _configureTts();
       SoundService.instance.play(RwSound.start).ignore();
       if (_guided == null) _say(intervals == null ? 'Run gestart. Succes!' : 'Run gestart: ${intervals.name}.');
+      if (briefing != null && briefing.isNotEmpty && _guided == null) _say(briefing);
+      if (_turnaround != null) _say('Heen en terug: halverwege zeg ik wanneer je moet omdraaien.');
       final g0 = _guided?.update(0);
       if (g0 != null) _say(g0);
     }
@@ -518,8 +596,9 @@ class RunRecorderService {
 
   /// Water en toiletten langs de route (komen binnen terwijl je al loopt): dan ook aankondigen.
   void setRoutePois(List<RoutePoi> pois) {
-    _pois = pois;
-    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: pois);
+    final f = _follower;
+    _pois = f != null && f.isLoop && f.joinedAt > 0 ? _shiftPois(pois, f) : pois;
+    if (_follower != null) _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois, landmarks: _landmarks);
   }
 
   /// Loopband: snelheid van de band doorgeven (km/u), dan telt de afstand live mee.
@@ -568,13 +647,23 @@ class RunRecorderService {
     }
     final follower = _follower;
     if (follower != null && r.isActive) {
-      final c = follower.update(LatLng(p.latitude, p.longitude));
+      final wasOff = follower.offRoute || follower.approaching;
+      final c = follower.update(LatLng(p.latitude, p.longitude), seconds: r.movingSeconds);
+      if (follower.rebased) _rebaseRoute(follower);
       if (c != null) {
         _say(c);
-        _buzz(follower.offRoute ? const [0, 500, 200, 500] : const [0, 150]);
+        final nowOff = follower.offRoute || follower.approaching;
+        // Eraf: lang-kort-lang. Nog steeds eraf: één middellange tik. Weer erop: één korte.
+        _buzz(nowOff ? (wasOff ? const [0, 300] : const [0, 500, 200, 500]) : const [0, 150]);
+        if (nowOff && follower.way != null) {
+          NotificationService.instance
+              .showTurn(_wayLine(follower.way!),
+                  follower.approaching ? 'Loop naar je route, dan begint de begeleiding' : 'Je bent van je route af')
+              .ignore();
+        }
       }
       final tg = _turns;
-      if (tg != null && turnByTurn && !follower.offRoute) {
+      if (tg != null && turnByTurn && !follower.offRoute && !follower.approaching) {
         final cue = tg.update(follower.progress);
         if (cue != null) {
           _say(cue.text);
@@ -589,6 +678,19 @@ class RunRecorderService {
                   'RunWise-route · nog ${Fmt.km(follower.remaining, decimals: 1)}')
               .ignore();
         }
+      }
+      if (!_routeDoneSaid &&
+          !follower.approaching &&
+          follower.track.length > 800 &&
+          follower.remaining < 30 &&
+          follower.progress > follower.track.length * 0.9) {
+        _routeDoneSaid = true;
+        final n = _routeTimesBefore + 1;
+        _say(n <= 1
+            ? 'Route voltooid! Je eerste keer op deze route. Mooi gedaan.'
+            : 'Route voltooid! Dit was je ${n}e keer op deze route.');
+        SoundService.instance.play(RwSound.finish).ignore();
+        _buzz(const [0, 150, 80, 150, 80, 500]);
       }
       final h = follower.offRoute ? null : _headsUp?.update(follower.progress);
       if (h != null) _say(h);
@@ -645,6 +747,39 @@ class RunRecorderService {
     } else {
       _buzz(const [0, 700]);
     }
+  }
+
+  /// Rondje opgepakt halverwege: afslagen, klimmen en tappunten tellen vanaf het nieuwe begin.
+  void _rebaseRoute(RouteFollower f) {
+    f.rebased = false;
+    final len = f.original.length;
+    double shift(double m) => ((m - f.joinedAt) % len + len) % len;
+    _turns = TurnGuide(detectTurns(f.track));
+    _climbs = [
+      for (final c in _climbs) RouteClimb(startMeters: shift(c.startMeters), lengthMeters: c.lengthMeters, gainMeters: c.gainMeters),
+    ];
+    _pois = _shiftPois(_pois, f);
+    final len2 = f.original.length;
+    _landmarks = [for (final l in _landmarks) (meters: ((l.meters - f.joinedAt) % len2 + len2) % len2, name: l.name)];
+    _headsUp = RouteHeadsUp.build(climbs: _climbs, pois: _pois, landmarks: _landmarks);
+    // Je record op deze route is vanaf het echte begin gemeten: dan klopt de vergelijking niet meer.
+    _ghost = null;
+  }
+
+  List<RoutePoi> _shiftPois(List<RoutePoi> pois, RouteFollower f) {
+    final len = f.original.length;
+    double shift(double m) => ((m - f.joinedAt) % len + len) % len;
+    return [
+      for (final p in pois)
+        RoutePoi(
+            kind: p.kind,
+            point: p.point,
+            alongMeters: shift(p.alongMeters),
+            offsetMeters: p.offsetMeters,
+            name: p.name,
+            fee: p.fee,
+            seasonal: p.seasonal),
+    ];
   }
 
   void _buzz(List<int> pattern) {
@@ -711,6 +846,8 @@ class RunRecorderService {
       followRoute: _follower?.track.points ?? const [],
       routeRemaining: _follower?.remaining,
       offRoute: _follower?.offRoute ?? false,
+      approachingRoute: _follower?.approaching ?? false,
+      wayToRoute: _follower?.way,
       walkRun: it?.plan.walkRun ?? false,
       treadmillKmh: r.treadmillKmh,
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
@@ -749,6 +886,9 @@ class RunRecorderService {
     NotificationService.instance.cancelTurn().ignore();
     _fuel = null;
     _guided = null;
+    _hunt = null;
+    _turnaround = null;
+    _landmarks = const [];
     _rec = null;
     _intervals = null;
     _position = null;

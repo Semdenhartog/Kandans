@@ -28,6 +28,7 @@ import '../../data/services/run_recorder_service.dart';
 import '../../domain/run_helpers.dart';
 import '../../shared/calendar.dart';
 import '../../shared/shine_text.dart';
+import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
 import '../../domain/availability.dart';
@@ -40,6 +41,7 @@ import '../../domain/training_plan.dart';
 import '../../domain/verdict.dart';
 import 'dashboard_layout_sheet.dart';
 import 'best_route_card.dart';
+import 'extra_cards.dart';
 import 'month_challenge_card.dart';
 import 'today_card.dart';
 import 'dashboard_providers.dart';
@@ -205,6 +207,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       DashCard.month: MonthChallengeCard(),
       DashCard.live: LiveShareEntryCard(),
       DashCard.bestRoute: BestRouteNowCard(),
+      DashCard.again: AgainCard(),
+      DashCard.goldenHour: GoldenHourCard(),
+      DashCard.weekend: WeekendCard(),
+      DashCard.onThisDay: OnThisDayCard(),
+      DashCard.yearGoal: YearGoalCard(),
     };
     final extrasOnly = [
       for (final c in layout.visible)
@@ -230,6 +237,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
             children: [
+              const FirstTip(
+                id: 'today',
+                icon: Icons.wb_sunny_outlined,
+                padding: EdgeInsets.only(bottom: 14),
+                text: 'Vandaag zie je het beste moment om te lopen. Tik op een uur in de grafiek voor het weer en kledingadvies op dat moment. Kaarten verplaatsen of verbergen kan met het schuifje rechtsboven.',
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

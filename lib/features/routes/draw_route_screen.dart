@@ -16,6 +16,7 @@ import '../../data/services/sync_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/gpx_parser.dart';
 import '../../domain/route_drawing.dart';
+import '../../shared/discard_guard.dart';
 import '../../shared/widgets.dart';
 import 'route_map.dart';
 
@@ -123,7 +124,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
         context,
         linked > 0 ? 'Route opgeslagen. $linked eerdere ${linked == 1 ? 'run' : 'runs'} op deze route gekoppeld.' : 'Route opgeslagen.',
       );
-      context.go('/routes/$id');
+      context.go('/routes/$id?nieuw=1');
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
     } finally {
@@ -163,7 +164,10 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
     final meters = loop?.distanceMeters ?? straightLength(drawWaypoints(_taps, _shape));
     final exact = loop != null;
     final secs = meters / 1000 * _pace();
-    return Scaffold(
+    return DiscardGuard(
+      dirty: () => _taps.isNotEmpty && !_saving,
+      message: 'Je getekende route wordt niet bewaard.',
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Route tekenen'),
         actions: [
@@ -275,6 +279,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }

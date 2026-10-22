@@ -10,6 +10,7 @@ import '../../core/format.dart';
 import '../../domain/availability.dart';
 import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
+import '../../domain/extras.dart' show weekendLongRun, weekendText;
 import '../../domain/start_time_scoring.dart';
 import '../models/models.dart';
 
@@ -295,6 +296,31 @@ class NotificationService {
       );
     }
     await scheduleWeeklyReport();
+    await _scheduleWeekend(forecast, profile, track);
+  }
+
+  static const _weekendId = 105;
+
+  /// Vrijdag om 19:00: wanneer je in het weekend het best je lange duurloop kunt doen.
+  Future<void> _scheduleWeekend(Forecast forecast, PerformanceInsights profile, List<LatLng> track) async {
+    try {
+      await _plugin.cancel(_weekendId);
+      final now = DateTime.now();
+      if (now.weekday != DateTime.thursday && now.weekday != DateTime.friday) return;
+      final at = DateTime(now.year, now.month, now.day + (DateTime.friday - now.weekday), 19);
+      if (!at.isAfter(now.add(const Duration(minutes: 2)))) return;
+      final planner = StartTimePlanner(forecast: forecast, profile: profile, track: track, durationMinutes: 90);
+      final text = weekendText(weekendLongRun(planner, now), Fmt.time);
+      if (text == null) return;
+      await _plugin.zonedSchedule(
+        _weekendId,
+        'Je weekend in RunWise',
+        text,
+        tz.TZDateTime.from(at.toUtc(), tz.UTC),
+        _details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (_) {}
   }
 
   static const _weeklyId = 103;

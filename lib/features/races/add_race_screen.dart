@@ -7,6 +7,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../shared/discard_guard.dart';
 import '../../shared/widgets.dart';
 
 class AddRaceScreen extends ConsumerStatefulWidget {
@@ -94,7 +95,9 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
           loading: () => const <RunRoute>[],
           error: (_, _) => const <RunRoute>[],
         );
-    return Scaffold(
+    return DiscardGuard(
+      dirty: () => !_busy && (_name.text.isNotEmpty || _goal.text.isNotEmpty),
+      child: Scaffold(
       appBar: AppBar(title: const Text('Wedstrijd toevoegen')),
       body: Form(
         key: _form,
@@ -190,6 +193,7 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

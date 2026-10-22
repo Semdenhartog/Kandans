@@ -16,8 +16,10 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/device_extras.dart';
 import '../../data/services/heart_rate_service.dart';
+import '../../data/services/location_service.dart' show quickPosition;
 import '../../data/services/notification_service.dart';
 import '../../data/services/poi_service.dart';
+import '../../data/services/route_photos_service.dart' show routePhotosProvider;
 import '../../data/services/run_recorder_service.dart';
 import '../../data/services/sound_service.dart';
 import '../../data/services/sync_service.dart';
@@ -33,7 +35,11 @@ import '../../domain/run_coach.dart';
 import '../../domain/run_helpers.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/training_plan.dart';
+import '../../domain/route_geometry.dart';
+import '../../domain/route_photos.dart' show projectOnTrack, PhotoSource;
+import '../../domain/start_time_scoring.dart' show RouteWind, routeWind;
 import '../../domain/route_turns.dart';
+import '../../domain/extras.dart' show daysAgoWords, calendarDaysBetween;
 import '../../domain/shoes.dart';
 import '../../shared/permission_primer.dart';
 import '../../shared/rolling_text.dart';
@@ -116,6 +122,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   String? _shoeId;
   bool _shoeChosen = false;
   RunRoute? _route;
+
+  /// Heen en terug op tijd (minuten); null = uit.
+  double? _turnaroundMin;
+
+  /// Weer en wind voor de briefing bij de start (vooraf opgehaald).
+  String? _briefing;
   RunStreams? _ghost;
   int? _ghostTime;
   bool _raceGhost = true;
@@ -138,6 +150,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       _route = r;
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadGhost(r.id!));
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareBriefing());
     SharedPreferences.getInstance().then((p) {
       if (mounted) {
         setState(() {
@@ -387,6 +400,70 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     if (ok == true) await n.requestPermission();
   }
 
+  /// Haalt het weer van nu op voor de briefing bij de start ("12 graden, eerste helft tegenwind").
+  Future<void> _prepareBriefing() async {
+    try {
+      final here = await quickPosition();
+      final route = _route;
+      final lat = route?.startLatitude ?? here?.latitude;
+      final lon = route?.startLongitude ?? here?.longitude;
+      if (lat == null || lon == null) return;
+      final f = await ref.read(weatherServiceProvider).forecast(lat, lon, days: 1).timeout(const Duration(seconds: 8));
+      final w = f.at(DateTime.now());
+      if (w == null || !mounted) return;
+      RouteWind? rw;
+      if (route != null && w.windDirection != null) {
+        rw = routeWind(trackSegments(decodePolyline(route.polyline)), w.windSpeed, w.windDirection!);
+      }
+      final text = startBriefing(
+        temperature: w.temperature,
+        feelsLike: w.feelsLike,
+        windKmh: w.windSpeed,
+        windFrom: w.windDirection,
+        rainChance: w.precipitationProbability,
+        firstHalfHead: rw?.firstHalfHead,
+        secondHalfHead: rw?.secondHalfHead,
+      );
+      if (mounted && identical(route, _route)) setState(() => _briefing = text);
+    } catch (_) {}
+  }
+
+  Future<void> _chooseTurnaround() async {
+    final picked = await showModalBottomSheet<double>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Text('Heen en terug', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            const Text('Hoe lang wil je in totaal lopen? Halverwege zegt RunWise dat je moet omdraaien. Daarna wijst de pijl je de weg terug naar je start.',
+                style: TextStyle(color: RwColors.muted, height: 1.4)),
+            const SizedBox(height: 12),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final m in const [20.0, 30.0, 40.0, 50.0, 60.0, 75.0, 90.0])
+                ChoiceChip(
+                  label: Text('${m.round()} min'),
+                  selected: _turnaroundMin == m,
+                  onSelected: (_) => Navigator.pop(ctx, m),
+                ),
+            ]),
+            if (_turnaroundMin != null) ...[
+              const SizedBox(height: 8),
+              TextButton(onPressed: () => Navigator.pop(ctx, 0.0), child: const Text('Uitzetten')),
+            ],
+          ]),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _turnaroundMin = picked <= 0 ? null : picked;
+      if (_turnaroundMin != null) _route = null;
+    });
+  }
+
   Future<void> _begin() async {
     HapticFeedback.heavyImpact();
     try {
@@ -407,15 +484,54 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         ghost: _raceGhost ? _ghost : null,
         guided: _guided,
         treadmillKmh: _indoor ? _tmKmh : null,
+        bests: _bests(),
+        recordLabels: {for (final e in bestEffortDistances) e.meters.round(): e.label},
+        longestBefore: _longest(),
+        turnaroundMinutes: _route == null && !_indoor ? _turnaroundMin : null,
+        routeTimesBefore: _route == null ? 0 : _routeTimes(_route!),
+        briefing: _indoor ? null : _briefing,
+        targetMeters: _targetKm == null ? null : _targetKm! * 1000,
       );
       final route = _route;
       if (route != null && !_indoor && route.polyline.isNotEmpty) {
         // Water en toiletten onderweg aankondigen (ophalen kan even duren; de run loopt al).
         ref.read(routePoisProvider(route.polyline).future).then(_svc.setRoutePois).catchError((Object _) {});
+        // Bezienswaardigheden (Wikipedia) langs de route: "over 150 meter kom je langs ...".
+        ref
+            .read(routePhotosProvider(route.polyline).future)
+            .then((p) => _svc.setRouteLandmarks([
+                  for (final ph in p.photos)
+                    if (ph.source == PhotoSource.landmark && (ph.title ?? '').isNotEmpty) (meters: ph.meters, name: ph.title!),
+                ]))
+            .catchError((Object _) {});
       }
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
     }
+  }
+
+  /// Je snelste tijden per afstand van vóór deze run (voor de recordjacht onderweg).
+  Map<int, double> _bests() {
+    final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+    final all = bestOverall([
+      for (final a in runs)
+        if (a.id != null && a.bestEfforts != null) (id: a.id!, efforts: a.bestEfforts!),
+    ]);
+    return {for (final e in all.entries) e.key: e.value.seconds};
+  }
+
+  double _longest() {
+    final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+    var m = 0.0;
+    for (final a in runs) {
+      if (a.distanceMeters > m) m = a.distanceMeters;
+    }
+    return m;
+  }
+
+  int _routeTimes(RunRoute r) {
+    final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+    return runs.where((a) => a.routeId != null && a.routeId == r.id).length;
   }
 
   /// Samsung en andere merken zetten apps op de achtergrond soms in slaapstand; dan stopt de opname.
@@ -661,11 +777,48 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                       ChoiceChip(label: Text(e.label), selected: c.every == e, onSelected: (_) => set(() => c = c.copyWith(every: e))),
                   ],
                 ),
+                const SizedBox(height: 14),
+                const Text('Hoe klinkt je coach?', style: TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                SegmentedButton<CoachStyle>(
+                  segments: [
+                    for (final st in CoachStyle.values) ButtonSegment(value: st, label: Text(st.label)),
+                  ],
+                  selected: {c.style},
+                  onSelectionChanged: (v) {
+                    set(() => c = c.copyWith(style: v.first));
+                    _svc
+                        .previewVoice(switch (v.first) {
+                          CoachStyle.calm => 'Kilometer 3. Dit stuk 5 minuten 30 per kilometer.',
+                          CoachStyle.motivating => 'Kilometer 3. Dit stuk 5 minuten 30 per kilometer. Lekker bezig!',
+                          CoachStyle.short => 'Kilometer 3. 5 minuten 30.',
+                        })
+                        .ignore();
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(c.style.description, style: const TextStyle(color: RwColors.muted, fontSize: 13)),
+                ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Tempo van het laatste stuk'),
                   value: c.lap,
                   onChanged: (v) => set(() => c = c.copyWith(lap: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Vergelijk met het vorige stuk'),
+                  subtitle: const Text('"6 seconden sneller dan het vorige stuk"'),
+                  value: c.compare,
+                  onChanged: c.style == CoachStyle.short || !c.lap ? null : (v) => set(() => c = c.copyWith(compare: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Verwachte eindtijd'),
+                  subtitle: const Text('Als je een route volgt: "met dit tempo ben je klaar na 52 minuten"'),
+                  value: c.finish,
+                  onChanged: c.style == CoachStyle.short ? null : (v) => set(() => c = c.copyWith(finish: v)),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -733,7 +886,51 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     await p.setString('rec_cues', jsonEncode(result.toJson()));
   }
 
-  Future<void> _chooseRoute(List<RunRoute> routes) async {
+  Future<void> _chooseRoute(List<RunRoute> unsorted) async {
+    // Handigste routes bovenaan: favorieten, dan wat dichtbij begint, dan wat je het laatst liep.
+    var here = _svc.view.value.position;
+    if (here == null) {
+      final q = await quickPosition();
+      if (q != null) here = LatLng(q.latitude, q.longitude);
+    }
+    if (!mounted) return;
+    final runs = ref.read(activitiesProvider).value ?? const <Activity>[];
+    final lastRun = <String, DateTime>{};
+    for (final a in runs) {
+      final id = a.routeId;
+      if (id == null) continue;
+      final cur = lastRun[id];
+      if (cur == null || a.startedAt.isAfter(cur)) lastRun[id] = a.startedAt;
+    }
+    final near = <String, double>{};
+    if (here != null) {
+      for (final r in unsorted) {
+        final pts = decodePolyline(r.polyline);
+        if (r.id == null || pts.length < 2) continue;
+        near[r.id!] = projectOnTrack(RouteTrack(pts), here).off;
+      }
+    }
+    double rank(RunRoute r) {
+      var v = 0.0;
+      if (r.isFavorite) v -= 1e7;
+      final d = near[r.id];
+      if (d != null) v += d.clamp(0, 50000).toDouble();
+      final last = lastRun[r.id];
+      v += last == null ? 20000 : (DateTime.now().difference(last).inDays * 50).clamp(0, 15000).toDouble();
+      return v;
+    }
+
+    final routes = [...unsorted]..sort((a, b) => rank(a).compareTo(rank(b)));
+    String sub(RunRoute r) {
+      final d = near[r.id];
+      final last = lastRun[r.id];
+      return [
+        Fmt.km(r.distanceMeters, decimals: 1),
+        if (d != null) d < 60 ? 'je staat erop' : 'op ${d < 1000 ? '${(d / 10).round() * 10} m' : Fmt.km(d, decimals: 1)} van je',
+        if (last != null) 'laatst ${daysAgoWords(calendarDaysBetween(last, DateTime.now()))}',
+      ].join(' · ');
+    }
+
     final picked = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -749,11 +946,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 title: const Text('Vrij lopen (geen route)'),
                 onTap: () => Navigator.pop(ctx, ''),
               ),
+              if (routes.isNotEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: Text('Je mag overal op een route instappen. RunWise wijst je de weg ernaartoe.',
+                      style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+                ),
               for (final r in routes)
                 ListTile(
-                  leading: const Icon(Icons.route_outlined, color: RwColors.accent),
+                  leading: Icon(r.isFavorite ? Icons.star : Icons.route_outlined, color: RwColors.accent),
                   title: Text(r.name),
-                  subtitle: Text(Fmt.km(r.distanceMeters, decimals: 1)),
+                  subtitle: Text(sub(r)),
                   trailing: r.id == _route?.id ? const Icon(Icons.check, color: RwColors.accent) : null,
                   onTap: () => Navigator.pop(ctx, r.id),
                 ),
@@ -765,10 +968,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     if (picked == null) return;
     setState(() {
       _route = picked.isEmpty ? null : routes.where((r) => r.id == picked).firstOrNull;
+      if (_route != null) _turnaroundMin = null;
       _ghost = null;
       _ghostTime = null;
+      _briefing = null;
     });
     if (picked.isNotEmpty) _loadGhost(picked);
+    _prepareBriefing();
   }
 
   /// Je snelste eerdere run op deze route, om tegen te racen (zoals Apple's Race Route).
@@ -1094,7 +1300,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           const SizedBox(height: 14),
           _NextTurnCard(turn: v.nextTurn!, inMeters: v.nextTurnIn!),
         ],
-        if (v.routeRemaining != null) ...[
+        if (v.routeRemaining != null && (v.offRoute || v.approachingRoute) && v.wayToRoute != null) ...[
+          const SizedBox(height: 14),
+          _WayToRouteCard(way: v.wayToRoute!, approaching: v.approachingRoute),
+        ] else if (v.routeRemaining != null) ...[
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -1287,6 +1496,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           avatar: const Icon(Icons.speed, size: 18),
                           label: Text(_targetPace == null ? 'Doeltempo' : 'Doel ${Fmt.pace(_targetPace!)}'),
                           onPressed: _chooseTargetPace,
+                        ),
+                      if (!_indoor && _route == null)
+                        ActionChip(
+                          avatar: const Icon(Icons.u_turn_left, size: 18),
+                          label: Text(_turnaroundMin == null ? 'Heen en terug' : 'Heen en terug ${_turnaroundMin!.round()} min'),
+                          onPressed: _chooseTurnaround,
                         ),
                       if (!_indoor && routes.isNotEmpty)
                         ActionChip(
@@ -2319,6 +2534,61 @@ class _BackToStart extends StatelessWidget {
   }
 }
 
+
+/// Je staat (nog) niet op je route: grote pijl en afstand naar de route.
+class _WayToRouteCard extends StatelessWidget {
+  const _WayToRouteCard({required this.way, required this.approaching});
+  final WayToRoute way;
+  final bool approaching;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = approaching ? RwColors.accent : RwColors.warning;
+    final dist = way.meters < 1000 ? '${(way.meters / 10).round() * 10} m' : Fmt.km(way.meters, decimals: 1);
+    final title = approaching ? 'Naar je route' : 'Terug naar je route';
+    return Semantics(
+      liveRegion: true,
+      label: '$title: $dist ${way.words}',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
+        ),
+        child: Row(children: [
+          if (way.relative != null)
+            TweenAnimationBuilder<double>(
+              tween: Tween(end: way.relative!),
+              duration: const Duration(milliseconds: 500),
+              builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
+              child: Icon(Icons.navigation, color: color, size: 40),
+            )
+          else
+            Icon(Icons.explore_outlined, color: color, size: 40),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title, style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+              const SizedBox(height: 2),
+              Text(
+                approaching
+                    ? 'Ligt ${way.words}. Je mag overal instappen.'
+                    : 'Ligt ${way.words}. Volg de pijl.',
+                style: const TextStyle(color: RwColors.muted, height: 1.3),
+              ),
+            ]),
+          ),
+          const SizedBox(width: 10),
+          Text(dist,
+              style: const TextStyle(
+                  fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
+        ]),
+      ),
+    );
+  }
+}
 
 /// Grote pijl met de volgende afslag, zoals een navigatie-app.
 class _NextTurnCard extends StatelessWidget {

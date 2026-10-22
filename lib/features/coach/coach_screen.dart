@@ -6,6 +6,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
 
 const _suggestions = [
@@ -130,6 +131,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       ),
       body: Column(
         children: [
+          const FirstTip(
+            id: 'coach',
+            icon: Icons.auto_awesome,
+            text: 'Stel je coach een vraag in gewone taal, zoals "Hoe train ik voor 10 km in 50 minuten?". De coach kent je runs en het weer.',
+          ),
           Expanded(
             child: history.when(
               loading: () => const LoadingView(),

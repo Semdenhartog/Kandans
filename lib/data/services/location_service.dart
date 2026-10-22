@@ -57,6 +57,13 @@ Future<Coordinates?> currentPosition() async {
   }
 }
 
+/// Snel je laatst bekende plek (zonder te wachten op GPS). Null als die er niet is.
+Future<Coordinates?> quickPosition() async {
+  final last = await _safe(Geolocator.getLastKnownPosition);
+  if (last == null) return null;
+  return Coordinates(last.latitude, last.longitude, 'Je laatst bekende locatie');
+}
+
 /// Locatie voor het weer: GPS → thuislocatie in profiel → favoriete route → Barneveld.
 final weatherLocationProvider = FutureProvider<Coordinates>((ref) async {
   final gps = await currentPosition();

@@ -4,19 +4,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme.dart';
 
 /// Versie van het "Nieuw in RunWise"-overzicht. Ophogen als er iets nieuws te vertellen is.
-const whatsNewVersion = 'nav-2026-10';
+const whatsNewVersion = 'luxe-2026-10';
 
 const _items = <(IconData, String, String)>[
-  (Icons.watch_outlined, 'Route op je horloge',
-      'Kies één keer je horloge. Daarna zet één knop de route erop, met uitleg voor jouw merk. Garmin trilt bij elke afslag.'),
-  (Icons.turn_right, 'Afslag voor afslag',
-      'Volg je een route, dan hoor je "over 100 meter rechtsaf", zie je een grote pijl en krijg je een melding op je horloge.'),
-  (Icons.terrain_outlined, 'Klim en drinkwater vooraf',
-      'RunWise zegt het als er een klim aankomt of een watertappunt vlak bij de route ligt.'),
-  (Icons.graphic_eq, 'Cadans-tik',
-      'Een zachte tik op je stappen per minuut, voor lichtere passen. Aan te zetten bij het starten van een run.'),
-  (Icons.wb_twilight, 'Daglicht-seintje',
-      'Loop je rond zonsondergang, dan hoor je hoeveel minuten daglicht je nog hebt.'),
+  (Icons.u_turn_right, 'Overal instappen op je route',
+      'Begin waar je wilt. RunWise zegt hoe ver en welke kant op de route ligt, en wijst je terug als je ervan af raakt.'),
+  (Icons.watch_outlined, 'Afslagen op je Galaxy of Pixel Watch',
+      'De volgende afslag staat nu altijd in de melding, dus ook op je Wear OS-horloge en je vergrendelscherm.'),
+  (Icons.emoji_events_outlined, 'Recordjacht onderweg',
+      '"Houd dit tempo vast en je loopt een nieuw 5 km-record." Plus je verwachte eindtijd en elke km een vergelijking met de vorige.'),
+  (Icons.record_voice_over_outlined, 'Kies je coachstem',
+      'Rustig, motiverend of kort. En bij de start een korte briefing: temperatuur en waar je tegenwind hebt.'),
+  (Icons.u_turn_left, 'Heen en terug op tijd',
+      'Kies 40 minuten, dan zegt RunWise halverwege dat je moet omdraaien.'),
+  (Icons.lightbulb_outline, 'Verlichting en bezienswaardigheden',
+      'Zie hoeveel van je route verlicht is, en hoor onderweg langs welke bezienswaardigheden je komt.'),
+  (Icons.wb_twilight, 'Gouden uur, weekend en jaardoel',
+      'Nieuwe kaarten op Vandaag. Verplaats of verberg ze met het schuifje rechtsboven.'),
+  (Icons.play_circle_outline, 'Je run nog eens zien',
+      'Bij elke run met GPS: tik op de afspeelknop en zie je run zich intekenen op de kaart.'),
+  (Icons.image_outlined, 'Route als poster en samen lopen',
+      'Deel een route als mooie poster, of nodig een loopmaatje uit met het beste moment en het routebestand.'),
 ];
 
 /// Toont één keer per versie wat er nieuw is. [skip] = alleen als gezien markeren (bijv. na de rondleiding).

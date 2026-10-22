@@ -11,6 +11,8 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
+import '../../domain/extras.dart';
+import '../../domain/geo.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/confetti.dart';
 import '../../shared/widgets.dart';
@@ -211,6 +213,37 @@ class RunSummaryScreen extends StatelessWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 12),
+            _NewRoadsCard(activity: a),
+            Builder(builder: (context) {
+              final hr = streams?.heartRate;
+              final maxHr = hr == null || hr.isEmpty ? null : hr.reduce((x, y) => x > y ? x : y);
+              final tip = recoveryTip(
+                movingSeconds: a.movingTimeSeconds,
+                avgHeartRate: a.averageHeartRate?.toDouble(),
+                // Zonder bekende maximale hartslag: je hoogste hartslag in deze run + 5 als schatting.
+                maxHeartRate: maxHr == null ? null : maxHr + 5,
+                temperature: a.temperatureCelsius,
+                when: a.startedAt,
+              );
+              return Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: RwCard(
+                  title: 'HERSTEL',
+                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Icon(Icons.restaurant_outlined, color: RwColors.accent),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(tip.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 4),
+                        Text(tip.text, style: const TextStyle(color: RwColors.muted, height: 1.45)),
+                      ]),
+                    ),
+                  ]),
+                ),
+              );
+            }),
             if (healthWritten) ...[
               const SizedBox(height: 12),
               const Row(
@@ -500,6 +533,44 @@ class _HomeSafeState extends State<_HomeSafe> {
           }
         },
       ),
+    );
+  }
+}
+
+
+/// Hoeveel van deze run over wegen ging waar je nog nooit liep. Met de badge-achtige titel "Ontdekker".
+class _NewRoadsCard extends ConsumerWidget {
+  const _NewRoadsCard({required this.activity});
+  final Activity activity;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final poly = activity.trackPolyline;
+    if (poly == null || poly.isEmpty) return const SizedBox.shrink();
+    final runs = ref.watch(activitiesProvider).value;
+    if (runs == null) return const SizedBox.shrink();
+    final previous = [
+      for (final r in runs)
+        if (r.id != activity.id && r.hasTrack && r.startedAt.isBefore(activity.startedAt)) decodePolyline(r.trackPolyline!),
+    ];
+    // Bij je eerste runs is alles nieuw: dan zeggen we nog niets.
+    if (previous.length < 3) return const SizedBox.shrink();
+    final m = newRoadMeters(decodePolyline(poly), previous);
+    if (m < 200) return const SizedBox.shrink();
+    final share = activity.distanceMeters <= 0 ? 0 : (m / activity.distanceMeters * 100).round().clamp(0, 100);
+    return RwCard(
+      title: m >= 1000 ? 'ONTDEKKER' : 'NIEUWE WEGEN',
+      child: Row(children: [
+        const Icon(Icons.explore, color: RwColors.accent),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Je liep ${Fmt.km(m, decimals: 1)} over wegen waar je nog nooit eerder liep ($share% van deze run).'
+            '${m >= 1000 ? ' Echte ontdekker!' : ''}',
+            style: const TextStyle(height: 1.4),
+          ),
+        ),
+      ]),
     );
   }
 }

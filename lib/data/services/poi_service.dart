@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../../domain/geo.dart';
+import '../../domain/lighting.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
 import 'offline_cache.dart';
@@ -31,11 +32,28 @@ class PoiService {
   Future<String> _ask(String url, String query) async {
     final res = await _http
         .post(Uri.parse(url), headers: {'User-Agent': 'RunWise/1.0 (nl.runwise.app)'}, body: {'data': query})
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 20));
     if (res.statusCode != 200) throw Exception('Overpass ${res.statusCode}');
     // Controleer dat het echt JSON is (bij drukte stuurt Overpass soms een HTML-pagina).
     parseOverpass(res.body);
     return res.body;
+  }
+
+  /// Straatverlichting langs een route (verlicht, onverlicht, onbekend in meters). Een maand bewaard.
+  Future<({double lit, double unlit, double unknown})> lighting(String polyline) async {
+    final track = RouteTrack(decodePolyline(polyline));
+    if (!track.isValid) return (lit: 0.0, unlit: 0.0, unknown: 0.0);
+    final query = litQuery(sampleTrack(track));
+    final key = _key(query);
+    final cached = await OfflineCache.load(key, maxAge: const Duration(days: 30));
+    if (cached?.data is String) {
+      try {
+        return lightingAlong(track, parseLitWays(cached!.data! as String));
+      } catch (_) {}
+    }
+    final body = await _race(query);
+    OfflineCache.save(key, body).ignore();
+    return lightingAlong(track, parseLitWays(body));
   }
 
   /// Vraagt alle servers tegelijk; het eerste goede antwoord telt.
@@ -86,4 +104,9 @@ final poiServiceProvider = Provider<PoiService>((ref) => PoiService());
 /// Voorzieningen per route (op polyline), onthouden zolang de app open is.
 final routePoisProvider = FutureProvider.family<List<RoutePoi>, String>((ref, polyline) {
   return ref.watch(poiServiceProvider).alongRoute(polyline);
+});
+
+/// Verlichting per route (op polyline).
+final routeLightingProvider = FutureProvider.family<({double lit, double unlit, double unknown}), String>((ref, polyline) {
+  return ref.watch(poiServiceProvider).lighting(polyline);
 });

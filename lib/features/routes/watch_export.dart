@@ -285,11 +285,146 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
 Future<void> _share(BuildContext context, RunRoute r, WatchBrand brand, List<RouteTurn> turns) async {
   try {
     final f = watchFile(r, brand, turns: turns);
-    await SharePlus.instance.share(ShareParams(
+    final res = await SharePlus.instance.share(ShareParams(
       files: [XFile.fromData(f.bytes, mimeType: f.mime, name: f.fileName)],
       subject: r.name,
     ));
+    if (res.status == ShareResultStatus.dismissed || !context.mounted) return;
+    await _askIfItArrived(context, brand);
   } catch (_) {
     if (context.mounted) showMessage(context, 'Het bestand kon niet worden gemaakt of gedeeld.', error: true);
   }
 }
+
+const _kChecks = 'watch_check_count';
+
+/// Wat je kunt proberen als de route niet op je horloge verschijnt.
+List<String> watchTroubleshooting(WatchBrand b) => [
+      ...switch (b) {
+        WatchBrand.garmin => const [
+            'Open Garmin Connect en kijk bij Meer → Training en planning → Koersen. Staat hij daar, tik dan op "Naar apparaat sturen".',
+            'Synchroniseer je horloge: trek in Garmin Connect het beginscherm omlaag.',
+            'Zag je Garmin Connect niet bij het delen? Kies "Opslaan" en importeer het bestand op connect.garmin.com → Koersen.',
+          ],
+        WatchBrand.coros => const [
+            'Open de COROS-app → Profiel → Routes. Staat hij daar niet, tik dan op Importeren en kies het bestand.',
+            'Zet bij de route "Synchroniseren met horloge" aan en houd je horloge vlakbij je telefoon.',
+          ],
+        WatchBrand.suunto => const [
+            'Open de Suunto-app → Kaart → Mijn routes en zet "Gebruik op horloge" aan.',
+            'Synchroniseer je horloge (Suunto-app → je horloge → Synchroniseren).',
+          ],
+        WatchBrand.polar => const [
+            'Polar kan het bestand niet uit een andere app openen: importeer het op flow.polar.com → Favorieten.',
+            'Zet de route bij Favorieten en synchroniseer daarna je horloge met Polar Flow.',
+          ],
+        WatchBrand.amazfit => const [
+            'Open de Zepp-app → Profiel → je horloge → Route-bestanden en tik op Synchroniseren.',
+            'Lukt het niet, kies dan bij het delen eerst "Opslaan" en importeer het bestand in de Zepp-app.',
+          ],
+        WatchBrand.wearos || WatchBrand.none => const [
+            'Je horloge laat RunWise-meldingen zien: zet meldingen van RunWise aan in de Galaxy Wearable- of Pixel Watch-app.',
+          ],
+      },
+      'Probeer het andere bestandstype (GPX of FIT) via de knop onderaan.',
+      'Lukt het nog niet? Loop de route met je telefoon: RunWise zegt elke afslag en je horloge trilt mee.',
+    ];
+
+/// Na het versturen: staat de route erop? Zo niet, laat zien wat je kunt doen. Vraagt het de eerste 3 keer.
+Future<void> _askIfItArrived(BuildContext context, WatchBrand brand) async {
+  var count = 0;
+  try {
+    final p = await SharedPreferences.getInstance();
+    count = p.getInt(_kChecks) ?? 0;
+    if (count >= 3) return;
+    await p.setInt(_kChecks, count + 1);
+  } catch (_) {}
+  if (!context.mounted) return;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Staat de route op je horloge?'),
+      content: const Text('Het kan een halve minuut duren voordat je horloge gesynchroniseerd is.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Nee, lukt niet')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Ja, top')),
+      ],
+    ),
+  );
+  if (ok != false || !context.mounted) return;
+  final tips = watchTroubleshooting(brand);
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    backgroundColor: RwColors.surface,
+    builder: (ctx) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Zo krijg je hem op je ${brand.label}', style: RwText.title),
+            const SizedBox(height: 12),
+            for (var i = 0; i < tips.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundColor: RwColors.surfaceHigh,
+                    child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(tips[i], style: const TextStyle(color: RwColors.muted, height: 1.45))),
+                ]),
+              ),
+            if (brand.importUrl != null)
+              OutlinedButton.icon(
+                onPressed: () => launchUrl(Uri.parse(brand.importUrl!), mode: LaunchMode.externalApplication),
+                icon: const Icon(Icons.open_in_new),
+                label: Text(brand == WatchBrand.garmin ? 'Garmin-koersen openen' : 'Polar Flow openen'),
+              ),
+            const SizedBox(height: 6),
+            FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('Begrepen')),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+
+/// Een loopmaatje uitnodigen: tekst met het beste moment en de route als GPX erbij.
+Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, String? weather}) async {
+  try {
+    final pts = decodePolyline(r.polyline);
+    final gpx = buildGpx(r.name, pts, profile: r.profileOrKmPoints, turns: detectTurns(RouteTrack(pts)));
+    final now = DateTime.now();
+    String moment(DateTime t) {
+      final day = t.day == now.day && t.month == now.month
+          ? 'vandaag'
+          : (t.difference(DateTime(now.year, now.month, now.day)).inDays == 1 ? 'morgen' : _weekday(t));
+      final hh = t.hour.toString().padLeft(2, '0'), mm = t.minute.toString().padLeft(2, '0');
+      return '$day om $hh:$mm';
+    }
+
+    final km = (r.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
+    final text = [
+      'Zin om mee te lopen? 🏃',
+      if (when != null) 'Beste moment volgens RunWise: ${moment(when)}${weather == null ? '' : ' ($weather)'}.',
+      'Route: ${r.name}, $km km. Het routebestand zit erbij (open het in je horloge-app of in Komoot).',
+      'Start: https://www.google.com/maps/search/?api=1&query=${r.startLatitude.toStringAsFixed(5)},${r.startLongitude.toStringAsFixed(5)}',
+    ].join('\n');
+    final safe = r.name.replaceAll(RegExp(r'[^A-Za-z0-9 _-]'), '').trim().replaceAll(' ', '-');
+    await SharePlus.instance.share(ShareParams(
+      text: text,
+      subject: 'Samen lopen: ${r.name}',
+      files: [XFile.fromData(Uint8List.fromList(utf8.encode(gpx)), mimeType: 'application/gpx+xml', name: '${safe.isEmpty ? 'route' : safe}.gpx')],
+    ));
+  } catch (_) {
+    if (context.mounted) showMessage(context, 'Uitnodigen is niet gelukt. Probeer het opnieuw.', error: true);
+  }
+}
+
+String _weekday(DateTime t) => const ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][t.weekday - 1];

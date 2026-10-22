@@ -18,12 +18,15 @@ import '../../domain/records.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
+import '../dashboard/dashboard_providers.dart' show routeBestProvider;
 import '../record/record_run_screen.dart';
 import 'elevation_profile.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
 import 'route_map_screen.dart';
 import 'turn_list_card.dart';
+import 'route_poster_screen.dart';
+import 'route_undo.dart';
 import 'watch_export.dart';
 
 /// Huidig weer bij de start van een route.
@@ -36,30 +39,17 @@ final _routeWeatherProvider = FutureProvider.family<HourWeather?, String>((ref, 
 });
 
 class RouteDetailScreen extends ConsumerWidget {
-  const RouteDetailScreen({super.key, required this.routeId});
+  const RouteDetailScreen({super.key, required this.routeId, this.isNew = false});
   final String routeId;
+
+  /// Net gemaakt of geïmporteerd: dan bieden we meteen aan om hem op je horloge te zetten.
+  final bool isNew;
 
   Future<void> _toggleFavorite(BuildContext context, WidgetRef ref, RunRoute r) async {
     try {
       await ref.read(repositoryProvider).setFavorite(r.id!, !r.isFavorite);
       ref.invalidate(routeDetailProvider(routeId));
       ref.invalidate(routesProvider);
-    } catch (e) {
-      if (context.mounted) showMessage(context, friendlyError(e), error: true);
-    }
-  }
-
-  Future<void> _delete(BuildContext context, WidgetRef ref, RunRoute r) async {
-    final ok = await confirmDialog(
-      context,
-      title: 'Route verwijderen?',
-      message: '"${r.name}" wordt definitief verwijderd. Runs op deze route blijven bewaard.',
-    );
-    if (!ok) return;
-    try {
-      await ref.read(repositoryProvider).deleteRoute(r.id!);
-      ref.invalidate(routesProvider);
-      if (context.mounted) context.go('/routes');
     } catch (e) {
       if (context.mounted) showMessage(context, friendlyError(e), error: true);
     }
@@ -106,6 +96,15 @@ class RouteDetailScreen extends ConsumerWidget {
                 onPressed: () => _toggleFavorite(context, ref, r),
               ),
               IconButton(
+                tooltip: 'Deel als poster',
+                icon: const Icon(Icons.image_outlined),
+                onPressed: () {
+                  final runs = (ref.read(activitiesProvider).value ?? const <Activity>[]).where((a) => a.routeId == r.id).toList();
+                  final fastest = runs.isEmpty ? null : runs.map((a) => a.movingTimeSeconds).reduce((a, b) => a < b ? a : b);
+                  openRoutePoster(context, r, fastestSeconds: fastest, timesRun: runs.length);
+                },
+              ),
+              IconButton(
                 tooltip: 'Naar je horloge',
                 icon: const Icon(Icons.watch_outlined),
                 onPressed: () => sendRouteToWatch(context, r, onRunWithPhone: () => openRecorder(context, route: r)),
@@ -113,13 +112,17 @@ class RouteDetailScreen extends ConsumerWidget {
               IconButton(
                 tooltip: 'Verwijderen',
                 icon: const Icon(Icons.delete_outline),
-                onPressed: () => _delete(context, ref, r),
+                onPressed: () => deleteRouteWithUndo(context, r),
               ),
             ],
           ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
+              if (isNew) ...[
+                _NewRouteCard(route: r),
+                const SizedBox(height: 14),
+              ],
               Row(
                 children: [
                   Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(r.distanceMeters))),
@@ -143,7 +146,22 @@ class RouteDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _WatchButton(route: r),
-              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: () {
+                  final best = ref.read(routeBestProvider).value?[r.id];
+                  inviteRunBuddy(
+                    context,
+                    r,
+                    when: best?.start,
+                    weather: best == null
+                        ? null
+                        : '${Fmt.temp(best.weather.feelsLike ?? best.weather.temperature)}, wind ${Fmt.wind(best.weather.windSpeed)}',
+                  );
+                },
+                icon: const Icon(Icons.group_add_outlined),
+                label: const Text('Nodig een loopmaatje uit'),
+              ),
+              const SizedBox(height: 4),
               _MapAndProfile(
                 route: r,
                 windSpeedKmh: w?.windSpeed,
@@ -188,6 +206,8 @@ class RouteDetailScreen extends ConsumerWidget {
               if (r.polyline.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _SurfaceCard(routeId: routeId, polyline: r.polyline),
+                const SizedBox(height: 12),
+                _LightingCard(polyline: r.polyline),
               ],
               const SizedBox(height: 12),
               _RouteHistoryCard(routeId: routeId),
@@ -586,6 +606,64 @@ class _PoiCard extends StatelessWidget {
   }
 }
 
+/// Straatverlichting langs de route: handig in de donkere maanden.
+class _LightingCard extends ConsumerWidget {
+  const _LightingCard({required this.polyline});
+  final String polyline;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = ref.watch(routeLightingProvider(polyline));
+    return RwCard(
+      title: 'VERLICHTING',
+      child: l.when(
+        loading: () => const Text('Verlichting wordt geladen…', style: TextStyle(color: RwColors.muted)),
+        error: (_, _) => Row(children: [
+          const Expanded(child: Text('Verlichting is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted))),
+          TextButton(onPressed: () => ref.invalidate(routeLightingProvider(polyline)), child: const Text('Opnieuw')),
+        ]),
+        data: (v) {
+          final total = v.lit + v.unlit + v.unknown;
+          if (total <= 0) return const Text('Geen gegevens over verlichting voor deze route.', style: TextStyle(color: RwColors.muted));
+          final lit = (v.lit / total * 100).round();
+          final unlit = (v.unlit / total * 100).round();
+          final unknown = 100 - lit - unlit;
+          final known = v.lit + v.unlit;
+          final litOfKnown = known <= 0 ? null : v.lit / known;
+          final advice = litOfKnown == null
+              ? 'Van de meeste wegen is niet bekend of er verlichting is.'
+              : litOfKnown >= 0.8
+                  ? 'Goed verlicht: prima voor een rondje in het donker.'
+                  : litOfKnown >= 0.5
+                      ? 'Deels verlicht. In het donker: lampje mee en reflecterende kleding.'
+                      : 'Grotendeels onverlicht. In het donker liever een andere route, of met een goede hoofdlamp.';
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                height: 14,
+                child: Row(children: [
+                  if (v.lit > 0) Expanded(flex: math.max(1, (v.lit / total * 1000).round()), child: Container(color: const Color(0xFFFFD166))),
+                  if (v.unlit > 0) Expanded(flex: math.max(1, (v.unlit / total * 1000).round()), child: Container(color: const Color(0xFF2E3A59))),
+                  if (v.unknown > 0)
+                    Expanded(flex: math.max(1, (v.unknown / total * 1000).round()), child: Container(color: const Color(0xFF4A4A55))),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('$lit% verlicht · $unlit% onverlicht · $unknown% onbekend', style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(advice, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+            const SizedBox(height: 4),
+            const Text('Bron: OpenStreetMap. Niet van elke weg is bekend of er lantaarnpalen staan.',
+                style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+          ]);
+        },
+      ),
+    );
+  }
+}
+
 /// Ondergrond van de route (zoals de padtypes bij Komoot en Strava), uit OpenStreetMap.
 class _SurfaceCard extends ConsumerWidget {
   const _SurfaceCard({required this.routeId, required this.polyline});
@@ -657,6 +735,36 @@ class _SurfaceCard extends ConsumerWidget {
 
 
 /// Grote knop: route naar je horloge (laat zien voor welk horloge).
+/// Net opgeslagen: één tik om hem op je horloge te zetten.
+class _NewRouteCard extends StatelessWidget {
+  const _NewRouteCard({required this.route});
+  final RunRoute route;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: RwColors.accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: RwColors.accent.withValues(alpha: 0.4)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Row(children: [
+          Icon(Icons.check_circle, color: RwColors.accent),
+          SizedBox(width: 8),
+          Expanded(child: Text('Je route staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
+        ]),
+        const SizedBox(height: 6),
+        const Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: RunWise zegt elke afslag.',
+            style: TextStyle(color: RwColors.muted, height: 1.4)),
+        const SizedBox(height: 10),
+        _WatchButton(route: route),
+      ]),
+    );
+  }
+}
+
 class _WatchButton extends StatefulWidget {
   const _WatchButton({required this.route});
   final RunRoute route;

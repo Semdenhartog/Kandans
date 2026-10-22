@@ -9,6 +9,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/weather_service.dart';
+import '../../shared/discard_guard.dart';
 import '../../shared/widgets.dart';
 
 /// Handmatig een run toevoegen. Het weer wordt automatisch opgehaald.
@@ -112,7 +113,9 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
     final secs = Fmt.parseDuration(_duration.text);
     final pace = (km != null && km > 0 && secs != null) ? secs / km : null;
 
-    return Scaffold(
+    return DiscardGuard(
+      dirty: () => !_busy && (_distance.text.isNotEmpty || _duration.text.isNotEmpty || _heartRate.text.isNotEmpty),
+      child: Scaffold(
       appBar: AppBar(title: const Text('Run toevoegen')),
       body: Form(
         key: _form,
@@ -201,6 +204,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

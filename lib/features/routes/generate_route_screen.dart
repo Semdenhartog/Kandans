@@ -163,7 +163,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
             ? 'Route opgeslagen. $linked eerdere ${linked == 1 ? 'run' : 'runs'} op dit rondje gekoppeld.'
             : 'Route opgeslagen.',
       );
-      context.go('/routes/$id');
+      context.go('/routes/$id?nieuw=1');
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
     } finally {

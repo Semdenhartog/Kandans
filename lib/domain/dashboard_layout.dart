@@ -1,5 +1,6 @@
 /// Kaarten op Vandaag die je zelf kunt ordenen of verbergen (zoals het ochtendrapport van Garmin).
 enum DashCard {
+  again('Nog een keer', 'Je laatste route met één tik opnieuw lopen'),
   warnings('Waarschuwingen', 'Onweer, hitte, gladheid, lucht en pollen'),
   clothing('Aantrekken', 'Kledingadvies voor het gekozen moment'),
   rain('Buien komende 2 uur', 'Live van Buienradar'),
@@ -8,7 +9,11 @@ enum DashCard {
   bestRoute('Beste route met deze wind', 'Welke van je routes nu de minste tegenwind heeft'),
   planner('Weekplanner', 'De beste momenten deze week'),
   month('Maanduitdaging', 'Je doel voor deze maand'),
-  live('Veilig onderweg', 'Live je locatie delen');
+  live('Veilig onderweg', 'Live je locatie delen'),
+  goldenHour('Gouden uur', 'Het mooiste licht van de dag en het loopweer dan'),
+  weekend('Weekend', 'Vanaf donderdag: beste moment voor je lange duurloop'),
+  onThisDay('Op deze dag', 'Wat je een jaar geleden liep'),
+  yearGoal('Jaardoel', 'Je kilometers dit jaar en waar je op uitkomt');
 
   const DashCard(this.label, this.description);
   final String label;

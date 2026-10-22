@@ -41,7 +41,13 @@ class RacesScreen extends ConsumerWidget {
           }
           final upcoming = list.where((r) => r.daysUntil >= 0).toList();
           final past = list.where((r) => r.daysUntil < 0).toList().reversed.toList();
-          return ListView(
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(racesProvider);
+              await ref.read(racesProvider.future).catchError((Object _) => const <RaceEvent>[]);
+            },
+            child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             children: [
               if (upcoming.isNotEmpty) ...[
@@ -53,6 +59,7 @@ class RacesScreen extends ConsumerWidget {
                 for (final r in past) _RaceTile(race: r),
               ],
             ],
+          ),
           );
         },
       ),
