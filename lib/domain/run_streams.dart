@@ -5,13 +5,16 @@ import 'geo.dart';
 /// Het verloop van een run: per meetpunt de tijd (s), afstand (m) en eventueel
 /// hoogte, hartslag en positie. Uit Strava.
 class RunStreams {
-  const RunStreams({required this.time, required this.distance, this.altitude, this.heartRate, this.positions});
+  const RunStreams({required this.time, required this.distance, this.altitude, this.heartRate, this.positions, this.gpsQuality});
 
   final List<double> time;
   final List<double> distance;
   final List<double>? altitude;
   final List<double>? heartRate;
   final List<LatLng>? positions;
+
+  /// Hoe goed de GPS was (alleen bij runs die met RunWise zijn opgenomen), zie GpsQuality.
+  final Map<String, dynamic>? gpsQuality;
 
   int get length => time.length;
   double get totalDistance => distance.isEmpty ? 0 : distance.last;
@@ -31,7 +34,15 @@ class RunStreams {
           if (p is List && p.length >= 2) LatLng((p[0] as num).toDouble(), (p[1] as num).toDouble()) else const LatLng(0, 0),
       ];
     }
-    return RunStreams(time: t, distance: d, altitude: same(nums(json['alt'])), heartRate: same(nums(json['hr'])), positions: pos);
+    final gps = json['gps'];
+    return RunStreams(
+      time: t,
+      distance: d,
+      altitude: same(nums(json['alt'])),
+      heartRate: same(nums(json['hr'])),
+      positions: pos,
+      gpsQuality: gps is Map ? gps.cast<String, dynamic>() : null,
+    );
   }
 
   /// Waarde van [series] op afstand [m] (lineair tussen de meetpunten).

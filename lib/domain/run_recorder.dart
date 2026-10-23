@@ -30,6 +30,47 @@ class RunSample {
   final int? hr;
 }
 
+/// Hoe goed de GPS was tijdens een run: wat er is weggefilterd en hoe vaak hij even weg was.
+class GpsQuality {
+  /// Metingen die te onnauwkeurig waren (meer dan [RunRecording.maxAccuracy] m).
+  int inaccurate = 0;
+
+  /// Metingen die een onmogelijke sprong maakten.
+  int jumps = 0;
+
+  /// Keren dat er meer dan [gapAfter] seconden geen bruikbare meting was (tunnel, viaduct, hoge gebouwen).
+  int gaps = 0;
+  double gapSeconds = 0;
+
+  static const gapAfter = 15.0;
+
+  bool get isClean => inaccurate == 0 && jumps == 0 && gaps == 0;
+
+  Map<String, dynamic> toJson() => {'acc': inaccurate, 'jump': jumps, 'gaps': gaps, 'gapS': gapSeconds.round()};
+
+  static GpsQuality? fromJson(Object? j) {
+    if (j is! Map) return null;
+    int i(Object? v) => (v as num?)?.toInt() ?? 0;
+    return GpsQuality()
+      ..inaccurate = i(j['acc'])
+      ..jumps = i(j['jump'])
+      ..gaps = i(j['gaps'])
+      ..gapSeconds = (j['gapS'] as num?)?.toDouble() ?? 0;
+  }
+
+  /// Korte uitleg voor onder de tijden per km.
+  String get text {
+    final poor = gapSeconds > 60 || jumps > 5;
+    final parts = <String>[
+      if (gaps > 0) '${gaps}× even geen GPS (samen ${gapSeconds.round()} s, rechte lijn geteld)',
+      if (jumps > 0) '$jumps ${jumps == 1 ? 'sprong' : 'sprongen'} weggefilterd',
+      if (inaccurate > 0) '$inaccurate onnauwkeurige ${inaccurate == 1 ? 'meting' : 'metingen'} overgeslagen',
+    ];
+    if (parts.isEmpty) return 'GPS: goed, geen storingen.';
+    return 'GPS: ${poor ? 'matig' : 'goed'}. ${parts.join(', ')}.';
+  }
+}
+
 /// Houdt een run bij: afstand, bewegende tijd, automatisch pauzeren en kilometertijden.
 /// Bevat geen GPS of timers zelf, zodat het goed te testen is.
 class RunRecording {
@@ -61,6 +102,9 @@ class RunRecording {
 
   /// Gemiddelde hartslag over de bewegende tijd.
   int? get averageHeartRate => _hrCount == 0 ? null : (_hrSum / _hrCount).round();
+
+  /// Hoe goed de GPS was (wordt bij de run bewaard).
+  GpsQuality gps = GpsQuality();
 
   GpsFix? _last;
   DateTime? _slowSince;
@@ -102,7 +146,11 @@ class RunRecording {
 
   /// Verwerkt een meting. Geeft een nieuwe hele km terug als die net is bereikt.
   int? add(GpsFix fix) {
-    if (!isActive || fix.accuracy > maxAccuracy) return null;
+    if (!isActive) return null;
+    if (fix.accuracy > maxAccuracy) {
+      gps.inaccurate++;
+      return null;
+    }
     final prev = _last;
     _last = fix;
     if (prev == null) {
@@ -115,6 +163,7 @@ class RunRecording {
     final d = distanceMeters(prev.point, fix.point);
     final v = fix.speed ?? d / dt;
     if (d / dt > maxSpeed) {
+      gps.jumps++;
       // Sprong: deze meting overslaan. Zijn er meerdere sprongen achter elkaar, dan was
       // waarschijnlijk het vórige punt fout (bijv. een slecht eerste punt). Dan opnieuw
       // beginnen vanaf het nieuwe punt, zonder de afstand ertussen mee te tellen.
@@ -137,6 +186,11 @@ class RunRecording {
       return null;
     }
     _jumps = 0;
+    // Lang geen bruikbare meting tijdens het lopen: een GPS-gat (de rechte lijn telt mee).
+    if (dt > GpsQuality.gapAfter && status == RecorderStatus.running) {
+      gps.gaps++;
+      gps.gapSeconds += dt;
+    }
 
     // Automatisch pauzeren bij stilstaan (stoplicht), en weer verder bij lopen.
     if (autoPause) {
@@ -261,6 +315,7 @@ class RunRecording {
         'samples': [
           for (final x in samples) [x.t, x.d, x.point.lat, x.point.lon, x.alt, x.hr],
         ],
+        'gps': gps.toJson(),
         'saved': DateTime.now().toIso8601String(),
       };
 
@@ -289,6 +344,7 @@ class RunRecording {
           hr: (l[5] as num?)?.toInt(),
         ));
       }
+      r.gps = GpsQuality.fromJson(j['gps']) ?? GpsQuality();
       r.status = RecorderStatus.paused;
       return r;
     } catch (_) {
@@ -358,6 +414,7 @@ class RunRecording {
       if (!indoor) 'll': ll,
       if (alt != null) 'alt': smooth(alt, 3),
       if (hr != null) 'hr': hr,
+      if (!indoor) 'gps': gps.toJson(),
       'src': indoor ? 'loopband' : 'runwise',
     };
   }

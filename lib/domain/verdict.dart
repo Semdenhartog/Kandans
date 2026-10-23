@@ -78,6 +78,7 @@ String? whyBetter(StartTimeScore now, StartTimeScore best, {double minDiff = 3})
     WeatherFactor.uv: 'minder felle zon',
     WeatherFactor.humid: 'minder benauwd',
     WeatherFactor.ice: 'geen kans op gladheid',
+    WeatherFactor.thunder: 'geen onweer',
   };
   final parts = [for (final d in diffs.take(2)) words[d.$1]!];
   return parts.join(' en ');

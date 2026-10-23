@@ -155,6 +155,17 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 Consumer(builder: (context, ref, _) {
+                  final rain = ref.watch(rainPreferenceProvider);
+                  return ListTile(
+                    leading: const TileIcon(Icons.umbrella_outlined, color: RwColors.accent),
+                    title: const Text('Lopen in de regen'),
+                    subtitle: Text(rain.label),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _pickRain(context, ref),
+                  );
+                }),
+                const Divider(height: 1, indent: 56),
+                Consumer(builder: (context, ref, _) {
                   final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
                   final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
                   final worn = shoes.where((s) => !s.retired && shoeWornOut(s, runs)).toList();
@@ -414,4 +425,46 @@ class _SectionTitle extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(4, 24, 4, 8),
         child: Text(text, style: RwText.overline),
       );
+}
+
+/// Kiezen hoe zwaar regen meetelt in het advies.
+Future<void> _pickRain(BuildContext context, WidgetRef ref) async {
+  final current = ref.read(rainPreferenceProvider);
+  final picked = await showModalBottomSheet<RainPreference>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text('Hoe erg vind je regen?',
+                  style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
+            ),
+            for (final r in RainPreference.values)
+              ListTile(
+                leading: Icon(r == current ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                    color: r == current ? RwColors.accent : RwColors.subtle),
+                title: Text(r.label),
+                subtitle: Text(r.explanation),
+                selected: r == current,
+                onTap: () => Navigator.pop(ctx, r),
+              ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text('Onweer en gladheid blijven altijd zwaar meetellen.',
+                  style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  if (picked == null || picked == current) return;
+  HapticFeedback.selectionClick();
+  await ref.read(rainPreferenceProvider.notifier).set(picked);
 }

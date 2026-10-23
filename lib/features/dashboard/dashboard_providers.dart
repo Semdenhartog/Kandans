@@ -19,12 +19,44 @@ final forecastProvider = FutureProvider<Forecast>((ref) async {
 /// Persoonlijk loopprofiel op basis van je runs (standaardwaarden als er te weinig zijn).
 final insightsProvider = Provider<PerformanceInsights>((ref) {
   final activities = ref.watch(activitiesProvider);
-  return activities.when(
+  final rain = ref.watch(rainPreferenceProvider);
+  final base = activities.when(
     data: PerformanceInsights.compute,
     loading: () => PerformanceInsights.defaults,
     error: (_, _) => PerformanceInsights.defaults,
   );
+  return rain == RainPreference.normal ? base : base.withRainWeight(rain.weight);
 });
+
+/// Jouw keuze over lopen in de regen (Ik → Loopvoorkeuren), bewaard op de telefoon.
+final rainPreferenceProvider = NotifierProvider<RainPreferenceNotifier, RainPreference>(RainPreferenceNotifier.new);
+
+class RainPreferenceNotifier extends Notifier<RainPreference> {
+  static const _key = 'rain_preference';
+
+  @override
+  RainPreference build() {
+    _load();
+    return RainPreference.normal;
+  }
+
+  Future<void> _load() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      final name = p.getString(_key);
+      final match = RainPreference.values.where((r) => r.name == name);
+      if (match.isNotEmpty) state = match.first;
+    } catch (_) {}
+  }
+
+  Future<void> set(RainPreference value) async {
+    state = value;
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setString(_key, value.name);
+    } catch (_) {}
+  }
+}
 
 /// Beste vertrekmoment per route (rustige duurloop), voor de routelijst.
 /// Sleutel = route-id.

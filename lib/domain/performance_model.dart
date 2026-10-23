@@ -17,7 +17,26 @@ class PerformanceInsights {
     this.morningPace,
     this.eveningPace,
     this.buckets = const [],
+    this.rainWeight = 1.0,
   });
+
+  /// Hoe zwaar regen meetelt in de score (1 = normaal, lager = regen vind je niet erg).
+  /// Een eigen keuze in Ik, niet berekend uit je runs.
+  final double rainWeight;
+
+  /// Zelfde profiel met een andere [rainWeight].
+  PerformanceInsights withRainWeight(double w) => PerformanceInsights(
+        sampleSize: sampleSize,
+        optimalMin: optimalMin,
+        optimalMax: optimalMax,
+        pctFasterInOptimal: pctFasterInOptimal,
+        windSecPerKmPer10kmh: windSecPerKmPer10kmh,
+        preferredTimeOfDay: preferredTimeOfDay,
+        morningPace: morningPace,
+        eveningPace: eveningPace,
+        buckets: buckets,
+        rainWeight: w,
+      );
 
   /// Aantal runs met weerdata dat is gebruikt.
   final int sampleSize;
@@ -166,4 +185,16 @@ class PerformanceInsights {
     }
     return den == 0 ? null : cov / den;
   }
+}
+
+/// Hoe je over lopen in de regen denkt.
+enum RainPreference {
+  avoid('Liever droog', 'Regen telt zwaarder mee', 1.5),
+  normal('Normaal', 'Regen telt gewoon mee', 1.0),
+  dontMind('Regen vind ik niet erg', 'Regen telt veel minder mee; wind, warmte en donker blijven gewoon tellen', 0.35);
+
+  const RainPreference(this.label, this.explanation, this.weight);
+  final String label;
+  final String explanation;
+  final double weight;
 }

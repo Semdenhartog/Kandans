@@ -110,7 +110,7 @@ class StartTimeScore {
 }
 
 /// Soort weerfactor achter de strafpunten.
-enum WeatherFactor { warm, cold, rain, wind, gusts, dark, uv, humid, ice }
+enum WeatherFactor { warm, cold, rain, wind, gusts, dark, uv, humid, ice, thunder }
 
 /// Soort bij een uitleg-tekst uit de score (de tekst bevat getallen, de soort niet).
 WeatherFactor? factorOf(String label) {
@@ -123,6 +123,7 @@ WeatherFactor? factorOf(String label) {
   if (label.startsWith('Hoge UV')) return WeatherFactor.uv;
   if (label.startsWith('Benauwd')) return WeatherFactor.humid;
   if (label.startsWith('Kans op gladheid')) return WeatherFactor.ice;
+  if (label.startsWith('Onweer')) return WeatherFactor.thunder;
   return null;
 }
 
@@ -332,7 +333,7 @@ class StartTimePlanner {
       TrainingType.recovery => 0.15,
     };
     final rainProb = w.precipitationProbability ?? ((w.precipitation ?? 0) > 0.1 ? 60.0 : 0.0);
-    final rainPenalty = rainProb * rainMul + math.min(20.0, (w.precipitation ?? 0) * 8);
+    final rainPenalty = (rainProb * rainMul + math.min(20.0, (w.precipitation ?? 0) * 8)) * profile.rainWeight;
     if (rainPenalty > 0) {
       final label = rainProb >= 95 && (w.precipitation ?? 0) >= 0.1
           ? 'Buien volgens Buienradar (${(w.precipitation ?? 0).toStringAsFixed(1)} mm/u)'
@@ -375,6 +376,10 @@ class StartTimePlanner {
 
     // Gladheid.
     if (w.temperature <= 0.5 && (w.precipitation ?? 0) > 0) p['Kans op gladheid'] = 20.0;
+
+    // Onweer (weercode 95–99): onveilig, telt altijd zwaar mee, ook als je regen niet erg vindt.
+    final code = w.weatherCode ?? 0;
+    if (code >= 95 && code <= 99) p['Onweer'] = 40.0;
 
     final total = p.values.fold<double>(0, (s, v) => s + v);
     return (score: 100 - total, penalties: p, wind: rw);

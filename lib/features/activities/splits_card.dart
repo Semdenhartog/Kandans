@@ -9,6 +9,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/route_geometry.dart';
+import '../../domain/run_recorder.dart' show GpsQuality;
 import '../../domain/run_streams.dart';
 import '../../domain/training_load.dart';
 import '../../domain/zones.dart';
@@ -77,6 +78,10 @@ class SplitsCard extends ConsumerWidget {
               const SizedBox(height: 6),
               Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met RunWise' }}. Wind = het weer bij de start van je run.',
                   style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+              if (GpsQuality.fromJson(s.gpsQuality) case final q?) ...[
+                const SizedBox(height: 2),
+                Text(q.text, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+              ],
               ..._efforts(s, ref),
               ..._zones(s, ref),
             ],

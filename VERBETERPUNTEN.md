@@ -22,7 +22,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 5. ✅ **P1 GPS vast op een verkeerd eerste punt.** *Waarom:* begint de opname met een uitschieter, dan werd elk goed punt daarna als "sprong" weggegooid. *Wat:* na 3 sprongen achter elkaar opnieuw beginnen vanaf het nieuwe punt, zonder afstand mee te tellen.
 6. ✅ **P1 Accubesparing van Android.** *Bleek er al in te zitten (uitleg + knop op het opnamescherm).* *Waarom:* Samsung, Xiaomi en OnePlus sluiten apps op de achtergrond, ook met een voorgrondmelding. *Wat:* vóór de eerste run vragen om RunWise uit te zonderen, met uitleg per merk.
 7. ✅ **P2 GPS-gat overbruggen.** *Waarom:* onder een viaduct of in een tunnel valt GPS weg. *Wat:* bij een gat < 2 min de rechte lijn meetellen en in het rundetail markeren. *Bestond al grotendeels: valt GPS even weg, dan telt de rechte lijn naar het volgende goede punt mee (zolang dat niet als sprong telt).*
-8. ⬜ **P2 GPS-kwaliteit per run.** *Wat:* in het rundetail "GPS: goed / 2 gaten / 4 sprongen weggefilterd". Helpt jou en mij bij het opsporen van fouten.
+8. ✅ **P2 GPS-kwaliteit per run.** Onder de tijden per km: "GPS: goed. 1× even geen GPS (samen 40 s, rechte lijn geteld), 2 sprongen weggefilterd". Alleen bij nieuwe opnames.
 9. ⬜ **P2 Nep-GPS-modus voor testen.** *Waarom:* opnemen is nu alleen te testen door echt te lopen. *Wat:* een verborgen testmodus die een route afspeelt. Ook bruikbaar in de schermafbeeldingen-workflow.
 10. ⬜ **P3 Weggooien ongedaan maken.** *Wat:* na "Weggooien" bij een onderbroken run 10 s een knop "Toch bewaren".
 
@@ -34,7 +34,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 14. ⬜ **P2 KNMI-weeralarm meenemen.** *Wat:* bij code oranje/rood een duidelijke waarschuwing bovenaan Vandaag.
 15. ⬜ **P2 Onzekerheid tonen.** *Wat:* "regen om 18:00 – onzeker" als de weermodellen het oneens zijn.
 16. ⬜ **P2 Hitte-gewenning.** *Wat:* de eerste warme dagen van het jaar zwaarder wegen dan dezelfde temperatuur in juli.
-17. ⬜ **P2 Eén schuif "regen vind ik niet erg".** *Wat:* simpele voorkeuren in plaats van een ingewikkeld profiel.
+17. ✅ **P2 Regen-voorkeur.** Ik → Lopen in de regen: Liever droog / Normaal / Regen vind ik niet erg. Telt mee in Vandaag, weekplanner en meldingen. Extra: **onweer** telde nog helemaal niet mee en geeft nu altijd 40 strafpunten.
 18. ✅ **P2 Ochtendmelding alleen als het uitmaakt.** Stil als je gewone looptijd prima is; wel een melding als een ander moment ≥8 punten beter is ("12 punten beter dan je gewone tijd (18:30)") of je gewone tijd slecht uitkomt. Schakelaar in Ik → Dagelijkse melding; staat standaard aan.
 19. ⬜ **P3 Ideale temperatuur per seizoen.** *Wat:* het loopprofiel apart voor zomer en winter.
 20. ⬜ **P3 Diensten uit je agenda lezen.** *Waarom:* met wisseldiensten verschuift je vrije tijd elke week. *Wat:* bezette blokken uit de agenda automatisch overslaan in het advies.

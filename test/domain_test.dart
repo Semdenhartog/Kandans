@@ -156,6 +156,34 @@ void main() {
       expect(hot.score, lessThan(best.score));
       expect(hot.reasons.first, contains('Warm'));
     });
+
+    test('regen-voorkeur: wie regen niet erg vindt, krijgt minder strafpunten', () {
+      final t = DateTime(2030, 6, 1, 18);
+      final f = Forecast(latitude: 52, longitude: 5, hours: [hour(t, rain: 80), hour(t.add(const Duration(hours: 1)), rain: 80)]);
+      int score(RainPreference r) => StartTimePlanner(
+            forecast: f,
+            profile: PerformanceInsights.defaults.withRainWeight(r.weight),
+            durationMinutes: 30,
+          ).scoreAt(t, TrainingType.easy).score;
+      expect(score(RainPreference.dontMind), greaterThan(score(RainPreference.normal)));
+      expect(score(RainPreference.normal), greaterThan(score(RainPreference.avoid)));
+      expect(PerformanceInsights.defaults.withRainWeight(0.35).optimalMax, PerformanceInsights.defaults.optimalMax);
+    });
+
+    test('onweer telt altijd zwaar mee, ook als je regen niet erg vindt', () {
+      final t = DateTime(2030, 6, 1, 18);
+      HourWeather storm(DateTime x) => HourWeather(
+          time: x, temperature: 18, feelsLike: 18, windSpeed: 5, windDirection: 270, precipitationProbability: 0, weatherCode: 95);
+      final f = Forecast(latitude: 52, longitude: 5, hours: [storm(t), storm(t.add(const Duration(hours: 1)))]);
+      final s = StartTimePlanner(
+        forecast: f,
+        profile: PerformanceInsights.defaults.withRainWeight(RainPreference.dontMind.weight),
+        durationMinutes: 30,
+      ).scoreAt(t, TrainingType.easy);
+      expect(s.reasons.first, 'Onweer');
+      expect(s.score, lessThanOrEqualTo(60));
+      expect(s.factors[WeatherFactor.thunder], 40);
+    });
   });
 
   group('prestatiemodel', () {
