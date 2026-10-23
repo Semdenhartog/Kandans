@@ -207,7 +207,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
                 backgroundColor: luxeGold,
                 foregroundColor: _ink,
                 minimumSize: const Size.fromHeight(54),
-                textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w800, fontSize: 16),
               ),
               onPressed: _busy || !available ? null : _buy,
               child: _busy

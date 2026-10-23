@@ -170,7 +170,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
                 backgroundColor: _gold,
                 foregroundColor: const Color(0xFF1C1405),
                 minimumSize: const Size.fromHeight(50),
-                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 16),
               ),
               onPressed: () => _shop(shop, s),
               icon: const Icon(Icons.storefront_outlined),

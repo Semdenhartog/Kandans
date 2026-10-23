@@ -261,7 +261,7 @@ class _PosterOrderScreenState extends ConsumerState<PosterOrderScreen> {
                             backgroundColor: luxeGold,
                             foregroundColor: _ink,
                             minimumSize: const Size.fromHeight(56),
-                            textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                            textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w800, fontSize: 16),
                           ),
                           onPressed: busy || product == null ? null : _pay,
                           child: busy
