@@ -2,7 +2,7 @@
 
 Gemaakt op 22-10-2026 na het doorlezen van de code (±38.000 regels Dart, 7 edge functions).
 
-**Let op:** bij het nalopen bleken 15 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
+**Let op:** bij het nalopen bleken 17 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
 
 **Eerlijke conclusie vooraf:** RunWise heeft al meer functies dan de meeste betaalde hardloop-apps.
 De grootste winst zit niet in nóg meer functies, maar in **betrouwbaarheid, testen, eenvoud en de lancering**.
@@ -47,7 +47,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 24. ⬜ **P2 Handmatige ronde.** *Wat:* een "ronde"-knop voor baantraining of eigen intervallen.
 25. ✅ **P2 Drinkherinnering bij warm weer.** *Wat:* boven 22 °C elke 20 min een seintje. *Bestond al als drink- en gelherinnering voor lange runs (nog niet weerafhankelijk).*
 26. ⬜ **P2 Stilstand-alarm voor je noodcontact.** *Wat:* sta je 5 min stil zonder pauze, dan vraagt de app "Alles goed?"; geen antwoord = sms met locatie. *Let op:* goed testen, vals alarm is erger dan geen alarm.
-27. ⬜ **P3 Tempo-doel per km.** *Wat:* "houd 5:30 aan" met seintjes bij te snel/te langzaam (los van intervallen).
+27. ✅ **P3 Tempo-doel per km.** *Wat:* "houd 5:30 aan" met seintjes bij te snel/te langzaam (los van intervallen). *Bestond al: tempodoel instellen bij de start (ook vanuit het schema).*
 28. ✅ **P3 Zelfde route, vorige keer.** *Wat:* tijdens het lopen "12 s sneller dan vorige keer op dit punt". *Bestond al: tegen je vorige keer lopen (ghost).*
 
 ## D. Na de run
@@ -91,7 +91,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 56. ⬜ **P2 Instellingen doorzoekbaar.** *Waarom:* er zijn er inmiddels erg veel.
 57. ⬜ **P2 Engelse taal.** *Wat:* teksten naar een vertaalbestand. Groot werk, pas zinvol voor buitenlandse lancering.
 58. ⬜ **P2 Lege schermen met één duidelijke actie** (geen runs, geen routes).
-59. ⬜ **P2 Onboarding inkorten** tot max. 3 schermen; de rest uitleggen op het moment dat je het nodig hebt.
+59. ✅ **P2 Onboarding inkorten** tot max. 3 schermen; de rest uitleggen op het moment dat je het nodig hebt. *Bestond al: de rondleiding heeft 3 schermen.*
 60. ⬜ **P3 Trillen consequent** (alleen bij echte acties, niet overal).
 
 ## H. Snelheid en accu
