@@ -315,7 +315,27 @@ class SyncService {
 
     var imported = 0;
     for (final p in runs) {
-      if (known.contains(p.uuid)) continue;
+      final origin = healthRunOrigin(p.sourceId);
+      // Runs die RunWise zelf naar Health Connect schreef, staan er al.
+      if (origin == HealthRunOrigin.runwise) continue;
+      final externalId = healthExternalId(p.uuid, origin);
+      if (known.contains(externalId)) continue;
+      if (known.contains(p.uuid)) {
+        // Eerder binnengekomen zonder herkenning: alsnog markeren als Strava-run (niet naar de coach).
+        if (externalId != p.uuid) {
+          try {
+            await _db
+                .from('activities')
+                .update({'external_id': externalId})
+                .eq('user_id', uid)
+                .eq('source', 'health_connect')
+                .eq('external_id', p.uuid);
+          } catch (_) {
+            // Volgende keer opnieuw.
+          }
+        }
+        continue;
+      }
       if (otherTimes.any((t) => t.difference(p.dateFrom).inMinutes.abs() < 20)) continue;
 
       final v = p.value as WorkoutHealthValue;
@@ -339,7 +359,7 @@ class SyncService {
         humidityPct: w?.humidity,
       );
       await _db.from('activities').upsert(
-        {...activity.toInsert(uid), 'external_id': p.uuid},
+        {...activity.toInsert(uid), 'external_id': externalId},
         onConflict: 'user_id,source,external_id',
         ignoreDuplicates: true,
       );
@@ -488,6 +508,26 @@ class _PendingUploader implements PendingRunUploader {
     return Activity.fromJson(row);
   }
 }
+
+/// Van welke app een Health Connect-run komt.
+enum HealthRunOrigin { runwise, strava, other }
+
+/// Pakketnaam van RunWise zelf (zie `flutter create --org nl.runwise` in build.yml).
+const runwisePackage = 'nl.runwise.runwise';
+
+/// Pakketnaam van de Strava-app.
+const stravaPackage = 'com.strava';
+
+HealthRunOrigin healthRunOrigin(String? sourceId) => switch (sourceId) {
+      runwisePackage => HealthRunOrigin.runwise,
+      stravaPackage => HealthRunOrigin.strava,
+      _ => HealthRunOrigin.other,
+    };
+
+/// external_id voor een Health Connect-run: runs van de Strava-app krijgen een herkenbaar begin,
+/// zodat ze (net als Strava-runs) niet naar de AI-coach gaan.
+String healthExternalId(String uuid, HealthRunOrigin origin) =>
+    origin == HealthRunOrigin.strava ? '${Activity.viaStravaPrefix}$uuid' : uuid;
 
 final syncServiceProvider = Provider<SyncService>((ref) => SyncService(ref));
 

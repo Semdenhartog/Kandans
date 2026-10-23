@@ -92,6 +92,7 @@ class Activity {
     this.bestEfforts,
     this.photos = const [],
     this.aiSummary,
+    this.externalId,
   });
 
   final String? id;
@@ -132,6 +133,16 @@ class Activity {
   /// Korte analyse van de coach (eenmalig gemaakt, daarna bewaard).
   final String? aiSummary;
 
+  /// Id bij de bron (Strava, Health Connect). Begint met [viaStravaPrefix] als de run via
+  /// Health Connect binnenkwam maar door de Strava-app was gemaakt.
+  final String? externalId;
+
+  /// Begin van [externalId] voor Health Connect-runs die van de Strava-app komen.
+  static const viaStravaPrefix = 'viastrava-';
+
+  /// Komt deze run (direct of via Health Connect) van Strava? Dan gaat hij niet naar de AI-coach.
+  bool get viaStrava => source == 'strava' || (externalId?.startsWith(viaStravaPrefix) ?? false);
+
   /// Automatisch aan de route gekoppeld (niet door de gebruiker gekozen).
   bool get autoLinked => routeId != null && !routeLinkLocked && source != 'manual';
 
@@ -165,6 +176,7 @@ class Activity {
             : null,
         photos: j['photos'] is List ? [for (final p in j['photos'] as List) p.toString()] : const [],
         aiSummary: j['ai_summary'] as String?,
+        externalId: j['external_id'] as String?,
       );
 
   Map<String, dynamic> toInsert(String userId) => {

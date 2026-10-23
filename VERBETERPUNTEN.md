@@ -2,7 +2,7 @@
 
 Gemaakt op 22-10-2026 na het doorlezen van de code (±38.000 regels Dart, 7 edge functions).
 
-**Let op:** bij het nalopen bleken 11 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
+**Let op:** bij het nalopen bleken 15 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
 
 **Eerlijke conclusie vooraf:** RunWise heeft al meer functies dan de meeste betaalde hardloop-apps.
 De grootste winst zit niet in nóg meer functies, maar in **betrouwbaarheid, testen, eenvoud en de lancering**.
@@ -21,7 +21,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 4. ✅ **P1 Laat zien dat er iets wacht.** *Wat:* smalle balk "1 run wacht op internet" boven de navigatie, tot hij geüpload is.
 5. ✅ **P1 GPS vast op een verkeerd eerste punt.** *Waarom:* begint de opname met een uitschieter, dan werd elk goed punt daarna als "sprong" weggegooid. *Wat:* na 3 sprongen achter elkaar opnieuw beginnen vanaf het nieuwe punt, zonder afstand mee te tellen.
 6. ✅ **P1 Accubesparing van Android.** *Bleek er al in te zitten (uitleg + knop op het opnamescherm).* *Waarom:* Samsung, Xiaomi en OnePlus sluiten apps op de achtergrond, ook met een voorgrondmelding. *Wat:* vóór de eerste run vragen om RunWise uit te zonderen, met uitleg per merk.
-7. ⬜ **P2 GPS-gat overbruggen.** *Waarom:* onder een viaduct of in een tunnel valt GPS weg. *Wat:* bij een gat < 2 min de rechte lijn meetellen en in het rundetail markeren.
+7. ✅ **P2 GPS-gat overbruggen.** *Waarom:* onder een viaduct of in een tunnel valt GPS weg. *Wat:* bij een gat < 2 min de rechte lijn meetellen en in het rundetail markeren. *Bestond al grotendeels: valt GPS even weg, dan telt de rechte lijn naar het volgende goede punt mee (zolang dat niet als sprong telt).*
 8. ⬜ **P2 GPS-kwaliteit per run.** *Wat:* in het rundetail "GPS: goed / 2 gaten / 4 sprongen weggefilterd". Helpt jou en mij bij het opsporen van fouten.
 9. ⬜ **P2 Nep-GPS-modus voor testen.** *Waarom:* opnemen is nu alleen te testen door echt te lopen. *Wat:* een verborgen testmodus die een route afspeelt. Ook bruikbaar in de schermafbeeldingen-workflow.
 10. ⬜ **P3 Weggooien ongedaan maken.** *Wat:* na "Weggooien" bij een onderbroken run 10 s een knop "Toch bewaren".
@@ -124,10 +124,10 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 80. ✅ **P1 Limiet op edge functions.** route-generator 60 en street-photos 100 per gebruiker per dag. Code klaar; Sem: migratie 0027 uitvoeren en de functies live zetten.
 81. ✅ **P1 Account verwijderen gecontroleerd:** alle 19 eigen tabellen, Strava-tokens en foto's worden gewist.
 82. ✅ **P2 Foutmeldingen automatisch opruimen** na 60 dagen (zoals de privacyverklaring belooft). In migratie 0027.
-83. ⬜ **P2 Al je gegevens downloaden** (AVG-recht op inzage) als één bestand.
+83. ✅ **P2 Al je gegevens downloaden** (AVG-recht op inzage) als één bestand. *Bestond al: Ik → Mijn gegevens kopiëren (AVG).*
 84. ✅ **P2 Geheimen-scan in GitHub Actions** (geheimen.yml) bij elke push.
-85. ⬜ **P2 Live-link: zichtbaar wanneer hij verloopt** en met één tik intrekken.
-86. ⬜ **P3 Strava-runs die via Health Connect binnenkomen herkennen**, zodat die ook niet naar de coach gaan.
+85. ✅ **P2 Live-link: zichtbaar wanneer hij verloopt** en met één tik intrekken. *Bestond al: live delen stopt vanzelf na de gekozen tijd en heeft een stopknop die je locatie wist.*
+86. ✅ **P3 Strava-runs via Health Connect herkend.** Runs die de Strava-app in Health Connect zet, gaan niet meer naar de AI-coach (ook eerder geïmporteerde worden gemarkeerd). RunWise-runs die RunWise zelf naar Health Connect schreef, komen niet meer dubbel terug.
 
 ## K. Play Store en lancering
 
@@ -147,7 +147,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 97. ⬜ **P2 Premium in drie zinnen kunnen uitleggen.** *Wat:* nu is onduidelijk wat gratis is en wat niet; maak één duidelijke grens.
 98. ⬜ **P2 Proefperiode zonder betaalgegevens.** *Wat:* 14 dagen alles, daarna kiezen.
 99. ⬜ **P2 Wachtlijst laten werken** (formulier werkt niet op Pages; bijv. een Supabase-tabel).
-100. ⬜ **P3 Eén vaste plek "Nieuw in RunWise"** die alleen grote veranderingen toont, niet elke kleine verbetering.
+100. ✅ **P3 Eén vaste plek "Nieuw in RunWise"** die alleen grote veranderingen toont, niet elke kleine verbetering. *Bestond al: "Nieuw in RunWise" verschijnt één keer per versie.*
 
 ---
 

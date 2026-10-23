@@ -23,7 +23,7 @@ class RunWiseRepository {
   static const _activityColumns =
       'id, started_at, distance_meters, moving_time_seconds, source, route_id, average_heart_rate, '
       'elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, wind_direction_degrees, '
-      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos, ai_summary';
+      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos, ai_summary, external_id';
 
   /// Verloop van een run (tijden per km, grafiek). Eigen opnames hebben het al; bij Strava-runs
   /// wordt het eenmalig bij Strava opgehaald. De snelste stukken worden er meteen bij berekend.

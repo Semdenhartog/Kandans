@@ -266,7 +266,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                     ],
                   ),
           ),
-          if (a.id != null && a.source != 'strava') ...[
+          if (a.id != null && !a.viaStrava) ...[
             const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'coach'), child: _CoachSummaryCard(activity: a)),
           ],
@@ -361,9 +361,10 @@ class ActivityDetailScreen extends ConsumerWidget {
               label: const Text('Run bijsnijden'),
             ),
           ],
-          if (a.source == 'strava') ...[
+          if (a.viaStrava) ...[
             const SizedBox(height: 12),
-            const Text('Gegevens via Strava', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+            Text(a.source == 'strava' ? 'Gegevens via Strava' : 'Gegevens van de Strava-app (via Health Connect)',
+                textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
         ],
       );

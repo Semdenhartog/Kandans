@@ -576,7 +576,7 @@ List<String> _smartQuestions(WidgetRef ref) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   // De coach kijkt niet naar Strava-runs, dus daar stellen we ook geen vraag over voor.
-  final runs = (ref.watch(activitiesProvider).value ?? const <Activity>[]).where((a) => a.source != 'strava').toList()
+  final runs = (ref.watch(activitiesProvider).value ?? const <Activity>[]).where((a) => !a.viaStrava).toList()
     ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
   if (runs.isNotEmpty) {
     final d = runs.first.startedAt.toLocal();

@@ -76,7 +76,10 @@ async function buildContext(db: SupabaseClient, userId: string, profile: Record<
   const [{ data: runs }, { data: races }, { data: perf }, { data: plan }] = await Promise.all([
     db.from("activities")
       .select("started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, wind_speed_kmh, feel, note")
-      .eq("user_id", userId).neq("source", "strava").gte("started_at", since)
+      .eq("user_id", userId).neq("source", "strava")
+      // Ook geen runs van de Strava-app die via Health Connect binnenkwamen (external_id "viastrava-…").
+      .or("external_id.is.null,external_id.not.like.viastrava-*")
+      .gte("started_at", since)
       .order("started_at", { ascending: false }).limit(60),
     db.from("race_events")
       .select("name, race_date, distance_meters, goal_time_seconds, predicted_finish_seconds")
@@ -199,10 +202,10 @@ async function summarize(
   apiKey: string, premium: boolean, freeUsed: number, freeLimit: number,
 ) {
   const { data: a } = await db.from("activities")
-    .select("id, user_id, source, started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, humidity_pct, feel, note, best_efforts, streams, ai_summary")
+    .select("id, user_id, source, started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, humidity_pct, feel, note, best_efforts, streams, ai_summary, external_id")
     .eq("id", activityId).maybeSingle();
   if (!a || a.user_id !== userId) return json(404, { error: "Run niet gevonden." });
-  if (a.source === "strava") return json(400, { error: "Runs uit Strava kunnen we niet door de coach laten bekijken (voorwaarden van Strava)." });
+  if (a.source === "strava" || String(a.external_id ?? "").startsWith("viastrava-")) return json(400, { error: "Runs uit Strava kunnen we niet door de coach laten bekijken (voorwaarden van Strava)." });
   if (a.ai_summary) return json(200, { summary: a.ai_summary, premium, free_left: null });
 
   // Tijden per km uit het verloop (als dat er is).
