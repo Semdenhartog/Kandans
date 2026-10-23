@@ -17,16 +17,16 @@ dependencies:
   http: ^1.2.2
   geolocator: ^14.1.1
   file_picker: ^13.1.0
-  xml: ^6.5.0
+  xml: ^7.1.0
   intl: any
   url_launcher: ^6.3.1
-  purchases_flutter: ^9.13.0
+  purchases_flutter: ^10.18.1
   health: ^13.3.0
-  flutter_local_notifications: ">=19.0.0 <20.0.0"
-  timezone: ^0.10.0
+  flutter_local_notifications: ^22.3.2
+  timezone: ^0.11.2
   shared_preferences: ^2.3.0
   flutter_map: ^8.1.0
-  latlong2: ^0.9.1
+  latlong2: ^0.10.1
   share_plus: ^13.0.0
   android_intent_plus: ^6.1.0
   flutter_tts: ^4.2.0
@@ -35,13 +35,13 @@ dependencies:
   screen_brightness: ">=2.0.0 <3.0.0"
   quick_actions: ">=1.0.0 <2.0.0"
   audioplayers: ">=6.0.0 <7.0.0"
-  local_auth: ^2.3.0
+  local_auth: ^3.0.2
   vibration: ^3.1.0
   flutter_reactive_ble: ^5.4.0
   permission_handler: ">=12.0.0 <14.0.0"
   image_picker: ^1.1.2
   path_provider: ^2.1.4
-  home_widget: ">=0.7.0 <0.9.0"
+  home_widget: ^0.10.0
   in_app_review: ">=2.0.0 <3.0.0"
 
 dev_dependencies:
@@ -49,7 +49,7 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
 
 flutter:
