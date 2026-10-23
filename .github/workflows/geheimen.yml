@@ -9,6 +9,6 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Zoeken naar sleutels
         run: python3 .github/scripts/geheimen_scan.py
