@@ -4,27 +4,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme.dart';
 
 /// Versie van het "Nieuw in RunWise"-overzicht. Ophogen als er iets nieuws te vertellen is.
-const whatsNewVersion = 'luxe-2026-10';
+const whatsNewVersion = 'betrouwbaar-2026-10';
 
 const _items = <(IconData, String, String)>[
-  (Icons.u_turn_right, 'Overal instappen op je route',
-      'Begin waar je wilt. RunWise zegt hoe ver en welke kant op de route ligt, en wijst je terug als je ervan af raakt.'),
-  (Icons.watch_outlined, 'Afslagen op je Galaxy of Pixel Watch',
-      'De volgende afslag staat nu altijd in de melding, dus ook op je Wear OS-horloge en je vergrendelscherm.'),
-  (Icons.emoji_events_outlined, 'Recordjacht onderweg',
-      '"Houd dit tempo vast en je loopt een nieuw 5 km-record." Plus je verwachte eindtijd en elke km een vergelijking met de vorige.'),
-  (Icons.record_voice_over_outlined, 'Kies je coachstem',
-      'Rustig, motiverend of kort. En bij de start een korte briefing: temperatuur en waar je tegenwind hebt.'),
-  (Icons.u_turn_left, 'Heen en terug op tijd',
-      'Kies 40 minuten, dan zegt RunWise halverwege dat je moet omdraaien.'),
-  (Icons.lightbulb_outline, 'Verlichting en bezienswaardigheden',
-      'Zie hoeveel van je route verlicht is, en hoor onderweg langs welke bezienswaardigheden je komt.'),
-  (Icons.wb_twilight, 'Gouden uur, weekend en jaardoel',
-      'Nieuwe kaarten op Vandaag. Verplaats of verberg ze met het schuifje rechtsboven.'),
-  (Icons.play_circle_outline, 'Je run nog eens zien',
-      'Bij elke run met GPS: tik op de afspeelknop en zie je run zich intekenen op de kaart.'),
-  (Icons.image_outlined, 'Route als poster en samen lopen',
-      'Deel een route als mooie poster, of nodig een loopmaatje uit met het beste moment en het routebestand.'),
+  (Icons.cloud_off_outlined, 'Je run is altijd veilig',
+      'Geen bereik na je run? Je run blijft op je telefoon staan en wordt vanzelf opgeslagen zodra je weer internet hebt.'),
+  (Icons.content_cut, 'Run bijsnijden',
+      'Vergeten te stoppen? Schuif in het rundetail het begin en eind naar waar je echt liep. Tijd, tempo en kaart rekenen mee.'),
+  (Icons.lightbulb_outline, 'Waarom later beter is',
+      'Vandaag zegt nu ook waarom wachten loont, bijvoorbeeld "12 punten beter dan nu: minder warm en droger".'),
+  (Icons.umbrella_outlined, 'Lopen in de regen',
+      'Vind je regen niet erg? Zeg het in Ik, dan telt regen minder mee. Onweer telt nu altijd zwaar mee.'),
+  (Icons.notifications_none, 'Slimmere ochtendmelding',
+      'Loop je meestal rond hetzelfde tijdstip, dan krijg je alleen een melding als een ander moment echt beter is.'),
+  (Icons.battery_std, 'GPS en accu per run',
+      'Na je run zie je hoeveel accu het kostte, en bij je tijden per km hoe goed de GPS was.'),
 ];
 
 /// Toont één keer per versie wat er nieuw is. [skip] = alleen als gezien markeren (bijv. na de rondleiding).
