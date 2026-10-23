@@ -407,6 +407,10 @@ jobs:
             grep -E -A6 "\[E\]|Expected:|  Actual:|Which:" tests-plain.txt | grep -v "^--$" | head -60 | while IFS= read -r line; do
               echo "::error::$line"
             done
+            # Ook de eerste regels van elke foutmelding (welke fout, waar), want de log zelf is niet altijd te openen.
+            grep -E -A8 "EXCEPTION CAUGHT BY|The following .* was thrown" tests-plain.txt | grep -vE "^--$|^$" | head -60 | while IFS= read -r line; do
+              echo "::error title=Foutmelding::$line"
+            done
             exit 1
           }
 

@@ -37,15 +37,19 @@ void main() {
   group('balk: runs die wachten op internet', () {
     tearDown(() => PendingRunStore.count.value = 0);
 
+    // De balk gebruikt geen Supabase; zonder nep-verbinding blijven er geen timers hangen.
+    Widget banner() => const ProviderScope(child: MaterialApp(home: Scaffold(body: PendingRunsBanner())));
+
     testWidgets('verborgen zonder wachtende runs', (t) async {
       PendingRunStore.count.value = 0;
-      await t.pumpWidget(_app(const PendingRunsBanner()));
+      await t.pumpWidget(banner());
       expect(find.textContaining('wacht'), findsNothing);
+      await _settle(t);
     });
 
     testWidgets('telt mee en verdwijnt weer', (t) async {
       PendingRunStore.count.value = 1;
-      await t.pumpWidget(_app(const PendingRunsBanner()));
+      await t.pumpWidget(banner());
       expect(find.text('1 run wacht op internet'), findsOneWidget);
       expect(find.text('Opnieuw'), findsOneWidget);
       PendingRunStore.count.value = 2;
@@ -54,6 +58,7 @@ void main() {
       PendingRunStore.count.value = 0;
       await t.pump();
       expect(find.textContaining('wacht'), findsNothing);
+      await _settle(t);
     });
   });
 
