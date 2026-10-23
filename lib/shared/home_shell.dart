@@ -128,7 +128,20 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       await svc.restore(r);
       if (mounted) openRecorder(context);
     } else if (choice == false) {
-      await RecordingStore.clear();
+      // Eerst 8 seconden de kans om het terug te draaien; pas daarna echt wissen.
+      var undo = false;
+      final bar = ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Run weggegooid.'),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(label: 'Toch bewaren', onPressed: () => undo = true),
+      ));
+      await bar.closed;
+      if (undo) {
+        await svc.restore(r);
+        if (mounted) openRecorder(context);
+      } else {
+        await RecordingStore.clear();
+      }
     }
   }
 

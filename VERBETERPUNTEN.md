@@ -24,7 +24,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 7. ✅ **P2 GPS-gat overbruggen.** *Waarom:* onder een viaduct of in een tunnel valt GPS weg. *Wat:* bij een gat < 2 min de rechte lijn meetellen en in het rundetail markeren. *Bestond al grotendeels: valt GPS even weg, dan telt de rechte lijn naar het volgende goede punt mee (zolang dat niet als sprong telt).*
 8. ✅ **P2 GPS-kwaliteit per run.** Onder de tijden per km: "GPS: goed. 1× even geen GPS (samen 40 s, rechte lijn geteld), 2 sprongen weggefilterd". Alleen bij nieuwe opnames.
 9. ⬜ **P2 Nep-GPS-modus voor testen.** *Waarom:* opnemen is nu alleen te testen door echt te lopen. *Wat:* een verborgen testmodus die een route afspeelt. Ook bruikbaar in de schermafbeeldingen-workflow.
-10. ⬜ **P3 Weggooien ongedaan maken.** *Wat:* na "Weggooien" bij een onderbroken run 10 s een knop "Toch bewaren".
+10. ✅ **P3 Weggooien ongedaan maken.** Na "Weggooien" bij een onderbroken run 8 s een knop "Toch bewaren"; pas daarna wordt het herstelbestand gewist.
 
 ## B. De kern: beste vertrektijd
 
