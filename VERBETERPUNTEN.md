@@ -138,7 +138,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 91. ⬜ **P1 Privacyverklaring afmaken** (naam, plaats, e-mail, datum) en Pages aanzetten.
 92. ✅ **P2 Store-afbeeldingen:** de schermtest maakt 6 Play Store-plaatjes (1080×1920) in `schermen-main/playstore/`, zonder uitlegballonnen. De feature graphic (1024×500) is nog ontwerpwerk.
 93. ⬜ **P2 "Feedback sturen"-knop** voor testers, met appversie erbij.
-94. ⬜ **P2 Om een beoordeling vragen** na de 5e geslaagde run (niet eerder).
+94. ✅ **P2 Om een beoordeling vragen** na de 5e eigen opgenomen run, één keer (Google's eigen venster, alleen bij installatie via de Play Store).
 
 ## L. Focus en verdienmodel
 

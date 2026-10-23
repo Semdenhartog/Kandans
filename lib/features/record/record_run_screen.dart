@@ -20,6 +20,7 @@ import '../../data/services/location_service.dart' show quickPosition;
 import '../../core/error_reporter.dart';
 import '../../data/services/notification_service.dart';
 import '../../data/services/pending_runs.dart';
+import '../../data/services/review_service.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/route_photos_service.dart' show routePhotosProvider;
 import '../../data/services/run_recorder_service.dart';
@@ -1152,6 +1153,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         shoeId: activity.shoeId,
         bestEfforts: bestEffortsToJson(efforts),
       );
+      // Na de 5e eigen run één keer om een beoordeling vragen (even later, na het felicitatiescherm).
+      final ownRuns = before.where((x) => x.source == 'runwise').length + 1;
+      Future<void>.delayed(const Duration(seconds: 4), () => ReviewService.maybeAsk(ownRuns)).ignore();
       Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
         fullscreenDialog: true,
         builder: (_) => RunSummaryScreen(
