@@ -129,6 +129,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       if (mounted) openRecorder(context);
     } else if (choice == false) {
       // Eerst 8 seconden de kans om het terug te draaien; pas daarna echt wissen.
+      if (!mounted) return;
       var undo = false;
       final bar = ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Run weggegooid.'),
