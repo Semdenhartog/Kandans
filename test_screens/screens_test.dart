@@ -320,7 +320,11 @@ class _FakeShell extends StatelessWidget {
 
 void main() {
   setUpAll(() async {
-    SharedPreferences.setMockInitialValues({});
+    // Uitlegballonnen voor nieuwe gebruikers als gezien markeren: de schermen zoals je ze normaal ziet
+    // (en zo ook bruikbaar voor de Play Store).
+    SharedPreferences.setMockInitialValues({
+      for (final id in ['today', 'runs', 'routes', 'coach']) 'tip_seen_$id': true,
+    });
     await initializeDateFormatting('nl_NL');
     await initializeDateFormatting('nl');
     Intl.defaultLocale = 'nl_NL';

@@ -15,6 +15,8 @@ permissions:
 
 jobs:
   screens:
+    # Dependabot mag niet naar de schermen-branches schrijven; de build is daar genoeg als controle.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -34,6 +36,11 @@ jobs:
             echo "::warning title=Schermen::$line"
           done
           ls -la test_screens/goldens || true
+      - name: Play Store-plaatjes (1080 x 1920)
+        if: always()
+        run: |
+          pip install --quiet pillow
+          python3 .github/scripts/store_screens.py test_screens/goldens test_screens/goldens/store || true
       - name: Uit beeld-controle
         # De schermtests zelf mogen falen (nepdata, geen Supabase), maar tekst of knoppen die
         # uit beeld vallen (RenderFlex overflowed) zijn echte fouten: dan wordt deze stap rood.
@@ -55,12 +62,14 @@ jobs:
           name: schermen
           path: |
             test_screens/goldens/*.png
+            test_screens/goldens/store/*.png
             screens.txt
           retention-days: 14
       - name: Plaatjes in branch 'schermen' zetten
         if: always()
         run: |
           mkdir -p /tmp/out && cp test_screens/goldens/*.png screens.txt /tmp/out/ 2>/dev/null || true
+          if [ -d test_screens/goldens/store ]; then mkdir -p /tmp/out/playstore && cp test_screens/goldens/store/*.png /tmp/out/playstore/ 2>/dev/null || true; fi
           cd /tmp/out
           git init -q -b schermen
           git config user.name "RunWise CI"

@@ -110,10 +110,10 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 69. ⬜ **P1 Opnamescherm opsplitsen.** *Waarom:* `record_run_screen.dart` is 2.794 regels; elke wijziging is risicovol. *Wat:* losse onderdelen per blok.
 70. ⬜ **P1 Dashboard opsplitsen** (1.362 regels).
 71. ✅ **P1 Stille fouten loggen** op de plekken waar je data kwijt kan raken (herstelbestand, wachtrij, km-tijden). *Waarom:* 59 keer `catch (_) {}`; fouten verdwijnen zonder spoor. *Wat:* op de belangrijke plekken naar de foutmelder.
-72. ⬜ **P1 Widgettests.** *Waarom:* `widget_test.dart` bevat 0 tests. *Wat:* minimaal starten, opnemen-stoppen-opslaan en inloggen.
+72. ✅ **P1 Widgettests (deels).** Correctie: er waren al 2 widgettests (mijn eerste telling miste ze). Toegevoegd: balk "runs wachten op internet" en het bijsnijdscherm. Een test van starten → opnemen → opslaan kan pas met nep-GPS (punt 9).
 73. ⬜ **P2 Schermafbeeldingen vergelijken.** *Wat:* screens.yml laat een verschil zien t.o.v. de vorige ronde, zodat onbedoelde wijzigingen opvallen.
 74. ⬜ **P2 Integratietest op een emulator in GitHub Actions** met nep-GPS (koppelt aan punt 9).
-75. ⬜ **P2 Pakketten automatisch bijwerken** (Dependabot) met build als controle.
+75. ✅ **P2 Pakketten bijwerken met Dependabot:** één verzamelvoorstel per maand voor pakketten en één voor GitHub Actions; de build draait erop. Alleen samenvoegen als die groen is.
 76. ⬜ **P2 Foutoverzicht.** *Wat:* een simpele weergave van `app_errors` gegroepeerd per fout, zodat je ziet wat testers raakt.
 77. ⬜ **P3 Strengere analyse-regels** (bijv. `unawaited_futures`).
 78. ⬜ **P3 Versie uit een git-tag** in plaats van het runnummer.
@@ -136,7 +136,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 89. 📄 **P1 Health Connect-aanvraag** (redenen klaar in docs/play-store.md) bij Google indienen (verplicht voor gezondheidsdata).
 90. 📄 **P1 Gegevensveiligheid-formulier** (ingevuld in docs/play-store.md) in Play Console invullen, gelijk aan de privacyverklaring.
 91. ⬜ **P1 Privacyverklaring afmaken** (naam, plaats, e-mail, datum) en Pages aanzetten.
-92. ⬜ **P2 Store-afbeeldingen uit screens.yml** maken (formaat Play Store).
+92. ✅ **P2 Store-afbeeldingen:** de schermtest maakt 6 Play Store-plaatjes (1080×1920) in `schermen-main/playstore/`, zonder uitlegballonnen. De feature graphic (1024×500) is nog ontwerpwerk.
 93. ⬜ **P2 "Feedback sturen"-knop** voor testers, met appversie erbij.
 94. ⬜ **P2 Om een beoordeling vragen** na de 5e geslaagde run (niet eerder).
 

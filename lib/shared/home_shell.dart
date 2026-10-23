@@ -147,7 +147,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         mainAxisSize: MainAxisSize.min,
         children: [
           const _OfflineBanner(),
-          const _PendingRunsBanner(),
+          const PendingRunsBanner(),
           // Satijnen navigatiebalk: licht doorschijnend, met een fijne lichte rand bovenaan.
           DecoratedBox(
             decoration: BoxDecoration(
@@ -221,8 +221,8 @@ class _OfflineBanner extends StatelessWidget {
 }
 
 /// Smalle balk zolang er opgenomen runs op de telefoon wachten op internet.
-class _PendingRunsBanner extends ConsumerWidget {
-  const _PendingRunsBanner();
+class PendingRunsBanner extends ConsumerWidget {
+  const PendingRunsBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

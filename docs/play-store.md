@@ -95,6 +95,8 @@ worden verkocht of voor advertenties gebruikt. Controleer dit in site/privacy.ht
 ## 6. Winkelvermelding
 
 - **Korte beschrijving (max. 80 tekens):** Loop op het beste moment: weer, wind en jouw route in één advies.
-- **Schermafbeeldingen:** gebruik de branch `schermen-main` (1080×1920 of groter). Kies: 01_vandaag,
-  11_opnemen_bezig, 03_run_detail, 04_routes, 05_coach, 15_na_je_run.
+- **Schermafbeeldingen:** staan klaar in de branch `schermen-main`, map `playstore/` (1080×1920, in de
+  goede volgorde genummerd). Ze worden bij elke schermtest opnieuw gemaakt met voorbeeldgegevens.
+  Download: GitHub → branch `schermen-main` → map `playstore` → bestand → "Download raw file".
+- **Feature graphic (1024×500):** nog niet gemaakt; dat is ontwerpwerk (logo + slogan). Kan in Claude Design of Canva.
 - **Contact-e-mail:** apart adres aanbevolen (niet je persoonlijke Gmail).

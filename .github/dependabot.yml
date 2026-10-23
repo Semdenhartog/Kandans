@@ -1,0 +1,25 @@
+# Eén keer per maand één voorstel (pull request) met alle pakket-updates samen.
+# De build draait er automatisch op; pas samenvoegen als die groen is.
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 1
+    groups:
+      alle-pakketten:
+        patterns: ["*"]
+    commit-message:
+      prefix: "Pakketten bijwerken"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 1
+    groups:
+      alle-acties:
+        patterns: ["*"]
+    commit-message:
+      prefix: "GitHub Actions bijwerken"
