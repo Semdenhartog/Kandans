@@ -10,9 +10,16 @@ import 'package:runwise/features/activities/trim_run_screen.dart';
 import 'package:runwise/shared/home_shell.dart' show PendingRunsBanner;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Nep-verbinding zonder automatisch verversen van de inlog (dat start een timer die de test laat falen).
+SupabaseClient _client() => SupabaseClient(
+      'https://voorbeeld.supabase.co',
+      'anon',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+
 /// Repository die het verloop uit het geheugen geeft in plaats van uit Supabase.
 class _FakeRepo extends RunWiseRepository {
-  _FakeRepo(this.streams) : super(SupabaseClient('https://voorbeeld.supabase.co', 'anon'));
+  _FakeRepo(this.streams) : super(_client());
   final Map<String, dynamic>? streams;
 
   @override
@@ -21,7 +28,7 @@ class _FakeRepo extends RunWiseRepository {
 
 Widget _app(Widget child, {List<Override> overrides = const []}) => ProviderScope(
       overrides: [
-        supabaseProvider.overrideWithValue(SupabaseClient('https://voorbeeld.supabase.co', 'anon')),
+        supabaseProvider.overrideWithValue(_client()),
         ...overrides,
       ],
       child: MaterialApp(home: Scaffold(body: child)),

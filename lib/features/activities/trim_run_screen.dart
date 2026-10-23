@@ -30,6 +30,7 @@ class TrimRunScreen extends ConsumerStatefulWidget {
 
 class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
   Map<String, dynamic>? _streams;
+  bool _loaded = false;
   List<double> _d = const [];
   RangeValues? _range;
   Object? _error;
@@ -47,6 +48,7 @@ class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
       final d = (s?['d'] as List?)?.map((x) => (x as num).toDouble()).toList() ?? const <double>[];
       if (!mounted) return;
       setState(() {
+        _loaded = true;
         _streams = s;
         _d = d;
         if (d.length >= 2) _range = RangeValues(0, d.last);
@@ -118,7 +120,7 @@ class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
                     textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
               ),
             )
-          : _streams == null
+          : !_loaded
               ? const LoadingView(cards: 2)
               : range == null
                   ? const Center(

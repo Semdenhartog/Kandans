@@ -411,6 +411,12 @@ jobs:
             grep -E -A8 "EXCEPTION CAUGHT BY|The following .* was thrown" tests-plain.txt | grep -vE "^--$|^$" | head -60 | while IFS= read -r line; do
               echo "::error title=Foutmelding::$line"
             done
+            # GitHub toont maar 10 meldingen per stap: de volledige uitvoer gaat naar branch "testuitvoer-<branch>".
+            mkdir -p /tmp/tu && cp tests-plain.txt /tmp/tu/ && (
+              cd /tmp/tu && git init -q -b t && git config user.name "RunWise CI" && git config user.email "ci@runwise.invalid" &&
+              git add -A && git commit -qm "Testuitvoer ${GITHUB_SHA::7}" &&
+              git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" "t:testuitvoer-${GITHUB_REF_NAME}"
+            ) || echo "::warning::Testuitvoer kon niet naar een branch"
             exit 1
           }
 
