@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:runwise/core/supabase.dart';
+import 'package:runwise/features/profile/shoes_screen.dart';
 import 'package:runwise/core/theme.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/repositories/repositories.dart';
@@ -234,14 +235,18 @@ final _coach = [
       createdAt: _now.subtract(const Duration(minutes: 8))),
 ];
 
-List<Override> _overrides({bool emptyPlan = false, bool newUser = false}) => [
+List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wornShoe = false}) => [
       supabaseProvider.overrideWithValue(SupabaseClient('https://voorbeeld.supabase.co', 'anon')),
       currentUserProvider.overrideWithValue(null),
       profileProvider.overrideWith((ref) => Profile(id: 'u', firstName: 'Sem', homeLatitude: _home.lat, homeLongitude: _home.lon)),
       activitiesProvider.overrideWith((ref) => newUser ? const <Activity>[] : _runs),
       routesProvider.overrideWith((ref) => newUser ? const <RunRoute>[] : _routes),
       planProvider.overrideWith((ref) => emptyPlan || newUser ? const <PlanSession>[] : _plan),
-      shoesProvider.overrideWith((ref) => newUser ? const <Shoe>[] : [Shoe(id: 's1', name: 'Novablast 4', isDefault: true), Shoe(id: 's2', name: 'Endorphin Speed')]),
+      shoesProvider.overrideWith((ref) => newUser
+          ? const <Shoe>[]
+          : wornShoe
+              ? [Shoe(id: 's1', name: 'Novablast 4', isDefault: true, startKm: 662, limitKm: 700, createdAt: DateTime(2100)), Shoe(id: 's2', name: 'Endorphin Speed')]
+              : [Shoe(id: 's1', name: 'Novablast 4', isDefault: true), Shoe(id: 's2', name: 'Endorphin Speed')]),
       racesProvider.overrideWith((ref) => newUser ? const <RaceEvent>[] : [RaceEvent(id: 'w1', name: 'Singelloop', raceDate: _now.add(const Duration(days: 38)), distanceMeters: 10000, goalTimeSeconds: 2880)]),
       coachMessagesProvider.overrideWith((ref) => newUser ? const <CoachMessage>[] : _coach),
       forecastProvider.overrideWith((ref) => _forecast),
@@ -260,12 +265,12 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false}) => [
     ];
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false}) async {
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(ProviderScope(
-    overrides: _overrides(emptyPlan: emptyPlan, newUser: newUser),
+    overrides: _overrides(emptyPlan: emptyPlan, newUser: newUser, wornShoe: wornShoe),
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
@@ -430,6 +435,7 @@ void main() {
   testWidgets('41 nieuw runs', (t) => _shot(t, '41_nieuw_runs', const ActivitiesScreen(), height: 1400, newUser: true));
   testWidgets('42 nieuw routes', (t) => _shot(t, '42_nieuw_routes', const RoutesScreen(), height: 1400, newUser: true));
   testWidgets('43 nieuw coach', (t) => _shot(t, '43_nieuw_coach', const CoachScreen(), height: 915, newUser: true));
+  testWidgets('44 schoenen aan vervanging toe', (t) => _shot(t, '44_schoenen', const ShoesScreen(), height: 1400, wornShoe: true));
   // Grote letters (160%): valt er iets uit beeld, dan faalt de stap 'Uit beeld-controle' in screens.yml.
   testWidgets('30 groot opnemen start', (t) {
     // Vorige tests laten een lopende run achter; voor het startscherm terug naar stilstand.
