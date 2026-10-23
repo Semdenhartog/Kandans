@@ -30,12 +30,12 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 11. ✅ **P1 Uitleg in één zin:** "11 punten beter dan nu: minder warm en droger." Vergelijkt het beste moment met nu, per soort weer. *Waarom:* een score zonder reden voelt willekeurig. *Wat:* "18:00 wint van 17:00: minder tegenwind op de terugweg".
 12. ⬜ **P1 Voorspelling achteraf controleren.** *Wat:* na de run vergelijken wat voorspeld was met het echte weer; zo zie je of het model klopt ("8 van de 10 keer goed").
-13. ⬜ **P2 Leren van wanneer je echt loopt.** *Wat:* loop je steeds rond 7:00, dan weegt die tijd zwaarder mee in het advies.
+13. ✅ **P2 Leren van wanneer je echt loopt (deels).** RunWise herkent je gewone looptijd uit je runs van de laatste 60 dagen (alleen als je echt meestal rond hetzelfde tijdstip loopt; bij wisseldiensten niet). Wordt nu gebruikt voor de ochtendmelding; de score zelf is bewust niet aangepast.
 14. ⬜ **P2 KNMI-weeralarm meenemen.** *Wat:* bij code oranje/rood een duidelijke waarschuwing bovenaan Vandaag.
 15. ⬜ **P2 Onzekerheid tonen.** *Wat:* "regen om 18:00 – onzeker" als de weermodellen het oneens zijn.
 16. ⬜ **P2 Hitte-gewenning.** *Wat:* de eerste warme dagen van het jaar zwaarder wegen dan dezelfde temperatuur in juli.
 17. ⬜ **P2 Eén schuif "regen vind ik niet erg".** *Wat:* simpele voorkeuren in plaats van een ingewikkeld profiel.
-18. ⬜ **P2 Ochtendmelding alleen als het uitmaakt.** *Wat:* alleen melden als het beste moment duidelijk beter is dan je gewone tijd, anders stil.
+18. ✅ **P2 Ochtendmelding alleen als het uitmaakt.** Stil als je gewone looptijd prima is; wel een melding als een ander moment ≥8 punten beter is ("12 punten beter dan je gewone tijd (18:30)") of je gewone tijd slecht uitkomt. Schakelaar in Ik → Dagelijkse melding; staat standaard aan.
 19. ⬜ **P3 Ideale temperatuur per seizoen.** *Wat:* het loopprofiel apart voor zomer en winter.
 20. ⬜ **P3 Diensten uit je agenda lezen.** *Waarom:* met wisseldiensten verschuift je vrije tijd elke week. *Wat:* bezette blokken uit de agenda automatisch overslaan in het advies.
 

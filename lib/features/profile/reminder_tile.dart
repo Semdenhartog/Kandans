@@ -97,6 +97,19 @@ class _ReminderTileState extends ConsumerState<ReminderTile> {
             trailing: Text(s!.timeLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
             onTap: _pickTime,
           ),
+        if (s?.enabled ?? false)
+          SwitchListTile(
+            secondary: const TileIcon(Icons.tune),
+            title: const Text('Alleen als het uitmaakt'),
+            subtitle: const Text('Geen melding als je gewone looptijd vandaag ook prima is. '
+                'Loop je op wisselende tijden, dan krijg je de melding gewoon elke dag.'),
+            value: s!.onlyWhenItMatters,
+            onChanged: (on) async {
+              await NotificationService.instance.setOnlyWhenItMatters(on);
+              await _load();
+              _refreshSchedule();
+            },
+          ),
       ],
     );
   }

@@ -96,6 +96,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           durationMinutes: _durationMinutes,
           rain: ref.read(rainNowcastProvider).value,
           availability: ref.read(availabilityProvider).value ?? Availability.always,
+          runStarts: [for (final a in ref.read(activitiesProvider).value ?? const <Activity>[]) a.startedAt],
         )
         .ignore();
   }

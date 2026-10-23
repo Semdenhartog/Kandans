@@ -12,14 +12,19 @@ import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
 import '../../domain/extras.dart' show weekendLongRun, weekendText;
 import '../../domain/start_time_scoring.dart';
+import '../../domain/usual_time.dart';
 import '../models/models.dart';
 
 /// Instellingen voor de dagelijkse melding.
 class DailyReminderSettings {
-  const DailyReminderSettings({required this.enabled, required this.hour, required this.minute});
+  const DailyReminderSettings({required this.enabled, required this.hour, required this.minute, this.onlyWhenItMatters = true});
   final bool enabled;
   final int hour;
   final int minute;
+
+  /// Alleen een ochtendmelding als het beste moment duidelijk beter is dan je gewone looptijd
+  /// (of die vandaag slecht uitkomt). Zonder gewone looptijd komt de melding altijd.
+  final bool onlyWhenItMatters;
 
   String get timeLabel => '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
 }
@@ -40,6 +45,7 @@ class NotificationService {
   static const _kHour = 'reminder_hour';
   static const _kMinute = 'reminder_minute';
   static const _kType = 'last_training_type';
+  static const _kSmart = 'reminder_only_when_it_matters';
   static const _ids = [101, 102];
 
   static const _details = NotificationDetails(
@@ -186,7 +192,13 @@ class NotificationService {
       enabled: p.getBool(_kEnabled) ?? false,
       hour: p.getInt(_kHour) ?? 7,
       minute: p.getInt(_kMinute) ?? 30,
+      onlyWhenItMatters: p.getBool(_kSmart) ?? true,
     );
+  }
+
+  Future<void> setOnlyWhenItMatters(bool on) async {
+    final p = await SharedPreferences.getInstance();
+    await p.setBool(_kSmart, on);
   }
 
   /// Zet de melding aan of uit. Geeft false als de gebruiker geen toestemming gaf.
@@ -231,6 +243,7 @@ class NotificationService {
     int durationMinutes = 45,
     RainNowcast? rain,
     Availability availability = Availability.always,
+    List<DateTime> runStarts = const [],
   }) async {
     if (!Platform.isAndroid) return;
     final s = await settings();
@@ -247,6 +260,7 @@ class NotificationService {
     );
 
     final now = DateTime.now();
+    final usual = s.onlyWhenItMatters ? usualStartTime(runStarts, now: now) : null;
     await _plugin.cancel(_soonId);
     // Seintje 30 minuten voor het beste moment van vandaag (alleen als het een goed moment is).
     try {
@@ -282,9 +296,21 @@ class NotificationService {
       final best = planner.bestPrecise(type, from: from, horizon: until.difference(from));
       if (best == null) continue;
 
+      // Je gewone looptijd die dag (alleen als die na het meldmoment valt).
+      final usualAt = usual?.on(date);
+      final atUsual = usualAt != null && usualAt.isAfter(from) && usualAt.isBefore(until) ? planner.scoreAt(usualAt, type) : null;
+      final decision = reminderDecision(
+        best: best,
+        usual: usual,
+        atUsual: atUsual,
+        usualAllowed: usualAt != null && availability.allows(usualAt, durationMinutes),
+      );
+      if (!decision.send) continue; // Je gewone tijd is prima: geen melding nodig.
+
       final w = best.weather;
       final body = 'Vertrek om ${Fmt.time(best.start)} (${best.verdict.toLowerCase()}, score ${best.score}) · '
           '${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${w.windSpeed.round()} km/u. '
+          '${decision.note == null ? '' : '${decision.note} '}'
           'Training: ${type.label.toLowerCase()}.';
       await _plugin.zonedSchedule(
         id,
