@@ -2,7 +2,7 @@
 
 Gemaakt op 22-10-2026 na het doorlezen van de code (±38.000 regels Dart, 7 edge functions).
 
-**Let op:** bij het nalopen bleken 17 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
+**Let op:** bij het nalopen bleken 18 punten al (grotendeels) in de app te zitten; die staan op ✅ met "Bestond al".
 
 **Eerlijke conclusie vooraf:** RunWise heeft al meer functies dan de meeste betaalde hardloop-apps.
 De grootste winst zit niet in nóg meer functies, maar in **betrouwbaarheid, testen, eenvoud en de lancering**.
@@ -90,7 +90,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 55. ⬜ **P2 Kleurenblind-veilig.** *Wat:* scores niet alleen met rood/groen, ook met vorm of tekst.
 56. ⬜ **P2 Instellingen doorzoekbaar.** *Waarom:* er zijn er inmiddels erg veel.
 57. ⬜ **P2 Engelse taal.** *Wat:* teksten naar een vertaalbestand. Groot werk, pas zinvol voor buitenlandse lancering.
-58. ⬜ **P2 Lege schermen met één duidelijke actie** (geen runs, geen routes).
+58. ✅ **P2 Lege schermen met één duidelijke actie** (geen runs, geen routes). *Bestond al: nagekeken met nieuwe schermtests 40–43 (Vandaag, Runs, Routes, Coach zonder gegevens); elk scherm heeft uitleg en één duidelijke knop.*
 59. ✅ **P2 Onboarding inkorten** tot max. 3 schermen; de rest uitleggen op het moment dat je het nodig hebt. *Bestond al: de rondleiding heeft 3 schermen.*
 60. ⬜ **P3 Trillen consequent** (alleen bij echte acties, niet overal).
 
