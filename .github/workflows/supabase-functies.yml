@@ -33,6 +33,7 @@ jobs:
           supabase functions deploy delete-account --project-ref "$PROJECT_REF"
           supabase functions deploy route-generator --project-ref "$PROJECT_REF"
           supabase functions deploy street-photos --project-ref "$PROJECT_REF"
+          supabase functions deploy poster-order --project-ref "$PROJECT_REF"
 
       # Zonder login-controle door Supabase: Strava en RevenueCat roepen deze zelf aan;
       # de functies controleren zelf wie er belt.
@@ -42,3 +43,5 @@ jobs:
           supabase functions deploy revenuecat-webhook --project-ref "$PROJECT_REF" --no-verify-jwt
           # De live-locatiepagina wordt zonder account bekeken; het geheime token in de link is de toegang.
           supabase functions deploy live-share --project-ref "$PROJECT_REF" --no-verify-jwt
+          # Stripe belt zelf; de functie controleert de handtekening van Stripe.
+          supabase functions deploy stripe-webhook --project-ref "$PROJECT_REF" --no-verify-jwt

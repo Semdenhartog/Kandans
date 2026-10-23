@@ -14,6 +14,7 @@ import '../features/auth/signup_screen.dart';
 import '../features/auth/verify_screen.dart';
 import '../features/coach/coach_screen.dart';
 import '../features/coach/paywall_screen.dart';
+import '../features/routes/poster_orders_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/profile/shoes_screen.dart';
@@ -74,6 +75,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/strava-connected',
         builder: (c, s) => StravaReturnScreen(status: s.uri.queryParameters['status'] ?? 'error'),
       ),
+      // Terugkomst na de betaalpagina van een poster: runwise://app/poster-besteld?status=ok&order=<id>
+      GoRoute(
+        path: '/poster-besteld',
+        builder: (c, s) => PosterOrdersScreen(
+          highlight: s.uri.queryParameters['order'],
+          justPaid: s.uri.queryParameters['status'] == 'ok',
+          cancelled: s.uri.queryParameters['status'] == 'cancel',
+        ),
+      ),
+      GoRoute(path: '/posters', builder: (c, s) => const PosterOrdersScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [

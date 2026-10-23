@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:share_plus/share_plus.dart';
@@ -17,6 +18,7 @@ import '../../domain/geo.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
+import '../luxe/luxe.dart';
 import '../routes/route_map.dart' show windColor, baseTileLayer;
 
 void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<String> badges = const []}) {
@@ -25,20 +27,20 @@ void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<Strin
   ));
 }
 
-enum _CardStyle { kaart, donker, oranje, foto, sticker }
+enum _CardStyle { kaart, donker, oranje, goud, foto, sticker }
 
 /// Maakt een mooie afbeelding van je run om te delen (Instagram, WhatsApp, ...).
-class ShareRunScreen extends StatefulWidget {
+class ShareRunScreen extends ConsumerStatefulWidget {
   const ShareRunScreen({super.key, required this.activity, this.route, this.badges = const []});
   final Activity activity;
   final RunRoute? route;
   final List<String> badges;
 
   @override
-  State<ShareRunScreen> createState() => _ShareRunScreenState();
+  ConsumerState<ShareRunScreen> createState() => _ShareRunScreenState();
 }
 
-class _ShareRunScreenState extends State<ShareRunScreen> {
+class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
   final _key = GlobalKey();
   // Met GPS-spoor standaard de echte kaart; anders de donkere kaart.
   late _CardStyle _style = (widget.activity.hasTrack || widget.route != null) ? _CardStyle.kaart : _CardStyle.donker;
@@ -77,6 +79,11 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
   }
 
   Future<void> _share() async {
+    // Gouden kaart hoort bij de Luxe-ontwerpen.
+    if (_style == _CardStyle.goud && !await ref.read(luxeAccessProvider.future)) {
+      if (!mounted || !await showLuxeSheet(context, ref)) return;
+    }
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
       final boundary = _key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
@@ -127,6 +134,7 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                         route: widget.route,
                         badges: widget.badges,
                         orange: _style == _CardStyle.oranje,
+                        gold: _style == _CardStyle.goud,
                         hideHome: _hideHome,
                         photo: _style == _CardStyle.foto ? _photo : null,
                         sticker: _style == _CardStyle.sticker,
@@ -149,6 +157,11 @@ class _ShareRunScreenState extends State<ShareRunScreen> {
                         const ButtonSegment(value: _CardStyle.kaart, label: Text('Kaart')),
                       const ButtonSegment(value: _CardStyle.donker, label: Text('Donker')),
                       const ButtonSegment(value: _CardStyle.oranje, label: Text('Oranje')),
+                      ButtonSegment(
+                        value: _CardStyle.goud,
+                        label: const Text('Goud'),
+                        icon: (ref.watch(luxeAccessProvider).value ?? false) ? null : const Icon(Icons.lock, size: 14, color: luxeGold),
+                      ),
                       if (_photo != null) const ButtonSegment(value: _CardStyle.foto, label: Text('Foto')),
                       const ButtonSegment(value: _CardStyle.sticker, label: Text('Sticker')),
                     ],
@@ -191,6 +204,7 @@ class RunShareCard extends StatelessWidget {
     this.route,
     this.badges = const [],
     this.orange = false,
+    this.gold = false,
     this.hideHome = true,
     this.photo,
     this.sticker = false,
@@ -206,6 +220,9 @@ class RunShareCard extends StatelessWidget {
   final RunRoute? route;
   final List<String> badges;
   final bool orange;
+
+  /// Luxe: zwart met goud (hoort bij de Luxe-ontwerpen).
+  final bool gold;
 
   /// Eigen foto als achtergrond (donker gemaakt zodat de tekst leesbaar blijft).
   final Uint8List? photo;
@@ -258,6 +275,12 @@ class RunShareCard extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
                 )
+              : gold
+                  ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF1E170B), Color(0xFF0A0806), Color(0xFF15100A)],
+                    )
               : const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -303,6 +326,15 @@ class RunShareCard extends StatelessWidget {
                 ),
               ),
             ],
+            if (gold && photo == null && !sticker && !map)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Padding(
+                    padding: const EdgeInsets.all(9),
+                    child: DecoratedBox(decoration: BoxDecoration(border: Border.all(color: luxeGold.withValues(alpha: 0.7)))),
+                  ),
+                ),
+              ),
             if (!orange && photo == null && !sticker && !map)
               Positioned(
                 right: -120,
@@ -313,7 +345,10 @@ class RunShareCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
-                      colors: [RwColors.accent.withValues(alpha: 0.28), RwColors.accent.withValues(alpha: 0)],
+                      colors: [
+                        (gold ? luxeGold : RwColors.accent).withValues(alpha: gold ? 0.22 : 0.28),
+                        (gold ? luxeGold : RwColors.accent).withValues(alpha: 0),
+                      ],
                     ),
                   ),
                 ),
@@ -350,6 +385,7 @@ class RunShareCard extends StatelessWidget {
                               windSpeed: a.windSpeedKmh,
                               windFrom: a.windDirectionDegrees,
                               orange: orange,
+                              gold: gold,
                               showStart: !hideHome,
                             ),
                           )
@@ -364,7 +400,7 @@ class RunShareCard extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                       decoration: BoxDecoration(
-                        color: orange ? RwColors.accentDark : RwColors.accent,
+                        color: orange ? RwColors.accentDark : (gold ? luxeGold : RwColors.accent),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -381,7 +417,7 @@ class RunShareCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
+                      _goldIf(gold, Text(
                         km,
                         style: TextStyle(
                           fontFamily: RwFonts.display, fontFeatures: rwTnum,
@@ -391,7 +427,7 @@ class RunShareCard extends StatelessWidget {
                           color: fg,
                           letterSpacing: -1.5,
                         ),
-                      ),
+                      )),
                       const SizedBox(width: 6),
                       Text(
                         'km',
@@ -457,8 +493,10 @@ class _ShareRoutePainter extends CustomPainter {
     required this.windSpeed,
     required this.windFrom,
     required this.orange,
+    this.gold = false,
     this.showStart = true,
   });
+  final bool gold;
   final bool showStart;
   final RouteTrack track;
   final double? windSpeed;
@@ -495,7 +533,7 @@ class _ShareRoutePainter extends CustomPainter {
     }
 
     final full = pathOf(pts);
-    final base = orange ? RwColors.accentDark : RwColors.accent;
+    final base = orange ? RwColors.accentDark : (gold ? luxeGold : RwColors.accent);
     canvas.drawPath(
       full,
       Paint()
@@ -507,7 +545,7 @@ class _ShareRoutePainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
     );
 
-    final segments = orange
+    final segments = orange || gold
         ? [WindSegment(pts, WindClass.calm)]
         : windSegments(track, windSpeedKmh: windSpeed ?? 0, windFromDegrees: windSpeed == null ? null : windFrom);
     for (final s in segments) {
@@ -515,7 +553,7 @@ class _ShareRoutePainter extends CustomPainter {
       canvas.drawPath(
         pathOf(s.points),
         Paint()
-          ..color = orange ? RwColors.accentDark : windColor(s.windClass)
+          ..color = orange ? RwColors.accentDark : (gold ? luxeGold : windColor(s.windClass))
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4.5
           ..strokeCap = StrokeCap.round
@@ -530,7 +568,8 @@ class _ShareRoutePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ShareRoutePainter old) => old.track != track || old.orange != orange || old.showStart != showStart;
+  bool shouldRepaint(covariant _ShareRoutePainter old) =>
+      old.track != track || old.orange != orange || old.gold != gold || old.showStart != showStart;
 }
 
 
@@ -568,3 +607,18 @@ class _ShareMap extends StatelessWidget {
     );
   }
 }
+
+/// Gouden verloop over [child] als [on] (Luxe-deelkaart).
+Widget _goldIf(bool on, Widget child) => !on
+    ? child
+    : ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (r) => const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF3DC95), luxeGold, Color(0xFF9C7A2E), Color(0xFFE8C977)],
+          stops: [0, 0.4, 0.75, 1],
+        ).createShader(r),
+        child: child,
+      );
+

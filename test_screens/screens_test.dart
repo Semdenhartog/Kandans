@@ -57,6 +57,13 @@ import 'package:runwise/domain/best_efforts.dart';
 import 'package:runwise/domain/run_streams.dart';
 import 'package:runwise/features/routes/route_detail_screen.dart';
 import 'package:runwise/features/routes/routes_screen.dart';
+import 'package:runwise/features/routes/poster_design.dart';
+import 'package:runwise/features/routes/poster_order_screen.dart';
+import 'package:runwise/features/activities/share_run_screen.dart' show RunShareCard;
+import 'package:runwise/features/luxe/luxe.dart' show luxeAccessProvider;
+import 'package:runwise/features/profile/shoe_replace_card.dart' show shoeShopProvider;
+import 'package:runwise/domain/shoe_shop.dart';
+import 'package:runwise/data/services/poster_order_service.dart';
 
 const _w = 412.0;
 
@@ -262,6 +269,13 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
       monthlyGoalProvider.overrideWith((ref) => 120.0),
       activityStreamsProvider(_runs.first.id!).overrideWith((ref) => _streams),
       routeDetailProvider('r1').overrideWith((ref) => _routes.first),
+      luxeAccessProvider.overrideWith((ref) => false),
+      shoeShopProvider.overrideWith((ref) => const ShoeShop(
+          name: 'Hardloopwinkel', urlTemplate: 'https://winkel.example/zoek?q={q}', isPartner: true)),
+      posterProductsProvider.overrideWith((ref) => const [
+            PosterProduct(id: '30x40', label: '30 × 40 cm', widthMm: 300, heightMm: 400, priceCents: 2495, description: 'Mat posterpapier, 200 g/m²'),
+            PosterProduct(id: '50x70', label: '50 × 70 cm', widthMm: 500, heightMm: 700, priceCents: 3495, description: 'Mat posterpapier, 200 g/m²'),
+          ]),
     ];
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
@@ -436,6 +450,38 @@ void main() {
   testWidgets('42 nieuw routes', (t) => _shot(t, '42_nieuw_routes', const RoutesScreen(), height: 1400, newUser: true));
   testWidgets('43 nieuw coach', (t) => _shot(t, '43_nieuw_coach', const CoachScreen(), height: 915, newUser: true));
   testWidgets('44 schoenen aan vervanging toe', (t) => _shot(t, '44_schoenen', const ShoesScreen(), height: 1400, wornShoe: true));
+  testWidgets('45 luxe posters', (t) {
+    final r = _routes.first;
+    final data = PosterData(title: r.name, polyline: r.polyline, distanceMeters: r.distanceMeters, elevationGainMeters: r.elevationGainMeters, timesRun: 19);
+    return _shot(
+        t,
+        '45_luxe_posters',
+        Scaffold(
+          body: GridView.count(
+            padding: const EdgeInsets.all(12),
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 4 / 5,
+            children: [for (final st in PosterStyle.values.where((x) => x.isLuxe)) RoutePosterArt(data: data, style: st)],
+          ),
+        ),
+        height: 1000);
+  });
+  testWidgets('46 gouden deelkaart', (t) => _shot(
+      t, '46_gouden_deelkaart', Scaffold(body: Center(child: RunShareCard(activity: _runs.first, route: _routes.first, gold: true, badges: const ['Record 5 km']))),
+      height: 700));
+  testWidgets('47 poster bestellen', (t) {
+    final r = _routes.first;
+    return _shot(
+        t,
+        '47_poster_bestellen',
+        PosterOrderScreen(
+          data: PosterData(title: r.name, polyline: r.polyline, distanceMeters: r.distanceMeters, elevationGainMeters: r.elevationGainMeters, timesRun: 19),
+          style: PosterStyle.goud,
+        ),
+        height: 2200);
+  });
   // Grote letters (160%): valt er iets uit beeld, dan faalt de stap 'Uit beeld-controle' in screens.yml.
   testWidgets('30 groot opnemen start', (t) {
     // Vorige tests laten een lopende run achter; voor het startscherm terug naar stilstand.

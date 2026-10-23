@@ -74,6 +74,46 @@ class BillingService {
     }
   }
 
+  // ------------------------------------------------------------ Luxe-ontwerpen (eenmalige aankoop)
+
+  /// Product in Google Play en RevenueCat (eenmalig, niet verbruikbaar).
+  static const luxeProductId = 'runwise_luxe_designs';
+
+  /// Rechten-id in RevenueCat die bij het product hoort.
+  static const luxeEntitlement = 'luxe_designs';
+
+  Future<StoreProduct?> _luxeProduct() async {
+    final list = await Purchases.getProducts([luxeProductId], productCategory: ProductCategory.nonSubscription);
+    return list.isEmpty ? null : list.first;
+  }
+
+  /// Prijs zoals Google Play hem toont (bijv. "€ 2,99"), of null als het product nog niet bestaat.
+  Future<String?> luxePrice(String userId) async {
+    await _ensure(userId);
+    return (await _luxeProduct())?.priceString;
+  }
+
+  /// Heeft deze gebruiker de Luxe-ontwerpen gekocht?
+  Future<bool> hasLuxeDesigns(String userId) async {
+    await _ensure(userId);
+    final info = await Purchases.getCustomerInfo();
+    return info.entitlements.active.containsKey(luxeEntitlement);
+  }
+
+  /// Koopt de Luxe-ontwerpen. Geeft false als de gebruiker zelf annuleert.
+  Future<bool> buyLuxeDesigns(String userId) async {
+    await _ensure(userId);
+    final product = await _luxeProduct();
+    if (product == null) throw Exception('De Luxe-ontwerpen zijn nog niet te koop. Probeer het later opnieuw.');
+    try {
+      await Purchases.purchaseStoreProduct(product);
+    } on PlatformException catch (e) {
+      if (PurchasesErrorHelper.getErrorCode(e) == PurchasesErrorCode.purchaseCancelledError) return false;
+      throw Exception('Betalen is niet gelukt. Probeer het opnieuw.');
+    }
+    return hasLuxeDesigns(userId);
+  }
+
   /// Zet een eerder gekocht abonnement terug (bijv. na opnieuw installeren).
   Future<bool> restore(String userId) async {
     await _ensure(userId);

@@ -71,6 +71,16 @@ Deno.serve(async (req) => {
     console.error("delete-account photos", e instanceof Error ? e.message : e);
   }
 
+  // Drukbestanden van posters verwijderen (de bestelling zelf blijft, zonder account, voor de boekhouding).
+  try {
+    const bucket = admin.storage.from("poster-files");
+    const { data: files } = await bucket.list(data.user.id, { limit: 1000 });
+    const paths = (files ?? []).map((f) => `${data.user.id}/${f.name}`);
+    if (paths.length) await bucket.remove(paths);
+  } catch (e) {
+    console.error("delete-account poster files", e instanceof Error ? e.message : e);
+  }
+
   const { error: deleteError } = await admin.auth.admin.deleteUser(data.user.id);
   if (deleteError) {
     console.error("delete-account failed", deleteError.message);

@@ -219,6 +219,14 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
+                  leading: const TileIcon(Icons.image_outlined, color: RwColors.accent),
+                  title: const Text('Mijn posters'),
+                  subtitle: const Text('Routeposters die je liet drukken'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/posters'),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
                   leading: const TileIcon(Icons.help_outline),
                   title: const Text('Hulp en veelgestelde vragen'),
                   subtitle: const Text('Route op je horloge, batterij, woordenlijst'),
