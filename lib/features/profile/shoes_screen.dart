@@ -8,6 +8,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
+import 'shoe_replace_card.dart';
 
 /// Mijn schoenen: hoeveel km erop zit en wanneer ze aan vervanging toe zijn.
 class ShoesScreen extends ConsumerWidget {
@@ -71,6 +72,8 @@ class ShoesScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             children: [
+              // Luxe kaart bovenaan als een schoen aan vervanging toe is (hier altijd, ook na "Later").
+              const ShoeReplaceCard(respectSnooze: false),
               for (final s in active) ...[
                 _ShoeCard(
                   shoe: s,

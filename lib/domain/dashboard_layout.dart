@@ -2,6 +2,7 @@
 enum DashCard {
   again('Nog een keer', 'Je laatste route met één tik opnieuw lopen'),
   warnings('Waarschuwingen', 'Onweer, hitte, gladheid, lucht en pollen'),
+  shoes('Nieuwe schoenen', 'Alleen als je schoenen aan vervanging toe zijn'),
   clothing('Aantrekken', 'Kledingadvies voor het gekozen moment'),
   rain('Buien komende 2 uur', 'Live van Buienradar'),
   hours('Per uur', 'De loopomstandigheden per uur'),

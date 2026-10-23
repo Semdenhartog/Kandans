@@ -164,3 +164,10 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 3. Ronde 2: lancering-blokkers (87–91) en beveiliging (79–81).
 4. Ronde 3: stabiliteit (6, 52, 53, 62, 69–72).
 5. Daarna pas de kern slimmer (11–18) en functies (21+).
+
+## M. Extra inkomsten (op verzoek van Sem, 23-10-2026)
+
+101. ✅ **Schoenen bij een hardloopspeciaalzaak.** Luxe kaart "Tijd voor nieuwe schoenen" op Vandaag en in Mijn schoenen: km-ring, advies, knop naar de winkel, afschrijven of later. Winkel en partnerlink instelbaar in Supabase (`model_config`: `shoe_shop_name`, `shoe_shop_url` met `{q}`, `shoe_shop_partner`). Zonder instelling: gewone zoeklink zonder commissie. Partnerlinks staan er eerlijk bij.
+102. ⬜ **Luxe-ontwerpen als losse aankoop** (poster- en deelkaartstijlen; gratis bij Premium).
+103. ⬜ **Routeposter bestellen in de app** (Stripe + drukpartner).
+
