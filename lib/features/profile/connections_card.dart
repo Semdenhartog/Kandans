@@ -7,6 +7,8 @@ import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
+import '../routes/strava_routes_screen.dart';
+import 'strava_history_screen.dart';
 
 /// Strava-oranje (huisstijl van Strava voor de "Koppel met Strava"-knop).
 const _stravaOrange = Color(0xFFFC5200);
@@ -103,6 +105,18 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
               onTap: () => Navigator.pop(ctx, 'sync'),
             ),
             ListTile(
+              leading: const TileIcon(Icons.history),
+              title: const Text('Oude runs ophalen'),
+              subtitle: const Text('Alles van vóór het laatste jaar'),
+              onTap: () => Navigator.pop(ctx, 'history'),
+            ),
+            ListTile(
+              leading: const TileIcon(Icons.route_outlined),
+              title: const Text('Routes uit Strava'),
+              subtitle: const Text('Kies welke routes je in RunWise wilt'),
+              onTap: () => Navigator.pop(ctx, 'routes'),
+            ),
+            ListTile(
               leading: const TileIcon(Icons.link_off, color: RwColors.danger),
               title: const Text('Strava ontkoppelen', style: TextStyle(color: RwColors.danger)),
               onTap: () => Navigator.pop(ctx, 'disconnect'),
@@ -112,6 +126,14 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
       ),
     );
     if (!mounted || choice == null) return;
+    if (choice == 'history') {
+      openStravaHistory(context);
+      return;
+    }
+    if (choice == 'routes') {
+      openStravaRoutes(context);
+      return;
+    }
     if (choice == 'sync') {
       await _run(() async {
         final n = await _sync.syncStrava();

@@ -6,6 +6,9 @@
 //   POST  { action: "sync" }        -> haalt nieuwe runs op (met het weer van dat moment)
 //   POST  { action: "disconnect" }  -> ontkoppelt en verwijdert de Strava-runs
 //   POST  { action: "streams", activity_id } -> tijden per km en grafiek van één run
+//   POST  { action: "history", before? }   -> oudere runs (ouder dan het eerste jaar), 200 activiteiten per keer
+//   POST  { action: "routes" }    -> je routes in Strava (lijst)
+//   POST  { action: "route", route_id }  -> één route met de volledige lijn, om te importeren
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets):
 //   STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
@@ -201,7 +204,8 @@ async function connect(db: SupabaseClient, userId: string) {
   url.searchParams.set("redirect_uri", callbackUrl());
   url.searchParams.set("response_type", "code");
   url.searchParams.set("approval_prompt", "auto");
-  url.searchParams.set("scope", "read,activity:read_all");
+  // read_all: ook je privéroutes kunnen importeren.
+  url.searchParams.set("scope", "read,read_all,activity:read_all");
   url.searchParams.set("state", state);
   return json(200, { url: url.toString() });
 }
@@ -266,6 +270,38 @@ type StravaActivity = {
   start_latlng?: [number, number] | [];
   map?: { summary_polyline?: string | null };
 };
+
+/// Strava-runs als rijen voor de tabel activities, met het weer van dat moment.
+async function toRows(list: StravaActivity[], userId: string) {
+  return await mapLimit(list, 6, async (a) => {
+    const start = new Date(a.start_date);
+    const ll = a.start_latlng && a.start_latlng.length === 2 ? a.start_latlng : null;
+    const w = ll ? await weatherAt(ll[0], ll[1], start) : null;
+    return {
+      user_id: userId,
+      source: "strava",
+      external_id: String(a.id),
+      started_at: start.toISOString(),
+      distance_meters: a.distance,
+      moving_time_seconds: a.moving_time,
+      average_pace_seconds_per_km: Math.round((a.moving_time / (a.distance / 1000)) * 100) / 100,
+      average_heart_rate: a.average_heartrate ? Math.round(a.average_heartrate) : null,
+      elevation_gain_meters: a.total_elevation_gain ?? null,
+      temperature_celsius: w?.temperature_celsius ?? null,
+      feels_like_celsius: w?.feels_like_celsius ?? null,
+      wind_speed_kmh: w?.wind_speed_kmh ?? null,
+      wind_direction_degrees: w?.wind_direction_degrees ?? null,
+      humidity_pct: w?.humidity_pct ?? null,
+      // GPS-spoor (vereenvoudigd) om de run aan een route te koppelen. "" = geen spoor.
+      track_polyline: a.map?.summary_polyline ?? "",
+    };
+  });
+}
+
+/// Is dit een run die we bewaren? (geen fiets, geen loopband, niet te kort)
+function isRun(a: StravaActivity) {
+  return RUN_TYPES.has(a.sport_type ?? a.type ?? "") && !a.trainer && a.distance > 500 && a.moving_time > 0;
+}
 
 /// Runs die al vóór deze versie waren opgehaald hebben nog geen GPS-spoor.
 /// Eenmalig ophalen (max. 3 pagina's per sync), zodat ook oude runs aan routes gekoppeld kunnen worden.
@@ -381,9 +417,7 @@ async function sync(db: SupabaseClient, userId: string) {
       if (list.length < 100) break;
     }
 
-    const runs = fetched.filter((a) =>
-      RUN_TYPES.has(a.sport_type ?? a.type ?? "") && !a.trainer && a.distance > 500 && a.moving_time > 0
-    );
+    const runs = fetched.filter(isRun);
 
     // Handmatig ingevoerde runs rond hetzelfde tijdstip niet dubbel opslaan.
     const { data: manual } = await db.from("activities").select("started_at")
@@ -394,29 +428,7 @@ async function sync(db: SupabaseClient, userId: string) {
 
     const fresh = runs.filter((a) => !isDuplicate(new Date(a.start_date).getTime()));
 
-    const rows = await mapLimit(fresh, 6, async (a) => {
-      const start = new Date(a.start_date);
-      const ll = a.start_latlng && a.start_latlng.length === 2 ? a.start_latlng : null;
-      const w = ll ? await weatherAt(ll[0], ll[1], start) : null;
-      return {
-        user_id: userId,
-        source: "strava",
-        external_id: String(a.id),
-        started_at: start.toISOString(),
-        distance_meters: a.distance,
-        moving_time_seconds: a.moving_time,
-        average_pace_seconds_per_km: Math.round((a.moving_time / (a.distance / 1000)) * 100) / 100,
-        average_heart_rate: a.average_heartrate ? Math.round(a.average_heartrate) : null,
-        elevation_gain_meters: a.total_elevation_gain ?? null,
-        temperature_celsius: w?.temperature_celsius ?? null,
-        feels_like_celsius: w?.feels_like_celsius ?? null,
-        wind_speed_kmh: w?.wind_speed_kmh ?? null,
-        wind_direction_degrees: w?.wind_direction_degrees ?? null,
-        humidity_pct: w?.humidity_pct ?? null,
-        // GPS-spoor (vereenvoudigd) om de run aan een route te koppelen. "" = geen spoor.
-        track_polyline: a.map?.summary_polyline ?? "",
-      };
-    });
+    const rows = await toRows(fresh, userId);
 
     if (rows.length > 0) {
       const { error } = await db.from("activities")
@@ -508,6 +520,163 @@ async function streams(db: SupabaseClient, userId: string, activityId: string) {
   return json(200, { streams: compact });
 }
 
+// ---------------------------------------------------------------- geschiedenis
+
+const HISTORY_PAGE = 200; // Strava geeft maximaal 200 activiteiten per pagina
+
+/// Oudere runs ophalen: één pagina van 200 activiteiten ouder dan [before] (of dan je oudste Strava-run).
+/// De app roept dit herhaald aan met de teruggegeven next_before, tot done = true.
+/// Zo blijft elke aanroep kort en houden we ons aan de limieten van Strava (100 verzoeken per 15 min).
+async function history(db: SupabaseClient, userId: string, beforeParam: unknown) {
+  const { data: conn } = await db.from("external_connections")
+    .select("user_id").eq("user_id", userId).eq("provider", "strava").maybeSingle();
+  if (!conn) return json(409, { error: "Strava is niet gekoppeld." });
+
+  let before = Number(beforeParam);
+  if (!Number.isFinite(before) || before <= 0) {
+    const { data: oldest } = await db.from("activities").select("started_at")
+      .eq("user_id", userId).eq("source", "strava").order("started_at", { ascending: true }).limit(1).maybeSingle();
+    before = Math.floor((oldest ? new Date(oldest.started_at as string).getTime() : Date.now()) / 1000);
+  }
+
+  try {
+    const token = await accessToken(db, userId);
+    const res = await fetch(
+      `${STRAVA}/api/v3/athlete/activities?before=${Math.floor(before)}&per_page=${HISTORY_PAGE}&page=1`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (res.status === 401) throw new ReconnectNeeded();
+    if (res.status === 429) return json(429, { error: "Strava is even druk. Over 15 minuten gaat het verder.", retry: true });
+    if (!res.ok) throw new Error(`Strava history ${res.status}`);
+    const list = (await res.json()) as StravaActivity[];
+    if (list.length === 0) return json(200, { imported: 0, done: true });
+
+    const times = list.map((a) => new Date(a.start_date).getTime());
+    const oldestTime = Math.min(...times);
+    const runs = list.filter(isRun);
+
+    // Handmatige runs en horloge-runs rond hetzelfde tijdstip niet dubbel opslaan.
+    const { data: others } = await db.from("activities").select("started_at")
+      .eq("user_id", userId).in("source", ["manual", "health_connect", "runwise"])
+      .gte("started_at", new Date(oldestTime - 86_400_000).toISOString())
+      .lte("started_at", new Date(Math.max(...times) + 86_400_000).toISOString());
+    const otherTimes = (others ?? []).map((m) => new Date(m.started_at as string).getTime());
+    const fresh = runs.filter((a) => !otherTimes.some((m) => Math.abs(m - new Date(a.start_date).getTime()) < 20 * 60_000));
+
+    const rows = await toRows(fresh, userId);
+    if (rows.length > 0) {
+      const { error } = await db.from("activities").upsert(rows, { onConflict: "user_id,source,external_id" });
+      if (error) throw error;
+    }
+    return json(200, {
+      imported: rows.length,
+      done: list.length < HISTORY_PAGE,
+      next_before: Math.floor(oldestTime / 1000),
+      oldest: new Date(oldestTime).toISOString(),
+    });
+  } catch (e) {
+    if (e instanceof ReconnectNeeded) {
+      await forgetConnection(db, userId, "Strava-toegang is ingetrokken. Koppel opnieuw.");
+      return json(409, { error: "Strava-toegang is verlopen of ingetrokken. Koppel Strava opnieuw.", reconnect: true });
+    }
+    console.error("strava history failed", e instanceof Error ? e.message : e);
+    return json(502, { error: "Oude runs ophalen bij Strava is mislukt. Probeer het later opnieuw." });
+  }
+}
+
+// ---------------------------------------------------------------- routes
+
+type StravaRoute = {
+  id?: number;
+  id_str?: string;
+  name?: string;
+  distance?: number;
+  elevation_gain?: number;
+  type?: number; // 1 = fiets, 2 = hardlopen
+  private?: boolean;
+  starred?: boolean;
+  updated_at?: string;
+  map?: { polyline?: string | null; summary_polyline?: string | null };
+};
+
+async function tokenInfo(db: SupabaseClient, userId: string): Promise<{ athleteId: number; scope: string }> {
+  const { data } = await db.rpc("strava_get_tokens", { p_user: userId });
+  const t = (data as Tokens[] | null)?.[0];
+  if (!t) throw new ReconnectNeeded();
+  return { athleteId: t.athlete_id, scope: t.scope ?? "" };
+}
+
+/// Je routes in Strava (alleen hardlooproutes), met een vereenvoudigde lijn voor een voorbeeld.
+async function routes(db: SupabaseClient, userId: string) {
+  try {
+    const token = await accessToken(db, userId);
+    const { athleteId, scope } = await tokenInfo(db, userId);
+    const all: StravaRoute[] = [];
+    for (let page = 1; page <= 3; page++) {
+      const res = await fetch(`${STRAVA}/api/v3/athletes/${athleteId}/routes?page=${page}&per_page=100`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) throw new ReconnectNeeded();
+      if (res.status === 429) return json(429, { error: "Strava is even druk. Probeer het over 15 minuten opnieuw." });
+      if (!res.ok) throw new Error(`Strava routes ${res.status}`);
+      const list = (await res.json()) as StravaRoute[];
+      all.push(...list);
+      if (list.length < 100) break;
+    }
+    return json(200, {
+      // id_str: route-id's zijn te groot voor een gewoon getal in JSON.
+      routes: all.filter((r) => r.type === 2).map((r) => ({
+        id: r.id_str ?? String(r.id ?? ""),
+        name: r.name ?? "Route uit Strava",
+        distance_m: r.distance ?? 0,
+        elevation_gain_m: r.elevation_gain ?? null,
+        private: r.private ?? false,
+        starred: r.starred ?? false,
+        summary_polyline: r.map?.summary_polyline ?? "",
+      })).filter((r) => r.id && r.summary_polyline),
+      cycling_skipped: all.filter((r) => r.type !== 2).length,
+      can_see_private: scope.includes("read_all"),
+    });
+  } catch (e) {
+    if (e instanceof ReconnectNeeded) {
+      await forgetConnection(db, userId, "Strava-toegang is ingetrokken. Koppel opnieuw.");
+      return json(409, { error: "Strava-toegang is verlopen of ingetrokken. Koppel Strava opnieuw.", reconnect: true });
+    }
+    console.error("strava routes failed", e instanceof Error ? e.message : e);
+    return json(502, { error: "Routes ophalen bij Strava is mislukt. Probeer het later opnieuw." });
+  }
+}
+
+/// Eén route met de volledige lijn (de lijst heeft alleen een vereenvoudigde).
+async function route(db: SupabaseClient, userId: string, routeId: string) {
+  if (!/^[0-9]{1,25}$/.test(routeId)) return json(400, { error: "Onbekende route." });
+  try {
+    const token = await accessToken(db, userId);
+    const res = await fetch(`${STRAVA}/api/v3/routes/${routeId}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.status === 401) throw new ReconnectNeeded();
+    if (res.status === 404) return json(404, { error: "Deze route bestaat niet meer in Strava." });
+    if (res.status === 429) return json(429, { error: "Strava is even druk. Probeer het over 15 minuten opnieuw." });
+    if (!res.ok) throw new Error(`Strava route ${res.status}`);
+    const r = (await res.json()) as StravaRoute;
+    const polyline = r.map?.polyline || r.map?.summary_polyline || "";
+    if (!polyline) return json(422, { error: "Deze route heeft geen lijn." });
+    return json(200, {
+      id: r.id_str ?? routeId,
+      name: r.name ?? "Route uit Strava",
+      distance_m: r.distance ?? 0,
+      elevation_gain_m: r.elevation_gain ?? null,
+      polyline,
+    });
+  } catch (e) {
+    if (e instanceof ReconnectNeeded) {
+      await forgetConnection(db, userId, "Strava-toegang is ingetrokken. Koppel opnieuw.");
+      return json(409, { error: "Strava-toegang is verlopen of ingetrokken. Koppel Strava opnieuw.", reconnect: true });
+    }
+    console.error("strava route failed", e instanceof Error ? e.message : e);
+    return json(502, { error: "Deze route ophalen bij Strava is mislukt." });
+  }
+}
+
 async function disconnect(db: SupabaseClient, userId: string) {
   try {
     const token = await accessToken(db, userId);
@@ -521,6 +690,8 @@ async function disconnect(db: SupabaseClient, userId: string) {
   await forgetConnection(db, userId, null);
   // Strava-gegevens bewaren we niet na ontkoppelen.
   await db.from("activities").delete().eq("user_id", userId).eq("source", "strava");
+  // Ook routes die uit Strava zijn geïmporteerd (voorwaarden van Strava).
+  await db.from("routes").delete().eq("user_id", userId).not("strava_route_id", "is", null);
   return json(200, { disconnected: true });
 }
 
@@ -554,6 +725,9 @@ Deno.serve(async (req) => {
       case "sync": return await sync(db, userId);
       case "disconnect": return await disconnect(db, userId);
       case "streams": return await streams(db, userId, String(body.activity_id ?? ""));
+      case "history": return await history(db, userId, body.before);
+      case "routes": return await routes(db, userId);
+      case "route": return await route(db, userId, String(body.route_id ?? ""));
       default: return json(400, { error: "Onbekende actie." });
     }
   } catch (e) {

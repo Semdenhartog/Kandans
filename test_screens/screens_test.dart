@@ -64,6 +64,8 @@ import 'package:runwise/features/luxe/luxe.dart' show luxeAccessProvider;
 import 'package:runwise/features/profile/shoe_replace_card.dart' show shoeShopProvider;
 import 'package:runwise/domain/shoe_shop.dart';
 import 'package:runwise/data/services/poster_order_service.dart';
+import 'package:runwise/features/routes/strava_routes_screen.dart';
+import 'package:runwise/features/profile/strava_history_screen.dart';
 
 const _w = 412.0;
 
@@ -272,6 +274,22 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
       luxeAccessProvider.overrideWith((ref) => false),
       shoeShopProvider.overrideWith((ref) => const ShoeShop(
           name: 'Hardloopwinkel', urlTemplate: 'https://winkel.example/zoek?q={q}', isPartner: true)),
+      stravaRoutesProvider.overrideWith((ref) => StravaRouteList(
+            canSeePrivate: false,
+            cyclingSkipped: 3,
+            routes: [
+              for (final (i, r) in _routes.indexed)
+                StravaRouteSummary(
+                  id: '${3400000000000000000 + i}',
+                  name: i == 0 ? r.name : '${r.name} (Strava)',
+                  distanceMeters: r.distanceMeters,
+                  elevationGainMeters: r.elevationGainMeters,
+                  summaryPolyline: r.polyline,
+                  starred: i == 1,
+                  isPrivate: i == 2,
+                ),
+            ],
+          )),
       posterProductsProvider.overrideWith((ref) => const [
             PosterProduct(id: '30x40', label: '30 × 40 cm', widthMm: 300, heightMm: 400, priceCents: 2495, description: 'Mat posterpapier, 200 g/m²'),
             PosterProduct(id: '50x70', label: '50 × 70 cm', widthMm: 500, heightMm: 700, priceCents: 3495, description: 'Mat posterpapier, 200 g/m²'),
@@ -482,6 +500,8 @@ void main() {
         ),
         height: 2200);
   });
+  testWidgets('48 strava oude runs', (t) => _shot(t, '48_strava_oude_runs', const StravaHistoryScreen(), height: 1200));
+  testWidgets('49 strava routes', (t) => _shot(t, '49_strava_routes', const StravaRoutesScreen(), height: 1200));
   // Grote letters (160%): valt er iets uit beeld, dan faalt de stap 'Uit beeld-controle' in screens.yml.
   testWidgets('30 groot opnemen start', (t) {
     // Vorige tests laten een lopende run achter; voor het startscherm terug naar stilstand.

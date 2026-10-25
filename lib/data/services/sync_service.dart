@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/config.dart';
 import '../../core/supabase.dart';
 import '../../domain/geo.dart';
+import '../../domain/gpx_parser.dart' show buildRoute;
 import '../../domain/readiness.dart';
 import '../../domain/run_matcher.dart';
 import '../models/models.dart';
@@ -25,6 +26,51 @@ class StravaConnection {
 }
 
 enum HealthStatus { unavailable, needsInstall, notConnected, connected }
+
+/// Resultaat van één stap "oude runs ophalen".
+class StravaHistoryPage {
+  const StravaHistoryPage({required this.imported, required this.done, this.nextBefore, this.oldest, this.rateLimited = false});
+  final int imported;
+  final bool done;
+
+  /// Waar de volgende stap verdergaat (epoch-seconden).
+  final int? nextBefore;
+
+  /// Oudste activiteit in deze stap (om de voortgang te tonen).
+  final DateTime? oldest;
+
+  /// Strava is even te druk; later verder.
+  final bool rateLimited;
+}
+
+/// Een route in Strava (uit de lijst; de volledige lijn komt bij het importeren).
+class StravaRouteSummary {
+  const StravaRouteSummary({
+    required this.id,
+    required this.name,
+    required this.distanceMeters,
+    required this.summaryPolyline,
+    this.elevationGainMeters,
+    this.isPrivate = false,
+    this.starred = false,
+  });
+  final String id;
+  final String name;
+  final double distanceMeters;
+  final double? elevationGainMeters;
+  final bool isPrivate;
+  final bool starred;
+  final String summaryPolyline;
+}
+
+class StravaRouteList {
+  const StravaRouteList({required this.routes, required this.canSeePrivate, this.cyclingSkipped = 0});
+  final List<StravaRouteSummary> routes;
+
+  /// Mag RunWise je privéroutes zien? (Nee bij een koppeling van vóór deze versie: opnieuw koppelen.)
+  final bool canSeePrivate;
+  final int cyclingSkipped;
+}
 
 /// Haalt runs automatisch op uit Strava (via de server) en Health Connect (op de telefoon).
 class SyncService {
@@ -62,9 +108,9 @@ class SyncService {
     );
   }
 
-  Future<Map<String, dynamic>> _strava(String action) async {
+  Future<Map<String, dynamic>> _strava(String action, [Map<String, dynamic> extra = const {}]) async {
     try {
-      final res = await _db.functions.invoke('strava', body: {'action': action});
+      final res = await _db.functions.invoke('strava', body: {'action': action, ...extra});
       return (res.data as Map).cast<String, dynamic>();
     } on FunctionException catch (e) {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
@@ -85,6 +131,56 @@ class SyncService {
   }
 
   Future<void> disconnectStrava() => _strava('disconnect');
+
+  /// Eén stap van "oude runs ophalen": 200 Strava-activiteiten ouder dan [before] (epoch-seconden).
+  /// Strava te druk? Dan [StravaHistoryPage.rateLimited] in plaats van een fout, zodat je later verder kunt.
+  Future<StravaHistoryPage> stravaHistoryPage({int? before}) async {
+    try {
+      final res = await _db.functions.invoke('strava', body: {'action': 'history', if (before != null) 'before': before});
+      final m = (res.data as Map).cast<String, dynamic>();
+      return StravaHistoryPage(
+        imported: (m['imported'] as num?)?.toInt() ?? 0,
+        done: m['done'] == true,
+        nextBefore: (m['next_before'] as num?)?.toInt(),
+        oldest: m['oldest'] == null ? null : DateTime.tryParse(m['oldest'] as String),
+      );
+    } on FunctionException catch (e) {
+      if (e.status == 429) return const StravaHistoryPage(imported: 0, done: false, rateLimited: true);
+      final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
+      throw Exception(details['error'] ?? 'Oude runs ophalen is niet gelukt. Probeer het later opnieuw.');
+    }
+  }
+
+  /// Je hardlooproutes in Strava.
+  Future<StravaRouteList> stravaRoutes() async {
+    final m = await _strava('routes');
+    return StravaRouteList(
+      routes: [
+        for (final r in (m['routes'] as List? ?? const []).cast<Map>())
+          StravaRouteSummary(
+            id: r['id'].toString(),
+            name: (r['name'] as String?) ?? 'Route uit Strava',
+            distanceMeters: (r['distance_m'] as num?)?.toDouble() ?? 0,
+            elevationGainMeters: (r['elevation_gain_m'] as num?)?.toDouble(),
+            isPrivate: r['private'] == true,
+            starred: r['starred'] == true,
+            summaryPolyline: (r['summary_polyline'] as String?) ?? '',
+          ),
+      ],
+      canSeePrivate: m['can_see_private'] == true,
+      cyclingSkipped: (m['cycling_skipped'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  /// Haalt één Strava-route met de volledige lijn op en bewaart hem als RunWise-route.
+  Future<String> importStravaRoute(StravaRouteSummary r) async {
+    final m = await _strava('route', {'route_id': r.id});
+    final pts = decodePolyline(m['polyline'] as String);
+    final route = buildRoute(pts, name: (m['name'] as String?) ?? r.name, source: 'strava_import')
+        .copyWith(stravaRouteId: r.id, elevationGainMeters: (m['elevation_gain_m'] as num?)?.toDouble());
+    final id = await _ref.read(repositoryProvider).addRoute(route);
+    return id;
+  }
 
   // ------------------------------------------------------------ Health Connect
 

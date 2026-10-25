@@ -171,3 +171,11 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 102. ✅ **Luxe-ontwerpen als losse aankoop.** 4 luxe posterstijlen (Goud, Marmer, Oceaan, Blauwdruk) en een gouden deelkaart; bekijken mag, delen/drukken vraagt ontgrendelen. Eenmalige aankoop via RevenueCat (`runwise_luxe_designs` / `luxe_designs`), gratis bij Premium. Sem: product aanmaken (zie docs/inkomsten.md).
 103. ✅ **Routeposter bestellen in de app.** Formaat en adres kiezen, drukbestand tot 300 dpi, betalen via Stripe (iDEAL/kaart), webhook met handtekeningcontrole zet de bestelling bij Gelato (standaard als concept, dus testmodus), statusoverzicht in Ik → Mijn posters, drukbestanden na 90 dagen weg. Sem: Stripe, Gelato, migratie 0028 en geheimen (zie docs/inkomsten.md).
 
+## N. Strava, badges en uitdagingen (op verzoek van Sem, 25-10-2026)
+
+104. ✅ **Oude runs uit Strava.** Strava → Oude runs ophalen: alles van vóór het eerste jaar, in stappen van 200 met het weer van toen. Voortgang bewaard; als Strava te druk is gaat het na 15 minuten vanzelf verder.
+105. ✅ **Routes uit Strava.** Kies welke hardlooproutes je importeert (ook vanuit het Routes-scherm). Privéroutes na opnieuw koppelen. Bij ontkoppelen verdwijnen ze weer (voorwaarden van Strava).
+106. ⬜ **Meer badges** (snelheid en records, weer en seizoen, volhouden, ontdekken).
+107. ⬜ **Eigen uitdagingen met live voortgang.**
+108. ⬜ **Uitdagingen samen met anderen (ranglijst).**
+

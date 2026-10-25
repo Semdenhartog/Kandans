@@ -237,11 +237,15 @@ class RunRoute {
     this.isFavorite = false,
     this.points = const [],
     this.elevationProfile = const [],
+    this.stravaRouteId,
   });
 
   final String? id;
   final String name;
   final String source;
+
+  /// Id van de route in Strava, als hij daaruit is geïmporteerd (wordt verwijderd bij ontkoppelen).
+  final String? stravaRouteId;
   final double distanceMeters;
   final double startLatitude;
   final double startLongitude;
@@ -273,15 +277,16 @@ class RunRoute {
         _ => 'Getekend',
       };
 
-  RunRoute copyWith({List<RoutePoint>? points, bool? isFavorite}) => RunRoute(
+  RunRoute copyWith({List<RoutePoint>? points, bool? isFavorite, String? stravaRouteId, double? elevationGainMeters}) => RunRoute(
         id: id,
         name: name,
         source: source,
+        stravaRouteId: stravaRouteId ?? this.stravaRouteId,
         distanceMeters: distanceMeters,
         startLatitude: startLatitude,
         startLongitude: startLongitude,
         polyline: polyline,
-        elevationGainMeters: elevationGainMeters,
+        elevationGainMeters: elevationGainMeters ?? this.elevationGainMeters,
         estimatedDurationSeconds: estimatedDurationSeconds,
         isFavorite: isFavorite ?? this.isFavorite,
         points: points ?? this.points,
@@ -300,6 +305,7 @@ class RunRoute {
         estimatedDurationSeconds: _in(j['estimated_duration_seconds']),
         isFavorite: (j['is_favorite'] as bool?) ?? false,
         elevationProfile: ElevationSample.listFromJson(j['elevation_profile']),
+        stravaRouteId: j['strava_route_id'] as String?,
       );
 
   Map<String, dynamic> toInsert(String userId) => {
@@ -314,6 +320,7 @@ class RunRoute {
         'polyline': polyline,
         'is_favorite': isFavorite,
         if (elevationProfile.isNotEmpty) 'elevation_profile': [for (final e in elevationProfile) e.toJson()],
+        if (stravaRouteId != null) 'strava_route_id': stravaRouteId,
       };
 }
 

@@ -19,6 +19,7 @@ import '../dashboard/dashboard_providers.dart';
 import 'route_photos_strip.dart';
 import 'route_undo.dart';
 import 'routes_overview_map.dart';
+import 'strava_routes_screen.dart';
 
 class RoutesScreen extends ConsumerStatefulWidget {
   const RoutesScreen({super.key});
@@ -191,6 +192,13 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.upload_file),
           ),
+          // Alleen als Strava gekoppeld is: je Strava-routes importeren.
+          if (ref.watch(stravaConnectionProvider).value != null)
+            IconButton(
+              tooltip: 'Routes uit Strava',
+              onPressed: () => openStravaRoutes(context),
+              icon: const Icon(Icons.cloud_download_outlined),
+            ),
         ],
       ),
       floatingActionButton: _mapView
