@@ -305,7 +305,12 @@ class _OfferTile extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: 8),
-          FilledButton.tonal(onPressed: onJoin, child: const Text('Doe mee')),
+          FilledButton.tonal(
+            onPressed: onJoin,
+            // Het thema maakt knoppen volle breedte; in een rij moet dat smal.
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 16)),
+            child: const Text('Doe mee'),
+          ),
         ]),
       );
 }

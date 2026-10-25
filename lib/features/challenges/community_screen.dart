@@ -119,7 +119,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuleren')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: const Text('Toevoegen')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text),
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+            child: const Text('Toevoegen'),
+          ),
         ],
       ),
     );
