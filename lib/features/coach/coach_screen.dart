@@ -295,12 +295,12 @@ class _Bubble extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: maxW),
       decoration: BoxDecoration(
         gradient: user
-            ? const LinearGradient(
+            ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: RwColors.isDark ? const [Color(0xFF4A3A22), Color(0xFF2E2416)] : const [Color(0xFFE9DCC5), Color(0xFFE1D1B6)],
               )
-            : const LinearGradient(
+            : LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [RwColors.surface, RwColors.surface],

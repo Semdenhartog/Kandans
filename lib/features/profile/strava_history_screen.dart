@@ -10,7 +10,6 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
-import '../../shared/widgets.dart';
 
 const _stravaOrange = Color(0xFFFC5200);
 

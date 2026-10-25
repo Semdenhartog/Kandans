@@ -92,8 +92,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent),
-      body: Stack(children: [
+      appBar: AppBar(backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent, foregroundColor: rwZandAvond.text),
+      // Altijd donker en goud, ook als de app licht staat.
+      body: DefaultTextStyle.merge(style: TextStyle(color: rwZandAvond.text), child: Stack(children: [
         const Positioned.fill(child: _GoldBackdrop()),
         ListView(
         padding: EdgeInsets.fromLTRB(22, MediaQuery.paddingOf(context).top + kToolbarHeight, 22, 32),
@@ -113,14 +114,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           Text(
             'Je eigen AI-hardloopcoach',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: RwColors.text),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: rwZandAvond.text),
           ),
           const SizedBox(height: 10),
           Text(
             'Kent je runs, je wedstrijden en het weer. Vraag wat je deze week moet lopen, '
             'hoe je je 10 km aanpakt of wat je aantrekt bij 3 graden en regen.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: RwColors.muted, height: 1.5),
+            style: TextStyle(color: rwZandAvond.muted, height: 1.5),
           ),
           const SizedBox(height: 22),
           const _GoldRule(),
@@ -137,7 +138,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               child: Text(
                 'Abonnementen zijn binnenkort beschikbaar. Zodra de app in de Play Store staat, '
                 'kun je hier je gratis proefmaand starten.',
-                style: TextStyle(color: RwColors.muted, height: 1.5),
+                style: TextStyle(color: rwZandAvond.muted, height: 1.5),
               ),
             )
           else
@@ -154,7 +155,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 if (list.isEmpty) {
                   return RwCard(
                     child: Text('Er zijn nu geen abonnementen beschikbaar. Probeer het later opnieuw.',
-                        style: TextStyle(color: RwColors.muted)),
+                        style: TextStyle(color: rwZandAvond.muted)),
                   );
                 }
                 final selected = list.firstWhere((p) => p.isYearly == _yearly, orElse: () => list.first);
@@ -186,7 +187,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           : '${selected.price} per ${selected.isYearly ? 'jaar' : 'maand'}, automatisch verlengd. '
                               'Opzeggen kan altijd in Google Play.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),
+                      style: TextStyle(color: rwZandAvond.subtle, fontSize: 12, height: 1.5),
                     ),
                   ],
                 );
@@ -214,7 +215,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
         ],
       ),
-      ]),
+      ])),
     );
   }
 }
@@ -375,7 +376,7 @@ class _PlanTile extends StatelessWidget {
         child: Row(
           children: [
             Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? _gold : RwColors.subtle),
+                color: selected ? _gold : rwZandAvond.subtle),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

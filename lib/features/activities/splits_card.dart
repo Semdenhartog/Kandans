@@ -66,11 +66,11 @@ class SplitsCard extends ConsumerWidget {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  const SizedBox(width: 44, child: Text('km', style: _head)),
-                  const Expanded(child: Text('tempo', style: _head)),
-                  if (hasHr) const SizedBox(width: 52, child: Text('hart', style: _head, textAlign: TextAlign.right)),
-                  if (hasEle) const SizedBox(width: 52, child: Text('omhoog', style: _head, textAlign: TextAlign.right)),
-                  const SizedBox(width: 72, child: Text('wind', style: _head, textAlign: TextAlign.right)),
+                  SizedBox(width: 44, child: Text('km', style: _head)),
+                  Expanded(child: Text('tempo', style: _head)),
+                  if (hasHr) SizedBox(width: 52, child: Text('hart', style: _head, textAlign: TextAlign.right)),
+                  if (hasEle) SizedBox(width: 52, child: Text('omhoog', style: _head, textAlign: TextAlign.right)),
+                  SizedBox(width: 72, child: Text('wind', style: _head, textAlign: TextAlign.right)),
                 ],
               ),
               const Divider(height: 12),
@@ -102,7 +102,7 @@ class SplitsCard extends ConsumerWidget {
     ]);
     return [
       const Divider(height: 28),
-      const Text('SNELSTE STUKKEN', style: _head),
+      Text('SNELSTE STUKKEN', style: _head),
       const SizedBox(height: 8),
       for (final b in list)
         Padding(

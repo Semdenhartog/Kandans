@@ -95,7 +95,7 @@ class _AmbiencePainter extends CustomPainter {
       case _Kind.stars:
         for (final (i, b) in bits.indexed) {
           final tw = 0.5 + 0.5 * math.sin((t * 2 + b.x * 3 + i) * math.pi);
-          canvas.drawCircle(Offset(b.x * w, b.y * h * 0.7), 0.8 + b.s, Paint()..color = Colors.white.withValues(alpha: 0.08 + 0.22 * tw));
+          canvas.drawCircle(Offset(b.x * w, b.y * h * 0.7), 0.8 + b.s, Paint()..color = RwColors.text.withValues(alpha: 0.08 + 0.22 * tw));
         }
       case _Kind.clouds:
         for (var i = 0; i < 4; i++) {
@@ -106,7 +106,7 @@ class _AmbiencePainter extends CustomPainter {
           canvas.drawOval(
             Rect.fromCenter(center: Offset(x, y), width: r * 2.4, height: r),
             Paint()
-              ..color = Colors.white.withValues(alpha: 0.035)
+              ..color = RwColors.text.withValues(alpha: 0.035)
               ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
           );
         }
@@ -125,7 +125,7 @@ class _AmbiencePainter extends CustomPainter {
         for (final b in bits) {
           final y = ((b.y + t * 0.8 * b.s) % 1.05) * h;
           final x = b.x * w + 8 * math.sin((t * 4 + b.x * 8) * math.pi);
-          canvas.drawCircle(Offset(x, y), 1.2 + b.s * 1.4, Paint()..color = Colors.white.withValues(alpha: 0.22));
+          canvas.drawCircle(Offset(x, y), 1.2 + b.s * 1.4, Paint()..color = RwColors.text.withValues(alpha: 0.22));
         }
     }
   }

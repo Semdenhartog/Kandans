@@ -5,10 +5,10 @@ import '../core/theme.dart';
 /// Kleuren van de aura per dagdeel: ochtendroze, daggoud, avondoranje, nachtblauw.
 List<Color> auraColors(DateTime t) {
   final h = t.hour;
-  if (h >= 5 && h < 9) return const [Color(0xFFFF8A80), Color(0xFFFDB27A)];
-  if (h >= 9 && h < 17) return [RwColors.accentLight, Color(0xFFFFD27A)];
+  if (h >= 5 && h < 9) return [RwColors.accentLight, const Color(0xFFE6BE8A)];
+  if (h >= 9 && h < 17) return [RwColors.accentLight, RwColors.accent];
   if (h >= 17 && h < 22) return [RwColors.accentDeep, RwColors.accent];
-  return const [Color(0xFF4C6FFF), Color(0xFF7A5CFF)];
+  return const [Color(0xFF5B6B8A), Color(0xFF3F4B66)];
 }
 
 /// Zachte gloed bovenin het scherm, die meekleurt met het dagdeel. Valt bij overgangen zacht over.

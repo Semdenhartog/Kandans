@@ -74,7 +74,11 @@ Future<bool> showLuxeSheet(BuildContext context, WidgetRef ref) async {
     isScrollControlled: true,
     showDragHandle: true,
     backgroundColor: const Color(0xFF0D0B08),
-    builder: (_) => const _LuxeSheet(),
+    // Altijd donker en goud, ook als de app licht staat.
+    builder: (_) => DefaultTextStyle.merge(
+      style: TextStyle(color: rwZandAvond.text),
+      child: IconTheme.merge(data: IconThemeData(color: rwZandAvond.text), child: const _LuxeSheet()),
+    ),
   );
   return ok ?? false;
 }
@@ -165,7 +169,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
             ),
             const SizedBox(height: 6),
             Text('Voor je routeposters en deelkaarten. Eenmalig, voor altijd van jou.',
-                textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, height: 1.4)),
+                textAlign: TextAlign.center, style: TextStyle(color: rwZandAvond.muted, height: 1.4)),
             const SizedBox(height: 18),
             SizedBox(
               height: 150,
@@ -232,7 +236,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
             if (available)
               TextButton(
                 onPressed: _busy ? null : _restore,
-                child: Text('Aankoop herstellen', style: TextStyle(color: RwColors.subtle)),
+                child: Text('Aankoop herstellen', style: TextStyle(color: rwZandAvond.subtle)),
               ),
           ],
         ),

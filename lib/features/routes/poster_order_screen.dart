@@ -328,7 +328,7 @@ class _FormatTile extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: selected ? const Color(0xFF1E180C) : RwColors.surface,
+              color: selected ? (RwColors.isDark ? const Color(0xFF1E180C) : const Color(0xFFF0E3C8)) : RwColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: selected ? luxeGold : RwColors.border, width: selected ? 1.5 : 1),
             ),
