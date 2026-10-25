@@ -48,8 +48,8 @@ class _MemberCardState extends State<MemberCard> {
     final gold = w.premium;
     const months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
     final since = w.since == null ? '—' : '${months[w.since!.month - 1]} ${w.since!.year}';
-    final ink = gold ? const Color(0xFF2A1E05) : RwColors.text;
-    final soft = gold ? const Color(0xAA2A1E05) : RwColors.subtle;
+    final ink = gold ? const Color(0xFF2A1E05) : rwZandAvond.text;
+    final soft = gold ? const Color(0xAA2A1E05) : rwZandAvond.subtle;
 
     return LayoutBuilder(builder: (context, c) {
       final width = c.maxWidth;
@@ -115,7 +115,7 @@ class _MemberCardState extends State<MemberCard> {
                     ),
               border: Border.all(color: gold ? const Color(0x66FFFFFF) : const Color(0x1FFFFFFF)),
               boxShadow: [
-                BoxShadow(color: (gold ? const Color(0xFFD4AF37) : RwColors.accent).withValues(alpha: 0.10), blurRadius: 40, spreadRadius: -6),
+                BoxShadow(color: (gold ? const Color(0xFFD4AF37) : rwZandAvond.accent).withValues(alpha: 0.10), blurRadius: 40, spreadRadius: -6),
                 BoxShadow(color: Colors.black.withValues(alpha: 0.45), blurRadius: 28, spreadRadius: -8, offset: const Offset(0, 12)),
               ],
             ),
@@ -130,7 +130,7 @@ class _MemberCardState extends State<MemberCard> {
                     children: [
                       Row(children: [
                         Text('KADANS',
-                            style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, letterSpacing: 3.2, fontSize: 13, color: gold ? ink : RwColors.accent)),
+                            style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, letterSpacing: 3.2, fontSize: 13, color: gold ? ink : rwZandAvond.accent)),
                         const Spacer(),
                         Text(gold ? 'PREMIUM' : 'MEMBER',
                             style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w700, letterSpacing: 2.4, fontSize: 11, color: soft)),
@@ -233,7 +233,7 @@ class _CardArt extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.4
-        ..color = gold ? const Color(0x552A1E05) : RwColors.accent.withValues(alpha: 0.35),
+        ..color = gold ? const Color(0x552A1E05) : rwZandAvond.accent.withValues(alpha: 0.35),
     );
     final fill = Path.from(p)
       ..lineTo(size.width, size.height)
@@ -247,7 +247,7 @@ class _CardArt extends CustomPainter {
           end: Alignment.bottomCenter,
           colors: gold
               ? [const Color(0x222A1E05), const Color(0x002A1E05)]
-              : [RwColors.accent.withValues(alpha: 0.10), RwColors.accent.withValues(alpha: 0)],
+              : [rwZandAvond.accent.withValues(alpha: 0.10), rwZandAvond.accent.withValues(alpha: 0)],
         ).createShader(Offset.zero & size),
     );
     // Gloed rechtsboven
@@ -256,7 +256,7 @@ class _CardArt extends CustomPainter {
       size.width * 0.5,
       Paint()
         ..shader = RadialGradient(colors: [
-          (gold ? Colors.white : RwColors.accent).withValues(alpha: gold ? 0.25 : 0.10),
+          (gold ? Colors.white : rwZandAvond.accent).withValues(alpha: gold ? 0.25 : 0.10),
           Colors.transparent,
         ]).createShader(Rect.fromCircle(center: Offset(size.width * 0.92, size.height * 0.05), radius: size.width * 0.5)),
     );

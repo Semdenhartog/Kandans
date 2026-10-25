@@ -215,10 +215,10 @@ ThemeData buildTheme() {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: RwColors.surfaceHigh,
-      selectedColor: RwColors.accent,
+      selectedColor: dark ? RwColors.accent : const Color(0xFFE3D2B4),
       side: BorderSide(color: RwColors.border),
       labelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.text),
-      secondaryLabelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.accentDark),
+      secondaryLabelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: dark ? RwColors.accentDark : RwColors.text),
       shape: const StadiumBorder(),
       showCheckmark: false,
     ),

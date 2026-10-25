@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme.dart';
+
 /// Tekst met een zacht metalen verloop, waar af en toe een lichtglans overheen trekt.
 class ShineText extends StatefulWidget {
-  const ShineText(this.text, {super.key, required this.style, this.colors = const [Color(0xFFFFFFFF), Color(0xFFFFE6CF), Color(0xFFE9D3BE)]});
+  const ShineText(this.text, {super.key, required this.style, List<Color>? colors}) : _colors = colors;
   final String text;
   final TextStyle style;
-  final List<Color> colors;
+  final List<Color>? _colors;
+
+  /// Licht metaal in donker; espresso met een bronzen glans overdag.
+  List<Color> get colors => _colors ?? (RwColors.isDark
+      ? const [Color(0xFFFFFFFF), Color(0xFFFFE6CF), Color(0xFFE9D3BE)]
+      : const [Color(0xFF2A2016), Color(0xFF4A3622), Color(0xFF3A2A1A)]);
 
   @override
   State<ShineText> createState() => _ShineTextState();
@@ -48,7 +55,7 @@ class _ShineTextState extends State<ShineText> with SingleTickerProviderStateMix
               return LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [widget.colors.last, widget.colors.first, Colors.white, widget.colors.first, widget.colors.last],
+                colors: [widget.colors.last, widget.colors.first, RwColors.isDark ? Colors.white : const Color(0xFFB8925E), widget.colors.first, widget.colors.last],
                 stops: [0, (x - 0.15).clamp(0.0, 1.0), x.clamp(0.0, 1.0), (x + 0.15).clamp(0.0, 1.0), 1],
               ).createShader(r);
             },

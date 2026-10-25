@@ -40,9 +40,9 @@ class AppearanceTile extends StatelessWidget {
             child: SegmentedButton<Appearance>(
               showSelectedIcon: false,
               segments: const [
-                ButtonSegment(value: Appearance.system, label: Text('Automatisch'), icon: Icon(Icons.brightness_auto_outlined)),
-                ButtonSegment(value: Appearance.light, label: Text('Licht'), icon: Icon(Icons.light_mode_outlined)),
-                ButtonSegment(value: Appearance.dark, label: Text('Donker'), icon: Icon(Icons.dark_mode_outlined)),
+                ButtonSegment(value: Appearance.system, label: Text('Auto')),
+                ButtonSegment(value: Appearance.light, label: Text('Licht')),
+                ButtonSegment(value: Appearance.dark, label: Text('Donker')),
               ],
               selected: {c.mode},
               onSelectionChanged: (v) => c.set(v.first),
