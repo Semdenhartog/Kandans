@@ -801,7 +801,7 @@ class _WatchButtonState extends State<_WatchButton> {
         if (mounted) setState(() => _brand = nb);
       },
       icon: const Icon(Icons.watch_outlined),
-      label: Text(b == null || !b.canImport ? 'Route naar je horloge' : 'Zet op je ${b.label}'),
+      label: Text(b == WatchBrand.garminBasic ? 'Afslagen op je Garmin' : (b == null || !b.canImport ? 'Route naar je horloge' : 'Zet op je ${b.label}')),
     );
   }
 }

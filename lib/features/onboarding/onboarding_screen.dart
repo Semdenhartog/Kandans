@@ -134,7 +134,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               for (final b in WatchBrand.values)
                 ChoiceChip(
-                  label: Text(b == WatchBrand.wearos ? 'Wear OS (Galaxy, Pixel)' : b.label),
+                  label: Text(b == WatchBrand.wearos ? 'Wear OS (Galaxy, Pixel)' : b == WatchBrand.garminBasic ? 'Garmin zonder routes (Vivoactive 5)' : b.label),
                   selected: _brand == b,
                   onSelected: (_) async {
                     setState(() => _brand = b);

@@ -16,11 +16,12 @@ import '../../domain/route_turns.dart';
 import '../../shared/widgets.dart';
 
 /// Merk van je horloge: bepaalt welk bestand Kadans maakt en welke stappen we uitleggen.
-enum WatchBrand { garmin, coros, suunto, polar, amazfit, wearos, none }
+enum WatchBrand { garmin, garminBasic, coros, suunto, polar, amazfit, wearos, none }
 
 extension WatchBrandInfo on WatchBrand {
   String get label => switch (this) {
         WatchBrand.garmin => 'Garmin',
+        WatchBrand.garminBasic => 'Garmin zonder routes (zoals Vivoactive 5)',
         WatchBrand.coros => 'Coros',
         WatchBrand.suunto => 'Suunto',
         WatchBrand.polar => 'Polar',
@@ -33,7 +34,10 @@ extension WatchBrandInfo on WatchBrand {
   bool get usesFit => this == WatchBrand.garmin;
 
   /// Kan dit horloge zelf een route volgen? Zo niet, dan helpt Kadans via meldingen.
-  bool get canImport => this != WatchBrand.wearos && this != WatchBrand.none;
+  bool get canImport => this != WatchBrand.wearos && this != WatchBrand.none && this != WatchBrand.garminBasic;
+
+  /// Kadans begeleidt met meldingen op je pols (geen routebestand).
+  String get runLabel => this == WatchBrand.garminBasic ? 'Loop met afslagen op je pols' : 'Loop deze route';
 
   /// Stappen om de route op het horloge te krijgen.
   List<String> get steps => switch (this) {
@@ -41,6 +45,11 @@ extension WatchBrandInfo on WatchBrand {
             'Tik hieronder op "Zet op mijn horloge" en kies Garmin Connect.',
             'Opent Garmin Connect het bestand niet? Kies dan "Opslaan" en ga in je browser naar Garmin Connect → Training en planning → Koersen → Importeren.',
             'Kies bij de koers "Naar apparaat sturen". Op je horloge: Hardlopen → houd menu ingedrukt → Navigatie → Koersen.',
+          ],
+        WatchBrand.garminBasic => const [
+            'Je horloge kan zelf geen route volgen. Kadans doet het via je telefoon: neem die mee en tik op "Loop met afslagen op je pols".',
+            'Eenmalig: zet in Garmin Connect → Instellingen → Meldingen de meldingen van Kadans aan.',
+            'Bij elke afslag trilt je horloge en zie je bijvoorbeeld "→ Over 100 m rechtsaf". Kadans zegt het ook hardop.',
           ],
         WatchBrand.coros => const [
             'Tik op "Zet op mijn horloge" en kies de COROS-app.',
@@ -93,6 +102,8 @@ Future<void> saveWatchBrand(WatchBrand b) async {
   try {
     final p = await SharedPreferences.getInstance();
     await p.setString(_kBrand, b.name);
+    // Garmin zonder routes toont alleen basistekens: dan alleen ← en → in de afslagmeldingen.
+    await p.setBool('simple_turn_arrows', b == WatchBrand.garminBasic);
   } catch (_) {}
 }
 
@@ -257,7 +268,7 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
                           runWithPhone();
                         },
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Loop deze route'),
+                  label: Text(current.runLabel),
                 ),
               if (current.importUrl != null) ...[
                 const SizedBox(height: 8),
@@ -305,6 +316,10 @@ List<String> watchTroubleshooting(WatchBrand b) => [
             'Open Garmin Connect en kijk bij Meer → Training en planning → Koersen. Staat hij daar, tik dan op "Naar apparaat sturen".',
             'Synchroniseer je horloge: trek in Garmin Connect het beginscherm omlaag.',
             'Zag je Garmin Connect niet bij het delen? Kies "Opslaan" en importeer het bestand op connect.garmin.com → Koersen.',
+          ],
+        WatchBrand.garminBasic => const [
+            'Geen trilling bij een afslag? Zet in Garmin Connect → Instellingen → Meldingen de meldingen van Kadans aan.',
+            'Staat "Niet storen" of de slaapmodus aan op je horloge? Zet die uit tijdens het lopen.',
           ],
         WatchBrand.coros => const [
             'Open de COROS-app → Profiel → Routes. Staat hij daar niet, tik dan op Importeren en kies het bestand.',

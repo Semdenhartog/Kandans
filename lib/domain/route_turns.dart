@@ -31,6 +31,13 @@ extension TurnKindText on TurnKind {
         TurnKind.uTurn => '↶',
       };
 
+  /// Eenvoudige pijl voor horloges die alleen basistekens tonen (zoals de Garmin Vivoactive 5).
+  String get simpleArrow => switch (this) {
+        TurnKind.slightLeft || TurnKind.left || TurnKind.sharpLeft => '←',
+        TurnKind.slightRight || TurnKind.right || TurnKind.sharpRight => '→',
+        TurnKind.uTurn => '↓',
+      };
+
   /// Draaiing van de pijl op het scherm in graden (0 = rechtdoor, + = rechts).
   double get screenAngle => switch (this) {
         TurnKind.slightLeft => -45,

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/geo.dart';
 import '../../core/format.dart';
@@ -449,6 +450,10 @@ class RunRecorderService {
   String _wayLine(WayToRoute w) =>
       '↩ Route ${w.meters < 1000 ? '${(w.meters / 10).round() * 10} m' : Fmt.km(w.meters, decimals: 1)} ${w.words}';
 
+  /// Horloge dat alleen basistekens toont (Garmin zonder routes): alleen ← en → in meldingen.
+  bool _simpleArrows = false;
+  String _arrow(TurnKind k) => _simpleArrows ? k.simpleArrow : k.arrow;
+
   /// Eén regel navigatie voor de melding: volgende afslag, of waar de route ligt.
   String? _navLine(RecorderView v) {
     if (v.routeRemaining == null) return null;
@@ -459,7 +464,7 @@ class RunRecorderService {
     final t = v.nextTurn, d = v.nextTurnIn;
     if (t != null && d != null && d < 1500) {
       final m = d < 20 ? 'nu' : (d >= 150 ? '${(d / 50).round() * 50} m' : '${(d / 10).round() * 10} m');
-      return '${t.kind.arrow} ${t.kind.label} · $m';
+      return '${_arrow(t.kind)} ${t.kind.label} · $m';
     }
     return '↑ Rechtdoor · nog ${Fmt.km(v.routeRemaining!, decimals: 1)}';
   }
@@ -528,6 +533,9 @@ class RunRecorderService {
     String? briefing,
     double? targetMeters,
   }) async {
+    try {
+      _simpleArrows = (await SharedPreferences.getInstance()).getBool('simple_turn_arrows') ?? false;
+    } catch (_) {}
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null;
     this.shareLive = shareLive && !indoor;
@@ -674,7 +682,7 @@ class RunRecorderService {
             _buzz(const [0, 60]);
           }
           NotificationService.instance
-              .showTurn('${cue.turn.kind.arrow} ${cue.atTurn ? 'Nu ${cue.turn.kind.label.toLowerCase()}' : cue.text}',
+              .showTurn('${_arrow(cue.turn.kind)} ${cue.atTurn ? 'Nu ${cue.turn.kind.label.toLowerCase()}' : cue.text}',
                   'Kadans-route · nog ${Fmt.km(follower.remaining, decimals: 1)}')
               .ignore();
         }
