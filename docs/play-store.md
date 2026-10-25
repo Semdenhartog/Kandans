@@ -94,7 +94,53 @@ worden verkocht of voor advertenties gebruikt. Controleer dit in site/privacy.ht
 
 ## 6. Winkelvermelding
 
-- **Korte beschrijving (max. 80 tekens):** Loop op het beste moment: weer, wind en jouw route in één advies.
+- **App-naam (max. 30 tekens):** Kadans – Beste loopmoment
+- **Korte beschrijving (max. 80 tekens):** Loop op het beste moment: weer, wind en jouw route in één advies. Naast Strava.
+- **Volledige beschrijving (max. 4000 tekens, nu 2362):**
+
+```
+Strava laat zien wat je gelopen hebt. Kadans zorgt dat je loopt op het beste moment.
+
+Kadans kijkt per kwartier naar het weer, de wind op jóuw route en de buien van het komende uur, en zegt precies wanneer je het best kunt gaan, welke kant je op moet en wat je aantrekt. Rustig, eerlijk en persoonlijk.
+
+HET BESTE MOMENT VAN VANDAAG
+• Een tijd met een score en uitleg: "13:25 – 18 punten beter dan nu: droger"
+• Temperatuur, gevoelstemperatuur, regen, buienradar, wind, donker, UV en benauwdheid in één advies
+• Wind op je eigen route: tegenwind heen, wind mee terug
+• Ochtendmelding met jouw beste moment, alleen als het echt beter is dan je gewone tijd
+
+LEERT HOE HET WEER JÓU RAAKT
+• Na een paar runs weet Kadans bij welke temperatuur en wind jij het snelst loopt
+• Eerlijke tijden: elke run en elk record ook gecorrigeerd voor het weer ("bij ideaal loopweer: 35:54")
+• Een trage run in storm is geen slechte run
+
+ROUTES OP DE WIND
+• Laat Kadans een rondje maken vanaf je huis, op de afstand of tijd die jij wilt
+• Kiest de route met de wind in de rug op de terugweg
+• Afslagen met stem en trilling, ook op je horloge
+• Zie per route wanneer het beste moment is om hem te lopen
+
+COACH EN SCHEMA
+• Een AI-coach die je runs, je schema en het weer van deze week kent
+• Trainingsschema op maat naar je wedstrijd, met tempo's en kledingadvies
+• Klaar-score: weet of je vandaag hard of rustig moet
+
+EN VERDER
+• Uitdagingen met gouden medailles en ranglijsten met vrienden (alleen je bijnaam is zichtbaar)
+• Schoenkilometers en een seintje als je schoenen op zijn
+• Live je locatie delen met iemand thuis
+• Kracht en mobiliteit met gesproken uitleg
+• Luxe posters van je vaste rondjes
+• Licht (Zand) en donker (Zand avond), volgt je telefoon
+
+WERKT NAAST STRAVA
+Koppel Strava en Kadans haalt je oude runs en routes binnen. Koppel je horloge via Health Connect (bijvoorbeeld Samsung Galaxy Watch, Fitbit of Pixel Watch) en je runs komen vanzelf binnen. Strava blijft je plek voor kudos en segmenten; Kadans plant je volgende run.
+
+PRIVACY
+Je locatie wordt alleen gebruikt terwijl je de app gebruikt. We bewaren hooguit een grove thuisplaats en verkopen niets. Runs uit Strava gaan niet naar de AI-coach en worden nooit aan anderen getoond.
+
+Kadans is gratis te gebruiken. Kadans Premium (onbeperkt de coach en schema's op maat) is een maand gratis, daarna €5 per maand of €40 per jaar.
+```
 - **Schermafbeeldingen:** staan klaar in de branch `schermen-main`, map `playstore/` (1080×1920, in de
   goede volgorde genummerd). Ze worden bij elke schermtest opnieuw gemaakt met voorbeeldgegevens.
   Download: GitHub → branch `schermen-main` → map `playstore` → bestand → "Download raw file".

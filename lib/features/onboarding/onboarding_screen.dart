@@ -88,8 +88,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _Page(
         icon: Icons.wb_sunny_outlined,
         title: 'Loop op het beste moment',
-        text: 'Kadans kijkt naar het weer, de wind op je route en de buien van het komende uur. '
-            'Je ziet tot op 5 minuten wanneer je het best kunt gaan, welke kant je op moet en wat je aantrekt.',
+        text: 'Strava laat zien wat je gelopen hebt. Kadans zegt wanneer je het best kunt gaan: '
+            'op het weer, de wind op jouw route en de buien van het komende uur. En welke kant je op moet en wat je aantrekt.',
         children: [
           FilledButton(onPressed: _next, child: const Text('Verder')),
         ],
@@ -151,9 +151,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       _Page(
         icon: Icons.sync,
-        title: 'Je runs vanzelf binnen',
-        text: 'Koppel Strava of je horloge (via Health Connect). Dan leert Kadans bij welk weer jij het snelst loopt, '
-            'en zie je je records, ook gecorrigeerd voor het weer.',
+        title: 'Werkt naast Strava',
+        text: 'Koppel Strava voor je oude runs en routes, en je horloge (via Health Connect) voor nieuwe runs. '
+            'Dan leert Kadans bij welk weer jij het snelst loopt. Strava blijft voor je kudos; Kadans plant je volgende run.',
         children: [
           FilledButton(
             onPressed: () => Navigator.pop(context, OnboardingNext.connect),
