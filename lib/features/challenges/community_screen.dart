@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme.dart';
 import '../../data/services/community_service.dart';
 import '../../shared/widgets.dart';
+import '../../data/repositories/repositories.dart' show profileProvider;
 import 'challenges.dart' show challengeGold;
+import 'invite_card.dart';
 
 void openCommunity(BuildContext context) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CommunityScreen()));
@@ -37,10 +40,13 @@ Future<void> _rememberJoined(bool joined) async {
 
 /// "Samen": ranglijsten met andere lopers (alleen bijnaam en totaal).
 class CommunityScreen extends ConsumerStatefulWidget {
-  const CommunityScreen({super.key, this.refreshOnOpen = true});
+  const CommunityScreen({super.key, this.refreshOnOpen = true, this.inviteCode});
 
   /// Uit in schermafbeeldingen-tests.
   final bool refreshOnOpen;
+
+  /// Vriendcode uit een uitnodigingslink (runwise://app/vriend?code=…): die vriend wordt meteen toegevoegd.
+  final String? inviteCode;
 
   @override
   ConsumerState<CommunityScreen> createState() => _CommunityScreenState();
@@ -136,17 +142,40 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     });
   }
 
-  void _shareCode(String code) {
-    SharePlus.instance.share(ShareParams(
-      text: 'Loop je mee in Kadans? Voeg me toe met mijn vriendcode $code (Uitdagingen → Samen).',
-    ));
+  void _shareCode(String code, String? nickname) {
+    final first = ref.read(profileProvider).value?.displayName;
+    shareInvite(code: code, name: first == null || first == 'loper' ? (nickname ?? '') : first).ignore();
+  }
+
+  bool _inviteHandled = false;
+
+  /// Vriend uit de uitnodigingslink toevoegen (eenmalig, zodra je meedoet).
+  void _acceptInvite(CommunityStatus s) {
+    final code = widget.inviteCode?.trim().toUpperCase();
+    if (_inviteHandled || code == null || code.isEmpty || !s.joined) return;
+    _inviteHandled = true;
+    if (code == s.friendCode) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _run(() async {
+        final name = await ref.read(communityServiceProvider).follow(code);
+        ref.invalidate(communityBoardProvider);
+        HapticFeedback.mediumImpact();
+        if (mounted) showMessage(context, '$name staat nu bij je vrienden.');
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final status = ref.watch(communityStatusProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Samen')),
+      appBar: AppBar(
+        title: const Text('Samen'),
+        // Geopend via een uitnodigingslink: geen scherm om naar terug te gaan.
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(icon: const Icon(Icons.close), tooltip: 'Sluiten', onPressed: () => context.go('/today')),
+      ),
       body: status.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorView(
@@ -155,6 +184,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         ),
         data: (s) {
           if (!s.joined) return _intro();
+          _acceptInvite(s);
           if (!_refreshed && widget.refreshOnOpen) WidgetsBinding.instance.addPostFrameCallback((_) => _refreshOnce());
           return _boards(s);
         },
@@ -165,6 +195,25 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   Widget _intro() => ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
+          if (widget.inviteCode != null) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: challengeGold.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: challengeGold),
+              ),
+              child: Row(children: [
+                const Icon(Icons.card_giftcard, color: challengeGold),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text('Je bent uitgenodigd! Kies hieronder een bijnaam en doe mee, dan voegen we je vriend meteen toe.',
+                      style: TextStyle(fontWeight: FontWeight.w600, height: 1.35)),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 16),
+          ],
           const Icon(Icons.groups_rounded, size: 56, color: challengeGold),
           const SizedBox(height: 12),
           Text('Loop samen met anderen', textAlign: TextAlign.center, style: RwText.title),
@@ -249,13 +298,20 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 IconButton(
                   tooltip: 'Code delen',
                   icon: const Icon(Icons.ios_share),
-                  onPressed: s.friendCode == null ? null : () => _shareCode(s.friendCode!),
+                  onPressed: s.friendCode == null ? null : () => _shareCode(s.friendCode!, s.nickname),
                 ),
               ]),
               const SizedBox(height: 4),
               Text('Je doet mee als ${s.nickname}. Deel je code, of voeg een vriend toe met zijn code.',
                   style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
               const SizedBox(height: 10),
+              FilledButton.icon(
+                onPressed: s.friendCode == null ? null : () => _shareCode(s.friendCode!, s.nickname),
+                icon: const Icon(Icons.card_giftcard),
+                label: const Text('Vrienden uitnodigen'),
+                style: FilledButton.styleFrom(backgroundColor: challengeGold, foregroundColor: rwZandAvond.accentDark),
+              ),
+              const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _busy ? null : _addFriend,
                 icon: const Icon(Icons.person_add_alt),

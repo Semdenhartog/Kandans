@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Loop mee in Kadans</title>
+<meta name="theme-color" content="#13110E">
+<meta property="og:title" content="Loop mee in Kadans">
+<meta property="og:description" content="Je bent uitgenodigd om samen te lopen.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#13110E; --surface:#1C1814; --border:#352E26;
+  --gold:#D9BF92; --gold-deep:#B8955F; --gold-light:#F0DDB6;
+  --text:#F1E9DC; --muted:#BDB1A0; --subtle:#94897A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(120% 70% at 50% 18%,#3A2F22 0%,var(--bg) 62%);background-color:var(--bg);color:var(--text);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px 16px}
+.card{width:100%;max-width:420px;border:1.5px solid var(--gold-deep);border-radius:28px;padding:36px 24px 28px;text-align:center;
+  background:rgba(28,24,20,.72);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.mark{width:180px;max-width:60%;height:auto;margin:0 auto 18px;display:block}
+.brand{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.5em;color:var(--gold);font-size:13px;margin:0 0 18px}
+h1{font-family:Saira,sans-serif;font-weight:800;font-size:30px;line-height:1.1;margin:0 0 8px}
+p{color:var(--muted);line-height:1.5;margin:0 0 20px}
+.code{border:1.5px solid var(--gold);border-radius:18px;background:var(--surface);padding:14px 10px;margin:0 0 22px}
+.code small{display:block;color:var(--subtle);letter-spacing:.3em;font-weight:600;font-size:11px;margin-bottom:4px}
+.code strong{font-family:Saira,sans-serif;font-size:34px;letter-spacing:.25em;color:var(--gold-light)}
+.btn{display:block;width:100%;padding:15px 18px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none;margin-bottom:10px}
+.primary{background:linear-gradient(135deg,var(--gold-light),var(--gold-deep));color:#1A1510}
+.secondary{border:1.5px solid var(--border);color:var(--text)}
+.note{font-size:13px;color:var(--subtle);margin:14px 0 0}
+</style>
+</head>
+<body>
+<main class="card">
+  <img class="mark" src="kadans-mark.png" alt="">
+  <div class="brand">KADANS</div>
+  <h1>Je bent uitgenodigd om samen te lopen</h1>
+  <p>Kadans zegt wanneer je het best kunt lopen. Met vrienden lopen jullie samen op de ranglijsten.</p>
+  <div class="code" id="codebox" hidden>
+    <small>VRIENDCODE</small>
+    <strong id="code"></strong>
+  </div>
+  <a class="btn primary" id="open" href="runwise://app/vriend">Open in Kadans</a>
+  <a class="btn secondary" id="get" href="https://github.com/Semdenhartog/Runwise/releases/download/laatste/runwise.apk">Kadans downloaden</a>
+  <p class="note">Al geïnstalleerd? Dan opent de knop bovenaan de app en wordt je vriend meteen toegevoegd. Anders: na het installeren de code invullen bij Uitdagingen → Samen.</p>
+</main>
+<script>
+(function () {
+  var raw = new URLSearchParams(location.search).get('code') || '';
+  var code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+  if (!code) return;
+  document.getElementById('code').textContent = code;
+  document.getElementById('codebox').hidden = false;
+  document.getElementById('open').href = 'runwise://app/vriend?code=' + encodeURIComponent(code);
+})();
+</script>
+</body>
+</html>

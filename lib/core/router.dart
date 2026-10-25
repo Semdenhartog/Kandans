@@ -12,6 +12,7 @@ import '../features/activities/add_activity_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
 import '../features/auth/verify_screen.dart';
+import '../features/challenges/community_screen.dart';
 import '../features/coach/coach_screen.dart';
 import '../features/coach/paywall_screen.dart';
 import '../features/routes/poster_orders_screen.dart';
@@ -46,6 +47,9 @@ class _AuthRefresh extends ChangeNotifier {
 
 const _publicPaths = {'/login', '/signup', '/verify'};
 
+/// Vriendcode uit een uitnodigingslink die binnenkwam voordat je was ingelogd.
+String? _pendingInvite;
+
 final routerProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(supabaseProvider).auth;
   final refresh = _AuthRefresh(auth.onAuthStateChange);
@@ -57,8 +61,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = auth.currentSession != null;
       final isPublic = _publicPaths.contains(state.matchedLocation);
+      if (!loggedIn && state.matchedLocation == '/vriend') {
+        // Uitnodiging bewaren tot na het inloggen.
+        _pendingInvite = state.uri.queryParameters['code'];
+        return '/login';
+      }
       if (!loggedIn && !isPublic) return '/login';
-      if (loggedIn && isPublic) return '/today';
+      if (loggedIn && isPublic) {
+        final code = _pendingInvite;
+        _pendingInvite = null;
+        return code == null ? '/today' : '/vriend?code=${Uri.encodeQueryComponent(code)}';
+      }
       return null;
     },
     routes: [
@@ -85,6 +98,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/posters', builder: (c, s) => const PosterOrdersScreen()),
+      // Uitnodiging van een vriend: runwise://app/vriend?code=K7QX2M (via de pagina vriend.html).
+      GoRoute(
+        path: '/vriend',
+        builder: (c, s) => CommunityScreen(inviteCode: s.uri.queryParameters['code']),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [
