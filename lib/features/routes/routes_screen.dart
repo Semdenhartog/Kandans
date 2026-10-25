@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -181,11 +182,6 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             icon: Icon(_mapView ? Icons.view_list_outlined : Icons.map_outlined),
           ),
           IconButton(
-            tooltip: 'Zelf een route tekenen',
-            onPressed: () => context.go('/routes/tekenen'),
-            icon: const Icon(Icons.draw_outlined),
-          ),
-          IconButton(
             tooltip: 'GPX importeren',
             onPressed: _importing ? null : _importGpx,
             icon: _importing
@@ -201,15 +197,32 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             ),
         ],
       ),
-      floatingActionButton: _mapView
-          ? null
-          : FloatingActionButton.extended(
-        heroTag: 'route-maken',
-        onPressed: () => context.go('/routes/maken'),
-        icon: const Icon(Icons.auto_awesome),
-        label: const Text('Route maken'),
-      ),
       body: Column(children: [
+        // De twee manieren om een route te maken, groot en bovenaan: tekenen is de belangrijkste.
+        if (!_mapView)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(
+                child: _CreateTile(
+                  icon: Icons.draw_outlined,
+                  title: 'Route tekenen',
+                  text: 'Tik punten op de kaart. Kadans volgt de paden.',
+                  primary: true,
+                  onTap: () => context.go('/routes/tekenen'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _CreateTile(
+                  icon: Icons.auto_awesome,
+                  title: 'Laten maken',
+                  text: 'Een rondje vanaf huis, met de wind mee terug.',
+                  onTap: () => context.go('/routes/maken'),
+                ),
+              ),
+            ]),
+          ),
         const FirstTip(id: 'routes', icon: Icons.route, text: 'Maak of teken een route en zet hem met één knop op je horloge. Bij het lopen mag je overal instappen: Kadans wijst de weg.'),
         Expanded(child: routes.when(
         loading: () => const LoadingView(),
@@ -225,9 +238,9 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
               icon: Icons.route_outlined,
               title: 'Nog geen routes',
               message: 'Laat Kadans een rondje maken vanaf je huis of een adres, op de afstand of tijd die jij wilt. '
-                  'Of teken zelf een route (potloodje rechtsboven) of importeer een GPX-bestand van je vaste rondje.',
-              actionLabel: 'Route maken',
-              onAction: () => context.go('/routes/maken'),
+                  'Of teken zelf je vaste rondje op de kaart, of importeer een GPX-bestand.',
+              actionLabel: 'Route tekenen',
+              onAction: () => context.go('/routes/tekenen'),
             );
           }
           if (_mapView) return RoutesOverviewMap(routes: list, bests: bests);
@@ -381,4 +394,58 @@ class _Sparkline extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _Sparkline old) => old.p != p;
+}
+
+/// Grote keuzetegel bovenaan Mijn routes (tekenen of laten maken).
+class _CreateTile extends StatelessWidget {
+  const _CreateTile({required this.icon, required this.title, required this.text, required this.onTap, this.primary = false});
+  final IconData icon;
+  final String title;
+  final String text;
+  final VoidCallback onTap;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = primary ? RwColors.accentDark : RwColors.text;
+    final sub = primary ? RwColors.accentDark.withValues(alpha: 0.8) : RwColors.muted;
+    return Semantics(
+      button: true,
+      label: '$title. $text',
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: Ink(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: primary
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
+                    )
+                  : null,
+              color: primary ? null : RwColors.surface,
+              border: Border.all(color: primary ? Colors.transparent : RwColors.border),
+              boxShadow: primary ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.25), blurRadius: 18, offset: const Offset(0, 6))] : null,
+            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(icon, color: fg, size: 26),
+              const SizedBox(height: 10),
+              Text(title, style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 18, color: fg, height: 1.1)),
+              const SizedBox(height: 4),
+              Text(text, style: TextStyle(fontSize: 12.5, color: sub, height: 1.3)),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
 }
