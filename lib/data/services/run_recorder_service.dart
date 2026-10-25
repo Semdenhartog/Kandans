@@ -24,6 +24,7 @@ import 'notification_service.dart';
 import 'sound_service.dart';
 import 'rain_service.dart';
 import 'recording_store.dart';
+import '../../domain/live_quests.dart';
 import '../../domain/run_helpers.dart';
 
 /// Wat het opnamescherm laat zien.
@@ -60,6 +61,12 @@ class RecorderView {
     this.nextTurnIn,
     this.walkRun = false,
     this.treadmillKmh,
+    this.quest,
+    this.questRemaining = 0,
+    this.questProgress = 0,
+    this.questsDone = 0,
+    this.questsTotal = 0,
+    this.questsOn = false,
   });
 
   final RecorderStatus status;
@@ -115,6 +122,16 @@ class RecorderView {
   /// Ingestelde loopbandsnelheid (km/u), of null.
   final double? treadmillKmh;
 
+  /// Live opdracht die nu loopt (null = geen), wat er nog over is (s of m) en voortgang 0..1.
+  final Quest? quest;
+  final double questRemaining;
+  final double questProgress;
+
+  /// Gehaalde en gedane opdrachten in deze run; [questsOn] = opdrachten staan aan.
+  final int questsDone;
+  final int questsTotal;
+  final bool questsOn;
+
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
 
@@ -156,6 +173,7 @@ class RunRecorderService {
   LatLng? _position;
   CueScheduler? _cues;
   PaceCoach? _coach;
+  QuestMaster? _quests;
   RouteFollower? _follower;
   GhostRace? _ghost;
   TurnGuide? _turns;
@@ -532,12 +550,13 @@ class RunRecorderService {
     int routeTimesBefore = 0,
     String? briefing,
     double? targetMeters,
+    bool quests = false,
   }) async {
     try {
       _simpleArrows = (await SharedPreferences.getInstance()).getBool('simple_turn_arrows') ?? false;
     } catch (_) {}
     this.haptics = haptics;
-    this.voice = voice || intervals != null || targetPace != null;
+    this.voice = voice || intervals != null || targetPace != null || quests;
     this.shareLive = shareLive && !indoor;
     this.targetPace = targetPace;
     _ticks = 0;
@@ -564,6 +583,8 @@ class RunRecorderService {
     _guided = guided == null ? null : GuidedPlayer(guided);
     if (guided != null) this.voice = true;
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
+    // Live opdrachten alleen bij een gewone buitenrun (niet naast intervallen of een begeleide run).
+    _quests = quests && !indoor && intervals == null && guided == null ? QuestMaster(targetMeters: targetMeters) : null;
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
     _turns = _follower == null ? null : TurnGuide(detectTurns(_follower!.track));
@@ -719,8 +740,31 @@ class RunRecorderService {
         _buzz(const [0, 200, 120, 200]);
       }
       _sayCue(r);
+      final qm = _quests;
+      if (qm != null) {
+        final qc = qm.update(r.movingSeconds, r.distance, r.averagePace);
+        if (qc != null) {
+          _say(qc.text);
+          if (qc.started != null) {
+            SoundService.instance.play(RwSound.interval).ignore();
+            _buzz(const [0, 250, 120, 250, 120, 250]);
+            NotificationService.instance
+                .showTurn('⚡ ${qc.started!.title}', 'Sneller dan ${questPace(qc.started!.targetPace)}/km')
+                .ignore();
+          } else if (qc.result != null) {
+            _buzz(qc.result!.success ? const [0, 150, 80, 150, 80, 500] : const [0, 500]);
+            if (qc.result!.success) SoundService.instance.play(RwSound.finish).ignore();
+            NotificationService.instance
+                .showTurn(qc.result!.success ? '✓ Opdracht gehaald' : 'Opdracht net niet',
+                    qc.result!.pace > 0 ? '${questPace(qc.result!.pace)}/km' : 'Kadans')
+                .ignore();
+          } else {
+            _buzz(const [0, 80]);
+          }
+        }
+      }
       final coach = _coach;
-      if (coach != null && (_intervals == null || _intervals!.finished)) {
+      if (coach != null && (_intervals == null || _intervals!.finished) && _quests?.active == null) {
         final c = coach.update(r.movingSeconds, r.currentPace);
         if (c != null) {
           _say(c);
@@ -858,6 +902,12 @@ class RunRecorderService {
       wayToRoute: _follower?.way,
       walkRun: it?.plan.walkRun ?? false,
       treadmillKmh: r.treadmillKmh,
+      quest: _quests?.active,
+      questRemaining: _quests?.remaining(moving, r.distance) ?? 0,
+      questProgress: _quests?.progress(moving, r.distance) ?? 0,
+      questsDone: _quests?.done ?? 0,
+      questsTotal: _quests?.total ?? 0,
+      questsOn: _quests != null,
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
       nextTurn: turnByTurn ? _turns?.next : null,
       nextTurnIn: turnByTurn && _follower != null ? _turns?.distanceTo(_follower!.progress) : null,
@@ -875,6 +925,8 @@ class RunRecorderService {
     _tick = null;
     r?.finish();
     if (shareLive) await LiveShareService.instance.stop();
+    final qs = _quests?.summary();
+    if (qs != null) _say(qs);
     if (r != null && r.distance > 0 && !r.indoor) _say('Run gestopt. ${(r.distance / 1000).toStringAsFixed(2).replaceAll('.', ',')} kilometer.');
     if (r != null && r.indoor) _say('Training gestopt. Goed gedaan.');
     view.value = const RecorderView(status: RecorderStatus.finished);
@@ -883,6 +935,7 @@ class RunRecorderService {
     NotificationService.instance.cancelRunProgress().ignore();
     _cues = null;
     _coach = null;
+    _quests = null;
     _follower = null;
     _ghost = null;
     _turns = null;

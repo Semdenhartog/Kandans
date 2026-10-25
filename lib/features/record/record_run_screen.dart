@@ -32,6 +32,7 @@ import '../../domain/badges.dart' as bd;
 import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
 import '../../domain/guided_runs.dart';
+import '../../domain/live_quests.dart';
 import '../../domain/heart_rate.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
@@ -102,6 +103,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _indoor = false;
   bool _sounds = true;
 
+  /// Live opdrachten (sprints, snelle minuut) tijdens een gewone run.
+  bool _quests = false;
+
   /// Doelafstand (km): de ring loopt vol naar dit doel. Null = per kilometer.
   double? _targetKm;
   bool _targetReached = false;
@@ -161,6 +165,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (mounted) {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
+          _quests = p.getBool('rec_quests') ?? false;
           _turnByTurn = p.getBool('rec_turns') ?? true;
           final sr = p.getDouble('rec_speech_rate');
           if (sr != null && sr >= 0.3 && sr <= 0.7) _svc.speechRate = sr;
@@ -513,6 +518,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         routeTimesBefore: _route == null ? 0 : _routeTimes(_route!),
         briefing: _indoor ? null : _briefing,
         targetMeters: _targetKm == null ? null : _targetKm! * 1000,
+        quests: _quests && _plan == null && _guided == null && !_indoor,
       );
       final route = _route;
       if (route != null && !_indoor && route.polyline.isNotEmpty) {
@@ -1367,7 +1373,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         ],
         if (!v.indoor && v.routeRemaining == null) _BackToStart(track: v.track),
         // Uitdaging: hoeveel deze run je dichterbij brengt (niet naast route-aanwijzingen, dan wordt het te vol).
-        if (v.routeRemaining == null) ChallengeLiveChip(view: v),
+        if (v.quest != null) _QuestCard(view: v) else if (v.questsOn && v.questsTotal > 0) _QuestTally(view: v),
+        if (v.routeRemaining == null && v.quest == null) ChallengeLiveChip(view: v),
         if (v.routeRemaining != null && v.nextTurn != null && !v.offRoute && (v.nextTurnIn ?? 1e9) < 400) ...[
           const SizedBox(height: 14),
           _NextTurnCard(turn: v.nextTurn!, inMeters: v.nextTurnIn!),
@@ -1479,6 +1486,18 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         selected: _voice || _plan != null,
                         onSelected: _plan != null ? null : (x) => setState(() => _voice = x),
                       ),
+                      if (!_indoor && _plan == null && _guided == null)
+                        FilterChip(
+                          avatar: const Icon(Icons.bolt_outlined, size: 18),
+                          label: const Text('Live opdrachten'),
+                          tooltip: 'Na het inlopen af en toe een korte opdracht: sprint 20 s, een snelle minuut of een km op tempo. '
+                              'Op jouw tempo, met de uitslag via je oortjes en je horloge.',
+                          selected: _quests,
+                          onSelected: (x) {
+                            setState(() => _quests = x);
+                            SharedPreferences.getInstance().then((p) => p.setBool('rec_quests', x)).ignore();
+                          },
+                        ),
                       FilterChip(
                         avatar: const Icon(Icons.music_note_outlined, size: 18),
                         label: const Text('Geluidjes'),
@@ -2875,5 +2894,77 @@ class _PresetCard extends StatelessWidget {
             ]),
           ),
         ),
+      );
+}
+
+/// Kaart met de live opdracht die nu loopt.
+class _QuestCard extends StatelessWidget {
+  const _QuestCard({required this.view});
+  final RecorderView view;
+
+  @override
+  Widget build(BuildContext context) {
+    final q = view.quest!;
+    final left = q.seconds != null ? '${view.questRemaining.ceil()} s' : '${view.questRemaining.round()} m';
+    final pace = view.currentPace;
+    final onPace = pace > 0 && pace <= q.targetPace;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Semantics(
+        liveRegion: true,
+        label: 'Opdracht ${q.title}, nog $left, doel sneller dan ${questPace(q.targetPace)} per kilometer',
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: RwColors.accent.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: RwColors.accent, width: 1.4),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              Icon(Icons.bolt, size: 20, color: RwColors.accent),
+              const SizedBox(width: 6),
+              Expanded(child: Text(q.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))),
+              Text(left, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20)),
+            ]),
+            const SizedBox(height: 6),
+            Text.rich(TextSpan(children: [
+              TextSpan(text: 'Doel: sneller dan ${questPace(q.targetPace)}/km · nu ', style: TextStyle(color: RwColors.muted)),
+              TextSpan(
+                text: pace > 0 ? questPace(pace) : '–',
+                style: TextStyle(fontWeight: FontWeight.w700, color: onPace ? RwColors.good : RwColors.text),
+              ),
+            ])),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: view.questProgress,
+                minHeight: 6,
+                color: RwColors.accent,
+                backgroundColor: RwColors.bar,
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stand van de opdrachten tussen twee opdrachten door.
+class _QuestTally extends StatelessWidget {
+  const _QuestTally({required this.view});
+  final RecorderView view;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Row(children: [
+          Icon(Icons.bolt_outlined, size: 18, color: RwColors.accent),
+          const SizedBox(width: 6),
+          Text('Opdrachten: ${view.questsDone} van ${view.questsTotal} gehaald',
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+        ]),
       );
 }
