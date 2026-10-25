@@ -762,8 +762,11 @@ class _HeroCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             ExcludeSemantics(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              // Wrap: met grote letters gaat "Morgen / bewolkt" netjes onder de tijd in plaats van letter voor letter.
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.end,
+                spacing: 12,
+                runSpacing: 4,
                 children: [
                   ShineText(
                     goNowShown ? 'Nu' : Fmt.time(s.start),
@@ -776,14 +779,11 @@ class _HeroCard extends StatelessWidget {
                       letterSpacing: -1.5,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        '${_dayLabel(s.start)}\n${weatherLabel(w.weatherCode)}',
-                        style: TextStyle(color: RwColors.muted, height: 1.3),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      '${_dayLabel(s.start)}\n${weatherLabel(w.weatherCode)}',
+                      style: TextStyle(color: RwColors.muted, height: 1.3),
                     ),
                   ),
                 ],

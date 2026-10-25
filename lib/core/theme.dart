@@ -217,7 +217,12 @@ ThemeData buildTheme() {
       backgroundColor: RwColors.surfaceHigh,
       selectedColor: dark ? RwColors.accent : const Color(0xFFE3D2B4),
       side: BorderSide(color: RwColors.border),
-      labelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.text),
+      // Tekst volgt de stand: aangezet in donker = donkere tekst op champagne.
+      labelStyle: TextStyle(
+        fontFamily: RwFonts.body,
+        fontWeight: FontWeight.w600,
+        color: WidgetStateColor.resolveWith((st) => st.contains(WidgetState.selected) && dark ? RwColors.accentDark : RwColors.text),
+      ),
       secondaryLabelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: dark ? RwColors.accentDark : RwColors.text),
       shape: const StadiumBorder(),
       showCheckmark: false,
