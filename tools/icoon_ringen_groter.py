@@ -4,6 +4,7 @@ Splitst de voorgrond in vaartlijnen en ringen, schaalt de ringen op (en de
 vaartlijnen iets af) en zet ze binnen de veilige cirkel van een Android
 adaptive icon (zichtbaar: ~683 px op een laag van 1024 px).
 Gebruik: python3 groter.py <map met assets/icon> <uitvoermap>
+Let op: werkt op het ORIGINELE icoon (coordinaten hieronder); niet nogmaals draaien op het resultaat.
 """
 import sys
 from PIL import Image
