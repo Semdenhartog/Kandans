@@ -55,6 +55,8 @@ import 'interval_picker.dart';
 import 'quick_start.dart';
 import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
+import '../challenges/community_screen.dart' show refreshCommunityQuietly;
+import '../../data/services/community_service.dart' show communityServiceProvider;
 
 /// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
 void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle, RunRoute? route, bool? indoor}) {
@@ -1130,6 +1132,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         // Hoogte verbeteren met de hoogtekaart (op de achtergrond).
         if (!rec.indoor) repo.improveElevation(id, streamsJson).then((_) => ref.invalidate(activitiesProvider)).ignore();
       }
+      // Ranglijsten van Samen bijwerken (alleen als je meedoet; op de achtergrond).
+      refreshCommunityQuietly(ref.read(communityServiceProvider)).ignore();
       final sync = ref.read(syncServiceProvider);
       final written = await sync.writeRunToHealth(activity);
       final startPct = _batteryAtStart;

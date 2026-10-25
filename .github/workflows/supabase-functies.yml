@@ -34,6 +34,7 @@ jobs:
           supabase functions deploy route-generator --project-ref "$PROJECT_REF"
           supabase functions deploy street-photos --project-ref "$PROJECT_REF"
           supabase functions deploy poster-order --project-ref "$PROJECT_REF"
+          supabase functions deploy community --project-ref "$PROJECT_REF"
 
       # Zonder login-controle door Supabase: Strava en RevenueCat roepen deze zelf aan;
       # de functies controleren zelf wie er belt.

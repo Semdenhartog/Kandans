@@ -67,6 +67,8 @@ import 'package:runwise/data/services/poster_order_service.dart';
 import 'package:runwise/features/routes/strava_routes_screen.dart';
 import 'package:runwise/features/profile/strava_history_screen.dart';
 import 'package:runwise/features/challenges/challenges.dart';
+import 'package:runwise/features/challenges/community_screen.dart';
+import 'package:runwise/data/services/community_service.dart';
 import 'package:runwise/domain/challenges.dart';
 
 const _w = 412.0;
@@ -246,7 +248,7 @@ final _coach = [
       createdAt: _now.subtract(const Duration(minutes: 8))),
 ];
 
-List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wornShoe = false}) => [
+List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false}) => [
       supabaseProvider.overrideWithValue(SupabaseClient('https://voorbeeld.supabase.co', 'anon')),
       currentUserProvider.overrideWithValue(null),
       profileProvider.overrideWith((ref) => Profile(id: 'u', firstName: 'Sem', homeLatitude: _home.lat, homeLongitude: _home.lon)),
@@ -293,6 +295,23 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
             ],
           )),
       joinedChallengesProvider.overrideWith(_FakeJoined.new),
+      communityStatusProvider.overrideWith((ref) async => notInCommunity
+          ? const CommunityStatus(joined: false)
+          : const CommunityStatus(joined: true, nickname: 'Sem uit Utrecht', friendCode: 'K7QX2M', boards: [
+              BoardInfo(key: 'km-2026-11', title: 'Kilometers in november', unit: 'km'),
+              BoardInfo(key: 'climb-2026-11', title: 'Hoogtemeters in november', unit: 'm'),
+              BoardInfo(key: 'advent-2026', title: 'Adventsloop (dagen op rij)', unit: 'dagen'),
+            ])),
+      communityBoardProvider.overrideWith((ref, arg) async => const BoardResult(total: 214, rows: [
+            BoardRow(rank: 1, nickname: 'Lotte loopt', value: 182.4, friend: true),
+            BoardRow(rank: 2, nickname: 'MarathonMark', value: 167.9),
+            BoardRow(rank: 3, nickname: 'Anouk_rent', value: 151.2),
+            BoardRow(rank: 4, nickname: 'Pieter V.', value: 139.0, friend: true),
+            BoardRow(rank: 5, nickname: 'Sem uit Utrecht', value: 126.7, me: true),
+            BoardRow(rank: 6, nickname: 'Dijkloper', value: 118.3),
+            BoardRow(rank: 6, nickname: 'Fenna', value: 118.3),
+            BoardRow(rank: 8, nickname: 'een_heel_lange_bijnaam_x', value: 97.5),
+          ], mine: BoardRow(rank: 5, nickname: 'Sem uit Utrecht', value: 126.7, me: true))),
       posterProductsProvider.overrideWith((ref) => const [
             PosterProduct(id: '30x40', label: '30 × 40 cm', widthMm: 300, heightMm: 400, priceCents: 2495, description: 'Mat posterpapier, 200 g/m²'),
             PosterProduct(id: '50x70', label: '50 × 70 cm', widthMm: 500, heightMm: 700, priceCents: 3495, description: 'Mat posterpapier, 200 g/m²'),
@@ -309,12 +328,12 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false}) async {
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(ProviderScope(
-    overrides: _overrides(emptyPlan: emptyPlan, newUser: newUser, wornShoe: wornShoe),
+    overrides: _overrides(emptyPlan: emptyPlan, newUser: newUser, wornShoe: wornShoe, notInCommunity: notInCommunity),
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
@@ -515,6 +534,9 @@ void main() {
   testWidgets('48 strava oude runs', (t) => _shot(t, '48_strava_oude_runs', const StravaHistoryScreen(), height: 1200));
   testWidgets('49 strava routes', (t) => _shot(t, '49_strava_routes', const StravaRoutesScreen(), height: 1200));
   testWidgets('50 uitdagingen', (t) => _shot(t, '50_uitdagingen', const ChallengesScreen(), height: 2200));
+  testWidgets('51 samen ranglijst', (t) => _shot(t, '51_samen_ranglijst', const CommunityScreen(refreshOnOpen: false), height: 1500));
+  testWidgets('52 samen meedoen', (t) => _shot(t, '52_samen_meedoen', const CommunityScreen(refreshOnOpen: false), height: 1300, notInCommunity: true));
+  testWidgets('53 groot samen', (t) => _shot(t, '53_groot_samen', const CommunityScreen(refreshOnOpen: false), height: 2400, textScale: 1.6));
   // Grote letters (160%): valt er iets uit beeld, dan faalt de stap 'Uit beeld-controle' in screens.yml.
   testWidgets('30 groot opnemen start', (t) {
     // Vorige tests laten een lopende run achter; voor het startscherm terug naar stilstand.

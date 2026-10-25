@@ -15,6 +15,7 @@ import '../../domain/challenges.dart';
 import '../../domain/monthly_goal.dart' show suggestedGoalKm;
 import '../../shared/widgets.dart';
 import '../activities/badges_screen.dart' show badgeIcon;
+import 'community_screen.dart' show openCommunity;
 
 const challengeGold = Color(0xFFD9B45A);
 
@@ -118,6 +119,28 @@ class ChallengesScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
+          RwCard(
+            onTap: () => openCommunity(context),
+            child: Row(children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(color: challengeGold.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(14)),
+                child: const Icon(Icons.groups_rounded, color: challengeGold),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Samen', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  SizedBox(height: 2),
+                  Text('Ranglijsten met andere lopers en vrienden. Alleen je bijnaam en totaal zijn zichtbaar.',
+                      style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+                ]),
+              ),
+              const Icon(Icons.chevron_right, color: RwColors.subtle),
+            ]),
+          ),
+          const SizedBox(height: 18),
           if (active.isNotEmpty) ...[
             const _Heading('BEZIG'),
             for (final p in active) ...[
