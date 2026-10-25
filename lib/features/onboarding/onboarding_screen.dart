@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/notification_service.dart';
+import '../../domain/availability.dart';
+import '../../domain/run_goal.dart';
 import '../../shared/route_backdrop.dart';
+import '../planner/availability_provider.dart';
 import '../routes/watch_export.dart' show WatchBrand, WatchBrandInfo, saveWatchBrand;
 
 const _doneKey = 'onboarding_done_v1';
@@ -24,7 +29,25 @@ Future<void> _markDone() async {
 }
 
 /// Wat de gebruiker na de rondleiding wil doen.
-enum OnboardingNext { today, connect, route }
+enum OnboardingNext { today, connect, route, race }
+
+/// Snelle keuzes voor "wanneer loop je meestal?" (sleutel uit [Availability.preset]).
+const _whenChoices = [
+  ('ochtend', 'Vroeg in de ochtend', Icons.wb_twilight),
+  ('werk', 'Na het werk, weekend overdag', Icons.work_outline),
+  ('avond', 'In de avond', Icons.nights_stay_outlined),
+  ('altijd', 'Wisselend (bijv. diensten)', Icons.shuffle),
+];
+
+/// Kort overzicht van wat er in de app zit, voor de uitlegpagina.
+const _features = [
+  (Icons.wb_sunny_outlined, 'Vandaag', 'Je beste moment, met weer, wind, buien en wat je aantrekt.'),
+  (Icons.route_outlined, 'Routes', 'Tekenen of laten maken, met ondergrond, verlichting en wind.'),
+  (Icons.play_circle_outline, 'Opnemen', 'Lopen met stem, tempo-doel, live opdrachten en afslagen op je horloge.'),
+  (Icons.flag_outlined, 'Uitdagingen en Samen', 'Doelen per maand, medailles en ranglijsten met vrienden.'),
+  (Icons.event_outlined, 'Wedstrijden', 'Je wedstrijd met schema, tempo per km en aftellen.'),
+  (Icons.auto_awesome_outlined, 'Coach', 'Vraag alles over je training; kent je eigen runs.'),
+];
 
 /// Toont de rondleiding als die nog niet is gezien. Geeft de gekozen vervolgstap terug.
 Future<OnboardingNext?> showOnboardingIfNeeded(BuildContext context) async {
@@ -37,17 +60,24 @@ Future<OnboardingNext?> showOnboardingIfNeeded(BuildContext context) async {
   return next ?? OnboardingNext.today;
 }
 
-/// Rondleiding van vier schermen bij de eerste keer openen.
-class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+/// Rondleiding bij de eerste keer openen: uitleg, een paar vragen die meteen je instellingen vullen,
+/// en elke stap is over te slaan. Ook later terug te zien via Ik → Hulp.
+class OnboardingScreen extends ConsumerStatefulWidget {
+  const OnboardingScreen({super.key, this.initialPage = 0});
+
+  /// Voor schermafbeeldingen: op welke pagina beginnen.
+  final int initialPage;
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _pages = PageController();
-  int _page = 0;
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  late final _pages = PageController(initialPage: widget.initialPage);
+  late int _page = widget.initialPage;
+  RunGoal? _goal;
+  String? _when;
+  bool _reminder = false;
   bool _asking = false;
   String? _locationResult;
   WatchBrand? _brand;
@@ -92,6 +122,84 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             'op het weer, de wind op jouw route en de buien van het komende uur. En welke kant je op moet en wat je aantrekt.',
         children: [
           FilledButton(onPressed: _next, child: const Text('Verder')),
+        ],
+      ),
+      _Page(
+        icon: Icons.apps_outlined,
+        title: 'Alles op een rij',
+        text: 'Dit zit er in Kadans. Je vindt het later terug onder de knoppen onderaan, en uitleg onder Ik → Hulp.',
+        children: [
+          for (final (icon, name, what) in _features)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Icon(icon, size: 22, color: RwColors.accent),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text.rich(TextSpan(children: [
+                    TextSpan(text: '$name  ', style: const TextStyle(fontWeight: FontWeight.w700)),
+                    TextSpan(text: what, style: TextStyle(color: RwColors.muted)),
+                  ])),
+                ),
+              ]),
+            ),
+          const SizedBox(height: 8),
+          FilledButton(onPressed: _next, child: const Text('Verder')),
+        ],
+      ),
+      _Page(
+        icon: Icons.emoji_events_outlined,
+        title: 'Waarvoor loop je?',
+        text: 'Dan houdt de coach daar rekening mee. Kies je een wedstrijd, dan zet je hem aan het eind meteen in de app.',
+        children: [
+          for (final g in RunGoal.values)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _Choice(
+                label: g.label,
+                selected: _goal == g,
+                onTap: () async {
+                  setState(() => _goal = g);
+                  await saveRunGoal(g);
+                  await Future<void>.delayed(const Duration(milliseconds: 300));
+                  if (mounted) _next();
+                },
+              ),
+            ),
+          TextButton(onPressed: _next, child: const Text('Sla over')),
+        ],
+      ),
+      _Page(
+        icon: Icons.schedule,
+        title: 'Wanneer loop je meestal?',
+        text: 'Kadans zoekt je beste moment alleen binnen die tijden. Je past ze altijd aan in de weekplanner.',
+        children: [
+          for (final (key, label, icon) in _whenChoices)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _Choice(
+                label: label,
+                icon: icon,
+                selected: _when == key,
+                onTap: () async {
+                  setState(() => _when = key);
+                  await saveAvailability(ref, Availability.preset(key));
+                },
+              ),
+            ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _reminder,
+            title: const Text('Elke ochtend je beste moment als melding'),
+            subtitle: Text('Eén melding per dag, geen reclame. Je telefoon vraagt zo om toestemming.',
+                style: TextStyle(color: RwColors.muted)),
+            onChanged: (on) async {
+              final ok = await NotificationService.instance.setEnabled(on);
+              if (mounted) setState(() => _reminder = on && ok);
+            },
+          ),
+          const SizedBox(height: 4),
+          FilledButton(onPressed: _next, child: Text(_when == null && !_reminder ? 'Sla over' : 'Verder')),
         ],
       ),
       _Page(
@@ -155,10 +263,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         text: 'Koppel Strava voor je oude runs en routes, en je horloge (via Health Connect) voor nieuwe runs. '
             'Dan leert Kadans bij welk weer jij het snelst loopt. Strava blijft voor je kudos; Kadans plant je volgende run.',
         children: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context, OnboardingNext.connect),
-            child: const Text('Strava of horloge koppelen'),
-          ),
+          if (_goal == RunGoal.race) ...[
+            FilledButton(
+              onPressed: () => Navigator.pop(context, OnboardingNext.race),
+              child: const Text('Mijn wedstrijd toevoegen'),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (_goal == RunGoal.race)
+            OutlinedButton(
+              onPressed: () => Navigator.pop(context, OnboardingNext.connect),
+              child: const Text('Strava of horloge koppelen'),
+            )
+          else
+            FilledButton(
+              onPressed: () => Navigator.pop(context, OnboardingNext.connect),
+              child: const Text('Strava of horloge koppelen'),
+            ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: () => Navigator.pop(context, OnboardingNext.route),
@@ -286,6 +407,36 @@ class _Page extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      );
+}
+
+/// Grote keuzeknop voor de vragen in de rondleiding.
+class _Choice extends StatelessWidget {
+  const _Choice({required this.label, required this.selected, required this.onTap, this.icon});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: selected ? RwColors.accent.withValues(alpha: 0.16) : RwColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: selected ? RwColors.accent : RwColors.bar, width: selected ? 1.6 : 1),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(children: [
+              if (icon != null) ...[Icon(icon, size: 20, color: RwColors.accent), const SizedBox(width: 12)],
+              Expanded(child: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+              if (selected) Icon(Icons.check_circle, size: 20, color: RwColors.accent),
+            ]),
           ),
         ),
       );

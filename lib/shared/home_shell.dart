@@ -97,6 +97,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         context.go('/me');
       case OnboardingNext.route:
         context.go('/routes/maken');
+      case OnboardingNext.race:
+        context.go('/me/races/new');
       case OnboardingNext.today:
         context.go('/today');
     }

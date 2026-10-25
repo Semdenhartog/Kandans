@@ -455,6 +455,9 @@ void main() {
   testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));
   testWidgets('13 inloggen', (t) => _shot(t, '13_inloggen', const LoginScreen(), height: 915));
   testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
+  testWidgets('14b rondleiding overzicht', (t) => _shot(t, '14b_rondleiding_overzicht', const OnboardingScreen(initialPage: 1), height: 915));
+  testWidgets('14c rondleiding doel', (t) => _shot(t, '14c_rondleiding_doel', const OnboardingScreen(initialPage: 2), height: 915));
+  testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 3), height: 915));
   testWidgets('15 na je run', (t) {
     final st = RunStreams.fromJson(_streams)!;
     return _shot(

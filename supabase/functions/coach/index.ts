@@ -355,7 +355,14 @@ Deno.serve(async (req) => {
   if (messages.length && messages[messages.length - 1].role === "user") messages.pop();
   messages.push({ role: "user", content: message });
 
-  const context = await buildContext(db, userId, profile);
+  const goals: Record<string, string> = {
+    start: "beginnen met lopen",
+    fit: "fit blijven",
+    faster: "sneller worden",
+    race: "een wedstrijd lopen",
+  };
+  const goal = goals[String(body.goal ?? "")];
+  const context = (await buildContext(db, userId, profile)) + (goal ? `\nDoel van de loper: ${goal}.` : "");
 
   const ai = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

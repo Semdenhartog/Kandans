@@ -9,6 +9,7 @@ import '../activities/fitness_screen.dart';
 import '../activities/run_insights_screens.dart';
 import '../activities/strength_screen.dart';
 import '../activities/year_story_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 import '../planner/training_plan_screen.dart';
 import '../routes/watch_export.dart';
 import 'heart_rate_screen.dart';
@@ -89,6 +90,14 @@ class HelpScreen extends StatelessWidget {
                   children: [Text(a, style: TextStyle(color: RwColors.muted, height: 1.5))],
                 ),
             ]),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.slideshow_outlined),
+            label: const Text('Rondleiding opnieuw bekijken'),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const OnboardingScreen()),
+            ),
           ),
           const SizedBox(height: 20),
           Text('WOORDENLIJST', style: RwText.overline),

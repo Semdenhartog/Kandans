@@ -9,6 +9,7 @@ import '../services/elevation_service.dart';
 import '../services/offline_cache.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
+import '../../domain/run_goal.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/training_plan.dart';
 
@@ -438,7 +439,8 @@ class RunWiseRepository {
   /// Stuurt een vraag naar de coach (server-functie `coach`).
   Future<CoachReply> askCoach(String message) async {
     try {
-      final res = await _db.functions.invoke('coach', body: {'message': message});
+      final goal = await savedRunGoal();
+      final res = await _db.functions.invoke('coach', body: {'message': message, if (goal != null) 'goal': goal.name});
       final data = (res.data as Map).cast<String, dynamic>();
       return CoachReply(
         reply: data['reply'] as String,
