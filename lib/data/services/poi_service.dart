@@ -51,7 +51,7 @@ class PoiService {
         return lightingAlong(track, parseLitWays(cached!.data! as String));
       } catch (_) {}
     }
-    final body = await _queued(query);
+    final body = await _race(query);
     OfflineCache.save(key, body).ignore();
     return lightingAlong(track, parseLitWays(body));
   }
@@ -88,13 +88,6 @@ class PoiService {
     return done.future;
   }
 
-  /// Eén vraag tegelijk naar Overpass vanuit deze app (verlichting en voorzieningen na elkaar).
-  Future<void> _queue = Future.value();
-  Future<String> _queued(String query) {
-    final run = _queue.then((_) => _race(query));
-    _queue = run.then((_) {}, onError: (_) {});
-    return run;
-  }
 
   Future<List<RoutePoi>> alongRoute(String polyline) async {
     final track = RouteTrack(decodePolyline(polyline));
@@ -109,7 +102,7 @@ class PoiService {
       } catch (_) {}
     }
     try {
-      final body = await _queued(query);
+      final body = await _race(query);
       OfflineCache.save(key, body).ignore();
       return poisAlongRoute(parseOverpass(body), track);
     } catch (e) {
