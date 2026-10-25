@@ -20,6 +20,7 @@ import '../../data/services/location_service.dart' show quickPosition;
 import '../../core/error_reporter.dart';
 import '../../data/services/notification_service.dart';
 import '../../data/services/pending_runs.dart';
+import '../challenges/challenges.dart' show ChallengeLiveChip;
 import '../../data/services/review_service.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/route_photos_service.dart' show routePhotosProvider;
@@ -1361,6 +1362,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _HeartRow(view: v),
         ],
         if (!v.indoor && v.routeRemaining == null) _BackToStart(track: v.track),
+        // Uitdaging: hoeveel deze run je dichterbij brengt (niet naast route-aanwijzingen, dan wordt het te vol).
+        if (v.routeRemaining == null) ChallengeLiveChip(view: v),
         if (v.routeRemaining != null && v.nextTurn != null && !v.offRoute && (v.nextTurnIn ?? 1e9) < 400) ...[
           const SizedBox(height: 14),
           _NextTurnCard(turn: v.nextTurn!, inMeters: v.nextTurnIn!),

@@ -38,6 +38,7 @@ import '../record/quick_start.dart';
 import '../record/record_run_screen.dart';
 import '../../domain/dashboard_layout.dart';
 import '../profile/shoe_replace_card.dart';
+import '../challenges/challenges.dart' show ChallengesCard;
 import '../../domain/training_plan.dart';
 import '../../domain/verdict.dart';
 import 'dashboard_layout_sheet.dart';
@@ -215,6 +216,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       DashCard.onThisDay: OnThisDayCard(),
       DashCard.yearGoal: YearGoalCard(),
       DashCard.shoes: ShoeReplaceCard(),
+      DashCard.challenges: ChallengesCard(),
     };
     final extrasOnly = [
       for (final c in layout.visible)

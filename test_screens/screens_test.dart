@@ -66,6 +66,8 @@ import 'package:runwise/domain/shoe_shop.dart';
 import 'package:runwise/data/services/poster_order_service.dart';
 import 'package:runwise/features/routes/strava_routes_screen.dart';
 import 'package:runwise/features/profile/strava_history_screen.dart';
+import 'package:runwise/features/challenges/challenges.dart';
+import 'package:runwise/domain/challenges.dart';
 
 const _w = 412.0;
 
@@ -290,11 +292,21 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
                 ),
             ],
           )),
+      joinedChallengesProvider.overrideWith(_FakeJoined.new),
       posterProductsProvider.overrideWith((ref) => const [
             PosterProduct(id: '30x40', label: '30 × 40 cm', widthMm: 300, heightMm: 400, priceCents: 2495, description: 'Mat posterpapier, 200 g/m²'),
             PosterProduct(id: '50x70', label: '50 × 70 cm', widthMm: 500, heightMm: 700, priceCents: 3495, description: 'Mat posterpapier, 200 g/m²'),
           ]),
     ];
+
+/// Twee uitdagingen van deze maand, zodat de voortgang op Vandaag, tijdens de run en in het overzicht te zien is.
+class _FakeJoined extends JoinedChallenges {
+  @override
+  List<Challenge> build() => [
+        for (final c in availableChallenges(DateTime.now(), suggestedMonthKm: 90))
+          if (c.kind == ChallengeKind.distance || c.kind == ChallengeKind.runs) c,
+      ].take(2).toList();
+}
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
     {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false}) async {
@@ -502,6 +514,7 @@ void main() {
   });
   testWidgets('48 strava oude runs', (t) => _shot(t, '48_strava_oude_runs', const StravaHistoryScreen(), height: 1200));
   testWidgets('49 strava routes', (t) => _shot(t, '49_strava_routes', const StravaRoutesScreen(), height: 1200));
+  testWidgets('50 uitdagingen', (t) => _shot(t, '50_uitdagingen', const ChallengesScreen(), height: 2200));
   // Grote letters (160%): valt er iets uit beeld, dan faalt de stap 'Uit beeld-controle' in screens.yml.
   testWidgets('30 groot opnemen start', (t) {
     // Vorige tests laten een lopende run achter; voor het startscherm terug naar stilstand.

@@ -10,6 +10,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/badges.dart' as bd;
 import '../../shared/widgets.dart';
+import '../challenges/challenges.dart' show challengeMedalsProvider, ChallengeMedal;
 
 void openBadges(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const BadgesScreen()));
@@ -67,6 +68,13 @@ class BadgesScreen extends ConsumerWidget {
               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           const Text('Tik op een badge voor meer uitleg.', style: TextStyle(color: RwColors.subtle)),
+          // Medailles van gehaalde uitdagingen.
+          if (ref.watch(challengeMedalsProvider) case final medals when medals.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            const Text('UITDAGINGEN', style: RwText.overline),
+            const SizedBox(height: 10),
+            Wrap(spacing: 12, runSpacing: 12, children: [for (final m in medals) ChallengeMedal(progress: m)]),
+          ],
           for (final cat in bd.BadgeCategory.values) ...[
             const SizedBox(height: 20),
             Row(children: [

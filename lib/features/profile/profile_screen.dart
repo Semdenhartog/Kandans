@@ -20,6 +20,7 @@ import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../activities/badges_screen.dart';
+import '../challenges/challenges.dart' show openChallenges;
 import '../activities/strength_screen.dart';
 import 'connections_card.dart';
 import 'emergency_contact.dart';
@@ -136,6 +137,14 @@ class ProfileScreen extends ConsumerWidget {
                   subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.go('/me/races'),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const TileIcon(Icons.emoji_events_outlined, color: RwColors.accent),
+                  title: const Text('Uitdagingen'),
+                  subtitle: const Text('Doe mee aan een maand- of seizoensuitdaging'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => openChallenges(context),
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
