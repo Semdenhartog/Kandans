@@ -175,7 +175,7 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 
 104. ✅ **Oude runs uit Strava.** Strava → Oude runs ophalen: alles van vóór het eerste jaar, in stappen van 200 met het weer van toen. Voortgang bewaard; als Strava te druk is gaat het na 15 minuten vanzelf verder.
 105. ✅ **Routes uit Strava.** Kies welke hardlooproutes je importeert (ook vanuit het Routes-scherm). Privéroutes na opnieuw koppelen. Bij ontkoppelen verdwijnen ze weer (voorwaarden van Strava).
-106. ⬜ **Meer badges** (snelheid en records, weer en seizoen, volhouden, ontdekken).
+106. ✅ **Meer badges: van 23 naar 49.** Snelheid en records (5 km onder 30/25/20, 10 km onder 60/50, snelle km, halve onder 2 uur), weer en seizoen (tropen, pool, zonsopkomst, langste dag, kerst, oud en nieuw, vier seizoenen), volhouden (7 dagen, 26 weken, 12 maanden op rij, een jaar loper), ontdekken (10/25 routes, 5 plekken, op reis, bergloper) en 15 km/30 km/250 runs/2500 km. Badgescherm in groepen. Bestaande badges behouden hun id.
 107. ⬜ **Eigen uitdagingen met live voortgang.**
 108. ⬜ **Uitdagingen samen met anderen (ranglijst).**
 

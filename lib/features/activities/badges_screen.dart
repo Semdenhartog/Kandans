@@ -33,6 +33,19 @@ IconData badgeIcon(String name) => switch (name) {
       'storm' => Icons.storm,
       'ac_unit' => Icons.ac_unit,
       'water_drop' => Icons.water_drop,
+      'bolt' => Icons.bolt,
+      'wb_sunny' => Icons.wb_sunny,
+      'light_mode' => Icons.light_mode,
+      'park' => Icons.park,
+      'celebration' => Icons.celebration,
+      'eco' => Icons.eco,
+      'event_repeat' => Icons.event_repeat,
+      'calendar_month' => Icons.calendar_month,
+      'cake' => Icons.cake,
+      'map' => Icons.map,
+      'travel_explore' => Icons.travel_explore,
+      'luggage' => Icons.luggage,
+      'landscape' => Icons.landscape,
       _ => Icons.star,
     };
 
@@ -45,8 +58,6 @@ class BadgesScreen extends ConsumerWidget {
     final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
     final all = bd.computeBadges(runs);
     final earned = all.where((b) => b.earned).length;
-    final normal = all.where((b) => !b.weather).toList();
-    final weather = all.where((b) => b.weather).toList();
     return Scaffold(
       appBar: AppBar(title: const Text('Badges')),
       body: ListView(
@@ -56,14 +67,22 @@ class BadgesScreen extends ConsumerWidget {
               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           const Text('Tik op een badge voor meer uitleg.', style: TextStyle(color: RwColors.subtle)),
-          const SizedBox(height: 16),
-          _Grid(badges: normal),
-          const SizedBox(height: 20),
-          const Text('WEERBADGES', style: RwText.overline),
-          const SizedBox(height: 4),
-          const Text('Alleen in RunWise: voor lopen in bijzonder weer.', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
-          const SizedBox(height: 10),
-          _Grid(badges: weather),
+          for (final cat in bd.BadgeCategory.values) ...[
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(child: Text(cat.title, style: RwText.overline)),
+              Text(
+                '${all.where((b) => b.category == cat && b.earned).length}/${all.where((b) => b.category == cat).length}',
+                style: const TextStyle(color: RwColors.subtle, fontSize: 12, fontFeatures: rwTnum),
+              ),
+            ]),
+            if (cat.subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(cat.subtitle!, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+            ],
+            const SizedBox(height: 10),
+            _Grid(badges: [for (final b in all) if (b.category == cat) b]),
+          ],
         ],
       ),
     );
