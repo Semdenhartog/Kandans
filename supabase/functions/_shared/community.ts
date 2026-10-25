@@ -66,7 +66,7 @@ export function boardValue(b: BoardDef, runs: RunRow[]): number {
 }
 
 // Basisfilter voor bijnamen. Sem kan dit uitbreiden; ongepaste namen kan hij ook in Supabase verwijderen.
-const BLOCKED = ["kut", "lul", "neuk", "hoer", "kanker", "tering", "tyfus", "fuck", "shit", "bitch", "admin", "moderator", "runwise", "strava"];
+const BLOCKED = ["kut", "lul", "neuk", "hoer", "kanker", "tering", "tyfus", "fuck", "shit", "bitch", "admin", "moderator", "runwise", "kadans", "strava"];
 
 /** Foutmelding als de bijnaam niet mag, anders null. */
 export function nicknameError(raw: unknown): string | null {
