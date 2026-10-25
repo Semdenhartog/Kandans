@@ -59,7 +59,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Uitdagingen + Samen (ranglijsten, vriendcode): `lib/features/challenges/`, functie `community`
 - Coach: functie `coach` (logt `coach_usage` per vraag), app `lib/features/coach/`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**, wacht op Stripe/Gelato-geheimen.
-- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 114). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
+- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 118). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
 - GitHub-secret `SUPABASE_ACCESS_TOKEN` zetten (dan kan alles met één klik live).
