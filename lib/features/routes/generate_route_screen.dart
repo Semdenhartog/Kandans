@@ -214,7 +214,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle, color: RwColors.good, size: 18),
+                          Icon(Icons.check_circle, color: RwColors.good, size: 18),
                           const SizedBox(width: 8),
                           Expanded(child: Text(_place!.label)),
                         ],
@@ -224,7 +224,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
                     ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.place_outlined, color: RwColors.subtle),
+                      leading: Icon(Icons.place_outlined, color: RwColors.subtle),
                       title: Text(p.label),
                       onTap: () => setState(() {
                         _place = p;
@@ -253,13 +253,13 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
                 const SizedBox(height: 16),
                 Text(
                   _byTime ? Fmt.duration(_minutes * 60) : '${_km.toStringAsFixed(_km % 1 == 0 ? 0 : 1).replaceAll('.', ',')} km',
-                  style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 40, fontWeight: FontWeight.w800, color: RwColors.accent),
+                  style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 40, fontWeight: FontWeight.w800, color: RwColors.accent),
                 ),
                 Text(
                   _byTime
                       ? 'Ongeveer ${Fmt.km(_targetMeters, decimals: 1)} bij jouw tempo van ${Fmt.pace(pace)}'
                       : 'Ongeveer ${Fmt.duration((_km * pace).round())} bij jouw tempo van ${Fmt.pace(pace)}',
-                  style: const TextStyle(color: RwColors.muted),
+                  style: TextStyle(color: RwColors.muted),
                 ),
                 if (_byTime)
                   Slider(
@@ -286,12 +286,12 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _generate,
             icon: _busy
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark))
+                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark))
                 : const Icon(Icons.auto_awesome),
             label: Text(_busy ? 'Rondjes zoeken…' : 'Maak mijn route'),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Kadans maakt een paar rondjes over wandel- en hardlooppaden en kiest de beste op de wind van vandaag.',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.subtle, fontSize: 13),
@@ -307,7 +307,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
           ],
           if (_results.isNotEmpty) ...[
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Routes © openrouteservice.org · kaartgegevens © OpenStreetMap-bijdragers',
               textAlign: TextAlign.center,
               style: TextStyle(color: RwColors.subtle, fontSize: 11),
@@ -370,18 +370,18 @@ class _CandidateCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       'Beste vertrektijd ${Fmt.time(b.start)} · score ${b.score}',
-                      style: const TextStyle(color: RwColors.muted),
+                      style: TextStyle(color: RwColors.muted),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Kleuren op de kaart: de wind om ${Fmt.time(b.start)}',
-                      style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                      style: TextStyle(color: RwColors.subtle, fontSize: 12),
                     ),
                     if (candidate.directionLabel != null) ...[
                       const SizedBox(height: 4),
                       Text(
                         'Loop ${candidate.directionLabel}: zo heb je de minste tegenwind op het eind',
-                        style: const TextStyle(color: RwColors.subtle, fontSize: 13, height: 1.4),
+                        style: TextStyle(color: RwColors.subtle, fontSize: 13, height: 1.4),
                       ),
                     ],
                   ],

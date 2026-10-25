@@ -19,6 +19,7 @@ import '../../domain/geo.dart';
 import '../../domain/year_recap.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
+import '../../core/appearance.dart';
 
 const _months = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 const _days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
@@ -85,7 +86,7 @@ class _HeatmapScreenState extends ConsumerState<HeatmapScreen> {
                     FlutterMap(
                       options: MapOptions(
                         initialCameraFit: CameraFit.coordinates(coordinates: allPts, padding: const EdgeInsets.all(40), maxZoom: 15),
-                        backgroundColor: const Color(0xFF17171A),
+                        backgroundColor: mapBackground,
                         minZoom: 5,
                         maxZoom: 18,
                         interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
@@ -145,7 +146,7 @@ class _RunCalendarScreenState extends ConsumerState<RunCalendarScreen> {
           children: [
             for (final a in runs)
               ListTile(
-                leading: const TileIcon(Icons.directions_run, color: RwColors.accent),
+                leading: TileIcon(Icons.directions_run, color: RwColors.accent),
                 title: Text('${Fmt.km(a.distanceMeters)} · ${Fmt.pace(a.paceSecondsPerKm)}'),
                 subtitle: Text('${Fmt.time(a.startedAt)} · ${Fmt.duration(a.movingTimeSeconds)}'),
                 onTap: a.id == null
@@ -201,11 +202,11 @@ class _RunCalendarScreenState extends ConsumerState<RunCalendarScreen> {
             ],
           ),
           Text('${byDay.values.expand((l) => l).length} runs · ${Fmt.km(km, decimals: 1)} · ${byDay.length} dagen gelopen',
-              textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
+              textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
           const SizedBox(height: 16),
           Row(children: [
             for (final d in ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'])
-              Expanded(child: Text(d, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12))),
+              Expanded(child: Text(d, textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12))),
           ]),
           const SizedBox(height: 6),
           GridView.count(
@@ -246,7 +247,7 @@ class _RunCalendarScreenState extends ConsumerState<RunCalendarScreen> {
                                 )),
                             if (runs != null)
                               Text((m / 1000).toStringAsFixed(m >= 10000 ? 0 : 1).replaceAll('.', ','),
-                                  style: const TextStyle(fontSize: 9, color: RwColors.accentDark)),
+                                  style: TextStyle(fontSize: 9, color: RwColors.accentDark)),
                           ],
                         ),
                       ),
@@ -362,7 +363,7 @@ class _YearRecapScreenState extends ConsumerState<YearRecapScreen> {
         child: Row(children: [
           Icon(icon, size: 20, color: RwColors.accent),
           const SizedBox(width: 10),
-          Expanded(child: Text(label, style: const TextStyle(color: RwColors.muted))),
+          Expanded(child: Text(label, style: TextStyle(color: RwColors.muted))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ]),
       );
@@ -378,7 +379,7 @@ class _RecapCard extends StatelessWidget {
     Widget stat(String v, String l) => Expanded(
           child: Column(children: [
             Text(v, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
-            Text(l, style: const TextStyle(color: RwColors.muted, fontSize: 11)),
+            Text(l, style: TextStyle(color: RwColors.muted, fontSize: 11)),
           ]),
         );
     return Container(
@@ -390,17 +391,17 @@ class _RecapCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Image.asset('assets/logo/mark.png', height: 18),
+            kadansImage('assets/logo/mark.png', height: 18),
             const SizedBox(width: 8),
-            Image.asset('assets/logo/wordmark.png', height: 9),
+            kadansImage('assets/logo/wordmark.png', height: 9),
             const Spacer(),
-            Text('${r.year}', style: const TextStyle(color: RwColors.muted, fontWeight: FontWeight.w700)),
+            Text('${r.year}', style: TextStyle(color: RwColors.muted, fontWeight: FontWeight.w700)),
           ]),
           const SizedBox(height: 18),
-          const Text('MIJN JAAR IN RUNS', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 1)),
+          Text('MIJN JAAR IN RUNS', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 1)),
           Text(r.km.round().toString(),
               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 84, fontWeight: FontWeight.w800, height: 1)),
-          const Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
+          Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
           const SizedBox(height: 18),
           Row(children: [
             stat('${r.runs}', 'runs'),
@@ -428,7 +429,7 @@ class _RecapCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(_months[m].substring(0, 1).toUpperCase(), style: const TextStyle(color: RwColors.subtle, fontSize: 10)),
+                          Text(_months[m].substring(0, 1).toUpperCase(), style: TextStyle(color: RwColors.subtle, fontSize: 10)),
                         ],
                       ),
                     ),

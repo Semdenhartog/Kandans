@@ -109,11 +109,11 @@ Future<WatchBrand?> pickWatchBrand(BuildContext context, {WatchBrand? current}) 
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: Text('Welk horloge heb je?', style: RwText.title),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: Text('Dan maakt Kadans het juiste bestand en leggen we precies uit wat je moet doen.',
                   style: TextStyle(color: RwColors.muted, height: 1.4)),
@@ -123,7 +123,7 @@ Future<WatchBrand?> pickWatchBrand(BuildContext context, {WatchBrand? current}) 
                 leading: Icon(b == WatchBrand.none ? Icons.phone_android : Icons.watch_outlined,
                     color: b == current ? RwColors.accent : RwColors.muted),
                 title: Text(b.label),
-                trailing: b == current ? const Icon(Icons.check, color: RwColors.accent) : null,
+                trailing: b == current ? Icon(Icons.check, color: RwColors.accent) : null,
                 onTap: () => Navigator.pop(ctx, b),
               ),
           ],
@@ -183,11 +183,11 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Route naar je horloge', style: RwText.title),
+              Text('Route naar je horloge', style: RwText.title),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.watch_outlined, size: 18, color: RwColors.muted),
+                  Icon(Icons.watch_outlined, size: 18, color: RwColors.muted),
                   const SizedBox(width: 6),
                   Expanded(child: Text(current.label, style: const TextStyle(fontWeight: FontWeight.w600))),
                   TextButton(
@@ -209,7 +209,7 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.turn_right, color: RwColors.accent),
+                    Icon(Icons.turn_right, color: RwColors.accent),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -237,7 +237,7 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
                         child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                       const SizedBox(width: 10),
-                      Expanded(child: Text(current.steps[i], style: const TextStyle(color: RwColors.muted, height: 1.45))),
+                      Expanded(child: Text(current.steps[i], style: TextStyle(color: RwColors.muted, height: 1.45))),
                     ],
                   ),
                 ),
@@ -376,7 +376,7 @@ Future<void> _askIfItArrived(BuildContext context, WatchBrand brand) async {
                     child: Text('${i + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(child: Text(tips[i], style: const TextStyle(color: RwColors.muted, height: 1.45))),
+                  Expanded(child: Text(tips[i], style: TextStyle(color: RwColors.muted, height: 1.45))),
                 ]),
               ),
             if (brand.importUrl != null)

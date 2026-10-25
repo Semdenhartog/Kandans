@@ -69,7 +69,7 @@ class _LiveShareEntryCardState extends State<LiveShareEntryCard> {
                   style: const TextStyle(height: 1.4),
                 ),
               ),
-              const Icon(Icons.chevron_right, color: RwColors.subtle),
+              Icon(Icons.chevron_right, color: RwColors.subtle),
             ],
           ),
         );
@@ -165,7 +165,7 @@ class _LiveShareScreenState extends ConsumerState<LiveShareScreen> {
   }
 
   List<Widget> _setup() => [
-        const Text(
+        Text(
           'Stuur iemand een link. Die ziet op een kaart waar je bent tijdens je run, zonder app of account.',
           style: TextStyle(color: RwColors.muted, height: 1.5),
         ),
@@ -197,7 +197,7 @@ class _LiveShareScreenState extends ConsumerState<LiveShareScreen> {
         FilledButton.icon(
           onPressed: _busy ? null : _start,
           icon: _busy
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark))
+              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark))
               : const Icon(Icons.share_location),
           label: const Text('Start en deel de link'),
         ),
@@ -240,11 +240,11 @@ class _LiveShareScreenState extends ConsumerState<LiveShareScreen> {
                 if (s.updates > 0) '${s.updates} updates verstuurd',
                 if (expires != null) 'stopt vanzelf om ${Fmt.time(expires)}',
               ].join(' · '),
-              style: const TextStyle(color: RwColors.muted, height: 1.4),
+              style: TextStyle(color: RwColors.muted, height: 1.4),
             ),
             if (s.error != null) ...[
               const SizedBox(height: 8),
-              Text(s.error!, style: const TextStyle(color: RwColors.warning)),
+              Text(s.error!, style: TextStyle(color: RwColors.warning)),
             ],
           ],
         ),
@@ -255,7 +255,7 @@ class _LiveShareScreenState extends ConsumerState<LiveShareScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SelectableText(url, style: const TextStyle(color: RwColors.accent)),
+            SelectableText(url, style: TextStyle(color: RwColors.accent)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -308,7 +308,7 @@ class _Privacy extends StatelessWidget {
   const _Privacy();
 
   @override
-  Widget build(BuildContext context) => const Text(
+  Widget build(BuildContext context) => Text(
         'Privacy: alleen wie de link heeft, kan meekijken. Bij stoppen wissen we je route en locatie direct van de server. '
         'Zolang je deelt, staat er een melding op je telefoon, ook als Kadans op de achtergrond draait.',
         style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),

@@ -8,7 +8,7 @@ const whatsNewVersion = 'kadans-2026-10';
 
 const _items = <(IconData, String, String)>[
   (Icons.auto_awesome_outlined, 'RunWise heet nu Kadans',
-      'Nieuwe naam, nieuw icoon: twee ringen in je ritme. Je runs, routes en instellingen blijven precies zoals ze waren.'),
+      'Nieuwe naam, nieuw icoon en nieuwe kleuren: Zand overdag en Zand avond in het donker (kies in Ik → Weergave). Je runs, routes en instellingen blijven zoals ze waren.'),
   (Icons.groups_outlined, 'Samen lopen',
       'Uitdagingen → Samen: ranglijsten met andere lopers en vrienden. Alleen je bijnaam en totaal zijn zichtbaar.'),
   (Icons.cloud_off_outlined, 'Je run is altijd veilig',
@@ -48,7 +48,7 @@ Future<void> showWhatsNewIfNeeded(BuildContext context, {bool skip = false}) asy
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Nieuw in Kadans', style: RwText.title),
+            Text('Nieuw in Kadans', style: RwText.title),
             const SizedBox(height: 16),
             for (final (icon, title, text) in _items)
               Padding(
@@ -64,7 +64,7 @@ Future<void> showWhatsNewIfNeeded(BuildContext context, {bool skip = false}) asy
                         children: [
                           Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
                           const SizedBox(height: 2),
-                          Text(text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                          Text(text, style: TextStyle(color: RwColors.muted, height: 1.4)),
                         ],
                       ),
                     ),

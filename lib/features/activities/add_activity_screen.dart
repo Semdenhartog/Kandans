@@ -159,7 +159,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
             ),
             if (pace != null && pace > 0) ...[
               const SizedBox(height: 8),
-              Text('Gemiddeld tempo: ${Fmt.pace(pace)}', style: const TextStyle(color: RwColors.accent)),
+              Text('Gemiddeld tempo: ${Fmt.pace(pace)}', style: TextStyle(color: RwColors.accent)),
             ],
             const SizedBox(height: 14),
             TextFormField(
@@ -186,7 +186,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
               onChanged: (v) => setState(() => _routeId = v),
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Het weer tijdens je run (temperatuur, wind, luchtvochtigheid) halen we automatisch op.',
               style: TextStyle(color: RwColors.subtle, fontSize: 13),
             ),
@@ -194,7 +194,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
             FilledButton(
               onPressed: _busy ? null : _save,
               child: _busy
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 22,
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark),

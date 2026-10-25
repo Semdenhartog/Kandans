@@ -84,7 +84,7 @@ class ShoesScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
               ],
               if (retired.isNotEmpty) ...[
-                const Padding(
+                Padding(
                   padding: EdgeInsets.fromLTRB(4, 12, 4, 8),
                   child: Text('AFGESCHREVEN', style: TextStyle(color: RwColors.subtle, fontWeight: FontWeight.w600)),
                 ),
@@ -104,7 +104,7 @@ class ShoesScreen extends ConsumerWidget {
                   ),
               ],
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Runs zonder schoen tellen mee voor je standaardschoen. Bij een run kies je ook een andere schoen.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12),
               ),
@@ -142,7 +142,7 @@ class _ShoeCard extends StatelessWidget {
                     color: RwColors.accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: const Text('Standaard', style: TextStyle(color: RwColors.accent, fontSize: 12, fontWeight: FontWeight.w700)),
+                  child: Text('Standaard', style: TextStyle(color: RwColors.accent, fontSize: 12, fontWeight: FontWeight.w700)),
                 ),
               PopupMenuButton<String>(
                 onSelected: (v) => v == 'default' ? onDefault?.call() : onRetire(),
@@ -169,7 +169,7 @@ class _ShoeCard extends StatelessWidget {
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
                       Text('${((1 - v) * 100).round()}%',
                           style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800, color: color)),
-                      const Text('over', style: TextStyle(color: RwColors.subtle, fontSize: 10)),
+                      Text('over', style: TextStyle(color: RwColors.subtle, fontSize: 10)),
                     ]),
                   ),
                 ),
@@ -183,7 +183,7 @@ class _ShoeCard extends StatelessWidget {
                     text: '${km.round()}',
                     style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800),
                   ),
-                  TextSpan(text: ' / ${shoe.limitKm} km', style: const TextStyle(color: RwColors.muted)),
+                  TextSpan(text: ' / ${shoe.limitKm} km', style: TextStyle(color: RwColors.muted)),
                 ])),
                 const SizedBox(height: 2),
                 Text(
@@ -195,7 +195,7 @@ class _ShoeCard extends StatelessWidget {
           ]),
           if (worn) ...[
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Tijd voor nieuwe schoenen: de demping is na zoveel kilometers flink minder. Dat vergroot de kans op blessures.',
               style: TextStyle(color: RwColors.danger, height: 1.4),
             ),
@@ -311,7 +311,7 @@ class _LifeRingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round
-      ..shader = const SweepGradient(
+      ..shader = SweepGradient(
         transform: GradientRotation(start),
         colors: [RwColors.good, RwColors.warning, RwColors.danger],
         stops: [0.0, 0.7, 0.95],

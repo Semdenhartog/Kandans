@@ -187,7 +187,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                 _freeLeft == 0
                     ? 'Dit was je laatste gratis vraag.'
                     : 'Nog $_freeLeft gratis vra${_freeLeft == 1 ? 'ag' : 'gen'}',
-                style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                style: TextStyle(color: RwColors.subtle, fontSize: 12),
               ),
             ),
           SafeArea(
@@ -246,7 +246,7 @@ class _Intro extends StatelessWidget {
           'De coach kijkt mee naar je runs, je wedstrijden en het weer. '
           '${premium ? '' : 'Probeer het met een paar gratis vragen.'}',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: RwColors.muted, height: 1.5),
+          style: TextStyle(color: RwColors.muted, height: 1.5),
         ),
         const SizedBox(height: 20),
         // Suggesties als kaartjes met een eigen icoon, die één voor één binnenschuiven.
@@ -262,13 +262,13 @@ class _Intro extends StatelessWidget {
                       color: RwColors.accent),
                   const SizedBox(width: 14),
                   Expanded(child: Text(s, style: const TextStyle(fontWeight: FontWeight.w600, height: 1.3))),
-                  const Icon(Icons.arrow_forward, size: 18, color: RwColors.subtle),
+                  Icon(Icons.arrow_forward, size: 18, color: RwColors.subtle),
                 ]),
               ),
             ),
           ),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'De coach is een AI en kan zich vergissen. Geen medisch advies: bij pijn of klachten ga je naar je huisarts of fysio.',
           textAlign: TextAlign.center,
           style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),
@@ -298,14 +298,14 @@ class _Bubble extends StatelessWidget {
             ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF4A2A10), Color(0xFF2E1A0B)],
+                colors: RwColors.isDark ? const [Color(0xFF4A3A22), Color(0xFF2E2416)] : const [Color(0xFFE9DCC5), Color(0xFFE1D1B6)],
               )
             : const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF1E1E23), Color(0xFF17171B)],
+                colors: [RwColors.surface, RwColors.surface],
               ),
-        border: Border.all(color: user ? RwColors.accent.withValues(alpha: 0.35) : const Color(0x14FFFFFF)),
+        border: Border.all(color: user ? RwColors.accent.withValues(alpha: 0.35) : RwColors.hairline),
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(20),
           topRight: const Radius.circular(20),
@@ -314,7 +314,7 @@ class _Bubble extends StatelessWidget {
         ),
       ),
       child: user
-          ? SelectableText(message.content, style: const TextStyle(color: RwColors.text, height: 1.45))
+          ? SelectableText(message.content, style: TextStyle(color: RwColors.text, height: 1.45))
           : fresh
               ? _TypeOut(text: message.content, onDone: onTyped, onGrow: onGrow)
               : SelectionArea(child: _RichReply(message.content)),
@@ -341,7 +341,7 @@ class _CoachMark extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
@@ -467,8 +467,8 @@ class _TypingState extends State<_Typing> with SingleTickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF1B1B20),
-              border: Border.all(color: const Color(0x14FFFFFF)),
+              color: RwColors.surface,
+              border: Border.all(color: RwColors.hairline),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
@@ -500,7 +500,7 @@ class _TypingState extends State<_Typing> with SingleTickerProviderStateMixin {
             ),
           ),
           const SizedBox(width: 10),
-          const Text('Coach denkt na…', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
+          Text('Coach denkt na…', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
         ]),
       );
 }
@@ -526,7 +526,7 @@ class _RichReply extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const base = TextStyle(fontFamily: RwFonts.body, color: RwColors.text, height: 1.45, fontSize: 15);
+    final base = TextStyle(fontFamily: RwFonts.body, color: RwColors.text, height: 1.45, fontSize: 15);
     final children = <Widget>[];
     for (final raw in text.trim().split('\n')) {
       final line = raw.trimRight();

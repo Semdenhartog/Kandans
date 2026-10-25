@@ -40,7 +40,7 @@ class _DashLayoutSheet extends ConsumerWidget {
                 ],
               ),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(
                 'Het oordeel en de beste vertrektijd staan altijd bovenaan. Sleep de rest in de volgorde die jij wilt, of zet kaarten uit.',
@@ -62,14 +62,14 @@ class _DashLayoutSheet extends ConsumerWidget {
                       index: i,
                       child: Semantics(
                         label: '${c.label} verslepen',
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.all(8),
                           child: Icon(Icons.drag_indicator, color: RwColors.subtle),
                         ),
                       ),
                     ),
                     title: Text(c.label, style: TextStyle(color: on ? RwColors.text : RwColors.subtle)),
-                    subtitle: Text(c.description, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                    subtitle: Text(c.description, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                     trailing: Switch(value: on, onChanged: (_) => n.toggle(c)),
                   );
                 },

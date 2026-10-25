@@ -148,7 +148,7 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
                 initialZoom: 8,
                 minZoom: 6,
                 maxZoom: 19,
-                backgroundColor: const Color(0xFF17171A),
+                backgroundColor: mapBackground,
                 interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
                 onMapReady: () {
                   _ready = true;
@@ -161,7 +161,7 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
                   for (final r in shown)
                     if (r != sel) Polyline(points: _pts(r), strokeWidth: 3.5, color: RwColors.accent.withValues(alpha: 0.45)),
                   if (sel != null) ...[
-                    Polyline(points: _pts(sel), strokeWidth: 10, color: Colors.black.withValues(alpha: 0.8)),
+                    Polyline(points: _pts(sel), strokeWidth: 10, color: routeHalo),
                     Polyline(points: _pts(sel), strokeWidth: 6, color: RwColors.accent),
                   ],
                 ]),
@@ -270,12 +270,12 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
                                               '${(r.elevationGainMeters ?? 0).round()} hm',
                                               if (r.estimatedDurationSeconds != null) Fmt.duration(r.estimatedDurationSeconds!),
                                             ].join(' · '),
-                                            style: const TextStyle(color: RwColors.muted),
+                                            style: TextStyle(color: RwColors.muted),
                                           ),
                                           if (best != null) ...[
                                             const SizedBox(height: 4),
                                             Text('Beste moment ${Fmt.time(best.start)} · ${best.score}',
-                                                style: const TextStyle(color: RwColors.accent, fontWeight: FontWeight.w600, fontSize: 13)),
+                                                style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w600, fontSize: 13)),
                                           ],
                                         ],
                                       ),

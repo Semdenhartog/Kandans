@@ -129,7 +129,7 @@ class _PhotosCardState extends ConsumerState<PhotosCard> {
                     alignment: Alignment.center,
                     child: _busy
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Column(
+                        : Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.add_a_photo_outlined, color: RwColors.accent),

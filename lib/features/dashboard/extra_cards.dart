@@ -29,7 +29,7 @@ class AgainCard extends ConsumerWidget {
       title: 'NOG EEN KEER',
       onTap: () => context.go('/routes/${last.route.id}'),
       child: Row(children: [
-        const Icon(Icons.replay, color: RwColors.accent),
+        Icon(Icons.replay, color: RwColors.accent),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -41,7 +41,7 @@ class AgainCard extends ConsumerWidget {
             Text(
               '${Fmt.km(last.route.distanceMeters, decimals: 1)} · ${daysAgoWords(days)} in ${Fmt.duration(last.run.movingTimeSeconds)}'
               '${last.times > 1 ? ' · ${last.times}× gelopen' : ''}',
-              style: const TextStyle(color: RwColors.muted),
+              style: TextStyle(color: RwColors.muted),
             ),
           ]),
         ),
@@ -72,7 +72,7 @@ class OnThisDayCard extends ConsumerWidget {
       title: 'OP DEZE DAG',
       onTap: a.id == null ? null : () => context.go('/runs/${a.id}'),
       child: Row(children: [
-        const Icon(Icons.history, color: RwColors.accent),
+        Icon(Icons.history, color: RwColors.accent),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -82,7 +82,7 @@ class OnThisDayCard extends ConsumerWidget {
             style: const TextStyle(height: 1.4),
           ),
         ),
-        if (a.id != null) const Icon(Icons.chevron_right, color: RwColors.muted),
+        if (a.id != null) Icon(Icons.chevron_right, color: RwColors.muted),
       ]),
     );
   }
@@ -131,10 +131,10 @@ class GoldenHourCard extends ConsumerWidget {
               s == null
                   ? 'Het zachtste licht van de dag: mooi voor een rustig rondje en foto\'s.'
                   : 'Loopweer om ${Fmt.time(s.start)}: ${s.verdict.toLowerCase()} (${s.score}/100), ${Fmt.temp(s.weather.temperature)}.',
-              style: const TextStyle(color: RwColors.muted, height: 1.35),
+              style: TextStyle(color: RwColors.muted, height: 1.35),
             ),
             if (g.evening)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 2),
                 child: Text('Na zonsondergang wordt het snel donker: neem een lampje mee.',
                     style: TextStyle(color: RwColors.subtle, fontSize: 12)),
@@ -165,7 +165,7 @@ class WeekendCard extends ConsumerWidget {
     return RwCard(
       title: 'WEEKEND',
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Icon(Icons.weekend_outlined, color: RwColors.accent),
+        Icon(Icons.weekend_outlined, color: RwColors.accent),
         const SizedBox(width: 12),
         Expanded(child: Text(text, style: const TextStyle(height: 1.45))),
       ]),
@@ -250,13 +250,13 @@ class YearGoalCard extends ConsumerWidget {
         title: 'JAARDOEL',
         onTap: () => _edit(context, ref, suggestion),
         child: Row(children: [
-          const Icon(Icons.flag_circle_outlined, color: RwColors.accent),
+          Icon(Icons.flag_circle_outlined, color: RwColors.accent),
           const SizedBox(width: 12),
           Expanded(
             child: Text('Je liep dit jaar al ${done.round()} km. Kies een doel voor ${now.year}, dan zie je of je op koers ligt.',
-                style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                style: TextStyle(color: RwColors.muted, height: 1.4)),
           ),
-          const Icon(Icons.chevron_right, color: RwColors.muted),
+          Icon(Icons.chevron_right, color: RwColors.muted),
         ]),
       );
     }
@@ -268,7 +268,7 @@ class YearGoalCard extends ConsumerWidget {
         Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text('${done.round()}',
               style: const TextStyle(fontFamily: RwFonts.display, fontSize: 30, fontWeight: FontWeight.w800, fontFeatures: rwTnum)),
-          Text(' / ${target.round()} km', style: const TextStyle(color: RwColors.muted, fontSize: 16)),
+          Text(' / ${target.round()} km', style: TextStyle(color: RwColors.muted, fontSize: 16)),
         ]),
         const SizedBox(height: 8),
         ClipRRect(
@@ -287,10 +287,10 @@ class YearGoalCard extends ConsumerWidget {
               : p.onTrack
                   ? 'Met dit tempo kom je uit op ${p.projectedKm.round()} km. Je ligt op koers.'
                   : 'Met dit tempo kom je uit op ${p.projectedKm.round()} km. Nog ${p.neededPerWeek.toStringAsFixed(1).replaceAll('.', ',')} km per week om het te halen.',
-          style: const TextStyle(color: RwColors.muted, height: 1.4),
+          style: TextStyle(color: RwColors.muted, height: 1.4),
         ),
         const SizedBox(height: 6),
-        Text(monthClimbText(runs, now), style: const TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4)),
+        Text(monthClimbText(runs, now), style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4)),
       ]),
     );
   }

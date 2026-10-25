@@ -23,7 +23,7 @@ class _Bit {
         drift = (r.nextDouble() - 0.5) * 0.35,
         spin = (r.nextDouble() - 0.5) * 14,
         size = 5 + r.nextDouble() * 7,
-        color = const [RwColors.accent, RwColors.accentDeep, RwColors.accentLight, RwColors.text, RwColors.good][r.nextInt(5)],
+        color = [RwColors.accent, RwColors.accentDeep, RwColors.accentLight, RwColors.text, RwColors.good][r.nextInt(5)],
         round = r.nextBool();
   final double x, delay, speed, drift, spin, size;
   final Color color;

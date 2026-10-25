@@ -48,19 +48,19 @@ class BestRouteNowCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.air, color: RwColors.accent),
+              Icon(Icons.air, color: RwColors.accent),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(best.route.name,
                     style: const TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
               ),
-              if (route != null) Text(Fmt.km(route.distanceMeters, decimals: 1), style: const TextStyle(color: RwColors.muted)),
+              if (route != null) Text(Fmt.km(route.distanceMeters, decimals: 1), style: TextStyle(color: RwColors.muted)),
             ],
           ),
           const SizedBox(height: 6),
-          Text(best.summary, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+          Text(best.summary, style: TextStyle(color: RwColors.muted, height: 1.4)),
           Text('Vergeleken met ${best.compared - 1} andere routes in de buurt.',
-              style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+              style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           if (route != null) ...[
             const SizedBox(height: 10),
             Align(

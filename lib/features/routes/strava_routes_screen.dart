@@ -103,7 +103,7 @@ class _StravaRoutesScreenState extends ConsumerState<StravaRoutesScreen> {
                     Row(children: [
                       Expanded(
                         child: Text('${data.routes.length} ${data.routes.length == 1 ? 'route' : 'routes'} in Strava',
-                            style: const TextStyle(color: RwColors.muted)),
+                            style: TextStyle(color: RwColors.muted)),
                       ),
                       if (available.isNotEmpty)
                         TextButton(
@@ -139,9 +139,9 @@ class _StravaRoutesScreenState extends ConsumerState<StravaRoutesScreen> {
                       ),
                     if (data.cyclingSkipped > 0)
                       Text('${data.cyclingSkipped} fietsroutes overgeslagen.',
-                          textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                          textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                     const SizedBox(height: 6),
-                    const Text('Routes via Strava. Ontkoppel je Strava, dan verdwijnen ze weer uit Kadans.',
+                    Text('Routes via Strava. Ontkoppel je Strava, dan verdwijnen ze weer uit Kadans.',
                         textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
                   ],
                 ],
@@ -185,7 +185,7 @@ class _PrivateHint extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const Text('Zie je je privéroutes niet?', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          const Text('Je koppeling is van vóór deze versie. Koppel Strava opnieuw en geef toestemming voor privéroutes.',
+          Text('Je koppeling is van vóór deze versie. Koppel Strava opnieuw en geef toestemming voor privéroutes.',
               style: TextStyle(color: RwColors.muted, height: 1.4)),
           Align(
             alignment: Alignment.centerLeft,
@@ -231,7 +231,7 @@ class _RouteTile extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  if (route.starred) const Padding(padding: EdgeInsets.only(right: 4), child: Icon(Icons.star, size: 14, color: RwColors.warning)),
+                  if (route.starred) Padding(padding: EdgeInsets.only(right: 4), child: Icon(Icons.star, size: 14, color: RwColors.warning)),
                   Expanded(
                     child: Text(route.name,
                         maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
@@ -244,13 +244,13 @@ class _RouteTile extends StatelessWidget {
                     if (route.elevationGainMeters != null) '${route.elevationGainMeters!.round()} m omhoog',
                     if (route.isPrivate) 'privé',
                   ].join(' · '),
-                  style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                  style: TextStyle(color: RwColors.subtle, fontSize: 12),
                 ),
               ]),
             ),
             const SizedBox(width: 8),
             imported
-                ? const Row(mainAxisSize: MainAxisSize.min, children: [
+                ? Row(mainAxisSize: MainAxisSize.min, children: [
                     Icon(Icons.check_circle, size: 18, color: RwColors.good),
                     SizedBox(width: 4),
                     Text('In Kadans', style: TextStyle(color: RwColors.good, fontSize: 12)),

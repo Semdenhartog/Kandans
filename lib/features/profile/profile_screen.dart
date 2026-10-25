@@ -22,6 +22,7 @@ import '../dashboard/dashboard_providers.dart';
 import '../activities/badges_screen.dart';
 import '../challenges/challenges.dart' show openChallenges;
 import '../activities/strength_screen.dart';
+import 'appearance_tile.dart';
 import 'connections_card.dart';
 import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
@@ -117,14 +118,14 @@ class ProfileScreen extends ConsumerWidget {
           }),
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 4),
-            child: Text(user?.email ?? '', style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
+            child: Text(user?.email ?? '', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
           ),
           const _SectionTitle('TRAINING'),
           Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: const TileIcon(Icons.calendar_month_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.calendar_month_outlined, color: RwColors.accent),
                   title: const Text('Trainingsschema'),
                   subtitle: const Text('Een schema op maat naar je wedstrijd of afstand'),
                   trailing: const Icon(Icons.chevron_right),
@@ -132,7 +133,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.flag_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.flag_outlined, color: RwColors.accent),
                   title: const Text('Wedstrijden'),
                   subtitle: const Text('Je doelen, voorspelde eindtijd en wedstrijdadvies'),
                   trailing: const Icon(Icons.chevron_right),
@@ -140,7 +141,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.emoji_events_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.emoji_events_outlined, color: RwColors.accent),
                   title: const Text('Uitdagingen'),
                   subtitle: const Text('Doe mee aan een maand- of seizoensuitdaging'),
                   trailing: const Icon(Icons.chevron_right),
@@ -148,7 +149,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.military_tech_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.military_tech_outlined, color: RwColors.accent),
                   title: const Text('Badges'),
                   subtitle: const Text('Mijlpalen en weerbadges'),
                   trailing: const Icon(Icons.chevron_right),
@@ -156,7 +157,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.fitness_center, color: RwColors.accent),
+                  leading: TileIcon(Icons.fitness_center, color: RwColors.accent),
                   title: const Text('Kracht en mobiliteit'),
                   subtitle: const Text('Warming-up, kracht voor lopers en rekken, met de stem erbij'),
                   trailing: const Icon(Icons.chevron_right),
@@ -166,7 +167,7 @@ class ProfileScreen extends ConsumerWidget {
                 Consumer(builder: (context, ref, _) {
                   final rain = ref.watch(rainPreferenceProvider);
                   return ListTile(
-                    leading: const TileIcon(Icons.umbrella_outlined, color: RwColors.accent),
+                    leading: TileIcon(Icons.umbrella_outlined, color: RwColors.accent),
                     title: const Text('Lopen in de regen'),
                     subtitle: Text(rain.label),
                     trailing: const Icon(Icons.chevron_right),
@@ -227,8 +228,10 @@ class ProfileScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                const AppearanceTile(),
+                const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.image_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.image_outlined, color: RwColors.accent),
                   title: const Text('Mijn posters'),
                   subtitle: const Text('Routeposters die je liet drukken'),
                   trailing: const Icon(Icons.chevron_right),
@@ -244,7 +247,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.workspace_premium_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.workspace_premium_outlined, color: RwColors.accent),
                   title: const Text('Kadans Premium'),
                   subtitle: Text(
                     profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
@@ -277,15 +280,15 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const TileIcon(Icons.delete_forever_outlined, color: RwColors.danger),
-                  title: const Text('Account verwijderen', style: TextStyle(color: RwColors.danger)),
+                  leading: TileIcon(Icons.delete_forever_outlined, color: RwColors.danger),
+                  title: Text('Account verwijderen', style: TextStyle(color: RwColors.danger)),
                   onTap: () => _deleteAccount(context, ref),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Kadans 1.0 · Weer via Open-Meteo.com · Buien via Buienradar.nl',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.subtle, fontSize: 12),
@@ -317,7 +320,7 @@ class _InsightsCard extends StatelessWidget {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Na 8 runs berekent Kadans bij welke temperatuur en wind jij het snelst loopt. '
               'Tot die tijd gaan we uit van 8–16°C als ideaal.',
               style: TextStyle(color: RwColors.muted, height: 1.5),
@@ -422,7 +425,7 @@ class _BucketChart extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('${b[k].from.round()}°', style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+                    Text('${b[k].from.round()}°', style: TextStyle(fontSize: 11, color: RwColors.subtle)),
                   ],
                 ),
               ),
@@ -471,7 +474,7 @@ Future<void> _pickRain(BuildContext context, WidgetRef ref) async {
                 selected: r == current,
                 onTap: () => Navigator.pop(ctx, r),
               ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text('Onweer en gladheid blijven altijd zwaar meetellen.',
                   style: TextStyle(color: RwColors.subtle, fontSize: 12)),

@@ -42,7 +42,7 @@ class NetPhoto extends StatelessWidget {
         errorBuilder: (context, _, _) => Container(
           color: RwColors.surfaceHigh,
           alignment: Alignment.center,
-          child: const Icon(Icons.image_not_supported_outlined, color: RwColors.subtle),
+          child: Icon(Icons.image_not_supported_outlined, color: RwColors.subtle),
         ),
       );
 }
@@ -81,7 +81,7 @@ class RoutePhotosCard extends ConsumerWidget {
         ),
         error: (e, _) => Row(
           children: [
-            const Expanded(child: Text('Foto\'s laden is niet gelukt.', style: TextStyle(color: RwColors.muted))),
+            Expanded(child: Text('Foto\'s laden is niet gelukt.', style: TextStyle(color: RwColors.muted))),
             TextButton(onPressed: () => ref.invalidate(routePhotosProvider(polyline)), child: const Text('Opnieuw')),
           ],
         ),
@@ -110,7 +110,7 @@ class RoutePhotosCard extends ConsumerWidget {
                   : rp.streetFailed
                       ? 'Straatfoto\'s konden niet worden geladen. Trek omlaag om het later opnieuw te proberen.'
                       : 'Langs deze route zijn nog geen foto\'s gevonden.',
-              style: const TextStyle(color: RwColors.muted, height: 1.4),
+              style: TextStyle(color: RwColors.muted, height: 1.4),
             );
           }
           return Column(
@@ -197,7 +197,7 @@ class RoutePhotosCard extends ConsumerWidget {
                   if (photos.any((p) => p.source == PhotoSource.landmark)) 'bezienswaardigheden via Wikipedia',
                   if (!rp.streetConfigured) 'straatfoto\'s volgen zodra Mapillary is ingesteld',
                 ].join(' · '),
-                style: const TextStyle(color: RwColors.subtle, fontSize: 11),
+                style: TextStyle(color: RwColors.subtle, fontSize: 11),
               ),
             ],
           );
@@ -268,12 +268,12 @@ class _PhotoViewerState extends State<PhotoViewer> {
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   if (p.description != null && p.description!.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(p.description!, style: const TextStyle(color: RwColors.muted)),
+                    Text(p.description!, style: TextStyle(color: RwColors.muted)),
                   ],
                   const SizedBox(height: 6),
                   Text(
                     [p.credit, if (p.capturedAt != null) 'opgenomen ${Fmt.date(p.capturedAt!)}'].join(' · '),
-                    style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                    style: TextStyle(color: RwColors.subtle, fontSize: 12),
                   ),
                   if (p.link != null)
                     Align(

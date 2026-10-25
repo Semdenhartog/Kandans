@@ -129,7 +129,7 @@ class ChallengesScreen extends ConsumerWidget {
                 child: const Icon(Icons.groups_rounded, color: challengeGold),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Samen', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                   SizedBox(height: 2),
@@ -137,7 +137,7 @@ class ChallengesScreen extends ConsumerWidget {
                       style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
                 ]),
               ),
-              const Icon(Icons.chevron_right, color: RwColors.subtle),
+              Icon(Icons.chevron_right, color: RwColors.subtle),
             ]),
           ),
           const SizedBox(height: 18),
@@ -151,7 +151,7 @@ class ChallengesScreen extends ConsumerWidget {
           ],
           const _Heading('KIES EEN UITDAGING'),
           if (offer.isEmpty)
-            const Text('Je doet al aan alle uitdagingen van nu mee. Volgende maand komen er nieuwe.',
+            Text('Je doet al aan alle uitdagingen van nu mee. Volgende maand komen er nieuwe.',
                 style: TextStyle(color: RwColors.muted))
           else
             for (final c in offer) ...[
@@ -274,7 +274,7 @@ class _ActiveCard extends StatelessWidget {
             ),
           ]),
         ),
-        IconButton(tooltip: 'Stoppen met deze uitdaging', onPressed: onLeave, icon: const Icon(Icons.close, color: RwColors.subtle)),
+        IconButton(tooltip: 'Stoppen met deze uitdaging', onPressed: onLeave, icon: Icon(Icons.close, color: RwColors.subtle)),
       ]),
     );
   }
@@ -299,9 +299,9 @@ class _OfferTile extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(challenge.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               const SizedBox(height: 2),
-              Text(challenge.description, style: const TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+              Text(challenge.description, style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
               const SizedBox(height: 2),
-              Text(_period(challenge), style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+              Text(_period(challenge), style: TextStyle(color: RwColors.subtle, fontSize: 12)),
             ]),
           ),
           const SizedBox(width: 8),
@@ -358,7 +358,7 @@ class ChallengesCard extends ConsumerWidget {
       title: 'UITDAGINGEN',
       onTap: () => openChallenges(context),
       child: active.isEmpty
-          ? const Row(children: [
+          ? Row(children: [
               Icon(Icons.emoji_events_outlined, color: RwColors.accent),
               SizedBox(width: 12),
               Expanded(child: Text('Kies een uitdaging voor deze maand en verdien een gouden medaille.', style: TextStyle(color: RwColors.muted, height: 1.4))),
@@ -374,7 +374,7 @@ class ChallengesCard extends ConsumerWidget {
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(p.challenge.title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                        Text('${_value(p)} · ${remainingText(p)}', style: const TextStyle(color: RwColors.muted, fontSize: 13)),
+                        Text('${_value(p)} · ${remainingText(p)}', style: TextStyle(color: RwColors.muted, fontSize: 13)),
                       ]),
                     ),
                   ]),
@@ -382,7 +382,7 @@ class ChallengesCard extends ConsumerWidget {
               if (active.length > 2)
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('+ ${active.length - 2} meer', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                  child: Text('+ ${active.length - 2} meer', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                 ),
             ]),
     );

@@ -262,7 +262,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   IconButton(
                     tooltip: 'Indeling van Vandaag aanpassen',
-                    icon: const Icon(Icons.tune, color: RwColors.subtle),
+                    icon: Icon(Icons.tune, color: RwColors.subtle),
                     onPressed: () => showDashLayoutSheet(context),
                   ),
                 ],
@@ -280,7 +280,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   _updatedAt ??= upd;
                   return '${Fmt.date(DateTime.now())}$weather$where${upd == null ? '' : ' · bijgewerkt ${Fmt.time(upd)}'}';
                 }(),
-                style: const TextStyle(color: RwColors.subtle),
+                style: TextStyle(color: RwColors.subtle),
               ),
               ),
               const SizedBox(height: 18),
@@ -361,13 +361,13 @@ class _TypePicker extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
                 backgroundColor: RwColors.surfaceHigh,
-                side: const BorderSide(color: RwColors.border),
+                side: BorderSide(color: RwColors.border),
                 showCheckmark: false,
               ),
           ],
         ),
         const SizedBox(height: 6),
-        Text(value.description, style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
+        Text(value.description, style: TextStyle(color: RwColors.subtle, fontSize: 13)),
       ],
     );
   }
@@ -525,7 +525,7 @@ class _ResultsState extends State<_Results> {
                 children: [
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text('PER UUR',
                             style: RwText.overline),
                       ),
@@ -539,7 +539,7 @@ class _ResultsState extends State<_Results> {
                   ),
                   const SizedBox(height: 10),
                   if (bars.isEmpty)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: Text('Geen uren met een goede score (70 of hoger) in de komende 36 uur.',
                           style: TextStyle(color: RwColors.muted)),
@@ -577,7 +577,7 @@ class _ResultsState extends State<_Results> {
               IconButton(
                 tooltip: 'Voorlezen',
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.volume_up_outlined, color: RwColors.subtle),
+                icon: Icon(Icons.volume_up_outlined, color: RwColors.subtle),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   final w = verdict.best.weather;
@@ -613,7 +613,7 @@ class _ResultsState extends State<_Results> {
           widget.insightsPersonal
               ? 'Berekend met jouw persoonlijke loopprofiel.'
               : 'Log minimaal 8 runs om het advies op jouw eigen prestaties af te stemmen.',
-          style: const TextStyle(color: RwColors.subtle, fontSize: 13),
+          style: TextStyle(color: RwColors.subtle, fontSize: 13),
           textAlign: TextAlign.center,
         ),
       ],
@@ -732,13 +732,13 @@ class _HeroCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(999)),
                     child: Text(isBest ? label : 'GEKOZEN MOMENT',
-                        style: const TextStyle(color: RwColors.background, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.6)),
+                        style: TextStyle(color: RwColors.background, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.6)),
                   ),
                   const Spacer(),
                   IconButton(
                     tooltip: 'Nodig iemand uit om mee te lopen',
                     visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.group_add_outlined, size: 20, color: RwColors.muted),
+                    icon: Icon(Icons.group_add_outlined, size: 20, color: RwColors.muted),
                     onPressed: () {
                       final when = goNowShown ? 'nu meteen' : '${_dayLabel(s.start).toLowerCase()} om ${Fmt.time(s.start)}';
                       SharePlus.instance.share(ShareParams(
@@ -767,7 +767,7 @@ class _HeroCard extends StatelessWidget {
                 children: [
                   ShineText(
                     goNowShown ? 'Nu' : Fmt.time(s.start),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: RwFonts.display, fontFeatures: rwTnum,
                       fontSize: 64,
                       fontWeight: FontWeight.w800,
@@ -782,7 +782,7 @@ class _HeroCard extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         '${_dayLabel(s.start)}\n${weatherLabel(w.weatherCode)}',
-                        style: const TextStyle(color: RwColors.muted, height: 1.3),
+                        style: TextStyle(color: RwColors.muted, height: 1.3),
                       ),
                     ),
                   ),
@@ -791,7 +791,7 @@ class _HeroCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(isBest ? v.detail : 'Je bekijkt ${Fmt.time(s.start)}. Het beste moment is ${Fmt.time(v.best.start)} (score ${v.best.score}).',
-                style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                style: TextStyle(color: RwColors.muted, height: 1.4)),
             const SizedBox(height: 14),
             Row(
               children: [
@@ -815,9 +815,9 @@ class _HeroCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(padding: EdgeInsets.only(top: 2), child: Icon(Icons.info_outline, size: 15, color: RwColors.subtle)),
+                      Padding(padding: EdgeInsets.only(top: 2), child: Icon(Icons.info_outline, size: 15, color: RwColors.subtle)),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(r, style: const TextStyle(color: RwColors.muted, fontSize: 13))),
+                      Expanded(child: Text(r, style: TextStyle(color: RwColors.muted, fontSize: 13))),
                     ],
                   ),
                 ),
@@ -830,12 +830,12 @@ class _HeroCard extends StatelessWidget {
               final dark = darkWarning(start, Duration(minutes: durationMinutes), lat, lon);
               return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  const Icon(Icons.home_outlined, size: 16, color: RwColors.subtle),
+                  Icon(Icons.home_outlined, size: 16, color: RwColors.subtle),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       '${goNowShown ? 'Ga je nu' : 'Ga je om ${Fmt.time(start)}'}, dan ben je rond ${Fmt.time(back)} terug ($durationMinutes min).',
-                      style: const TextStyle(color: RwColors.muted, fontSize: 13),
+                      style: TextStyle(color: RwColors.muted, fontSize: 13),
                     ),
                   ),
                 ]),
@@ -843,9 +843,9 @@ class _HeroCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Padding(padding: EdgeInsets.only(top: 1), child: Icon(Icons.nights_stay_outlined, size: 16, color: RwColors.warning)),
+                      Padding(padding: EdgeInsets.only(top: 1), child: Icon(Icons.nights_stay_outlined, size: 16, color: RwColors.warning)),
                       const SizedBox(width: 6),
-                      Expanded(child: Text(dark, style: const TextStyle(color: RwColors.warning, fontSize: 13, height: 1.35))),
+                      Expanded(child: Text(dark, style: TextStyle(color: RwColors.warning, fontSize: 13, height: 1.35))),
                     ]),
                   ),
               ]);
@@ -858,7 +858,7 @@ class _HeroCard extends StatelessWidget {
                     // Glas-stijl: de oranje hoofdknop "Start run" zweeft al onderin.
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.black.withValues(alpha: 0.32),
+                        backgroundColor: RwColors.surface.withValues(alpha: 0.6),
                         foregroundColor: RwColors.text,
                         side: BorderSide(color: RwColors.good.withValues(alpha: 0.6)),
                       ),
@@ -872,7 +872,7 @@ class _HeroCard extends StatelessWidget {
                     // Secundair (glas met oranje rand): de oranje hoofdknop is "Start run".
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.black.withValues(alpha: 0.32),
+                        backgroundColor: RwColors.surface.withValues(alpha: 0.6),
                         foregroundColor: RwColors.text,
                         side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
                       ),
@@ -882,7 +882,7 @@ class _HeroCard extends StatelessWidget {
                           showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
                         }
                       },
-                      icon: const Icon(Icons.alarm_add_outlined, color: RwColors.accentLight),
+                      icon: Icon(Icons.alarm_add_outlined, color: RwColors.accentLight),
                       label: Text('Wekker ${Fmt.time(remindAt)}'),
                     ),
                   )
@@ -901,7 +901,7 @@ class _HeroCard extends StatelessWidget {
                     style: IconButton.styleFrom(
                       minimumSize: const Size(52, 52),
                       side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
-                      backgroundColor: Colors.black.withValues(alpha: 0.32),
+                      backgroundColor: RwColors.surface.withValues(alpha: 0.6),
                     ),
                     onPressed: () => addToCalendar(
                       context,
@@ -910,7 +910,7 @@ class _HeroCard extends StatelessWidget {
                       minutes: durationMinutes,
                       details: 'Beste moment volgens Kadans: score ${s.score}. ${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}.',
                     ),
-                    icon: const Icon(Icons.event_available_outlined, color: RwColors.accentLight),
+                    icon: Icon(Icons.event_available_outlined, color: RwColors.accentLight),
                   ),
                 ],
                 if (v.kind == VerdictKind.tough) ...[
@@ -931,11 +931,11 @@ class _HeroCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 10),
                 child: Row(
                   children: [
-                    const Icon(Icons.directions_run, size: 16, color: RwColors.subtle),
+                    Icon(Icons.directions_run, size: 16, color: RwColors.subtle),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text('Nu vertrekken kan ook: score ${v.now.score} (${gain <= 3 ? 'bijna even goed' : '$gain punten minder'}).',
-                          style: const TextStyle(color: RwColors.subtle, fontSize: 13)),
+                          style: TextStyle(color: RwColors.subtle, fontSize: 13)),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accentLight),
@@ -970,7 +970,7 @@ class _HeroStat extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+                Text(label, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
                 Text(value, maxLines: 2, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.2)),
               ],
             ),
@@ -990,7 +990,7 @@ class _PlanRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: RwColors.surface,
-        shape: const StadiumBorder(side: BorderSide(color: RwColors.border)),
+        shape: StadiumBorder(side: BorderSide(color: RwColors.border)),
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: onTap,
@@ -998,7 +998,7 @@ class _PlanRow extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
             child: Row(
               children: [
-                const Icon(Icons.directions_run, size: 20, color: RwColors.accent),
+                Icon(Icons.directions_run, size: 20, color: RwColors.accent),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -1007,8 +1007,8 @@ class _PlanRow extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
-                const Text('Wijzig', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w600)),
-                const Icon(Icons.chevron_right, color: RwColors.accent, size: 20),
+                Text('Wijzig', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w600)),
+                Icon(Icons.chevron_right, color: RwColors.accent, size: 20),
               ],
             ),
           ),
@@ -1060,7 +1060,7 @@ class _HourBars extends StatelessWidget {
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.visible,
-                    style: const TextStyle(fontSize: 10, color: RwColors.accent, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 10, color: RwColors.accent, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Expanded(
@@ -1079,8 +1079,8 @@ class _HourBars extends StatelessWidget {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                                 colors: isBest
-                                    ? const [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
-                                    : (isSel ? const [Color(0xFFB5B5BE), RwColors.muted] : const [Color(0xFF34343B), RwColors.bar]),
+                                    ? [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
+                                    : (isSel ? [RwColors.subtle, RwColors.muted] : [RwColors.border, RwColors.bar]),
                               ),
                               boxShadow: isBest ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 12, spreadRadius: -2)] : null,
                               borderRadius: BorderRadius.circular(6),
@@ -1154,7 +1154,7 @@ class _RouteWindCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-          Text(text, style: const TextStyle(height: 1.5, color: RwColors.muted)),
+          Text(text, style: TextStyle(height: 1.5, color: RwColors.muted)),
         ],
       ),
     );
@@ -1184,8 +1184,8 @@ class _ClothingCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF232328), RwColors.surfaceHigh]),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+                    gradient: LinearGradient(colors: [RwColors.surface, RwColors.surfaceHigh]),
+                    border: Border.all(color: RwColors.hairline),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -1202,9 +1202,9 @@ class _ClothingCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.info_outline, size: 16, color: RwColors.accent),
+                  Icon(Icons.info_outline, size: 16, color: RwColors.accent),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(tip, style: const TextStyle(color: RwColors.muted, height: 1.4))),
+                  Expanded(child: Text(tip, style: TextStyle(color: RwColors.muted, height: 1.4))),
                 ],
               ),
             ),
@@ -1267,9 +1267,9 @@ class _RainCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              Text(Fmt.time(rain.points.first.time), style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+              Text(Fmt.time(rain.points.first.time), style: TextStyle(fontSize: 11, color: RwColors.subtle)),
               const Spacer(),
-              Text(Fmt.time(rain.points.last.time), style: const TextStyle(fontSize: 11, color: RwColors.subtle)),
+              Text(Fmt.time(rain.points.last.time), style: TextStyle(fontSize: 11, color: RwColors.subtle)),
             ],
           ),
           const SizedBox(height: 8),
@@ -1277,7 +1277,7 @@ class _RainCard extends StatelessWidget {
             onTap: () => launchUrl(Uri.parse('https://www.buienradar.nl'), mode: LaunchMode.externalApplication),
             child: Text(
               'Neerslagverwachting: Buienradar.nl · bijgewerkt ${Fmt.time(rain.fetchedAt)}',
-              style: const TextStyle(fontSize: 11, color: RwColors.subtle, decoration: TextDecoration.underline),
+              style: TextStyle(fontSize: 11, color: RwColors.subtle, decoration: TextDecoration.underline),
             ),
           ),
         ],
@@ -1327,7 +1327,7 @@ class _WarningsCard extends StatelessWidget {
                     children: [
                       Text(w.title, style: TextStyle(fontWeight: FontWeight.w700, color: _color(w.level) == RwColors.muted ? RwColors.text : _color(w.level))),
                       const SizedBox(height: 2),
-                      Text(w.text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                      Text(w.text, style: TextStyle(color: RwColors.muted, height: 1.4)),
                     ],
                   ),
                 ),
@@ -1350,13 +1350,13 @@ class _WindNeedle extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 22,
         height: 22,
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.18))),
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: RwColors.text.withValues(alpha: 0.18))),
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: fromDegrees - 140, end: fromDegrees + 180),
           duration: const Duration(milliseconds: 1400),
           curve: Curves.elasticOut,
           builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
-          child: const Icon(Icons.navigation, size: 13, color: RwColors.accentLight),
+          child: Icon(Icons.navigation, size: 13, color: RwColors.accentLight),
         ),
       );
 }

@@ -36,9 +36,9 @@ class FitnessScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(advice.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent)),
+                  Text(advice.title, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent)),
                   const SizedBox(height: 4),
-                  Text(advice.text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                  Text(advice.text, style: TextStyle(color: RwColors.muted, height: 1.4)),
                   const SizedBox(height: 14),
                   Row(
                     children: [
@@ -53,7 +53,7 @@ class FitnessScreen extends ConsumerWidget {
                     const SizedBox(height: 10),
                     Text(
                       'Fitheid ${today.fitness >= weekAgo.fitness ? '+' : ''}${(today.fitness - weekAgo.fitness).round()} ten opzichte van een week geleden.',
-                      style: const TextStyle(color: RwColors.subtle, fontSize: 13),
+                      style: TextStyle(color: RwColors.subtle, fontSize: 13),
                     ),
                   ],
                 ],
@@ -71,7 +71,7 @@ class FitnessScreen extends ConsumerWidget {
                     child: SizedBox(height: 180, child: RevealIn(child: CustomPaint(painter: _FitnessPainter(series), size: Size.infinite))),
                   ),
                   const SizedBox(height: 8),
-                  const Wrap(
+                  Wrap(
                     spacing: 16,
                     children: [
                       _Legend(color: RwColors.accent, label: 'Fitheid'),
@@ -104,15 +104,15 @@ class FitnessScreen extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Text('Rustig ${(b.easyShare * 100).round()}%', style: const TextStyle(color: RwColors.good, fontWeight: FontWeight.w600)),
+                        Text('Rustig ${(b.easyShare * 100).round()}%', style: TextStyle(color: RwColors.good, fontWeight: FontWeight.w600)),
                         const Spacer(),
-                        Text('Stevig ${(100 - b.easyShare * 100).round()}%', style: const TextStyle(color: RwColors.warning, fontWeight: FontWeight.w600)),
+                        Text('Stevig ${(100 - b.easyShare * 100).round()}%', style: TextStyle(color: RwColors.warning, fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text(b.advice, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+                    Text(b.advice, style: TextStyle(color: RwColors.muted, height: 1.4)),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Goede lopers doen zo\'n 80% van hun tijd rustig. Rustig = onder 80% van je maximale hartslag, of zonder hartslag duidelijk trager dan je drempeltempo.',
                       style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),
                     ),
@@ -121,7 +121,7 @@ class FitnessScreen extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 12),
-            const RwCard(
+            RwCard(
               title: 'HOE WERKT DIT?',
               child: Text(
                 'Elke run krijgt een belasting: hoe lang en hoe zwaar (op hartslag als je een band of horloge gebruikt, anders op tempo). '
@@ -147,7 +147,7 @@ class _Legend extends StatelessWidget {
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
         Container(width: 14, height: 4, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+        Text(label, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
       ]);
 }
 
@@ -238,7 +238,7 @@ class _FitnessPainter extends CustomPainter {
     for (var i = 0; i < days.length; i++) {
       if (days[i].day.day != 1) continue;
       final tp = TextPainter(
-        text: TextSpan(text: months[days[i].day.month - 1], style: const TextStyle(fontFamily: RwFonts.body, color: RwColors.subtle, fontSize: 10)),
+        text: TextSpan(text: months[days[i].day.month - 1], style: TextStyle(fontFamily: RwFonts.body, color: RwColors.subtle, fontSize: 10)),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset((x(i) - tp.width / 2).clamp(0, size.width - tp.width), h + 3));

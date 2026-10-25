@@ -77,7 +77,7 @@ class HelpScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          const Text('VEELGESTELDE VRAGEN', style: RwText.overline),
+          Text('VEELGESTELDE VRAGEN', style: RwText.overline),
           const SizedBox(height: 8),
           Card(
             child: Column(children: [
@@ -86,12 +86,12 @@ class HelpScreen extends StatelessWidget {
                   title: Text(q, style: const TextStyle(fontWeight: FontWeight.w600)),
                   childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
                   expandedAlignment: Alignment.centerLeft,
-                  children: [Text(a, style: const TextStyle(color: RwColors.muted, height: 1.5))],
+                  children: [Text(a, style: TextStyle(color: RwColors.muted, height: 1.5))],
                 ),
             ]),
           ),
           const SizedBox(height: 20),
-          const Text('WOORDENLIJST', style: RwText.overline),
+          Text('WOORDENLIJST', style: RwText.overline),
           const SizedBox(height: 8),
           Card(
             child: Column(children: [
@@ -197,7 +197,7 @@ class _SearchSheetState extends State<_SearchSheet> {
           ),
           Expanded(
             child: list.isEmpty
-                ? const Center(child: Text('Niets gevonden.', style: TextStyle(color: RwColors.muted)))
+                ? Center(child: Text('Niets gevonden.', style: TextStyle(color: RwColors.muted)))
                 : ListView(children: [
                     for (final d in list)
                       ListTile(

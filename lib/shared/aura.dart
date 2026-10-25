@@ -6,8 +6,8 @@ import '../core/theme.dart';
 List<Color> auraColors(DateTime t) {
   final h = t.hour;
   if (h >= 5 && h < 9) return const [Color(0xFFFF8A80), Color(0xFFFDB27A)];
-  if (h >= 9 && h < 17) return const [RwColors.accentLight, Color(0xFFFFD27A)];
-  if (h >= 17 && h < 22) return const [RwColors.accentDeep, RwColors.accent];
+  if (h >= 9 && h < 17) return [RwColors.accentLight, Color(0xFFFFD27A)];
+  if (h >= 17 && h < 22) return [RwColors.accentDeep, RwColors.accent];
   return const [Color(0xFF4C6FFF), Color(0xFF7A5CFF)];
 }
 
@@ -21,7 +21,7 @@ class RwAura extends StatelessWidget {
     return IgnorePointer(
       child: ExcludeSemantics(
         child: DecoratedBox(
-          decoration: const BoxDecoration(color: RwColors.background),
+          decoration: BoxDecoration(color: RwColors.background),
           child: Stack(children: [
             Positioned(
               top: -220,

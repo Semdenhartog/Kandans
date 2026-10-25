@@ -259,7 +259,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 8),
-                    Text(_error!, style: const TextStyle(color: RwColors.danger)),
+                    Text(_error!, style: TextStyle(color: RwColors.danger)),
                   ],
                   const SizedBox(height: 12),
                   FilledButton.icon(
@@ -271,7 +271,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
                     label: const Text('Route opslaan'),
                   ),
                   const SizedBox(height: 6),
-                  const Text('Routes © openrouteservice.org | kaartdata © OpenStreetMap-bijdragers',
+                  Text('Routes © openrouteservice.org | kaartdata © OpenStreetMap-bijdragers',
                       textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 10)),
                 ],
               ),

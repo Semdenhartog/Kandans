@@ -11,7 +11,7 @@ class ConfigMissingApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: const Scaffold(
+      home: Scaffold(
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(24),

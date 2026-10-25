@@ -67,11 +67,11 @@ class BadgesScreen extends ConsumerWidget {
           Text('$earned van ${all.length} verdiend',
               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          const Text('Tik op een badge voor meer uitleg.', style: TextStyle(color: RwColors.subtle)),
+          Text('Tik op een badge voor meer uitleg.', style: TextStyle(color: RwColors.subtle)),
           // Medailles van gehaalde uitdagingen.
           if (ref.watch(challengeMedalsProvider) case final medals when medals.isNotEmpty) ...[
             const SizedBox(height: 20),
-            const Text('UITDAGINGEN', style: RwText.overline),
+            Text('UITDAGINGEN', style: RwText.overline),
             const SizedBox(height: 10),
             Wrap(spacing: 12, runSpacing: 12, children: [for (final m in medals) ChallengeMedal(progress: m)]),
           ],
@@ -81,12 +81,12 @@ class BadgesScreen extends ConsumerWidget {
               Expanded(child: Text(cat.title, style: RwText.overline)),
               Text(
                 '${all.where((b) => b.category == cat && b.earned).length}/${all.where((b) => b.category == cat).length}',
-                style: const TextStyle(color: RwColors.subtle, fontSize: 12, fontFeatures: rwTnum),
+                style: TextStyle(color: RwColors.subtle, fontSize: 12, fontFeatures: rwTnum),
               ),
             ]),
             if (cat.subtitle != null) ...[
               const SizedBox(height: 4),
-              Text(cat.subtitle!, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+              Text(cat.subtitle!, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
             ],
             const SizedBox(height: 10),
             _Grid(badges: [for (final b in all) if (b.category == cat) b]),
@@ -137,7 +137,7 @@ class BadgeTile extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(b.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
-                Text(b.description, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
+                Text(b.description, textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

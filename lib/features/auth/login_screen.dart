@@ -110,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: _resetPassword,
-                  child: const Text('Wachtwoord vergeten?', style: TextStyle(color: RwColors.muted)),
+                  child: Text('Wachtwoord vergeten?', style: TextStyle(color: RwColors.muted)),
                 ),
               ),
               FormError(_error),

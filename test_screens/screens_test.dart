@@ -328,7 +328,9 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false}) async {
+  RwColors.use(dark ? rwZandAvond : rwZand);
+  addTearDown(() => RwColors.use(rwZand));
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
@@ -399,6 +401,14 @@ void main() {
     await _loadFonts();
   });
 
+  // Donkere weergave (Zand avond) van de belangrijkste schermen.
+  testWidgets('60 donker vandaag', (t) => _shot(t, '60_donker_vandaag', const DashboardScreen(), height: 2600, nav: true, dark: true));
+  testWidgets('61 donker runs', (t) => _shot(t, '61_donker_runs', const ActivitiesScreen(), height: 1800, dark: true));
+  testWidgets('62 donker run detail', (t) => _shot(t, '62_donker_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3200, dark: true));
+  testWidgets('63 donker routes', (t) => _shot(t, '63_donker_routes', const RoutesScreen(), height: 1600, dark: true));
+  testWidgets('64 donker ik', (t) => _shot(t, '64_donker_ik', const ProfileScreen(), height: 2600, dark: true));
+  testWidgets('65 donker opnemen', (t) => _shot(t, '65_donker_opnemen', const RecordRunScreen(), height: 915, dark: true));
+  testWidgets('66 donker coach', (t) => _shot(t, '66_donker_coach', const CoachScreen(), height: 915, dark: true));
   testWidgets('01 vandaag', (t) => _shot(t, '01_vandaag', const DashboardScreen(), height: 2600, nav: true));
   testWidgets('01b vandaag boven', (t) => _shot(t, '01b_vandaag_boven', const DashboardScreen(), height: 915, nav: true));
   testWidgets('02 runs', (t) => _shot(t, '02_runs', const ActivitiesScreen(), height: 1800));

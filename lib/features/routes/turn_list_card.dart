@@ -11,10 +11,11 @@ import '../../shared/widgets.dart';
 
 /// Pijl die de kant van een afslag op wijst.
 class TurnArrow extends StatelessWidget {
-  const TurnArrow(this.kind, {super.key, this.size = 22, this.color = RwColors.accent});
+  const TurnArrow(this.kind, {super.key, this.size = 22, Color? color}) : _color = color;
   final TurnKind kind;
   final double size;
-  final Color color;
+  final Color? _color;
+  Color get color => _color ?? RwColors.accent;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,7 @@ class _TurnListCardState extends State<TurnListCard> {
                     SizedBox(width: 32, child: TurnArrow(t.kind)),
                     const SizedBox(width: 8),
                     Expanded(child: Text(t.kind.label, style: const TextStyle(fontWeight: FontWeight.w600))),
-                    Text('na ${Fmt.km(t.meters, decimals: 1)}', style: const TextStyle(color: RwColors.muted)),
+                    Text('na ${Fmt.km(t.meters, decimals: 1)}', style: TextStyle(color: RwColors.muted)),
                   ],
                 ),
               ),

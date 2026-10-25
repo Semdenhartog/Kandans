@@ -117,8 +117,8 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
               onTap: () => Navigator.pop(ctx, 'routes'),
             ),
             ListTile(
-              leading: const TileIcon(Icons.link_off, color: RwColors.danger),
-              title: const Text('Strava ontkoppelen', style: TextStyle(color: RwColors.danger)),
+              leading: TileIcon(Icons.link_off, color: RwColors.danger),
+              title: Text('Strava ontkoppelen', style: TextStyle(color: RwColors.danger)),
               onTap: () => Navigator.pop(ctx, 'disconnect'),
             ),
           ],
@@ -189,7 +189,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             ),
             title: Text(health == HealthStatus.connected ? 'Horloge' : 'Koppel je horloge'),
             subtitle: Text(healthSubtitle),
-            trailing: health == HealthStatus.connected ? const Icon(Icons.sync, color: RwColors.subtle) : null,
+            trailing: health == HealthStatus.connected ? Icon(Icons.sync, color: RwColors.subtle) : null,
             enabled: !_busy && health != HealthStatus.unavailable,
             onTap: () => _healthTap(health),
           ),
@@ -197,7 +197,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             FutureBuilder<bool>(
               future: _writeOn ??= _sync.healthWriteEnabled(),
               builder: (context, snap) => SwitchListTile(
-                secondary: const Icon(Icons.upload_outlined, color: RwColors.subtle),
+                secondary: Icon(Icons.upload_outlined, color: RwColors.subtle),
                 title: const Text('Opgenomen runs naar Samsung Health'),
                 subtitle: const Text('Zet runs die je in Kadans opneemt ook in Health Connect (Samsung Health, Google Fit)'),
                 value: snap.data ?? false,

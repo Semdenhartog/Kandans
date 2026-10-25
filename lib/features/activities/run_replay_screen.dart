@@ -7,7 +7,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../domain/geo.dart';
 import '../../domain/route_geometry.dart';
-import '../routes/route_map.dart' show baseTileLayer, mapAttribution;
+import '../routes/route_map.dart' show baseTileLayer, mapAttribution, mapBackground;
 
 /// Je run nog eens zien: het spoor tekent zich in ongeveer 12 seconden, met een stip, de afstand en de tijd.
 void openRunReplay(BuildContext context, Activity a) {
@@ -84,13 +84,13 @@ class _RunReplayScreenState extends State<RunReplayScreen> with SingleTickerProv
             FlutterMap(
               options: MapOptions(
                 initialCameraFit: CameraFit.coordinates(coordinates: _pts, padding: const EdgeInsets.fromLTRB(40, 40, 40, 160)),
-                backgroundColor: const Color(0xFF17171A),
+                backgroundColor: mapBackground,
                 interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
               ),
               children: [
                 baseTileLayer(false),
                 PolylineLayer(polylines: [
-                  Polyline(points: _pts, strokeWidth: 4, color: Colors.white.withValues(alpha: 0.14)),
+                  Polyline(points: _pts, strokeWidth: 4, color: RwColors.text.withValues(alpha: 0.14)),
                   if (shown.length >= 2) ...[
                     Polyline(points: shown, strokeWidth: 12, color: RwColors.accent.withValues(alpha: 0.22)),
                     Polyline(points: shown, strokeWidth: 5, color: RwColors.accent),

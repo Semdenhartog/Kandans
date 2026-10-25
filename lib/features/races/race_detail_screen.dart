@@ -112,7 +112,7 @@ class RaceDetailScreen extends ConsumerWidget {
             children: [
               Text(
                 '${Fmt.dateLong(r.raceDate)}${r.startTime == null ? '' : ' · start ${r.startTime}'}',
-                style: const TextStyle(color: RwColors.muted),
+                style: TextStyle(color: RwColors.muted),
               ),
               if (r.daysUntil > 0) ...[
                 const SizedBox(height: 14),
@@ -123,7 +123,7 @@ class RaceDetailScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 6),
                     child: Text(r.daysUntil == 1 ? 'dag tot de start' : 'dagen tot de start',
-                        style: const TextStyle(color: RwColors.muted, fontWeight: FontWeight.w600)),
+                        style: TextStyle(color: RwColors.muted, fontWeight: FontWeight.w600)),
                   ),
                 ]),
               ] else
@@ -174,7 +174,7 @@ class _AdviceView extends StatelessWidget {
             children: [
               Text(
                 Fmt.duration(predicted),
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: RwColors.accent, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+                style: TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: RwColors.accent, fontFamily: RwFonts.display, fontFeatures: rwTnum),
               ),
               Text(
                 vsGoal.abs() < 15
@@ -182,7 +182,7 @@ class _AdviceView extends StatelessWidget {
                     : vsGoal < 0
                         ? '${Fmt.duration(-vsGoal)} sneller dan je doel van ${Fmt.duration(race.goalTimeSeconds)}.'
                         : '${Fmt.duration(vsGoal)} langzamer dan je doel van ${Fmt.duration(race.goalTimeSeconds)}.',
-                style: const TextStyle(color: RwColors.muted),
+                style: TextStyle(color: RwColors.muted),
               ),
               const SizedBox(height: 12),
               _Line('Basis', advice.basedOn, Fmt.duration(advice.baseFinishSeconds)),
@@ -204,7 +204,7 @@ class _AdviceView extends StatelessWidget {
                   ? 'Deze wedstrijd is al geweest.'
                   : 'De weersverwachting komt ongeveer $forecastHorizonDays dagen van tevoren beschikbaar. '
                       'Kom dan terug voor een voorspelling met het weer erbij.',
-              style: const TextStyle(height: 1.5, color: RwColors.muted),
+              style: TextStyle(height: 1.5, color: RwColors.muted),
             ),
           )
         else
@@ -229,7 +229,7 @@ class _AdviceView extends StatelessWidget {
         const SizedBox(height: 12),
         _AdviceCard(icon: Icons.water_drop_outlined, title: 'Drinken en energie', text: advice.hydration),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'Dit is een schatting op basis van je runs en het verwachte weer, geen garantie. '
           'Luister naar je lichaam.',
           style: TextStyle(color: RwColors.subtle, fontSize: 12),
@@ -252,7 +252,7 @@ class _Line extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(width: 96, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600))),
-            Expanded(child: Text(detail, style: const TextStyle(color: RwColors.subtle))),
+            Expanded(child: Text(detail, style: TextStyle(color: RwColors.subtle))),
             Text(value),
           ],
         ),
@@ -278,7 +278,7 @@ class _AdviceCard extends StatelessWidget {
                 children: [
                   Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
-                  Text(text, style: const TextStyle(color: RwColors.muted, height: 1.5)),
+                  Text(text, style: TextStyle(color: RwColors.muted, height: 1.5)),
                 ],
               ),
             ),
@@ -341,18 +341,18 @@ class _PacingCardState extends State<_PacingCard> {
               PacingStrategy.negative => 'Eerste helft iets rustiger, tweede helft iets sneller. Vaak het snelst.',
               PacingStrategy.easyStart => 'De eerste 2 km rustiger (in de drukte), daarna op doeltempo.',
             },
-            style: const TextStyle(color: RwColors.muted, fontSize: 13),
+            style: TextStyle(color: RwColors.muted, fontSize: 13),
           ),
           const SizedBox(height: 10),
           for (final (i, sp) in shown.indexed) ...[
             if (!_all && plan.length > 12 && i == 5)
-              const Padding(padding: EdgeInsets.symmetric(vertical: 2), child: Text('…', style: TextStyle(color: RwColors.subtle))),
+              Padding(padding: EdgeInsets.symmetric(vertical: 2), child: Text('…', style: TextStyle(color: RwColors.subtle))),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 3),
               child: Row(children: [
-                SizedBox(width: 56, child: Text(sp.meters < 999 ? '${(sp.km - 1 + sp.meters / 1000).toStringAsFixed(1).replaceAll('.', ',')}' : 'km ${sp.km}', style: const TextStyle(color: RwColors.subtle))),
+                SizedBox(width: 56, child: Text(sp.meters < 999 ? '${(sp.km - 1 + sp.meters / 1000).toStringAsFixed(1).replaceAll('.', ',')}' : 'km ${sp.km}', style: TextStyle(color: RwColors.subtle))),
                 Expanded(child: Text(Fmt.pace(sp.pace), style: const TextStyle(fontWeight: FontWeight.w700))),
-                Text(Fmt.duration(sp.cumulative.round()), style: const TextStyle(color: RwColors.muted)),
+                Text(Fmt.duration(sp.cumulative.round()), style: TextStyle(color: RwColors.muted)),
               ]),
             ),
           ],

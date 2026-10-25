@@ -446,7 +446,7 @@ class _OverviewState extends State<_Overview> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Hoeveel kilometer wil je per week lopen?', style: TextStyle(color: RwColors.muted)),
+              Text('Hoeveel kilometer wil je per week lopen?', style: TextStyle(color: RwColors.muted)),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -458,7 +458,7 @@ class _OverviewState extends State<_Overview> {
               ),
               const SizedBox(height: 8),
               Text(avg >= 3 ? 'Je liep de laatste 4 weken gemiddeld ${avg.toStringAsFixed(1).replaceAll('.', ',')} km. Voorstellen:' : 'Voorstellen om mee te beginnen:',
-                  textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                  textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
               const SizedBox(height: 8),
               Wrap(spacing: 8, alignment: WrapAlignment.center, children: [
                 for (final (i, g) in ideas.indexed)
@@ -517,11 +517,11 @@ class _OverviewState extends State<_Overview> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text('DEZE WEEK',
                     style: RwText.overline),
               ),
-              Text(Fmt.km(weekKm * 1000, decimals: 1), style: const TextStyle(fontWeight: FontWeight.w700, color: RwColors.accent)),
+              Text(Fmt.km(weekKm * 1000, decimals: 1), style: TextStyle(fontWeight: FontWeight.w700, color: RwColors.accent)),
             ],
           ),
           const SizedBox(height: 10),
@@ -549,7 +549,7 @@ class _OverviewState extends State<_Overview> {
                             color: d.runs > 0 ? null : (d.isFuture ? Colors.transparent : RwColors.surfaceHigh),
                             // Gelopen dagen als kleine oranje munten met gloed; vandaag met een lichtrand.
                             gradient: d.runs > 0
-                                ? const LinearGradient(
+                                ? LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
@@ -559,13 +559,13 @@ class _OverviewState extends State<_Overview> {
                                 ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.35), blurRadius: 10, spreadRadius: -2)]
                                 : (d.isToday ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.25), blurRadius: 12)] : null),
                             border: Border.all(
-                              color: d.isToday ? (d.runs > 0 ? RwColors.text : RwColors.accent) : (d.runs > 0 ? Colors.white.withValues(alpha: 0.25) : RwColors.border),
+                              color: d.isToday ? (d.runs > 0 ? RwColors.text : RwColors.accent) : (d.runs > 0 ? RwColors.text.withValues(alpha: 0.25) : RwColors.border),
                               width: d.isToday ? 2 : 1,
                             ),
                           ),
                           child: d.runs > 0
                               ? Text(d.km >= 10 ? d.km.round().toString() : d.km.toStringAsFixed(1).replaceAll('.', ','),
-                                  style: const TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w800, fontSize: 12))
+                                  style: TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w800, fontSize: 12))
                               : null,
                         ),
                       ],
@@ -605,7 +605,7 @@ class _OverviewState extends State<_Overview> {
                         ),
                         Text(
                           weekKm >= _goalKm! ? '🎉' : 'nog ${(_goalKm! - weekKm).toStringAsFixed(1).replaceAll('.', ',')} km',
-                          style: const TextStyle(color: RwColors.muted),
+                          style: TextStyle(color: RwColors.muted),
                         ),
                       ],
                     ),
@@ -627,7 +627,7 @@ class _OverviewState extends State<_Overview> {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.local_fire_department, color: RwColors.accent, size: 20),
+                Icon(Icons.local_fire_department, color: RwColors.accent, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -645,7 +645,7 @@ class _OverviewState extends State<_Overview> {
                 Icon(check.tooFast ? Icons.warning_amber_rounded : Icons.info_outline,
                     color: check.tooFast ? RwColors.warning : RwColors.muted, size: 20),
                 const SizedBox(width: 8),
-                Expanded(child: Text(msg, style: const TextStyle(color: RwColors.muted, height: 1.4))),
+                Expanded(child: Text(msg, style: TextStyle(color: RwColors.muted, height: 1.4))),
               ],
             ),
           ],
@@ -654,7 +654,7 @@ class _OverviewState extends State<_Overview> {
           InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () => openFitness(context),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
               child: Row(children: [
                 Icon(Icons.show_chart, color: RwColors.accent, size: 20),
@@ -725,8 +725,8 @@ class _OverviewState extends State<_Overview> {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: i == totals.length - 1
-                                        ? const [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
-                                        : const [Color(0xFF34343B), RwColors.bar],
+                                        ? [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
+                                        : [RwColors.border, RwColors.bar],
                                   ),
                                   boxShadow: i == totals.length - 1 && w.km > 0
                                       ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.4), blurRadius: 10, spreadRadius: -2)]
@@ -738,7 +738,7 @@ class _OverviewState extends State<_Overview> {
                             const SizedBox(height: 4),
                             FittedBox(
                               child: Text(_barLabel(w, i == totals.length - 1),
-                                  style: const TextStyle(fontSize: 10, color: RwColors.subtle)),
+                                  style: TextStyle(fontSize: 10, color: RwColors.subtle)),
                             ),
                           ],
                         ),
@@ -898,7 +898,7 @@ class _ActivityTile extends StatelessWidget {
           ),
           if (onRunAgain != null)
             ListTile(
-              leading: const Icon(Icons.replay, color: RwColors.accent),
+              leading: Icon(Icons.replay, color: RwColors.accent),
               title: Text('Loop ${routeName ?? 'deze route'} opnieuw'),
               subtitle: const Text('Met de route op je scherm en tegen je record'),
               onTap: () => Navigator.pop(ctx, 'again'),
@@ -910,8 +910,8 @@ class _ActivityTile extends StatelessWidget {
               onTap: () => Navigator.pop(ctx, 'share'),
             ),
           ListTile(
-            leading: const Icon(Icons.delete_outline, color: RwColors.danger),
-            title: const Text('Verwijderen', style: TextStyle(color: RwColors.danger)),
+            leading: Icon(Icons.delete_outline, color: RwColors.danger),
+            title: Text('Verwijderen', style: TextStyle(color: RwColors.danger)),
             subtitle: const Text('Je kunt het nog 5 seconden ongedaan maken'),
             onTap: () => Navigator.pop(ctx, 'delete'),
           ),
@@ -980,7 +980,7 @@ class _ActivityTile extends StatelessWidget {
                       ],
                     ),
                     Text('${Fmt.date(a.startedAt)} · ${Fmt.time(a.startedAt)}${weather.isEmpty ? '' : ' · $weather'}',
-                        maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                     const SizedBox(height: 6),
                     FittedBox(
                       fit: BoxFit.scaleDown,
@@ -1001,7 +1001,7 @@ class _ActivityTile extends StatelessWidget {
                           '≈ ${Fmt.pace(correctedSeconds(a) / (a.distanceMeters / 1000))} bij ideaal weer',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                          style: TextStyle(color: RwColors.subtle, fontSize: 12),
                         ),
                       ),
                     if (badges.isNotEmpty) ...[
@@ -1029,7 +1029,7 @@ class _TileStat extends StatelessWidget {
         padding: const EdgeInsets.only(right: 14),
         child: Text.rich(TextSpan(children: [
           TextSpan(text: value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w700, fontSize: 18)),
-          if (unit.isNotEmpty) TextSpan(text: ' $unit', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+          if (unit.isNotEmpty) TextSpan(text: ' $unit', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
         ])),
       );
 }
@@ -1054,7 +1054,7 @@ class _WeekHeader extends StatelessWidget {
             child: Text(label, style: RwText.overline),
           ),
           Text('${km.toStringAsFixed(1).replaceAll('.', ',')} km · $runs ${runs == 1 ? 'run' : 'runs'}',
-              style: const TextStyle(fontSize: 13, color: RwColors.subtle)),
+              style: TextStyle(fontSize: 13, color: RwColors.subtle)),
         ],
       ),
     );

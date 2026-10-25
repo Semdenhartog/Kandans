@@ -34,7 +34,7 @@ class WeekPlannerEntry extends ConsumerWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.15), shape: BoxShape.circle),
-            child: const Icon(Icons.calendar_month_outlined, color: RwColors.accent),
+            child: Icon(Icons.calendar_month_outlined, color: RwColors.accent),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -45,7 +45,7 @@ class WeekPlannerEntry extends ConsumerWidget {
               style: const TextStyle(height: 1.4),
             ),
           ),
-          const Icon(Icons.chevron_right, color: RwColors.subtle),
+          Icon(Icons.chevron_right, color: RwColors.subtle),
         ],
       ),
     );
@@ -121,7 +121,7 @@ class WeekPlannerScreen extends ConsumerWidget {
                         style: const TextStyle(height: 1.45),
                       ),
                     ),
-                    const Icon(Icons.edit_outlined, color: RwColors.subtle),
+                    Icon(Icons.edit_outlined, color: RwColors.subtle),
                   ],
                 ),
               ),
@@ -143,7 +143,7 @@ class WeekPlannerScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
               ],
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Verder vooruit is de verwachting minder zeker. Kijk de dag zelf op Vandaag voor het moment op 5 minuten nauwkeurig.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12),
               ),
@@ -184,7 +184,7 @@ class _Pick extends StatelessWidget {
     final s = score;
     return Row(
       children: [
-        Expanded(child: Text(label, style: const TextStyle(color: RwColors.muted))),
+        Expanded(child: Text(label, style: TextStyle(color: RwColors.muted))),
         Text(
           s == null ? 'geen moment' : '${_day(s.start)} ${Fmt.time(s.start)}',
           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -219,7 +219,7 @@ class _DayCard extends StatelessWidget {
                   e == null
                       ? 'Geen moment binnen je looptijden'
                       : '${weatherLabel(e.weather.weatherCode)} · ${Fmt.temp(e.weather.feelsLike ?? e.weather.temperature)} · wind ${Fmt.wind(e.weather.windSpeed)}',
-                  style: const TextStyle(color: RwColors.muted, fontSize: 13),
+                  style: TextStyle(color: RwColors.muted, fontSize: 13),
                 ),
               ],
             ),
@@ -229,7 +229,7 @@ class _DayCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(Fmt.time(e.start),
-                    style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800, color: RwColors.accent)),
+                    style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800, color: RwColors.accent)),
                 Text('score ${e.score}', style: TextStyle(color: _color(e.score), fontSize: 12, fontWeight: FontWeight.w700)),
               ],
             ),
@@ -296,7 +296,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          const Text(
+          Text(
             'Kadans kiest alleen momenten waarop je hele run binnen deze tijden past. Werk je in wisseldiensten? Pas het per week aan.',
             style: TextStyle(color: RwColors.muted, height: 1.45),
           ),
@@ -321,7 +321,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
                     ),
                     Expanded(
                       child: _days[d] == null
-                          ? const Text('kan niet', style: TextStyle(color: RwColors.subtle))
+                          ? Text('kan niet', style: TextStyle(color: RwColors.subtle))
                           : Row(children: [
                               TextButton(onPressed: () => _pick(d, true), child: Text(TimeWindow.fmt(_days[d]!.startMinute))),
                               const Text('–'),

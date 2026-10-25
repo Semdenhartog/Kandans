@@ -2,16 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/appearance.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
 import 'features/lock/app_lock_gate.dart';
 
-class RunWiseApp extends ConsumerWidget {
+class RunWiseApp extends ConsumerStatefulWidget {
   const RunWiseApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RunWiseApp> createState() => _RunWiseAppState();
+}
+
+class _RunWiseAppState extends ConsumerState<RunWiseApp> with WidgetsBindingObserver {
+  final _appearance = AppearanceController.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _appearance.addListener(_changed);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _appearance.removeListener(_changed);
+    super.dispose();
+  }
+
+  // Telefoon wisselt tussen licht en donker (bijv. 's avonds automatisch).
+  @override
+  void didChangePlatformBrightness() => _changed();
+
+  void _changed() {
+    if (!mounted) return;
+    _appearance.apply(View.of(context).platformDispatcher.platformBrightness);
+    setState(() {});
+    // Schermen lezen de kleuren direct; laat ze allemaal opnieuw tekenen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) rebuildAllChildren(context);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    _appearance.apply(View.of(context).platformDispatcher.platformBrightness);
     return MaterialApp.router(
       title: 'Kadans',
       debugShowCheckedModeBanner: false,

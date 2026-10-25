@@ -76,7 +76,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
           child: const Text('Ik heb op de link geklikt, nu inloggen'),
         ),
         const SizedBox(height: 24),
-        const Text('Of vul de code in:', style: TextStyle(color: RwColors.muted)),
+        Text('Of vul de code in:', style: TextStyle(color: RwColors.muted)),
         const SizedBox(height: 8),
         TextField(
           controller: _code,
@@ -97,7 +97,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
         const SizedBox(height: 12),
         TextButton(
           onPressed: _resend,
-          child: const Text('Stuur de code opnieuw', style: TextStyle(color: RwColors.muted)),
+          child: Text('Stuur de code opnieuw', style: TextStyle(color: RwColors.muted)),
         ),
       ],
     );

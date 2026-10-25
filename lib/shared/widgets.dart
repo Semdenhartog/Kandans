@@ -60,10 +60,10 @@ class _RwCardState extends State<RwCard> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white.withValues(alpha: 0.11), RwColors.border.withValues(alpha: 0.6), RwColors.border.withValues(alpha: 0.35)],
+            colors: [Colors.white.withValues(alpha: RwColors.isDark ? 0.11 : 0.8), RwColors.border.withValues(alpha: 0.6), RwColors.border.withValues(alpha: 0.35)],
             stops: const [0, 0.35, 1],
           ),
-          boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 10), spreadRadius: -8)],
+          boxShadow: [BoxShadow(color: RwColors.palette.shadow, blurRadius: 24, offset: const Offset(0, 10), spreadRadius: -8)],
         ),
         child: Padding(
           padding: const EdgeInsets.all(1),
@@ -72,11 +72,11 @@ class _RwCardState extends State<RwCard> {
             borderRadius: BorderRadius.circular(19),
             clipBehavior: Clip.antiAlias,
             child: Ink(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFF18181C), RwColors.surface],
+                  colors: [RwColors.isDark ? const Color(0xFF221D18) : const Color(0xFFFBF8F2), RwColors.surface],
                 ),
               ),
               child: w.onTap == null
@@ -115,7 +115,7 @@ class StatTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(label, maxLines: 1, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
+            child: Text(label, maxLines: 1, style: TextStyle(fontSize: 12, color: RwColors.subtle)),
           ),
           const SizedBox(height: 4),
           // Altijd op één regel: lange waarden (bijv. "0,0 km") worden iets kleiner in plaats van af te breken.
@@ -163,7 +163,7 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: RwColors.muted, height: 1.5)),
+                style: TextStyle(color: RwColors.muted, height: 1.5)),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 20),
               SizedBox(
@@ -320,7 +320,7 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
               gradient: LinearGradient(
                 begin: Alignment(-1 + t * 2 - 1, 0),
                 end: Alignment(1 + t * 2 - 1, 0),
-                colors: const [RwColors.surfaceHigh, Color(0xFF2C2C33), RwColors.surfaceHigh],
+                colors: [RwColors.surfaceHigh, RwColors.border, RwColors.surfaceHigh],
                 stops: const [0.25, 0.5, 0.75],
               ),
             ),
@@ -408,7 +408,7 @@ Future<bool> confirmDialog(
         destructive
             ? TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: Text(confirmLabel, style: const TextStyle(color: RwColors.danger)),
+                child: Text(confirmLabel, style: TextStyle(color: RwColors.danger)),
               )
             : FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(confirmLabel)),
       ],
@@ -500,7 +500,7 @@ class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateM
               gradient: LinearGradient(
                 begin: Alignment(x - 1, -0.3),
                 end: Alignment(x + 1, 0.3),
-                colors: const [RwColors.surfaceHigh, Color(0xFF26262C), RwColors.surfaceHigh],
+                colors: [RwColors.surfaceHigh, RwColors.border, RwColors.surfaceHigh],
               ),
             ),
           );
@@ -559,7 +559,7 @@ class RwFab extends StatelessWidget {
         builder: (context, ext, _) => DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
@@ -593,7 +593,7 @@ class RwFab extends StatelessWidget {
                         if (ext) ...[
                           const SizedBox(width: 8),
                           Text(label,
-                              style: const TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w700, fontSize: 16)),
+                              style: TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w700, fontSize: 16)),
                         ],
                       ]),
                     ),
@@ -626,9 +626,10 @@ class FabScrollWatcher extends StatelessWidget {
 
 /// Icoon in een getint tegeltje (zoals in de instellingen van een iPhone): rustiger en chiquer in lijsten.
 class TileIcon extends StatelessWidget {
-  const TileIcon(this.icon, {super.key, this.color = RwColors.muted});
+  const TileIcon(this.icon, {super.key, Color? color}) : _color = color;
   final IconData icon;
-  final Color color;
+  final Color? _color;
+  Color get color => _color ?? RwColors.muted;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -643,7 +644,7 @@ class TileIcon extends StatelessWidget {
           ),
           border: Border.all(color: color.withValues(alpha: 0.22)),
         ),
-        child: Icon(icon, size: 19, color: color == RwColors.muted ? RwColors.text : color),
+        child: Icon(icon, size: 19, color: _color == null ? RwColors.text : color),
       );
 }
 
@@ -700,8 +701,8 @@ class _BackToTopState extends State<BackToTop> {
                 opacity: _show ? 1 : 0,
                 duration: const Duration(milliseconds: 200),
                 child: Material(
-                  color: const Color(0xEE1E1E23),
-                  shape: const StadiumBorder(side: BorderSide(color: Color(0x22FFFFFF))),
+                  color: RwColors.surface.withValues(alpha: 0.95),
+                  shape: StadiumBorder(side: BorderSide(color: RwColors.border)),
                   elevation: 6,
                   child: InkWell(
                     customBorder: const StadiumBorder(),
@@ -710,7 +711,7 @@ class _BackToTopState extends State<BackToTop> {
                       widget.controller.animateTo(0, duration: const Duration(milliseconds: 600), curve: Curves.easeOutCubic);
                       setState(() => _show = false);
                     },
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(Icons.arrow_upward, size: 16, color: RwColors.accentLight),

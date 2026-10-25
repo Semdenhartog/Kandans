@@ -170,7 +170,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                 end: Alignment.bottomCenter,
                 colors: [RwColors.surfaceHigh.withValues(alpha: 0.92), RwColors.surface],
               ),
-              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.07))),
+              border: Border(top: BorderSide(color: RwColors.hairline)),
             ),
             child: NavigationBar(
               backgroundColor: Colors.transparent,
@@ -217,12 +217,12 @@ class _OfflineBanner extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                const Icon(Icons.cloud_off, size: 16, color: RwColors.warning),
+                Icon(Icons.cloud_off, size: 16, color: RwColors.warning),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Geen internet. Je ziet de gegevens van ${today ? 'vandaag $hhmm' : '${t.day}-${t.month} $hhmm'}.',
-                    style: const TextStyle(fontSize: 13, color: RwColors.muted),
+                    style: TextStyle(fontSize: 13, color: RwColors.muted),
                   ),
                 ),
               ],
@@ -265,15 +265,15 @@ class PendingRunsBanner extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.cloud_upload_outlined, size: 16, color: RwColors.warning),
+                  Icon(Icons.cloud_upload_outlined, size: 16, color: RwColors.warning),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       n == 1 ? '1 run wacht op internet' : '$n runs wachten op internet',
-                      style: const TextStyle(fontSize: 13, color: RwColors.muted),
+                      style: TextStyle(fontSize: 13, color: RwColors.muted),
                     ),
                   ),
-                  const Text('Opnieuw', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: RwColors.accent)),
+                  Text('Opnieuw', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: RwColors.accent)),
                 ],
               ),
             ),

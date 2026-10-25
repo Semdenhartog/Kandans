@@ -72,7 +72,7 @@ class TodayCard extends ConsumerWidget {
                 CircleAvatar(
                   backgroundColor: sessionColor(session.kind).withValues(alpha: 0.18),
                   child: doneToday
-                      ? const Icon(Icons.check, color: RwColors.good)
+                      ? Icon(Icons.check, color: RwColors.good)
                       : Icon(sessionIcon(session.kind), color: sessionColor(session.kind)),
                 ),
                 const SizedBox(width: 12),
@@ -82,7 +82,7 @@ class TodayCard extends ConsumerWidget {
                     children: [
                       Text(doneToday ? 'Gedaan: ${session.title}' : session.title,
                           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                      Text(session.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RwColors.muted)),
+                      Text(session.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: RwColors.muted)),
                     ],
                   ),
                 ),
@@ -95,7 +95,7 @@ class TodayCard extends ConsumerWidget {
                 decoration: BoxDecoration(color: RwColors.warning.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
                 child: Text(
                   'Je klaar-score is ${ready.score}. Een stevige training kan vandaag beter een rustige worden.',
-                  style: const TextStyle(color: RwColors.warning),
+                  style: TextStyle(color: RwColors.warning),
                 ),
               ),
             ],
@@ -125,12 +125,12 @@ class TodayCard extends ConsumerWidget {
           ] else if (plan.isNotEmpty)
             Row(
               children: [
-                const Icon(Icons.hotel_outlined, color: RwColors.muted),
+                Icon(Icons.hotel_outlined, color: RwColors.muted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     next == null ? 'Je schema is klaar.' : 'Rustdag. Volgende: ${next.title} (${Fmt.date(next.date)}).',
-                    style: const TextStyle(color: RwColors.muted),
+                    style: TextStyle(color: RwColors.muted),
                   ),
                 ),
               ],
@@ -167,7 +167,7 @@ class TodayCard extends ConsumerWidget {
                   Expanded(
                     child: InkWell(
                       onTap: () => openTrainingPlan(context),
-                      child: const _Mini(icon: Icons.calendar_month_outlined, label: 'Schema', value: 'Bekijk', color: RwColors.muted),
+                      child: _Mini(icon: Icons.calendar_month_outlined, label: 'Schema', value: 'Bekijk', color: RwColors.muted),
                     ),
                   ),
               ],
@@ -228,14 +228,14 @@ class _ReadinessRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Klaar-score', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+                Text('Klaar-score', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                 Text(ready.title, style: const TextStyle(fontWeight: FontWeight.w700)),
                 if (!hasBody && Platform.isAndroid)
-                  const Text('Tik om slaap en HRV van je horloge mee te nemen', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+                  Text('Tik om slaap en HRV van je horloge mee te nemen', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: RwColors.subtle),
+          Icon(Icons.chevron_right, color: RwColors.subtle),
         ],
       ),
     );
@@ -269,12 +269,12 @@ class _ReadinessSheet extends ConsumerWidget {
                         size: 18, color: f.effect >= 0 ? RwColors.good : RwColors.warning),
                     const SizedBox(width: 8),
                     Expanded(child: Text('${f.label}: ${f.text}')),
-                    Text(f.effect >= 0 ? '+${f.effect}' : '${f.effect}', style: const TextStyle(color: RwColors.subtle)),
+                    Text(f.effect >= 0 ? '+${f.effect}' : '${f.effect}', style: TextStyle(color: RwColors.subtle)),
                   ],
                 ),
               ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'De score begint bij 70 en gaat omhoog of omlaag door je slaap, rusthartslag en HRV (vergeleken met jouw normaal) '
               'en hoeveel herstel je nog nodig hebt. Het is een hulpmiddel: luister ook naar je lichaam.',
               style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),
@@ -298,7 +298,7 @@ class _ReadinessSheet extends ConsumerWidget {
                 label: const Text('Slaap, rusthartslag en HRV koppelen'),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Via Health Connect (bijv. van Samsung Health, Garmin of Oura). Deze gegevens blijven op je telefoon.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12),
               ),
@@ -326,7 +326,7 @@ class _Mini extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+                Text(label, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
                 Text(value, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w700, color: color == RwColors.muted ? RwColors.text : color)),
               ],
             ),
@@ -438,7 +438,7 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+          Text(label, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
           OdometerIn(value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20)),
         ],
       );
@@ -457,7 +457,7 @@ class _Line extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: RwColors.muted),
             const SizedBox(width: 8),
-            Expanded(child: Text(text, style: const TextStyle(color: RwColors.muted))),
+            Expanded(child: Text(text, style: TextStyle(color: RwColors.muted))),
           ],
         ),
       );
@@ -489,7 +489,7 @@ class RaceCountdownCard extends ConsumerWidget {
               FlipDigits(text: days == 0 ? '!' : '$days'),
               const SizedBox(height: 4),
               Text(days == 0 ? 'vandaag' : (days == 1 ? 'dag' : 'dagen'),
-                  style: const TextStyle(color: RwColors.accent, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+                  style: TextStyle(color: RwColors.accent, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
             ]),
             const SizedBox(width: 14),
             Expanded(
@@ -497,10 +497,10 @@ class RaceCountdownCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(race.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                  Text('${Fmt.km(race.distanceMeters, decimals: 1)} · ${Fmt.date(race.raceDate)}', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                  Text('${Fmt.km(race.distanceMeters, decimals: 1)} · ${Fmt.date(race.raceDate)}', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                   const SizedBox(height: 6),
                   Text.rich(TextSpan(children: [
-                    const TextSpan(text: 'Verwacht ', style: TextStyle(color: RwColors.muted)),
+                    TextSpan(text: 'Verwacht ', style: TextStyle(color: RwColors.muted)),
                     TextSpan(text: Fmt.duration(predicted), style: const TextStyle(fontWeight: FontWeight.w800)),
                     TextSpan(
                       text: diff.abs() < 15
@@ -512,7 +512,7 @@ class RaceCountdownCard extends ConsumerWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: RwColors.subtle),
+            Icon(Icons.chevron_right, color: RwColors.subtle),
           ],
         ),
       ),
@@ -542,7 +542,7 @@ class YearStoryCard extends ConsumerWidget {
           onTap: () => openYearStory(context, year: year),
           child: Ink(
             padding: const EdgeInsets.all(18),
-            decoration: const BoxDecoration(gradient: LinearGradient(colors: [RwColors.accentDeep, RwColors.accent])),
+            decoration: BoxDecoration(gradient: LinearGradient(colors: [RwColors.accentDeep, RwColors.accent])),
             child: Row(children: [
               const Icon(Icons.auto_stories, color: Colors.black, size: 32),
               const SizedBox(width: 14),

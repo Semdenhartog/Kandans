@@ -82,7 +82,7 @@ class ElevationCard extends ConsumerWidget {
           children: [
             TableRow(children: [
               for (final l in ['Stijgen', 'Dalen', 'Hoogste', 'Laagste'])
-                Text(l, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                Text(l, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
             ]),
             TableRow(children: [
               for (final v in ['${up.round()} m', '${down.round()} m', '${range.max.round()} m', '${range.min.round()} m'])
@@ -95,16 +95,16 @@ class ElevationCard extends ConsumerWidget {
         ),
         if (flat) ...[
           const SizedBox(height: 10),
-          const Text('Vlak parcours: minder dan 5 meter klimmen.', style: TextStyle(color: RwColors.muted)),
+          Text('Vlak parcours: minder dan 5 meter klimmen.', style: TextStyle(color: RwColors.muted)),
         ] else if (perKm.length > 1) ...[
           const SizedBox(height: 14),
-          const Text('PER KILOMETER', style: RwText.overline),
+          Text('PER KILOMETER', style: RwText.overline),
           const SizedBox(height: 6),
           Table(
             columnWidths: const {0: FixedColumnWidth(52), 1: FlexColumnWidth(), 2: FlexColumnWidth()},
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
-              const TableRow(children: [
+              TableRow(children: [
                 Text('km', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                 Text('omhoog', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                 Text('omlaag', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
@@ -114,7 +114,7 @@ class ElevationCard extends ConsumerWidget {
                   Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text('${k.km}', style: const TextStyle(fontWeight: FontWeight.w600))),
                   Text(k.up < 1 ? '–' : '+${k.up.round()} m',
                       style: TextStyle(color: k.up >= 10 ? RwColors.warning : RwColors.text, fontFeatures: rwTnum, fontWeight: FontWeight.w600)),
-                  Text(k.down < 1 ? '–' : '−${k.down.round()} m', style: const TextStyle(color: RwColors.muted, fontFeatures: rwTnum)),
+                  Text(k.down < 1 ? '–' : '−${k.down.round()} m', style: TextStyle(color: RwColors.muted, fontFeatures: rwTnum)),
                 ]),
             ],
           ),

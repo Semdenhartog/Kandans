@@ -117,13 +117,13 @@ class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text('Het verloop van deze run kon niet worden geladen.\n${friendlyError(_error!)}',
-                    textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
+                    textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
               ),
             )
           : !_loaded
               ? const LoadingView(cards: 2)
               : range == null
-                  ? const Center(
+                  ? Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
                         child: Text('Deze run heeft geen verloop per seconde, dus bijsnijden kan niet.',
@@ -133,7 +133,7 @@ class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
                   : ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        const Text(
+                        Text(
                           'Vergeten te stoppen, of te laat gestart? Schuif het begin en het eind naar waar je echt liep.',
                           style: TextStyle(color: RwColors.muted, height: 1.4),
                         ),
@@ -173,8 +173,8 @@ class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Begin ${Fmt.km(range.start)}', style: const TextStyle(color: RwColors.muted)),
-                                  Text('Eind ${Fmt.km(range.end)}', style: const TextStyle(color: RwColors.muted)),
+                                  Text('Begin ${Fmt.km(range.start)}', style: TextStyle(color: RwColors.muted)),
+                                  Text('Eind ${Fmt.km(range.end)}', style: TextStyle(color: RwColors.muted)),
                                 ],
                               ),
                             ],
@@ -224,10 +224,10 @@ class _Stat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: RwColors.muted, fontSize: 12)),
+        Text(label, style: TextStyle(color: RwColors.muted, fontSize: 12)),
         Text(value,
             style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
-        Text('was $was', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+        Text('was $was', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
       ],
     );
   }

@@ -22,11 +22,11 @@ Future<Uint8List> paceBandPng({
   c.drawRect(const Rect.fromLTWH(0, 0, width, 8), Paint()..color = RwColors.accent);
 
   void text(String s, double x, double y,
-      {double size = 20, Color color = RwColors.text, FontWeight weight = FontWeight.w600, double? maxW, TextAlign align = TextAlign.left}) {
+      {double size = 20, Color? color, FontWeight weight = FontWeight.w600, double? maxW, TextAlign align = TextAlign.left}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: size, color: color, fontWeight: weight),
+        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: size, color: color ?? RwColors.text, fontWeight: weight),
       ),
       textDirection: TextDirection.ltr,
       textAlign: align,

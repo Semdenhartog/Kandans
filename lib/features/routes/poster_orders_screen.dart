@@ -146,7 +146,7 @@ class _OrderCard extends StatelessWidget {
         ]),
         const SizedBox(height: 2),
         Text('${order.productId.replaceAll('x', ' × ')} cm · ${Fmt.date(order.createdAt)}',
-            style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+            style: TextStyle(color: RwColors.subtle, fontSize: 12)),
         const SizedBox(height: 12),
         Row(children: [
           Icon(Icons.circle, size: 10, color: color),
@@ -166,7 +166,7 @@ class _OrderCard extends StatelessWidget {
               ),
           ]),
           const SizedBox(height: 4),
-          const Row(children: [
+          Row(children: [
             Expanded(child: Text('Betaald', style: TextStyle(color: RwColors.subtle, fontSize: 11))),
             Expanded(child: Text('Gedrukt', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 11))),
             Expanded(child: Text('Onderweg', textAlign: TextAlign.right, style: TextStyle(color: RwColors.subtle, fontSize: 11))),

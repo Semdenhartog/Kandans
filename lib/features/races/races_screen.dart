@@ -75,7 +75,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
         child: Text(text.toUpperCase(),
-            style: const TextStyle(color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.6)),
+            style: TextStyle(color: RwColors.subtle, fontWeight: FontWeight.w600, letterSpacing: 0.6)),
       );
 }
 
@@ -107,7 +107,7 @@ class _RaceTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${Fmt.date(race.raceDate)} · ${Fmt.km(race.distanceMeters, decimals: 1)} · doel ${Fmt.duration(race.goalTimeSeconds)}',
-                    style: const TextStyle(color: RwColors.subtle),
+                    style: TextStyle(color: RwColors.subtle),
                   ),
                 ],
               ),

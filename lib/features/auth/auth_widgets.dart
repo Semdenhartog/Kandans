@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../shared/aura.dart';
 import '../../shared/route_backdrop.dart';
+import '../../core/appearance.dart';
 
 /// Gemeenschappelijke opmaak voor login, registratie en activatie.
 class AuthScaffold extends StatelessWidget {
@@ -38,7 +39,7 @@ class AuthScaffold extends StatelessWidget {
                   const SizedBox(height: 40),
                   Text(
                     eyebrow.toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: RwColors.accent,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1.2,
@@ -57,7 +58,7 @@ class AuthScaffold extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(subtitle, style: const TextStyle(color: RwColors.muted, height: 1.5)),
+                  Text(subtitle, style: TextStyle(color: RwColors.muted, height: 1.5)),
                   const SizedBox(height: 28),
                   ...children,
                 ],
@@ -118,9 +119,9 @@ class RunWiseLogo extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset('assets/logo/mark.png', height: height, excludeFromSemantics: true),
+          kadansImage('assets/logo/mark.png', height: height),
           SizedBox(width: height * 0.35),
-          Image.asset('assets/logo/wordmark.png', height: height * 0.46, excludeFromSemantics: true),
+          kadansImage('assets/logo/wordmark.png', height: height * 0.46),
         ],
       ),
     );
@@ -136,7 +137,7 @@ class FormError extends StatelessWidget {
     if (message == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Text(message!, style: const TextStyle(color: RwColors.danger)),
+      child: Text(message!, style: TextStyle(color: RwColors.danger)),
     );
   }
 }
@@ -153,7 +154,7 @@ class BusyButton extends StatelessWidget {
     return FilledButton(
       onPressed: busy ? null : onPressed,
       child: busy
-          ? const SizedBox(
+          ? SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark),

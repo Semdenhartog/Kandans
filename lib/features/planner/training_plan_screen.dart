@@ -204,7 +204,7 @@ class _PlanView extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 daysLeft > 0 ? 'Nog $daysLeft dagen · ${Fmt.dateLong(race.date)}' : (daysLeft == 0 ? 'Vandaag is het zover!' : 'Je schema is afgelopen.'),
-                style: const TextStyle(color: RwColors.muted),
+                style: TextStyle(color: RwColors.muted),
               ),
               if (past.isNotEmpty) ...[
                 const SizedBox(height: 10),
@@ -213,7 +213,7 @@ class _PlanView extends ConsumerWidget {
                   child: LinearProgressIndicator(value: donePast / past.length, minHeight: 8, color: RwColors.accent, backgroundColor: RwColors.bar),
                 ),
                 const SizedBox(height: 4),
-                Text('$donePast van ${past.length} trainingen tot nu toe gedaan', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                Text('$donePast van ${past.length} trainingen tot nu toe gedaan', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
               ],
             ],
           ),
@@ -252,7 +252,7 @@ class _PlanView extends ConsumerWidget {
                   title: Text('Week ${e.key}', style: const TextStyle(fontWeight: FontWeight.w600)),
                   subtitle: Text(
                     '${e.value.where((s) => sessionDone(s, done)).length} van ${e.value.length} gedaan',
-                    style: const TextStyle(color: RwColors.subtle),
+                    style: TextStyle(color: RwColors.subtle),
                   ),
                   childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                   children: [for (final s in e.value) _SessionTile(session: s, done: sessionDone(s, done), today: today)],
@@ -275,7 +275,7 @@ class _PlanView extends ConsumerWidget {
             for (final s in e.value) _SessionTile(session: s, done: sessionDone(s, done), today: today),
           ],
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'Het schema bouwt geleidelijk op, met elke 4e week wat rustiger en de laatste 2 weken afbouwen. '
           'Mis je een training? Geen probleem, ga gewoon verder met de volgende.',
           style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),
@@ -299,13 +299,13 @@ class _SessionTile extends StatelessWidget {
     final color = sessionColor(s.kind);
     return Card(
       shape: isToday
-          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: RwColors.accent, width: 1.5))
+          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: RwColors.accent, width: 1.5))
           : null,
       child: ExpansionTile(
         shape: const Border(),
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.18),
-          child: done ? const Icon(Icons.check, color: RwColors.good) : Icon(sessionIcon(s.kind), color: color),
+          child: done ? Icon(Icons.check, color: RwColors.good) : Icon(sessionIcon(s.kind), color: color),
         ),
         title: Text(s.title, style: TextStyle(fontWeight: FontWeight.w600, color: missed ? RwColors.subtle : RwColors.text)),
         subtitle: Text(
@@ -316,7 +316,7 @@ class _SessionTile extends StatelessWidget {
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(s.description, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+          Text(s.description, style: TextStyle(color: RwColors.muted, height: 1.4)),
           if (!s.date.isBefore(today) && s.kind != SessionKind.race) ...[
             const SizedBox(height: 10),
             FilledButton.icon(
@@ -489,7 +489,7 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
             ),
             SizedBox(width: 72, child: Text('$_weeks weken', style: const TextStyle(fontWeight: FontWeight.w700))),
           ]),
-          const Text('Meer weken = rustiger opbouwen. Twijfel je? Kies wat langer.', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+          Text('Meer weken = rustiger opbouwen. Twijfel je? Kies wat langer.', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
         ],
         if (_program == null && races.isNotEmpty) ...[
           _label('WEDSTRIJD'),
@@ -578,11 +578,11 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
                     child: Row(children: [
                       Icon(sessionIcon(s.kind), size: 18, color: sessionColor(s.kind)),
                       const SizedBox(width: 8),
-                      SizedBox(width: 64, child: Text('${_dayNames[s.date.weekday - 1]} ${s.date.day}-${s.date.month}', style: const TextStyle(color: RwColors.subtle))),
+                      SizedBox(width: 64, child: Text('${_dayNames[s.date.weekday - 1]} ${s.date.day}-${s.date.month}', style: TextStyle(color: RwColors.subtle))),
                       Expanded(child: Text(s.title)),
                     ]),
                   ),
-                const Text('…', style: TextStyle(color: RwColors.subtle)),
+                Text('…', style: TextStyle(color: RwColors.subtle)),
                 const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: _saving ? null : _save,
@@ -648,7 +648,7 @@ class PlanCheckCard extends ConsumerWidget {
               Expanded(child: Text(check.title, style: TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 16))),
             ]),
             const SizedBox(height: 6),
-            Text(check.text, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+            Text(check.text, style: TextStyle(color: RwColors.muted, height: 1.4)),
             if (check.fix != null) ...[
               const SizedBox(height: 10),
               Align(
@@ -732,13 +732,13 @@ Future<void> showSessionBriefing(BuildContext context, PlanSession session, {int
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('JOUW TRAINING', style: TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    Text('JOUW TRAINING', style: TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                     Text(s.title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800, height: 1.15)),
                   ]),
                 ),
               ]),
               const SizedBox(height: 12),
-              Text(s.description, style: const TextStyle(color: RwColors.muted, height: 1.45)),
+              Text(s.description, style: TextStyle(color: RwColors.muted, height: 1.45)),
               const Divider(height: 28),
               row(Icons.timer_outlined, 'Ongeveer $minutes minuten${s.distanceMeters != null ? ' · ${Fmt.km(s.distanceMeters!, decimals: 1)}' : ''}'),
               if (pace != null)
@@ -822,7 +822,7 @@ class _PlanReplay extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('SCHEMA AFGEROND', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 0.6, fontSize: 12)),
+            Text('SCHEMA AFGEROND', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w800, letterSpacing: 0.6, fontSize: 12)),
             const SizedBox(height: 4),
             Text(doneCount >= sessions.length * 0.8 ? 'Wat een prestatie!' : 'Je bent er doorheen!',
                 style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
@@ -836,11 +836,11 @@ class _PlanReplay extends StatelessWidget {
             ]),
             const SizedBox(height: 10),
             if (longest != null)
-              Text('Langste run: ${Fmt.km(longest.distanceMeters, decimals: 1)} op ${Fmt.date(longest.startedAt)}.', style: const TextStyle(color: RwColors.muted)),
+              Text('Langste run: ${Fmt.km(longest.distanceMeters, decimals: 1)} op ${Fmt.date(longest.startedAt)}.', style: TextStyle(color: RwColors.muted)),
             if (p0 > 0 && p1 > 0 && p0 - p1 >= 3)
-              Text('Je gemiddelde tempo ging van ${Fmt.pace(p0)} naar ${Fmt.pace(p1)}.', style: const TextStyle(color: RwColors.good, fontWeight: FontWeight.w600)),
+              Text('Je gemiddelde tempo ging van ${Fmt.pace(p0)} naar ${Fmt.pace(p1)}.', style: TextStyle(color: RwColors.good, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
-            const Text('Klaar voor het volgende doel? Kies rechtsboven "Nieuw schema maken".', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+            Text('Klaar voor het volgende doel? Kies rechtsboven "Nieuw schema maken".', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
         ),
       ),

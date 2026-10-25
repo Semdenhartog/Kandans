@@ -29,7 +29,7 @@ class SplitsCard extends ConsumerWidget {
     return RwCard(
       title: 'PER KILOMETER',
       child: async.when(
-        loading: () => const Row(
+        loading: () => Row(
           children: [
             SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
             SizedBox(width: 10),
@@ -38,14 +38,14 @@ class SplitsCard extends ConsumerWidget {
         ),
         error: (e, _) => Row(
           children: [
-            Expanded(child: Text(friendlyError(e), style: const TextStyle(color: RwColors.muted))),
+            Expanded(child: Text(friendlyError(e), style: TextStyle(color: RwColors.muted))),
             TextButton(onPressed: () => ref.invalidate(activityStreamsProvider(a.id!)), child: const Text('Opnieuw')),
           ],
         ),
         data: (json) {
           final s = RunStreams.fromJson(json);
           if (s == null) {
-            return const Text('Voor deze run zijn geen tijden per km beschikbaar.', style: TextStyle(color: RwColors.muted));
+            return Text('Voor deze run zijn geen tijden per km beschikbaar.', style: TextStyle(color: RwColors.muted));
           }
           final splits = splitsOf(s);
           final ex = extremes(splits);
@@ -77,10 +77,10 @@ class SplitsCard extends ConsumerWidget {
               for (final sp in splits) _row(sp, ex, hasHr, hasEle),
               const SizedBox(height: 6),
               Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}. Wind = het weer bij de start van je run.',
-                  style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+                  style: TextStyle(color: RwColors.subtle, fontSize: 11)),
               if (GpsQuality.fromJson(s.gpsQuality) case final q?) ...[
                 const SizedBox(height: 2),
-                Text(q.text, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+                Text(q.text, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
               ],
               ..._efforts(s, ref),
               ..._zones(s, ref),
@@ -111,10 +111,10 @@ class SplitsCard extends ConsumerWidget {
             children: [
               SizedBox(width: 110, child: Text(b.label, style: const TextStyle(fontWeight: FontWeight.w600))),
               Expanded(child: Text(Fmt.duration(b.seconds), style: const TextStyle(fontWeight: FontWeight.w700))),
-              Text(Fmt.pace(b.paceSecPerKm), style: const TextStyle(color: RwColors.muted)),
+              Text(Fmt.pace(b.paceSecPerKm), style: TextStyle(color: RwColors.muted)),
               if ((overall[b.meters.round()]?.seconds ?? double.infinity) > b.seconds + 0.5) ...[
                 const SizedBox(width: 8),
-                const Tooltip(
+                Tooltip(
                   message: 'Je snelste ooit op deze afstand',
                   child: Icon(Icons.emoji_events, color: RwColors.accent, size: 18),
                 ),
@@ -125,7 +125,7 @@ class SplitsCard extends ConsumerWidget {
     ];
   }
 
-  static const _zoneColors = [Color(0xFF8D8D98), Color(0xFF5AA9FF), RwColors.good, RwColors.warning, RwColors.danger];
+  static List<Color> get _zoneColors => [const Color(0xFF8D8D98), const Color(0xFF5AA9FF), RwColors.good, RwColors.warning, RwColors.danger];
 
   /// Hoeveel tijd je in elke zone liep (hartslag als die er is, anders tempo).
   List<Widget> _zones(RunStreams s, WidgetRef ref) {
@@ -159,26 +159,26 @@ class SplitsCard extends ConsumerWidget {
             child: Row(children: [
               Container(width: 10, height: 10, decoration: BoxDecoration(color: _zoneColors[i], shape: BoxShape.circle)),
               const SizedBox(width: 8),
-              SizedBox(width: 30, child: Text('Z${i + 1}', style: const TextStyle(color: RwColors.subtle))),
+              SizedBox(width: 30, child: Text('Z${i + 1}', style: TextStyle(color: RwColors.subtle))),
               Expanded(child: Text(z.names[i])),
               Text(Fmt.duration(z.seconds[i]), style: const TextStyle(fontWeight: FontWeight.w600)),
               SizedBox(
                 width: 44,
-                child: Text('${(z.seconds[i] / total * 100).round()}%', textAlign: TextAlign.right, style: const TextStyle(color: RwColors.muted)),
+                child: Text('${(z.seconds[i] / total * 100).round()}%', textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted)),
               ),
             ]),
           ),
     ];
   }
 
-  static const _head = TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w600);
+  static TextStyle get _head => TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w600);
 
   Widget _legend(Color c, String label) => Padding(
         padding: const EdgeInsets.only(right: 14),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 12, height: 4, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 5),
-          Text(label, style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
+          Text(label, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
         ]),
       );
 
@@ -242,22 +242,22 @@ class SplitsCard extends ConsumerWidget {
               Text(Fmt.pace(sp.paceSecPerKm).replaceAll(' /km', ''),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: isFast ? const Color(0xFFF2D892) : (isSlow ? RwColors.warning : RwColors.text),
+                    color: isFast ? (RwColors.isDark ? const Color(0xFFF2D892) : const Color(0xFF8A6A22)) : (isSlow ? RwColors.warning : RwColors.text),
                   )),
-              if (isFast) const Text('  snelst', style: TextStyle(color: Color(0xFFD9B45A), fontSize: 12, fontWeight: FontWeight.w700)),
+              if (isFast) Text('  snelst', style: TextStyle(color: RwColors.isDark ? const Color(0xFFD9B45A) : const Color(0xFF8A6A22), fontSize: 12, fontWeight: FontWeight.w700)),
             ]),
           ),
           if (hasHr)
             SizedBox(
               width: 52,
               child: Text(sp.heartRate == null ? '–' : '${sp.heartRate!.round()}',
-                  textAlign: TextAlign.right, style: const TextStyle(color: RwColors.muted)),
+                  textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted)),
             ),
           if (hasEle)
             SizedBox(
               width: 52,
               child: Text(sp.elevationGain == null ? '–' : '${sp.elevationGain!.round()} m',
-                  textAlign: TextAlign.right, style: const TextStyle(color: RwColors.muted)),
+                  textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted)),
             ),
           SizedBox(
             width: 72,
@@ -271,7 +271,7 @@ class SplitsCard extends ConsumerWidget {
                     margin: const EdgeInsets.only(right: 6),
                     decoration: BoxDecoration(color: windColor(cls), shape: BoxShape.circle),
                   ),
-                Text(windText, style: const TextStyle(color: RwColors.muted)),
+                Text(windText, style: TextStyle(color: RwColors.muted)),
               ],
             ),
           ),
@@ -375,7 +375,7 @@ class _ChartPainter extends CustomPainter {
     final kmStep = total <= 8000 ? 1000.0 : total <= 21000 ? 5000.0 : 10000.0;
     for (var m = kmStep; m < total; m += kmStep) {
       final tp = TextPainter(
-        text: TextSpan(text: '${(m / 1000).round()}', style: const TextStyle(fontFamily: RwFonts.body, color: RwColors.subtle, fontSize: 10)),
+        text: TextSpan(text: '${(m / 1000).round()}', style: TextStyle(fontFamily: RwFonts.body, color: RwColors.subtle, fontSize: 10)),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset(x(m) - tp.width / 2, h + 2));

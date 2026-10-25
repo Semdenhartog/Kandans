@@ -166,7 +166,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   Text('$_total',
                       style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 46, fontWeight: FontWeight.w800, height: 1)),
-                  const Text('runs opgehaald', style: TextStyle(color: RwColors.muted, fontSize: 12)),
+                  Text('runs opgehaald', style: TextStyle(color: RwColors.muted, fontSize: 12)),
                 ]),
               ),
             ),
@@ -174,7 +174,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
           const SizedBox(height: 20),
           Text(title, textAlign: TextAlign.center, style: RwText.title),
           const SizedBox(height: 6),
-          Text(sub, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted, height: 1.45)),
+          Text(sub, textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, height: 1.45)),
           const SizedBox(height: 18),
           if (_state == _State.running) const LinearProgressIndicator(minHeight: 4, color: _stravaOrange),
           const SizedBox(height: 22),
@@ -197,7 +197,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
           const _Point(Icons.auto_awesome_outlined, 'Runs uit Strava gaan niet naar de AI-coach (voorwaarden van Strava).'),
           const _Point(Icons.save_outlined, 'Je voortgang wordt bewaard. Stoppen en later verdergaan kan altijd.'),
           const SizedBox(height: 10),
-          const Text('Gegevens via Strava', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+          Text('Gegevens via Strava', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
         ],
       ),
     );
@@ -215,7 +215,7 @@ class _Point extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Icon(icon, size: 18, color: RwColors.subtle),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(color: RwColors.muted, fontSize: 13, height: 1.4))),
+          Expanded(child: Text(text, style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.4))),
         ]),
       );
 }

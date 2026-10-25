@@ -26,7 +26,7 @@ class RecordsScreen extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [
-                const Text(
+                Text(
                   'Naast je echte tijd zie je je weer-record: de tijd die je bij ideaal loopweer (10 °C, windstil) zou hebben gelopen. '
                   'Zo telt een snelle run in storm ook mee.',
                   style: TextStyle(color: RwColors.muted, height: 1.45),
@@ -105,11 +105,11 @@ class _Cell extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: RwColors.subtle)),
+              Text(label, style: TextStyle(fontSize: 12, color: RwColors.subtle)),
               const SizedBox(height: 4),
               Text(value,
                   style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800, color: color)),
-              Text(sub, style: const TextStyle(fontSize: 12, color: RwColors.muted)),
+              Text(sub, style: TextStyle(fontSize: 12, color: RwColors.muted)),
             ],
           ),
         ),

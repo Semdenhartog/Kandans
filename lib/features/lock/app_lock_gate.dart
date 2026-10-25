@@ -85,13 +85,13 @@ class _LockScreen extends ConsumerWidget {
           child: Column(
             children: [
               const Spacer(),
-              const Icon(Icons.fingerprint, size: 88, color: RwColors.accent),
+              Icon(Icons.fingerprint, size: 88, color: RwColors.accent),
               const SizedBox(height: 20),
               const Text('Kadans is vergrendeld',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
-              const Text('Gebruik je vingerafdruk, of de pincode van je telefoon.',
+              Text('Gebruik je vingerafdruk, of de pincode van je telefoon.',
                   textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
               const Spacer(),
               FilledButton.icon(
@@ -106,7 +106,7 @@ class _LockScreen extends ConsumerWidget {
                   lock.reset();
                   await ref.read(supabaseProvider).auth.signOut();
                 },
-                child: const Text('Uitloggen en opnieuw inloggen met wachtwoord', style: TextStyle(color: RwColors.muted)),
+                child: Text('Uitloggen en opnieuw inloggen met wachtwoord', style: TextStyle(color: RwColors.muted)),
               ),
             ],
           ),
@@ -133,7 +133,7 @@ Future<void> maybeOfferFingerprint(BuildContext context) async {
   final yes = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      icon: const Icon(Icons.fingerprint, size: 40, color: RwColors.accent),
+      icon: Icon(Icons.fingerprint, size: 40, color: RwColors.accent),
       title: const Text('Voortaan met je vingerafdruk?'),
       content: const Text('Je blijft ingelogd. Bij het openen van Kadans ontgrendel je de app met je vingerafdruk '
           '(of de pincode van je telefoon). Je kunt dit altijd uitzetten bij Ik.'),

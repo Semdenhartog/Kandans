@@ -91,7 +91,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                           Text(bpm == null ? '–' : '$bpm',
                               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 48, fontWeight: FontWeight.w800)),
                           const SizedBox(width: 6),
-                          const Text('bpm', style: TextStyle(color: RwColors.muted)),
+                          Text('bpm', style: TextStyle(color: RwColors.muted)),
                           const Spacer(),
                           if (zone > 0)
                             Chip(label: Text('Zone $zone · ${heartRateZoneNames[zone]}')),
@@ -108,7 +108,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                               ? '${_hr.deviceName} is onthouden. Hij verbindt vanzelf als je een run start.'
                               : 'Nog geen band gekoppeld.',
                         },
-                        style: const TextStyle(color: RwColors.muted),
+                        style: TextStyle(color: RwColors.muted),
                       ),
                       if (_hr.hasSavedDevice) ...[
                         const SizedBox(height: 10),
@@ -121,7 +121,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                               OutlinedButton(onPressed: () => _hr.disconnect().then((_) => setState(() {})), child: const Text('Verbreken')),
                             TextButton(
                               onPressed: () => _hr.forget().then((_) => setState(() {})),
-                              child: const Text('Vergeten', style: TextStyle(color: RwColors.danger)),
+                              child: Text('Vergeten', style: TextStyle(color: RwColors.danger)),
                             ),
                           ],
                         ),
@@ -141,12 +141,12 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
           ),
           if (_error != null) ...[
             const SizedBox(height: 8),
-            Text(_error!, style: const TextStyle(color: RwColors.danger)),
+            Text(_error!, style: TextStyle(color: RwColors.danger)),
           ],
           if (scanning || _found.isNotEmpty) ...[
             const SizedBox(height: 12),
             if (_found.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(12),
                 child: Text('Doe je band om (vaak gaat hij pas aan als hij huid voelt) en houd hem dichtbij.',
                     style: TextStyle(color: RwColors.muted)),
@@ -154,7 +154,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
             for (final d in _found.values)
               Card(
                 child: ListTile(
-                  leading: const TileIcon(Icons.monitor_heart_outlined, color: RwColors.accent),
+                  leading: TileIcon(Icons.monitor_heart_outlined, color: RwColors.accent),
                   title: Text(d.name.isEmpty ? 'Onbekende band' : d.name),
                   subtitle: Text('Signaal ${d.rssi} dBm'),
                   trailing: const Icon(Icons.chevron_right),
@@ -182,14 +182,14 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                   Text(
                     'Hiermee rekent Kadans je hartslagzones uit. Zone 2 (rustig) is ${(max * 0.6).round()}–${(max * 0.7).round()} bpm. '
                     'Weet je het niet precies? Een vuistregel is 220 min je leeftijd.',
-                    style: const TextStyle(color: RwColors.muted, height: 1.4),
+                    style: TextStyle(color: RwColors.muted, height: 1.4),
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Werkt met banden die standaard Bluetooth-hartslag uitzenden, zoals Polar H9/H10, Garmin HRM-Dual, Wahoo TICKR en Coros. '
             'Een horloge kan dit soms ook (zet "hartslag uitzenden" aan op je horloge).',
             style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),

@@ -202,7 +202,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
             if (hasProfile)
               Container(
                 padding: EdgeInsets.fromLTRB(16, 14, 16, 14 + MediaQuery.paddingOf(context).bottom),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: RwColors.surface,
                   border: Border(top: BorderSide(color: RwColors.border)),
                 ),
@@ -227,7 +227,7 @@ class _CircleButton extends StatelessWidget {
         message: tooltip,
         child: Material(
           color: RwColors.background.withValues(alpha: 0.9),
-          shape: const CircleBorder(side: BorderSide(color: RwColors.border)),
+          shape: CircleBorder(side: BorderSide(color: RwColors.border)),
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: onTap,

@@ -94,7 +94,7 @@ class _FirstTipState extends State<FirstTip> {
                       tooltip: 'Tip wegtikken',
                       visualDensity: VisualDensity.compact,
                       onPressed: _dismiss,
-                      icon: const Icon(Icons.close, size: 18, color: RwColors.muted),
+                      icon: Icon(Icons.close, size: 18, color: RwColors.muted),
                     ),
                   ]),
                 ),

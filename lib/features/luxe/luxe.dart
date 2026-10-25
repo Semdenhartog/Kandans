@@ -164,7 +164,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
                   style: TextStyle(fontFamily: RwFonts.display, fontSize: 30, fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 6),
-            const Text('Voor je routeposters en deelkaarten. Eenmalig, voor altijd van jou.',
+            Text('Voor je routeposters en deelkaarten. Eenmalig, voor altijd van jou.',
                 textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, height: 1.4)),
             const SizedBox(height: 18),
             SizedBox(
@@ -232,7 +232,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
             if (available)
               TextButton(
                 onPressed: _busy ? null : _restore,
-                child: const Text('Aankoop herstellen', style: TextStyle(color: RwColors.subtle)),
+                child: Text('Aankoop herstellen', style: TextStyle(color: RwColors.subtle)),
               ),
           ],
         ),

@@ -167,9 +167,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         children: [
           const Icon(Icons.groups_rounded, size: 56, color: challengeGold),
           const SizedBox(height: 12),
-          const Text('Loop samen met anderen', textAlign: TextAlign.center, style: RwText.title),
+          Text('Loop samen met anderen', textAlign: TextAlign.center, style: RwText.title),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Doe mee aan maandelijkse ranglijsten voor kilometers en hoogtemeters, en voeg vrienden toe met een code.',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.muted, height: 1.4),
@@ -234,7 +234,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           const SizedBox(height: 14),
           result.when(
             loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
-            error: (e, _) => Text(e.toString().replaceFirst('Exception: ', ''), style: const TextStyle(color: RwColors.danger)),
+            error: (e, _) => Text(e.toString().replaceFirst('Exception: ', ''), style: TextStyle(color: RwColors.danger)),
             data: (r) => _list(r, board),
           ),
           const SizedBox(height: 20),
@@ -254,7 +254,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               ]),
               const SizedBox(height: 4),
               Text('Je doet mee als ${s.nickname}. Deel je code, of voeg een vriend toe met zijn code.',
-                  style: const TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+                  style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
               const SizedBox(height: 10),
               OutlinedButton.icon(
                 onPressed: _busy ? null : _addFriend,
@@ -267,7 +267,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           Center(
             child: TextButton(
               onPressed: _busy ? null : _leave,
-              child: const Text('Stoppen met Samen', style: TextStyle(color: RwColors.subtle)),
+              child: Text('Stoppen met Samen', style: TextStyle(color: RwColors.subtle)),
             ),
           ),
         ],
@@ -282,7 +282,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         child: Text(
           _friends ? 'Nog geen vrienden op deze ranglijst. Voeg iemand toe met zijn code.' : 'Nog niemand op deze ranglijst. Ga lopen en sta bovenaan!',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: RwColors.muted),
+          style: TextStyle(color: RwColors.muted),
         ),
       );
     }
@@ -298,7 +298,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       ),
       for (final row in r.rows) _RankRow(row: row, unit: board.unit),
       if (mineOutside) ...[
-        const Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Icon(Icons.more_vert, color: RwColors.subtle, size: 18)),
+        Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Icon(Icons.more_vert, color: RwColors.subtle, size: 18)),
         _RankRow(row: r.mine!, unit: board.unit),
       ],
     ]);
@@ -316,7 +316,7 @@ class _Bullet extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Icon(icon, size: 18, color: RwColors.accent),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(color: RwColors.muted, height: 1.35))),
+          Expanded(child: Text(text, style: TextStyle(color: RwColors.muted, height: 1.35))),
         ]),
       );
 }
@@ -356,9 +356,9 @@ class _RankRow extends StatelessWidget {
                 ? CircleAvatar(
                     radius: 13,
                     backgroundColor: medal,
-                    child: Text('${row.rank}', style: const TextStyle(color: RwColors.background, fontWeight: FontWeight.w800, fontSize: 13)),
+                    child: Text('${row.rank}', style: TextStyle(color: RwColors.background, fontWeight: FontWeight.w800, fontSize: 13)),
                   )
-                : Text('${row.rank}', textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontWeight: FontWeight.w700)),
+                : Text('${row.rank}', textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontWeight: FontWeight.w700)),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -369,7 +369,7 @@ class _RankRow extends StatelessWidget {
               ),
               if (row.friend) ...[
                 const SizedBox(width: 6),
-                const Icon(Icons.people_outline, size: 15, color: RwColors.subtle),
+                Icon(Icons.people_outline, size: 15, color: RwColors.subtle),
               ],
             ]),
           ),

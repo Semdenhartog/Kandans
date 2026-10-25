@@ -67,7 +67,7 @@ class _EmergencyContactTileState extends State<EmergencyContactTile> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Tijdens een run kun je met de SOS-knop dit contact een sms sturen met je locatie. '
               'Het nummer blijft alleen op deze telefoon.',
               style: TextStyle(color: RwColors.muted),
@@ -91,7 +91,7 @@ class _EmergencyContactTileState extends State<EmergencyContactTile> {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        leading: const TileIcon(Icons.sos_outlined, color: RwColors.danger),
+        leading: TileIcon(Icons.sos_outlined, color: RwColors.danger),
         title: const Text('Noodcontact'),
         subtitle: Text(_c == null
             ? 'Stel iemand in die je met één tik je locatie stuurt'
@@ -142,7 +142,7 @@ Future<void> showSosSheet(BuildContext context) async {
                 label: Text('Stuur locatie naar ${contact.name.isEmpty ? contact.phone : contact.name}'),
               )
             else
-              const Text(
+              Text(
                 'Tip: stel op "Ik" een noodcontact in, dan kun je hier met één tik je locatie sturen.',
                 style: TextStyle(color: RwColors.subtle),
               ),

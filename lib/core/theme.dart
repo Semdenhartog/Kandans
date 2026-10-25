@@ -1,29 +1,128 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-/// Kleuren van het Kadans-logo: oranje verloop op bijna-zwart.
+/// Eén kleurenset. Kadans heeft er twee: Zand (licht, overdag) en Zand avond (donker).
+class RwPalette {
+  const RwPalette({
+    required this.brightness,
+    required this.background,
+    required this.surface,
+    required this.surfaceHigh,
+    required this.border,
+    required this.hairline,
+    required this.accent,
+    required this.accentDeep,
+    required this.accentLight,
+    required this.accentDark,
+    required this.text,
+    required this.muted,
+    required this.subtle,
+    required this.bar,
+    required this.good,
+    required this.danger,
+    required this.warning,
+    required this.signal,
+    required this.sheet,
+    required this.snack,
+    required this.focusFill,
+    required this.scrim,
+    required this.shadow,
+  });
+  final Brightness brightness;
+  final Color background, surface, surfaceHigh, border, hairline;
+  final Color accent, accentDeep, accentLight, accentDark;
+  final Color text, muted, subtle, bar;
+  final Color good, danger, warning, signal;
+  final Color sheet, snack, focusFill, scrim, shadow;
+}
+
+/// Zand: warm zand met brons en espresso. Rustig voor de ogen, goed leesbaar buiten.
+const rwZand = RwPalette(
+  brightness: Brightness.light,
+  background: Color(0xFFEDE6DA),
+  surface: Color(0xFFF7F2EA),
+  surfaceHigh: Color(0xFFE7DFD2),
+  border: Color(0xFFDCD1BF),
+  hairline: Color(0x1F3B2C1F),
+  accent: Color(0xFF7A5A34),
+  accentDeep: Color(0xFF5E4325),
+  accentLight: Color(0xFFA27C4A),
+  accentDark: Color(0xFFFBF7F0),
+  text: Color(0xFF211A13),
+  muted: Color(0xFF5A5044),
+  subtle: Color(0xFF6C6153),
+  bar: Color(0xFFD9CEBC),
+  good: Color(0xFF2A6B3F),
+  danger: Color(0xFFA93A35),
+  warning: Color(0xFF7E5B0E),
+  signal: Color(0xFFA44A18),
+  sheet: Color(0xFFF7F2EA),
+  snack: Color(0xFF2B231B),
+  focusFill: Color(0xFFF1EADF),
+  scrim: Color(0x8C211A13),
+  shadow: Color(0x24402A12),
+);
+
+/// Zand avond: de donkere tegenhanger, voor 's avonds en in het donker.
+const rwZandAvond = RwPalette(
+  brightness: Brightness.dark,
+  background: Color(0xFF13110E),
+  surface: Color(0xFF1C1814),
+  surfaceHigh: Color(0xFF25201B),
+  border: Color(0xFF352E26),
+  hairline: Color(0x1AF1E9DC),
+  accent: Color(0xFFD9BF92),
+  accentDeep: Color(0xFFB8955F),
+  accentLight: Color(0xFFE8D3AE),
+  accentDark: Color(0xFF1A1510),
+  text: Color(0xFFF1E9DC),
+  muted: Color(0xFFBDB1A0),
+  subtle: Color(0xFF94897A),
+  bar: Color(0xFF3A332B),
+  good: Color(0xFF8CC99A),
+  danger: Color(0xFFEF7F78),
+  warning: Color(0xFFE6C16A),
+  signal: Color(0xFFE0884E),
+  sheet: Color(0xFF1A1612),
+  snack: Color(0xFF2A241E),
+  focusFill: Color(0xFF2B251F),
+  scrim: Color(0xB3000000),
+  shadow: Color(0x66000000),
+);
+
+/// Kleuren van de huidige set. Wisselt mee met licht/donker (zie [RwColors.use]).
 class RwColors {
-  static const background = Color(0xFF09090B);
-  static const surface = Color(0xFF141417);
-  static const surfaceHigh = Color(0xFF1C1C20);
-  static const border = Color(0xFF29292F);
+  static RwPalette _p = rwZand;
+  static RwPalette get palette => _p;
+  static void use(RwPalette p) => _p = p;
+  static bool get isDark => _p.brightness == Brightness.dark;
 
-  /// Logo-oranje (midden van het verloop). Tekst erop: [accentDark].
-  static const accent = Color(0xFFFD8A26);
+  static Color get background => _p.background;
+  static Color get surface => _p.surface;
+  static Color get surfaceHigh => _p.surfaceHigh;
+  static Color get border => _p.border;
 
-  /// Begin en eind van het logo-verloop, voor accenten.
-  static const accentDeep = Color(0xFFFD3D22);
-  static const accentLight = Color(0xFFFD9E28);
-  static const accentDark = Color(0xFF09090B);
+  /// Fijne rand om kaarten en panelen.
+  static Color get hairline => _p.hairline;
 
-  static const text = Color(0xFFF4F4F5);
-  static const muted = Color(0xFFBDBDC6);
-  static const subtle = Color(0xFF8D8D98);
-  static const bar = Color(0xFF323238);
+  /// Merkkleur (brons overdag, champagne 's avonds). Tekst erop: [accentDark].
+  static Color get accent => _p.accent;
+  static Color get accentDeep => _p.accentDeep;
+  static Color get accentLight => _p.accentLight;
+  static Color get accentDark => _p.accentDark;
 
-  /// Status: goed (groen), let op (geel), slecht (rood). Bewust anders dan het merk-oranje.
-  static const good = Color(0xFF4ADE80);
-  static const danger = Color(0xFFFF5470);
-  static const warning = Color(0xFFF5C542);
+  static Color get text => _p.text;
+  static Color get muted => _p.muted;
+  static Color get subtle => _p.subtle;
+  static Color get bar => _p.bar;
+
+  /// Status: goed, let op, slecht. Bewust anders dan de merkkleur.
+  static Color get good => _p.good;
+  static Color get danger => _p.danger;
+  static Color get warning => _p.warning;
+
+  /// Sportief oranje, alleen voor wat nú gebeurt (opnemen, live delen).
+  static Color get signal => _p.signal;
 }
 
 /// Lettertypes: Saira voor koppen en grote getallen (past bij het logo),
@@ -34,7 +133,7 @@ const rwTnum = <FontFeature>[FontFeature.tabularFigures()];
 /// Vaste tekststijlen, zodat koppen, labels en cijfers overal hetzelfde zijn.
 class RwText {
   /// Sectiekop in hoofdletters, met ruime spatiëring (zoals in horloges en luxe-apps).
-  static const overline = TextStyle(
+  static TextStyle get overline => TextStyle(
     fontFamily: RwFonts.body,
     fontSize: 12,
     color: RwColors.subtle,
@@ -49,7 +148,7 @@ class RwText {
   static const number = TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, height: 1);
 
   /// Klein label onder een getal.
-  static const label = TextStyle(fontFamily: RwFonts.body, fontSize: 12, color: RwColors.subtle);
+  static TextStyle get label => TextStyle(fontFamily: RwFonts.body, fontSize: 12, color: RwColors.subtle);
 }
 
 class RwFonts {
@@ -58,9 +157,10 @@ class RwFonts {
 }
 
 ThemeData buildTheme() {
+  final dark = RwColors.isDark;
   final scheme = ColorScheme.fromSeed(
     seedColor: RwColors.accent,
-    brightness: Brightness.dark,
+    brightness: RwColors.palette.brightness,
   ).copyWith(
     primary: RwColors.accent,
     onPrimary: RwColors.accentDark,
@@ -90,7 +190,8 @@ ThemeData buildTheme() {
           headlineSmall: display(base.textTheme.headlineSmall),
         )
         .apply(bodyColor: RwColors.text, displayColor: RwColors.text),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
+      systemOverlayStyle: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       // Doorzichtig, zodat de aura bovenin doorschijnt (de schermen zelf hebben hun eigen achtergrond).
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
@@ -107,7 +208,7 @@ ThemeData buildTheme() {
         letterSpacing: -0.3,
       ),
     ),
-    listTileTheme: const ListTileThemeData(
+    listTileTheme: ListTileThemeData(
       iconColor: RwColors.muted,
       titleTextStyle: TextStyle(fontFamily: RwFonts.body, fontSize: 16, fontWeight: FontWeight.w600, color: RwColors.text),
       subtitleTextStyle: TextStyle(fontFamily: RwFonts.body, fontSize: 13, color: RwColors.subtle, height: 1.35),
@@ -115,9 +216,9 @@ ThemeData buildTheme() {
     chipTheme: ChipThemeData(
       backgroundColor: RwColors.surfaceHigh,
       selectedColor: RwColors.accent,
-      side: const BorderSide(color: RwColors.border),
-      labelStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.text),
-      secondaryLabelStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.accentDark),
+      side: BorderSide(color: RwColors.border),
+      labelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.text),
+      secondaryLabelStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, color: RwColors.accentDark),
       shape: const StadiumBorder(),
       showCheckmark: false,
     ),
@@ -130,7 +231,7 @@ ThemeData buildTheme() {
             (s) => s.contains(WidgetState.selected) ? RwColors.accentDark : RwColors.text),
         iconColor: WidgetStateProperty.resolveWith(
             (s) => s.contains(WidgetState.selected) ? RwColors.accentDark : RwColors.muted),
-        side: WidgetStateProperty.all(const BorderSide(color: RwColors.border)),
+        side: WidgetStateProperty.all(BorderSide(color: RwColors.border)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -146,7 +247,7 @@ ThemeData buildTheme() {
       // Zelfde rand als RwCard, zodat lijstkaarten (Ik, schema) en RwCards één familie zijn.
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0x14FFFFFF)),
+        side: BorderSide(color: RwColors.hairline),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -173,10 +274,10 @@ ThemeData buildTheme() {
       filled: true,
       // Veld licht iets op zodra je erin typt.
       fillColor: WidgetStateColor.resolveWith(
-        (st) => st.contains(WidgetState.focused) ? const Color(0xFF221D1A) : RwColors.surfaceHigh,
+        (st) => st.contains(WidgetState.focused) ? RwColors.palette.focusFill : RwColors.surfaceHigh,
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      labelStyle: const TextStyle(color: RwColors.muted),
+      labelStyle: TextStyle(color: RwColors.muted),
       floatingLabelStyle: WidgetStateTextStyle.resolveWith(
         (st) => TextStyle(
           color: st.contains(WidgetState.error)
@@ -186,20 +287,20 @@ ThemeData buildTheme() {
           letterSpacing: 0.3,
         ),
       ),
-      hintStyle: const TextStyle(color: RwColors.subtle),
+      hintStyle: TextStyle(color: RwColors.subtle),
       prefixIconColor: WidgetStateColor.resolveWith((st) => st.contains(WidgetState.focused) ? RwColors.accent : RwColors.subtle),
       suffixIconColor: WidgetStateColor.resolveWith((st) => st.contains(WidgetState.focused) ? RwColors.accent : RwColors.subtle),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: RwColors.border),
+        borderSide: BorderSide(color: RwColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+        borderSide: BorderSide(color: RwColors.hairline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: RwColors.accent, width: 1.6),
+        borderSide: BorderSide(color: RwColors.accent, width: 1.6),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
@@ -207,7 +308,7 @@ ThemeData buildTheme() {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: RwColors.danger, width: 1.6),
+        borderSide: BorderSide(color: RwColors.danger, width: 1.6),
       ),
     ),
     textSelectionTheme: TextSelectionThemeData(
@@ -229,56 +330,56 @@ ThemeData buildTheme() {
         foregroundColor: RwColors.text,
         minimumSize: const Size.fromHeight(52),
         shape: const StadiumBorder(),
-        side: const BorderSide(color: RwColors.border, width: 1.5),
+        side: BorderSide(color: RwColors.border, width: 1.5),
         textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: RwColors.accent,
       foregroundColor: RwColors.accentDark,
       elevation: 2,
       highlightElevation: 4,
       extendedTextStyle: TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 16),
     ),
-    snackBarTheme: const SnackBarThemeData(
+    snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: Color(0xFF26262C),
+      backgroundColor: RwColors.palette.snack,
       elevation: 6,
-      shape: StadiumBorder(side: BorderSide(color: Color(0x1FFFFFFF))),
+      shape: StadiumBorder(side: BorderSide(color: RwColors.hairline)),
       insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 14),
-      contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: RwColors.text, fontWeight: FontWeight.w500),
+      contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: dark ? RwColors.text : const Color(0xFFF7F2EA), fontWeight: FontWeight.w500),
     ),
     // Vernieuwen (omlaag trekken) en laadlijnen in Kadans-kleuren.
-    progressIndicatorTheme: const ProgressIndicatorThemeData(
+    progressIndicatorTheme: ProgressIndicatorThemeData(
       color: RwColors.accent,
       refreshBackgroundColor: RwColors.surfaceHigh,
       linearTrackColor: RwColors.bar,
     ),
-    bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: Color(0xFF151518),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: RwColors.palette.sheet,
       surfaceTintColor: Colors.transparent,
-      modalBarrierColor: Color(0xB3000000),
+      modalBarrierColor: RwColors.palette.scrim,
       showDragHandle: true,
-      dragHandleColor: Color(0xFF3A3A42),
+      dragHandleColor: RwColors.border,
       dragHandleSize: Size(40, 4),
       // Lichte rand langs de bovenkant: het paneel "zweeft" boven de inhoud.
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        side: BorderSide(color: Color(0x22FFFFFF)),
+        side: BorderSide(color: RwColors.hairline),
       ),
     ),
-    dialogTheme: const DialogThemeData(
-      backgroundColor: Color(0xFF17171B),
+    dialogTheme: DialogThemeData(
+      backgroundColor: RwColors.palette.sheet,
       surfaceTintColor: Colors.transparent,
-      barrierColor: Color(0xB3000000),
+      barrierColor: RwColors.palette.scrim,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(26)),
-        side: BorderSide(color: Color(0x14FFFFFF)),
+        side: BorderSide(color: RwColors.hairline),
       ),
       titleTextStyle: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800, color: RwColors.text),
       contentTextStyle: TextStyle(fontFamily: RwFonts.body, fontSize: 15, color: RwColors.muted, height: 1.45),
     ),
-    dividerTheme: const DividerThemeData(color: RwColors.border),
+    dividerTheme: DividerThemeData(color: RwColors.border),
     // Vloeiende overgangen tussen schermen (vervagen en schuiven, zoals de nieuwste Android-stijl).
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
       TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),

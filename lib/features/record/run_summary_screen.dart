@@ -84,7 +84,7 @@ class RunSummaryScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
           children: [
             Text(greeting, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800)),
-            Text('${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}', style: const TextStyle(color: RwColors.subtle)),
+            Text('${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}', style: TextStyle(color: RwColors.subtle)),
             const SizedBox(height: 16),
             // Kilometers tellen op tot je afstand.
             TweenAnimationBuilder<double>(
@@ -93,7 +93,7 @@ class RunSummaryScreen extends StatelessWidget {
               curve: Curves.easeOutCubic,
               builder: (_, v, _) => Text(
                 v.toStringAsFixed(2).replaceAll('.', ','),
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: RwFonts.display, fontFeatures: rwTnum,
                   fontSize: 72,
                   fontWeight: FontWeight.w800,
@@ -102,7 +102,7 @@ class RunSummaryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
+            Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -157,10 +157,10 @@ class RunSummaryScreen extends StatelessWidget {
                           children: [
                             SizedBox(width: 120, child: Text(b.label, style: const TextStyle(fontWeight: FontWeight.w600))),
                             Expanded(child: Text(Fmt.duration(b.seconds), style: const TextStyle(fontWeight: FontWeight.w700))),
-                            Text(Fmt.pace(b.paceSecPerKm), style: const TextStyle(color: RwColors.muted)),
+                            Text(Fmt.pace(b.paceSecPerKm), style: TextStyle(color: RwColors.muted)),
                             if (_isRecord(b)) ...[
                               const SizedBox(width: 8),
-                              const Icon(Icons.emoji_events, color: RwColors.accent, size: 18),
+                              Icon(Icons.emoji_events, color: RwColors.accent, size: 18),
                             ],
                           ],
                         ),
@@ -235,13 +235,13 @@ class RunSummaryScreen extends StatelessWidget {
                 child: RwCard(
                   title: 'HERSTEL',
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Icon(Icons.restaurant_outlined, color: RwColors.accent),
+                    Icon(Icons.restaurant_outlined, color: RwColors.accent),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(tip.title, style: const TextStyle(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 4),
-                        Text(tip.text, style: const TextStyle(color: RwColors.muted, height: 1.45)),
+                        Text(tip.text, style: TextStyle(color: RwColors.muted, height: 1.45)),
                       ]),
                     ),
                   ]),
@@ -250,7 +250,7 @@ class RunSummaryScreen extends StatelessWidget {
             }),
             if (healthWritten) ...[
               const SizedBox(height: 12),
-              const Row(
+              Row(
                 children: [
                   Icon(Icons.check_circle_outline, color: RwColors.good, size: 18),
                   SizedBox(width: 8),
@@ -262,12 +262,12 @@ class RunSummaryScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.battery_std, color: RwColors.subtle, size: 18),
+                  Icon(Icons.battery_std, color: RwColors.subtle, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       batteryUsedPct == 0 ? 'Deze run kostte minder dan 1% accu.' : 'Deze run kostte $batteryUsedPct% accu.',
-                      style: const TextStyle(color: RwColors.muted),
+                      style: TextStyle(color: RwColors.muted),
                     ),
                   ),
                 ],
@@ -295,7 +295,7 @@ class RunSummaryScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  const Expanded(
+                  Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('Je deelkaart staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                       SizedBox(height: 2),
@@ -303,7 +303,7 @@ class RunSummaryScreen extends StatelessWidget {
                           style: TextStyle(color: RwColors.muted, height: 1.35)),
                     ]),
                   ),
-                  const Icon(Icons.ios_share, color: RwColors.accent),
+                  Icon(Icons.ios_share, color: RwColors.accent),
                 ]),
               ),
             if (a.hasTrack) const SizedBox(height: 12),
@@ -580,7 +580,7 @@ class _NewRoadsCard extends ConsumerWidget {
     return RwCard(
       title: m >= 1000 ? 'ONTDEKKER' : 'NIEUWE WEGEN',
       child: Row(children: [
-        const Icon(Icons.explore, color: RwColors.accent),
+        Icon(Icons.explore, color: RwColors.accent),
         const SizedBox(width: 12),
         Expanded(
           child: Text(

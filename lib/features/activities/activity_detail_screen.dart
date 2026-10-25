@@ -63,7 +63,7 @@ class ActivityDetailScreen extends ConsumerWidget {
               ),
             if (a.routeId != null)
               ListTile(
-                leading: const Icon(Icons.link_off, color: RwColors.danger),
+                leading: Icon(Icons.link_off, color: RwColors.danger),
                 title: const Text('Losmaken van route'),
                 onTap: () => Navigator.pop(ctx, ''),
               ),
@@ -144,7 +144,7 @@ class ActivityDetailScreen extends ConsumerWidget {
           ),
           Text(
             '${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}',
-            style: const TextStyle(color: RwColors.subtle),
+            style: TextStyle(color: RwColors.subtle),
           ),
           const SizedBox(height: 4),
           Text(
@@ -182,12 +182,12 @@ class ActivityDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (a.hasTrack) ...[
-                        const Text(
+                        Text(
                           'Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt Kadans je volgende runs hier vanzelf aan.',
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ] else
-                        const Text(
+                        Text(
                           'Koppel deze run aan een route. Dan zie je je tijden op die route naast elkaar, eerlijk vergeleken voor het weer.',
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
@@ -219,7 +219,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                               children: [
                                 Text(route.name, style: const TextStyle(fontWeight: FontWeight.w700)),
                                 if (a.autoLinked)
-                                  const Text('Automatisch herkend aan je GPS-spoor',
+                                  Text('Automatisch herkend aan je GPS-spoor',
                                       style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                               ],
                             ),
@@ -244,7 +244,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 12),
                         Text(
                           _historyLine(a, history),
-                          style: const TextStyle(color: RwColors.muted, height: 1.45),
+                          style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ],
                       const SizedBox(height: 10),
@@ -275,7 +275,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             key: _sectionKey(a, 'weer'),
             title: 'HET WEER TIJDENS JE RUN',
             child: a.temperatureCelsius == null && a.windSpeedKmh == null
-                ? const Text('Geen weergegevens bij deze run.', style: TextStyle(color: RwColors.muted))
+                ? Text('Geen weergegevens bij deze run.', style: TextStyle(color: RwColors.muted))
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -295,7 +295,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                           children: [
                             Text(
                               Fmt.duration(corrected),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: RwFonts.display, fontFeatures: rwTnum,
                                 fontSize: 30,
                                 fontWeight: FontWeight.w800,
@@ -310,7 +310,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.only(bottom: 3),
                                 child: Text(
                                   'bij ideaal weer · ${Fmt.pace(corrected / (a.distanceMeters / 1000))}',
-                                  style: const TextStyle(color: RwColors.muted),
+                                  style: TextStyle(color: RwColors.muted),
                                 ),
                               ),
                             ),
@@ -320,10 +320,10 @@ class ActivityDetailScreen extends ConsumerWidget {
                         Text(
                           'Het weer kostte je ongeveer ${Fmt.duration(cost.totalSeconds)} (${cost.explanation}). '
                           'Zo vergelijk je runs eerlijk, ook als het hard waaide.',
-                          style: const TextStyle(color: RwColors.muted, height: 1.45),
+                          style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ] else
-                        const Text(
+                        Text(
                           'Prima loopweer: het weer had nauwelijks invloed op je tijd.',
                           style: TextStyle(color: RwColors.muted),
                         ),
@@ -364,7 +364,7 @@ class ActivityDetailScreen extends ConsumerWidget {
           if (a.viaStrava) ...[
             const SizedBox(height: 12),
             Text(a.source == 'strava' ? 'Gegevens via Strava' : 'Gegevens van de Strava-app (via Health Connect)',
-                textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
         ],
       );
@@ -425,13 +425,13 @@ class ActivityDetailScreen extends ConsumerWidget {
                   animateIn: true,
                   ),
                 ),
-                const IgnorePointer(
+                IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Color(0xCC09090B), Color(0x0009090B), Color(0x0009090B), RwColors.background],
+                        colors: [RwColors.background.withValues(alpha: 0.8), RwColors.background.withValues(alpha: 0), RwColors.background.withValues(alpha: 0), RwColors.background],
                         stops: [0, 0.28, 0.62, 1],
                       ),
                     ),
@@ -636,7 +636,7 @@ class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
           if (t != null)
             Text(t, style: const TextStyle(height: 1.45))
           else ...[
-            const Text('Laat de coach in een paar zinnen vertellen wat goed ging, wat het weer deed en wat je volgende keer kunt doen.',
+            Text('Laat de coach in een paar zinnen vertellen wat goed ging, wat het weer deed en wat je volgende keer kunt doen.',
                 style: TextStyle(color: RwColors.muted)),
             const SizedBox(height: 10),
             OutlinedButton.icon(
@@ -649,11 +649,11 @@ class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
           ],
           if (_error != null) ...[
             const SizedBox(height: 8),
-            Text(_error!, style: const TextStyle(color: RwColors.danger)),
+            Text(_error!, style: TextStyle(color: RwColors.danger)),
           ],
           if (t != null) ...[
             const SizedBox(height: 6),
-            const Text('Gemaakt door AI; kan fouten bevatten.', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+            Text('Gemaakt door AI; kan fouten bevatten.', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
           ],
         ],
       ),

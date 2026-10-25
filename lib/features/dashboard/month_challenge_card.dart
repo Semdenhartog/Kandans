@@ -65,7 +65,7 @@ class MonthChallengeCard extends ConsumerWidget {
           children: [
             Text(
               'Hoeveel kilometer wil je in $month lopen? Op basis van je vorige maanden stellen we $suggested km voor.',
-              style: const TextStyle(color: RwColors.muted, height: 1.45),
+              style: TextStyle(color: RwColors.muted, height: 1.45),
             ),
             const SizedBox(height: 12),
             FilledButton.tonalIcon(
@@ -99,7 +99,7 @@ class MonthChallengeCard extends ConsumerWidget {
                 painter: _RingPainter(fraction: f, expected: p.expectedKm / target, achieved: p.achieved),
                 child: Center(
                   child: p.achieved
-                      ? const Icon(Icons.emoji_events, color: RwColors.accent, size: 36)
+                      ? Icon(Icons.emoji_events, color: RwColors.accent, size: 36)
                       : Text(
                           '${(f * 100).round()}%',
                           style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800),
@@ -121,19 +121,19 @@ class MonthChallengeCard extends ConsumerWidget {
                       baseline: TextBaseline.alphabetic,
                       child: OdometerIn(
                         done.toStringAsFixed(done < 100 ? 1 : 0).replaceAll('.', ','),
-                        style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent),
+                        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800, color: RwColors.accent),
                       ),
                     ),
                     TextSpan(
                       text: ' / ${target.round()} km',
-                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: RwColors.muted),
+                      style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: RwColors.muted),
                     ),
                   ]),
                 ),
                 const SizedBox(height: 4),
                 Text(p.statusText, style: const TextStyle(height: 1.4)),
                 const SizedBox(height: 4),
-                const Text('Tik om je doel aan te passen', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+                Text('Tik om je doel aan te passen', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
               ],
             ),
           ),
@@ -165,7 +165,7 @@ class _RingPainter extends CustomPainter {
         2 * math.pi * fraction,
         false,
         Paint()
-          ..shader = const SweepGradient(
+          ..shader = SweepGradient(
             colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
             transform: GradientRotation(-math.pi / 2),
           ).createShader(rect)
@@ -223,7 +223,7 @@ class _GoalSheetState extends State<_GoalSheet> {
             Center(
               child: Text(
                 '${_km.round()} km',
-                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 44, fontWeight: FontWeight.w800, color: RwColors.accent),
+                style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 44, fontWeight: FontWeight.w800, color: RwColors.accent),
               ),
             ),
             Slider(

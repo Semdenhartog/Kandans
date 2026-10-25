@@ -173,7 +173,7 @@ class RouteDetailScreen extends ConsumerWidget {
               RwCard(
                 title: 'WIND OP DEZE ROUTE, NU',
                 child: w == null
-                    ? const Text('Weer wordt geladen…', style: TextStyle(color: RwColors.muted))
+                    ? Text('Weer wordt geladen…', style: TextStyle(color: RwColors.muted))
                     : Text(
                         rw == null
                             ? 'Wind ${Fmt.wind(w.windSpeed)}.'
@@ -265,12 +265,12 @@ class _KmRow extends StatelessWidget {
           SizedBox(
             width: 70,
             child: Text(b == null ? '–' : 'naar ${Fmt.compass(b)}',
-                style: const TextStyle(color: RwColors.muted)),
+                style: TextStyle(color: RwColors.muted)),
           ),
           Expanded(
             child: Text(
               point.elevation == null ? '' : '${point.elevation!.round()} m',
-              style: const TextStyle(color: RwColors.subtle),
+              style: TextStyle(color: RwColors.subtle),
             ),
           ),
           Text(windText, style: TextStyle(color: color)),
@@ -351,7 +351,7 @@ class _MapAndProfileState extends ConsumerState<_MapAndProfile> {
               ? 'Pijltjes tonen de looprichting. Tik op de kaart om hem groot te openen.'
               : 'Pijltjes tonen de beste richting van nu: ${widget.directionLabel}. Tik op de kaart om hem groot te openen.',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+          style: TextStyle(color: RwColors.subtle, fontSize: 12),
         ),
         if (profile.length >= 3) ...[
           const SizedBox(height: 12),
@@ -391,7 +391,7 @@ class _RouteHistoryCard extends ConsumerWidget {
     final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
     final h = routeHistory(all, routeId);
     if (h.isEmpty) {
-      return const RwCard(
+      return RwCard(
         title: 'JOUW RUNS OP DEZE ROUTE',
         child: Text(
           'Nog geen runs op deze route. Koppel een run aan deze route (open de run bij Runs) '
@@ -451,14 +451,14 @@ class _RouteHistoryCard extends ConsumerWidget {
                   children: [
                     SizedBox(
                       width: 84,
-                      child: Text(Fmt.date(r.activity.startedAt), style: const TextStyle(color: RwColors.muted, fontSize: 13)),
+                      child: Text(Fmt.date(r.activity.startedAt), style: TextStyle(color: RwColors.muted, fontSize: 13)),
                     ),
                     SizedBox(
                       width: 62,
                       child: Text(Fmt.duration(r.activity.movingTimeSeconds),
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: sameRun(r.activity, fastest.activity) ? const Color(0xFFF2D892) : RwColors.text,
+                            color: sameRun(r.activity, fastest.activity) ? (RwColors.isDark ? const Color(0xFFF2D892) : const Color(0xFF8A6A22)) : RwColors.text,
                           )),
                     ),
                     // Balkje: korter = sneller (weergecorrigeerd tempo).
@@ -499,7 +499,7 @@ class _RouteHistoryCard extends ConsumerWidget {
                       child: Text(
                         r.activity.windSpeedKmh == null ? '' : '${r.activity.windSpeedKmh!.round()} km/u',
                         textAlign: TextAlign.right,
-                        style: const TextStyle(color: RwColors.subtle, fontSize: 12),
+                        style: TextStyle(color: RwColors.subtle, fontSize: 12),
                       ),
                     ),
                   ],
@@ -507,7 +507,7 @@ class _RouteHistoryCard extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Balk: tempo gecorrigeerd voor het weer (langer = sneller). Goud = beste prestatie.',
             style: TextStyle(color: RwColors.subtle, fontSize: 11),
           ),
@@ -542,7 +542,7 @@ class _PoiCard extends StatelessWidget {
     return RwCard(
       title: 'WATER EN TOILET',
       child: loading && pois.isEmpty
-          ? const Row(
+          ? Row(
               children: [
                 SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                 SizedBox(width: 10),
@@ -552,14 +552,14 @@ class _PoiCard extends StatelessWidget {
           : failed
               ? Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text('Kon de voorzieningen nu niet laden.', style: TextStyle(color: RwColors.muted)),
                     ),
                     TextButton(onPressed: onRetry, child: const Text('Opnieuw')),
                   ],
                 )
               : pois.isEmpty
-                  ? const Text(
+                  ? Text(
                       'Geen watertappunten of toiletten gevonden binnen 150 m van je route. Neem bij een lange run zelf drinken mee.',
                       style: TextStyle(color: RwColors.muted, height: 1.45),
                     )
@@ -590,13 +590,13 @@ class _PoiCard extends StatelessWidget {
                                 Text(
                                   'km ${((reversed ? length - p.alongMeters : p.alongMeters) / 1000).toStringAsFixed(1).replaceAll('.', ',')}'
                                   '${p.offsetMeters > 40 ? ' · ${(p.offsetMeters / 10).round() * 10} m' : ''}',
-                                  style: const TextStyle(color: RwColors.subtle, fontSize: 13),
+                                  style: TextStyle(color: RwColors.subtle, fontSize: 13),
                                 ),
                               ],
                             ),
                           ),
                         const SizedBox(height: 6),
-                        const Text(
+                        Text(
                           'Bron: OpenStreetMap-bijdragers. Controleer ter plekke of een kraan werkt.',
                           style: TextStyle(color: RwColors.subtle, fontSize: 11),
                         ),
@@ -617,14 +617,14 @@ class _LightingCard extends ConsumerWidget {
     return RwCard(
       title: 'VERLICHTING',
       child: l.when(
-        loading: () => const Text('Verlichting wordt geladen…', style: TextStyle(color: RwColors.muted)),
+        loading: () => Text('Verlichting wordt geladen…', style: TextStyle(color: RwColors.muted)),
         error: (_, _) => Row(children: [
-          const Expanded(child: Text('Verlichting is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted))),
+          Expanded(child: Text('Verlichting is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted))),
           TextButton(onPressed: () => ref.invalidate(routeLightingProvider(polyline)), child: const Text('Opnieuw')),
         ]),
         data: (v) {
           final total = v.lit + v.unlit + v.unknown;
-          if (total <= 0) return const Text('Geen gegevens over verlichting voor deze route.', style: TextStyle(color: RwColors.muted));
+          if (total <= 0) return Text('Geen gegevens over verlichting voor deze route.', style: TextStyle(color: RwColors.muted));
           final lit = (v.lit / total * 100).round();
           final unlit = (v.unlit / total * 100).round();
           final unknown = 100 - lit - unlit;
@@ -653,9 +653,9 @@ class _LightingCard extends ConsumerWidget {
             const SizedBox(height: 8),
             Text('$lit% verlicht · $unlit% onverlicht · $unknown% onbekend', style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            Text(advice, style: const TextStyle(color: RwColors.muted, height: 1.4)),
+            Text(advice, style: TextStyle(color: RwColors.muted, height: 1.4)),
             const SizedBox(height: 4),
-            const Text('Bron: OpenStreetMap. Niet van elke weg is bekend of er lantaarnpalen staan.',
+            Text('Bron: OpenStreetMap. Niet van elke weg is bekend of er lantaarnpalen staan.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ]);
         },
@@ -692,11 +692,11 @@ class _SurfaceCard extends ConsumerWidget {
     return RwCard(
       title: 'ONDERGROND',
       child: s.when(
-        loading: () => const Text('Ondergrond wordt geladen…', style: TextStyle(color: RwColors.muted)),
-        error: (_, _) => const Text('Ondergrond is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted)),
+        loading: () => Text('Ondergrond wordt geladen…', style: TextStyle(color: RwColors.muted)),
+        error: (_, _) => Text('Ondergrond is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted)),
         data: (m) {
           final total = m.values.fold<double>(0, (a, b) => a + b);
-          if (total <= 0) return const Text('Geen gegevens over de ondergrond voor deze route.', style: TextStyle(color: RwColors.muted));
+          if (total <= 0) return Text('Geen gegevens over de ondergrond voor deze route.', style: TextStyle(color: RwColors.muted));
           final types = [for (final t in _order) if ((m[t] ?? 0) > 0) t];
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -723,7 +723,7 @@ class _SurfaceCard extends ConsumerWidget {
                   ]),
                 ),
               const SizedBox(height: 4),
-              const Text('Bron: OpenStreetMap via openrouteservice. Niet overal is de ondergrond bekend.',
+              Text('Bron: OpenStreetMap via openrouteservice. Niet overal is de ondergrond bekend.',
                   style: TextStyle(color: RwColors.subtle, fontSize: 11)),
             ],
           );
@@ -750,13 +750,13 @@ class _NewRouteCard extends StatelessWidget {
         border: Border.all(color: RwColors.accent.withValues(alpha: 0.4)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Row(children: [
+        Row(children: [
           Icon(Icons.check_circle, color: RwColors.accent),
           SizedBox(width: 8),
           Expanded(child: Text('Je route staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
         ]),
         const SizedBox(height: 6),
-        const Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: Kadans zegt elke afslag.',
+        Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: Kadans zegt elke afslag.',
             style: TextStyle(color: RwColors.muted, height: 1.4)),
         const SizedBox(height: 10),
         _WatchButton(route: route),

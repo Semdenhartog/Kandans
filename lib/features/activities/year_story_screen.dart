@@ -186,7 +186,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
         ]),
       ),
       _Slide(
-        colors: const [RwColors.accentDeep, Color(0xFF6B1A0B)],
+        colors: [RwColors.accentDeep, Color(0xFF6B1A0B)],
         body: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
           const _Small('Je liep dit jaar'),
           _Count(r.km, decimals: 0, suffix: ' km', size: 96),
@@ -276,7 +276,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(children: [
-                  const Icon(Icons.emoji_events, color: RwColors.accent, size: 22),
+                  Icon(Icons.emoji_events, color: RwColors.accent, size: 22),
                   const SizedBox(width: 10),
                   Expanded(child: Text('Snelste ${bestEffortLabel(e.key)}', style: const TextStyle(color: Colors.white70, fontSize: 16))),
                   Text(Fmt.duration(e.value),
@@ -286,7 +286,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
           ]),
         ),
       _Slide(
-        colors: const [RwColors.accent, RwColors.accentDeep],
+        colors: [RwColors.accent, RwColors.accentDeep],
         body: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
           const _Small('Dat was je', dark: true),
           _Big('${r.year}', size: 110, color: Colors.black),

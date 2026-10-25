@@ -178,7 +178,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                   FilledButton.icon(
                     onPressed: _busy ? null : _share,
                     icon: _busy
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark),
@@ -270,7 +270,7 @@ class RunShareCard extends StatelessWidget {
             ? const BoxDecoration()
             : BoxDecoration(
           gradient: orange
-              ? const LinearGradient(
+              ? LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
@@ -281,7 +281,7 @@ class RunShareCard extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: [Color(0xFF1E170B), Color(0xFF0A0806), Color(0xFF15100A)],
                     )
-              : const LinearGradient(
+              : LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [Color(0xFF17171B), RwColors.background],
@@ -465,7 +465,7 @@ class RunShareCard extends StatelessWidget {
   }
 
   static Widget _tint(Widget child, bool orange) => orange
-      ? ColorFiltered(colorFilter: const ColorFilter.mode(RwColors.accentDark, BlendMode.srcIn), child: child)
+      ? ColorFiltered(colorFilter: ColorFilter.mode(RwColors.accentDark, BlendMode.srcIn), child: child)
       : child;
 
   static Widget _stat(String label, String value, Color fg, Color muted) => Expanded(

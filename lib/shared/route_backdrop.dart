@@ -61,7 +61,7 @@ class RouteBackdropPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2
-        ..color = Colors.white.withValues(alpha: 0.05),
+        ..color = RwColors.text.withValues(alpha: 0.05),
     );
     final len = metric.length * progress.clamp(0.0, 1.0);
     if (len <= 1) return;

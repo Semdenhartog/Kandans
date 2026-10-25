@@ -158,7 +158,7 @@ class _PosterOrderScreenState extends ConsumerState<PosterOrderScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Poster laten drukken')),
       body: products.hasError
-          ? const Center(
+          ? Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text('Posters bestellen is nog niet beschikbaar. Probeer het later opnieuw.',
@@ -351,7 +351,7 @@ class _FormatTile extends StatelessWidget {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(product.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                   if (product.description != null)
-                    Text(product.description!, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+                    Text(product.description!, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                 ]),
               ),
               Text(product.priceLabel,
@@ -373,7 +373,7 @@ class _Note extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Icon(icon, size: 18, color: RwColors.subtle),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(color: RwColors.muted, fontSize: 13, height: 1.4))),
+          Expanded(child: Text(text, style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.4))),
         ]),
       );
 }

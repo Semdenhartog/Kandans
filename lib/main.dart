@@ -15,6 +15,7 @@ import 'data/services/notification_service.dart';
 import 'shared/config_missing_app.dart';
 import 'data/services/app_lock_service.dart';
 import 'data/services/heart_rate_service.dart';
+import 'core/appearance.dart';
 
 void main() {
   runZonedGuarded(() {
@@ -54,6 +55,7 @@ class _BootstrapState extends State<_Bootstrap> {
   late Future<void> _init = _start();
 
   Future<void> _start() async {
+    await AppearanceController.instance.load();
     await initializeDateFormatting('nl_NL');
     await NotificationService.instance.init().catchError((_) {});
     await AppLockService.instance.load();
@@ -93,14 +95,14 @@ class _BootstrapState extends State<_Bootstrap> {
                       ? Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.error_outline, color: RwColors.danger, size: 48),
+                            Icon(Icons.error_outline, color: RwColors.danger, size: 48),
                             const SizedBox(height: 12),
                             const Text('Kadans kon niet starten',
                                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                             const SizedBox(height: 8),
                             SelectableText('${snap.error}',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(color: RwColors.muted)),
+                                style: TextStyle(color: RwColors.muted)),
                             const SizedBox(height: 20),
                             FilledButton(
                               onPressed: () => setState(() => _init = _start()),
@@ -164,7 +166,7 @@ class _IntroState extends State<_Intro> with TickerProviderStateMixin {
               opacity: appear,
               child: ScaleTransition(
                 scale: Tween(begin: 0.92, end: 1.0).animate(appear),
-                child: Image.asset('assets/logo/logo.png', width: 220, semanticLabel: 'Kadans'),
+                child: kadansImage('assets/logo/logo.png', width: 220, semanticLabel: 'Kadans'),
               ),
             ),
           ]),
@@ -172,7 +174,7 @@ class _IntroState extends State<_Intro> with TickerProviderStateMixin {
         const SizedBox(height: 24),
         FadeTransition(
           opacity: appear,
-          child: const SizedBox(
+          child: SizedBox(
             width: 120,
             child: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(2)),
@@ -198,7 +200,7 @@ class _ErrorText extends StatelessWidget {
         child: Text(
           'Fout: $message',
           textDirection: TextDirection.ltr,
-          style: const TextStyle(color: RwColors.danger, fontSize: 13),
+          style: TextStyle(color: RwColors.danger, fontSize: 13),
         ),
       ),
     );

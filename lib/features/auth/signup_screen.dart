@@ -129,12 +129,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       padding: const EdgeInsets.only(top: 12),
                       child: Text.rich(
                         TextSpan(
-                          style: const TextStyle(color: RwColors.muted, height: 1.4),
+                          style: TextStyle(color: RwColors.muted, height: 1.4),
                           children: [
                             const TextSpan(text: 'Ik ga akkoord met de '),
                             TextSpan(
                               text: 'privacyverklaring',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: RwColors.accent,
                                 decoration: TextDecoration.underline,
                               ),

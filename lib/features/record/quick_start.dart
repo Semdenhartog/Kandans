@@ -45,23 +45,23 @@ Future<void> showQuickStart(BuildContext context, WidgetRef ref) async {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const Padding(padding: EdgeInsets.fromLTRB(8, 0, 8, 8), child: Text('Snel starten', style: RwText.title)),
+          Padding(padding: EdgeInsets.fromLTRB(8, 0, 8, 8), child: Text('Snel starten', style: RwText.title)),
           if (session != null)
             ListTile(
-              leading: const TileIcon(Icons.event_available_outlined, color: RwColors.accent),
+              leading: TileIcon(Icons.event_available_outlined, color: RwColors.accent),
               title: Text(session.title),
               subtitle: const Text('Je training van vandaag, met de juiste tempo\'s'),
               onTap: () => Navigator.pop(c, 'session'),
             ),
           if (route != null)
             ListTile(
-              leading: const TileIcon(Icons.route_outlined, color: RwColors.accent),
+              leading: TileIcon(Icons.route_outlined, color: RwColors.accent),
               title: Text('Je vaste rondje: ${route.name}'),
               subtitle: Text('${Fmt.km(route.distanceMeters, decimals: 1)} · met route en tegen je record'),
               onTap: () => Navigator.pop(c, 'route'),
             ),
           ListTile(
-            leading: const TileIcon(Icons.terrain_outlined, color: RwColors.good),
+            leading: TileIcon(Icons.terrain_outlined, color: RwColors.good),
             title: const Text('Buiten lopen'),
             subtitle: const Text('Gewoon gaan, met GPS'),
             onTap: () => Navigator.pop(c, 'out'),

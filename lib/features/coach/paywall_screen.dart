@@ -110,13 +110,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, height: 1.05),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Je eigen AI-hardloopcoach',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: RwColors.text),
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Kent je runs, je wedstrijden en het weer. Vraag wat je deze week moet lopen, '
             'hoe je je 10 km aanpakt of wat je aantrekt bij 3 graden en regen.',
             textAlign: TextAlign.center,
@@ -133,7 +133,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           const _GoldRule(),
           const SizedBox(height: 22),
           if (!billing.isAvailable)
-            const RwCard(
+            RwCard(
               child: Text(
                 'Abonnementen zijn binnenkort beschikbaar. Zodra de app in de Play Store staat, '
                 'kun je hier je gratis proefmaand starten.',
@@ -152,7 +152,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
               data: (list) {
                 if (list.isEmpty) {
-                  return const RwCard(
+                  return RwCard(
                     child: Text('Er zijn nu geen abonnementen beschikbaar. Probeer het later opnieuw.',
                         style: TextStyle(color: RwColors.muted)),
                   );
@@ -186,7 +186,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           : '${selected.price} per ${selected.isYearly ? 'jaar' : 'maand'}, automatisch verlengd. '
                               'Opzeggen kan altijd in Google Play.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),
+                      style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),
                     ),
                   ],
                 );

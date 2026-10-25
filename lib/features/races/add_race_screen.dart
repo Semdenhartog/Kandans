@@ -142,7 +142,7 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
                   ActionChip(
                     label: Text(e.key),
                     backgroundColor: RwColors.surfaceHigh,
-                    side: const BorderSide(color: RwColors.border),
+                    side: BorderSide(color: RwColors.border),
                     onPressed: () => setState(() =>
                         _distance.text = (e.value / 1000).toString().replaceAll('.', ',')),
                   ),
@@ -181,7 +181,7 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
               onChanged: (v) => setState(() => _routeId = v),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Tip: importeer het parcours als GPX bij Routes. Dan houdt de voorspelling rekening met de wind op het parcours.',
               style: TextStyle(color: RwColors.subtle, fontSize: 13),
             ),

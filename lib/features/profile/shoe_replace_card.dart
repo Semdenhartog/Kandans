@@ -122,10 +122,10 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           border: Border.all(color: _gold.withValues(alpha: 0.55)),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF241B0C), Color(0xFF15120D), RwColors.surface],
+            colors: RwColors.isDark ? [const Color(0xFF241B0C), const Color(0xFF15120D), RwColors.surface] : [const Color(0xFFF0E2C2), const Color(0xFFF5ECDB), RwColors.surface],
           ),
           boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.12), blurRadius: 24, spreadRadius: -6)],
         ),
@@ -150,7 +150,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
                           style: const TextStyle(fontFamily: RwFonts.display, fontSize: 22, fontWeight: FontWeight.w800, height: 1.1)),
                       const SizedBox(height: 2),
                       Text('${pick.km.round()} van ${s.limitKm} km',
-                          style: const TextStyle(color: RwColors.muted, fontFeatures: rwTnum)),
+                          style: TextStyle(color: RwColors.muted, fontFeatures: rwTnum)),
                     ],
                   ),
                 ),
@@ -162,7 +162,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
                   ? 'Na zo\'n ${s.limitKm} km nemen demping en grip merkbaar af. Een nieuw paar loopt prettiger en helpt blessures voorkomen.'
                   : 'Na zo\'n ${s.limitKm} km nemen demping en grip merkbaar af. Laat je bij ${shop.name} adviseren: '
                       'neem je oude paar mee, dan zien ze hoe je loopt.',
-              style: const TextStyle(color: RwColors.muted, height: 1.45),
+              style: TextStyle(color: RwColors.muted, height: 1.45),
             ),
             const SizedBox(height: 14),
             FilledButton.icon(
@@ -184,12 +184,12 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
                 if (widget.respectSnooze)
                   TextButton(
                     onPressed: () => _later(s),
-                    child: const Text('Later', style: TextStyle(color: RwColors.subtle)),
+                    child: Text('Later', style: TextStyle(color: RwColors.subtle)),
                   ),
               ],
             ),
             if (shop.isPartner)
-              const Text(
+              Text(
                 'Partnerlink: Kadans krijgt een kleine vergoeding als je iets koopt. Jij betaalt niets extra.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: RwColors.subtle, fontSize: 11),

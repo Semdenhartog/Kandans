@@ -103,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           if (_locationResult != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Text(_locationResult!, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.good)),
+              child: Text(_locationResult!, textAlign: TextAlign.center, style: TextStyle(color: RwColors.good)),
             ),
           FilledButton.icon(
             onPressed: _asking || _locationResult != null ? null : _askLocation,
@@ -279,7 +279,7 @@ class _Page extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 32, fontWeight: FontWeight.w800, height: 1.1)),
                   const SizedBox(height: 16),
-                  Text(text, textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted, fontSize: 16, height: 1.5)),
+                  Text(text, textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16, height: 1.5)),
                   const Spacer(flex: 2),
                   const SizedBox(height: 24),
                   ...children,

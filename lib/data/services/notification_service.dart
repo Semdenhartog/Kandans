@@ -55,7 +55,7 @@ class NotificationService {
       channelDescription: 'Elke dag je beste vertrektijd voor een run',
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
-      color: Color(0xFFFD8A26),
+      color: Color(0xFF7A5A34),
     ),
   );
 
@@ -92,7 +92,7 @@ class NotificationService {
             playSound: false,
             enableVibration: false,
             visibility: NotificationVisibility.public,
-            color: const Color(0xFFFD8A26),
+            color: const Color(0xFF7A5A34),
             colorized: true,
             actions: [
               paused
@@ -152,7 +152,7 @@ class NotificationService {
             onlyAlertOnce: false,
             playSound: false,
             visibility: NotificationVisibility.public,
-            color: Color(0xFFFD8A26),
+            color: Color(0xFF7A5A34),
           ),
         ),
       );
@@ -376,7 +376,7 @@ class NotificationService {
             'Weekoverzicht',
             channelDescription: 'Elke maandag je week in het kort',
             importance: Importance.defaultImportance,
-            color: Color(0xFFFD8A26),
+            color: Color(0xFF7A5A34),
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

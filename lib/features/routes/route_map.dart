@@ -55,6 +55,23 @@ const _darkMap = ColorFilter.matrix(<double>[
   0, 0, 0, 1, 0,
 ]);
 
+/// Overdag (Zand): de grijze kaart een tikje warm, zodat hij bij het zand past.
+const _sandMap = ColorFilter.matrix(<double>[
+  0.94, 0, 0, 0, 10, //
+  0, 0.91, 0, 0, 9, //
+  0, 0, 0.84, 0, 8, //
+  0, 0, 0, 1, 0,
+]);
+
+/// Kaartkleur bij de huidige weergave.
+ColorFilter mapFilter({bool photo = false}) => photo ? _dimPhoto : (RwColors.isDark ? _darkMap : _sandMap);
+
+/// Ondergrond terwijl de kaart laadt.
+Color get mapBackground => RwColors.isDark ? const Color(0xFF17171A) : const Color(0xFFE4DCCD);
+
+/// Rand om de routelijn, zodat hij loskomt van de kaart.
+Color get routeHalo => RwColors.isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9);
+
 /// Luchtfoto iets donkerder en minder fel, zodat de route leesbaar blijft.
 const _dimPhoto = ColorFilter.matrix(<double>[
   0.74, 0.04, 0.02, 0, 0, //
@@ -208,7 +225,7 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
       return Container(
         decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(widget.borderRadius)),
         alignment: Alignment.center,
-        child: const Text('Geen route om te tonen', style: TextStyle(color: RwColors.subtle)),
+        child: Text('Geen route om te tonen', style: TextStyle(color: RwColors.subtle)),
       );
     }
     final km = (_track.length / 1000).toStringAsFixed(1).replaceAll('.', ',');
@@ -248,7 +265,7 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                 padding: EdgeInsets.fromLTRB(32, 32 + pad.top, 32, 40 + pad.bottom),
                 maxZoom: 17,
               ),
-              backgroundColor: photo ? const Color(0xFF1B1D1A) : const Color(0xFF17171A),
+              backgroundColor: photo ? const Color(0xFF1B1D1A) : mapBackground,
               minZoom: 6,
               maxZoom: 19,
               interactionOptions: InteractionOptions(
@@ -262,19 +279,19 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                 userAgentPackageName: 'nl.runwise.app',
                 maxNativeZoom: 19,
                 tileProvider: _tiles,
-                tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: photo ? _dimPhoto : _darkMap, child: tile),
+                tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: mapFilter(photo: photo), child: tile),
               ),
               if (_drawProgress case final t?) ...[
                 // Intekenen: de route groeit van start naar finish, met een gloeiende kop.
                 PolylineLayer(polylines: [
                   if (_partial(t).length >= 2) ...[
                     Polyline(points: _partial(t), strokeWidth: line + 10, color: RwColors.accent.withValues(alpha: 0.22)),
-                    Polyline(points: _partial(t), strokeWidth: line + 3.5, color: Colors.black.withValues(alpha: 0.8)),
+                    Polyline(points: _partial(t), strokeWidth: line + 3.5, color: routeHalo),
                     Polyline(points: _partial(t), strokeWidth: line, color: RwColors.accent),
                   ],
                 ]),
                 MarkerLayer(markers: [
-                  Marker(point: _pts.first, width: 30, height: 30, child: const _Pin(icon: Icons.flag, color: RwColors.accent)),
+                  Marker(point: _pts.first, width: 30, height: 30, child: _Pin(icon: Icons.flag, color: RwColors.accent)),
                   Marker(
                     point: _partial(t).last,
                     width: 26,
@@ -299,7 +316,7 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                     color: (photo ? Colors.white : RwColors.accent).withValues(alpha: photo ? 0.16 : 0.22),
                   ),
                   // Donkere rand, zodat de route op elke ondergrond leesbaar is.
-                  Polyline(points: _pts, strokeWidth: line + 3.5, color: Colors.black.withValues(alpha: 0.8)),
+                  Polyline(points: _pts, strokeWidth: line + 3.5, color: routeHalo),
                   for (final s in _segments)
                     Polyline(points: [for (final p in s.points) _ll(p)], strokeWidth: line, color: windColor(s.windClass)),
                 ],
@@ -318,7 +335,7 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                   for (final p in widget.pois)
                     Marker(point: _ll(p.point), width: 26, height: 26, child: PoiIcon(p.kind)),
                   if (separateFinish)
-                    Marker(point: _ll(finish), width: 30, height: 30, child: const _Pin(icon: Icons.sports_score, color: RwColors.text)),
+                    Marker(point: _ll(finish), width: 30, height: 30, child: _Pin(icon: Icons.sports_score, color: RwColors.text)),
                   Marker(
                     point: _ll(start),
                     width: 32,
@@ -447,7 +464,7 @@ class _KmBadge extends StatelessWidget {
         ),
         child: Text(
           '$km',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: RwFonts.display, fontFeatures: rwTnum,
             fontWeight: FontWeight.w800,
             fontSize: 11,
@@ -500,7 +517,7 @@ class _RoundButton extends StatelessWidget {
         message: tooltip,
         child: Material(
           color: RwColors.background.withValues(alpha: 0.88),
-          shape: const CircleBorder(side: BorderSide(color: RwColors.border)),
+          shape: CircleBorder(side: BorderSide(color: RwColors.border)),
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: onTap,
@@ -585,12 +602,12 @@ class _WindBadge extends StatelessWidget {
           children: [
             Transform.rotate(
               angle: (fromDegrees + 180) * math.pi / 180,
-              child: const Icon(Icons.navigation, size: 16, color: RwColors.text),
+              child: Icon(Icons.navigation, size: 16, color: RwColors.text),
             ),
             const SizedBox(width: 5),
             Text(
               compact ? '${speed.round()}' : '${speed.round()} km/u ${Fmt.compass(fromDegrees)}',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: RwColors.text),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: RwColors.text),
             ),
           ],
         ),
@@ -609,7 +626,7 @@ class _Legend extends StatelessWidget {
           children: [
             Container(width: 14, height: 4, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(2))),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 10.5, color: RwColors.text, fontWeight: FontWeight.w600)),
+            Text(label, style: TextStyle(fontSize: 10.5, color: RwColors.text, fontWeight: FontWeight.w600)),
           ],
         );
 
@@ -748,7 +765,7 @@ Widget _baseTiles(bool photo) => TileLayer(
       userAgentPackageName: 'nl.runwise.app',
       maxNativeZoom: 19,
       tileProvider: _tiles,
-      tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: photo ? _dimPhoto : _darkMap, child: tile),
+      tileBuilder: (context, tile, _) => ColorFiltered(colorFilter: mapFilter(photo: photo), child: tile),
     );
 
 Widget _attribution(bool photo) => Positioned(
@@ -861,7 +878,7 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                       ? (widget.planned.isNotEmpty ? _ll(widget.planned.first) : const ll.LatLng(52.15, 5.4))
                       : _ll(pos),
                   initialZoom: pos == null ? 7 : 16,
-                  backgroundColor: const Color(0xFF17171A),
+                  backgroundColor: mapBackground,
                   interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
                   onMapReady: () => _ready = true,
                   onPositionChanged: (_, hasGesture) {
@@ -876,11 +893,11 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                     ]),
                   if (pts.length >= 2)
                     PolylineLayer(polylines: [
-                      Polyline(points: pts, strokeWidth: 9, color: Colors.black.withValues(alpha: 0.8)),
+                      Polyline(points: pts, strokeWidth: 9, color: routeHalo),
                       Polyline(points: pts, strokeWidth: 5.5, color: RwColors.accent),
                     ]),
                   MarkerLayer(markers: [
-                    if (pts.isNotEmpty) Marker(point: pts.first, width: 28, height: 28, child: const _Pin(icon: Icons.flag, color: RwColors.accent)),
+                    if (pts.isNotEmpty) Marker(point: pts.first, width: 28, height: 28, child: _Pin(icon: Icons.flag, color: RwColors.accent)),
                     if (pos != null && !_headingUp) Marker(point: _ll(pos), width: 22, height: 22, child: _dot(const Color(0xFF4C8DFF))),
                     if (pos != null && _headingUp)
                       Marker(
@@ -966,7 +983,7 @@ class DrawRouteMap extends StatelessWidget {
                 initialZoom: 15,
                 minZoom: 6,
                 maxZoom: 19,
-                backgroundColor: const Color(0xFF17171A),
+                backgroundColor: mapBackground,
                 interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
                 onTap: (_, p) => onTap(LatLng(p.latitude, p.longitude)),
               ),
@@ -981,7 +998,7 @@ class DrawRouteMap extends StatelessWidget {
                       pattern: StrokePattern.dashed(segments: const [10, 8]),
                     ),
                   if (line.length >= 2) ...[
-                    Polyline(points: line, strokeWidth: 9, color: Colors.black.withValues(alpha: 0.8)),
+                    Polyline(points: line, strokeWidth: 9, color: routeHalo),
                     Polyline(points: line, strokeWidth: 5.5, color: RwColors.accent),
                   ],
                 ]),
@@ -994,7 +1011,7 @@ class DrawRouteMap extends StatelessWidget {
                       child: GestureDetector(
                         onLongPress: onMoveTap == null ? null : () => onMoveTap!(i),
                         child: i == 0
-                            ? const _Pin(icon: Icons.flag, color: RwColors.accent)
+                            ? _Pin(icon: Icons.flag, color: RwColors.accent)
                             : Container(
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(

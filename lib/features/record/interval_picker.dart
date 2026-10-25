@@ -81,7 +81,7 @@ class _PickerSheetState extends State<_PickerSheet> {
             children: [
               const Text('Soort training', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Bij intervallen zegt de stem wanneer je snel moet en wanneer je mag herstellen, ook met je scherm uit.',
                 style: TextStyle(color: RwColors.muted, height: 1.4),
               ),
@@ -89,20 +89,20 @@ class _PickerSheetState extends State<_PickerSheet> {
               if (!_custom) ...[
                 Card(
                   child: ListTile(
-                    leading: const Icon(Icons.directions_run, color: RwColors.accent),
+                    leading: Icon(Icons.directions_run, color: RwColors.accent),
                     title: const Text('Gewone run'),
                     subtitle: const Text('Zonder intervallen'),
-                    trailing: widget.current == null ? const Icon(Icons.check, color: RwColors.accent) : null,
+                    trailing: widget.current == null ? Icon(Icons.check, color: RwColors.accent) : null,
                     onTap: () => Navigator.pop(context, (plan: null)),
                   ),
                 ),
                 for (final p in IntervalPlan.presets)
                   Card(
                     child: ListTile(
-                      leading: const Icon(Icons.timer_outlined, color: RwColors.accent),
+                      leading: Icon(Icons.timer_outlined, color: RwColors.accent),
                       title: Text(p.name),
                       subtitle: Text(_summary(p)),
-                      trailing: widget.current?.name == p.name ? const Icon(Icons.check, color: RwColors.accent) : null,
+                      trailing: widget.current?.name == p.name ? Icon(Icons.check, color: RwColors.accent) : null,
                       onTap: () => Navigator.pop(context, (plan: p)),
                     ),
                   ),
@@ -142,7 +142,7 @@ class _PickerSheetState extends State<_PickerSheet> {
                 _stepper('Uitlopen', '$_cooldown min', _cooldown > 0 ? () => setState(() => _cooldown--) : null,
                     _cooldown < 30 ? () => setState(() => _cooldown++) : null),
                 const SizedBox(height: 8),
-                Text('${_built.name} · ${_summary(_built)}', style: const TextStyle(color: RwColors.muted)),
+                Text('${_built.name} · ${_summary(_built)}', style: TextStyle(color: RwColors.muted)),
                 const SizedBox(height: 12),
                 Row(
                   children: [

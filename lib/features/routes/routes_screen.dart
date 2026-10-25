@@ -115,7 +115,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
         if (shown != total)
           Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: Text('$shown van $total routes', style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
+            child: Text('$shown van $total routes', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ),
       ],
     );
@@ -256,7 +256,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             itemBuilder: (context, index) {
               if (withFilters && index == 0) return _filters(list.length, shown.length);
               if (shown.isEmpty) {
-                return const Padding(
+                return Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
                   child: Text('Geen routes gevonden. Pas je zoekopdracht of filter aan.',
                       textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
@@ -278,7 +278,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                           Row(
                             children: [
                               if (r.isFavorite)
-                                const Padding(
+                                Padding(
                                   padding: EdgeInsets.only(right: 6),
                                   child: Icon(Icons.star, size: 16, color: RwColors.accent),
                                 ),
@@ -298,7 +298,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                               if (r.elevationGainMeters != null) '${r.elevationGainMeters!.round()} hm',
                               r.sourceLabel,
                             ].join(' · '),
-                            style: const TextStyle(color: RwColors.subtle),
+                            style: TextStyle(color: RwColors.subtle),
                           ),
                           if (r.profileOrKmPoints.length >= 3) ...[
                             const SizedBox(height: 6),
@@ -316,14 +316,14 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                               ),
                               child: Text(
                                 'Beste moment ${Fmt.time(bests[r.id]!.start)} · ${bests[r.id]!.score}',
-                                style: const TextStyle(color: RwColors.accentLight, fontSize: 12, fontWeight: FontWeight.w700),
+                                style: TextStyle(color: RwColors.accentLight, fontSize: 12, fontWeight: FontWeight.w700),
                               ),
                             ),
                           ],
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, color: RwColors.subtle),
+                    Icon(Icons.chevron_right, color: RwColors.subtle),
                   ],
                 ),
               );

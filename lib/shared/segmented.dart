@@ -27,7 +27,7 @@ class RwSegmented<T> extends StatelessWidget {
         decoration: BoxDecoration(
           color: RwColors.surfaceHigh,
           borderRadius: BorderRadius.circular(h),
-          border: Border.all(color: const Color(0x14FFFFFF)),
+          border: Border.all(color: RwColors.hairline),
         ),
         child: Stack(children: [
           AnimatedPositioned(
@@ -40,7 +40,7 @@ class RwSegmented<T> extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(h),
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],

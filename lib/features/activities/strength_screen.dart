@@ -35,7 +35,7 @@ class StrengthScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
+            Text(
               'Twee keer per week kracht maakt je sneller en minder blessuregevoelig. Geen materiaal nodig; '
               'de stem telt mee, dus je hoeft niet op je scherm te kijken.',
               style: TextStyle(color: RwColors.muted, height: 1.45),
@@ -55,13 +55,13 @@ class StrengthScreen extends StatelessWidget {
                     title: Text(r.title),
                     subtitle: Text('${(r.totalSeconds / 60).round()} min · ${r.exercises.length} oefeningen\n${r.subtitle}'),
                     isThreeLine: true,
-                    trailing: const Icon(Icons.play_circle_outline, color: RwColors.accent, size: 32),
+                    trailing: Icon(Icons.play_circle_outline, color: RwColors.accent, size: 32),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RoutinePlayerScreen(routine: r))),
                   ),
                 ),
               )),
             const SizedBox(height: 8),
-            const Text('Pijn bij een oefening? Stop ermee. Twijfel je, vraag een fysiotherapeut.',
+            Text('Pijn bij een oefening? Stop ermee. Twijfel je, vraag een fysiotherapeut.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
         ),
@@ -163,15 +163,15 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                 ),
               ),
               const SizedBox(height: 6),
-              Text(_p.finished ? 'Klaar' : 'Oefening ${_p.index + 1} van ${_p.count}', style: const TextStyle(color: RwColors.subtle)),
+              Text(_p.finished ? 'Klaar' : 'Oefening ${_p.index + 1} van ${_p.count}', style: TextStyle(color: RwColors.subtle)),
               const Spacer(),
               if (c == null) ...[
-                const Icon(Icons.check_circle, color: RwColors.good, size: 72),
+                Icon(Icons.check_circle, color: RwColors.good, size: 72),
                 const SizedBox(height: 12),
                 const Text('Goed gedaan!',
                     textAlign: TextAlign.center, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 32, fontWeight: FontWeight.w800)),
                 Text('${(widget.routine.totalSeconds / 60).round()} minuten ${widget.routine.title.toLowerCase()}.',
-                    textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted)),
+                    textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted)),
               ] else ...[
                 Text(_p.resting ? 'PAUZE' : (c.side == null ? 'NU' : 'NU · ${c.side!.toUpperCase()}'),
                     textAlign: TextAlign.center,
@@ -196,13 +196,13 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(_p.resting ? (n?.how ?? '') : c.how,
-                    textAlign: TextAlign.center, style: const TextStyle(color: RwColors.muted, height: 1.45, fontSize: 16)),
+                    textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, height: 1.45, fontSize: 16)),
               ],
               const Spacer(),
               if (!_p.finished) ...[
                 if (!_p.resting && n != null)
                   Text('Daarna: ${n.name}${n.side == null ? '' : ' (${n.side})'}',
-                      textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle)),
+                      textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle)),
                 const SizedBox(height: 12),
                 Row(children: [
                   Expanded(
@@ -236,7 +236,7 @@ class CooldownTip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RwCard(
         onTap: () => openStrength(context, routineId: 'cooldown'),
-        child: const Row(children: [
+        child: Row(children: [
           Icon(Icons.self_improvement, color: RwColors.accent, size: 28),
           SizedBox(width: 12),
           Expanded(
@@ -290,7 +290,7 @@ class _CountdownPainter extends CustomPainter {
     canvas.drawCircle(c, r, Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
-      ..color = Colors.white.withValues(alpha: 0.06));
+      ..color = RwColors.text.withValues(alpha: 0.06));
     if (f <= 0.001) return;
     const start = -1.5707963;
     final sweep = 6.2831853 * f;
