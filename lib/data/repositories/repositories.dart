@@ -466,8 +466,9 @@ class RunWiseRepository {
 
   /// Ondergrond langs een route (asfalt, klinkers, halfverhard, onverhard), in meters per soort.
   /// Eenmaal opgehaald wordt het op de telefoon bewaard (een route verandert niet).
+  /// Sleutel '_geschat' = meters die geschat zijn uit het soort weg (straat, fietspad, bospad).
   Future<Map<String, double>> routeSurface(String routeId, String polyline) async {
-    final key = 'surface_${routeId}_${polyline.length}';
+    final key = 'surface2_${routeId}_${polyline.length}';
     Map<String, double> decode(Object? d) => {for (final e in (d as Map).entries) e.key.toString(): (e.value as num).toDouble()};
     final cached = await OfflineCache.load(key);
     if (cached != null) return decode(cached.data);
@@ -487,6 +488,8 @@ class RunWiseRepository {
       final out = {
         for (final e in list.cast<Map>()) e['type'].toString(): (e['meters'] as num).toDouble(),
       };
+      final guessed = list.cast<Map>().fold<double>(0, (a, e) => a + ((e['guessed'] as num?)?.toDouble() ?? 0));
+      if (guessed > 0) out['_geschat'] = guessed;
       if (out.isNotEmpty) await OfflineCache.save(key, out);
       return out;
     } on FunctionException catch (e) {

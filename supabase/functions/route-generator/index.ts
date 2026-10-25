@@ -1,4 +1,5 @@
 import { checkQuota } from "../_shared/quota.ts";
+import { decodePolyline, inferSurface } from "../_shared/surface.ts";
 // Edge Function: route-generator
 // Maakt rondjes van een gewenste lengte vanaf een startpunt, via openrouteservice
 // (gratis, op basis van OpenStreetMap). De app kiest daarna het rondje met de beste wind.
@@ -6,7 +7,8 @@ import { checkQuota } from "../_shared/quota.ts";
 //   POST { lat, lon, distance_m, count? }  ->  { routes: [{ coordinates: [[lon,lat,ele]], distance_m, ascent_m }] }
 //   POST { mode: "path", points: [[lat,lon], ...] }  ->  { route: { coordinates, distance_m, ascent_m } }
 //        (zelf getekende route: volgt paden en wegen langs de punten die je tikt)
-//   POST { mode: "surface", points: [[lat,lon], ...] }  ->  { surface: [{ type, meters }] }
+//   POST { mode: "surface", points: [[lat,lon], ...] }  ->  { surface: [{ type, meters, guessed }] }
+//     guessed = meters die geschat zijn uit het soort weg (straat, fietspad, bospad) of uit de buren
 //        (ondergrond langs een route: asfalt, klinkers, halfverhard, onverhard)
 //
 // Geheim (Supabase -> Edge Functions -> Secrets): ORS_API_KEY
@@ -82,14 +84,6 @@ async function path(key: string, points: number[][]) {
 }
 
 // openrouteservice-ondergrondcodes -> onze groepen.
-const SURFACE: Record<number, string> = {
-  1: "verhard", 3: "verhard", 4: "verhard", 6: "verhard",
-  5: "klinkers", 14: "klinkers", 18: "klinkers",
-  8: "halfverhard", 9: "halfverhard", 10: "halfverhard",
-  2: "onverhard", 11: "onverhard", 12: "onverhard", 15: "onverhard", 16: "onverhard", 17: "onverhard", 7: "onverhard",
-  0: "onbekend", 13: "onbekend",
-};
-
 async function surface(key: string, points: number[][]) {
   const res = await fetch("https://api.openrouteservice.org/v2/directions/foot-walking/json", {
     method: "POST",
@@ -97,8 +91,8 @@ async function surface(key: string, points: number[][]) {
     body: JSON.stringify({
       coordinates: points.map(([lat, lon]) => [lon, lat]),
       instructions: false,
-      geometry: false,
-      extra_info: ["surface"],
+      geometry: true,
+      extra_info: ["surface", "waytype"],
       radiuses: points.map(() => 100),
     }),
     signal: AbortSignal.timeout(20_000),
@@ -109,13 +103,11 @@ async function surface(key: string, points: number[][]) {
     return null;
   }
   const data = await res.json();
-  const summary = (data.routes?.[0]?.extras?.surface?.summary ?? []) as { value: number; distance: number }[];
-  const out = new Map<string, number>();
-  for (const s of summary) {
-    const t = SURFACE[s.value] ?? "onbekend";
-    out.set(t, (out.get(t) ?? 0) + Number(s.distance));
-  }
-  return [...out.entries()].map(([type, meters]) => ({ type, meters: Math.round(meters) }));
+  const route = data.routes?.[0];
+  const geometry = typeof route?.geometry === "string" ? decodePolyline(route.geometry) : [];
+  const surf = (route?.extras?.surface?.values ?? []) as [number, number, number][];
+  const way = (route?.extras?.waytype?.values ?? []) as [number, number, number][];
+  return inferSurface(geometry, surf, way);
 }
 
 function readKey(): string {

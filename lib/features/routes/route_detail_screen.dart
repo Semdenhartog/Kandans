@@ -695,7 +695,8 @@ class _SurfaceCard extends ConsumerWidget {
         loading: () => Text('Ondergrond wordt geladen…', style: TextStyle(color: RwColors.muted)),
         error: (_, _) => Text('Ondergrond is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted)),
         data: (m) {
-          final total = m.values.fold<double>(0, (a, b) => a + b);
+          final total = m.entries.where((e) => !e.key.startsWith('_')).fold<double>(0, (a, e) => a + e.value);
+          final guessedPct = total <= 0 ? 0 : ((m['_geschat'] ?? 0) / total * 100).round();
           if (total <= 0) return Text('Geen gegevens over de ondergrond voor deze route.', style: TextStyle(color: RwColors.muted));
           final types = [for (final t in _order) if ((m[t] ?? 0) > 0) t];
           return Column(
@@ -723,7 +724,12 @@ class _SurfaceCard extends ConsumerWidget {
                   ]),
                 ),
               const SizedBox(height: 4),
-              Text('Bron: OpenStreetMap via openrouteservice. Niet overal is de ondergrond bekend.',
+              if (guessedPct > 0)
+                Text('Waarvan $guessedPct% geschat: waar de kaart geen ondergrond noemt, kijkt Kadans naar het soort weg '
+                    '(straat en fietspad = verhard, stoep = tegels, bosweg = halfverhard, pad = onverhard).',
+                    style: TextStyle(color: RwColors.muted, fontSize: 12, height: 1.35)),
+              const SizedBox(height: 2),
+              Text('Bron: OpenStreetMap via openrouteservice.',
                   style: TextStyle(color: RwColors.subtle, fontSize: 11)),
             ],
           );
