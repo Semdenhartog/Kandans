@@ -64,7 +64,7 @@ class CueSettings {
   /// Vergelijken met het vorige stuk ("6 seconden sneller dan de vorige").
   final bool compare;
 
-  /// Verwachte eindtijd noemen als RunWise weet hoe ver je nog moet (route of heen-en-terug).
+  /// Verwachte eindtijd noemen als Kadans weet hoe ver je nog moet (route of heen-en-terug).
   final bool finish;
 
   /// Herinneringen om te drinken en (bij lange runs) een gel te nemen.
@@ -266,7 +266,7 @@ class RecordHunt {
   }
 }
 
-/// Heen en terug op tijd: halverwege zegt RunWise "draai om".
+/// Heen en terug op tijd: halverwege zegt Kadans "draai om".
 class Turnaround {
   Turnaround(this.totalSeconds);
   final double totalSeconds;
@@ -404,9 +404,9 @@ class WayToRoute {
 
 /// Route volgen tijdens het lopen: waar ben je op de route en ben je ervan af?
 ///
-/// - Je mag overal op de route beginnen: RunWise pakt de route op waar je erop komt.
+/// - Je mag overal op de route beginnen: Kadans pakt de route op waar je erop komt.
 ///   Bij een rondje draait de route mee, zodat je toch het hele rondje loopt.
-/// - Sta je nog niet op de route, of ben je eraf, dan zegt RunWise welke kant je op moet.
+/// - Sta je nog niet op de route, of ben je eraf, dan zegt Kadans welke kant je op moet.
 class RouteFollower {
   RouteFollower(RouteTrack track, {this.offAfter = 45, this.backWithin = 25, this.repeatSeconds = 30})
       : _track = track,

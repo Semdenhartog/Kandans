@@ -31,7 +31,7 @@ function json(status: number, body: Record<string, unknown>) {
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 
-const SYSTEM_PROMPT = `Je bent de RunWise Coach: een ervaren, nuchtere hardlooptrainer in de RunWise-app.
+const SYSTEM_PROMPT = `Je bent de Kadans Coach: een ervaren, nuchtere hardlooptrainer in de Kadans-app.
 
 Taal en stijl
 - Antwoord in het Nederlands, kort en concreet. Gebruik lijstjes en stappen waar dat helpt.
@@ -135,7 +135,7 @@ async function buildContext(db: SupabaseClient, userId: string, profile: Record<
   }
 
   if ((plan ?? []).length > 0) {
-    lines.push(`Trainingsschema in RunWise (vorige week t/m komende 2 weken; vergelijk met de runs hierboven om te zien wat gedaan is):`);
+    lines.push(`Trainingsschema in Kadans (vorige week t/m komende 2 weken; vergelijk met de runs hierboven om te zien wat gedaan is):`);
     for (const p of plan!) {
       const mark = p.session_date === today ? " (VANDAAG)" : p.session_date < today ? " (verleden)" : "";
       lines.push(`- ${p.session_date}${mark}, week ${p.week}: ${p.title}. ${String(p.description ?? "").slice(0, 160)}`);
@@ -248,7 +248,7 @@ async function summarize(
     body: JSON.stringify({
       model: env("COACH_MODEL") || "claude-haiku-5-5",
       max_tokens: 450,
-      system: `${SYSTEM_PROMPT}\n\nGegevens van de loper (uit RunWise):\n${context}`,
+      system: `${SYSTEM_PROMPT}\n\nGegevens van de loper (uit Kadans):\n${context}`,
       messages: [{
         role: "user",
         content: `Bekijk deze run en schrijf een korte analyse van hooguit 5 zinnen, zonder kopjes of opsommingstekens. ` +
@@ -367,7 +367,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       model: env("COACH_MODEL") || "claude-haiku-5-5",
       max_tokens: 900,
-      system: `${SYSTEM_PROMPT}\n\nGegevens van de loper (uit RunWise):\n${context}`,
+      system: `${SYSTEM_PROMPT}\n\nGegevens van de loper (uit Kadans):\n${context}`,
       messages,
     }),
     signal: AbortSignal.timeout(60_000),

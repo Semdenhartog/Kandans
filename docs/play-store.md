@@ -1,6 +1,6 @@
 # Play Store – klaar om te plakken
 
-Alles wat Google vraagt voordat RunWise in de Play Store mag. Gemaakt uit de echte rechten
+Alles wat Google vraagt voordat Kadans in de Play Store mag. Gemaakt uit de echte rechten
 en diensten in de code (22-10-2026). Klopt er iets niet meer na een wijziging, pas dit bestand dan ook aan.
 
 ## 0. Volgorde
@@ -22,7 +22,7 @@ Play Console → App-content → **Voorgrondservicerechten** → `FOREGROUND_SER
 **Taak:** Gebruiker gestarte activiteit (fitness/hardlopen).
 
 **Beschrijving (plakken):**
-> RunWise neemt een hardloopronde op die de gebruiker zelf start met de knop "Start run". Tijdens de opname
+> Kadans neemt een hardloopronde op die de gebruiker zelf start met de knop "Start run". Tijdens de opname
 > gebruikt de app GPS om afstand, tempo, kilometertijden en de route te meten. De gebruiker legt de telefoon
 > meestal in een zak of armband met het scherm uit; daarom draait de opname als voorgrondservice met een
 > zichtbare, doorlopende melding ("Run bezig"). De service stopt zodra de gebruiker de run afrondt of pauzeert
@@ -84,10 +84,10 @@ Play Console → App-content → **Health Connect**. Per recht een reden:
 
 | Recht | Reden (plakken) |
 |---|---|
-| READ_EXERCISE, READ_DISTANCE | Runs van je horloge (Garmin, Fitbit, Samsung …) automatisch in RunWise zetten. |
+| READ_EXERCISE, READ_DISTANCE | Runs van je horloge (Garmin, Fitbit, Samsung …) automatisch in Kadans zetten. |
 | READ_HEART_RATE | Gemiddelde hartslag bij een run tonen en hartslagzones berekenen. |
 | READ_RESTING_HEART_RATE, READ_HEART_RATE_VARIABILITY, READ_SLEEP | Dagelijkse klaar-score: is vandaag geschikt voor een zware of lichte training. |
-| WRITE_EXERCISE, WRITE_DISTANCE, WRITE_TOTAL_CALORIES_BURNED | In RunWise opgenomen runs terugschrijven, zodat andere apps ze zien (alleen als de gebruiker dit aanzet). |
+| WRITE_EXERCISE, WRITE_DISTANCE, WRITE_TOTAL_CALORIES_BURNED | In Kadans opgenomen runs terugschrijven, zodat andere apps ze zien (alleen als de gebruiker dit aanzet). |
 
 De privacyverklaring moet een kopje over Health Connect bevatten: welke gegevens, waarvoor, en dat ze niet
 worden verkocht of voor advertenties gebruikt. Controleer dit in site/privacy.html.

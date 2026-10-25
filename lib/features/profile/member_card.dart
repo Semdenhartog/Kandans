@@ -129,7 +129,7 @@ class _MemberCardState extends State<MemberCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
-                        Text('RUNWISE',
+                        Text('KADANS',
                             style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, letterSpacing: 3.2, fontSize: 13, color: gold ? ink : RwColors.accent)),
                         const Spacer(),
                         Text(gold ? 'PREMIUM' : 'MEMBER',

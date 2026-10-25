@@ -21,7 +21,7 @@ class RecordsScreen extends ConsumerWidget {
           ? const EmptyState(
               icon: Icons.emoji_events_outlined,
               title: 'Nog geen records',
-              message: 'Loop een run van 5 km of meer. RunWise houdt dan je snelste tijden bij, ook gecorrigeerd voor het weer.',
+              message: 'Loop een run van 5 km of meer. Kadans houdt dan je snelste tijden bij, ook gecorrigeerd voor het weer.',
             )
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),

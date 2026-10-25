@@ -74,7 +74,7 @@ class _HeatmapScreenState extends ConsumerState<HeatmapScreen> {
           ? EmptyState(
               icon: Icons.map_outlined,
               title: 'Nog geen sporen',
-              message: 'Runs met een GPS-spoor (opgenomen in RunWise, uit Strava of geïmporteerd) verschijnen hier samen op één kaart.',
+              message: 'Runs met een GPS-spoor (opgenomen in Kadans, uit Strava of geïmporteerd) verschijnen hier samen op één kaart.',
             )
           : ValueListenableBuilder<MapLayer>(
               valueListenable: mapLayerNotifier,
@@ -392,7 +392,7 @@ class _RecapCard extends StatelessWidget {
           Row(children: [
             Image.asset('assets/logo/mark.png', height: 18),
             const SizedBox(width: 8),
-            Image.asset('assets/logo/wordmark.png', height: 12),
+            Image.asset('assets/logo/wordmark.png', height: 9),
             const Spacer(),
             Text('${r.year}', style: const TextStyle(color: RwColors.muted, fontWeight: FontWeight.w700)),
           ]),

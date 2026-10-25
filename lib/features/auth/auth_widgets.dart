@@ -113,14 +113,14 @@ class RunWiseLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'RunWise',
+      label: 'Kadans',
       image: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset('assets/logo/mark.png', height: height, excludeFromSemantics: true),
           SizedBox(width: height * 0.35),
-          Image.asset('assets/logo/wordmark.png', height: height * 0.62, excludeFromSemantics: true),
+          Image.asset('assets/logo/wordmark.png', height: height * 0.46, excludeFromSemantics: true),
         ],
       ),
     );

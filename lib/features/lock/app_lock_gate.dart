@@ -87,7 +87,7 @@ class _LockScreen extends ConsumerWidget {
               const Spacer(),
               const Icon(Icons.fingerprint, size: 88, color: RwColors.accent),
               const SizedBox(height: 20),
-              const Text('RunWise is vergrendeld',
+              const Text('Kadans is vergrendeld',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
@@ -135,7 +135,7 @@ Future<void> maybeOfferFingerprint(BuildContext context) async {
     builder: (ctx) => AlertDialog(
       icon: const Icon(Icons.fingerprint, size: 40, color: RwColors.accent),
       title: const Text('Voortaan met je vingerafdruk?'),
-      content: const Text('Je blijft ingelogd. Bij het openen van RunWise ontgrendel je de app met je vingerafdruk '
+      content: const Text('Je blijft ingelogd. Bij het openen van Kadans ontgrendel je de app met je vingerafdruk '
           '(of de pincode van je telefoon). Je kunt dit altijd uitzetten bij Ik.'),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Nee, bedankt')),

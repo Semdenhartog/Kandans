@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
   const { data, error } = await admin.auth.getUser(token);
   if (error || !data?.user) return json(401, { error: "Sessie ongeldig. Log opnieuw in." });
 
-  // Strava-koppeling intrekken (als die er is), zodat RunWise daar geen toegang meer heeft.
+  // Strava-koppeling intrekken (als die er is), zodat Kadans daar geen toegang meer heeft.
   try {
     const { data: tokens } = await admin.rpc("strava_get_tokens", { p_user: data.user.id });
     const access = (tokens as { access_token: string }[] | null)?.[0]?.access_token;

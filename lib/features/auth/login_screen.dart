@@ -80,7 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       eyebrow: 'Welkom terug',
-      title: 'Log in op RunWise.',
+      title: 'Log in op Kadans.',
       subtitle: 'Loop niet zomaar. Loop op het beste moment.',
       children: [
         Form(

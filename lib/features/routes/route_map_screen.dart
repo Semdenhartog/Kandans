@@ -101,11 +101,11 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       if (!await Geolocator.isLocationServiceEnabled()) {
         throw Exception('Zet locatie aan op je telefoon om jezelf op de kaart te zien.');
       }
-      await explainLocationFirst(context, why: 'Zo kan RunWise laten zien waar jij nu bent op de kaart.');
+      await explainLocationFirst(context, why: 'Zo kan Kadans laten zien waar jij nu bent op de kaart.');
       var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
       if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
-        throw Exception('RunWise mag je locatie niet gebruiken. Dit kun je aanzetten in de instellingen van je telefoon.');
+        throw Exception('Kadans mag je locatie niet gebruiken. Dit kun je aanzetten in de instellingen van je telefoon.');
       }
       if (!_showMe) setState(() => _showMe = true);
       final pos = await Geolocator.getCurrentPosition(

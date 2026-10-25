@@ -13,7 +13,7 @@ class RunWiseApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
-      title: 'RunWise',
+      title: 'Kadans',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: router,

@@ -65,12 +65,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await markLocationExplained();
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
-        _locationResult = 'Locatie staat uit op je telefoon. RunWise gebruikt nu je thuisplaats of Barneveld.';
+        _locationResult = 'Locatie staat uit op je telefoon. Kadans gebruikt nu je thuisplaats of Barneveld.';
       } else {
         var p = await Geolocator.checkPermission();
         if (p == LocationPermission.denied) p = await Geolocator.requestPermission();
         _locationResult = p == LocationPermission.denied || p == LocationPermission.deniedForever
-            ? 'Geen probleem. RunWise gebruikt dan het weer van Barneveld; je kunt dit later aanzetten.'
+            ? 'Geen probleem. Kadans gebruikt dan het weer van Barneveld; je kunt dit later aanzetten.'
             : 'Top, het weer klopt nu voor jouw plek.';
       }
     } catch (_) {
@@ -88,7 +88,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _Page(
         icon: Icons.wb_sunny_outlined,
         title: 'Loop op het beste moment',
-        text: 'RunWise kijkt naar het weer, de wind op je route en de buien van het komende uur. '
+        text: 'Kadans kijkt naar het weer, de wind op je route en de buien van het komende uur. '
             'Je ziet tot op 5 minuten wanneer je het best kunt gaan, welke kant je op moet en wat je aantrekt.',
         children: [
           FilledButton(onPressed: _next, child: const Text('Verder')),
@@ -97,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _Page(
         icon: Icons.my_location,
         title: 'Het weer op jouw plek',
-        text: 'Daarvoor vraagt RunWise je locatie, alleen terwijl je de app gebruikt. We bewaren hooguit een '
+        text: 'Daarvoor vraagt Kadans je locatie, alleen terwijl je de app gebruikt. We bewaren hooguit een '
             'grove thuisplaats (op ongeveer 1 km afgerond) en delen je locatie met niemand, tenzij je zelf live delen aanzet.',
         children: [
           if (_locationResult != null)
@@ -124,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _Page(
         icon: Icons.watch_outlined,
         title: 'Welk horloge heb je?',
-        text: 'Dan zet RunWise je route met één knop op je horloge, met een trilling bij elke afslag. '
+        text: 'Dan zet Kadans je route met één knop op je horloge, met een trilling bij elke afslag. '
             'Geen horloge? Dan zegt je telefoon de afslagen.',
         children: [
           Wrap(
@@ -152,7 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _Page(
         icon: Icons.sync,
         title: 'Je runs vanzelf binnen',
-        text: 'Koppel Strava of je horloge (via Health Connect). Dan leert RunWise bij welk weer jij het snelst loopt, '
+        text: 'Koppel Strava of je horloge (via Health Connect). Dan leert Kadans bij welk weer jij het snelst loopt, '
             'en zie je je records, ook gecorrigeerd voor het weer.',
         children: [
           FilledButton(

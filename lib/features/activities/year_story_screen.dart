@@ -126,7 +126,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
                 ),
                 Row(children: [
                   const SizedBox(width: 16),
-                  Text('RunWise · ${widget.year}', style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
+                  Text('Kadans · ${widget.year}', style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
                   const Spacer(),
                   IconButton(
                     tooltip: 'Sluiten',
@@ -259,7 +259,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
             if (windiest != null)
               _WeatherLine(Icons.air, 'Hardste wind', Fmt.wind(windiest.windSpeedKmh), Fmt.date(windiest.startedAt)),
             const SizedBox(height: 12),
-            const _Text('Alleen RunWise houdt bij in wat voor weer jij liep.'),
+            const _Text('Alleen Kadans houdt bij in wat voor weer jij liep.'),
           ]),
         ),
       if (r.longest != null || fast.isNotEmpty)

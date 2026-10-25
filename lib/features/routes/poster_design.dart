@@ -156,7 +156,7 @@ class RoutePosterArt extends StatelessWidget {
               ]),
               SizedBox(height: 18 * u),
               Row(children: [
-                gold(Text('RUNWISE',
+                gold(Text('KADANS',
                     style: TextStyle(
                         color: s.fg.withValues(alpha: 0.7),
                         fontFamily: RwFonts.display,

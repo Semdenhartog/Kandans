@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import '../core/theme.dart';
 import '../data/services/sound_service.dart';
 
-/// Een korte regen van confetti in RunWise-kleuren (bij een record of nieuwe badge). Eén keer, ~2,5 s.
+/// Een korte regen van confetti in Kadans-kleuren (bij een record of nieuwe badge). Eén keer, ~2,5 s.
 class Confetti extends StatefulWidget {
   const Confetti({super.key, this.count = 90});
   final int count;

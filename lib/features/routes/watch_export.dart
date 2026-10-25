@@ -15,7 +15,7 @@ import '../../domain/route_geometry.dart';
 import '../../domain/route_turns.dart';
 import '../../shared/widgets.dart';
 
-/// Merk van je horloge: bepaalt welk bestand RunWise maakt en welke stappen we uitleggen.
+/// Merk van je horloge: bepaalt welk bestand Kadans maakt en welke stappen we uitleggen.
 enum WatchBrand { garmin, coros, suunto, polar, amazfit, wearos, none }
 
 extension WatchBrandInfo on WatchBrand {
@@ -32,7 +32,7 @@ extension WatchBrandInfo on WatchBrand {
   /// Garmin leest afslagen uit een FIT-koers; de rest werkt met GPX (met afslagen als waypoints).
   bool get usesFit => this == WatchBrand.garmin;
 
-  /// Kan dit horloge zelf een route volgen? Zo niet, dan helpt RunWise via meldingen.
+  /// Kan dit horloge zelf een route volgen? Zo niet, dan helpt Kadans via meldingen.
   bool get canImport => this != WatchBrand.wearos && this != WatchBrand.none;
 
   /// Stappen om de route op het horloge te krijgen.
@@ -63,8 +63,8 @@ extension WatchBrandInfo on WatchBrand {
             'Op je horloge: Training → Hardlopen → Route.',
           ],
         WatchBrand.wearos || WatchBrand.none => const [
-            'Start de run in RunWise met "Loop deze route" en neem je telefoon mee.',
-            'Bij elke afslag zegt RunWise "Over 100 meter rechtsaf" en zie je een grote pijl.',
+            'Start de run in Kadans met "Loop deze route" en neem je telefoon mee.',
+            'Bij elke afslag zegt Kadans "Over 100 meter rechtsaf" en zie je een grote pijl.',
             'Heb je een horloge? Dan trilt dat ook en zie je de afslag als melding.',
           ],
       };
@@ -115,7 +115,7 @@ Future<WatchBrand?> pickWatchBrand(BuildContext context, {WatchBrand? current}) 
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
-              child: Text('Dan maakt RunWise het juiste bestand en leggen we precies uit wat je moet doen.',
+              child: Text('Dan maakt Kadans het juiste bestand en leggen we precies uit wat je moet doen.',
                   style: TextStyle(color: RwColors.muted, height: 1.4)),
             ),
             for (final b in WatchBrand.values)
@@ -217,7 +217,7 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
                             ? 'Geen afslagen gevonden: deze route is vooral rechtdoor.'
                             : current.canImport
                                 ? '${turns.length} afslagen herkend. ${current.usesFit ? 'Je horloge trilt vóór elke afslag en toont de richting.' : 'Ze staan als punten in het bestand.'}'
-                                : '${turns.length} afslagen herkend. RunWise meldt ze tijdens het lopen.',
+                                : '${turns.length} afslagen herkend. Kadans meldt ze tijdens het lopen.',
                         style: const TextStyle(height: 1.4),
                       ),
                     ),
@@ -323,11 +323,11 @@ List<String> watchTroubleshooting(WatchBrand b) => [
             'Lukt het niet, kies dan bij het delen eerst "Opslaan" en importeer het bestand in de Zepp-app.',
           ],
         WatchBrand.wearos || WatchBrand.none => const [
-            'Je horloge laat RunWise-meldingen zien: zet meldingen van RunWise aan in de Galaxy Wearable- of Pixel Watch-app.',
+            'Je horloge laat Kadans-meldingen zien: zet meldingen van Kadans aan in de Galaxy Wearable- of Pixel Watch-app.',
           ],
       },
       'Probeer het andere bestandstype (GPX of FIT) via de knop onderaan.',
-      'Lukt het nog niet? Loop de route met je telefoon: RunWise zegt elke afslag en je horloge trilt mee.',
+      'Lukt het nog niet? Loop de route met je telefoon: Kadans zegt elke afslag en je horloge trilt mee.',
     ];
 
 /// Na het versturen: staat de route erop? Zo niet, laat zien wat je kunt doen. Vraagt het de eerste 3 keer.
@@ -412,7 +412,7 @@ Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, S
     final km = (r.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
     final text = [
       'Zin om mee te lopen? 🏃',
-      if (when != null) 'Beste moment volgens RunWise: ${moment(when)}${weather == null ? '' : ' ($weather)'}.',
+      if (when != null) 'Beste moment volgens Kadans: ${moment(when)}${weather == null ? '' : ' ($weather)'}.',
       'Route: ${r.name}, $km km. Het routebestand zit erbij (open het in je horloge-app of in Komoot).',
       'Start: https://www.google.com/maps/search/?api=1&query=${r.startLatitude.toStringAsFixed(5)},${r.startLongitude.toStringAsFixed(5)}',
     ].join('\n');

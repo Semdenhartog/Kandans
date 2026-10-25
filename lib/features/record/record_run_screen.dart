@@ -205,7 +205,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!_indoor) {
           await explainLocationFirst(context,
-              why: 'Om je run op te nemen meet RunWise met GPS waar je loopt: afstand, tempo en je route op de kaart.');
+              why: 'Om je run op te nemen meet Kadans met GPS waar je loopt: afstand, tempo en je route op de kaart.');
         }
         if (!mounted) return;
         _svc.warmUp().catchError((Object e) {
@@ -395,7 +395,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     SharedPreferences.getInstance().then((p) => p.setInt('rec_cadence', picked)).ignore();
   }
 
-  /// Afslagen ook op je horloge: daarvoor moet RunWise meldingen mogen tonen. Eén keer uitleggen en vragen.
+  /// Afslagen ook op je horloge: daarvoor moet Kadans meldingen mogen tonen. Eén keer uitleggen en vragen.
   Future<void> _askTurnNotifications() async {
     if (_route == null || _indoor || !_turnByTurn) return;
     final n = NotificationService.instance;
@@ -410,8 +410,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         icon: const Icon(Icons.watch_outlined),
         title: const Text('Afslagen op je horloge?'),
         content: const Text(
-            'RunWise kan bij elke afslag een melding sturen. Die komt ook op je horloge, dat dan trilt en de richting laat zien.\n\n'
-            'Daarvoor vraagt je telefoon zo of RunWise meldingen mag sturen. Je krijgt alleen meldingen over je run.'),
+            'Kadans kan bij elke afslag een melding sturen. Die komt ook op je horloge, dat dan trilt en de richting laat zien.\n\n'
+            'Daarvoor vraagt je telefoon zo of Kadans meldingen mag sturen. Je krijgt alleen meldingen over je run.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Niet nu')),
           FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Ja, graag')),
@@ -459,7 +459,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             const Text('Heen en terug', style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            const Text('Hoe lang wil je in totaal lopen? Halverwege zegt RunWise dat je moet omdraaien. Daarna wijst de pijl je de weg terug naar je start.',
+            const Text('Hoe lang wil je in totaal lopen? Halverwege zegt Kadans dat je moet omdraaien. Daarna wijst de pijl je de weg terug naar je start.',
                 style: TextStyle(color: RwColors.muted, height: 1.4)),
             const SizedBox(height: 12),
             Wrap(spacing: 8, runSpacing: 8, children: [
@@ -568,20 +568,20 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Laat RunWise doorlopen op de achtergrond',
+              const Text('Laat Kadans doorlopen op de achtergrond',
                   style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
               const SizedBox(height: 8),
               const Text(
                 'Om batterij te sparen zetten veel telefoons apps in slaapstand als je scherm uit is. '
-                'Dan stopt RunWise halverwege je run met meten. Zo voorkom je dat:',
+                'Dan stopt Kadans halverwege je run met meten. Zo voorkom je dat:',
                 style: TextStyle(color: RwColors.muted, height: 1.4),
               ),
               const SizedBox(height: 12),
-              const Text('1. Tik hieronder op "Batterij-instellingen" en kies bij RunWise "Niet optimaliseren" of "Onbeperkt".',
+              const Text('1. Tik hieronder op "Batterij-instellingen" en kies bij Kadans "Niet optimaliseren" of "Onbeperkt".',
                   style: TextStyle(height: 1.4)),
               const SizedBox(height: 8),
               const Text(
-                  '2. Samsung: Instellingen → Batterij → Achtergrondgebruik beperken → Apps nooit in slaapstand → voeg RunWise toe.',
+                  '2. Samsung: Instellingen → Batterij → Achtergrondgebruik beperken → Apps nooit in slaapstand → voeg Kadans toe.',
                   style: TextStyle(height: 1.4)),
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -971,7 +971,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               if (routes.isNotEmpty)
                 const Padding(
                   padding: EdgeInsets.fromLTRB(16, 4, 16, 4),
-                  child: Text('Je mag overal op een route instappen. RunWise wijst je de weg ernaartoe.',
+                  child: Text('Je mag overal op een route instappen. Kadans wijst je de weg ernaartoe.',
                       style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
                 ),
               for (final r in routes)

@@ -245,7 +245,7 @@ class ProfileScreen extends ConsumerWidget {
                 const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const TileIcon(Icons.workspace_premium_outlined, color: RwColors.accent),
-                  title: const Text('RunWise Premium'),
+                  title: const Text('Kadans Premium'),
                   subtitle: Text(
                     profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
                   ),
@@ -286,7 +286,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'RunWise 1.0 · Weer via Open-Meteo.com · Buien via Buienradar.nl',
+            'Kadans 1.0 · Weer via Open-Meteo.com · Buien via Buienradar.nl',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.subtle, fontSize: 12),
           ),
@@ -318,7 +318,7 @@ class _InsightsCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Na 8 runs berekent RunWise bij welke temperatuur en wind jij het snelst loopt. '
+              'Na 8 runs berekent Kadans bij welke temperatuur en wind jij het snelst loopt. '
               'Tot die tijd gaan we uit van 8–16°C als ideaal.',
               style: TextStyle(color: RwColors.muted, height: 1.5),
             ),

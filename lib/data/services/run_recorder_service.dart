@@ -369,7 +369,7 @@ class RunRecorderService {
     var p = await Geolocator.checkPermission();
     if (p == LocationPermission.denied) p = await Geolocator.requestPermission();
     if (p == LocationPermission.denied || p == LocationPermission.deniedForever) {
-      throw Exception('RunWise mag je locatie niet gebruiken. Zet dit aan in de instellingen van je telefoon.');
+      throw Exception('Kadans mag je locatie niet gebruiken. Zet dit aan in de instellingen van je telefoon.');
     }
   }
 
@@ -391,7 +391,7 @@ class RunRecorderService {
             distanceFilter: indoor ? 500 : 0,
             intervalDuration: Duration(seconds: indoor ? 30 : 1),
             foregroundNotificationConfig: const ForegroundNotificationConfig(
-              notificationTitle: 'RunWise neemt je run op',
+              notificationTitle: 'Kadans neemt je run op',
               notificationText: 'Tik om je run te zien of te stoppen.',
               enableWakeLock: true,
               setOngoing: true,
@@ -441,7 +441,7 @@ class RunRecorderService {
     final title = r.indoor ? 'Loopband${r.treadmillKmh == null ? '' : ' · ${Fmt.km(r.distance, decimals: 2)}'}' : Fmt.km(r.distance, decimals: 2);
     NotificationService.instance
         .showRunProgress(nav ?? title,
-            nav == null ? (body.isEmpty ? 'RunWise neemt je run op' : body) : '$title${body.isEmpty ? '' : ' · $body'}',
+            nav == null ? (body.isEmpty ? 'Kadans neemt je run op' : body) : '$title${body.isEmpty ? '' : ' · $body'}',
             movingSeconds: v.movingSeconds, paused: paused)
         .ignore();
   }
@@ -675,7 +675,7 @@ class RunRecorderService {
           }
           NotificationService.instance
               .showTurn('${cue.turn.kind.arrow} ${cue.atTurn ? 'Nu ${cue.turn.kind.label.toLowerCase()}' : cue.text}',
-                  'RunWise-route · nog ${Fmt.km(follower.remaining, decimals: 1)}')
+                  'Kadans-route · nog ${Fmt.km(follower.remaining, decimals: 1)}')
               .ignore();
         }
       }

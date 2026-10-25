@@ -40,7 +40,7 @@ class ErrorReporter {
   static String clip(String s, int max) => s.length <= max ? s : '${s.substring(0, max - 1)}…';
 
   static Future<void> report(Object error, StackTrace? stack, {String? context}) async {
-    if (kDebugMode) debugPrint('RunWise-fout: $error\n$stack');
+    if (kDebugMode) debugPrint('Kadans-fout: $error\n$stack');
     if (_sending || _sent >= maxPerSession) return;
     final key = fingerprint(error, stack);
     if (!_seen.add(key)) return;

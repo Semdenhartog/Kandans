@@ -51,7 +51,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       showMessage(
         context,
         active
-            ? 'Welkom bij RunWise Premium! Je coach staat klaar.'
+            ? 'Welkom bij Kadans Premium! Je coach staat klaar.'
             : 'Betaling ontvangen. Je Premium wordt zo geactiveerd.',
       );
       if (context.canPop()) context.pop();
@@ -106,7 +106,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
           const SizedBox(height: 8),
           const _GoldText(
-            'RunWise Premium',
+            'Kadans Premium',
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, height: 1.05),
           ),
           const SizedBox(height: 6),

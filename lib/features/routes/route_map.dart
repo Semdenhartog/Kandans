@@ -46,7 +46,7 @@ class _MapLayerNotifier extends ValueNotifier<MapLayer> {
 const _greyTiles = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png';
 const _photoTiles = 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg';
 
-/// Maakt van de lichtgrijze kaart een donkere kaart in RunWise-stijl:
+/// Maakt van de lichtgrijze kaart een donkere kaart in Kadans-stijl:
 /// omkeren, dimmen en een tikje koel, zodat de oranje route eruit springt.
 const _darkMap = ColorFilter.matrix(<double>[
   -0.60, 0, 0, 0, 165, //

@@ -107,7 +107,7 @@ class RunWiseRepository {
     return row['id'] as String;
   }
 
-  /// Een in RunWise opgenomen run opslaan. Met een vaste [externalId] maakt opnieuw
+  /// Een in Kadans opgenomen run opslaan. Met een vaste [externalId] maakt opnieuw
   /// versturen (na een verbroken verbinding) nooit een tweede run.
   Future<String> addRecordedRun(Activity a, String externalId) async {
     final row = await _db
@@ -183,7 +183,7 @@ class RunWiseRepository {
   Future<Uint8List> downloadPhoto(String path) => _db.storage.from(_photoBucket).download(path);
 
   /// Koppelt een run aan een route (of los met null), door de gebruiker zelf.
-  /// Daarna koppelt RunWise deze run niet meer automatisch.
+  /// Daarna koppelt Kadans deze run niet meer automatisch.
   Future<void> setActivityRoute(String activityId, String? routeId) async {
     await _db.from('activities').update({'route_id': routeId, 'route_link_locked': true}).eq('id', activityId);
   }

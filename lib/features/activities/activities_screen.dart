@@ -131,7 +131,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
     try {
       await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(Uint8List.fromList(utf8.encode(text)), mimeType: mime, name: name)],
-        subject: 'Mijn runs uit RunWise',
+        subject: 'Mijn runs uit Kadans',
       ));
     } catch (e) {
       if (mounted) showMessage(context, 'Exporteren is niet gelukt: ${friendlyError(e)}', error: true);
@@ -307,7 +307,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             return EmptyState(
               icon: Icons.directions_run,
               title: 'Nog geen runs',
-              message: 'Neem een run op met Start run, voeg er een met de hand toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert RunWise bij welk weer jij het snelst loopt.',
+              message: 'Neem een run op met Start run, voeg er een met de hand toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert Kadans bij welk weer jij het snelst loopt.',
               actionLabel: 'Eerste run toevoegen',
               onAction: () => context.go('/runs/new'),
             );
@@ -767,7 +767,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   late RunFilter _f = widget.initial;
 
   static const _sources = {
-    'runwise': 'Opgenomen in RunWise',
+    'runwise': 'Opgenomen in Kadans',
     'strava': 'Strava',
     'health_connect': 'Horloge',
     'manual': 'Met de hand',

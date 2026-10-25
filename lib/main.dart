@@ -95,7 +95,7 @@ class _BootstrapState extends State<_Bootstrap> {
                           children: [
                             const Icon(Icons.error_outline, color: RwColors.danger, size: 48),
                             const SizedBox(height: 12),
-                            const Text('RunWise kon niet starten',
+                            const Text('Kadans kon niet starten',
                                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                             const SizedBox(height: 8),
                             SelectableText('${snap.error}',
@@ -164,7 +164,7 @@ class _IntroState extends State<_Intro> with TickerProviderStateMixin {
               opacity: appear,
               child: ScaleTransition(
                 scale: Tween(begin: 0.92, end: 1.0).animate(appear),
-                child: Image.asset('assets/logo/logo.png', width: 220, semanticLabel: 'RunWise'),
+                child: Image.asset('assets/logo/logo.png', width: 220, semanticLabel: 'Kadans'),
               ),
             ),
           ]),

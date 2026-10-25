@@ -297,7 +297,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           const Text(
-            'RunWise kiest alleen momenten waarop je hele run binnen deze tijden past. Werk je in wisseldiensten? Pas het per week aan.',
+            'Kadans kiest alleen momenten waarop je hele run binnen deze tijden past. Werk je in wisseldiensten? Pas het per week aan.',
             style: TextStyle(color: RwColors.muted, height: 1.45),
           ),
           const SizedBox(height: 12),

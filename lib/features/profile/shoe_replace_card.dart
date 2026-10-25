@@ -190,7 +190,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
             ),
             if (shop.isPartner)
               const Text(
-                'Partnerlink: RunWise krijgt een kleine vergoeding als je iets koopt. Jij betaalt niets extra.',
+                'Partnerlink: Kadans krijgt een kleine vergoeding als je iets koopt. Jij betaalt niets extra.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: RwColors.subtle, fontSize: 11),
               ),

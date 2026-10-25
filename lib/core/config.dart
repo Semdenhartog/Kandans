@@ -20,7 +20,7 @@ class AppConfig {
     defaultValue: 'https://semdenhartog.github.io/Runwise/privacy.html',
   );
 
-  /// Website van RunWise (voor de live-meeloop-pagina live.html).
+  /// Website van Kadans (voor de live-meeloop-pagina live.html).
   static const siteUrl = String.fromEnvironment('SITE_URL', defaultValue: 'https://semdenhartog.github.io/Runwise');
 
   /// Publieke RevenueCat SDK-sleutel voor Android (begint met "goog_").

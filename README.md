@@ -1,4 +1,4 @@
-# RunWise – Android-app (v1)
+# Kadans (voorheen RunWise) – Android-app (v1)
 
 Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het weer, de wind op je route en je eigen prestaties.
 
@@ -20,7 +20,7 @@ Bewust **nog niet**: pushmeldingen en ophalen terwijl de app dicht is.
 
 ## Ontwerp
 
-- **Figma:** [RunWise – huisstijl en app](https://www.figma.com/design/9UghVxyQMKiRE2Vi1vmQOb) — kleuren, letters, logo, onderdelen en de schermen Vandaag, Coach en Premium.
+- **Figma:** [Kadans – huisstijl en app](https://www.figma.com/design/9UghVxyQMKiRE2Vi1vmQOb) — kleuren, letters, logo, onderdelen en de schermen Vandaag, Coach en Premium.
 - De kleuren in Figma heten hetzelfde als in `lib/core/theme.dart` (`RwColors`) en op de website (`--accent`, `--bg` …). Verander je een kleur, doe dat dan op alle drie de plekken.
 - Logo-bestanden: `assets/logo/` (merkteken, woordmerk, volledig logo) en `assets/icon/` (app-icoon).
 
@@ -70,7 +70,7 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 3. **Authentication → Sign In / Providers → Email**: zet *Confirm email* aan.
 4. **Authentication → Emails → Confirm signup**: zet de code in de mail, bijvoorbeeld:
    ```html
-   <h2>Welkom bij RunWise!</h2>
+   <h2>Welkom bij Kadans!</h2>
    <p>Je activatiecode is: <strong>{{ .Token }}</strong></p>
    ```
 5. **Edge Functions → Deploy a new function → Via editor**: naam `delete-account`,
@@ -79,7 +79,7 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
    naar `config.json`. Gebruik **nooit** de service-role key in de app.
 
 ### 3a. Strava-koppeling instellen
-1. Ga naar https://www.strava.com/settings/api en maak een API-app aan (naam RunWise).
+1. Ga naar https://www.strava.com/settings/api en maak een API-app aan (naam Kadans).
 2. Vul bij **Authorization Callback Domain** in: `jdswennyfczpqblfkrxt.supabase.co`
 3. Supabase → **Edge Functions → Secrets**: zet `STRAVA_CLIENT_ID` en `STRAVA_CLIENT_SECRET` (zelf invullen, niet in een chat plakken).
 4. Let op: een nieuwe Strava-app kan eerst maar een beperkt aantal sporters koppelen; meer aanvragen kan bij Strava.
@@ -128,8 +128,8 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 4. Vanaf de volgende push bouwt GitHub naast de APK ook **runwise-playstore-aab**: dat bestand upload je in de Play Console.
 
 ### 4c. Health Connect en de Play Store
-Google Play vraagt bij de eerste versie een **verklaring voor Health Connect**: RunWise leest alleen *trainingen*, *afstand* en *hartslag* om je runs automatisch te loggen en je loopprofiel te berekenen. Zet dit ook in de privacyverklaring:
-> RunWise leest met jouw toestemming hardlooptrainingen, afstand en hartslag uit Health Connect om je runs automatisch toe te voegen. Deze gegevens worden alleen gebruikt voor jouw eigen overzicht, loopprofiel en coach, worden niet verkocht of gedeeld met adverteerders, en worden verwijderd als je je account verwijdert.
+Google Play vraagt bij de eerste versie een **verklaring voor Health Connect**: Kadans leest alleen *trainingen*, *afstand* en *hartslag* om je runs automatisch te loggen en je loopprofiel te berekenen. Zet dit ook in de privacyverklaring:
+> Kadans leest met jouw toestemming hardlooptrainingen, afstand en hartslag uit Health Connect om je runs automatisch toe te voegen. Deze gegevens worden alleen gebruikt voor jouw eigen overzicht, loopprofiel en coach, worden niet verkocht of gedeeld met adverteerders, en worden verwijderd als je je account verwijdert.
 
 ### 5. Later: publiceren in de Play Store
 - Google Play-ontwikkelaarsaccount (eenmalig ca. $25).

@@ -14,7 +14,7 @@ class ShoeShop {
   final String name;
   final String urlTemplate;
 
-  /// Verdient RunWise iets aan een aankoop via deze link? Dan melden we dat.
+  /// Verdient Kadans iets aan een aankoop via deze link? Dan melden we dat.
   final bool isPartner;
 
   /// Zolang er geen winkel is ingesteld: gewoon zoeken op het web, zonder partner.

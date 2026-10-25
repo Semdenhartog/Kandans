@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/services/app_lock_service.dart';
 import '../../shared/widgets.dart';
 
-/// Aan/uit: RunWise ontgrendelen met je vingerafdruk.
+/// Aan/uit: Kadans ontgrendelen met je vingerafdruk.
 class FingerprintTile extends StatefulWidget {
   const FingerprintTile({super.key});
 

@@ -69,7 +69,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
-      eyebrow: 'Start met RunWise',
+      eyebrow: 'Start met Kadans',
       title: 'Jouw beste loopmoment begint hier.',
       subtitle: 'Maak een gratis account. We vragen alleen wat nodig is.',
       children: [

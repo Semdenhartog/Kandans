@@ -33,7 +33,7 @@ class _StravaReturnScreenState extends ConsumerState<StravaReturnScreen> {
         _done = true;
         _message = switch (widget.status) {
           'denied' => 'Je hebt de koppeling geannuleerd. Je kunt het altijd opnieuw proberen.',
-          'scope' => 'RunWise heeft toestemming nodig om je activiteiten te lezen. Probeer het opnieuw en laat dat vinkje aan.',
+          'scope' => 'Kadans heeft toestemming nodig om je activiteiten te lezen. Probeer het opnieuw en laat dat vinkje aan.',
           'expired' => 'De koppeling duurde te lang. Probeer het opnieuw.',
           _ => 'Koppelen met Strava is niet gelukt. Probeer het later opnieuw.',
         };

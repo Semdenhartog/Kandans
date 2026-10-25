@@ -54,7 +54,7 @@ RunRoute parseGpx(
 }
 
 /// Maakt een route (met punten per kilometer en looprichting) van een lijst GPS-punten.
-/// Gebruikt voor GPX-bestanden en voor routes die RunWise zelf maakt.
+/// Gebruikt voor GPX-bestanden en voor routes die Kadans zelf maakt.
 RunRoute buildRoute(
   List<LatLng> raw, {
   required String name,
@@ -158,7 +158,7 @@ String buildGpx(
 }) {
   final b = StringBuffer()
     ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
-    ..writeln('<gpx version="1.1" creator="RunWise" xmlns="http://www.topografix.com/GPX/1/1">')
+    ..writeln('<gpx version="1.1" creator="Kadans" xmlns="http://www.topografix.com/GPX/1/1">')
     ..writeln('  <metadata><name>${_xml(name)}</name></metadata>');
   for (final t in turns) {
     b.writeln('  <wpt lat="${t.point.lat.toStringAsFixed(6)}" lon="${t.point.lon.toStringAsFixed(6)}">'

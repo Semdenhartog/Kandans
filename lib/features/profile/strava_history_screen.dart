@@ -140,7 +140,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
   Widget build(BuildContext context) {
     final month = _oldest == null ? null : DateFormat('MMMM yyyy', 'nl').format(_oldest!.toLocal());
     final (title, sub) = switch (_state) {
-      _State.idle when _total == 0 => ('Al je oude runs', 'Tot nu toe haalde RunWise je laatste jaar uit Strava op. Hier haal je alles op wat daarvoor ligt.'),
+      _State.idle when _total == 0 => ('Al je oude runs', 'Tot nu toe haalde Kadans je laatste jaar uit Strava op. Hier haal je alles op wat daarvoor ligt.'),
       _State.idle => ('Gepauzeerd', 'Tik op Verder om door te gaan waar je was${month == null ? '' : ' ($month)'}.'),
       _State.running => ('Bezig met ophalen…', month == null ? 'Even geduld.' : 'Nu bij $month.'),
       _State.waiting => ('Strava is even druk', 'Strava staat maar een beperkt aantal verzoeken toe. We gaan om ${DateFormat('HH:mm').format(_resumeAt!)} vanzelf verder (laat dit scherm open), of later met de knop.'),
@@ -193,7 +193,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
           else
             FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Naar je runs')),
           const SizedBox(height: 22),
-          const _Point(Icons.wb_cloudy_outlined, 'Bij elke run halen we het weer van toen op. Zo leert RunWise beter bij welk weer jij het snelst loopt.'),
+          const _Point(Icons.wb_cloudy_outlined, 'Bij elke run halen we het weer van toen op. Zo leert Kadans beter bij welk weer jij het snelst loopt.'),
           const _Point(Icons.auto_awesome_outlined, 'Runs uit Strava gaan niet naar de AI-coach (voorwaarden van Strava).'),
           const _Point(Icons.save_outlined, 'Je voortgang wordt bewaard. Stoppen en later verdergaan kan altijd.'),
           const SizedBox(height: 10),

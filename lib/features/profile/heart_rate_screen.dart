@@ -39,7 +39,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
       _found.clear();
     });
     if (!await _hr.ensurePermissions()) {
-      setState(() => _error = 'RunWise mag Bluetooth niet gebruiken. Zet "Apparaten in de buurt" aan bij de app-rechten.');
+      setState(() => _error = 'Kadans mag Bluetooth niet gebruiken. Zet "Apparaten in de buurt" aan bij de app-rechten.');
       return;
     }
     _scan = _hr.scan().listen((d) {
@@ -180,7 +180,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                     ],
                   ),
                   Text(
-                    'Hiermee rekent RunWise je hartslagzones uit. Zone 2 (rustig) is ${(max * 0.6).round()}–${(max * 0.7).round()} bpm. '
+                    'Hiermee rekent Kadans je hartslagzones uit. Zone 2 (rustig) is ${(max * 0.6).round()}–${(max * 0.7).round()} bpm. '
                     'Weet je het niet precies? Een vuistregel is 220 min je leeftijd.',
                     style: const TextStyle(color: RwColors.muted, height: 1.4),
                   ),

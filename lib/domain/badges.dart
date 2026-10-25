@@ -9,7 +9,7 @@ import 'weekly_load.dart';
 enum BadgeCategory {
   milestone('MIJLPALEN', null),
   speed('SNELHEID EN RECORDS', 'Snelle tijden, gemeten op het snelste stuk binnen een run.'),
-  weather('WEER EN SEIZOEN', 'Alleen in RunWise: voor lopen in bijzonder weer en op bijzondere dagen.'),
+  weather('WEER EN SEIZOEN', 'Alleen in Kadans: voor lopen in bijzonder weer en op bijzondere dagen.'),
   streak('VOLHOUDEN', 'Voor wie blijft lopen, week in week uit.'),
   explore('ONTDEKKEN', 'Nieuwe routes en nieuwe plekken.');
 
@@ -40,7 +40,7 @@ class Badge {
   final double progress;
   final BadgeCategory category;
 
-  /// RunWise-badges voor lopen in bijzonder weer (blauw op het scherm).
+  /// Kadans-badges voor lopen in bijzonder weer (blauw op het scherm).
   bool get weather => category == BadgeCategory.weather;
 
   bool get earned => earnedAt != null;
@@ -258,7 +258,7 @@ List<Badge> computeBadges(List<Activity> runs, {DateTime? now}) {
   const w = BadgeCategory.weather, e = BadgeCategory.explore, k = BadgeCategory.streak;
   return [
     // Mijlpalen.
-    _single('first', 'Eerste stap', 'Je eerste run in RunWise.', 'flag', sorted, (_) => true),
+    _single('first', 'Eerste stap', 'Je eerste run in Kadans.', 'flag', sorted, (_) => true),
     _single('5k', '5 kilometer', 'Een run van 5 km of meer.', 'looks_5', sorted, (a) => a.distanceMeters >= 4950),
     _single('10k', '10 kilometer', 'Een run van 10 km of meer.', 'filter_9_plus', sorted, (a) => a.distanceMeters >= 9900),
     _single('15k', '15 kilometer', 'Een run van 15 km of meer.', 'route', sorted, (a) => a.distanceMeters >= 14900),

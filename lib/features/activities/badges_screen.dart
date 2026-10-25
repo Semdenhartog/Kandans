@@ -50,7 +50,7 @@ IconData badgeIcon(String name) => switch (name) {
       _ => Icons.star,
     };
 
-/// Badges en mijlpalen (zoals de awards in Nike Run Club), met eigen RunWise-weerbadges.
+/// Badges en mijlpalen (zoals de awards in Nike Run Club), met eigen Kadans-weerbadges.
 class BadgesScreen extends ConsumerWidget {
   const BadgesScreen({super.key});
 

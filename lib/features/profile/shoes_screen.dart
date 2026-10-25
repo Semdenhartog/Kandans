@@ -61,7 +61,7 @@ class ShoesScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.directions_walk,
               title: 'Nog geen schoenen',
-              message: 'Voeg je hardloopschoenen toe. RunWise telt de kilometers en geeft een seintje '
+              message: 'Voeg je hardloopschoenen toe. Kadans telt de kilometers en geeft een seintje '
                   'als ze aan vervanging toe zijn (meestal na 600 tot 800 km).',
               actionLabel: 'Schoen toevoegen',
               onAction: () => _add(context, ref, firstShoe: true),

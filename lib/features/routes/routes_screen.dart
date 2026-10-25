@@ -210,7 +210,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
         label: const Text('Route maken'),
       ),
       body: Column(children: [
-        const FirstTip(id: 'routes', icon: Icons.route, text: 'Maak of teken een route en zet hem met één knop op je horloge. Bij het lopen mag je overal instappen: RunWise wijst de weg.'),
+        const FirstTip(id: 'routes', icon: Icons.route, text: 'Maak of teken een route en zet hem met één knop op je horloge. Bij het lopen mag je overal instappen: Kadans wijst de weg.'),
         Expanded(child: routes.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(
@@ -224,7 +224,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             return EmptyState(
               icon: Icons.route_outlined,
               title: 'Nog geen routes',
-              message: 'Laat RunWise een rondje maken vanaf je huis of een adres, op de afstand of tijd die jij wilt. '
+              message: 'Laat Kadans een rondje maken vanaf je huis of een adres, op de afstand of tijd die jij wilt. '
                   'Of teken zelf een route (potloodje rechtsboven) of importeer een GPX-bestand van je vaste rondje.',
               actionLabel: 'Route maken',
               onAction: () => context.go('/routes/maken'),

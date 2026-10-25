@@ -67,7 +67,7 @@ class StravaRouteList {
   const StravaRouteList({required this.routes, required this.canSeePrivate, this.cyclingSkipped = 0});
   final List<StravaRouteSummary> routes;
 
-  /// Mag RunWise je privéroutes zien? (Nee bij een koppeling van vóór deze versie: opnieuw koppelen.)
+  /// Mag Kadans je privéroutes zien? (Nee bij een koppeling van vóór deze versie: opnieuw koppelen.)
   final bool canSeePrivate;
   final int cyclingSkipped;
 }
@@ -172,7 +172,7 @@ class SyncService {
     );
   }
 
-  /// Haalt één Strava-route met de volledige lijn op en bewaart hem als RunWise-route.
+  /// Haalt één Strava-route met de volledige lijn op en bewaart hem als Kadans-route.
   Future<String> importStravaRoute(StravaRouteSummary r) async {
     final m = await _strava('route', {'route_id': r.id});
     final pts = decodePolyline(m['polyline'] as String);
@@ -348,7 +348,7 @@ class SyncService {
         end: end,
         totalDistance: a.distanceMeters.round(),
         totalDistanceUnit: HealthDataUnit.METER,
-        title: 'Hardlopen (RunWise)',
+        title: 'Hardlopen (Kadans)',
       );
     } catch (_) {
       return false;
@@ -412,7 +412,7 @@ class SyncService {
     var imported = 0;
     for (final p in runs) {
       final origin = healthRunOrigin(p.sourceId);
-      // Runs die RunWise zelf naar Health Connect schreef, staan er al.
+      // Runs die Kadans zelf naar Health Connect schreef, staan er al.
       if (origin == HealthRunOrigin.runwise) continue;
       final externalId = healthExternalId(p.uuid, origin);
       if (known.contains(externalId)) continue;
@@ -608,7 +608,7 @@ class _PendingUploader implements PendingRunUploader {
 /// Van welke app een Health Connect-run komt.
 enum HealthRunOrigin { runwise, strava, other }
 
-/// Pakketnaam van RunWise zelf (zie `flutter create --org nl.runwise` in build.yml).
+/// Pakketnaam van Kadans zelf (zie `flutter create --org nl.runwise` in build.yml).
 const runwisePackage = 'nl.runwise.runwise';
 
 /// Pakketnaam van de Strava-app.

@@ -3,10 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/theme.dart';
 
-/// Versie van het "Nieuw in RunWise"-overzicht. Ophogen als er iets nieuws te vertellen is.
-const whatsNewVersion = 'betrouwbaar-2026-10';
+/// Versie van het "Nieuw in Kadans"-overzicht. Ophogen als er iets nieuws te vertellen is.
+const whatsNewVersion = 'kadans-2026-10';
 
 const _items = <(IconData, String, String)>[
+  (Icons.auto_awesome_outlined, 'RunWise heet nu Kadans',
+      'Nieuwe naam, nieuw icoon: twee ringen in je ritme. Je runs, routes en instellingen blijven precies zoals ze waren.'),
+  (Icons.groups_outlined, 'Samen lopen',
+      'Uitdagingen → Samen: ranglijsten met andere lopers en vrienden. Alleen je bijnaam en totaal zijn zichtbaar.'),
   (Icons.cloud_off_outlined, 'Je run is altijd veilig',
       'Geen bereik na je run? Je run blijft op je telefoon staan en wordt vanzelf opgeslagen zodra je weer internet hebt.'),
   (Icons.content_cut, 'Run bijsnijden',
@@ -44,7 +48,7 @@ Future<void> showWhatsNewIfNeeded(BuildContext context, {bool skip = false}) asy
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Nieuw in RunWise', style: RwText.title),
+            const Text('Nieuw in Kadans', style: RwText.title),
             const SizedBox(height: 16),
             for (final (icon, title, text) in _items)
               Padding(

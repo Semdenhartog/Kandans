@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import '../core/theme.dart';
 import 'rolling_text.dart';
 
-/// Kaart met optionele titel, in RunWise-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
+/// Kaart met optionele titel, in Kadans-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
 /// en als je erop kunt tikken veert hij een fractie in.
 class RwCard extends StatefulWidget {
   const RwCard({super.key, this.title, required this.child, this.padding, this.onTap, this.trailing});

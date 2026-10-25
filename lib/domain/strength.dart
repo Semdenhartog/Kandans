@@ -1,4 +1,4 @@
-/// Kracht- en mobiliteitsroutines voor lopers (eigen RunWise-oefeningen, zonder materiaal).
+/// Kracht- en mobiliteitsroutines voor lopers (eigen Kadans-oefeningen, zonder materiaal).
 class Exercise {
   const Exercise(this.name, this.how, {this.seconds = 40, this.perSide = false});
   final String name;

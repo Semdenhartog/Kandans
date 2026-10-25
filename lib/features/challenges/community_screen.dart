@@ -138,7 +138,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   void _shareCode(String code) {
     SharePlus.instance.share(ShareParams(
-      text: 'Loop je mee in RunWise? Voeg me toe met mijn vriendcode $code (Uitdagingen → Samen).',
+      text: 'Loop je mee in Kadans? Voeg me toe met mijn vriendcode $code (Uitdagingen → Samen).',
     ));
   }
 

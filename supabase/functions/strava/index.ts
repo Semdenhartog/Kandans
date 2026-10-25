@@ -1,5 +1,5 @@
 // Edge Function: strava
-// Koppelt een RunWise-account aan Strava en haalt de runs op.
+// Koppelt een Kadans-account aan Strava en haalt de runs op.
 //
 //   POST  { action: "connect" }     -> geeft de Strava-inloglink terug
 //   GET   /strava/callback          -> Strava stuurt de gebruiker hierheen na toestemming
@@ -14,7 +14,7 @@
 //   STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
 // De tokens staan in het afgeschermde schema "private" en komen nooit in de app.
 //
-// Deploy met "Verify JWT" UIT: Strava roept /callback aan zonder RunWise-login.
+// Deploy met "Verify JWT" UIT: Strava roept /callback aan zonder Kadans-login.
 // De POST-acties controleren de login zelf.
 
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";

@@ -58,7 +58,7 @@ class RoutePhotosService {
       'pilicense': 'free',
       'origin': '*',
     });
-    final res = await _http.get(uri, headers: {'User-Agent': 'RunWise/1.0 (nl.runwise.app)'}).timeout(const Duration(seconds: 12));
+    final res = await _http.get(uri, headers: {'User-Agent': 'Kadans/1.0 (nl.runwise.app)'}).timeout(const Duration(seconds: 12));
     if (res.statusCode != 200) return const [];
     return parseWikipediaLandmarks(res.body, t);
   }

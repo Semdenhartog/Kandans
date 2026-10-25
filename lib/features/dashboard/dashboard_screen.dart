@@ -742,7 +742,7 @@ class _HeroCard extends StatelessWidget {
                     onPressed: () {
                       final when = goNowShown ? 'nu meteen' : '${_dayLabel(s.start).toLowerCase()} om ${Fmt.time(s.start)}';
                       SharePlus.instance.share(ShareParams(
-                        text: 'Zin om mee te lopen? Volgens RunWise is $when het beste moment: '
+                        text: 'Zin om mee te lopen? Volgens Kadans is $when het beste moment: '
                             '${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}'
                             '${(w.precipitationProbability ?? 0) < 20 ? ', droog' : ', regenkans ${Fmt.pct(w.precipitationProbability)}'}. Doe je mee?',
                       )).ignore();
@@ -877,7 +877,7 @@ class _HeroCard extends StatelessWidget {
                         side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
                       ),
                       onPressed: () async {
-                        final ok = await setAlarm(remindAt, 'RunWise: om ${Fmt.time(s.start)} lopen');
+                        final ok = await setAlarm(remindAt, 'Kadans: om ${Fmt.time(s.start)} lopen');
                         if (!ok && context.mounted) {
                           showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
                         }
@@ -905,10 +905,10 @@ class _HeroCard extends StatelessWidget {
                     ),
                     onPressed: () => addToCalendar(
                       context,
-                      title: 'Hardlopen (RunWise)',
+                      title: 'Hardlopen (Kadans)',
                       start: s.start,
                       minutes: durationMinutes,
-                      details: 'Beste moment volgens RunWise: score ${s.score}. ${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}.',
+                      details: 'Beste moment volgens Kadans: score ${s.score}. ${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}.',
                     ),
                     icon: const Icon(Icons.event_available_outlined, color: RwColors.accentLight),
                   ),

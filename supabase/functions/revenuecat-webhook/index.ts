@@ -6,7 +6,7 @@
 //   URL:                  https://<project>.supabase.co/functions/v1/revenuecat-webhook
 //   Authorization header: dezelfde waarde als het geheim REVENUECAT_WEBHOOK_SECRET
 //
-// Deploy met "Verify JWT" UIT: RevenueCat heeft geen RunWise-login.
+// Deploy met "Verify JWT" UIT: RevenueCat heeft geen Kadans-login.
 // De app logt bij RevenueCat in met de Supabase user-id, dus app_user_id = user_id.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";

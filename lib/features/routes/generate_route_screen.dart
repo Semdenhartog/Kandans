@@ -292,7 +292,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'RunWise maakt een paar rondjes over wandel- en hardlooppaden en kiest de beste op de wind van vandaag.',
+            'Kadans maakt een paar rondjes over wandel- en hardlooppaden en kiest de beste op de wind van vandaag.',
             textAlign: TextAlign.center,
             style: TextStyle(color: RwColors.subtle, fontSize: 13),
           ),

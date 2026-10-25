@@ -36,7 +36,7 @@ Future<Uint8List> paceBandPng({
     tp.paint(c, Offset(x, y));
   }
 
-  text('RUNWISE · TEMPOBAND', 24, 22, size: 14, color: RwColors.accent, weight: FontWeight.w800);
+  text('KADANS · TEMPOBAND', 24, 22, size: 14, color: RwColors.accent, weight: FontWeight.w800);
   text(title, 24, 44, size: 28, weight: FontWeight.w800);
   text(subtitle, 24, 82, size: 16, color: RwColors.muted, weight: FontWeight.w500);
   for (var i = 0; i < plan.length; i++) {

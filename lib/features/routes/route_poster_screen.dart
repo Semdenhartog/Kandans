@@ -64,7 +64,7 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
       final safe = widget.route.name.replaceAll(RegExp(r'[^A-Za-z0-9 _-]'), '').trim().replaceAll(' ', '-');
       await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(data.buffer.asUint8List(), mimeType: 'image/png', name: 'runwise-${safe.isEmpty ? 'route' : safe}.png')],
-        text: '${widget.route.name} · ${Fmt.km(widget.route.distanceMeters, decimals: 1)} · gemaakt met RunWise',
+        text: '${widget.route.name} · ${Fmt.km(widget.route.distanceMeters, decimals: 1)} · gemaakt met Kadans',
       ));
     } catch (_) {
       if (mounted) showMessage(context, 'Delen is niet gelukt. Probeer het opnieuw.', error: true);

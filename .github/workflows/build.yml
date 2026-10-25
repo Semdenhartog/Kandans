@@ -84,7 +84,7 @@ jobs:
                   '        </intent>\n'
                   '    </queries>\n'
                   '</manifest>'))
-          s = s.replace('android:label="runwise"', 'android:label="RunWise"')
+          s = s.replace('android:label="runwise"', 'android:label="Kadans"')
           open(p, "w").write(s)
           EOF
 
@@ -368,7 +368,7 @@ jobs:
           EOF2
             sed -i 's/^          //' "$f"
           done
-          echo "::notice::App-icoon (RunWise-logo) en donker opstartscherm ingesteld"
+          echo "::notice::App-icoon (Kadans-logo) en donker opstartscherm ingesteld"
 
       - name: Analyse-meldingen als annotaties tonen
         run: |

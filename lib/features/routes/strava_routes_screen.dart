@@ -20,7 +20,7 @@ void openStravaRoutes(BuildContext context) =>
 
 final stravaRoutesProvider = FutureProvider.autoDispose<StravaRouteList>((ref) => ref.read(syncServiceProvider).stravaRoutes());
 
-/// Kies welke van je Strava-routes je in RunWise wilt hebben.
+/// Kies welke van je Strava-routes je in Kadans wilt hebben.
 class StravaRoutesScreen extends ConsumerStatefulWidget {
   const StravaRoutesScreen({super.key});
 
@@ -141,7 +141,7 @@ class _StravaRoutesScreenState extends ConsumerState<StravaRoutesScreen> {
                       Text('${data.cyclingSkipped} fietsroutes overgeslagen.',
                           textAlign: TextAlign.center, style: const TextStyle(color: RwColors.subtle, fontSize: 12)),
                     const SizedBox(height: 6),
-                    const Text('Routes via Strava. Ontkoppel je Strava, dan verdwijnen ze weer uit RunWise.',
+                    const Text('Routes via Strava. Ontkoppel je Strava, dan verdwijnen ze weer uit Kadans.',
                         textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
                   ],
                 ],
@@ -253,7 +253,7 @@ class _RouteTile extends StatelessWidget {
                 ? const Row(mainAxisSize: MainAxisSize.min, children: [
                     Icon(Icons.check_circle, size: 18, color: RwColors.good),
                     SizedBox(width: 4),
-                    Text('In RunWise', style: TextStyle(color: RwColors.good, fontSize: 12)),
+                    Text('In Kadans', style: TextStyle(color: RwColors.good, fontSize: 12)),
                   ])
                 : Icon(picked ? Icons.check_circle : Icons.radio_button_unchecked, color: picked ? _stravaOrange : RwColors.subtle),
           ]),

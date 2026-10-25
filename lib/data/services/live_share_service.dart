@@ -77,7 +77,7 @@ bool shouldSend({
 }
 
 /// Deelt je locatie tijdens een run via een geheime link.
-/// Blijft actief als je de app wegklikt (Android-melding "RunWise deelt je locatie").
+/// Blijft actief als je de app wegklikt (Android-melding "Kadans deelt je locatie").
 class LiveShareService {
   LiveShareService._();
   static final instance = LiveShareService._();
@@ -123,7 +123,7 @@ class LiveShareService {
     var p = await Geolocator.checkPermission();
     if (p == LocationPermission.denied) p = await Geolocator.requestPermission();
     if (p == LocationPermission.denied || p == LocationPermission.deniedForever) {
-      throw Exception('RunWise mag je locatie niet gebruiken. Zet dit aan in de instellingen van je telefoon.');
+      throw Exception('Kadans mag je locatie niet gebruiken. Zet dit aan in de instellingen van je telefoon.');
     }
   }
 
@@ -186,8 +186,8 @@ class LiveShareService {
             distanceFilter: 10,
             intervalDuration: const Duration(seconds: 10),
             foregroundNotificationConfig: const ForegroundNotificationConfig(
-              notificationTitle: 'RunWise deelt je locatie',
-              notificationText: 'Je live locatie is zichtbaar via je link. Open RunWise om te stoppen.',
+              notificationTitle: 'Kadans deelt je locatie',
+              notificationText: 'Je live locatie is zichtbaar via je link. Open Kadans om te stoppen.',
               enableWakeLock: true,
               setOngoing: true,
             ),

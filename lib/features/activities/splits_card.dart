@@ -76,7 +76,7 @@ class SplitsCard extends ConsumerWidget {
               const Divider(height: 12),
               for (final sp in splits) _row(sp, ex, hasHr, hasEle),
               const SizedBox(height: 6),
-              Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met RunWise' }}. Wind = het weer bij de start van je run.',
+              Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}. Wind = het weer bij de start van je run.',
                   style: const TextStyle(color: RwColors.subtle, fontSize: 11)),
               if (GpsQuality.fromJson(s.gpsQuality) case final q?) ...[
                 const SizedBox(height: 2),

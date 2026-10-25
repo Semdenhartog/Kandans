@@ -756,7 +756,7 @@ class _NewRouteCard extends StatelessWidget {
           Expanded(child: Text('Je route staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
         ]),
         const SizedBox(height: 6),
-        const Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: RunWise zegt elke afslag.',
+        const Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: Kadans zegt elke afslag.',
             style: TextStyle(color: RwColors.muted, height: 1.4)),
         const SizedBox(height: 10),
         _WatchButton(route: route),

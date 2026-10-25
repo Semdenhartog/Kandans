@@ -31,7 +31,7 @@ class PoiService {
 
   Future<String> _ask(String url, String query) async {
     final res = await _http
-        .post(Uri.parse(url), headers: {'User-Agent': 'RunWise/1.0 (nl.runwise.app)'}, body: {'data': query})
+        .post(Uri.parse(url), headers: {'User-Agent': 'Kadans/1.0 (nl.runwise.app)'}, body: {'data': query})
         .timeout(const Duration(seconds: 20));
     if (res.statusCode != 200) throw Exception('Overpass ${res.statusCode}');
     // Controleer dat het echt JSON is (bij drukte stuurt Overpass soms een HTML-pagina).

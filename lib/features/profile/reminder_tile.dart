@@ -38,7 +38,7 @@ class _ReminderTileState extends ConsumerState<ReminderTile> {
         builder: (ctx) => AlertDialog(
           title: const Text('Dagelijkse melding'),
           content: const Text(
-            'RunWise stuurt je één melding per dag met het beste moment om te lopen. '
+            'Kadans stuurt je één melding per dag met het beste moment om te lopen. '
             'Daarvoor vraagt je telefoon zo om toestemming voor meldingen. Geen reclame, en je zet het hier altijd weer uit.',
           ),
           actions: [

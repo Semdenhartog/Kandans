@@ -94,7 +94,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
       final name = 'runwise-${a.startedAt.toLocal().toIso8601String().substring(0, 10)}.png';
       await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(data.buffer.asUint8List(), mimeType: 'image/png', name: name)],
-        text: '${Fmt.km(a.distanceMeters, decimals: 1)} gelopen met RunWise 🏃',
+        text: '${Fmt.km(a.distanceMeters, decimals: 1)} gelopen met Kadans 🏃',
       ));
     } catch (e) {
       if (mounted) showMessage(context, 'Delen is niet gelukt. Probeer het opnieuw.', error: true);
@@ -365,7 +365,7 @@ class RunShareCard extends StatelessWidget {
                     children: [
                       _tint(Image.asset('assets/logo/mark.png', height: 18), orange),
                       const SizedBox(width: 8),
-                      _tint(Image.asset('assets/logo/wordmark.png', height: 12), orange),
+                      _tint(Image.asset('assets/logo/wordmark.png', height: 9), orange),
                       const Spacer(),
                       Text(
                         Fmt.date(a.startedAt),

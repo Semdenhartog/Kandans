@@ -19,7 +19,7 @@ void openLiveShare(BuildContext context) {
 Future<void> _shareLink(String url, String name) =>
     SharePlus.instance.share(ShareParams(
       text: '${name.isEmpty ? 'Ik' : name} ga hardlopen. Kijk hier live mee waar ik ben: $url',
-      subject: 'Live meelopen met RunWise',
+      subject: 'Live meelopen met Kadans',
     ));
 
 /// Kaartje op Vandaag: live delen starten of de status zien.
@@ -310,7 +310,7 @@ class _Privacy extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Text(
         'Privacy: alleen wie de link heeft, kan meekijken. Bij stoppen wissen we je route en locatie direct van de server. '
-        'Zolang je deelt, staat er een melding op je telefoon, ook als RunWise op de achtergrond draait.',
+        'Zolang je deelt, staat er een melding op je telefoon, ook als Kadans op de achtergrond draait.',
         style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.5),
       );
 }

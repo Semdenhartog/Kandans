@@ -1,5 +1,5 @@
 /// Begeleide runs: de stem van de coach praat je door een run heen (zoals de Guided Runs van Nike Run Club).
-/// Eigen RunWise-teksten; de app spreekt ze uit op het juiste moment (op bewegende tijd).
+/// Eigen Kadans-teksten; de app spreekt ze uit op het juiste moment (op bewegende tijd).
 class GuidedCue {
   const GuidedCue(this.atMinute, this.text);
   final double atMinute;

@@ -20,7 +20,7 @@ class ConfigMissingApp extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'RunWise is nog niet ingesteld',
+                  'Kadans is nog niet ingesteld',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, fontFeatures: rwTnum),
                 ),
                 SizedBox(height: 12),

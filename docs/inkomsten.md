@@ -14,7 +14,7 @@ schoen 90% van zijn km-grens heeft. De knop opent nu een gewone zoekopdracht naa
 
 **Wat jij doet:**
 1. Kies een hardloopspeciaalzaak met een affiliate-programma. Speciaalzaken zitten meestal bij een
-   netwerk als Daisycon, TradeTracker of Awin. Meld je daar aan met RunWise als "app".
+   netwerk als Daisycon, TradeTracker of Awin. Meld je daar aan met Kadans als "app".
 2. Haal bij het netwerk een **zoek- of deeplink** op waarin het zoekwoord past, en zet `{q}` op de
    plek van het zoekwoord. Voorbeeld van de vorm (niet echt):
    `https://winkel.example/zoeken?q={q}&utm_source=runwise&partner=12345`
@@ -29,7 +29,7 @@ schoen 90% van zijn km-grens heeft. De knop opent nu een gewone zoekopdracht naa
    ```
 
    Alleen `https://`-links met `{q}` worden gebruikt. Met `shoe_shop_partner = true` staat er onder
-   de knop: "Partnerlink: RunWise krijgt een kleine vergoeding als je iets koopt."
+   de knop: "Partnerlink: Kadans krijgt een kleine vergoeding als je iets koopt."
 
 ---
 

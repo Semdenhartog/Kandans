@@ -13,7 +13,7 @@ class RunStreams {
   final List<double>? heartRate;
   final List<LatLng>? positions;
 
-  /// Hoe goed de GPS was (alleen bij runs die met RunWise zijn opgenomen), zie GpsQuality.
+  /// Hoe goed de GPS was (alleen bij runs die met Kadans zijn opgenomen), zie GpsQuality.
   final Map<String, dynamic>? gpsQuality;
 
   int get length => time.length;

@@ -1,7 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Eigen RunWise-geluidjes (zelf gemaakt, in assets/sounds): start, elke km, intervalwissel, record en finish.
+/// Eigen Kadans-geluidjes (zelf gemaakt, in assets/sounds): start, elke km, intervalwissel, record en finish.
 /// Muziek wordt even zachter gezet in plaats van gestopt.
 enum RwSound { start, km, interval, record, finish }
 

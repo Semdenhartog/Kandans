@@ -31,7 +31,7 @@ class DailyReminderSettings {
 
 /// Dagelijkse melding "beste moment vandaag".
 ///
-/// De meldingen worden ingepland op de telefoon zelf, telkens als RunWise de
+/// De meldingen worden ingepland op de telefoon zelf, telkens als Kadans de
 /// weersverwachting ophaalt (bij openen of vernieuwen). De verwachting gaat
 /// 2 dagen vooruit, dus vandaag en morgen staan altijd klaar.
 class NotificationService {
@@ -106,7 +106,7 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Mag RunWise meldingen tonen? (Android 13+ vraagt hier apart om.)
+  /// Mag Kadans meldingen tonen? (Android 13+ vraagt hier apart om.)
   Future<bool> allowed() async {
     await init();
     try {
@@ -340,7 +340,7 @@ class NotificationService {
       if (text == null) return;
       await _plugin.zonedSchedule(
         _weekendId,
-        'Je weekend in RunWise',
+        'Je weekend in Kadans',
         text,
         tz.TZDateTime.from(at.toUtc(), tz.UTC),
         _details,
@@ -367,7 +367,7 @@ class NotificationService {
       }
       await _plugin.zonedSchedule(
         _weeklyId,
-        'Je week in RunWise',
+        'Je week in Kadans',
         'Je weekoverzicht staat klaar: kilometers, schema en tips voor deze week.',
         tz.TZDateTime.from(at.toUtc(), tz.UTC),
         const NotificationDetails(

@@ -67,7 +67,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
         switch (status) {
           case HealthStatus.needsInstall:
             await _sync.installHealthConnect();
-            return 'Installeer Health Connect en kom daarna terug naar RunWise.';
+            return 'Installeer Health Connect en kom daarna terug naar Kadans.';
           case HealthStatus.notConnected:
             final ok = await _sync.connectHealth();
             ref.invalidate(healthStatusProvider);
@@ -113,7 +113,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             ListTile(
               leading: const TileIcon(Icons.route_outlined),
               title: const Text('Routes uit Strava'),
-              subtitle: const Text('Kies welke routes je in RunWise wilt'),
+              subtitle: const Text('Kies welke routes je in Kadans wilt'),
               onTap: () => Navigator.pop(ctx, 'routes'),
             ),
             ListTile(
@@ -145,7 +145,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
       final ok = await confirmDialog(
         context,
         title: 'Strava ontkoppelen?',
-        message: 'RunWise haalt dan geen runs meer op uit Strava, en de runs die uit Strava kwamen worden uit RunWise verwijderd. '
+        message: 'Kadans haalt dan geen runs meer op uit Strava, en de runs die uit Strava kwamen worden uit Kadans verwijderd. '
             'In Strava zelf verandert er niets.',
         confirmLabel: 'Ontkoppelen',
       );
@@ -199,7 +199,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
               builder: (context, snap) => SwitchListTile(
                 secondary: const Icon(Icons.upload_outlined, color: RwColors.subtle),
                 title: const Text('Opgenomen runs naar Samsung Health'),
-                subtitle: const Text('Zet runs die je in RunWise opneemt ook in Health Connect (Samsung Health, Google Fit)'),
+                subtitle: const Text('Zet runs die je in Kadans opneemt ook in Health Connect (Samsung Health, Google Fit)'),
                 value: snap.data ?? false,
                 onChanged: _busy
                     ? null

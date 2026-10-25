@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
   }
 
   return json(200, {
-    name: share.display_name ?? "Een RunWise-loper",
+    name: share.display_name ?? "Een Kadans-loper",
     active,
     started_at: share.started_at,
     expires_at: share.expires_at,

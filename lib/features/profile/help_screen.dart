@@ -22,30 +22,30 @@ const helpFaq = <(String, String)>[
     'Hoe zet ik een route op mijn horloge?',
     'Open een route en tik op "Zet op je horloge". De eerste keer kies je je merk. Garmin krijgt een koers die trilt bij '
         'elke afslag; Coros, Suunto, Polar en Amazfit krijgen een GPX-bestand. Volg daarna de stappen op het scherm. '
-        'Een Galaxy Watch of Pixel Watch laat de afslagen zien als melding terwijl je met RunWise loopt.'
+        'Een Galaxy Watch of Pixel Watch laat de afslagen zien als melding terwijl je met Kadans loopt.'
   ),
   (
     'Moet ik bij het begin van een route starten?',
-    'Nee. Start je run en loop naar de route: RunWise zegt hoe ver en welke kant op. Kom je halverwege op de route, '
+    'Nee. Start je run en loop naar de route: Kadans zegt hoe ver en welke kant op. Kom je halverwege op de route, '
         'dan gaat de begeleiding daar verder. Bij een rondje loop je het hele rondje vanaf dat punt.'
   ),
   (
     'Ik ben van mijn route af. Wat nu?',
-    'RunWise trilt twee keer lang en zegt waar de route ligt, bijvoorbeeld "60 meter links van je". Dat herhaalt '
+    'Kadans trilt twee keer lang en zegt waar de route ligt, bijvoorbeeld "60 meter links van je". Dat herhaalt '
         'zich elke 30 seconden tot je er weer op bent. Je ziet ook een pijl op het scherm.'
   ),
   (
     'Waarom stopt mijn run soms met meten?',
     'Sommige telefoons zetten apps in de slaapstand. Kies bij het starten van een run "Zorg dat je telefoon je run '
-        'niet stopt" en volg de stappen. Dan blijft RunWise meten met het scherm uit.'
+        'niet stopt" en volg de stappen. Dan blijft Kadans meten met het scherm uit.'
   ),
   (
     'Hoe komt de beste vertrektijd tot stand?',
-    'RunWise kijkt per kwartier naar temperatuur, regen, wind op je route, donker, UV en benauwdheid, en naar wat jij '
+    'Kadans kijkt per kwartier naar temperatuur, regen, wind op je route, donker, UV en benauwdheid, en naar wat jij '
         'fijn vindt (dat leert de app van je eerdere runs). Tik op een uur in de grafiek op Vandaag voor de uitleg.'
   ),
   (
-    'Hoe krijg ik mijn runs van mijn horloge in RunWise?',
+    'Hoe krijg ik mijn runs van mijn horloge in Kadans?',
     'Koppel Strava of Health Connect in Ik → Apparaten en koppelingen. Nieuwe runs komen dan vanzelf binnen als je de '
         'app opent.'
   ),
@@ -64,7 +64,7 @@ const helpGlossary = <(String, String)>[
   ('Trainingsbelasting', 'Hoe zwaar je de laatste weken trainde, vergeleken met wat je gewend bent. Te snel omhoog vergroot de kans op blessures.'),
   ('Vorm en fitheid', 'Fitheid bouw je op over weken; vorm is hoe fris je nu bent. Voor een wedstrijd laat je je vorm bewust stijgen.'),
   ('Negatieve split', 'De tweede helft sneller lopen dan de eerste. Vaak de snelste manier om een wedstrijd te lopen.'),
-  ('Gevoelstemperatuur', 'Hoe warm of koud het aanvoelt door wind en vocht. RunWise gebruikt die voor kledingadvies.'),
+  ('Gevoelstemperatuur', 'Hoe warm of koud het aanvoelt door wind en vocht. Kadans gebruikt die voor kledingadvies.'),
 ];
 
 class HelpScreen extends StatelessWidget {

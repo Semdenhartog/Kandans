@@ -57,7 +57,7 @@ String _xml(String s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').repl
 String runsGpx(List<Activity> runs) {
   final b = StringBuffer()
     ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
-    ..writeln('<gpx version="1.1" creator="RunWise" xmlns="http://www.topografix.com/GPX/1/1">');
+    ..writeln('<gpx version="1.1" creator="Kadans" xmlns="http://www.topografix.com/GPX/1/1">');
   final sorted = [...runs.where((a) => a.hasTrack)]..sort((a, b) => a.startedAt.compareTo(b.startedAt));
   for (final a in sorted) {
     final pts = decodePolyline(a.trackPolyline!);

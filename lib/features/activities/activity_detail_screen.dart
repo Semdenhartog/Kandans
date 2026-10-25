@@ -183,7 +183,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                     children: [
                       if (a.hasTrack) ...[
                         const Text(
-                          'Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt RunWise je volgende runs hier vanzelf aan.',
+                          'Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt Kadans je volgende runs hier vanzelf aan.',
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ] else

@@ -42,7 +42,7 @@ class AppLockService {
   }
 
   /// Vraagt om je vingerafdruk. Pincode of patroon van je telefoon mag ook (dan kom je er altijd in).
-  Future<bool> authenticate({String reason = 'Ontgrendel RunWise'}) async {
+  Future<bool> authenticate({String reason = 'Ontgrendel Kadans'}) async {
     if (_busy) return false;
     _busy = true;
     try {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Kleuren van het RunWise-logo: oranje verloop op bijna-zwart.
+/// Kleuren van het Kadans-logo: oranje verloop op bijna-zwart.
 class RwColors {
   static const background = Color(0xFF09090B);
   static const surface = Color(0xFF141417);
@@ -248,7 +248,7 @@ ThemeData buildTheme() {
       insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 14),
       contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: RwColors.text, fontWeight: FontWeight.w500),
     ),
-    // Vernieuwen (omlaag trekken) en laadlijnen in RunWise-kleuren.
+    // Vernieuwen (omlaag trekken) en laadlijnen in Kadans-kleuren.
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: RwColors.accent,
       refreshBackgroundColor: RwColors.surfaceHigh,
