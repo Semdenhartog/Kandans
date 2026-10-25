@@ -32,7 +32,7 @@ class PoiService {
   Future<String> _ask(String url, String query) async {
     final res = await _http
         .post(Uri.parse(url), headers: {'User-Agent': 'Kadans/1.0 (nl.runwise.app)'}, body: {'data': query})
-        .timeout(const Duration(seconds: 20));
+        .timeout(const Duration(seconds: 25));
     if (res.statusCode != 200) throw Exception('Overpass ${res.statusCode}');
     // Controleer dat het echt JSON is (bij drukte stuurt Overpass soms een HTML-pagina).
     parseOverpass(res.body);
@@ -51,27 +51,49 @@ class PoiService {
         return lightingAlong(track, parseLitWays(cached!.data! as String));
       } catch (_) {}
     }
-    final body = await _race(query);
+    final body = await _queued(query);
     OfflineCache.save(key, body).ignore();
     return lightingAlong(track, parseLitWays(body));
   }
 
-  /// Vraagt alle servers tegelijk; het eerste goede antwoord telt.
+  /// Eerst de snelste server; pas als die na een paar seconden niets zegt (of faalt) de volgende erbij.
+  /// Alles tegelijk vragen maakt het juist trager: Overpass laat maar 2 vragen tegelijk toe per telefoon.
   Future<String> _race(String query) {
     final done = Completer<String>();
-    var failed = 0;
+    var started = 0, failed = 0;
     Object? lastError;
-    for (final url in _endpoints) {
+    Timer? next;
+    void start() {
+      if (done.isCompleted || started >= _endpoints.length) return;
+      final url = _endpoints[started++];
+      next?.cancel();
+      next = Timer(const Duration(seconds: 4), start);
       _ask(url, query).then((body) {
-        if (!done.isCompleted) done.complete(body);
+        if (!done.isCompleted) {
+          next?.cancel();
+          done.complete(body);
+        }
       }, onError: (Object e) {
         lastError = e;
-        if (++failed == _endpoints.length && !done.isCompleted) {
-          done.completeError(Exception('Voorzieningen langs de route konden niet worden geladen. ($lastError)'));
+        failed++;
+        if (failed == _endpoints.length && !done.isCompleted) {
+          done.completeError(Exception('Gegevens langs de route konden niet worden geladen. ($lastError)'));
+        } else {
+          start(); // deze faalde: meteen de volgende proberen
         }
       });
     }
+
+    start();
     return done.future;
+  }
+
+  /// Eén vraag tegelijk naar Overpass vanuit deze app (verlichting en voorzieningen na elkaar).
+  Future<void> _queue = Future.value();
+  Future<String> _queued(String query) {
+    final run = _queue.then((_) => _race(query));
+    _queue = run.then((_) {}, onError: (_) {});
+    return run;
   }
 
   Future<List<RoutePoi>> alongRoute(String polyline) async {
@@ -87,7 +109,7 @@ class PoiService {
       } catch (_) {}
     }
     try {
-      final body = await _race(query);
+      final body = await _queued(query);
       OfflineCache.save(key, body).ignore();
       return poisAlongRoute(parseOverpass(body), track);
     } catch (e) {

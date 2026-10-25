@@ -19,7 +19,7 @@ void main() {
     expect(l.lit, closeTo(600, 45));
     expect(l.unlit, closeTo(400, 45));
     expect(l.unknown, lessThan(5));
-    expect(sampleTrack(route).length, inInclusiveRange(12, 14));
-    expect(litQuery(sampleTrack(route)), startsWith('[out:json][timeout:25];way["highway"](around:25,52.00000,5.00000'));
+    expect(sampleTrack(route).length, inInclusiveRange(8, 10));
+    expect(litQuery(sampleTrack(route)), startsWith('[out:json][timeout:20];way["highway"](around:20,52.00000,5.00000'));
   });
 }

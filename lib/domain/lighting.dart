@@ -7,16 +7,17 @@ import 'route_geometry.dart';
 /// Straatverlichting langs een route, uit OpenStreetMap (tag "lit" op wegen en paden).
 
 /// Punten om de [every] meter langs de route (voor een korte Overpass-vraag).
-List<LatLng> sampleTrack(RouteTrack t, {double every = 80, int max = 180}) {
+List<LatLng> sampleTrack(RouteTrack t, {double every = 120, int max = 110}) {
   if (!t.isValid) return const [];
   final step = math.max(every, t.length / max);
   return [for (var m = 0.0; m <= t.length; m += step) t.at(m)];
 }
 
-/// Overpass-vraag: alle wegen en paden binnen 25 m van de route, met hun vorm.
+/// Overpass-vraag: alle wegen en paden binnen 20 m van de route, met hun vorm.
+/// Lichter dan voorheen (minder punten, kleinere straal), zodat de server sneller antwoordt.
 String litQuery(List<LatLng> samples) {
   final coords = samples.map((p) => '${p.lat.toStringAsFixed(5)},${p.lon.toStringAsFixed(5)}').join(',');
-  return '[out:json][timeout:25];way["highway"](around:25,$coords);out tags geom 2000;';
+  return '[out:json][timeout:20];way["highway"](around:20,$coords);out tags geom 1500;';
 }
 
 class LitWay {

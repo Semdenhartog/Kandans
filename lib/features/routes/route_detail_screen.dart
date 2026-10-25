@@ -617,7 +617,7 @@ class _LightingCard extends ConsumerWidget {
     return RwCard(
       title: 'VERLICHTING',
       child: l.when(
-        loading: () => Text('Verlichting wordt geladen…', style: TextStyle(color: RwColors.muted)),
+        loading: () => Text('Verlichting wordt geladen… De eerste keer duurt dit even; daarna staat het meteen klaar.', style: TextStyle(color: RwColors.muted, height: 1.35)),
         error: (_, _) => Row(children: [
           Expanded(child: Text('Verlichting is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted))),
           TextButton(onPressed: () => ref.invalidate(routeLightingProvider(polyline)), child: const Text('Opnieuw')),
