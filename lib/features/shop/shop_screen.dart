@@ -109,7 +109,7 @@ class ShopScreen extends ConsumerWidget {
                                   aspectRatio: 3 / 4,
                                   child: IgnorePointer(
                                     child: RoutePosterArt(
-                                      style: i.isEven ? PosterStyle.goud : PosterStyle.nacht,
+                                      style: i.isEven ? PosterStyle.goud : PosterStyle.marmer,
                                       data: PosterData(
                                         title: r.name,
                                         polyline: r.polyline,
