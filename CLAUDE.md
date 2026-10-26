@@ -34,8 +34,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   - `screens.yml`: schermafbeeldingen (licht + `6x_donker_*`, ook grote letters) naar branch `schermen-<branch>`,
     incl. `screens.txt`; faalt op "overflowed by". Play Store-plaatjes in `playstore/`.
   - `supabase-functies.yml`: zet alle edge functions live, met de hand én vanzelf bij een push naar main die `supabase/functions/**` raakt
-    (**werkt pas als GitHub-secret `SUPABASE_ACCESS_TOKEN` bestaat** — 25 okt nog niet gevonden; zonder token: waarschuwing, geen fout).
-    Tot die tijd: losse functie live zetten via de Supabase-MCP `deploy_edge_function` (imports `../_shared/x` → `./_shared/x`).
+    (GitHub-secret `SUPABASE_ACCESS_TOKEN` is gezet en werkt sinds 26 okt; zonder token: waarschuwing, geen fout).
   - `geheimen.yml`: geheimen-scan.
   - `site.yml`: zet `site/` op GitHub Pages (**Pages staat nog uit** → Settings → Pages → Source: GitHub Actions) en vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in (wachtlijst). Links in `site/` zijn relatief (Pages draait op `/Runwise/`).
@@ -69,7 +68,6 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 180). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
-- GitHub-secret `SUPABASE_ACCESS_TOKEN` zetten (dan kan alles met één klik live). Daarna: coach (doel + antwoordlengte) live.
 - GitHub Pages aanzetten; `site/privacy.html` [NAAM], [PLAATS], [E-MAILADRES] invullen; migraties 0030 en 0031 draaien.
 - Supabase Auth-mailtemplates zeggen nog "RunWise" → aanpassen (Authentication → Email Templates).
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
