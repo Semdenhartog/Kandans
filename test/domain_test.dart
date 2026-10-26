@@ -674,6 +674,51 @@ void main() {
       final list = runWarnings(fc((t) => w(t)), t0, 30, air: at);
       expect(list.map((x) => x.kind), containsAll(['air', 'pollen']));
       expect(list.firstWhere((x) => x.kind == 'pollen').title, 'Veel graspollen');
+      // Geen hooikoorts: geen pollen; wel hooikoorts: zwaarder.
+      expect(runWarnings(fc((t) => w(t)), t0, 30, air: at, pollen: PollenSensitivity.none).any((x) => x.kind == 'pollen'), isFalse);
+      expect(runWarnings(fc((t) => w(t)), t0, 30, air: at, pollen: PollenSensitivity.hayfever)
+          .firstWhere((x) => x.kind == 'pollen').level, WarningLevel.danger);
+    });
+
+    HourWeather wx(DateTime t, {double temp = 12, double? feels, double wind = 10, int code = 2, double rain = 0, double? prob, double? hum}) =>
+        HourWeather(time: t, temperature: temp, feelsLike: feels ?? temp, windSpeed: wind, windGusts: wind + 10, windDirection: 225,
+            weatherCode: code, isDay: true, precipitation: rain, precipitationProbability: prob, humidity: hum);
+
+    test('mist, natte bladeren en twijfelbui', () {
+      expect(runWarnings(fc((t) => wx(t, code: 45)), t0, 45).map((x) => x.kind), contains('fog'));
+      expect(runWarnings(fc((t) => wx(t, rain: 0.3)), t0, 45).map((x) => x.kind), contains('leaves'));
+      final maybe = runWarnings(fc((t) => wx(t, prob: 40)), t0, 45);
+      expect(maybe.map((x) => x.kind), contains('rainmaybe'));
+      expect(maybe.firstWhere((x) => x.kind == 'rainmaybe').text, contains('40%'));
+    });
+
+    test('wind: begin tegen de wind in (niet als je een route volgt)', () {
+      final list = runWarnings(fc((t) => wx(t, wind: 24)), t0, 45);
+      expect(list.firstWhere((x) => x.kind == 'windtip').text, contains('zuidwesten'));
+      expect(runWarnings(fc((t) => wx(t, wind: 24)), t0, 45, hasRoute: true).any((x) => x.kind == 'windtip'), isFalse);
+    });
+
+    test('eerste warme dag, benauwd en kou', () {
+      final warm = runWarnings(fc((t) => wx(t, temp: 24, hum: 80)), t0, 45, recentMaxTemp: 14);
+      expect(warm.map((x) => x.kind), containsAll(['acclimatise', 'muggy']));
+      expect(runWarnings(fc((t) => wx(t, temp: 24)), t0, 45, recentMaxTemp: 22).any((x) => x.kind == 'acclimatise'), isFalse);
+      expect(runWarnings(fc((t) => wx(t, temp: -1, feels: -6)), t0, 45).map((x) => x.kind), contains('cold'));
+      expect(runWarnings(fc((t) => wx(t, temp: 6, feels: 0)), t0, 45).map((x) => x.kind), contains('windchill'));
+    });
+  });
+
+  group('kledingadvies', () {
+    final t = DateTime(2026, 10, 20, 17);
+    HourWeather w(double temp) => HourWeather(time: t, temperature: temp, feelsLike: temp, windSpeed: 5, isDay: true);
+    test('snel koud = een laagje warmer', () {
+      final normal = clothingFor(w(7), TrainingType.easy);
+      final cold = clothingFor(w(7), TrainingType.easy, feel: ClothingFeel.cold);
+      expect(normal.summary, isNot(cold.summary));
+      expect(cold.items.length, greaterThanOrEqualTo(normal.items.length));
+    });
+    test('drinkadvies bij warmte', () {
+      expect(clothingFor(w(26), TrainingType.easy, durationMinutes: 50).extras.join(' '), contains('ml per uur'));
+      expect(clothingFor(w(12), TrainingType.easy, durationMinutes: 40).extras.join(' '), isNot(contains('drink')));
     });
   });
 

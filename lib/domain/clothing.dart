@@ -1,6 +1,20 @@
 import '../data/models/models.dart';
 import 'start_time_scoring.dart';
 
+/// Hoe snel je het koud of warm hebt (Ik → Kledingadvies). Schuift het advies een paar graden op.
+enum ClothingFeel {
+  cold('Ik heb het snel koud', 'Advies een laagje warmer', -3),
+  normal('Normaal', 'Het standaard advies', 0),
+  warm('Ik heb het snel warm', 'Advies een laagje luchtiger', 3);
+
+  const ClothingFeel(this.label, this.explanation, this.bias);
+  final String label;
+  final String explanation;
+
+  /// Graden die bij de "looptemperatuur" opgeteld worden.
+  final int bias;
+}
+
 /// Kledingadvies voor één run.
 class ClothingAdvice {
   const ClothingAdvice({required this.summary, required this.items, required this.extras});
@@ -25,9 +39,9 @@ double runningTemperature(double feelsLike, TrainingType type) => feelsLike +
       TrainingType.recovery => 7,
     };
 
-ClothingAdvice clothingFor(HourWeather w, TrainingType type, {int durationMinutes = 45}) {
+ClothingAdvice clothingFor(HourWeather w, TrainingType type, {int durationMinutes = 45, ClothingFeel feel = ClothingFeel.normal}) {
   final feels = w.feelsLike ?? w.temperature;
-  final t = runningTemperature(feels, type);
+  final t = runningTemperature(feels, type) + feel.bias;
   final items = <String>[];
   final String summary;
 
@@ -63,7 +77,14 @@ ClothingAdvice clothingFor(HourWeather w, TrainingType type, {int durationMinute
   if ((w.uvIndex ?? 0) >= 5 && w.isDay) extras.add('Pet en zonnebrand (UV ${w.uvIndex!.round()})');
   if (!w.isDay) extras.add('Reflecterende kleding en een lampje: het is donker');
   if (w.temperature <= 1) extras.add('Kans op gladheid: kies schoenen met grip of een veilige route');
-  if (durationMinutes >= 75 && feels >= 15) extras.add('Neem drinken mee: je bent lang onderweg');
+  // Drinken: hoeveel, afhankelijk van warmte en duur.
+  if (feels >= 22 && durationMinutes >= 45) {
+    extras.add('Drink vooraf een glas water en neem 400–700 ml per uur mee: het is warm');
+  } else if (durationMinutes >= 75 && feels >= 15) {
+    extras.add('Neem drinken mee (ongeveer 400–600 ml per uur): je bent lang onderweg');
+  } else if (durationMinutes >= 90) {
+    extras.add('Neem iets te drinken mee voor onderweg: je bent lang weg');
+  }
 
   return ClothingAdvice(summary: summary, items: items, extras: extras);
 }

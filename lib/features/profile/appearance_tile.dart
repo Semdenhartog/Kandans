@@ -48,6 +48,20 @@ class AppearanceTile extends StatelessWidget {
               onSelectionChanged: (v) => c.set(v.first),
             ),
           ),
+          const SizedBox(height: 14),
+          Text('Openen op', style: TextStyle(fontSize: 13, color: RwColors.subtle, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<String>(
+              showSelectedIcon: false,
+              segments: [
+                for (final e in AppearanceController.startTabs.entries) ButtonSegment(value: e.key, label: Text(e.value)),
+              ],
+              selected: {c.startTab},
+              onSelectionChanged: (v) => c.setStartTab(v.first),
+            ),
+          ),
         ]),
       ),
     );

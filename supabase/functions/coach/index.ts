@@ -362,6 +362,11 @@ Deno.serve(async (req) => {
     race: "een wedstrijd lopen",
   };
   const goal = goals[String(body.goal ?? "")];
+  const lengths: Record<string, string> = {
+    short: "Houd je antwoord deze keer heel kort: hooguit 4 regels of 3 punten, alleen de kern.",
+    long: "De loper wil meer uitleg: geef de kern en daarna gerust achtergrond en het waarom (maximaal ongeveer 250 woorden).",
+  };
+  const lengthNote = lengths[String(body.length ?? "")] ?? "";
   const context = (await buildContext(db, userId, profile)) + (goal ? `\nDoel van de loper: ${goal}.` : "");
 
   const ai = await fetch("https://api.anthropic.com/v1/messages", {
@@ -374,7 +379,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       model: env("COACH_MODEL") || "claude-haiku-5-5",
       max_tokens: 900,
-      system: `${SYSTEM_PROMPT}\n\nGegevens van de loper (uit Kadans):\n${context}`,
+      system: `${SYSTEM_PROMPT}${lengthNote ? `\n\n${lengthNote}` : ""}\n\nGegevens van de loper (uit Kadans):\n${context}`,
       messages,
     }),
     signal: AbortSignal.timeout(60_000),

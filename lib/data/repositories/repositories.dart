@@ -440,7 +440,12 @@ class RunWiseRepository {
   Future<CoachReply> askCoach(String message) async {
     try {
       final goal = await savedRunGoal();
-      final res = await _db.functions.invoke('coach', body: {'message': message, if (goal != null) 'goal': goal.name});
+      final style = await savedCoachStyle();
+      final res = await _db.functions.invoke('coach', body: {
+        'message': message,
+        if (goal != null) 'goal': goal.name,
+        if (style != CoachLength.normal) 'length': style.name,
+      });
       final data = (res.data as Map).cast<String, dynamic>();
       return CoachReply(
         reply: data['reply'] as String,

@@ -697,7 +697,7 @@ Future<void> showSessionBriefing(BuildContext context, PlanSession session, {int
       final feels = w?.feelsLike ?? w?.temperature;
       final pace = s.intervals == null || s.intervals!.walkRun ? s.targetPace : null;
       final hot = pace != null && feels != null ? heatAdjustedPace(pace, feelsLike: feels, humidity: w?.humidity) : null;
-      final clothes = w == null ? null : clothingFor(w, _typeFor(s), durationMinutes: minutes);
+      final clothes = w == null ? null : clothingFor(w, _typeFor(s), durationMinutes: minutes, feel: ref.watch(clothingFeelProvider));
       final walkRun = s.intervals?.walkRun ?? false;
       final tip = walkRun
           ? 'Wandelen hoort erbij en is geen falen. Loop zo rustig dat je kunt praten; de stem zegt wanneer je wisselt.'

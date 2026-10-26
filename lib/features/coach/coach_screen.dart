@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
+import '../../domain/run_goal.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../shared/first_tips.dart';
@@ -105,6 +106,38 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     }
   }
 
+  /// Kies hoe lang de antwoorden van de coach zijn.
+  Future<void> _chooseLength() async {
+    final current = await savedCoachStyle();
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<CoachLength>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text('Hoe lang mogen de antwoorden zijn?', style: RwText.title.copyWith(fontSize: 20)),
+            ),
+            for (final c in CoachLength.values)
+              ListTile(
+                leading: Icon(c == current ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                    color: c == current ? RwColors.accent : RwColors.subtle),
+                title: Text(c.label),
+                subtitle: Text(c.explanation),
+                onTap: () => Navigator.pop(ctx, c),
+              ),
+          ]),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    await saveCoachStyle(picked);
+    if (mounted) showMessage(context, 'De coach antwoordt vanaf nu ${picked.label.toLowerCase()}.');
+  }
+
   @override
   Widget build(BuildContext context) {
     final history = ref.watch(coachMessagesProvider);
@@ -122,6 +155,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               padding: const EdgeInsets.only(right: 4),
               child: _GoldPill(onTap: () => context.push('/premium')),
             ),
+          IconButton(
+            tooltip: 'Lengte van de antwoorden',
+            icon: const Icon(Icons.short_text),
+            onPressed: _chooseLength,
+          ),
           IconButton(
             tooltip: 'Gesprek wissen',
             icon: const Icon(Icons.delete_sweep_outlined),

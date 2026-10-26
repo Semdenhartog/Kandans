@@ -557,6 +557,8 @@ class RunRecorderService {
     String? briefing,
     double? targetMeters,
     bool quests = false,
+    QuestLevel questLevel = QuestLevel.normal,
+    int questGapMinutes = 5,
   }) async {
     try {
       _simpleArrows = (await SharedPreferences.getInstance()).getBool('simple_turn_arrows') ?? false;
@@ -593,7 +595,8 @@ class RunRecorderService {
     _laps.clear();
     _lapStartT = 0;
     _lapStartD = 0;
-    _quests = quests && !indoor && intervals == null && guided == null ? QuestMaster(targetMeters: targetMeters) : null;
+    _quests = quests && !indoor && intervals == null && guided == null ? QuestMaster(targetMeters: targetMeters, level: questLevel, gapSeconds: questGapMinutes * 60.0)
+        : null;
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
     _turns = _follower == null ? null : TurnGuide(detectTurns(_follower!.track));

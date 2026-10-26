@@ -63,13 +63,30 @@ String _spoken(double secPerKm) {
 }
 
 /// Volgt de opdrachten. Roep [update] aan bij elke GPS-meting.
+/// Hoe pittig de opdrachten zijn.
+enum QuestLevel {
+  easy('Rustig', 0.6),
+  normal('Normaal', 1),
+  hard('Pittig', 1.4);
+
+  const QuestLevel(this.label, this.factor);
+  final String label;
+
+  /// Vermenigvuldigt hoeveel sneller dan je gemiddelde je moet lopen.
+  final double factor;
+}
+
 class QuestMaster {
   QuestMaster({
     this.warmupSeconds = 8 * 60,
     this.warmupMeters = 1200,
     this.gapSeconds = 5 * 60,
     this.targetMeters,
+    this.level = QuestLevel.normal,
   });
+
+  /// Rustig, normaal of pittig.
+  final QuestLevel level;
 
   /// Eerst rustig inlopen.
   final double warmupSeconds;
@@ -110,13 +127,17 @@ class QuestMaster {
     return (1 - remaining(t, d) / whole).clamp(0, 1).toDouble();
   }
 
-  Quest _make(QuestKind kind, double base) => switch (kind) {
-        // Sneller dan je gemiddelde, met een ondergrens zodat het haalbaar blijft.
-        QuestKind.sprint => Quest(kind: kind, targetPace: (base - 50).clamp(150, 900).toDouble(), seconds: 20),
-        QuestKind.fastMinute => Quest(kind: kind, targetPace: (base - 25).clamp(160, 900).toDouble(), seconds: 60),
-        QuestKind.steadyKm => Quest(kind: kind, targetPace: (base - 10).clamp(170, 900).toDouble(), meters: 1000),
-        QuestKind.strongFinish => Quest(kind: kind, targetPace: (base - 15).clamp(160, 900).toDouble(), meters: 500),
-      };
+  Quest _make(QuestKind kind, double base) {
+    final f = level.factor;
+    // Sneller dan je gemiddelde, met een ondergrens zodat het haalbaar blijft.
+    double pace(double faster, double floor) => (base - faster * f).clamp(floor, 900).toDouble();
+    return switch (kind) {
+      QuestKind.sprint => Quest(kind: kind, targetPace: pace(50, 150), seconds: level == QuestLevel.hard ? 30 : 20),
+      QuestKind.fastMinute => Quest(kind: kind, targetPace: pace(25, 160), seconds: 60),
+      QuestKind.steadyKm => Quest(kind: kind, targetPace: pace(10, 170), meters: 1000),
+      QuestKind.strongFinish => Quest(kind: kind, targetPace: pace(15, 160), meters: 500),
+    };
+  }
 
   String _intro(Quest q) => switch (q.kind) {
         QuestKind.sprint => 'Opdracht: sprint ${q.seconds!.round()} seconden, sneller dan ${_spoken(q.targetPace)}. Start nu!',

@@ -29,6 +29,7 @@ import '../features/routes/route_detail_screen.dart';
 import '../features/routes/routes_screen.dart';
 import '../shared/home_shell.dart';
 import '../shared/tab_scroll.dart';
+import 'appearance.dart';
 import 'supabase.dart';
 import '../features/shop/shop_screen.dart';
 
@@ -57,7 +58,8 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
-    initialLocation: '/today',
+    // Openen op het tabblad dat je koos in Ik → Weergave (standaard Vandaag).
+    initialLocation: AppearanceController.instance.startTab,
     refreshListenable: refresh,
     redirect: (context, state) {
       final loggedIn = auth.currentSession != null;
@@ -71,7 +73,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (loggedIn && isPublic) {
         final code = _pendingInvite;
         _pendingInvite = null;
-        return code == null ? '/today' : '/vriend?code=${Uri.encodeQueryComponent(code)}';
+        return code == null ? AppearanceController.instance.startTab : '/vriend?code=${Uri.encodeQueryComponent(code)}';
       }
       return null;
     },

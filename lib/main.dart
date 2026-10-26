@@ -16,6 +16,7 @@ import 'shared/config_missing_app.dart';
 import 'data/services/app_lock_service.dart';
 import 'data/services/heart_rate_service.dart';
 import 'core/appearance.dart';
+import 'domain/run_goal.dart';
 
 void main() {
   runZonedGuarded(() {
@@ -56,6 +57,7 @@ class _BootstrapState extends State<_Bootstrap> {
 
   Future<void> _start() async {
     await AppearanceController.instance.load();
+    await loadRunGoal();
     await initializeDateFormatting('nl_NL');
     await NotificationService.instance.init().catchError((_) {});
     await AppLockService.instance.load();

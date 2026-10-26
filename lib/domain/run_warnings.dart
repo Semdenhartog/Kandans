@@ -30,6 +30,17 @@ class AirQuality {
 
 enum WarningLevel { info, caution, danger }
 
+/// Hooikoorts-instelling (Ik → Pollen): bepaalt of en hoe pollen meetellen in de waarschuwingen.
+enum PollenSensitivity {
+  none('Geen hooikoorts', 'Geen pollenmeldingen'),
+  normal('Normaal', 'Een melding bij veel pollen'),
+  hayfever('Ik heb hooikoorts', 'Ook bij matige pollen een waarschuwing, met tips');
+
+  const PollenSensitivity(this.label, this.explanation);
+  final String label;
+  final String explanation;
+}
+
 class RunWarning {
   const RunWarning(this.level, this.title, this.text, {this.kind = ''});
   final WarningLevel level;
@@ -65,7 +76,18 @@ DateTime? nextDarkness(Forecast f, DateTime from) {
 }
 
 /// Waarschuwingen voor een run die om [start] begint en [minutes] duurt.
-List<RunWarning> runWarnings(Forecast f, DateTime start, int minutes, {AirQuality? air}) {
+///
+/// [pollen]: hoe zwaar pollen meetellen. [recentMaxTemp]: de warmste run van de afgelopen weken (°C), om de
+/// eerste warme dag te herkennen. [hasRoute]: je volgt een route (dan staat de wind al in de routekaart).
+List<RunWarning> runWarnings(
+  Forecast f,
+  DateTime start,
+  int minutes, {
+  AirQuality? air,
+  PollenSensitivity pollen = PollenSensitivity.normal,
+  double? recentMaxTemp,
+  bool hasRoute = false,
+}) {
   final during = weatherDuring(f, start, minutes);
   if (during.isEmpty) return const [];
   final out = <RunWarning>[];
@@ -90,6 +112,10 @@ List<RunWarning> runWarnings(Forecast f, DateTime start, int minutes, {AirQualit
 
   // Warmte.
   final feels = during.map((w) => w.feelsLike ?? w.temperature).reduce(math.max);
+  final coolest = feels >= 25 ? _coolestDaylight(f, start) : null;
+  final coolerText = coolest != null && (coolest.feelsLike ?? coolest.temperature) <= feels - 4
+      ? ' Om ${_hhmm(coolest.time)} is het ${(coolest.feelsLike ?? coolest.temperature).round()} °C.'
+      : '';
   if (feels >= 25) {
     // Ongeveer 0,35% trager per graad boven 15 °C, bij 6:00/km.
     final slower = ((feels - 15) * 0.0035 * 360).round();
@@ -97,9 +123,22 @@ List<RunWarning> runWarnings(Forecast f, DateTime start, int minutes, {AirQualit
       feels >= 30 ? WarningLevel.danger : WarningLevel.caution,
       feels >= 30 ? 'Heet: pas op voor oververhitting' : 'Warm',
       'Gevoelstemperatuur tot ${feels.round()} °C. Loop ongeveer $slower s/km rustiger, neem drinken mee '
-          'en stop bij duizeligheid of hoofdpijn.',
+          'en stop bij duizeligheid of hoofdpijn.$coolerText',
       kind: 'heat',
     ));
+  }
+  // Eerste warme dag: je lichaam is nog niet gewend aan warmte (dat duurt 1–2 weken).
+  if (feels >= 22 && recentMaxTemp != null && recentMaxTemp < feels - 6) {
+    out.add(RunWarning(WarningLevel.caution, 'Eerste warme dag',
+        'Je liep de afgelopen weken bij hooguit ${recentMaxTemp.round()} °C. Je lichaam moet nog wennen aan warmte: '
+            'begin rustig en drink extra.',
+        kind: 'acclimatise'));
+  }
+  // Benauwd: warm en vochtig, zweet verdampt slecht.
+  final muggy = during.any((w) => w.temperature >= 20 && (w.humidity ?? 0) >= 75);
+  if (muggy && feels < 30) {
+    out.add(const RunWarning(WarningLevel.info, 'Benauwd',
+        'Warm en vochtig: je zweet verdampt slecht. Loop wat rustiger dan je gevoel zegt.', kind: 'muggy'));
   }
 
   // Gladheid.
@@ -117,6 +156,48 @@ List<RunWarning> runWarnings(Forecast f, DateTime start, int minutes, {AirQualit
   } else if (minTemp <= 0) {
     out.add(const RunWarning(WarningLevel.caution, 'Kans op gladheid',
         'Het vriest. Bruggen, fietspaden en bladeren kunnen glad zijn.', kind: 'ice'));
+  }
+
+  // Kou: warming-up binnen en gure wind.
+  final coldFeels = during.map((w) => w.feelsLike ?? w.temperature).reduce(math.min);
+  if (coldFeels <= -3) {
+    out.add(RunWarning(WarningLevel.info, 'Koud',
+        'Voelt als ${coldFeels.round()} °C. Doe je warming-up binnen en begin rustig: koude lucht prikt in je longen.',
+        kind: 'cold'));
+  } else if (minTemp <= 8 && during.any((w) => (w.feelsLike ?? w.temperature) <= w.temperature - 5)) {
+    out.add(RunWarning(WarningLevel.info, 'Gure wind',
+        'Door de wind voelt het als ${coldFeels.round()} °C. Bescherm je handen en oren.', kind: 'windchill'));
+  }
+
+  // Mist: slecht zicht.
+  if (during.any((w) => w.weatherCode == 45 || w.weatherCode == 48)) {
+    out.add(const RunWarning(WarningLevel.caution, 'Mist',
+        'Slecht zicht: draag felle kleuren en een lampje, en pas op bij oversteken.', kind: 'fog'));
+  }
+
+  // Herfst: natte bladeren zijn glad.
+  if ((start.month == 10 || start.month == 11) && minTemp > 1 &&
+      during.any((w) => (w.precipitation ?? 0) > 0.05 || (w.precipitationProbability ?? 0) >= 60)) {
+    out.add(const RunWarning(WarningLevel.info, 'Natte bladeren',
+        'Op fietspaden en in het bos zijn natte bladeren glad, vooral in bochten.', kind: 'leaves'));
+  }
+
+  // Twijfelachtige bui: modellen geven een middelgrote kans zonder echte regen.
+  final dry = during.every((w) => (w.precipitation ?? 0) < 0.1);
+  final maybe = during.map((w) => w.precipitationProbability ?? 0).fold<double>(0, math.max);
+  if (dry && maybe >= 30 && maybe < 60) {
+    out.add(RunWarning(WarningLevel.info, 'Misschien een bui',
+        'Kans op regen ${maybe.round()}%: het is onzeker. Een dun jack is genoeg.', kind: 'rainmaybe'));
+  }
+
+  // Wind op een rondje zonder route: begin tegen de wind in.
+  final wind = during.map((w) => w.windSpeed).reduce(math.max);
+  if (!hasRoute && wind >= 20 && gust < 45) {
+    final dir = during.first.windDirection;
+    final from = dir == null ? '' : ' (wind uit het ${_compass(dir)})';
+    out.add(RunWarning(WarningLevel.info, 'Begin tegen de wind in',
+        'Stevige wind$from: loop eerst tegen de wind in, dan heb je hem op de terugweg mee als je moe bent.',
+        kind: 'windtip'));
   }
 
   // Donker.
@@ -156,16 +237,46 @@ List<RunWarning> runWarnings(Forecast f, DateTime start, int minutes, {AirQualit
       for (final e in pollen.entries)
         if ((e.value ?? 0) >= _pollenLevels[e.key]!.moderate && !high.contains(e.key)) e.key,
     ];
-    if (high.isNotEmpty) {
-      out.add(RunWarning(WarningLevel.caution, 'Veel ${high.join(' en ')}',
-          'Last van hooikoorts? Loop liever na een regenbui of laat op de avond, en draag een zonnebril.',
+    if (pollen == PollenSensitivity.none) {
+      // Geen hooikoorts: geen pollenmeldingen.
+    } else if (high.isNotEmpty) {
+      out.add(RunWarning(
+          pollen == PollenSensitivity.hayfever ? WarningLevel.danger : WarningLevel.caution,
+          'Veel ${high.join(' en ')}',
+          pollen == PollenSensitivity.hayfever
+              ? 'Kies liever een ander moment: na een regenbui of laat op de avond. Zonnebril op en douche na je run.'
+              : 'Last van hooikoorts? Loop liever na een regenbui of laat op de avond, en draag een zonnebril.',
           kind: 'pollen'));
     } else if (moderate.isNotEmpty) {
-      out.add(RunWarning(WarningLevel.info, 'Wat ${moderate.join(' en ')}',
-          'Met hooikoorts kun je er last van hebben.', kind: 'pollen'));
+      out.add(RunWarning(
+          pollen == PollenSensitivity.hayfever ? WarningLevel.caution : WarningLevel.info,
+          'Wat ${moderate.join(' en ')}',
+          pollen == PollenSensitivity.hayfever
+              ? 'Je kunt er last van hebben: zonnebril op en neem je medicijnen op tijd.'
+              : 'Met hooikoorts kun je er last van hebben.',
+          kind: 'pollen'));
     }
   }
 
   out.sort((a, b) => b.level.index.compareTo(a.level.index));
   return out;
+}
+
+/// Koelste uur bij daglicht in de komende 18 uur (voor het tip bij hitte).
+HourWeather? _coolestDaylight(Forecast f, DateTime from) {
+  HourWeather? best;
+  for (final w in f.hours) {
+    if (w.time.isBefore(from) || w.time.isAfter(from.add(const Duration(hours: 18))) || !w.isDay) continue;
+    final t = w.feelsLike ?? w.temperature;
+    if (best == null || t < (best.feelsLike ?? best.temperature)) best = w;
+  }
+  return best;
+}
+
+String _hhmm(DateTime t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+/// Windrichting in woorden ("zuidwesten").
+String _compass(double deg) {
+  const names = ['noorden', 'noordoosten', 'oosten', 'zuidoosten', 'zuiden', 'zuidwesten', 'westen', 'noordwesten'];
+  return names[((deg % 360) / 45).round() % 8];
 }

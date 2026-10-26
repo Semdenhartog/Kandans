@@ -5,6 +5,8 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/weather_service.dart';
+import '../../domain/clothing.dart';
+import '../../domain/run_warnings.dart';
 import '../../domain/dashboard_layout.dart';
 import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
@@ -57,6 +59,55 @@ class RainPreferenceNotifier extends Notifier<RainPreference> {
     } catch (_) {}
   }
 }
+
+/// Een keuze uit een enum, bewaard op de telefoon.
+class _EnumPref<T extends Enum> extends Notifier<T> {
+  _EnumPref(this._key, this._values, this._initial);
+  final String _key;
+  final List<T> _values;
+  final T _initial;
+
+  @override
+  T build() {
+    _load();
+    return _initial;
+  }
+
+  Future<void> _load() async {
+    try {
+      final name = (await SharedPreferences.getInstance()).getString(_key);
+      final match = _values.where((v) => v.name == name);
+      if (match.isNotEmpty) state = match.first;
+    } catch (_) {}
+  }
+
+  Future<void> set(T value) async {
+    state = value;
+    try {
+      await (await SharedPreferences.getInstance()).setString(_key, value.name);
+    } catch (_) {}
+  }
+}
+
+/// Ik → Kledingadvies: snel koud, normaal of snel warm.
+final clothingFeelProvider = NotifierProvider<_EnumPref<ClothingFeel>, ClothingFeel>(
+    () => _EnumPref('clothing_feel', ClothingFeel.values, ClothingFeel.normal));
+
+/// Ik → Pollen: geen hooikoorts, normaal of hooikoorts.
+final pollenSensitivityProvider = NotifierProvider<_EnumPref<PollenSensitivity>, PollenSensitivity>(
+    () => _EnumPref('pollen_sensitivity', PollenSensitivity.values, PollenSensitivity.normal));
+
+/// Warmste run (°C) van de afgelopen 3 weken, om "eerste warme dag" te herkennen (null = te weinig runs).
+final recentMaxRunTempProvider = Provider<double?>((ref) {
+  final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+  final since = DateTime.now().subtract(const Duration(days: 21));
+  final temps = [
+    for (final a in runs)
+      if (a.startedAt.isAfter(since) && a.temperatureCelsius != null) a.temperatureCelsius!,
+  ];
+  if (temps.length < 3) return null;
+  return temps.reduce((a, b) => a > b ? a : b);
+});
 
 /// Beste vertrekmoment per route (rustige duurloop), voor de routelijst.
 /// Sleutel = route-id.

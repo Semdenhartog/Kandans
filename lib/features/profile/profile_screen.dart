@@ -31,6 +31,9 @@ import 'help_screen.dart';
 import 'member_card.dart';
 import 'reminder_tile.dart';
 import '../shop/shop_tile.dart';
+import '../../domain/clothing.dart';
+import '../../domain/run_goal.dart';
+import '../../domain/run_warnings.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -174,6 +177,68 @@ class ProfileScreen extends ConsumerWidget {
                     subtitle: Text(rain.label),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _pickRain(context, ref),
+                  );
+                }),
+                const Divider(height: 1, indent: 56),
+                // Je doel (uit de rondleiding), later aan te passen. Gaat mee naar de coach.
+                ValueListenableBuilder<RunGoal?>(
+                  valueListenable: runGoalNotifier,
+                  builder: (context, goal, _) => ListTile(
+                    leading: TileIcon(Icons.emoji_events_outlined, color: RwColors.accent),
+                    title: const Text('Mijn doel'),
+                    subtitle: Text(goal?.label ?? 'Nog niet gekozen'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final current = goal ?? await savedRunGoal();
+                      if (!context.mounted) return;
+                      await _pickOption<RunGoal?>(
+                        context,
+                        title: 'Waarvoor loop je?',
+                        values: RunGoal.values,
+                        current: current,
+                        label: (v) => v!.label,
+                        explanation: (v) => v!.explanation,
+                        onPick: (v) => saveRunGoal(v!),
+                      );
+                    },
+                  ),
+                ),
+                const Divider(height: 1, indent: 56),
+                Consumer(builder: (context, ref, _) {
+                  final feel = ref.watch(clothingFeelProvider);
+                  return ListTile(
+                    leading: TileIcon(Icons.checkroom_outlined, color: RwColors.accent),
+                    title: const Text('Kledingadvies'),
+                    subtitle: Text(feel.label),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _pickOption<ClothingFeel>(
+                      context,
+                      title: 'Hoe snel heb je het koud?',
+                      values: ClothingFeel.values,
+                      current: feel,
+                      label: (v) => v.label,
+                      explanation: (v) => v.explanation,
+                      onPick: (v) => ref.read(clothingFeelProvider.notifier).set(v),
+                    ),
+                  );
+                }),
+                const Divider(height: 1, indent: 56),
+                Consumer(builder: (context, ref, _) {
+                  final pollen = ref.watch(pollenSensitivityProvider);
+                  return ListTile(
+                    leading: TileIcon(Icons.local_florist_outlined, color: RwColors.accent),
+                    title: const Text('Hooikoorts en pollen'),
+                    subtitle: Text(pollen.label),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _pickOption<PollenSensitivity>(
+                      context,
+                      title: 'Heb je last van pollen?',
+                      values: PollenSensitivity.values,
+                      current: pollen,
+                      label: (v) => v.label,
+                      explanation: (v) => v.explanation,
+                      onPick: (v) => ref.read(pollenSensitivityProvider.notifier).set(v),
+                    ),
                   );
                 }),
                 const Divider(height: 1, indent: 56),
@@ -490,4 +555,43 @@ Future<void> _pickRain(BuildContext context, WidgetRef ref) async {
   if (picked == null || picked == current) return;
   HapticFeedback.selectionClick();
   await ref.read(rainPreferenceProvider.notifier).set(picked);
+}
+
+/// Eén keuze uit een lijstje (met uitleg per optie), als blad onderin.
+Future<void> _pickOption<T>(
+  BuildContext context, {
+  required String title,
+  required List<T> values,
+  required T current,
+  required String Function(T) label,
+  required String Function(T) explanation,
+  required void Function(T) onPick,
+}) async {
+  final picked = await showModalBottomSheet<T>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(title, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
+          ),
+          for (final v in values)
+            ListTile(
+              leading: Icon(v == current ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: v == current ? RwColors.accent : RwColors.subtle),
+              title: Text(label(v)),
+              subtitle: Text(explanation(v)),
+              selected: v == current,
+              onTap: () => Navigator.pop(ctx, v),
+            ),
+        ]),
+      ),
+    ),
+  );
+  if (picked == null || picked == current) return;
+  HapticFeedback.selectionClick();
+  onPick(picked);
 }

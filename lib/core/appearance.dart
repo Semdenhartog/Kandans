@@ -24,11 +24,27 @@ class AppearanceController extends ChangeNotifier {
   Appearance _mode = Appearance.system;
   Appearance get mode => _mode;
 
+  /// Met welk tabblad de app opent: /today, /runs of /routes.
+  static const startTabs = {'/today': 'Vandaag', '/runs': 'Runs', '/routes': 'Routes'};
+  String _startTab = '/today';
+  String get startTab => _startTab;
+
+  Future<void> setStartTab(String tab) async {
+    if (!startTabs.containsKey(tab)) return;
+    _startTab = tab;
+    notifyListeners();
+    try {
+      await (await SharedPreferences.getInstance()).setString('start_tab', tab);
+    } catch (_) {}
+  }
+
   Future<void> load() async {
     try {
       final p = await SharedPreferences.getInstance();
       final v = p.getString(_key);
       _mode = Appearance.values.firstWhere((a) => a.name == v, orElse: () => Appearance.system);
+      final tab = p.getString('start_tab');
+      if (tab != null && startTabs.containsKey(tab)) _startTab = tab;
     } catch (_) {}
     apply(PlatformDispatcher.instance.platformBrightness);
   }

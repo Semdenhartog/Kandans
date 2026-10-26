@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -325,6 +326,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       settings: settings,
                       layout: layout,
                       extras: extras,
+                      clothingFeel: ref.watch(clothingFeelProvider),
+                      pollen: ref.watch(pollenSensitivityProvider),
+                      recentMaxTemp: ref.watch(recentMaxRunTempProvider),
                     ),
                   ];
                 },
@@ -446,7 +450,13 @@ class _Results extends StatefulWidget {
     required this.settings,
     required this.layout,
     required this.extras,
+    this.clothingFeel = ClothingFeel.normal,
+    this.pollen = PollenSensitivity.normal,
+    this.recentMaxTemp,
   });
+  final ClothingFeel clothingFeel;
+  final PollenSensitivity pollen;
+  final double? recentMaxTemp;
   final StartTimePlanner planner;
   final TrainingType type;
   final bool insightsPersonal;
@@ -463,6 +473,15 @@ class _Results extends StatefulWidget {
 class _ResultsState extends State<_Results> {
   DateTime? _selected;
   bool _goodOnly = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // "Alleen goede uren" blijft aan als je het eerder aanzette.
+    SharedPreferences.getInstance().then((p) {
+      if (mounted && (p.getBool('hours_good_only') ?? false)) setState(() => _goodOnly = true);
+    }).catchError((Object _) {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -512,12 +531,15 @@ class _ResultsState extends State<_Results> {
     final isBest = identical(shown, best) || shown.start == best.start;
     final bars = _goodOnly ? goodHoursOnly(all) : all;
     final warnings = runWarnings(widget.planner.forecast, shown.start, widget.planner.durationMinutes,
-        air: airAt(widget.air, shown.start));
+        air: airAt(widget.air, shown.start),
+        pollen: widget.pollen,
+        recentMaxTemp: widget.recentMaxTemp,
+        hasRoute: widget.planner.track.length >= 2);
 
     Widget? card(DashCard c) => switch (c) {
           DashCard.warnings => warnings.isEmpty ? null : _WarningsCard(warnings: warnings),
           DashCard.clothing => _ClothingCard(
-              advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes),
+              advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes, feel: widget.clothingFeel),
               at: shown.start,
             ),
           DashCard.rain => widget.rain != null && widget.rain!.points.isNotEmpty ? _RainCard(rain: widget.rain!) : null,
@@ -534,7 +556,10 @@ class _ResultsState extends State<_Results> {
                       FilterChip(
                         label: const Text('Alleen goede uren'),
                         selected: _goodOnly,
-                        onSelected: (v) => setState(() => _goodOnly = v),
+                        onSelected: (v) {
+                          setState(() => _goodOnly = v);
+                          SharedPreferences.getInstance().then((p) => p.setBool('hours_good_only', v)).ignore();
+                        },
                         visualDensity: VisualDensity.compact,
                       ),
                     ],

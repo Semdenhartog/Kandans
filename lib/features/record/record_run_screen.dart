@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -105,6 +106,14 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   /// Live opdrachten (sprints, snelle minuut) tijdens een gewone run.
   bool _quests = false;
+  QuestLevel _questLevel = QuestLevel.normal;
+  int _questGap = 5;
+
+  /// Scherm aan houden tijdens de run (kost meer accu).
+  bool _screenOn = false;
+
+  /// Ronde-knop naast Pauze en Stop.
+  bool _lapButton = true;
 
   /// Doelafstand (km): de ring loopt vol naar dit doel. Null = per kilometer.
   double? _targetKm;
@@ -166,6 +175,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         setState(() {
           _haptics = p.getBool('rec_haptics') ?? true;
           _quests = p.getBool('rec_quests') ?? false;
+          _questLevel = QuestLevel.values.where((l) => l.name == p.getString('rec_quest_level')).firstOrNull ?? QuestLevel.normal;
+          final gap = p.getInt('rec_quest_gap');
+          _questGap = gap == 3 || gap == 5 || gap == 8 ? gap! : 5;
+          _screenOn = p.getBool('rec_screen_on') ?? false;
+          _lapButton = p.getBool('rec_lap_button') ?? true;
           _turnByTurn = p.getBool('rec_turns') ?? true;
           final sr = p.getDouble('rec_speech_rate');
           if (sr != null && sr >= 0.3 && sr <= 0.7) _svc.speechRate = sr;
@@ -232,6 +246,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     if (_nightMode) setNightBrightness(false);
     // Weggegaan zonder te starten: GPS weer uit.
     if (_svc.recording?.status == RecorderStatus.idle) _svc.discard();
+    if (_screenOn) WakelockPlus.disable().catchError((Object _) {});
     _pages.dispose();
     super.dispose();
   }
@@ -322,6 +337,56 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       _targetReached = false;
     });
     SharedPreferences.getInstance().then((p) => p.setDouble('rec_target_km', picked)).ignore();
+  }
+
+  /// Instellingen voor de live opdrachten: hoe pittig en hoe vaak.
+  Future<void> _chooseQuestSettings() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Live opdrachten', style: RwText.title),
+              const SizedBox(height: 4),
+              Text('Na het inlopen af en toe een korte opdracht, op jouw eigen tempo.', style: TextStyle(color: RwColors.muted)),
+              const SizedBox(height: 16),
+              const Text('Hoe pittig?', style: TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Wrap(spacing: 8, children: [
+                for (final l in QuestLevel.values)
+                  ChoiceChip(
+                    label: Text(l.label),
+                    selected: _questLevel == l,
+                    onSelected: (_) {
+                      set(() {});
+                      setState(() => _questLevel = l);
+                      SharedPreferences.getInstance().then((p) => p.setString('rec_quest_level', l.name)).ignore();
+                    },
+                  ),
+              ]),
+              const SizedBox(height: 16),
+              const Text('Hoe vaak?', style: TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Wrap(spacing: 8, children: [
+                for (final g in const [3, 5, 8])
+                  ChoiceChip(
+                    label: Text('Om de $g min'),
+                    selected: _questGap == g,
+                    onSelected: (_) {
+                      set(() {});
+                      setState(() => _questGap = g);
+                      SharedPreferences.getInstance().then((p) => p.setInt('rec_quest_gap', g)).ignore();
+                    },
+                  ),
+              ]),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 
   void _toggleSunMode(bool on) {
@@ -519,7 +584,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         briefing: _indoor ? null : _briefing,
         targetMeters: _targetKm == null ? null : _targetKm! * 1000,
         quests: _quests && _plan == null && _guided == null && !_indoor,
+        questLevel: _questLevel,
+        questGapMinutes: _questGap,
       );
+      if (_screenOn) WakelockPlus.enable().catchError((Object _) {});
       final route = _route;
       if (route != null && !_indoor && route.polyline.isNotEmpty) {
         // Water en toiletten onderweg aankondigen (ophalen kan even duren; de run loopt al).
@@ -640,6 +708,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       indoorMeters = await _askDistance(estimate: _svc.recording!.distance);
       if (indoorMeters == null) return; // Toch nog niet stoppen.
     }
+    WakelockPlus.disable().catchError((Object _) {});
     final rec = await _svc.stop();
     if (indoorMeters != null) rec?.setIndoorDistance(indoorMeters);
     if (rec == null || rec.distance < 200 || rec.movingSeconds < 60) {
@@ -1567,6 +1636,34 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           label: Text(_targetKm == null ? 'Doelafstand' : 'Doel ${_kmWords(_targetKm!)} km'),
                           onPressed: _chooseTargetKm,
                         ),
+                      if (_quests && !_indoor && _plan == null && _guided == null)
+                        ActionChip(
+                          avatar: const Icon(Icons.tune, size: 18),
+                          label: Text('Opdrachten: ${_questLevel.label.toLowerCase()}, om de $_questGap min'),
+                          onPressed: _chooseQuestSettings,
+                        ),
+                      if (_moreOpts || _screenOn)
+                        FilterChip(
+                          avatar: const Icon(Icons.screen_lock_portrait_outlined, size: 18),
+                          label: const Text('Scherm aan'),
+                          tooltip: 'Het scherm blijft aan tijdens je run (handig op een armband; kost meer accu)',
+                          selected: _screenOn,
+                          onSelected: (x) {
+                            setState(() => _screenOn = x);
+                            SharedPreferences.getInstance().then((p) => p.setBool('rec_screen_on', x)).ignore();
+                          },
+                        ),
+                      if (_moreOpts)
+                        FilterChip(
+                          avatar: const Icon(Icons.flag_outlined, size: 18),
+                          label: const Text('Ronde-knop'),
+                          tooltip: 'Een knop naast Pauze en Stop voor je eigen rondetijden',
+                          selected: _lapButton,
+                          onSelected: (x) {
+                            setState(() => _lapButton = x);
+                            SharedPreferences.getInstance().then((p) => p.setBool('rec_lap_button', x)).ignore();
+                          },
+                        ),
                       if (_moreOpts || _sunMode)
                       FilterChip(
                         avatar: const Icon(Icons.wb_sunny_outlined, size: 18),
@@ -1670,6 +1767,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                               label: Text(v.status == RecorderStatus.paused ? 'Verder' : 'Pauze', style: const TextStyle(fontSize: 17)),
                             ),
                           ),
+                          if (_lapButton) ...[
                           const SizedBox(width: 10),
                           // Ronde: eigen rondetijd (baan, vaste stukken). Tijd en tempo worden uitgesproken.
                           Semantics(
@@ -1694,6 +1792,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                               ),
                             ),
                           ),
+                          ],
                           const SizedBox(width: 10),
                           Expanded(
                             child: FilledButton.icon(
