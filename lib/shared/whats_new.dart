@@ -4,9 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme.dart';
 
 /// Versie van het "Nieuw in Kadans"-overzicht. Ophogen als er iets nieuws te vertellen is.
-const whatsNewVersion = 'kadans-2026-10';
+const whatsNewVersion = 'kadans-2026-10b';
 
 const _items = <(IconData, String, String)>[
+  (Icons.shopping_bag_outlined, 'De Kadans-shop',
+      'Routeposters, Luxe-ontwerpen, Premium en schoenen op één plek: tik op het tasje op Vandaag of Routes, of op Shop in Ik.'),
+  (Icons.bolt_outlined, 'Live opdrachten en rondes',
+      'Zet bij de start "Live opdrachten" aan voor sprintjes onderweg, en tik tijdens het lopen op Ronde voor je eigen rondetijden.'),
+  (Icons.card_giftcard, 'Vrienden uitnodigen',
+      'In Samen deel je een gouden uitnodiging met een link die je vriend meteen toevoegt.'),
   (Icons.auto_awesome_outlined, 'RunWise heet nu Kadans',
       'Nieuwe naam, nieuw icoon en nieuwe kleuren: Zand overdag en Zand avond in het donker (kies in Ik → Weergave). Je runs, routes en instellingen blijven zoals ze waren.'),
   (Icons.groups_outlined, 'Samen lopen',
@@ -36,6 +42,11 @@ Future<void> showWhatsNewIfNeeded(BuildContext context, {bool skip = false}) asy
   if (p.getString('whats_new_seen') == whatsNewVersion) return;
   await p.setString('whats_new_seen', whatsNewVersion);
   if (skip || !context.mounted) return;
+  await showWhatsNew(context);
+}
+
+/// Het overzicht van wat er nieuw is (ook later terug te zien via Ik → Hulp).
+Future<void> showWhatsNew(BuildContext context) async {
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,

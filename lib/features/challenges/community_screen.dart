@@ -111,6 +111,13 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   Future<void> _addFriend() async {
     final ctrl = TextEditingController();
+    // Staat er een vriendcode of uitnodigingslink op het klembord? Dan alvast invullen.
+    try {
+      final clip = (await Clipboard.getData(Clipboard.kTextPlain))?.text ?? '';
+      final code = friendCodeFrom(clip);
+      if (code != null && code != ref.read(communityStatusProvider).value?.friendCode) ctrl.text = code;
+    } catch (_) {}
+    if (!mounted) return;
     final code = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -311,7 +318,17 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 label: const Text('Vrienden uitnodigen'),
                 style: FilledButton.styleFrom(backgroundColor: challengeGold, foregroundColor: rwZandAvond.accentDark),
               ),
-              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: s.friendCode == null
+                    ? null
+                    : () async {
+                        await Clipboard.setData(ClipboardData(text: inviteLink(s.friendCode!)));
+                        HapticFeedback.selectionClick();
+                        if (mounted) showMessage(context, 'Uitnodigingslink gekopieerd');
+                      },
+                icon: const Icon(Icons.link, size: 18),
+                label: const Text('Link kopiëren'),
+              ),
               OutlinedButton.icon(
                 onPressed: _busy ? null : _addFriend,
                 icon: const Icon(Icons.person_add_alt),

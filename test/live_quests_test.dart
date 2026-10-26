@@ -64,4 +64,13 @@ void main() {
   test('tempo-tekst', () {
     expect(questPace(305), '5:05');
   });
+
+  test('overslaan telt niet mee', () {
+    final m = QuestMaster(warmupSeconds: 0, warmupMeters: 0);
+    m.update(1, 3, 360);
+    expect(m.active, isNotNull);
+    m.skip(5);
+    expect(m.active, isNull);
+    expect(m.total, 0);
+  });
 }

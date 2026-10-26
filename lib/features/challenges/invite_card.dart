@@ -12,6 +12,16 @@ import '../../core/theme.dart';
 /// Link waarmee een vriend je toevoegt: opent de app (of de downloadpagina) met je code ingevuld.
 String inviteLink(String code) => '${AppConfig.siteUrl}/vriend.html?code=${Uri.encodeQueryComponent(code)}';
 
+/// Haalt een vriendcode uit tekst: een uitnodigingslink (…?code=K7QX2M) of een losse code van 6 tekens.
+String? friendCodeFrom(String text) {
+  final t = text.trim();
+  final link = RegExp(r'[?&]code=([A-Za-z0-9]{4,8})').firstMatch(t);
+  if (link != null) return link.group(1)!.toUpperCase();
+  final bare = RegExp(r'^[A-Za-z0-9]{6}$').firstMatch(t);
+  if (bare != null && RegExp(r'[0-9]').hasMatch(t) && RegExp(r'[A-Za-z]').hasMatch(t)) return t.toUpperCase();
+  return null;
+}
+
 /// Luxe uitnodigingskaart (staand 1080×1350), altijd donker-goud.
 Future<Uint8List> inviteCardPng({required String code, required String name}) async {
   const w = 1080.0, h = 1350.0;

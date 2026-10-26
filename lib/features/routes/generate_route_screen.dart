@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
@@ -50,6 +51,30 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
   String? _saving;
 
   @override
+  void initState() {
+    super.initState();
+    // Vorige keuze terugzetten (afstand of tijd), zodat je niet elke keer opnieuw hoeft te schuiven.
+    SharedPreferences.getInstance().then((p) {
+      if (!mounted) return;
+      setState(() {
+        _byTime = p.getBool('gen_by_time') ?? _byTime;
+        final km = p.getDouble('gen_km');
+        if (km != null && km >= 2 && km <= 30) _km = km;
+        final min = p.getInt('gen_minutes');
+        if (min != null && min >= 15 && min <= 180) _minutes = min;
+      });
+    }).catchError((Object _) {});
+  }
+
+  void _rememberChoice() {
+    SharedPreferences.getInstance().then((p) async {
+      await p.setBool('gen_by_time', _byTime);
+      await p.setDouble('gen_km', _km);
+      await p.setInt('gen_minutes', _minutes);
+    }).catchError((Object _) {});
+  }
+
+  @override
   void dispose() {
     _address.dispose();
     super.dispose();
@@ -80,6 +105,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
 
   Future<void> _generate() async {
     FocusScope.of(context).unfocus();
+    _rememberChoice();
     setState(() {
       _busy = true;
       _results = const [];

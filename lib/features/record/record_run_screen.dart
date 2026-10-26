@@ -1177,6 +1177,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           healthWritten: written,
           batteryUsedPct: batteryUsed,
           badges: bd.newBadges(before, [...before, saved]),
+          laps: _svc.laps,
         ),
       ));
     } catch (e) {
@@ -1660,7 +1661,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(64)),
+                              style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(64), padding: const EdgeInsets.symmetric(horizontal: 10)),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
                                 v.status == RecorderStatus.paused ? _svc.resume() : _svc.pause();
@@ -1669,11 +1670,36 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                               label: Text(v.status == RecorderStatus.paused ? 'Verder' : 'Pauze', style: const TextStyle(fontSize: 17)),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
+                          // Ronde: eigen rondetijd (baan, vaste stukken). Tijd en tempo worden uitgesproken.
+                          Semantics(
+                            button: true,
+                            label: 'Ronde${v.laps.isEmpty ? '' : ', nu ${v.laps.length} rondes'}',
+                            excludeSemantics: true,
+                            child: SizedBox(
+                              width: 64,
+                              height: 64,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(64, 64)),
+                                onPressed: v.status == RecorderStatus.paused
+                                    ? null
+                                    : () {
+                                        HapticFeedback.selectionClick();
+                                        _svc.lap();
+                                      },
+                                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                  const Icon(Icons.flag_outlined, size: 22),
+                                  Text(v.laps.isEmpty ? 'Ronde' : '${v.laps.length + 1}', style: const TextStyle(fontSize: 12)),
+                                ]),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: FilledButton.icon(
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size.fromHeight(64),
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
                                 backgroundColor: RwColors.danger,
                                 foregroundColor: RwColors.background,
                               ),
@@ -2919,6 +2945,13 @@ class _QuestCard extends StatelessWidget {
               Icon(Icons.bolt, size: 20, color: RwColors.accent),
               const SizedBox(width: 6),
               Expanded(child: Text(q.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))),
+              // Overslaan, bijvoorbeeld bij een oversteek of een drukke stoep.
+              IconButton(
+                tooltip: 'Opdracht overslaan',
+                visualDensity: VisualDensity.compact,
+                icon: Icon(Icons.skip_next, color: RwColors.muted),
+                onPressed: () => RunRecorderService.instance.skipQuest(),
+              ),
               Text(left, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 20)),
             ]),
             const SizedBox(height: 6),

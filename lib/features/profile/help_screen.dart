@@ -14,6 +14,8 @@ import '../planner/training_plan_screen.dart';
 import '../routes/watch_export.dart';
 import 'heart_rate_screen.dart';
 import 'privacy_screen.dart';
+import '../../shared/whats_new.dart';
+import 'feedback_sheet.dart';
 
 void openHelp(BuildContext context) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpScreen()));
@@ -100,6 +102,24 @@ class HelpScreen extends StatelessWidget {
               MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const OnboardingScreen()),
             ),
           ),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.new_releases_outlined),
+                label: const Text('Wat is nieuw'),
+                onPressed: () => showWhatsNew(context),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.icon(
+                icon: const Icon(Icons.feedback_outlined),
+                label: const Text('Feedback'),
+                onPressed: () => showFeedbackSheet(context),
+              ),
+            ),
+          ]),
           const SizedBox(height: 20),
           Text('WOORDENLIJST', style: RwText.overline),
           const SizedBox(height: 8),
@@ -164,6 +184,8 @@ final settingsDestinations = <SettingsDestination>[
   SettingsDestination('Mijn posterbestellingen', Icons.local_shipping_outlined, 'poster bestelling bezorging status', (c) => c.push('/posters')),
   SettingsDestination('Privacyverklaring', Icons.privacy_tip_outlined, 'privacy avg gegevens verklaring', openPrivacy),
   SettingsDestination('Rondleiding', Icons.slideshow_outlined, 'rondleiding uitleg intro begin', (c) => Navigator.of(c).push(MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const OnboardingScreen()))),
+  SettingsDestination('Feedback sturen', Icons.feedback_outlined, 'feedback fout bug idee melden contact mail', showFeedbackSheet),
+  SettingsDestination('Wat is nieuw', Icons.new_releases_outlined, 'nieuw update versie veranderd', showWhatsNew),
   SettingsDestination('Premium', Icons.workspace_premium_outlined, 'premium abonnement coach betalen', (c) => c.push('/premium')),
   SettingsDestination('Hulp en woordenlijst', Icons.help_outline, 'hulp vraag uitleg faq woord', openHelp),
 ];

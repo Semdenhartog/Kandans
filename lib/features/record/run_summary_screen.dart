@@ -33,7 +33,11 @@ class RunSummaryScreen extends StatelessWidget {
     this.healthWritten = false,
     this.badges = const [],
     this.batteryUsedPct,
+    this.laps = const [],
   });
+
+  /// Handmatige rondes (knop tijdens het lopen).
+  final List<({double seconds, double meters})> laps;
 
   /// Hoeveel procent accu de run kostte (null = onbekend, of de telefoon laadde).
   final int? batteryUsedPct;
@@ -118,6 +122,10 @@ class RunSummaryScreen extends StatelessWidget {
             if (records.isNotEmpty) ...[
               const SizedBox(height: 16),
               _RecordPlaque(records: [for (final r in records) (label: r.label, seconds: r.seconds)]),
+            ],
+            if (laps.length >= 2) ...[
+              const SizedBox(height: 16),
+              _LapsCard(laps: laps, indoor: a.distanceMeters <= 0),
             ],
             if (a.id != null) ...[
               const SizedBox(height: 16),
@@ -590,6 +598,49 @@ class _NewRoadsCard extends ConsumerWidget {
             style: const TextStyle(height: 1.4),
           ),
         ),
+      ]),
+    );
+  }
+}
+
+/// Je eigen rondes, met de snelste in goud.
+class _LapsCard extends StatelessWidget {
+  const _LapsCard({required this.laps, required this.indoor});
+  final List<({double seconds, double meters})> laps;
+  final bool indoor;
+
+  @override
+  Widget build(BuildContext context) {
+    final fastest = laps.map((l) => l.seconds).reduce((a, b) => a < b ? a : b);
+    return RwCard(
+      title: 'RONDES · ${laps.length}',
+      child: Column(children: [
+        for (final (i, l) in laps.indexed)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              SizedBox(width: 34, child: Text('${i + 1}', style: TextStyle(color: RwColors.subtle))),
+              Expanded(
+                child: Text(Fmt.duration(l.seconds.round()),
+                    style: TextStyle(
+                      fontFamily: RwFonts.display,
+                      fontFeatures: rwTnum,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                      color: l.seconds == fastest ? RwColors.accent : RwColors.text,
+                    )),
+              ),
+              if (!indoor && l.meters > 50) ...[
+                Text(Fmt.km(l.meters, decimals: 2), style: TextStyle(color: RwColors.muted)),
+                const SizedBox(width: 14),
+                SizedBox(
+                  width: 64,
+                  child: Text('${Fmt.pace(l.seconds / (l.meters / 1000))}/km',
+                      textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted, fontFeatures: rwTnum)),
+                ),
+              ],
+            ]),
+          ),
       ]),
     );
   }

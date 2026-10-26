@@ -20,6 +20,9 @@ class AppConfig {
     defaultValue: 'https://semdenhartog.github.io/Runwise/privacy.html',
   );
 
+  /// E-mailadres voor "Feedback sturen" (leeg = de gebruiker kiest zelf een app via delen).
+  static const feedbackEmail = String.fromEnvironment('FEEDBACK_EMAIL');
+
   /// Website van Kadans (voor de live-meeloop-pagina live.html).
   static const siteUrl = String.fromEnvironment('SITE_URL', defaultValue: 'https://semdenhartog.github.io/Runwise');
 

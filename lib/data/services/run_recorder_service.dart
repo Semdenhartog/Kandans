@@ -67,6 +67,7 @@ class RecorderView {
     this.questsDone = 0,
     this.questsTotal = 0,
     this.questsOn = false,
+    this.laps = const [],
   });
 
   final RecorderStatus status;
@@ -132,6 +133,9 @@ class RecorderView {
   final int questsTotal;
   final bool questsOn;
 
+  /// Handmatige rondes: per ronde de tijd (s) en afstand (m).
+  final List<({double seconds, double meters})> laps;
+
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
 
@@ -174,6 +178,8 @@ class RunRecorderService {
   CueScheduler? _cues;
   PaceCoach? _coach;
   QuestMaster? _quests;
+  final List<({double seconds, double meters})> _laps = [];
+  double _lapStartT = 0, _lapStartD = 0;
   RouteFollower? _follower;
   GhostRace? _ghost;
   TurnGuide? _turns;
@@ -584,6 +590,9 @@ class RunRecorderService {
     if (guided != null) this.voice = true;
     _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
     // Live opdrachten alleen bij een gewone buitenrun (niet naast intervallen of een begeleide run).
+    _laps.clear();
+    _lapStartT = 0;
+    _lapStartD = 0;
     _quests = quests && !indoor && intervals == null && guided == null ? QuestMaster(targetMeters: targetMeters) : null;
     _follower = indoor || followRoute.length < 2 ? null : RouteFollower(RouteTrack(followRoute));
     _ghost = _follower == null || ghost == null || ghost.totalDistance < 500 ? null : GhostRace(ghost);
@@ -839,6 +848,43 @@ class RunRecorderService {
     Vibration.vibrate(pattern: pattern).catchError((_) {});
   }
 
+  /// Live opdracht overslaan (bijv. bij een drukke oversteek).
+  void skipQuest() {
+    final q = _quests;
+    if (q?.active == null) return;
+    q!.skip(_movingNow());
+    _say('Opdracht overgeslagen.');
+    view.value = _snapshot();
+  }
+
+  /// Handmatige ronde (knop tijdens het lopen): tijd en tempo van deze ronde worden uitgesproken.
+  void lap() {
+    final r = _rec;
+    if (r == null || !r.isActive) return;
+    final t = _movingNow(), d = r.distance;
+    final lt = t - _lapStartT, ld = d - _lapStartD;
+    if (lt < 3) return; // dubbele tik
+    _laps.add((seconds: lt, meters: ld));
+    _lapStartT = t;
+    _lapStartD = d;
+    _buzz(const [0, 90, 60, 90]);
+    SoundService.instance.play(RwSound.interval).ignore();
+    final m = lt ~/ 60, sec = (lt % 60).round();
+    final time = m == 0 ? '$sec seconden' : '$m minuut${m == 1 ? '' : 'en'}${sec == 0 ? '' : ' $sec'}';
+    final pace = !r.indoor && ld > 50 ? ', tempo ${_spokenPace(lt / (ld / 1000))}' : '';
+    _say('Ronde ${_laps.length}: $time$pace.');
+    view.value = _snapshot();
+  }
+
+  static String _spokenPace(double secPerKm) {
+    final s = secPerKm.round();
+    final r = s % 60;
+    return '${s ~/ 60}${r == 0 ? ' minuten' : ' ${r.toString().padLeft(2, '0')}'} per kilometer';
+  }
+
+  /// Rondes van de laatste (of lopende) run, voor het overzicht na afloop.
+  List<({double seconds, double meters})> get laps => List.unmodifiable(_laps);
+
   /// Sla de huidige intervalstap over (bijv. als je eerder klaar bent met inlopen).
   void skipStep() {
     final it = _intervals, r = _rec;
@@ -908,6 +954,7 @@ class RunRecorderService {
       questsDone: _quests?.done ?? 0,
       questsTotal: _quests?.total ?? 0,
       questsOn: _quests != null,
+      laps: List.unmodifiable(_laps),
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
       nextTurn: turnByTurn ? _turns?.next : null,
       nextTurnIn: turnByTurn && _follower != null ? _turns?.distanceTo(_follower!.progress) : null,

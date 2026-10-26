@@ -293,7 +293,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ),
     ];
 
-    return Scaffold(
+    // Terugknop van Android: eerst een stap terug in de rondleiding, pas op de eerste stap sluiten.
+    return PopScope(
+      canPop: _page == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _page > 0) {
+          _pages.previousPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
+        }
+      },
+      child: Scaffold(
       body: Stack(children: [
         // Een route die zich met elke pagina verder intekent, met een lopende stip aan de kop.
         Positioned.fill(
@@ -317,16 +325,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
+            Row(children: [
+              // Terug naar de vorige stap (vegen kan ook).
+              AnimatedOpacity(
+                opacity: _page > 0 ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: IconButton(
+                  tooltip: 'Vorige',
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _page > 0
+                      ? () => _pages.previousPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic)
+                      : null,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
                 onPressed: () async {
                   await markLocationExplained();
                   if (context.mounted) Navigator.pop(context, OnboardingNext.today);
                 },
                 child: const Text('Overslaan'),
               ),
-            ),
+            ]),
             Expanded(
               child: PageView(
                 controller: _pages,
@@ -340,7 +360,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (var i = 0; i < pages.length; i++)
-                    AnimatedContainer(
+                    GestureDetector(
+                      onTap: () => _pages.animateToPage(i, duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic),
+                      child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: i == _page ? 22 : 8,
@@ -350,6 +372,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
+                    ),
                 ],
               ),
             ),
@@ -357,6 +380,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
       ),
       ]),
+    ),
     );
   }
 }

@@ -177,6 +177,13 @@ class QuestMaster {
     return QuestCue(_intro(q), started: q);
   }
 
+  /// Opdracht overslaan (telt niet mee); de rust tot de volgende begint opnieuw.
+  void skip(double t) {
+    if (_active == null) return;
+    _active = null;
+    _lastEnd = t;
+  }
+
   /// Korte samenvatting voor het einde van de run, of null als er geen opdrachten waren.
   String? summary() {
     if (results.isEmpty) return null;
