@@ -222,7 +222,7 @@ List<RunWarning> runWarnings(
         kind: 'air',
       ));
     }
-    final pollen = {
+    final counts = {
       'graspollen': air.grass,
       'berkenpollen': air.birch,
       'elzenpollen': air.alder,
@@ -230,11 +230,11 @@ List<RunWarning> runWarnings(
       'ambrosiapollen': air.ragweed,
     };
     final high = [
-      for (final e in pollen.entries)
+      for (final e in counts.entries)
         if ((e.value ?? 0) >= _pollenLevels[e.key]!.high) e.key,
     ];
     final moderate = [
-      for (final e in pollen.entries)
+      for (final e in counts.entries)
         if ((e.value ?? 0) >= _pollenLevels[e.key]!.moderate && !high.contains(e.key)) e.key,
     ];
     if (pollen == PollenSensitivity.none) {
