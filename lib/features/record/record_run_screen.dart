@@ -1235,7 +1235,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       );
       // Na de 5e eigen run één keer om een beoordeling vragen (even later, na het felicitatiescherm).
       final ownRuns = before.where((x) => x.source == 'runwise').length + 1;
-      Future<void>.delayed(const Duration(seconds: 4), () => ReviewService.maybeAsk(ownRuns)).ignore();
+      final gotRecord = previousBest.isNotEmpty &&
+          efforts.any((b) {
+            final prev = previousBest[b.meters.round()];
+            return prev == null || b.seconds + 0.5 < prev.seconds;
+          });
+      Future<void>.delayed(const Duration(seconds: 4), () => ReviewService.maybeAsk(ownRuns, happy: gotRecord)).ignore();
       Navigator.of(context).pushReplacement(MaterialPageRoute<void>(
         fullscreenDialog: true,
         builder: (_) => RunSummaryScreen(

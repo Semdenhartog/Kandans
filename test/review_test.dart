@@ -8,4 +8,10 @@ void main() {
     expect(ReviewService.shouldAsk(ownRuns: 12, askedBefore: false), isTrue);
     expect(ReviewService.shouldAsk(ownRuns: 12, askedBefore: true), isFalse);
   });
+
+  test('na een record al vanaf de 3e run', () {
+    expect(ReviewService.shouldAsk(ownRuns: 3, askedBefore: false, happy: true), isTrue);
+    expect(ReviewService.shouldAsk(ownRuns: 2, askedBefore: false, happy: true), isFalse);
+    expect(ReviewService.shouldAsk(ownRuns: 3, askedBefore: true, happy: true), isFalse);
+  });
 }

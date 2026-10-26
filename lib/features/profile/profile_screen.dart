@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
+import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
@@ -313,6 +315,17 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/premium'),
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: TileIcon(Icons.favorite_border, color: RwColors.accent),
+                  title: const Text('Vertel een vriend over Kadans'),
+                  subtitle: const Text('Deel een linkje naar de app'),
+                  onTap: () => SharePlus.instance.share(ShareParams(
+                    text: 'Ik gebruik Kadans: die zegt wanneer je het best kunt gaan hardlopen, met het weer, de wind op je route '
+                        'en je eigen tempo. Kijk maar: ${AppConfig.siteUrl}/',
+                    subject: 'Kadans: loop op het beste moment',
+                  )),
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(

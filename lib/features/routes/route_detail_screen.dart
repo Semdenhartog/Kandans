@@ -146,6 +146,7 @@ class RouteDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _WatchButton(route: r),
+              Wrap(alignment: WrapAlignment.center, children: [
               TextButton.icon(
                 onPressed: () {
                   final best = ref.read(routeBestProvider).value?[r.id];
@@ -161,6 +162,12 @@ class RouteDetailScreen extends ConsumerWidget {
                 icon: const Icon(Icons.group_add_outlined),
                 label: const Text('Nodig een loopmaatje uit'),
               ),
+              TextButton.icon(
+                onPressed: () => shareRouteLink(context, r),
+                icon: const Icon(Icons.link),
+                label: const Text('Deel als link'),
+              ),
+              ]),
               const SizedBox(height: 4),
               _MapAndProfile(
                 route: r,

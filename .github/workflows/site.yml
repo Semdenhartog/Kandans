@@ -27,6 +27,19 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # Openbare Supabase-gegevens (URL en anon-sleutel, dezelfde als in de app) in de wachtlijst zetten.
+      - name: Wachtlijst koppelen aan Supabase
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          c = json.load(open("app_config.json"))
+          for f in pathlib.Path("site").glob("*.html"):
+              s = f.read_text(encoding="utf-8")
+              if "__SUPABASE_URL__" in s:
+                  s = s.replace("__SUPABASE_URL__", c["SUPABASE_URL"]).replace("__SUPABASE_ANON_KEY__", c["SUPABASE_ANON_KEY"])
+                  f.write_text(s, encoding="utf-8")
+                  print(f"::notice::Wachtlijst gekoppeld in {f.name}")
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

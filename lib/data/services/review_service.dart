@@ -12,13 +12,15 @@ class ReviewService {
   static const _key = 'review_asked';
 
   /// Moet er na deze run om een beoordeling worden gevraagd?
-  static bool shouldAsk({required int ownRuns, required bool askedBefore}) => !askedBefore && ownRuns >= afterRuns;
+  /// Na een record ([happy]) mag het al vanaf de 3e run: dan is iemand het meest tevreden.
+  static bool shouldAsk({required int ownRuns, required bool askedBefore, bool happy = false}) =>
+      !askedBefore && (ownRuns >= afterRuns || (happy && ownRuns >= 3));
 
   /// Na het opslaan van een eigen run aanroepen met het aantal eigen runs (inclusief deze).
-  static Future<void> maybeAsk(int ownRuns) async {
+  static Future<void> maybeAsk(int ownRuns, {bool happy = false}) async {
     try {
       final p = await SharedPreferences.getInstance();
-      if (!shouldAsk(ownRuns: ownRuns, askedBefore: p.getBool(_key) ?? false)) return;
+      if (!shouldAsk(ownRuns: ownRuns, askedBefore: p.getBool(_key) ?? false, happy: happy)) return;
       final review = InAppReview.instance;
       if (!await review.isAvailable()) return;
       await p.setBool(_key, true);

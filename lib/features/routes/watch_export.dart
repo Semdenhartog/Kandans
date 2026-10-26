@@ -14,6 +14,8 @@ import '../../domain/gpx_parser.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/route_turns.dart';
 import '../../shared/widgets.dart';
+import '../../core/config.dart';
+import '../../domain/route_share.dart';
 
 /// Merk van je horloge: bepaalt welk bestand Kadans maakt en welke stappen we uitleggen.
 enum WatchBrand { garmin, garminBasic, coros, suunto, polar, amazfit, wearos, none }
@@ -430,6 +432,7 @@ Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, S
       if (when != null) 'Beste moment volgens Kadans: ${moment(when)}${weather == null ? '' : ' ($weather)'}.',
       'Route: ${r.name}, $km km. Het routebestand zit erbij (open het in je horloge-app of in Komoot).',
       'Start: https://www.google.com/maps/search/?api=1&query=${r.startLatitude.toStringAsFixed(5)},${r.startLongitude.toStringAsFixed(5)}',
+      'Bekijk of bewaar de route: ${SharedRoute(r.name, pts).webLink(AppConfig.siteUrl)}',
     ].join('\n');
     final safe = r.name.replaceAll(RegExp(r'[^A-Za-z0-9 _-]'), '').trim().replaceAll(' ', '-');
     await SharePlus.instance.share(ShareParams(
@@ -443,3 +446,17 @@ Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, S
 }
 
 String _weekday(DateTime t) => const ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][t.weekday - 1];
+
+/// Route delen als link: wie hem opent ziet de route op een kaart en kan hem in Kadans bewaren.
+Future<void> shareRouteLink(BuildContext context, RunRoute r) async {
+  final pts = decodePolyline(r.polyline);
+  if (pts.length < 2) {
+    showMessage(context, 'Deze route heeft geen vorm om te delen.', error: true);
+    return;
+  }
+  final km = (r.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
+  await SharePlus.instance.share(ShareParams(
+    text: '${r.name} ($km km), een route uit Kadans:\n${SharedRoute(r.name, pts).webLink(AppConfig.siteUrl)}',
+    subject: 'Route: ${r.name}',
+  ));
+}

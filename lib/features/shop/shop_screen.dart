@@ -180,6 +180,16 @@ class ShopScreen extends ConsumerWidget {
                     icon: Icons.arrow_forward,
                     onPressed: () => context.push('/premium'),
                   ),
+                  // Actiecodes (bijv. van een hardloper die je volgt) wissel je in bij Google Play.
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(foregroundColor: _gold),
+                      onPressed: () => _redeem(context),
+                      icon: const Icon(Icons.confirmation_number_outlined, size: 18),
+                      label: const Text('Heb je een code? Inwisselen'),
+                    ),
+                  ),
                 ]),
               ),
               const SizedBox(height: 22),
@@ -224,6 +234,33 @@ class ShopScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Actiecode inwisselen: Google Play opent met de code ingevuld; daarna staat het abonnement of de aankoop klaar.
+Future<void> _redeem(BuildContext context) async {
+  final ctrl = TextEditingController();
+  final code = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Code inwisselen'),
+      content: TextField(
+        controller: ctrl,
+        autofocus: true,
+        textCapitalization: TextCapitalization.characters,
+        decoration: const InputDecoration(labelText: 'Actiecode', hintText: 'Bijv. KADANS-RUNNER'),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuleren')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Inwisselen')),
+      ],
+    ),
+  );
+  ctrl.dispose();
+  if (code == null || code.isEmpty) return;
+  final ok = await launchUrl(Uri.parse('https://play.google.com/redeem?code=${Uri.encodeQueryComponent(code)}'),
+          mode: LaunchMode.externalApplication)
+      .catchError((Object _) => false);
+  if (!ok && context.mounted) showMessage(context, 'Google Play kon niet worden geopend.', error: true);
 }
 
 class _Header extends StatelessWidget {

@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/format.dart';
+import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../domain/geo.dart';
@@ -91,10 +92,11 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       if (data == null) throw Exception('De afbeelding kon niet worden gemaakt.');
       final a = widget.activity;
-      final name = 'runwise-${a.startedAt.toLocal().toIso8601String().substring(0, 10)}.png';
+      final name = 'kadans-${a.startedAt.toLocal().toIso8601String().substring(0, 10)}.png';
       await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(data.buffer.asUint8List(), mimeType: 'image/png', name: name)],
-        text: '${Fmt.km(a.distanceMeters, decimals: 1)} gelopen met Kadans 🏃',
+        // Met een link, zodat wie het ziet Kadans kan vinden.
+        text: '${Fmt.km(a.distanceMeters, decimals: 1)} gelopen met Kadans 🏃 ${AppConfig.siteUrl}/',
       ));
     } catch (e) {
       if (mounted) showMessage(context, 'Delen is niet gelukt. Probeer het opnieuw.', error: true);

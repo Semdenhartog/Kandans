@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>Live meelopen – RunWise</title>
-<meta name="theme-color" content="#09090B">
+<title>Live meelopen – Kadans</title>
+<meta name="theme-color" content="#13110E">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,9 +14,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --bg:#09090B; --surface:#141417; --surface-high:#1C1C20; --border:#29292F;
-  --accent:#FD8A26; --accent-deep:#FD3D22; --accent-light:#FD9E28;
-  --text:#F4F4F5; --muted:#BDBDC6; --subtle:#8D8D98; --good:#4ADE80; --danger:#FF5470;
+  --bg:#13110E; --surface:#1C1814; --surface-high:#25201B; --border:#352E26;
+  --accent:#D9BF92; --accent-deep:#B8955F; --accent-light:#F0DDB6;
+  --text:#F1E9DC; --muted:#BDB1A0; --subtle:#94897A; --good:#8CC99A; --danger:#EF7F78;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
@@ -28,7 +28,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans
 .leaflet-control-attribution a{color:#ddd!important}
 .leaflet-bar a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
 header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:10px;pointer-events:none}
-.pill{pointer-events:auto;background:rgba(9,9,11,.9);border:1px solid var(--border);border-radius:999px;padding:8px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(6px)}
+.pill{pointer-events:auto;background:rgba(19,17,14,.9);border:1px solid var(--border);border-radius:999px;padding:8px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(6px)}
 .brand img{height:16px}
 .panel{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
 .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -48,13 +48,13 @@ header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));lef
 .msg{padding:40px 24px;text-align:center;color:var(--muted)}
 .msg h1{font-family:Saira,sans-serif;font-weight:800;color:var(--text);font-size:26px;margin:0 0 8px}
 .runner{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 6px rgba(253,138,38,.3),0 2px 8px rgba(0,0,0,.6)}
-button.follow{pointer-events:auto;margin-left:auto;background:rgba(9,9,11,.9);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
+button.follow{pointer-events:auto;margin-left:auto;background:rgba(19,17,14,.9);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
 button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
 </style>
 </head>
 <body>
 <header>
-  <div class="pill brand"><img src="mark.png" alt=""><img src="wordmark.png" alt="RunWise"></div>
+  <div class="pill brand"><img src="kadans-mark.png" alt=""><span style="font-family:Saira,sans-serif;font-weight:800;letter-spacing:.3em;color:#D9BF92;font-size:12px">KADANS</span></div>
   <button class="follow" id="follow" aria-pressed="true" type="button">Volgen</button>
 </header>
 <div id="map" role="region" aria-label="Kaart met de live locatie"></div>
@@ -86,8 +86,8 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
   L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', {
     maxZoom: 19, minZoom: 6, attribution: 'Kaart © Kadaster / PDOK'
   }).addTo(map);
-  var glow = L.polyline([], { color: '#FD8A26', weight: 14, opacity: .22 }).addTo(map);
-  var line = L.polyline([], { color: '#FD8A26', weight: 5, opacity: 1, lineJoin: 'round' }).addTo(map);
+  var glow = L.polyline([], { color: '#D9BF92', weight: 14, opacity: .22 }).addTo(map);
+  var line = L.polyline([], { color: '#D9BF92', weight: 5, opacity: 1, lineJoin: 'round' }).addTo(map);
   var marker = null, accuracy = null, follow = true, first = true, data = null;
 
   $('follow').addEventListener('click', function () {
@@ -148,7 +148,7 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
       var ll = [data.last.lat, data.last.lon];
       if (!marker) {
         marker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="runner"></div>', iconSize: [22, 22], iconAnchor: [11, 11] }) }).addTo(map);
-        accuracy = L.circle(ll, { radius: 1, color: '#FD8A26', weight: 1, opacity: .4, fillOpacity: .1 }).addTo(map);
+        accuracy = L.circle(ll, { radius: 1, color: '#D9BF92', weight: 1, opacity: .4, fillOpacity: .1 }).addTo(map);
       }
       marker.setLatLng(ll);
       accuracy.setLatLng(ll).setRadius(Math.min(data.last.accuracy || 0, 200));

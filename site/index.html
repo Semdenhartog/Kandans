@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RunWise – de beste loopmomenten</title>
-<meta name="description" content="RunWise zegt op 5 minuten nauwkeurig wanneer je het best kunt gaan hardlopen: op basis van weer, wind op je route, buien en je eigen prestaties.">
-<meta property="og:title" content="RunWise – de beste loopmomenten">
+<title>Kadans – de beste loopmomenten</title>
+<meta name="description" content="Kadans zegt op 5 minuten nauwkeurig wanneer je het best kunt gaan hardlopen: op basis van weer, wind op je route, buien en je eigen prestaties.">
+<meta property="og:title" content="Kadans – de beste loopmomenten">
 <meta property="og:description" content="Weet wanneer je moet lopen, welke kant je op moet en wat je aantrekt.">
-<meta property="og:image" content="/og.png">
-<meta name="theme-color" content="#09090B">
+<meta property="og:image" content="og.png">
+<meta name="theme-color" content="#13110E">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,10 +16,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&amp;display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#09090B; --surface:#141417; --surface-high:#1C1C20; --border:#29292F; --bar:#323238;
-  --accent:#FD8A26; --accent-deep:#FD3D22; --accent-light:#FD9E28;
-  --text:#F4F4F5; --muted:#BDBDC6; --subtle:#8D8D98; --good:#4ADE80; --rain:#5AA9FF;
-  --grad:linear-gradient(135deg,var(--accent-deep) 0%,var(--accent) 55%,var(--accent-light) 100%);
+  --bg:#13110E; --surface:#1C1814; --surface-high:#25201B; --border:#352E26; --bar:#3A332B;
+  --accent:#D9BF92; --accent-deep:#B8955F; --accent-light:#F0DDB6;
+  --text:#F1E9DC; --muted:#BDB1A0; --subtle:#94897A; --good:#8CC99A; --rain:#9DB8C9;
+  --grad:linear-gradient(135deg,var(--accent-light) 0%,var(--accent) 50%,var(--accent-deep) 100%);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -38,7 +38,7 @@ img{display:block;max-width:100%}
 
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-top:22px;padding-bottom:22px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.brand img.mark{height:34px;width:auto}.brand img.word{height:20px;width:auto}
+.brand img.mark{height:34px;width:auto}.brand .word{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:17px}
 nav{display:flex;flex-wrap:wrap;gap:24px;font-size:15px}
 nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 
@@ -48,7 +48,7 @@ nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
 .hero-visual{flex:1 1 360px;min-width:0;display:flex;justify-content:center}
 
-.phone{width:100%;max-width:370px;padding:26px;display:flex;flex-direction:column;gap:18px;border-radius:32px;box-shadow:0 30px 80px rgba(253,90,38,.12)}
+.phone{width:100%;max-width:370px;padding:26px;display:flex;flex-direction:column;gap:18px;border-radius:32px;box-shadow:0 30px 80px rgba(217,191,146,.10)}
 .phone-top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--subtle)}
 .pill{padding:4px 10px;border-radius:999px;background:var(--surface-high);color:var(--muted);font-size:13px}
 .best{background:var(--grad);color:var(--bg);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px}
@@ -58,7 +58,7 @@ nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 .score{background:var(--bg);color:var(--good);border-radius:14px;padding:6px 10px;text-align:center;font-family:Saira,sans-serif;font-weight:800;font-size:22px;line-height:1}
 .score small{display:block;font-family:'DM Sans',sans-serif;font-weight:500;font-size:11px;color:var(--muted);margin-top:3px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:rgba(9,9,11,.14);border-radius:999px;padding:5px 10px;font-size:13px;font-weight:600}
+.chip{background:rgba(19,17,14,.14);border-radius:999px;padding:5px 10px;font-size:13px;font-weight:600}
 .panel{background:var(--surface-high);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .panel-head{display:flex;justify-content:space-between;font-size:13px}
 .panel-head span:last-child{color:var(--subtle)}
@@ -67,7 +67,7 @@ nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 .bars i.r{background:var(--rain)}
 .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--subtle)}
 
-section.band{background:#0F0F12;border-top:1px solid #18181C;border-bottom:1px solid #18181C}
+section.band{background:#17140F;border-top:1px solid #241F18;border-bottom:1px solid #241F18}
 .section{padding-top:96px;padding-bottom:96px;display:flex;flex-direction:column;gap:48px}
 .section h2{font-size:clamp(32px,4vw,52px);text-transform:uppercase;max-width:44rem}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
@@ -98,13 +98,13 @@ details p{margin:10px 0 0;color:var(--muted)}
 .cta{padding:0 24px 112px}
 .cta-box{max-width:1200px;margin:0 auto;background:var(--grad);color:var(--bg);border-radius:32px;padding:clamp(32px,6vw,72px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:32px}
 .cta-box h2{font-size:clamp(30px,4vw,48px);text-transform:uppercase}
-.cta-box p{margin:0;font-size:18px;color:#2A1407}
+.cta-box p{margin:0;font-size:18px;color:#2A2016}
 form{flex:1 1 360px;min-width:0;display:flex;flex-wrap:wrap;gap:12px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-input[type=email]{flex:1 1 220px;min-width:0;min-height:52px;padding:0 20px;border-radius:999px;border:1.5px solid var(--bg);background:#FFF4EA;color:var(--bg);font-size:17px;font-family:inherit}
+input[type=email]{flex:1 1 220px;min-width:0;min-height:52px;padding:0 20px;border-radius:999px;border:1.5px solid var(--bg);background:#FBF4E8;color:var(--bg);font-size:17px;font-family:inherit}
 form button{background:var(--bg);color:var(--text)}
 
-footer{border-top:1px solid #18181C;padding:32px 0}
+footer{border-top:1px solid #241F18;padding:32px 0}
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;font-size:14px;color:var(--subtle)}
 .foot a{color:var(--subtle)}
 @media (max-width:560px){nav{gap:16px;font-size:14px}.hero{padding-top:24px}}
@@ -113,9 +113,9 @@ footer{border-top:1px solid #18181C;padding:32px 0}
 <body>
 
 <header class="wrap">
-  <a class="brand" href="#top" aria-label="RunWise, naar boven">
-    <img class="mark" src="mark.png" alt="" width="58" height="34">
-    <img class="word" src="wordmark.png" alt="RunWise" width="156" height="20">
+  <a class="brand" href="#top" aria-label="Kadans, naar boven">
+    <img class="mark" src="kadans-mark.png" alt="" width="54" height="34">
+    <span class="word">KADANS</span>
   </a>
   <nav aria-label="Hoofdmenu">
     <a href="#hoe">Hoe het werkt</a>
@@ -130,7 +130,7 @@ footer{border-top:1px solid #18181C;padding:32px 0}
   <div class="hero-copy">
     <span class="eyebrow">De beste loopmomenten</span>
     <h1 class="display">Loop niet zomaar.<br><span class="grad-text">Loop op het beste moment.</span></h1>
-    <p class="lead">RunWise kijkt naar het weer, de wind op je route, de buienradar en je eigen runs, en zegt op 5 minuten nauwkeurig wanneer je het best kunt vertrekken. En welke kant je op moet, en wat je aantrekt.</p>
+    <p class="lead">Kadans kijkt naar het weer, de wind op je route, de buienradar en je eigen runs, en zegt op 5 minuten nauwkeurig wanneer je het best kunt vertrekken. En welke kant je op moet, en wat je aantrekt.</p>
     <div class="actions">
       <a class="btn btn-primary" href="#wachtlijst">Zet me op de wachtlijst</a>
       <a class="btn btn-ghost" href="#hoe">Hoe het werkt</a>
@@ -138,7 +138,7 @@ footer{border-top:1px solid #18181C;padding:32px 0}
   </div>
 
   <div class="hero-visual">
-    <div class="card phone" role="img" aria-label="Voorbeeld van het scherm Vandaag in RunWise: beste vertrektijd 18:35, met de buien voor de komende 2 uur">
+    <div class="card phone" role="img" aria-label="Voorbeeld van het scherm Vandaag in Kadans: beste vertrektijd 18:35, met de buien voor de komende 2 uur">
       <div class="phone-top"><span>Vandaag · Barneveld</span><span class="pill">Voorbeeld</span></div>
       <div class="best">
         <div class="best-row">
@@ -170,7 +170,7 @@ footer{border-top:1px solid #18181C;padding:32px 0}
     <h2 class="display">Zo werkt het</h2>
     <div class="steps">
       <div class="card step"><span class="n grad-text">1</span><h3>Koppel je runs</h3><p>Via je horloge (Fitbit, Samsung, Garmin en meer via Health Connect), Strava, een GPX-bestand of gewoon met de hand.</p></div>
-      <div class="card step"><span class="n grad-text">2</span><h3>Kies je route en training</h3><p>Rustig, tempo, lang of herstel, op je eigen rondje. Na 8 runs weet RunWise bij welk weer jij het snelst loopt.</p></div>
+      <div class="card step"><span class="n grad-text">2</span><h3>Kies je route en training</h3><p>Rustig, tempo, lang of herstel, op je eigen rondje. Na 8 runs weet Kadans bij welk weer jij het snelst loopt.</p></div>
       <div class="card step"><span class="n grad-text">3</span><h3>Vertrek op het beste moment</h3><p>Op 5 minuten nauwkeurig, met de buien van de komende 2 uur erbij. Geen gegok meer met de weer-app.</p></div>
     </div>
   </div>
@@ -180,27 +180,27 @@ footer{border-top:1px solid #18181C;padding:32px 0}
   <h2 class="display">Alles om slimmer te trainen</h2>
   <div class="feats">
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#FD8A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l3 2"></path><path d="M9 2h6"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l3 2"></path><path d="M9 2h6"></path></svg>
       <span class="tag">Gratis</span><h3>Op 5 minuten nauwkeurig</h3><p>Weer per kwartier en live buien, zodat je weet of je om 18:30 of 18:35 moet gaan.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#FD8A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3"></path><path d="M3 12h15a3 3 0 1 1-3 3"></path><path d="M3 16h7"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3"></path><path d="M3 12h15a3 3 0 1 1-3 3"></path><path d="M3 16h7"></path></svg>
       <span class="tag">Gratis</span><h3>Wind op jouw route</h3><p>Tegen- of rugwind per kilometer. Loop zo dat je de wind op het eind in je rug hebt.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#FD8A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"></path><path d="M15 8h5v5"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"></path><path d="M15 8h5v5"></path></svg>
       <span class="tag">Gratis</span><h3>Jouw loopprofiel</h3><p>Bij welke temperatuur en wind jij het snelst bent, en of je een ochtend- of avondloper bent.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#FD8A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 4h11l-2 4 2 4H5"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 4h11l-2 4 2 4H5"></path></svg>
       <span class="tag">Gratis</span><h3>Wedstrijddoelen</h3><p>Verwachte eindtijd met het weer van de wedstrijddag, plus advies over tempo, kleding en drinken.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#FD8A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 10h8"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 10h8"></path></svg>
       <span class="tag prem">Premium</span><h3>Je eigen AI-coach</h3><p>Een coach die je runs, je wedstrijd en het weer van de komende dagen kent. Vraag wat je deze week moet lopen.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#FD8A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="3"></rect><path d="M10 7h4"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="3"></rect><path d="M10 7h4"></path></svg>
       <span class="tag">Gratis</span><h3>Werkt met je horloge</h3><p>Runs komen vanzelf binnen via Health Connect of Strava, met het weer van dat moment erbij.</p>
     </div>
   </div>
@@ -229,9 +229,9 @@ footer{border-top:1px solid #18181C;padding:32px 0}
 <section class="wrap section">
   <h2 class="display">Veelgestelde vragen</h2>
   <div class="faq">
-    <details class="card"><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en je ranglijsten. Strava laat zien wat je liep; RunWise helpt je vóór je run. Ze werken prima naast elkaar.</p></details>
+    <details class="card"><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en je ranglijsten. Strava laat zien wat je liep; Kadans helpt je vóór je run. Ze werken prima naast elkaar.</p></details>
     <details class="card"><summary>Heb ik een horloge nodig?</summary><p>Nee. Je kunt runs ook met de hand invoeren of een GPX-bestand uploaden. Met een horloge gaat het vanzelf.</p></details>
-    <details class="card"><summary>Op welke telefoons werkt het?</summary><p>RunWise komt eerst voor Android. iPhone volgt later.</p></details>
+    <details class="card"><summary>Op welke telefoons werkt het?</summary><p>Kadans komt eerst voor Android. iPhone volgt later.</p></details>
     <details class="card"><summary>Wat doen jullie met mijn gegevens?</summary><p>Alleen jij ziet je runs. We verkopen niets en tonen geen advertenties. Je kunt alles inzien en je account met één tik verwijderen. Lees de <a href="privacy.html">privacyverklaring</a>.</p></details>
   </div>
 </section>
@@ -241,23 +241,50 @@ footer{border-top:1px solid #18181C;padding:32px 0}
   <div class="cta-box">
     <div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <h2 class="display">Wees er als eerste bij</h2>
-      <p>RunWise is bijna klaar. Laat je e-mailadres achter en je hoort het zodra je kunt meetesten.</p>
+      <p>Kadans is bijna klaar. Laat je e-mailadres achter en je hoort het zodra je kunt meetesten.</p>
     </div>
-    <form name="wachtlijst" method="POST" action="/bedankt.html" data-netlify="true" netlify-honeypot="bot-field">
-      <input type="hidden" name="form-name" value="wachtlijst">
-      <p class="sr"><label>Niet invullen <input name="bot-field"></label></p>
+    <form id="wachtlijst-form" name="wachtlijst" novalidate>
+      <p class="sr"><label>Niet invullen <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
       <label for="email" class="sr">E-mailadres</label>
       <input id="email" name="email" type="email" required autocomplete="email" placeholder="jouw@email.nl">
       <button type="submit" class="btn">Aanmelden</button>
+      <p id="wachtlijst-msg" role="status" style="flex:1 1 100%;margin:0;font-weight:600"></p>
     </form>
   </div>
 </section>
 
 <footer>
   <div class="wrap foot">
-    <span>© 2026 RunWise</span>
+    <span>© 2026 Kadans</span>
     <span>Weer via Open-Meteo · Buien via Buienradar · <a href="privacy.html">Privacy</a></span>
   </div>
 </footer>
+<script>
+// Wachtlijst: e-mailadres naar Supabase (tabel waitlist, alleen toevoegen). URL en openbare sleutel worden bij het
+// online zetten ingevuld (zie .github/workflows/site.yml).
+(function () {
+  var URL_ = '__SUPABASE_URL__', KEY = '__SUPABASE_ANON_KEY__';
+  var form = document.getElementById('wachtlijst-form'), msg = document.getElementById('wachtlijst-msg');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.elements['bot-field'].value) return;
+    var email = form.elements.email.value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Vul een geldig e-mailadres in.'; return; }
+    if (URL_.indexOf('__') === 0) { msg.textContent = 'De wachtlijst staat nog niet aan. Probeer het later nog eens.'; return; }
+    var btn = form.querySelector('button'); btn.disabled = true; msg.textContent = 'Even geduld…';
+    fetch(URL_ + '/rest/v1/waitlist', {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ email: email, source: 'website' })
+    }).then(function (r) {
+      if (r.ok || r.status === 409) { location.href = 'bedankt.html'; return; }
+      throw new Error(r.status);
+    }).catch(function () {
+      msg.textContent = 'Aanmelden lukte niet. Probeer het over een paar minuten opnieuw.';
+      btn.disabled = false;
+    });
+  });
+})();
+</script>
 </body>
 </html>

@@ -21,6 +21,7 @@ import '../activities/share_run_screen.dart';
 import '../activities/strength_screen.dart';
 import '../profile/emergency_contact.dart';
 import '../routes/route_map.dart';
+import '../routes/route_poster_screen.dart';
 
 /// Direct na het opslaan: je run in één oogopslag, met snelste stukken en records.
 class RunSummaryScreen extends StatelessWidget {
@@ -130,6 +131,10 @@ class RunSummaryScreen extends StatelessWidget {
             if (a.id != null) ...[
               const SizedBox(height: 16),
               _QuickFeel(activityId: a.id!),
+            ],
+            if (a.routeId != null) ...[
+              const SizedBox(height: 12),
+              _PosterTip(routeId: a.routeId!, record: records.isNotEmpty),
             ],
             const SizedBox(height: 12),
             const CooldownTip(),
@@ -641,6 +646,42 @@ class _LapsCard extends StatelessWidget {
               ],
             ]),
           ),
+      ]),
+    );
+  }
+}
+
+/// Na een run op een vaste route: "zet hem aan de muur" (poster). Alleen bij de 1e, 10e, 25e… keer of een record,
+/// zodat het geen reclame na elke run wordt.
+class _PosterTip extends ConsumerWidget {
+  const _PosterTip({required this.routeId, required this.record});
+  final String routeId;
+  final bool record;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final route = (ref.watch(routesProvider).value ?? const <RunRoute>[]).where((r) => r.id == routeId).firstOrNull;
+    if (route == null || route.polyline.isEmpty) return const SizedBox.shrink();
+    final runs = (ref.watch(activitiesProvider).value ?? const <Activity>[]).where((x) => x.routeId == routeId).toList();
+    final n = runs.length;
+    const milestones = {1, 10, 25, 50, 100};
+    if (!record && !milestones.contains(n)) return const SizedBox.shrink();
+    final fastest = runs.isEmpty ? null : runs.map((x) => x.movingTimeSeconds).reduce((x, y) => x < y ? x : y);
+    final why = record ? 'Nieuw record op ${route.name}.' : (n == 1 ? 'Je eerste keer op ${route.name}.' : 'Al $n keer ${route.name} gelopen.');
+    return RwCard(
+      onTap: () => openRoutePoster(context, route, fastestSeconds: fastest, timesRun: n),
+      child: Row(children: [
+        Icon(Icons.image_outlined, color: RwColors.accent),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Zet hem aan de muur', style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 2),
+            Text('$why Maak er een poster van, met je snelste tijd erop.',
+                style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+          ]),
+        ),
+        Icon(Icons.chevron_right, color: RwColors.subtle),
       ]),
     );
   }

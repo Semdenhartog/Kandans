@@ -26,6 +26,7 @@ import '../features/races/races_screen.dart';
 import '../features/routes/draw_route_screen.dart';
 import '../features/routes/generate_route_screen.dart';
 import '../features/routes/route_detail_screen.dart';
+import '../features/routes/route_import_screen.dart';
 import '../features/routes/routes_screen.dart';
 import '../shared/home_shell.dart';
 import '../shared/tab_scroll.dart';
@@ -49,8 +50,8 @@ class _AuthRefresh extends ChangeNotifier {
 
 const _publicPaths = {'/login', '/signup', '/verify'};
 
-/// Vriendcode uit een uitnodigingslink die binnenkwam voordat je was ingelogd.
-String? _pendingInvite;
+/// Link (uitnodiging of gedeelde route) die binnenkwam voordat je was ingelogd: daarna alsnog openen.
+String? _pendingLink;
 
 final routerProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(supabaseProvider).auth;
@@ -64,16 +65,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = auth.currentSession != null;
       final isPublic = _publicPaths.contains(state.matchedLocation);
-      if (!loggedIn && state.matchedLocation == '/vriend') {
-        // Uitnodiging bewaren tot na het inloggen.
-        _pendingInvite = state.uri.queryParameters['code'];
+      if (!loggedIn && (state.matchedLocation == '/vriend' || state.matchedLocation == '/route-delen')) {
+        // Uitnodiging of gedeelde route bewaren tot na het inloggen.
+        _pendingLink = state.uri.toString();
         return '/login';
       }
       if (!loggedIn && !isPublic) return '/login';
       if (loggedIn && isPublic) {
-        final code = _pendingInvite;
-        _pendingInvite = null;
-        return code == null ? AppearanceController.instance.startTab : '/vriend?code=${Uri.encodeQueryComponent(code)}';
+        final link = _pendingLink;
+        _pendingLink = null;
+        return link ?? AppearanceController.instance.startTab;
       }
       return null;
     },
@@ -102,6 +103,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/posters', builder: (c, s) => const PosterOrdersScreen()),
       GoRoute(path: '/shop', builder: (c, s) => const ShopScreen()),
+      // Gedeelde route: runwise://app/route-delen?n=<naam>&p=<polyline> (via de pagina route.html).
+      GoRoute(path: '/route-delen', builder: (c, s) => RouteImportScreen(params: s.uri.queryParameters)),
       // Uitnodiging van een vriend: runwise://app/vriend?code=K7QX2M (via de pagina vriend.html).
       GoRoute(
         path: '/vriend',

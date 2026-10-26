@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme.dart';
 
@@ -20,6 +21,7 @@ class ShopTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           onTap: () {
             HapticFeedback.selectionClick();
+            markShopSeen();
             context.push('/shop');
           },
           child: Ink(
@@ -61,14 +63,47 @@ class ShopTile extends StatelessWidget {
   }
 }
 
-/// Klein goud tasje voor in een kopbalk.
+const _seenKey = 'shop_seen';
+
+/// Shop geopend: het "nieuw"-stipje verdwijnt.
+void markShopSeen() {
+  SharedPreferences.getInstance().then((p) => p.setBool(_seenKey, true)).catchError((Object _) => false);
+  shopSeen.value = true;
+}
+
+/// Of de shop al eens geopend is (voor het stipje op het tasje).
+final shopSeen = ValueNotifier<bool>(true);
+
+/// Eén keer inlezen bij het opstarten van een tasje.
+bool _seenLoaded = false;
+void _loadSeen() {
+  if (_seenLoaded) return;
+  _seenLoaded = true;
+  SharedPreferences.getInstance().then((p) => shopSeen.value = p.getBool(_seenKey) ?? false).catchError((Object _) => true);
+}
+
+/// Klein goud tasje voor in een kopbalk, met een stipje zolang je de shop nog niet bekeek.
 class ShopIconButton extends StatelessWidget {
   const ShopIconButton({super.key});
 
   @override
-  Widget build(BuildContext context) => IconButton(
-        tooltip: 'Shop',
-        icon: Icon(Icons.shopping_bag_outlined, color: RwColors.accent),
-        onPressed: () => context.push('/shop'),
-      );
+  Widget build(BuildContext context) {
+    _loadSeen();
+    return ValueListenableBuilder<bool>(
+      valueListenable: shopSeen,
+      builder: (context, seen, _) => IconButton(
+        tooltip: seen ? 'Shop' : 'Shop (nieuw)',
+        icon: Badge(
+          isLabelVisible: !seen,
+          smallSize: 8,
+          backgroundColor: const Color(0xFFD9BF92),
+          child: Icon(Icons.shopping_bag_outlined, color: RwColors.accent),
+        ),
+        onPressed: () {
+          markShopSeen();
+          context.push('/shop');
+        },
+      ),
+    );
+  }
 }

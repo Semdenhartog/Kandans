@@ -349,13 +349,25 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   Widget _list(BoardResult r, BoardInfo board) {
     if (r.rows.isEmpty) {
+      final code = ref.read(communityStatusProvider).value?.friendCode;
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Text(
-          _friends ? 'Nog geen vrienden op deze ranglijst. Voeg iemand toe met zijn code.' : 'Nog niemand op deze ranglijst. Ga lopen en sta bovenaan!',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: RwColors.muted),
-        ),
+        child: Column(children: [
+          Text(
+            _friends ? 'Nog geen vrienden op deze ranglijst. Samen lopen is leuker: nodig iemand uit.' : 'Nog niemand op deze ranglijst. Ga lopen en sta bovenaan!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: RwColors.muted),
+          ),
+          if (_friends && code != null) ...[
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () => _shareCode(code, ref.read(communityStatusProvider).value?.nickname),
+              icon: const Icon(Icons.card_giftcard),
+              label: const Text('Vrienden uitnodigen'),
+              style: FilledButton.styleFrom(backgroundColor: challengeGold, foregroundColor: rwZandAvond.accentDark),
+            ),
+          ],
+        ]),
       );
     }
     final mineOutside = r.mine != null && !r.rows.any((x) => x.me);
