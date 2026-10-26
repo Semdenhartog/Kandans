@@ -51,6 +51,8 @@ class SplitsCard extends ConsumerWidget {
           final ex = extremes(splits);
           final hasHr = splits.any((x) => x.heartRate != null);
           final hasEle = splits.any((x) => x.elevationGain != null);
+          // Windkolom alleen als we de looprichting én het weer kennen (anders een lege kolom).
+          final hasWind = a.windDirectionDegrees != null && a.windSpeedKmh != null && splits.any((x) => x.bearing != null);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -70,13 +72,13 @@ class SplitsCard extends ConsumerWidget {
                   Expanded(child: Text('tempo', style: _head)),
                   if (hasHr) SizedBox(width: 52, child: Text('hart', style: _head, textAlign: TextAlign.right)),
                   if (hasEle) SizedBox(width: 52, child: Text('omhoog', style: _head, textAlign: TextAlign.right)),
-                  SizedBox(width: 72, child: Text('wind', style: _head, textAlign: TextAlign.right)),
+                  if (hasWind) SizedBox(width: 72, child: Text('wind', style: _head, textAlign: TextAlign.right)),
                 ],
               ),
               const Divider(height: 12),
-              for (final sp in splits) _row(sp, ex, hasHr, hasEle),
+              for (final sp in splits) _row(sp, ex, hasHr, hasEle, hasWind),
               const SizedBox(height: 6),
-              Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}. Wind = het weer bij de start van je run.',
+              Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}.${hasWind ? ' Wind = het weer bij de start van je run.' : ''}',
                   style: TextStyle(color: RwColors.subtle, fontSize: 11)),
               if (GpsQuality.fromJson(s.gpsQuality) case final q?) ...[
                 const SizedBox(height: 2),
@@ -125,7 +127,7 @@ class SplitsCard extends ConsumerWidget {
     ];
   }
 
-  static List<Color> get _zoneColors => [const Color(0xFF8D8D98), const Color(0xFF5AA9FF), RwColors.good, RwColors.warning, RwColors.danger];
+  static List<Color> get _zoneColors => [for (var z = 1; z <= 5; z++) rwZoneColor(z)];
 
   /// Hoeveel tijd je in elke zone liep (hartslag als die er is, anders tempo).
   List<Widget> _zones(RunStreams s, WidgetRef ref) {
@@ -182,7 +184,7 @@ class SplitsCard extends ConsumerWidget {
         ]),
       );
 
-  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle) {
+  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle, bool hasWind) {
     final a = activity;
     final cls = sp.bearing == null || a.windDirectionDegrees == null || a.windSpeedKmh == null
         ? null
@@ -259,6 +261,7 @@ class SplitsCard extends ConsumerWidget {
               child: Text(sp.elevationGain == null ? '–' : '${sp.elevationGain!.round()} m',
                   textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted)),
             ),
+          if (hasWind)
           SizedBox(
             width: 72,
             child: Row(

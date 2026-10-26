@@ -131,6 +131,17 @@ class RwColors {
 const rwTnum = <FontFeature>[FontFeature.tabularFigures()];
 
 /// Vaste tekststijlen, zodat koppen, labels en cijfers overal hetzelfde zijn.
+/// Kleur per hartslagzone (1–5), in de huisstijl: van rustig (zand) via groen en goud naar oranje en rood.
+/// Zones staan er altijd ook als nummer/tekst bij, zodat je ze niet alleen aan de kleur hoeft te herkennen.
+Color rwZoneColor(int zone) => switch (zone) {
+      1 => RwColors.subtle,
+      2 => RwColors.good,
+      3 => RwColors.warning,
+      4 => RwColors.signal,
+      5 => RwColors.danger,
+      _ => RwColors.subtle,
+    };
+
 class RwText {
   /// Sectiekop in hoofdletters, met ruime spatiëring (zoals in horloges en luxe-apps).
   static TextStyle get overline => TextStyle(

@@ -244,7 +244,7 @@ class ProfileScreen extends ConsumerWidget {
                   leading: TileIcon(Icons.workspace_premium_outlined, color: RwColors.accent),
                   title: const Text('Kadans Premium'),
                   subtitle: Text(
-                    profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna €5 p/m of €40 p/j',
+                    profile.value?.isPremium ?? false ? 'Actief' : '1 maand gratis, daarna € 5 per maand',
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/premium'),
@@ -394,7 +394,7 @@ class _BucketChart extends StatelessWidget {
     final minS = speeds.reduce((a, c) => a < c ? a : c);
     final maxS = speeds.reduce((a, c) => a > c ? a : c);
     return SizedBox(
-      height: 110,
+      height: 128,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -405,6 +405,13 @@ class _BucketChart extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    // Hoeveel sneller dan bij je langzaamste temperatuur.
+                    Text(
+                      speeds[k] / minS - 1 < 0.005 ? '–' : '+${((speeds[k] / minS - 1) * 100).round()}%',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, fontFeatures: rwTnum,
+                          color: speeds[k] == maxS ? RwColors.accent : RwColors.subtle),
+                    ),
+                    const SizedBox(height: 3),
                     Flexible(
                       child: FractionallySizedBox(
                         heightFactor: maxS == minS ? 0.7 : 0.25 + 0.75 * (speeds[k] - minS) / (maxS - minS),
@@ -419,7 +426,9 @@ class _BucketChart extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('${b[k].from.round()}°', style: TextStyle(fontSize: 11, color: RwColors.subtle)),
+                    Text('${b[k].from.round()}–${b[k].to.round()}°',
+                        maxLines: 1, overflow: TextOverflow.visible, softWrap: false,
+                        style: TextStyle(fontSize: 11, color: RwColors.subtle)),
                   ],
                 ),
               ),

@@ -553,6 +553,12 @@ class _ResultsState extends State<_Results> {
                       selected: shown.start,
                       onTap: (s) => setState(() => _selected = s.start),
                     ),
+                  if (bars.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text('Hoger en warmer = beter moment · het beste uur gloeit · tik voor details',
+                          style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+                    ),
                 ],
               ),
             ),
@@ -1034,7 +1040,7 @@ class _HourBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 130,
+      height: 146,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: scores.length,
@@ -1064,6 +1070,17 @@ class _HourBars extends StatelessWidget {
                     overflow: TextOverflow.visible,
                     style: TextStyle(fontSize: 10, color: RwColors.accent, fontWeight: FontWeight.w700),
                   ),
+                  // Score boven het gekozen en het beste uur, zodat je niet hoeft te raden.
+                  Text(
+                    isSel || isBest ? '${s.score}' : '',
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFeatures: rwTnum,
+                      fontWeight: FontWeight.w800,
+                      color: isBest ? RwColors.accent : RwColors.text,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Expanded(
                     child: Align(
@@ -1082,7 +1099,14 @@ class _HourBars extends StatelessWidget {
                                 end: Alignment.bottomCenter,
                                 colors: isBest
                                     ? [RwColors.accentLight, RwColors.accent, RwColors.accentDeep]
-                                    : (isSel ? [RwColors.subtle, RwColors.muted] : [RwColors.border, RwColors.bar]),
+                                    : isSel
+                                        ? [RwColors.subtle, RwColors.muted]
+                                        // Kleur volgt de score: goede uren warmer, matige uren vager.
+                                        : s.score >= 80
+                                            ? [RwColors.accentLight.withValues(alpha: 0.75), RwColors.accent.withValues(alpha: 0.6)]
+                                            : s.score >= 60
+                                                ? [RwColors.border, RwColors.bar]
+                                                : [RwColors.bar.withValues(alpha: 0.55), RwColors.bar.withValues(alpha: 0.45)],
                               ),
                               boxShadow: isBest ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 12, spreadRadius: -2)] : null,
                               borderRadius: BorderRadius.circular(6),

@@ -266,10 +266,12 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
             child: ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-            itemCount: shown.length + head + (withFilters && shown.isEmpty ? 1 : 0),
+            itemCount: shown.length + head + (withFilters && shown.isEmpty ? 1 : 0) + (withFilters ? 0 : 1),
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               if (withFilters && index == 0) return _filters(list.length, shown.length);
+              // Weinig routes: onderaan een paar ideeën, in plaats van een leeg scherm.
+              if (!withFilters && index == shown.length) return const _RouteIdeas();
               if (shown.isEmpty) {
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
@@ -448,6 +450,40 @@ class _CreateTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Ideeën onder een korte routelijst: poster laten maken, GPX importeren, een rondje laten maken.
+class _RouteIdeas extends StatelessWidget {
+  const _RouteIdeas();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget idea(IconData icon, String title, String text, VoidCallback onTap) => RwCard(
+          onTap: onTap,
+          child: Row(children: [
+            Icon(icon, color: RwColors.accent),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text(text, style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
+              ]),
+            ),
+            Icon(Icons.chevron_right, color: RwColors.subtle),
+          ]),
+        );
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text('IDEEËN', style: RwText.overline),
+        const SizedBox(height: 8),
+        idea(Icons.image_outlined, 'Je rondje aan de muur', 'Laat een route drukken als poster, in de stijl die jij kiest.', () => context.push('/shop')),
+        const SizedBox(height: 10),
+        idea(Icons.auto_awesome_outlined, 'Iets nieuws proberen', 'Laat Kadans een rondje maken met de wind mee terug.', () => context.go('/routes/maken')),
+      ]),
     );
   }
 }

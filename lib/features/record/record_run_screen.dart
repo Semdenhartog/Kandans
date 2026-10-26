@@ -2124,13 +2124,7 @@ class _HeartRow extends StatelessWidget {
   const _HeartRow({required this.view});
   final RecorderView view;
 
-  static Map<int, Color> get _zoneColors => {
-    1: const Color(0xFF8D8D98),
-    2: const Color(0xFF5AA9FF),
-    3: RwColors.good,
-    4: RwColors.warning,
-    5: RwColors.danger,
-  };
+  static Map<int, Color> get _zoneColors => {for (var z = 1; z <= 5; z++) z: rwZoneColor(z)};
 
   @override
   Widget build(BuildContext context) {

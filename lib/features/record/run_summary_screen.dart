@@ -491,7 +491,7 @@ class _RecordPlaque extends StatelessWidget {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(records.length == 1 ? 'NIEUW RECORD' : '${records.length} NIEUWE RECORDS',
                       style: const TextStyle(color: _gold, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.8)),
-                  const Text('Persoonlijk beste', style: TextStyle(fontFamily: RwFonts.display, fontSize: 18, fontWeight: FontWeight.w800)),
+                  Text('Persoonlijk beste', style: TextStyle(fontFamily: RwFonts.display, fontSize: 18, fontWeight: FontWeight.w800, color: rwZandAvond.text)),
                 ]),
               ),
             ]),
@@ -501,7 +501,8 @@ class _RecordPlaque extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(children: [
-                  Expanded(child: Text(r.label, style: const TextStyle(fontWeight: FontWeight.w600))),
+                  // Altijd donker-goud: tekst expliciet licht (anders onleesbaar als de app licht staat).
+                  Expanded(child: Text(r.label, style: TextStyle(fontWeight: FontWeight.w600, color: rwZandAvond.text))),
                   Text(Fmt.duration(r.seconds),
                       style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFF2D892))),
                 ]),

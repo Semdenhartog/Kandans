@@ -97,9 +97,15 @@ class ElevationCard extends ConsumerWidget {
           const SizedBox(height: 10),
           Text('Vlak parcours: minder dan 5 meter klimmen.', style: TextStyle(color: RwColors.muted)),
         ] else if (perKm.length > 1) ...[
-          const SizedBox(height: 14),
-          Text('PER KILOMETER', style: RwText.overline),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
+          // Ingeklapt: de klim per km staat ook al in "Per kilometer"; hier alleen voor wie ook het dalen wil zien.
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 6),
+              title: Text('OMHOOG EN OMLAAG PER KM', style: RwText.overline),
+              children: [
           Table(
             columnWidths: const {0: FixedColumnWidth(52), 1: FlexColumnWidth(), 2: FlexColumnWidth()},
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
@@ -117,6 +123,9 @@ class ElevationCard extends ConsumerWidget {
                   Text(k.down < 1 ? '–' : '−${k.down.round()} m', style: TextStyle(color: RwColors.muted, fontFeatures: rwTnum)),
                 ]),
             ],
+          ),
+              ],
+            ),
           ),
         ],
       ]),

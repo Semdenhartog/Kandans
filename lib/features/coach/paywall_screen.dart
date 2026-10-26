@@ -130,16 +130,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           const _Benefit(icon: Icons.calendar_month_outlined, text: 'Trainingsweken op maat van je doel'),
           const _Benefit(icon: Icons.flag_outlined, text: 'Wedstrijdplan: tempo, kleding en drinken'),
           const _Benefit(icon: Icons.insights_outlined, text: 'Na elke run een persoonlijke analyse'),
+          const _Benefit(icon: Icons.auto_awesome_outlined, text: 'Luxe-posterstijlen en gouden deelkaart inbegrepen'),
           const SizedBox(height: 10),
           const _GoldRule(),
           const SizedBox(height: 22),
           if (!billing.isAvailable)
-            RwCard(
-              child: Text(
-                'Abonnementen zijn binnenkort beschikbaar. Zodra de app in de Play Store staat, '
-                'kun je hier je gratis proefmaand starten.',
-                style: TextStyle(color: rwZandAvond.muted, height: 1.5),
-              ),
+            _DarkNote(
+              text: 'Abonnementen zijn binnenkort beschikbaar. Zodra de app in de Play Store staat, '
+                  'kun je hier je gratis proefmaand starten.',
             )
           else
             plans.when(
@@ -153,10 +151,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
               data: (list) {
                 if (list.isEmpty) {
-                  return RwCard(
-                    child: Text('Er zijn nu geen abonnementen beschikbaar. Probeer het later opnieuw.',
-                        style: TextStyle(color: rwZandAvond.muted)),
-                  );
+                  return const _DarkNote(text: 'Er zijn nu geen abonnementen beschikbaar. Probeer het later opnieuw.');
                 }
                 final selected = list.firstWhere((p) => p.isYearly == _yearly, orElse: () => list.first);
                 return Column(
@@ -407,4 +402,21 @@ class _PlanTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Mededeling in de donker-gouden stijl van Premium (ook als de app licht staat).
+class _DarkNote extends StatelessWidget {
+  const _DarkNote({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: rwZandAvond.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _gold.withValues(alpha: 0.45)),
+        ),
+        child: Text(text, style: TextStyle(color: rwZandAvond.muted, height: 1.5)),
+      );
 }
