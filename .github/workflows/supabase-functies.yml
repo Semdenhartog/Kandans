@@ -1,33 +1,49 @@
 # Zet de server-functies (Edge Functions) live in Supabase.
-# Starten: GitHub -> Actions -> "Supabase-functies live zetten" -> Run workflow.
+# Vanzelf bij elke wijziging in supabase/functions op main, of met de hand:
+# GitHub -> Actions -> "Supabase-functies live zetten" -> Run workflow.
 # Eenmalig nodig: GitHub-geheim SUPABASE_ACCESS_TOKEN (Supabase -> Account -> Access Tokens).
 name: Supabase-functies live zetten
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['supabase/functions/**']
+
+concurrency:
+  group: supabase-functies
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       PROJECT_REF: jdswennyfczpqblfkrxt
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 
       - name: Controleren of het geheim er is
+        id: check
         run: |
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
-            echo "::error::Zet eerst het GitHub-geheim SUPABASE_ACCESS_TOKEN (zie README)."
+            if [ "${{ github.event_name }}" = "push" ]; then
+              # Automatische run: niet als fout tonen, wel een duidelijke melding.
+              echo "::warning::Functies niet live gezet: het GitHub-geheim SUPABASE_ACCESS_TOKEN ontbreekt nog (Settings -> Secrets and variables -> Actions -> Repository secret)."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::Zet eerst het GitHub-geheim SUPABASE_ACCESS_TOKEN onder Settings -> Secrets and variables -> Actions -> Repository secrets (niet bij Environments of Dependabot). Naam precies: SUPABASE_ACCESS_TOKEN."
             exit 1
           fi
 
       # Met login-controle door Supabase: alleen ingelogde app-gebruikers.
       - name: coach en delete-account
+        if: steps.check.outputs.skip != 'true'
         run: |
           supabase functions deploy coach --project-ref "$PROJECT_REF"
           supabase functions deploy delete-account --project-ref "$PROJECT_REF"
@@ -39,6 +55,7 @@ jobs:
       # Zonder login-controle door Supabase: Strava en RevenueCat roepen deze zelf aan;
       # de functies controleren zelf wie er belt.
       - name: strava en revenuecat-webhook
+        if: steps.check.outputs.skip != 'true'
         run: |
           supabase functions deploy strava --project-ref "$PROJECT_REF" --no-verify-jwt
           supabase functions deploy revenuecat-webhook --project-ref "$PROJECT_REF" --no-verify-jwt

@@ -1112,7 +1112,8 @@ class _HourBars extends StatelessWidget {
                       alignment: Alignment.bottomCenter,
                       // Staafjes groeien bij openen één voor één omhoog; het beste uur gloeit.
                       child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: (s.score.clamp(5, 100)) / 100),
+                        // Bij "minder beweging" (Android-toegankelijkheid) meteen op hoogte.
+                        tween: Tween(begin: MediaQuery.disableAnimationsOf(context) ? (s.score.clamp(5, 100)) / 100 : 0, end: (s.score.clamp(5, 100)) / 100),
                         duration: Duration(milliseconds: 500 + 35 * i.clamp(0, 16)),
                         curve: Curves.easeOutCubic,
                         builder: (_, h, _) => FractionallySizedBox(

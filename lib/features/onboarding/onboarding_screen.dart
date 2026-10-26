@@ -311,7 +311,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               builder: (_, _) {
                 final page = _pages.hasClients && _pages.position.haveDimensions ? (_pages.page ?? 0) : _page.toDouble();
                 return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: 1),
+                  tween: Tween(begin: MediaQuery.disableAnimationsOf(context) ? 1 : 0, end: 1),
                   duration: const Duration(milliseconds: 1400),
                   curve: Curves.easeOutCubic,
                   builder: (_, intro, _) => CustomPaint(

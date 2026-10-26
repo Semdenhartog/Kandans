@@ -17,10 +17,10 @@ jobs:
   screens:
     # Dependabot mag niet naar de schermen-branches schrijven; de build is daar genoeg als controle.
     if: github.actor != 'dependabot[bot]'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -57,7 +57,7 @@ jobs:
           else
             echo "Niets uit beeld."
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: schermen

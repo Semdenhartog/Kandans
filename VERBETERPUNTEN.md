@@ -188,3 +188,81 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 116. ✅ **Rondleiding met vragen.** 7 schermen, elk over te slaan: uitleg, overzicht van alle functies, doel (gaat mee naar de coach), wanneer je loopt (vult de weekplanner) + dagelijkse melding, locatie, horloge, koppelen; bij doel "wedstrijd" meteen naar Wedstrijd toevoegen. Opnieuw te bekijken via Ik → Hulp. *Nodig: functie `coach` opnieuw live zetten voor het doel.*
 117. ✅ **Live opdrachten tijdens je run.** Keuze "Live opdrachten" bij de start. Na 8 min/1,2 km inlopen om de 5 min: sprint 20 s, snelle minuut, km op tempo; bij een doelafstand een sterke finish. Doelen op je eigen gemiddelde tempo; stem, trilling en melding op je horloge; kaart met aftellen tijdens de opdracht. Niet naast intervallen, begeleide runs of loopband.
 118. ✅ **Luxe uitnodiging.** "Vrienden uitnodigen" in Samen deelt een gouden kaart + link naar `site/vriend.html`, die de app opent (`runwise://app/vriend?code=…`) en de vriend meteen toevoegt (ook na eerst inloggen of meedoen). *Nodig: GitHub Pages aan; downloadknop wijst nu naar de APK, later naar de Play Store.*
+
+## Ronde 26 oktober 2026 (vraag van Sem: shop, privacy, en 6 × 10 verbeteringen)
+
+**Gevraagd**
+119. ✅ **Privacyverklaring gaf een fout.** Oorzaak: GitHub Pages staat nog uit, dus de website bestond niet (404). Nu staat de verklaring ook ín de app (werkt altijd, ook offline), met een knop naar de website. *Nodig: Pages aanzetten.*
+120. ✅ **Shop.** Eén winkel voor routeposters (je eigen routes als voorbeeld), Luxe-ontwerpen, Premium en schoenen. Gouden tegel in Ik, tasje op Vandaag en Routes, vindbaar via zoeken. "Mijn posters" zit nu in de shop.
+
+**1. Gebruiksgemak**
+121. ✅ Feedback sturen (Ik → Hulp), met appversie en toestel als je wilt.
+122. ✅ Ronde-knop tijdens het lopen: rondetijd en tempo uitgesproken, rondes in het overzicht na je run (snelste in goud).
+123. ✅ Vriend toevoegen: code of uitnodigingslink op het klembord wordt vanzelf ingevuld.
+124. ✅ Uitnodigingslink kopiëren in Samen.
+125. ✅ Rondleiding: terugknop, tikbare bolletjes en de Android-terugknop gaat een stap terug.
+126. ✅ "Wat is nieuw" later terug te zien (Hulp) en bijgewerkt met deze ronde.
+127. ✅ Live opdracht overslaan (bijv. bij een oversteek).
+128. ✅ Zoeken in Ik vindt nu ook Shop, posterbestellingen, privacy, rondleiding, feedback en wat-is-nieuw.
+129. ✅ "Laten maken" onthoudt je laatste keuze (afstand of tijd).
+130. ✅ Android-terug in de rondleiding sluit niet meer meteen alles.
+
+**2. Layout**
+131. ✅ Records-kaart na je run: tekst was onleesbaar in het lichte thema.
+132. ✅ Uurgrafiek: kleur volgt de score, score boven het gekozen en beste uur, korte uitleg eronder.
+133. ✅ Hartslagzones in de huisstijl (zand, groen, goud, oranje, rood) i.p.v. blauw/grijs.
+134. ✅ Premium: "binnenkort"-melding in donker-goud (was een licht vak op zwart); Luxe staat bij de voordelen.
+135. ✅ Premium-regel in Ik brak lelijk af ("p/ j").
+136. ✅ Per km: lege windkolom weg als er geen wind per km bekend is.
+137. ✅ Korte routelijst: ideeën eronder (poster, rondje laten maken) i.p.v. een leeg scherm.
+138. ✅ Loopprofiel: percentage boven elke staaf en temperatuurbereik eronder.
+139. ✅ Weekoverzicht: cijfers krimpen bij grote letters (gaf een fout in de schermcontrole op maandag).
+140. ✅ Hoogte per km inklapbaar (dubbelde met "Per kilometer").
+
+**3. Opties**
+141. ✅ Live opdrachten: rustig / normaal / pittig.
+142. ✅ Live opdrachten: om de 3, 5 of 8 minuten.
+143. ✅ Scherm aan tijdens je run.
+144. ✅ Ronde-knop aan/uit.
+145. ✅ Openen op Vandaag, Runs of Routes (Ik → Weergave).
+146. ✅ Kledingadvies: snel koud / normaal / snel warm.
+147. ✅ Hooikoorts: geen pollenmeldingen, normaal, of extra gevoelig.
+148. ✅ Coach: korte, normale of uitgebreide antwoorden. *Nodig: functie `coach` live zetten.*
+149. ✅ "Mijn doel" uit de rondleiding later te wijzigen in Ik.
+150. ✅ "Alleen goede uren" blijft onthouden.
+
+**4. Weer en advies**
+151. ✅ Mist: waarschuwing over zicht.
+152. ✅ Natte bladeren in oktober/november.
+153. ✅ "Misschien een bui" bij een onzekere regenkans (30–60%).
+154. ✅ Benauwd (warm en vochtig).
+155. ✅ Eerste warme dag: je bent nog niet gewend aan warmte.
+156. ✅ Koud: warming-up binnen.
+157. ✅ Gure wind: voelt veel kouder dan het is.
+158. ✅ Begin tegen de wind in (als je geen route volgt).
+159. ✅ Bij hitte: hoe laat het koelste moment is.
+160. ✅ Drinkadvies met hoeveelheden.
+
+**5. Groei en inkomsten**
+161. ✅ Route delen als link: webpagina met kaart en GPX, en "Opslaan in Kadans" via de app. Ook in de loopmaatje-uitnodiging.
+162. ✅ Postertip na je 1e, 10e, 25e… keer op een route of na een record.
+163. ✅ Lege vriendenranglijst: knop om vrienden uit te nodigen.
+164. ✅ Gedeelde run bevat een link naar Kadans.
+165. ✅ Wachtlijst via Supabase (tabel `waitlist`, alleen toevoegen). *Nodig: migratie 0030 + Pages aan.*
+166. ✅ Website, live-pagina en bedankpagina in Kadans-stijl (naam, goud, logo).
+167. ✅ Om een beoordeling vragen na een record (al vanaf run 3), het blije moment.
+168. ✅ "Nieuw"-stipje op het shoptasje tot je de shop bekeek.
+169. ✅ Vertel een vriend over Kadans (Ik).
+170. ✅ Actiecode inwisselen in de shop (Google Play), voor influencer-acties.
+
+**6. Betrouwbaarheid en onderhoud**
+171. ✅ GitHub Actions bijgewerkt (Node 20-waarschuwingen weg).
+172. ✅ Bouwserver vastgezet op Ubuntu 24.04 (geen verrassingen door de overstap naar 26).
+173. ✅ Functies gaan vanzelf live bij een wijziging op main (zodra het token er is); zonder token een waarschuwing i.p.v. een fout.
+174. ✅ Websitelinks werken nu op GitHub Pages (ze wezen naar de verkeerde map).
+175. ✅ Privacyverklaring op één plek: de website is de bron, de app volgt bij elke build.
+176. ✅ Foutoverzicht in Supabase: `select * from foutoverzicht;` (migratie 0031).
+177. ✅ "Minder beweging": ook uurgrafiek en rondleiding zonder animatie.
+178. ✅ Tests voor opdrachten, rondes-overslaan, routelink, vriendcode, nieuwe weerwaarschuwingen, kledingvoorkeur en beoordeling.
+179. ✅ Nieuwe schermen in de schermcontrole (shop, privacy, rondleidingstappen).
+180. ✅ Overdracht (CLAUDE.md) en dit overzicht bijgewerkt.

@@ -79,7 +79,7 @@ ClothingAdvice clothingFor(HourWeather w, TrainingType type, {int durationMinute
   if (w.temperature <= 1) extras.add('Kans op gladheid: kies schoenen met grip of een veilige route');
   // Drinken: hoeveel, afhankelijk van warmte en duur.
   if (feels >= 22 && durationMinutes >= 45) {
-    extras.add('Drink vooraf een glas water en neem 400–700 ml per uur mee: het is warm');
+    extras.add('Neem drinken mee (400–700 ml per uur) en drink vooraf een glas water: het is warm');
   } else if (durationMinutes >= 75 && feels >= 15) {
     extras.add('Neem drinken mee (ongeveer 400–600 ml per uur): je bent lang onderweg');
   } else if (durationMinutes >= 90) {

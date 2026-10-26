@@ -33,10 +33,15 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
     Fouten lezen: `gh api repos/Semdenhartog/Runwise/check-runs/<job-id>/annotations` (max 10 per stap).
   - `screens.yml`: schermafbeeldingen (licht + `6x_donker_*`, ook grote letters) naar branch `schermen-<branch>`,
     incl. `screens.txt`; faalt op "overflowed by". Play Store-plaatjes in `playstore/`.
-  - `supabase-functies.yml`: zet alle edge functions live (**werkt pas als GitHub-secret `SUPABASE_ACCESS_TOKEN` bestaat** — nog niet gezet).
+  - `supabase-functies.yml`: zet alle edge functions live, met de hand én vanzelf bij een push naar main die `supabase/functions/**` raakt
+    (**werkt pas als GitHub-secret `SUPABASE_ACCESS_TOKEN` bestaat** — 25 okt nog niet gevonden; zonder token: waarschuwing, geen fout).
     Tot die tijd: losse functie live zetten via de Supabase-MCP `deploy_edge_function` (imports `../_shared/x` → `./_shared/x`).
   - `geheimen.yml`: geheimen-scan.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0029** staan erin (Sem draait SQL zelf in de SQL Editor;
+  - `site.yml`: zet `site/` op GitHub Pages (**Pages staat nog uit** → Settings → Pages → Source: GitHub Actions) en vult
+    `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in (wachtlijst). Links in `site/` zijn relatief (Pages draait op `/Runwise/`).
+- Privacyverklaring: bron is `site/privacy.html`; `tools/privacy_naar_dart.py` maakt er `lib/features/profile/privacy_text.dart`
+  van (draait in build.yml en screens.yml). In de app: `openPrivacy(context)`.
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0031** staan erin (0030 wachtlijst, 0031 foutoverzicht: door Sem te draaien) (Sem draait SQL zelf in de SQL Editor;
   `apply_migration` via MCP wordt in deze omgeving geannuleerd, `execute_sql` voor lezen werkt wel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Gratis kaartdata: PDOK-tegels, Overpass (verlichting, voorzieningen; per vraag eerst één server, na 4 s reserve),
@@ -59,10 +64,13 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Uitdagingen + Samen (ranglijsten, vriendcode): `lib/features/challenges/`, functie `community`
 - Coach: functie `coach` (logt `coach_usage` per vraag), app `lib/features/coach/`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**, wacht op Stripe/Gelato-geheimen.
-- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 118). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
+- Shop: `lib/features/shop/` (`/shop`, tasje met "nieuw"-stip, gouden tegel in Ik). Route delen: `domain/route_share.dart`,
+  `site/route.html`, deeplink `runwise://app/route-delen?n=&p=` → `RouteImportScreen`. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
+- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 180). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
-- GitHub-secret `SUPABASE_ACCESS_TOKEN` zetten (dan kan alles met één klik live).
+- GitHub-secret `SUPABASE_ACCESS_TOKEN` zetten (dan kan alles met één klik live). Daarna: coach (doel + antwoordlengte) live.
+- GitHub Pages aanzetten; `site/privacy.html` [NAAM], [PLAATS], [E-MAILADRES] invullen; migraties 0030 en 0031 draaien.
 - Supabase Auth-mailtemplates zeggen nog "RunWise" → aanpassen (Authentication → Email Templates).
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
