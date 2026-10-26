@@ -25,6 +25,7 @@ jobs:
         with:
           channel: stable
           cache: true
+      - run: python3 tools/privacy_naar_dart.py
       - run: flutter pub get
       - name: Schermafbeeldingen maken
         run: flutter test test_screens --update-goldens --reporter expanded 2>&1 | tee screens.txt

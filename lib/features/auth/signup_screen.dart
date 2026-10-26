@@ -2,11 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/config.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
+import '../profile/privacy_screen.dart';
 import 'auth_widgets.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -139,10 +138,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 decoration: TextDecoration.underline,
                               ),
                               recognizer: TapGestureRecognizer()
-                                ..onTap = () => launchUrl(
-                                      Uri.parse(AppConfig.privacyUrl),
-                                      mode: LaunchMode.externalApplication,
-                                    ),
+                                ..onTap = () => openPrivacy(context),
                             ),
                             const TextSpan(text: '.'),
                           ],

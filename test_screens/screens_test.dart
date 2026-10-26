@@ -49,6 +49,7 @@ import 'package:runwise/features/planner/availability_provider.dart';
 import 'package:runwise/features/planner/training_plan_screen.dart';
 import 'package:runwise/features/auth/login_screen.dart';
 import 'package:runwise/features/onboarding/onboarding_screen.dart';
+import 'package:runwise/features/profile/privacy_screen.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
 import 'package:runwise/features/record/run_summary_screen.dart';
@@ -457,6 +458,7 @@ void main() {
   testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
   testWidgets('14b rondleiding overzicht', (t) => _shot(t, '14b_rondleiding_overzicht', const OnboardingScreen(initialPage: 1), height: 915));
   testWidgets('14c rondleiding doel', (t) => _shot(t, '14c_rondleiding_doel', const OnboardingScreen(initialPage: 2), height: 915));
+  testWidgets('16 privacy', (t) => _shot(t, '16_privacy', const PrivacyScreen(), height: 1600));
   testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 3), height: 915));
   testWidgets('15 na je run', (t) {
     final st = RunStreams.fromJson(_streams)!;

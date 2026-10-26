@@ -3,39 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacyverklaring – RunWise</title>
-<meta name="theme-color" content="#09090B">
-<link rel="icon" type="image/png" href="/favicon.png">
+<title>Privacyverklaring – Kadans</title>
+<meta name="theme-color" content="#13110E">
+<link rel="icon" type="image/png" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Saira:wght@700;800&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:#09090B;color:#F4F4F5;font-family:'DM Sans',system-ui,sans-serif;line-height:1.65}
-main{max-width:760px;margin:0 auto;padding:40px 20px 96px}
+:root{--bg:#13110E;--surface:#1C1814;--border:#352E26;--gold:#D9BF92;--gold-deep:#B8955F;--gold-light:#F0DDB6;--text:#F1E9DC;--muted:#BDB1A0;--subtle:#94897A}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.65}
+main{max-width:760px;margin:0 auto;padding:40px 16px 96px}
 .top{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
 .top img{height:30px;width:auto}
-h1{font-family:Saira,sans-serif;font-weight:800;font-size:44px;margin:0 0 8px;letter-spacing:-.01em;text-transform:uppercase;background:linear-gradient(135deg,#FD3D22,#FD8A26 55%,#FD9E28);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.4em;color:var(--gold);font-size:14px}
+h1{font-family:Saira,sans-serif;font-weight:800;font-size:clamp(30px,8vw,44px);margin:0 0 8px;letter-spacing:-.01em;text-transform:uppercase;background:linear-gradient(135deg,var(--gold-light),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
 h2{font-family:Saira,sans-serif;font-weight:700;font-size:22px;margin:36px 0 8px}
-p,li{color:#BDBDC6}
-strong{color:#F4F4F5}
-a{color:#FD8A26}
-.meta{color:#8D8D98;font-size:14px}
+p,li{color:var(--muted)}
+strong{color:var(--text)}
+a{color:var(--gold)}
+.meta{color:var(--subtle);font-size:14px}
+.tablewrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;margin:8px 0}
-td,th{border:1px solid #29292F;padding:8px 10px;text-align:left;vertical-align:top;color:#BDBDC6}
-th{color:#F4F4F5;background:#141417}
+td,th{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top;color:var(--muted)}
+th{color:var(--text);background:var(--surface)}
 </style>
 </head>
 <body>
 <main>
-<a class="top" href="/" aria-label="Terug naar RunWise"><img src="/mark.png" alt="" width="51" height="30"><img src="/wordmark.png" alt="RunWise" width="156" height="20" style="height:18px"></a>
+<a class="top" href="./" aria-label="Terug naar Kadans"><img src="kadans-mark.png" alt="" width="48" height="30"><span class="brand">KADANS</span></a>
 <h1>Privacyverklaring</h1>
-<p class="meta">Versie 1.1 · laatst bijgewerkt: [DATUM]</p>
+<p class="meta">Versie 1.1 · laatst bijgewerkt: 26 oktober 2026</p>
 
-<p>RunWise is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we daarvoor gebruiken en wat je rechten zijn.</p>
+<p>Kadans (voorheen RunWise) is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we daarvoor gebruiken en wat je rechten zijn.</p>
 
 <h2>Wie zijn wij?</h2>
-<p>RunWise wordt gemaakt door [NAAM], [PLAATS]. Vragen over privacy? Mail naar <a href="mailto:[E-MAILADRES]">[E-MAILADRES]</a>.</p>
+<p>Kadans wordt gemaakt door [NAAM], [PLAATS]. Vragen over privacy? Mail naar <a href="mailto:[E-MAILADRES]">[E-MAILADRES]</a>.</p>
 
 <h2>Welke gegevens gebruiken we?</h2>
-<table>
+<div class="tablewrap"><table>
 <tr><th>Gegevens</th><th>Waarvoor</th></tr>
 <tr><td>E-mailadres en wachtwoord</td><td>Je account. Je wachtwoord wordt versleuteld opgeslagen door onze databasedienst; wij kunnen het niet zien.</td></tr>
 <tr><td>Voornaam</td><td>Om je aan te spreken in de app.</td></tr>
@@ -43,12 +46,12 @@ th{color:#F4F4F5;background:#141417}
 <tr><td>Weer tijdens je runs</td><td>Wordt automatisch opgehaald, om te leren bij welk weer jij het snelst loopt.</td></tr>
 <tr><td>Routes die je importeert (GPS-punten)</td><td>Om de wind op je looprichting te berekenen.</td></tr>
 <tr><td>Wedstrijddoelen</td><td>Voor je wedstrijdvoorspelling en advies.</td></tr>
-<tr><td>Trainingen, afstand en hartslag uit Health Connect (alleen als je je horloge koppelt)</td><td>Om je runs automatisch toe te voegen. RunWise leest alleen hardlooptrainingen.</td></tr>
+<tr><td>Trainingen, afstand en hartslag uit Health Connect (alleen als je je horloge koppelt)</td><td>Om je runs automatisch toe te voegen. Kadans leest alleen hardlooptrainingen.</td></tr>
 <tr><td>Runs uit Strava (alleen als je Strava koppelt)</td><td>Om je runs automatisch toe te voegen. Ontkoppel je Strava, dan verwijderen we deze runs.</td></tr>
 <tr><td>Vragen aan de coach en de antwoorden</td><td>Om je persoonlijk trainingsadvies te geven en het gesprek te onthouden. Je kunt het gesprek altijd wissen.</td></tr>
 <tr><td>Abonnementsstatus</td><td>Om te weten of je Premium hebt. Betalingen lopen via Google Play; wij zien geen betaalgegevens.</td></tr>
 <tr><td>Foutmeldingen (technische gegevens: wat er misging, appversie, Android of iOS)</td><td>Om fouten in de app op te sporen en op te lossen. We bewaren ze maximaal 60 dagen.</td></tr>
-<tr><td>Runs die je in RunWise opneemt (GPS-spoor, afstand, tijd, hoogte en eventueel hartslag per meetpunt)</td><td>Om je run op te slaan, aan je routes te koppelen en je tijden per kilometer, grafiek en snelste stukken te tonen. De opname loopt alleen als jij op Start drukt.</td></tr>
+<tr><td>Runs die je in Kadans opneemt (GPS-spoor, afstand, tijd, hoogte en eventueel hartslag per meetpunt)</td><td>Om je run op te slaan, aan je routes te koppelen en je tijden per kilometer, grafiek en snelste stukken te tonen. De opname loopt alleen als jij op Start drukt.</td></tr>
 <tr><td>Hartslag van je hartslagband (alleen als je zelf een band koppelt)</td><td>Om tijdens je run je hartslag en zone te tonen, en je gemiddelde hartslag bij de run te bewaren. De verbinding loopt via Bluetooth rechtstreeks met je telefoon.</td></tr>
 <tr><td>Foto's die je bij een run zet</td><td>Om ze bij je run en op je deelkaart te tonen. Ze staan in een afgeschermde opslag die alleen jij kunt openen, en worden gewist als je de run of je account verwijdert.</td></tr>
 <tr><td>Runs naar Health Connect (alleen als je dit aanzet)</td><td>Opgenomen runs (tijd en afstand) worden in Health Connect op je telefoon gezet, zodat ze ook in bijvoorbeeld Samsung Health staan.</td></tr>
@@ -63,7 +66,7 @@ th{color:#F4F4F5;background:#141417}
 <tr><td>Live locatie (alleen als je zelf live delen start)</td><td>Zodat iemand met jouw geheime link kan zien waar je loopt. Het delen stopt vanzelf na de tijd die je kiest (maximaal 5 uur). Bij stoppen wissen we je route en locatie direct. Je kiest zelf welke naam de kijker ziet.</td></tr>
 <tr><td>Posterbestelling (alleen als je een poster laat drukken): naam, bezorgadres, e-mailadres, het gekozen formaat en het drukbestand</td><td>Om je poster te laten drukken, te bezorgen en de betaling af te handelen. Bestelgegevens bewaren we 7 jaar, omdat dat wettelijk moet voor de boekhouding; het drukbestand verwijderen we na 90 dagen.</td></tr>
 <tr><td>Locatie (alleen als je toestemming geeft)</td><td>Om het weer op jouw plek op te halen. We bewaren alleen een grove thuislocatie (afgerond op ongeveer 1 km).</td></tr>
-</table>
+</table></div>
 <p>We gebruiken geen advertenties, verkopen geen gegevens en volgen je niet buiten de app.</p>
 
 <h2>Grondslag</h2>

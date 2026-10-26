@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/config.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/billing_service.dart';
 import '../../shared/widgets.dart';
+import '../profile/privacy_screen.dart';
 
 final _plansProvider = FutureProvider.autoDispose<List<PlanOption>>((ref) async {
   final billing = ref.watch(billingServiceProvider);
@@ -210,7 +210,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: _gold),
-            onPressed: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
+            onPressed: () => openPrivacy(context),
             child: const Text('Privacyverklaring'),
           ),
         ],

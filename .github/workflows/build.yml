@@ -352,6 +352,9 @@ jobs:
           print("::notice::Release wordt ondertekend met de uploadsleutel")
           EOF2
 
+      - name: Privacyverklaring in de app bijwerken (uit site/privacy.html)
+        run: python3 tools/privacy_naar_dart.py
+
       - name: Pakketten downloaden
         run: flutter pub get
 

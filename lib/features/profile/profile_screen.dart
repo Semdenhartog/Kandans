@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/config.dart';
 import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -27,6 +25,7 @@ import 'connections_card.dart';
 import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
 import '../planner/training_plan_screen.dart';
+import 'privacy_screen.dart';
 import 'heart_rate_screen.dart';
 import 'help_screen.dart';
 import 'member_card.dart';
@@ -259,7 +258,7 @@ class ProfileScreen extends ConsumerWidget {
                 ListTile(
                   leading: const TileIcon(Icons.privacy_tip_outlined),
                   title: const Text('Privacyverklaring'),
-                  onTap: () => launchUrl(Uri.parse(AppConfig.privacyUrl), mode: LaunchMode.externalApplication),
+                  onTap: () => openPrivacy(context),
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
