@@ -13,6 +13,7 @@ import '../onboarding/onboarding_screen.dart';
 import '../planner/training_plan_screen.dart';
 import '../routes/watch_export.dart';
 import 'heart_rate_screen.dart';
+import 'privacy_screen.dart';
 
 void openHelp(BuildContext context) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpScreen()));
@@ -159,6 +160,10 @@ final settingsDestinations = <SettingsDestination>[
     final b = await pickWatchBrand(c, current: await loadWatchBrand());
     if (b != null) await saveWatchBrand(b);
   }),
+  SettingsDestination('Shop', Icons.shopping_bag_outlined, 'shop winkel poster posters drukken luxe kopen schoenen bestelling', (c) => c.push('/shop')),
+  SettingsDestination('Mijn posterbestellingen', Icons.local_shipping_outlined, 'poster bestelling bezorging status', (c) => c.push('/posters')),
+  SettingsDestination('Privacyverklaring', Icons.privacy_tip_outlined, 'privacy avg gegevens verklaring', openPrivacy),
+  SettingsDestination('Rondleiding', Icons.slideshow_outlined, 'rondleiding uitleg intro begin', (c) => Navigator.of(c).push(MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const OnboardingScreen()))),
   SettingsDestination('Premium', Icons.workspace_premium_outlined, 'premium abonnement coach betalen', (c) => c.push('/premium')),
   SettingsDestination('Hulp en woordenlijst', Icons.help_outline, 'hulp vraag uitleg faq woord', openHelp),
 ];

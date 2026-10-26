@@ -30,6 +30,7 @@ import '../features/routes/routes_screen.dart';
 import '../shared/home_shell.dart';
 import '../shared/tab_scroll.dart';
 import 'supabase.dart';
+import '../features/shop/shop_screen.dart';
 
 /// Laat GoRouter opnieuw de redirect uitvoeren bij in- of uitloggen.
 class _AuthRefresh extends ChangeNotifier {
@@ -98,6 +99,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/posters', builder: (c, s) => const PosterOrdersScreen()),
+      GoRoute(path: '/shop', builder: (c, s) => const ShopScreen()),
       // Uitnodiging van een vriend: runwise://app/vriend?code=K7QX2M (via de pagina vriend.html).
       GoRoute(
         path: '/vriend',

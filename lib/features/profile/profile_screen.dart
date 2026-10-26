@@ -30,6 +30,7 @@ import 'heart_rate_screen.dart';
 import 'help_screen.dart';
 import 'member_card.dart';
 import 'reminder_tile.dart';
+import '../shop/shop_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -119,6 +120,8 @@ class ProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 10, left: 4),
             child: Text(user?.email ?? '', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
           ),
+          const SizedBox(height: 14),
+          const ShopTile(),
           const _SectionTitle('TRAINING'),
           Card(
             child: Column(
@@ -228,14 +231,6 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const AppearanceTile(),
-                const Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: TileIcon(Icons.image_outlined, color: RwColors.accent),
-                  title: const Text('Mijn posters'),
-                  subtitle: const Text('Routeposters die je liet drukken'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/posters'),
-                ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const TileIcon(Icons.help_outline),

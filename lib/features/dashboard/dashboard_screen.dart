@@ -48,6 +48,7 @@ import 'month_challenge_card.dart';
 import 'today_card.dart';
 import 'dashboard_providers.dart';
 import 'weather_ambience.dart';
+import '../shop/shop_tile.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -260,6 +261,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                     ),
                   ),
+                  const ShopIconButton(),
                   IconButton(
                     tooltip: 'Indeling van Vandaag aanpassen',
                     icon: Icon(Icons.tune, color: RwColors.subtle),
