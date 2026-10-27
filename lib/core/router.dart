@@ -13,6 +13,7 @@ import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
 import '../features/auth/verify_screen.dart';
 import '../features/challenges/community_screen.dart';
+import '../features/community/community_feed_screen.dart';
 import '../features/coach/coach_screen.dart';
 import '../features/coach/paywall_screen.dart';
 import '../features/routes/poster_orders_screen.dart';
@@ -165,9 +166,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
           ]),
           StatefulShellBranch(routes: [
+            GoRoute(path: '/community', builder: (c, s) => const CommunityFeedScreen()),
+          ]),
+          StatefulShellBranch(routes: [
             GoRoute(
               path: '/me',
-              builder: (c, s) => const ScrollToTopOnReselect(tab: 4, child: ProfileScreen()),
+              builder: (c, s) => const ScrollToTopOnReselect(tab: 5, child: ProfileScreen()),
               routes: [
                 GoRoute(path: 'shoes', builder: (c, s) => const ShoesScreen()),
                 GoRoute(

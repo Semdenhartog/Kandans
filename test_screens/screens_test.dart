@@ -51,6 +51,8 @@ import 'package:runwise/features/auth/login_screen.dart';
 import 'package:runwise/features/onboarding/onboarding_screen.dart';
 import 'package:runwise/features/profile/privacy_screen.dart';
 import 'package:runwise/features/shop/shop_screen.dart';
+import 'package:runwise/features/community/community_feed_screen.dart';
+import 'package:runwise/data/services/community_feed_service.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
 import 'package:runwise/features/record/run_summary_screen.dart';
@@ -297,6 +299,7 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
             ],
           )),
       joinedChallengesProvider.overrideWith(_FakeJoined.new),
+      communityFeedServiceProvider.overrideWithValue(_FakeFeed()),
       communityStatusProvider.overrideWith((ref) async => notInCommunity
           ? const CommunityStatus(joined: false)
           : const CommunityStatus(joined: true, nickname: 'Sem uit Utrecht', friendCode: 'K7QX2M', boards: [
@@ -379,11 +382,13 @@ class _FakeShell extends StatelessWidget {
         body: child,
         bottomNavigationBar: NavigationBar(
           selectedIndex: 0,
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
           destinations: const [
             NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), label: 'Vandaag'),
             NavigationDestination(icon: Icon(Icons.directions_run), label: 'Runs'),
             NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Routes'),
             NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), label: 'Coach'),
+            NavigationDestination(icon: Icon(Icons.forum_outlined), label: 'Community'),
             NavigationDestination(icon: Icon(Icons.person_outline), label: 'Ik'),
           ],
         ),
@@ -461,6 +466,7 @@ void main() {
   testWidgets('14c rondleiding doel', (t) => _shot(t, '14c_rondleiding_doel', const OnboardingScreen(initialPage: 2), height: 915));
   testWidgets('16 privacy', (t) => _shot(t, '16_privacy', const PrivacyScreen(), height: 1600));
   testWidgets('17 shop', (t) => _shot(t, '17_shop', const ShopScreen(), height: 2000));
+  testWidgets('18 community', (t) => _shot(t, '18_community', const CommunityFeedScreen(), height: 1830));
   testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 3), height: 915));
   testWidgets('15 na je run', (t) {
     final st = RunStreams.fromJson(_streams)!;
@@ -587,4 +593,35 @@ class _OpenBriefingState extends State<_OpenBriefing> {
 
   @override
   Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
+}
+
+/// Voorbeeldberichten voor de schermafbeelding van Community.
+class _FakeFeed implements CommunityFeedService {
+  static final _now = DateTime.now();
+  @override
+  Future<List<CommunityPost>> feed({String? topic, int? before}) async => before != null
+      ? const []
+      : [
+          CommunityPost(id: 3, topic: 'afspreken', body: 'Wie loopt zaterdagochtend 10 km mee rond het Kootwijkerzand? Rustig tempo, rond 6:00/km.', createdAt: _now.subtract(const Duration(minutes: 25)), nickname: 'Anne', likes: 4, comments: 2),
+          CommunityPost(id: 2, topic: 'spullen', body: 'Welke schoen raden jullie aan voor modderige bospaden? Mijn Novablast glijdt alle kanten op.', createdAt: _now.subtract(const Duration(hours: 3)), nickname: 'Sem', likes: 2, comments: 5, liked: true, mine: true, canDelete: true),
+          CommunityPost(id: 1, topic: 'beginners', body: 'Vandaag voor het eerst 5 km zonder te wandelen! Het beste moment van Kadans klopte precies: droog en bijna geen wind.', createdAt: _now.subtract(const Duration(days: 1)), nickname: 'Loper Lisa', likes: 12, comments: 3),
+        ];
+  @override
+  Future<List<CommunityComment>> comments(int postId) async => const [];
+  @override
+  Future<bool> rulesAccepted() async => true;
+  @override
+  Future<void> acceptRules() async {}
+  @override
+  Future<void> post(String topic, String body) async {}
+  @override
+  Future<void> comment(int postId, String body) async {}
+  @override
+  Future<bool> like(int postId) async => true;
+  @override
+  Future<void> report(String kind, int id, String reason) async {}
+  @override
+  Future<void> delete(String kind, int id) async {}
+  @override
+  Future<void> block(String nickname) async {}
 }

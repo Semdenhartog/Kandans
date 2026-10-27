@@ -176,6 +176,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
             ),
             child: NavigationBar(
               backgroundColor: Colors.transparent,
+              // Zes tabbladen: alleen het gekozen tabblad met naam, anders wordt het te krap.
+              labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
               selectedIndex: shell.currentIndex,
               animationDuration: const Duration(milliseconds: 450),
               onDestinationSelected: (i) {
@@ -188,6 +190,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                 NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: 'Runs'),
                 NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: 'Routes'),
                 NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Coach'),
+                NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: 'Community'),
                 NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Ik'),
               ],
             ),
