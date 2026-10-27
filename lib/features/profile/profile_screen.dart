@@ -3,14 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
-import '../../core/config.dart';
 import '../../core/theme.dart';
+import '../../data/services/community_service.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
@@ -18,6 +17,7 @@ import '../../data/services/offline_cache.dart';
 import '../../domain/badges.dart' show computeBadges;
 import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
+import '../challenges/invite_card.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../activities/badges_screen.dart';
 import '../challenges/challenges.dart' show openChallenges;
@@ -320,12 +320,16 @@ class ProfileScreen extends ConsumerWidget {
                 ListTile(
                   leading: TileIcon(Icons.favorite_border, color: RwColors.accent),
                   title: const Text('Vertel een vriend over Kadans'),
-                  subtitle: const Text('Deel een linkje naar de app'),
-                  onTap: () => SharePlus.instance.share(ShareParams(
-                    text: 'Ik gebruik Kadans: die zegt wanneer je het best kunt gaan hardlopen, met het weer, de wind op je route '
-                        'en je eigen tempo. Kijk maar: ${AppConfig.siteUrl}/',
-                    subject: 'Kadans: loop op het beste moment',
-                  )),
+                  subtitle: const Text('Stuur een gouden uitnodiging met een link naar de app'),
+                  // Luxe kaart met link; zit je in Samen, dan voegt de link je ook meteen als vriend toe.
+                  onTap: () async {
+                    String? code;
+                    try {
+                      code = (await ref.read(communityServiceProvider).status()).friendCode;
+                    } catch (_) {}
+                    final p = ref.read(profileProvider).value;
+                    await shareAppInvite(name: p == null || p.displayName == 'loper' ? '' : p.displayName, friendCode: code);
+                  },
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(

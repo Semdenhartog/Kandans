@@ -12,6 +12,9 @@ import '../../core/theme.dart';
 /// Link waarmee een vriend je toevoegt: opent de app (of de downloadpagina) met je code ingevuld.
 String inviteLink(String code) => '${AppConfig.siteUrl}/vriend.html?code=${Uri.encodeQueryComponent(code)}';
 
+/// Link om Kadans aan te raden (zonder vriendcode): de pagina stuurt door naar de app of de Play Store.
+String appInviteLink() => '${AppConfig.siteUrl}/vriend.html?app=1';
+
 /// Haalt een vriendcode uit tekst: een uitnodigingslink (…?code=K7QX2M) of een losse code van 6 tekens.
 String? friendCodeFrom(String text) {
   final t = text.trim();
@@ -23,7 +26,8 @@ String? friendCodeFrom(String text) {
 }
 
 /// Luxe uitnodigingskaart (staand 1080×1350), altijd donker-goud.
-Future<Uint8List> inviteCardPng({required String code, required String name}) async {
+/// Met [code]: uitnodiging voor Samen. Zonder code: "probeer Kadans" (Vertel een vriend).
+Future<Uint8List> inviteCardPng({String? code, required String name}) async {
   const w = 1080.0, h = 1350.0;
   const pal = rwZandAvond;
   const gold = Color(0xFFD9BF92), goldDeep = Color(0xFFB8955F), goldLight = Color(0xFFF0DDB6);
@@ -100,8 +104,13 @@ Future<Uint8List> inviteCardPng({required String code, required String name}) as
   }
 
   text('KADANS', 660, size: 30, spacing: 14, weight: FontWeight.w800);
-  text(name.isEmpty ? 'Loop met mij mee' : '$name nodigt je uit', 730, size: 54, color: pal.text, weight: FontWeight.w800);
-  text('om samen te lopen', 800, size: 34, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
+  if (code == null) {
+    text(name.isEmpty ? 'Een uitnodiging voor jou' : '$name nodigt je uit', 730, size: 54, color: pal.text, weight: FontWeight.w800);
+    text('Loop op het beste moment', 800, size: 34, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
+  } else {
+    text(name.isEmpty ? 'Loop met mij mee' : '$name nodigt je uit', 730, size: 54, color: pal.text, weight: FontWeight.w800);
+    text('om samen te lopen', 800, size: 34, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
+  }
 
   // De code in een gouden kader.
   const boxW = 620.0, boxH = 150.0;
@@ -114,10 +123,16 @@ Future<Uint8List> inviteCardPng({required String code, required String name}) as
       ..strokeWidth = 2.5
       ..shader = ui.Gradient.linear(Offset(w / 2 - boxW / 2, 0), Offset(w / 2 + boxW / 2, 0), [goldDeep, goldLight, goldDeep]),
   );
-  text('VRIENDCODE', 944, size: 22, color: pal.subtle, spacing: 6, weight: FontWeight.w700);
-  text(code.split('').join(' '), 978, size: 64, color: goldLight, weight: FontWeight.w800, spacing: 4);
-
-  text('Open de link of vul de code in bij Uitdagingen → Samen', 1150, size: 28, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
+  if (code == null) {
+    // Drie dingen die Kadans doet, als een menukaart.
+    text('BESTE MOMENT  ·  WIND OP JE ROUTE  ·  COACH', 944, size: 22, color: pal.subtle, spacing: 3, weight: FontWeight.w700);
+    text('Tik op de link', 984, size: 56, color: goldLight, weight: FontWeight.w800);
+    text('Gratis te proberen · Android', 1150, size: 28, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
+  } else {
+    text('VRIENDCODE', 944, size: 22, color: pal.subtle, spacing: 6, weight: FontWeight.w700);
+    text(code.split('').join(' '), 978, size: 64, color: goldLight, weight: FontWeight.w800, spacing: 4);
+    text('Open de link of vul de code in bij Uitdagingen → Samen', 1150, size: 28, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
+  }
 
   // Kleine sterretjes voor wat glans.
   final sparkle = Paint()..color = goldLight.withValues(alpha: 0.7);
@@ -150,5 +165,21 @@ Future<void> shareInvite({required String code, required String name}) async {
     ));
   } catch (_) {
     await SharePlus.instance.share(ShareParams(text: text, subject: 'Loop mee in Kadans'));
+  }
+}
+
+/// "Vertel een vriend": luxe kaart + korte tekst met de link (naar de app of de Play Store).
+Future<void> shareAppInvite({required String name, String? friendCode}) async {
+  final link = friendCode == null ? appInviteLink() : '${appInviteLink()}&code=${Uri.encodeQueryComponent(friendCode)}';
+  final text = 'Ik loop met Kadans: die zegt wanneer je het best kunt gaan. Probeer hem ook: $link';
+  try {
+    final png = await inviteCardPng(name: name);
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile.fromData(png, mimeType: 'image/png', name: 'kadans-uitnodiging.png')],
+      text: text,
+      subject: 'Probeer Kadans',
+    ));
+  } catch (_) {
+    await SharePlus.instance.share(ShareParams(text: text, subject: 'Probeer Kadans'));
   }
 }
