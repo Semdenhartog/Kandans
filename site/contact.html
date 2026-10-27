@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact – Kadans</title>
+<meta name="description" content="Neem contact op met Kadans voor vragen, privacy of ondersteuning.">
+<meta name="theme-color" content="#13110E">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#13110E; --surface:#1C1814; --surface-high:#25201B; --border:#352E26; --bar:#3A332B;
+  --accent:#D9BF92; --accent-deep:#B8955F; --accent-light:#F0DDB6;
+  --text:#F1E9DC; --muted:#BDB1A0; --subtle:#94897A; --good:#8CC99A; --rain:#9DB8C9;
+  --grad:linear-gradient(135deg,var(--accent-light) 0%,var(--accent) 50%,var(--accent-deep) 100%);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-light)}
+img{display:block;max-width:100%}
+.wrap{max-width:920px;margin:0 auto;padding:0 24px}
+.display{font-family:Saira,sans-serif;font-weight:800;letter-spacing:-0.01em;line-height:1.02;margin:0}
+.eyebrow{font-family:Saira,sans-serif;font-weight:700;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+header{padding-top:22px;padding-bottom:22px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img.mark{height:34px;width:auto}.brand .word{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:17px}
+nav{display:flex;flex-wrap:wrap;gap:18px;margin-top:20px;font-size:15px}
+nav a{color:var(--muted)}nav a:hover{color:var(--text)}
+main{padding:24px 0 96px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:32px}
+.card h1{font-size:clamp(34px,5vw,56px);text-transform:uppercase;margin:0 0 14px}
+.card p, .card li{color:var(--muted)}
+.meta{font-size:14px;color:var(--subtle);margin:0 0 18px}
+ul{padding-left:18px}
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:26px}
+.contact-item{background:var(--surface-high);border:1px solid var(--border);border-radius:18px;padding:20px}
+.contact-item h2{margin:0 0 8px;font-size:18px;color:var(--text)}
+.contact-item p{margin:0;color:var(--muted)}
+footer{border-top:1px solid #241F18;padding:32px 0 48px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;font-size:14px;color:var(--subtle)}
+.foot a{color:var(--subtle)}
+@media (max-width:560px){nav{gap:12px;font-size:14px}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <a class="brand" href="index.html" aria-label="Terug naar Kadans">
+    <img class="mark" src="kadans-mark.png" alt="" width="54" height="34">
+    <span class="word">KADANS</span>
+  </a>
+  <nav aria-label="Hoofdmenu">
+    <a href="index.html">Home</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <span class="eyebrow">Contact</span>
+    <h1 class="display">We helpen je graag</h1>
+    <p class="meta">Voor vragen, privacy, ondersteuning of feedback kun je contact opnemen.</p>
+
+    <div class="contact-grid">
+      <div class="contact-item">
+        <h2>E-mail</h2>
+        <p><a href="mailto:sb.denhartog@hotmail.com">sb.denhartog@hotmail.com</a></p>
+      </div>
+      <div class="contact-item">
+        <h2>Naam</h2>
+        <p>Sem den Hartog</p>
+      </div>
+      <div class="contact-item">
+        <h2>Woonplaats</h2>
+        <p>Barneveld</p>
+      </div>
+    </div>
+
+    <p style="margin-top:22px;">Heb je een vraag over je account, jouw data, een abonnement, of een privacyverzoek? Stuur een e-mail en we reageren zo snel mogelijk.</p>
+    <p><a href="mailto:sb.denhartog@hotmail.com">sb.denhartog@hotmail.com</a></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 Kadans</span>
+    <span><a href="contact.html">Contact</a> · <a href="privacy.html">Privacy</a></span>
+  </div>
+</footer>
+</body>
+</html>
