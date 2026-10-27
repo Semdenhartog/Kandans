@@ -40,7 +40,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in (wachtlijst). Links in `site/` zijn relatief (Pages draait op `/Runwise/`).
 - Privacyverklaring: bron is `site/privacy.html`; `tools/privacy_naar_dart.py` maakt er `lib/features/profile/privacy_text.dart`
   van (draait in build.yml en screens.yml). In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0031** staan erin (0030 wachtlijst, 0031 foutoverzicht: door Sem te draaien) (Sem draait SQL zelf in de SQL Editor;
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0033** staan erin (0030 wachtlijst, 0031 foutoverzicht, 0032 actiecodes, 0033 community: door Sem te draaien; lokaal getest met Postgres 16 + Supabase-stubs, zie /var/tmp/kadanspg als die er nog is) (Sem draait SQL zelf in de SQL Editor;
   `apply_migration` via MCP wordt in deze omgeving geannuleerd, `execute_sql` voor lezen werkt wel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Gratis kaartdata: PDOK-tegels, Overpass (verlichting, voorzieningen; per vraag eerst één server, na 4 s reserve),
@@ -53,6 +53,10 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   `RwColors.*` en `RwText.*` zijn **getters** (wisselen mee): gebruik ze **nooit in `const`**. Weergave-keuze: Ik → Weergave
   (`lib/core/appearance.dart`). Premium, Luxe, ledenkaart, deelkaart en posters blijven altijd donker-goud (`rwZandAvond.*`).
 - Lettertypes: Saira (koppen/cijfers), DM Sans (tekst).
+- Talen: `lib/core/i18n.dart` (`tr('Nederlandse tekst')`, `trf()` met {invulplekken}), vertalingen in `tools/vertalingen.py`
+  → `python3 tools/maak_vertalingen.py` maakt `lib/core/i18n_strings.dart` en meldt wat ontbreekt. Nieuw scherm vertalen:
+  `python3 tools/tr_codemod.py <bestand>` (zet Text('…') om en haalt const weg), daarna vertalingen aanvullen.
+  Vertaald: inloggen, rondleiding, onderbalk, Ik, shop, community. Rest (Vandaag, opnemen, stemcoach, runs, routes) nog NL.
 
 ## Belangrijkste functies (waar te vinden)
 - Vandaag / beste moment: `lib/features/dashboard/` · Opnemen + navigatie: `lib/features/record/`, `lib/data/services/run_recorder_service.dart`
@@ -65,10 +69,12 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**, wacht op Stripe/Gelato-geheimen.
 - Shop: `lib/features/shop/` (`/shop`, tasje met "nieuw"-stip, gouden tegel in Ik). Route delen: `domain/route_share.dart`,
   `site/route.html`, deeplink `runwise://app/route-delen?n=&p=` → `RouteImportScreen`. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
-- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 180). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
+- Community-tab: `lib/features/community/`, databasefuncties `community_*` (migratie 0033). Actiecodes: `redeem_promo`/`create_promo` (0032).
+- Bronnen: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
+- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 189). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
-- GitHub Pages aanzetten; `site/privacy.html` [NAAM], [PLAATS], [E-MAILADRES] invullen; migraties 0030 en 0031 draaien.
+- GitHub Pages aanzetten; migraties 0030 t/m 0033 draaien; zichzelf moderator maken (zie 0033). Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
 - Supabase Auth-mailtemplates zeggen nog "RunWise" → aanpassen (Authentication → Email Templates).
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.

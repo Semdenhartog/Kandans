@@ -266,3 +266,14 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 178. ✅ Tests voor opdrachten, rondes-overslaan, routelink, vriendcode, nieuwe weerwaarschuwingen, kledingvoorkeur en beoordeling.
 179. ✅ Nieuwe schermen in de schermcontrole (shop, privacy, rondleidingstappen).
 180. ✅ Overdracht (CLAUDE.md) en dit overzicht bijgewerkt.
+
+## Ronde 27 oktober 2026
+181. ✅ **Eigen actiecodes en vouchers** (migratie 0032): gratis Premium, Luxe of alles; alleen als hash opgeslagen, max. gebruik, verloopdatum, 10 pogingen per dag. Inwisselen in de shop; onbekende code → Google Play. *Betaalde vouchers moeten via Google Play (regels).*
+182. ✅ **Vertel een vriend**: gouden uitnodigingskaart (afbeelding) met link; `vriend.html` stuurt naar de Play Store zodra `PLAY_LIVE = true`, nu nog naar de APK.
+183. ✅ **Privacyverklaring ingevuld** (Sem den Hartog, handelsnaam Kadans, Barneveld) en feedbackadres.
+184. ✅ **Bronnen op één plek** (Ik → bronnen en licenties); namen van diensten uit de schermen, klein "bronnen"-linkje. Kaartvermeldingen blijven (licentie-eis).
+185. ✅ **Community-tabblad** (migratie 0033): onderwerpen, berichten, reacties, duimpjes, melden (3× = verborgen), blokkeren, huisregels, filter op links/telefoonnummers/scheldwoorden, limieten per dag. Alleen tekst.
+186. ✅ **Talen**: NL/EN/DE/FR/ES te kiezen op het beginscherm, in de rondleiding en in Ik. Vertaald: inloggen, rondleiding, onderbalk, Ik, shop, community. *Rest volgt per scherm.*
+187. ✅ Datums in de gekozen taal.
+188. ✅ Migraties 0030–0033 lokaal getest op Postgres 16 (alle 33 migraties, plus een test van codes en community).
+189. ✅ Onderbalk met zes tabbladen: alleen het gekozen tabblad toont zijn naam.
