@@ -939,7 +939,7 @@ void main() {
       // Geen duidelijk verschil: terug naar de oude uitleg.
       expect(whyBetter(later, later), isNull);
       expect(factorOf('Tegenwind op je route (14 km/u)'), WeatherFactor.wind);
-      expect(factorOf('Buien volgens Buienradar (1.2 mm/u)'), WeatherFactor.rain);
+      expect(factorOf('Buien op komst (1.2 mm/u)'), WeatherFactor.rain);
       expect(factorOf('Iets anders'), isNull);
     });
   });

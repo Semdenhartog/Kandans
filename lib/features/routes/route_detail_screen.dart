@@ -28,6 +28,7 @@ import 'turn_list_card.dart';
 import 'route_poster_screen.dart';
 import 'route_undo.dart';
 import 'watch_export.dart';
+import '../profile/sources_screen.dart';
 
 /// Huidig weer bij de start van een route.
 final _routeWeatherProvider = FutureProvider.family<HourWeather?, String>((ref, routeId) async {
@@ -553,7 +554,7 @@ class _PoiCard extends StatelessWidget {
               children: [
                 SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                 SizedBox(width: 10),
-                Expanded(child: Text('Zoeken in OpenStreetMap… dit kan even duren.', style: TextStyle(color: RwColors.muted))),
+                Expanded(child: Text('Zoeken langs je route… dit kan even duren.', style: TextStyle(color: RwColors.muted))),
               ],
             )
           : failed
@@ -604,9 +605,10 @@ class _PoiCard extends StatelessWidget {
                           ),
                         const SizedBox(height: 6),
                         Text(
-                          'Bron: OpenStreetMap-bijdragers. Controleer ter plekke of een kraan werkt.',
+                          'Controleer ter plekke of een kraan werkt.',
                           style: TextStyle(color: RwColors.subtle, fontSize: 11),
                         ),
+                        const SourcesLink(),
                       ],
                     ),
     );
@@ -662,8 +664,9 @@ class _LightingCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(advice, style: TextStyle(color: RwColors.muted, height: 1.4)),
             const SizedBox(height: 4),
-            Text('Bron: OpenStreetMap. Niet van elke weg is bekend of er lantaarnpalen staan.',
+            Text('Niet van elke weg is bekend of er lantaarnpalen staan.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+            const SourcesLink(),
           ]);
         },
       ),
@@ -736,8 +739,7 @@ class _SurfaceCard extends ConsumerWidget {
                     '(straat en fietspad = verhard, stoep = tegels, bosweg = halfverhard, pad = onverhard).',
                     style: TextStyle(color: RwColors.muted, fontSize: 12, height: 1.35)),
               const SizedBox(height: 2),
-              Text('Bron: OpenStreetMap via openrouteservice.',
-                  style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+              const SourcesLink(),
             ],
           );
         },

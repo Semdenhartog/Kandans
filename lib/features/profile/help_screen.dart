@@ -14,6 +14,7 @@ import '../planner/training_plan_screen.dart';
 import '../routes/watch_export.dart';
 import 'heart_rate_screen.dart';
 import 'privacy_screen.dart';
+import 'sources_screen.dart';
 import '../../shared/whats_new.dart';
 import 'feedback_sheet.dart';
 
@@ -183,6 +184,7 @@ final settingsDestinations = <SettingsDestination>[
   SettingsDestination('Shop', Icons.shopping_bag_outlined, 'shop winkel poster posters drukken luxe kopen schoenen bestelling', (c) => c.push('/shop')),
   SettingsDestination('Mijn posterbestellingen', Icons.local_shipping_outlined, 'poster bestelling bezorging status', (c) => c.push('/posters')),
   SettingsDestination('Privacyverklaring', Icons.privacy_tip_outlined, 'privacy avg gegevens verklaring', openPrivacy),
+  SettingsDestination('Bronnen en licenties', Icons.info_outline, 'bronnen licenties weer buienradar kaart openstreetmap', openSources),
   SettingsDestination('Rondleiding', Icons.slideshow_outlined, 'rondleiding uitleg intro begin', (c) => Navigator.of(c).push(MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => const OnboardingScreen()))),
   SettingsDestination('Feedback sturen', Icons.feedback_outlined, 'feedback fout bug idee melden contact mail', showFeedbackSheet),
   SettingsDestination('Wat is nieuw', Icons.new_releases_outlined, 'nieuw update versie veranderd', showWhatsNew),

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -50,6 +49,7 @@ import 'today_card.dart';
 import 'dashboard_providers.dart';
 import 'weather_ambience.dart';
 import '../shop/shop_tile.dart';
+import '../profile/sources_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -1325,13 +1325,7 @@ class _RainCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => launchUrl(Uri.parse('https://www.buienradar.nl'), mode: LaunchMode.externalApplication),
-            child: Text(
-              'Neerslagverwachting: Buienradar.nl · bijgewerkt ${Fmt.time(rain.fetchedAt)}',
-              style: TextStyle(fontSize: 11, color: RwColors.subtle, decoration: TextDecoration.underline),
-            ),
-          ),
+          SourcesLink(prefix: 'Bijgewerkt ${Fmt.time(rain.fetchedAt)} · '),
         ],
       ),
     );

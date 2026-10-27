@@ -36,6 +36,7 @@ import '../shop/shop_tile.dart';
 import '../../domain/clothing.dart';
 import '../../domain/run_goal.dart';
 import '../../domain/run_warnings.dart';
+import 'sources_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -364,10 +365,12 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            'Kadans 1.0 · Weer via Open-Meteo.com · Buien via Buienradar.nl',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: RwColors.subtle, fontSize: 12),
+          Center(
+            child: TextButton(
+              style: TextButton.styleFrom(foregroundColor: RwColors.subtle, textStyle: const TextStyle(fontSize: 12)),
+              onPressed: () => openSources(context),
+              child: const Text('Kadans · bronnen en licenties'),
+            ),
           ),
         ],
       ),

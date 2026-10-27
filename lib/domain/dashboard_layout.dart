@@ -5,7 +5,7 @@ enum DashCard {
   shoes('Nieuwe schoenen', 'Alleen als je schoenen aan vervanging toe zijn'),
   challenges('Uitdagingen', 'Je uitdagingen en hoe je ervoor staat'),
   clothing('Aantrekken', 'Kledingadvies voor het gekozen moment'),
-  rain('Buien komende 2 uur', 'Live van Buienradar'),
+  rain('Buien komende 2 uur', 'Live, per 5 minuten'),
   hours('Per uur', 'De loopomstandigheden per uur'),
   routeWind('Wind op je route', 'Alleen als je een route kiest'),
   bestRoute('Beste route met deze wind', 'Welke van je routes nu de minste tegenwind heeft'),

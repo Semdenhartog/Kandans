@@ -336,7 +336,7 @@ class StartTimePlanner {
     final rainPenalty = (rainProb * rainMul + math.min(20.0, (w.precipitation ?? 0) * 8)) * profile.rainWeight;
     if (rainPenalty > 0) {
       final label = rainProb >= 95 && (w.precipitation ?? 0) >= 0.1
-          ? 'Buien volgens Buienradar (${(w.precipitation ?? 0).toStringAsFixed(1)} mm/u)'
+          ? 'Buien op komst (${(w.precipitation ?? 0).toStringAsFixed(1)} mm/u)'
           : 'Kans op regen (${rainProb.round()}%)';
       p[label] = rainPenalty;
     }

@@ -21,7 +21,7 @@ class RainService {
     });
     final res = await _client.get(uri).timeout(const Duration(seconds: 10));
     if (res.statusCode != 200) {
-      throw Exception('Buienradar is even niet bereikbaar (${res.statusCode}).');
+      throw Exception('De buienverwachting is even niet bereikbaar (${res.statusCode}).');
     }
     return parse(res.body, DateTime.now());
   }
