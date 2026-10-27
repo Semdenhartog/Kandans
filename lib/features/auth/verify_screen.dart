@@ -8,6 +8,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets.dart';
 import 'auth_widgets.dart';
+import '../../core/i18n.dart';
 
 /// Activatiecode uit de welkomstmail invullen.
 class VerifyScreen extends ConsumerStatefulWidget {
@@ -32,7 +33,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
   Future<void> _verify() async {
     final code = _code.text.trim();
     if (code.length < 6) {
-      setState(() => _error = 'Vul de code uit de e-mail in.');
+      setState(() => _error = tr('Vul de code uit de e-mail in.'));
       return;
     }
     setState(() {
@@ -65,39 +66,39 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
-      eyebrow: 'Nog één stap',
-      title: 'Bevestig je e-mailadres.',
+      eyebrow: tr('Nog één stap'),
+      title: tr('Bevestig je e-mailadres.'),
       subtitle: 'We hebben een e-mail gestuurd naar ${widget.email}. '
           'Staat er een link in? Klik erop (krijg je daarna een foutpagina, dan is dat niet erg) en log hier in. '
           'Staat er een code in? Vul die hieronder in. Niets ontvangen? Kijk ook in je spammap.',
       children: [
         FilledButton(
           onPressed: () => context.go('/login'),
-          child: const Text('Ik heb op de link geklikt, nu inloggen'),
+          child: Text(tr('Ik heb op de link geklikt, nu inloggen')),
         ),
-        const SizedBox(height: 24),
-        Text('Of vul de code in:', style: TextStyle(color: RwColors.muted)),
-        const SizedBox(height: 8),
+        SizedBox(height: 24),
+        Text(tr('Of vul de code in:'), style: TextStyle(color: RwColors.muted)),
+        SizedBox(height: 8),
         TextField(
           controller: _code,
           keyboardType: TextInputType.number,
-          autofillHints: const [AutofillHints.oneTimeCode],
+          autofillHints: [AutofillHints.oneTimeCode],
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 28, letterSpacing: 8, fontWeight: FontWeight.w700),
-          decoration: const InputDecoration(hintText: '123456'),
+          style: TextStyle(fontSize: 28, letterSpacing: 8, fontWeight: FontWeight.w700),
+          decoration: InputDecoration(hintText: tr('123456')),
           onSubmitted: (_) => _verify(),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         FormError(_error),
         OutlinedButton(
           onPressed: _busy ? null : _verify,
-          child: Text(_busy ? 'Bezig…' : 'Activeer met code'),
+          child: Text(_busy ? tr('Bezig…') : tr('Activeer met code')),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         TextButton(
           onPressed: _resend,
-          child: Text('Stuur de code opnieuw', style: TextStyle(color: RwColors.muted)),
+          child: Text(tr('Stuur de code opnieuw'), style: TextStyle(color: RwColors.muted)),
         ),
       ],
     );

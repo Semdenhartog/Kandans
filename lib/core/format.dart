@@ -1,10 +1,19 @@
 import 'package:intl/intl.dart';
 
+import 'i18n.dart';
+
 /// Hulpfuncties om getallen en tijden leesbaar te tonen (Nederlands).
 class Fmt {
-  static final _date = DateFormat('EEE d MMM', 'nl_NL');
-  static final _dateLong = DateFormat('EEEE d MMMM yyyy', 'nl_NL');
-  static final _time = DateFormat('HH:mm', 'nl_NL');
+  // Datums in de gekozen taal (de opmaak wordt per taal bewaard).
+  static final _cache = <String, DateFormat>{};
+  static DateFormat _f(String pattern) {
+    final loc = LanguageController.instance.lang.intlLocale;
+    return _cache.putIfAbsent('$loc|$pattern', () => DateFormat(pattern, loc));
+  }
+
+  static DateFormat get _date => _f('EEE d MMM');
+  static DateFormat get _dateLong => _f('EEEE d MMMM yyyy');
+  static DateFormat get _time => _f('HH:mm');
 
   static String date(DateTime d) => _date.format(d.toLocal());
   static String dateLong(DateTime d) => _dateLong.format(d.toLocal());

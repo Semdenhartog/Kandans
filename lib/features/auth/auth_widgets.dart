@@ -4,6 +4,8 @@ import '../../core/theme.dart';
 import '../../shared/aura.dart';
 import '../../shared/route_backdrop.dart';
 import '../../core/appearance.dart';
+import '../../core/i18n.dart';
+import '../../shared/language_picker.dart';
 
 /// Gemeenschappelijke opmaak voor login, registratie en activatie.
 class AuthScaffold extends StatelessWidget {
@@ -24,21 +26,23 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: [
-        const Positioned.fill(child: RwAura()),
-        const Positioned.fill(child: DrawnRoute(top: true)),
+        Positioned.fill(child: RwAura()),
+        Positioned.fill(child: DrawnRoute(top: true)),
+        // Taal kiezen, meteen op het beginscherm.
+        const SafeArea(child: Align(alignment: Alignment.topRight, child: Padding(padding: EdgeInsets.all(8), child: LanguageButton()))),
         SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
+              constraints: BoxConstraints(maxWidth: 440),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const _GlowLogo(),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40),
                   Text(
-                    eyebrow.toUpperCase(),
+                    tr(eyebrow).toUpperCase(),
                     style: TextStyle(
                       color: RwColors.accent,
                       fontWeight: FontWeight.w600,
@@ -46,10 +50,10 @@ class AuthScaffold extends StatelessWidget {
                       fontSize: 13,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
-                    title,
-                    style: const TextStyle(
+                    tr(title),
+                    style: TextStyle(
                       fontSize: 32,
                       fontFamily: RwFonts.display, fontFeatures: rwTnum,
                       fontWeight: FontWeight.w800,
@@ -57,9 +61,9 @@ class AuthScaffold extends StatelessWidget {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(subtitle, style: TextStyle(color: RwColors.muted, height: 1.5)),
-                  const SizedBox(height: 28),
+                  SizedBox(height: 10),
+                  Text(tr(subtitle), style: TextStyle(color: RwColors.muted, height: 1.5)),
+                  SizedBox(height: 28),
                   ...children,
                 ],
               ),
@@ -79,7 +83,7 @@ class _GlowLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 900),
+        duration: Duration(milliseconds: 900),
         curve: Curves.easeOutCubic,
         builder: (_, t, child) => Opacity(
           opacity: t,
@@ -100,7 +104,7 @@ class _GlowLogo extends StatelessWidget {
               ),
             ),
           ),
-          const RunWiseLogo(height: 38),
+          RunWiseLogo(height: 38),
         ]),
       );
 }
@@ -114,7 +118,7 @@ class RunWiseLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Kadans',
+      label: tr('Kadans'),
       image: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -134,9 +138,9 @@ class FormError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message == null) return const SizedBox.shrink();
+    if (message == null) return SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 12),
       child: Text(message!, style: TextStyle(color: RwColors.danger)),
     );
   }

@@ -18,6 +18,7 @@ import '../core/format.dart';
 import '../data/services/recording_store.dart';
 import '../data/services/run_recorder_service.dart';
 import '../features/record/record_run_screen.dart';
+import '../core/i18n.dart';
 
 /// Onderste navigatiebalk met de vijf hoofdtabbladen.
 /// Haalt bij het openen (en terugkomen in) de app automatisch nieuwe runs op
@@ -63,7 +64,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
             context.go('/today');
         }
       });
-      qa.setShortcutItems(const [
+      qa.setShortcutItems([
         ShortcutItem(type: 'run', localizedTitle: 'Start run'),
         ShortcutItem(type: 'treadmill', localizedTitle: 'Loopband'),
         ShortcutItem(type: 'best', localizedTitle: 'Beste moment'),
@@ -116,13 +117,13 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.restore, size: 36),
-        title: const Text('Je run is onderbroken'),
+        icon: Icon(Icons.restore, size: 36),
+        title: Text(tr('Je run is onderbroken')),
         content: Text('Je run$when is gestopt doordat de app werd afgesloten ($what). '
             'Je kunt verder lopen of hem opslaan.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Weggooien')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Verder of opslaan')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Weggooien'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Verder of opslaan'))),
         ],
       ),
     );
@@ -134,9 +135,9 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       if (!mounted) return;
       var undo = false;
       final bar = ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text('Run weggegooid.'),
-        duration: const Duration(seconds: 8),
-        action: SnackBarAction(label: 'Toch bewaren', onPressed: () => undo = true),
+        content: Text(tr('Run weggegooid.')),
+        duration: Duration(seconds: 8),
+        action: SnackBarAction(label: tr('Toch bewaren'), onPressed: () => undo = true),
       ));
       await bar.closed;
       if (undo) {
@@ -158,7 +159,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     final shell = widget.shell;
     return Scaffold(
       // Aura achter de tabbladen; de tabbladen zelf zijn doorzichtig.
-      body: Stack(children: [const Positioned.fill(child: RwAura()), shell]),
+      body: Stack(children: [Positioned.fill(child: RwAura()), shell]),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -179,19 +180,19 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
               // Zes tabbladen: alleen het gekozen tabblad met naam, anders wordt het te krap.
               labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
               selectedIndex: shell.currentIndex,
-              animationDuration: const Duration(milliseconds: 450),
+              animationDuration: Duration(milliseconds: 450),
               onDestinationSelected: (i) {
                 if (i != shell.currentIndex) HapticFeedback.selectionClick();
                 if (i == shell.currentIndex) notifyTabReselected(i);
                 shell.goBranch(i, initialLocation: i == shell.currentIndex);
               },
-              destinations: const [
-                NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny), label: 'Vandaag'),
-                NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: 'Runs'),
-                NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: 'Routes'),
-                NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Coach'),
-                NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: 'Community'),
-                NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Ik'),
+              destinations: [
+                NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny), label: tr('Vandaag')),
+                NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: tr('Runs')),
+                NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: tr('Routes')),
+                NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: tr('Coach')),
+                NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('Community')),
+                NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: tr('Ik')),
               ],
             ),
           ),
@@ -210,7 +211,7 @@ class _OfflineBanner extends StatelessWidget {
     return ValueListenableBuilder<DateTime?>(
       valueListenable: OfflineCache.showingCachedSince,
       builder: (context, since, _) {
-        if (since == null) return const SizedBox.shrink();
+        if (since == null) return SizedBox.shrink();
         final t = since.toLocal();
         final hhmm = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
         final today = DateUtils.isSameDay(t, DateTime.now());
@@ -219,11 +220,11 @@ class _OfflineBanner extends StatelessWidget {
           child: Container(
             width: double.infinity,
             color: RwColors.surfaceHigh,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 Icon(Icons.cloud_off, size: 16, color: RwColors.warning),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Geen internet. Je ziet de gegevens van ${today ? 'vandaag $hhmm' : '${t.day}-${t.month} $hhmm'}.',
@@ -248,7 +249,7 @@ class PendingRunsBanner extends ConsumerWidget {
     return ValueListenableBuilder<int>(
       valueListenable: PendingRunStore.count,
       builder: (context, n, _) {
-        if (n <= 0) return const SizedBox.shrink();
+        if (n <= 0) return SizedBox.shrink();
         return Semantics(
           liveRegion: true,
           button: true,
@@ -267,18 +268,18 @@ class PendingRunsBanner extends ConsumerWidget {
             child: Container(
               width: double.infinity,
               color: RwColors.surfaceHigh,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
                   Icon(Icons.cloud_upload_outlined, size: 16, color: RwColors.warning),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       n == 1 ? '1 run wacht op internet' : '$n runs wachten op internet',
                       style: TextStyle(fontSize: 13, color: RwColors.muted),
                     ),
                   ),
-                  Text('Opnieuw', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: RwColors.accent)),
+                  Text(tr('Opnieuw'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: RwColors.accent)),
                 ],
               ),
             ),

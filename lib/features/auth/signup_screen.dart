@@ -7,6 +7,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../profile/privacy_screen.dart';
 import 'auth_widgets.dart';
+import '../../core/i18n.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -36,7 +37,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
     if (!_accepted) {
-      setState(() => _error = 'Ga akkoord met de privacyverklaring om verder te gaan.');
+      setState(() => _error = tr('Ga akkoord met de privacyverklaring om verder te gaan.'));
       return;
     }
     setState(() {
@@ -68,9 +69,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
-      eyebrow: 'Start met Kadans',
-      title: 'Jouw beste loopmoment begint hier.',
-      subtitle: 'Maak een gratis account. We vragen alleen wat nodig is.',
+      eyebrow: tr('Start met Kadans'),
+      title: tr('Jouw beste loopmoment begint hier.'),
+      subtitle: tr('Maak een gratis account. We vragen alleen wat nodig is.'),
       children: [
         Form(
           key: _form,
@@ -80,42 +81,42 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               TextFormField(
                 controller: _firstName,
                 textCapitalization: TextCapitalization.words,
-                autofillHints: const [AutofillHints.givenName],
-                decoration: const InputDecoration(labelText: 'Voornaam'),
-                validator: (v) => (v ?? '').trim().isEmpty ? 'Vul je voornaam in' : null,
+                autofillHints: [AutofillHints.givenName],
+                decoration: InputDecoration(labelText: tr('Voornaam')),
+                validator: (v) => (v ?? '').trim().isEmpty ? tr('Vul je voornaam in') : null,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'E-mailadres'),
+                autofillHints: [AutofillHints.email],
+                decoration: InputDecoration(labelText: tr('E-mailadres')),
                 validator: (v) {
                   final s = (v ?? '').trim();
                   return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s)
                       ? null
-                      : 'Vul een geldig e-mailadres in';
+                      : tr('Vul een geldig e-mailadres in');
                 },
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               TextFormField(
                 controller: _password,
                 obscureText: true,
-                autofillHints: const [AutofillHints.newPassword],
-                decoration: const InputDecoration(
-                  labelText: 'Wachtwoord',
-                  helperText: 'Minimaal 8 tekens',
+                autofillHints: [AutofillHints.newPassword],
+                decoration: InputDecoration(
+                  labelText: tr('Wachtwoord'),
+                  helperText: tr('Minimaal 8 tekens'),
                 ),
-                validator: (v) => (v ?? '').length < 8 ? 'Gebruik minimaal 8 tekens' : null,
+                validator: (v) => (v ?? '').length < 8 ? tr('Gebruik minimaal 8 tekens') : null,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               TextFormField(
                 controller: _password2,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Herhaal wachtwoord'),
-                validator: (v) => v != _password.text ? 'De wachtwoorden zijn niet gelijk' : null,
+                decoration: InputDecoration(labelText: tr('Herhaal wachtwoord')),
+                validator: (v) => v != _password.text ? tr('De wachtwoorden zijn niet gelijk') : null,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -125,14 +126,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   ),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
+                      padding: EdgeInsets.only(top: 12),
                       child: Text.rich(
                         TextSpan(
                           style: TextStyle(color: RwColors.muted, height: 1.4),
                           children: [
-                            const TextSpan(text: 'Ik ga akkoord met de '),
+                            TextSpan(text: tr('Ik ga akkoord met de ')),
                             TextSpan(
-                              text: 'privacyverklaring',
+                              text: tr('privacyverklaring'),
                               style: TextStyle(
                                 color: RwColors.accent,
                                 decoration: TextDecoration.underline,
@@ -140,7 +141,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () => openPrivacy(context),
                             ),
-                            const TextSpan(text: '.'),
+                            TextSpan(text: '.'),
                           ],
                         ),
                       ),
@@ -148,13 +149,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               FormError(_error),
-              BusyButton(label: 'Account aanmaken', busy: _busy, onPressed: _submit),
-              const SizedBox(height: 12),
+              BusyButton(label: tr('Account aanmaken'), busy: _busy, onPressed: _submit),
+              SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => context.go('/login'),
-                child: const Text('Ik heb al een account'),
+                child: Text(tr('Ik heb al een account')),
               ),
             ],
           ),

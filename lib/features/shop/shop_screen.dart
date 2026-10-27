@@ -17,6 +17,7 @@ import '../luxe/luxe.dart';
 import '../profile/shoe_replace_card.dart' show shoeShopProvider;
 import '../routes/poster_design.dart';
 import '../routes/route_poster_screen.dart';
+import '../../core/i18n.dart';
 
 /// De Kadans-shop: routeposters, Luxe-ontwerpen, Premium en hardloopschoenen op één plek.
 /// Altijd donker en goud, ook als de app licht staat (net als Premium en Luxe).
@@ -31,13 +32,13 @@ class ShopScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pal = rwZandAvond;
-    final routes = ref.watch(routesProvider).value ?? const <RunRoute>[];
-    final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
-    final products = ref.watch(posterProductsProvider).value ?? const <PosterProduct>[];
+    final routes = ref.watch(routesProvider).value ?? <RunRoute>[];
+    final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
+    final products = ref.watch(posterProductsProvider).value ?? <PosterProduct>[];
     final luxe = ref.watch(luxeAccessProvider).value ?? false;
     final premium = ref.watch(profileProvider).value?.isPremium ?? false;
     final shop = ref.watch(shoeShopProvider).value ?? ShoeShop.fallback;
-    final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
+    final shoes = ref.watch(shoesProvider).value ?? <Shoe>[];
 
     // Favorieten eerst, dan de routes die je het vaakst liep.
     int times(RunRoute r) => runs.where((a) => a.routeId != null && a.routeId == r.id).length;
@@ -54,33 +55,33 @@ class ShopScreen extends ConsumerWidget {
     return Theme(
       data: buildTheme().copyWith(
         scaffoldBackgroundColor: _bg,
-        appBarTheme: const AppBarTheme(backgroundColor: _bg, foregroundColor: _goldLight, elevation: 0, scrolledUnderElevation: 0),
+        appBarTheme: AppBarTheme(backgroundColor: _bg, foregroundColor: _goldLight, elevation: 0, scrolledUnderElevation: 0),
       ),
       child: DefaultTextStyle.merge(
         style: TextStyle(color: pal.text),
         child: Scaffold(
-          appBar: AppBar(title: const Text('Shop'), foregroundColor: _goldLight),
+          appBar: AppBar(title: Text(tr('Shop')), foregroundColor: _goldLight),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
+            padding: EdgeInsets.fromLTRB(16, 4, 16, 40),
             children: [
-              Text('KADANS SHOP', style: TextStyle(color: _gold, letterSpacing: 4, fontWeight: FontWeight.w800, fontSize: 12)),
-              const SizedBox(height: 6),
-              Text('Jouw rondjes, mooi gemaakt', style: RwText.title.copyWith(color: pal.text)),
-              const SizedBox(height: 6),
-              Text('Laat een route drukken als poster, ontgrendel de Luxe-ontwerpen of vind nieuwe schoenen.', style: body),
-              const SizedBox(height: 22),
+              Text(tr('KADANS SHOP'), style: TextStyle(color: _gold, letterSpacing: 4, fontWeight: FontWeight.w800, fontSize: 12)),
+              SizedBox(height: 6),
+              Text(tr('Jouw rondjes, mooi gemaakt'), style: RwText.title.copyWith(color: pal.text)),
+              SizedBox(height: 6),
+              Text(tr('Laat een route drukken als poster, ontgrendel de Luxe-ontwerpen of vind nieuwe schoenen.'), style: body),
+              SizedBox(height: 22),
 
               // Routeposters
-              _Header(icon: Icons.image_outlined, title: 'Routeposters', trailing: fromLabel),
-              const SizedBox(height: 10),
+              _Header(icon: Icons.image_outlined, title: tr('Routeposters'), trailing: fromLabel),
+              SizedBox(height: 10),
               if (shown.isEmpty)
                 _Panel(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Nog geen routes', style: TextStyle(color: pal.text, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text('Teken een rondje of laat er een maken; daarna kun je het hier als poster laten drukken.', style: body),
-                    const SizedBox(height: 10),
-                    _GoldButton(label: 'Naar routes', icon: Icons.route_outlined, onPressed: () => context.go('/routes')),
+                    Text(tr('Nog geen routes'), style: TextStyle(color: pal.text, fontWeight: FontWeight.w700)),
+                    SizedBox(height: 4),
+                    Text(tr('Teken een rondje of laat er een maken; daarna kun je het hier als poster laten drukken.'), style: body),
+                    SizedBox(height: 10),
+                    _GoldButton(label: tr('Naar routes'), icon: Icons.route_outlined, onPressed: () => context.go('/routes')),
                   ]),
                 )
               else
@@ -89,7 +90,7 @@ class ShopScreen extends ConsumerWidget {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: shown.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 12),
+                    separatorBuilder: (_, _) => SizedBox(width: 12),
                     itemBuilder: (context, i) {
                       final r = shown[i];
                       final mine = runs.where((a) => a.routeId != null && a.routeId == r.id).toList();
@@ -124,7 +125,7 @@ class ShopScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              SizedBox(height: 6),
                               Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: pal.text, fontWeight: FontWeight.w600)),
                             ]),
                           ),
@@ -133,31 +134,31 @@ class ShopScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Row(children: [
                 Expanded(
-                  child: Text('Tik op een route, kies een stijl en bestel. Gedrukt op mat papier en thuisbezorgd.',
+                  child: Text(tr('Tik op een route, kies een stijl en bestel. Gedrukt op mat papier en thuisbezorgd.'),
                       style: body.copyWith(fontSize: 13)),
                 ),
                 TextButton.icon(
                   style: TextButton.styleFrom(foregroundColor: _gold),
                   onPressed: () => context.push('/posters'),
-                  icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                  label: const Text('Mijn bestellingen'),
+                  icon: Icon(Icons.local_shipping_outlined, size: 18),
+                  label: Text(tr('Mijn bestellingen')),
                 ),
               ]),
-              const SizedBox(height: 22),
+              SizedBox(height: 22),
 
               // Luxe-ontwerpen
-              _Header(icon: Icons.auto_awesome_outlined, title: 'Luxe-ontwerpen', trailing: luxe ? 'Ontgrendeld' : null),
-              const SizedBox(height: 10),
+              _Header(icon: Icons.auto_awesome_outlined, title: tr('Luxe-ontwerpen'), trailing: luxe ? 'Ontgrendeld' : null),
+              SizedBox(height: 10),
               _Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('4 posterstijlen (Goud, Marmer, Oceaan, Blauwdruk) en een gouden deelkaart. Eén keer kopen, voor altijd van jou. Bij Premium inbegrepen.',
+                  Text(tr('4 posterstijlen (Goud, Marmer, Oceaan, Blauwdruk) en een gouden deelkaart. Eén keer kopen, voor altijd van jou. Bij Premium inbegrepen.'),
                       style: body),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   _GoldButton(
-                    label: luxe ? 'Bekijk je ontwerpen' : 'Bekijken en ontgrendelen',
+                    label: luxe ? tr('Bekijk je ontwerpen') : tr('Bekijken en ontgrendelen'),
                     icon: luxe ? Icons.check_circle_outline : Icons.lock_open_outlined,
                     onPressed: () => luxe && shown.isNotEmpty
                         ? openRoutePoster(context, shown.first)
@@ -165,20 +166,20 @@ class ShopScreen extends ConsumerWidget {
                   ),
                 ]),
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: 22),
 
               // Premium
-              _Header(icon: Icons.workspace_premium_outlined, title: 'Kadans Premium', trailing: premium ? 'Actief' : null),
-              const SizedBox(height: 10),
+              _Header(icon: Icons.workspace_premium_outlined, title: tr('Kadans Premium'), trailing: premium ? 'Actief' : null),
+              SizedBox(height: 10),
               _Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Je eigen AI-coach, een schema op maat, wedstrijdplan en een analyse na elke run. Luxe-ontwerpen zitten erbij.',
+                  Text(tr('Je eigen AI-coach, een schema op maat, wedstrijdplan en een analyse na elke run. Luxe-ontwerpen zitten erbij.'),
                       style: body),
-                  const SizedBox(height: 4),
-                  Text('1 maand gratis · daarna € 5 per maand of € 40 per jaar', style: body.copyWith(color: _goldLight, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 4),
+                  Text(tr('1 maand gratis · daarna € 5 per maand of € 40 per jaar'), style: body.copyWith(color: _goldLight, fontWeight: FontWeight.w600)),
+                  SizedBox(height: 12),
                   _GoldButton(
-                    label: premium ? 'Je lidmaatschap' : 'Probeer 1 maand gratis',
+                    label: premium ? tr('Je lidmaatschap') : tr('Probeer 1 maand gratis'),
                     icon: Icons.arrow_forward,
                     onPressed: () => context.push('/premium'),
                   ),
@@ -188,30 +189,30 @@ class ShopScreen extends ConsumerWidget {
                     child: TextButton.icon(
                       style: TextButton.styleFrom(foregroundColor: _gold),
                       onPressed: () => _redeem(context, ref),
-                      icon: const Icon(Icons.confirmation_number_outlined, size: 18),
-                      label: const Text('Heb je een code? Inwisselen'),
+                      icon: Icon(Icons.confirmation_number_outlined, size: 18),
+                      label: Text(tr('Heb je een code? Inwisselen')),
                     ),
                   ),
                 ]),
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: 22),
 
               // Schoenen
-              _Header(icon: Icons.directions_run, title: 'Hardloopschoenen'),
-              const SizedBox(height: 10),
+              _Header(icon: Icons.directions_run, title: tr('Hardloopschoenen')),
+              SizedBox(height: 10),
               _Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(
                     shop.isFallback
-                        ? 'Zoek een nieuw paar op het web. Binnenkort met advies van een hardloopspeciaalzaak.'
+                        ? tr('Zoek een nieuw paar op het web. Binnenkort met advies van een hardloopspeciaalzaak.')
                         : 'Nieuwe schoenen bij ${shop.name}${shop.isPartner ? ' (partnerlink: Kadans krijgt een klein deel, jij betaalt niets extra)' : ''}.',
                     style: body,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   _GoldButton(
                     label: () {
                       final d = defaultShoe(shoes);
-                      return d == null ? 'Hardloopschoenen bekijken' : 'Nieuwe ${d.name}';
+                      return d == null ? tr('Hardloopschoenen bekijken') : 'Nieuwe ${d.name}';
                     }(),
                     icon: Icons.open_in_new,
                     outlined: true,
@@ -219,14 +220,13 @@ class ShopScreen extends ConsumerWidget {
                       final d = defaultShoe(shoes);
                       final ok = await launchUrl(shop.urlFor(d?.name ?? 'hardloopschoenen'), mode: LaunchMode.externalApplication)
                           .catchError((Object _) => false);
-                      if (!ok && context.mounted) showMessage(context, 'De winkel kon niet worden geopend.', error: true);
+                      if (!ok && context.mounted) showMessage(context, tr('De winkel kon niet worden geopend.'), error: true);
                     },
                   ),
                 ]),
               ),
-              const SizedBox(height: 22),
-              Text(
-                'Posters betaal je via Stripe (iDEAL, bankpas of creditcard). Premium en Luxe lopen via Google Play.',
+              SizedBox(height: 22),
+              Text(tr('Posters betaal je via Stripe (iDEAL, bankpas of creditcard). Premium en Luxe lopen via Google Play.'),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: pal.subtle, fontSize: 12, height: 1.4),
               ),
@@ -244,16 +244,16 @@ Future<void> _redeem(BuildContext context, WidgetRef ref) async {
   final code = await showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Code inwisselen'),
+      title: Text(tr('Code inwisselen')),
       content: TextField(
         controller: ctrl,
         autofocus: true,
         textCapitalization: TextCapitalization.characters,
-        decoration: const InputDecoration(labelText: 'Actiecode of voucher', hintText: 'Bijv. LOPER30'),
+        decoration: InputDecoration(labelText: tr('Actiecode of voucher'), hintText: tr('Bijv. LOPER30')),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuleren')),
-        FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Inwisselen')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Annuleren'))),
+        FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: Text(tr('Inwisselen'))),
       ],
     ),
   );
@@ -277,17 +277,17 @@ Future<void> _redeem(BuildContext context, WidgetRef ref) async {
     return;
   }
   if (r != null && r['unknown'] != true) {
-    showMessage(context, '${r['message'] ?? 'Inwisselen lukte niet.'}', error: true);
+    showMessage(context, '${r['message'] ?? tr('Inwisselen lukte niet.')}', error: true);
     return;
   }
   final play = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Google Play-code?'),
-      content: const Text('Deze code kennen we niet. Is het een code van Google Play? Dan wissel je hem daar in.'),
+      title: Text(tr('Google Play-code?')),
+      content: Text(tr('Deze code kennen we niet. Is het een code van Google Play? Dan wissel je hem daar in.')),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Nee')),
-        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Open Google Play')),
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Nee'))),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Open Google Play'))),
       ],
     ),
   );
@@ -295,7 +295,7 @@ Future<void> _redeem(BuildContext context, WidgetRef ref) async {
   final ok = await launchUrl(Uri.parse('https://play.google.com/redeem?code=${Uri.encodeQueryComponent(code)}'),
           mode: LaunchMode.externalApplication)
       .catchError((Object _) => false);
-  if (!ok && context.mounted) showMessage(context, 'Google Play kon niet worden geopend.', error: true);
+  if (!ok && context.mounted) showMessage(context, tr('Google Play kon niet worden geopend.'), error: true);
 }
 
 class _Header extends StatelessWidget {
@@ -307,19 +307,19 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(children: [
         Icon(icon, size: 20, color: ShopScreen._gold),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Expanded(
           child: Text(title,
               style: TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 19, color: rwZandAvond.text)),
         ),
         if (trailing != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: ShopScreen._goldDeep),
             ),
-            child: Text(trailing!, style: const TextStyle(color: ShopScreen._goldLight, fontSize: 12, fontWeight: FontWeight.w700)),
+            child: Text(trailing!, style: TextStyle(color: ShopScreen._goldLight, fontSize: 12, fontWeight: FontWeight.w700)),
           ),
       ]);
 }
@@ -330,7 +330,7 @@ class _Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: rwZandAvond.surface,
           borderRadius: BorderRadius.circular(18),
@@ -351,15 +351,15 @@ class _GoldButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 18),
-      const SizedBox(width: 8),
+      SizedBox(width: 8),
       Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
     ]);
     if (outlined) {
       return OutlinedButton(
         style: OutlinedButton.styleFrom(
           foregroundColor: ShopScreen._goldLight,
-          side: const BorderSide(color: ShopScreen._goldDeep),
-          minimumSize: const Size(0, 46),
+          side: BorderSide(color: ShopScreen._goldDeep),
+          minimumSize: Size(0, 46),
         ),
         onPressed: onPressed,
         child: child,
@@ -369,7 +369,7 @@ class _GoldButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: ShopScreen._gold,
         foregroundColor: rwZandAvond.accentDark,
-        minimumSize: const Size(0, 46),
+        minimumSize: Size(0, 46),
       ),
       onPressed: onPressed,
       child: child,

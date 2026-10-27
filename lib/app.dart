@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/appearance.dart';
+import 'core/i18n.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
 import 'features/lock/app_lock_gate.dart';
@@ -22,12 +23,14 @@ class _RunWiseAppState extends ConsumerState<RunWiseApp> with WidgetsBindingObse
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _appearance.addListener(_changed);
+    LanguageController.instance.addListener(_changed);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _appearance.removeListener(_changed);
+    LanguageController.instance.removeListener(_changed);
     super.dispose();
   }
 
@@ -63,8 +66,8 @@ class _RunWiseAppState extends ConsumerState<RunWiseApp> with WidgetsBindingObse
           child: AppLockGate(child: child ?? const SizedBox.shrink()),
         );
       },
-      locale: const Locale('nl', 'NL'),
-      supportedLocales: const [Locale('nl', 'NL'), Locale('en')],
+      locale: LanguageController.instance.lang.locale,
+      supportedLocales: [for (final l in AppLanguage.values) l.locale],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

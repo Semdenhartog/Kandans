@@ -16,6 +16,7 @@ import 'shared/config_missing_app.dart';
 import 'data/services/app_lock_service.dart';
 import 'data/services/heart_rate_service.dart';
 import 'core/appearance.dart';
+import 'core/i18n.dart';
 import 'domain/run_goal.dart';
 
 void main() {
@@ -58,7 +59,9 @@ class _BootstrapState extends State<_Bootstrap> {
   Future<void> _start() async {
     await AppearanceController.instance.load();
     await loadRunGoal();
-    await initializeDateFormatting('nl_NL');
+    // Datums in alle talen van de app (nl, en, de, fr, es).
+    await initializeDateFormatting();
+    await LanguageController.instance.load();
     await NotificationService.instance.init().catchError((_) {});
     await AppLockService.instance.load();
     await HeartRateService.instance.load();
