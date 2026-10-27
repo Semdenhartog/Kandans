@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:xml/xml.dart';
 
+import 'fit_parser.dart';
 import 'geo.dart';
 
 class RunFileException implements Exception {
@@ -50,7 +53,7 @@ String? _child(XmlElement e, String local) =>
 ImportedRun parseRunFile(String text) {
   final XmlDocument doc;
   try {
-    doc = XmlDocument.parse(text);
+    doc = XmlDocument.parse(text.trimLeft());
   } catch (_) {
     throw RunFileException('Dit bestand kon niet worden gelezen. Kies een .gpx- of .tcx-bestand.');
   }
@@ -89,6 +92,29 @@ ImportedRun parseRunFile(String text) {
   } else {
     throw RunFileException('Onbekend bestand. Kies een .gpx- of .tcx-bestand.');
   }
+  return _buildRun(pts, name);
+}
+
+/// Leest een FIT-bestand (Garmin en andere horloges). Gooit [RunFileException] bij een fout of een andere sport.
+ImportedRun parseFitRun(Uint8List bytes, {String? name}) {
+  final FitData fit;
+  try {
+    fit = parseFit(bytes);
+  } on FitFormatException catch (e) {
+    throw RunFileException(e.message);
+  } catch (_) {
+    throw RunFileException('Dit FIT-bestand kon niet worden gelezen.');
+  }
+  if (!fit.isRunning) throw RunFileException('Dit is geen hardloopactiviteit.');
+  final pts = [
+    for (final p in fit.points)
+      _Pt(p.time, p.lat == null || p.lon == null ? null : LatLng(p.lat!, p.lon!),
+          ele: p.altitude, hr: p.heartRate, dist: p.distance),
+  ];
+  return _buildRun(pts, name);
+}
+
+ImportedRun _buildRun(List<_Pt> pts, String? name) {
   pts.sort((a, b) => a.time.compareTo(b.time));
   if (pts.length < 10) throw RunFileException('Er staan te weinig meetpunten met tijd in dit bestand.');
 

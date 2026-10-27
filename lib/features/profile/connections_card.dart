@@ -8,6 +8,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../shared/widgets.dart';
 import '../routes/strava_routes_screen.dart';
+import 'strava_archive_screen.dart';
 import 'strava_history_screen.dart';
 
 /// Strava-oranje (huisstijl van Strava voor de "Koppel met Strava"-knop).
@@ -222,6 +223,13 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             trailing: _busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : null,
             enabled: !_busy,
             onTap: () => _stravaTap(conn),
+          ),
+          ListTile(
+            leading: Icon(Icons.folder_zip_outlined, color: RwColors.subtle),
+            title: const Text('Strava-archief importeren'),
+            subtitle: const Text('Ook zonder koppeling: al je runs uit de download van je Strava-account'),
+            enabled: !_busy,
+            onTap: () => openStravaArchive(context),
           ),
         ],
       ),

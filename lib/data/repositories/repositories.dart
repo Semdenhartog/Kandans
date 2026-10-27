@@ -120,6 +120,25 @@ class RunWiseRepository {
     return row['id'] as String;
   }
 
+  /// Een run uit een Strava-archief. Staat dezelfde Strava-run er al in (ook via de koppeling), dan
+  /// gebeurt er niets en komt er null terug.
+  Future<String?> addStravaArchiveRun(Activity a, String stravaId,
+      {required Map<String, dynamic> streams, Map<String, double>? bestEfforts}) async {
+    final row = await _db
+        .from('activities')
+        .upsert({
+          ...a.toInsert(_uid),
+          'source': 'strava',
+          'external_id': stravaId,
+          'streams': streams,
+          if (bestEfforts != null) 'best_efforts': bestEfforts,
+        }, onConflict: 'user_id,source,external_id', ignoreDuplicates: true)
+        .select('id')
+        .maybeSingle()
+        .timeout(const Duration(seconds: 30));
+    return row?['id'] as String?;
+  }
+
   Future<void> deleteActivity(String id) async {
     // Eerst de foto's bij deze run uit de opslag halen.
     try {

@@ -62,7 +62,9 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Routes (tekenen, laten maken, ondergrond, verlichting, horloge): `lib/features/routes/`
 - Horloges: `watch_export.dart`. `WatchBrand.garminBasic` = Garmin zonder koersen (Vivoactive 5):
   geen bestand, maar afslagmeldingen op de pols met alleen ← → (`simple_turn_arrows`).
-- Strava: `supabase/functions/strava` (sync, history, routes, route), app: `profile/strava_history_screen.dart`, `routes/strava_routes_screen.dart`
+- Strava: `supabase/functions/strava` (sync, history, routes, route), app: `profile/strava_history_screen.dart`, `routes/strava_routes_screen.dart`.
+  Archief-import zonder koppeling: `profile/strava_archive_screen.dart` + `domain/zip_reader.dart`, `fit_parser.dart`, `strava_archive.dart`
+  (bron `strava`, external_id = Strava-id; testarchief via `tools/maak_strava_testarchief.py`).
 - Uitdagingen + Samen (ranglijsten, vriendcode): `lib/features/challenges/`, functie `community`
 - Coach: functie `coach` (logt `coach_usage` per vraag), app `lib/features/coach/`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**, wacht op Stripe/Gelato-geheimen.
@@ -70,7 +72,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   `site/route.html`, deeplink `runwise://app/route-delen?n=&p=` → `RouteImportScreen`. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
 - Community-tab: `lib/features/community/`, databasefuncties `community_*` (migratie 0033). Actiecodes: `redeem_promo`/`create_promo` (0032).
 - Bronnen: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
-- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 189). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
+- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 191). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
 - GitHub Pages aanzetten. Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.

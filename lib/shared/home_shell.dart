@@ -186,14 +186,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                 if (i == shell.currentIndex) notifyTabReselected(i);
                 shell.goBranch(i, initialLocation: i == shell.currentIndex);
               },
-              destinations: [
-                NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny), label: tr('Vandaag')),
-                NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: tr('Runs')),
-                NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: tr('Routes')),
-                NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: tr('Coach')),
-                NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('Community')),
-                NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: tr('Ik')),
-              ],
+              destinations: homeDestinations(),
             ),
           ),
         ],
@@ -201,6 +194,16 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     );
   }
 }
+
+/// De zes tabbladen onderin (ook gebruikt voor de schermafbeelding van de balk).
+List<NavigationDestination> homeDestinations() => [
+  NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny), label: tr('Vandaag')),
+  NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: tr('Runs')),
+  NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: tr('Routes')),
+  NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: tr('Coach')),
+  NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('Forum')),
+  NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: tr('Ik')),
+    ];
 
 /// Smalle balk als de app geen internet heeft en bewaarde gegevens toont.
 class _OfflineBanner extends StatelessWidget {

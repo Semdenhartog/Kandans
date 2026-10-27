@@ -24,6 +24,8 @@ import '../../domain/best_efforts.dart';
 import '../../domain/geo.dart';
 import '../../domain/run_export.dart';
 import '../../domain/run_file_import.dart';
+import '../../domain/strava_archive.dart';
+import '../profile/strava_archive_screen.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/shoes.dart';
 import '../../domain/run_filter.dart';
@@ -144,10 +146,18 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
       final file = await FilePicker.pickFile(type: FileType.any);
       if (file == null) return;
       final lower = file.name.toLowerCase();
-      if (!lower.endsWith('.gpx') && !lower.endsWith('.tcx')) {
-        throw RunFileException('Kies een .gpx- of .tcx-bestand.');
+      if (lower.endsWith('.zip')) {
+        if (mounted) openStravaArchive(context);
+        return;
       }
-      final run = parseRunFile(utf8.decode(await file.readAsBytes(), allowMalformed: true));
+      final plain = lower.endsWith('.gz') ? lower.substring(0, lower.length - 3) : lower;
+      if (!plain.endsWith('.gpx') && !plain.endsWith('.tcx') && !plain.endsWith('.fit')) {
+        throw RunFileException('Kies een .gpx-, .tcx- of .fit-bestand.');
+      }
+      final bytes = await file.readAsBytes();
+      final run = plain.endsWith('.gpx') && !lower.endsWith('.gz')
+          ? parseRunFile(utf8.decode(bytes, allowMalformed: true))
+          : parseStravaArchiveFile(lower, bytes);
       final existing = ref.read(activitiesProvider).value ?? const <Activity>[];
       if (existing.any((a) => a.startedAt.difference(run.start).inMinutes.abs() < 20)) {
         if (mounted) showMessage(context, 'Deze run staat er al in (rond hetzelfde tijdstip).');
@@ -257,6 +267,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                   context.go('/runs/new');
                 case 'import':
                   _import();
+                case 'archive':
+                  openStravaArchive(context);
                 case 'calendar':
                   openCalendar(context);
                 case 'heatmap':
@@ -276,7 +288,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text('Jaaroverzicht'))),
               PopupMenuDivider(),
               PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
-              PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX)'))),
+              PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX/FIT)'))),
+              PopupMenuItem(value: 'archive', child: ListTile(leading: Icon(Icons.folder_zip_outlined), title: Text('Strava-archief importeren'))),
               PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
               PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text('Exporteer GPS-sporen (GPX)'))),
             ],

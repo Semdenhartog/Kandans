@@ -50,6 +50,8 @@ import 'package:runwise/features/planner/training_plan_screen.dart';
 import 'package:runwise/features/auth/login_screen.dart';
 import 'package:runwise/features/onboarding/onboarding_screen.dart';
 import 'package:runwise/features/profile/privacy_screen.dart';
+import 'package:runwise/features/profile/strava_archive_screen.dart';
+import 'package:runwise/shared/home_shell.dart';
 import 'package:runwise/features/shop/shop_screen.dart';
 import 'package:runwise/features/community/community_feed_screen.dart';
 import 'package:runwise/data/services/community_feed_service.dart';
@@ -333,7 +335,7 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0}) async {
   RwColors.use(dark ? rwZandAvond : rwZand);
   addTearDown(() => RwColors.use(rwZand));
   tester.view.physicalSize = Size(_w * 2, height * 2);
@@ -352,7 +354,7 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
           child: child!,
         ),
       ),
-      home: nav ? _FakeShell(child: screen) : screen,
+      home: nav ? _FakeShell(index: navIndex, child: screen) : screen,
     ),
   ));
   for (var i = 0; i < 14; i++) {
@@ -374,23 +376,17 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
 
 /// Zelfde onderbalk als de echte app (zonder router).
 class _FakeShell extends StatelessWidget {
-  const _FakeShell({required this.child});
+  const _FakeShell({required this.child, this.index = 0});
   final Widget child;
+  final int index;
 
   @override
   Widget build(BuildContext context) => Scaffold(
         body: child,
         bottomNavigationBar: NavigationBar(
-          selectedIndex: 0,
+          selectedIndex: index,
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), label: 'Vandaag'),
-            NavigationDestination(icon: Icon(Icons.directions_run), label: 'Runs'),
-            NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Routes'),
-            NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), label: 'Coach'),
-            NavigationDestination(icon: Icon(Icons.forum_outlined), label: 'Community'),
-            NavigationDestination(icon: Icon(Icons.person_outline), label: 'Ik'),
-          ],
+          destinations: homeDestinations(),
         ),
       );
 }
@@ -467,6 +463,10 @@ void main() {
   testWidgets('16 privacy', (t) => _shot(t, '16_privacy', const PrivacyScreen(), height: 1600));
   testWidgets('17 shop', (t) => _shot(t, '17_shop', const ShopScreen(), height: 2000));
   testWidgets('18 community', (t) => _shot(t, '18_community', const CommunityFeedScreen(), height: 1830));
+  testWidgets('18b community met balk', (t) => _shot(t, '18b_community_balk', const CommunityFeedScreen(), height: 915, nav: true, navIndex: 4));
+  testWidgets('18c community balk grote letters',
+      (t) => _shot(t, '18c_community_balk_groot', const CommunityFeedScreen(), height: 915, nav: true, navIndex: 4, textScale: 1.3));
+  testWidgets('19 strava-archief', (t) => _shot(t, '19_strava_archief', const StravaArchiveScreen(), height: 1900));
   testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 3), height: 915));
   testWidgets('15 na je run', (t) {
     final st = RunStreams.fromJson(_streams)!;

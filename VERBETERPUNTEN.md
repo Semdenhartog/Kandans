@@ -277,3 +277,5 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 187. ✅ Datums in de gekozen taal.
 188. ✅ Migraties 0030–0033 lokaal getest op Postgres 16 (alle 33 migraties, plus een test van codes en community).
 189. ✅ Onderbalk met zes tabbladen: alleen het gekozen tabblad toont zijn naam.
+190. ✅ Tabblad heet in de onderbalk **Forum** (Community brak af over twee regels); het scherm zelf heet nog Community. Bij "gaat binnenkort open" nu een knop Opnieuw proberen.
+191. ✅ **Strava-archief importeren** (ook zonder koppeling): zip van Strava kiezen, alleen hardloopactiviteiten uit GPX/TCX/FIT (ook .gz), weer van toen erbij, dubbele runs overgeslagen. Bron blijft `strava` (niet naar coach/anderen). Eigen zip-lezer met zip64, eigen FIT-lezer (`domain/fit_parser.dart`). Losse import accepteert nu ook FIT.

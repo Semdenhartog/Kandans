@@ -292,6 +292,8 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         icon: Icons.forum_outlined,
         title: tr('De community gaat binnenkort open'),
         message: tr('Hier praat je straks met andere lopers over routes, wedstrijden, schoenen en blessures, en spreek je af om samen te lopen.'),
+        actionLabel: tr('Opnieuw proberen'),
+        onAction: _load,
       );
     }
     if (_error != null) {

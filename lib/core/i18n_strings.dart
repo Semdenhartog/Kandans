@@ -47,6 +47,8 @@ const kTranslations = <String, List<String>>{
   'Bericht verwijderd.': ['Post deleted.', 'Beitrag gelöscht.', 'Message supprimé.', 'Mensaje eliminado.'],
   'Bedankt, we kijken ernaar.': ['Thanks, we\'ll take a look.', 'Danke, wir sehen es uns an.', 'Merci, nous allons regarder.', 'Gracias, lo revisaremos.'],
   'Community': ['Community', 'Community', 'Communauté', 'Comunidad'],
+  'Forum': ['Forum', 'Forum', 'Forum', 'Foro'],
+  'Opnieuw proberen': ['Try again', 'Erneut versuchen', 'Réessayer', 'Reintentar'],
   'Ranglijsten en vrienden': ['Leaderboards and friends', 'Ranglisten und Freunde', 'Classements et amis', 'Clasificaciones y amigos'],
   'Bericht': ['Post', 'Beitrag', 'Message', 'Mensaje'],
   'Alles': ['All', 'Alle', 'Tout', 'Todo'],
