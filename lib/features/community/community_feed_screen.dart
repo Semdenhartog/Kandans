@@ -233,6 +233,12 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
       appBar: AppBar(
         title: Text(tr('Community')),
         actions: [
+          if (joined)
+            IconButton(
+              tooltip: tr('Nieuw bericht'),
+              icon: const Icon(Icons.edit_square),
+              onPressed: _newPost,
+            ),
           IconButton(
             tooltip: tr('Ranglijsten en vrienden'),
             icon: Icon(Icons.leaderboard_outlined),
