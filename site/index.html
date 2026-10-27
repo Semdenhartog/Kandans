@@ -30,7 +30,8 @@ img{display:block;max-width:100%}
 .display{font-family:Saira,sans-serif;font-weight:800;letter-spacing:-0.01em;line-height:1.02;margin:0}
 .eyebrow{font-family:Saira,sans-serif;font-weight:700;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
 .lead{font-size:19px;color:var(--muted);margin:0;max-width:34rem}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border-radius:999px;font-weight:600;font-size:17px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border-radius:999px;font-weight:600;font-size:17px;text-decoration:none;border:0;cursor:pointer;transition:transform .12s ease,opacity .12s ease}
+.btn:hover{transform:translateY(-1px)}
 .btn-primary{background:var(--grad);color:var(--bg)}.btn-primary:hover{color:var(--bg);filter:brightness(1.07)}
 .btn-ghost{border:1.5px solid var(--border);color:var(--text)}.btn-ghost:hover{color:var(--text);border-color:var(--subtle)}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:24px}
@@ -96,7 +97,7 @@ summary{cursor:pointer;font-weight:600;font-size:18px;list-style-position:outsid
 details p{margin:10px 0 0;color:var(--muted)}
 
 .cta{padding:0 24px 112px}
-.cta-box{max-width:1200px;margin:0 auto;background:var(--grad);color:var(--bg);border-radius:32px;padding:clamp(32px,6vw,72px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:32px}
+.cta-box{max-width:1200px;margin:0 auto;background:var(--grad);color:var(--bg);border-radius:32px;padding:clamp(32px,6vw,72px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:30px}
 .cta-box h2{font-size:clamp(30px,4vw,48px);text-transform:uppercase}
 .cta-box p{margin:0;font-size:18px;color:#2A2016}
 form{flex:1 1 360px;min-width:0;display:flex;flex-wrap:wrap;gap:12px}
@@ -122,6 +123,7 @@ footer{border-top:1px solid #241F18;padding:32px 0}
     <a href="#functies">Functies</a>
     <a href="#prijs">Prijs</a>
     <a href="#wachtlijst">Wachtlijst</a>
+    <a href="privacy.html">Privacy</a>
   </nav>
 </header>
 
@@ -130,7 +132,7 @@ footer{border-top:1px solid #241F18;padding:32px 0}
   <div class="hero-copy">
     <span class="eyebrow">De beste loopmomenten</span>
     <h1 class="display">Loop niet zomaar.<br><span class="grad-text">Loop op het beste moment.</span></h1>
-    <p class="lead">Kadans kijkt naar het weer, de wind op je route, de buienradar en je eigen runs, en zegt op 5 minuten nauwkeurig wanneer je het best kunt vertrekken. En welke kant je op moet, en wat je aantrekt.</p>
+    <p class="lead">Kadans kijkt naar het weer, de wind op je route, de buienradar en je eigen runs, en zegt op 5 minuten nauwkeurig wanneer je het best kunt vertrekken. En welke kant je op moet, zodat je het rustigste en snelste loopmoment pakt.</p>
     <div class="actions">
       <a class="btn btn-primary" href="#wachtlijst">Zet me op de wachtlijst</a>
       <a class="btn btn-ghost" href="#hoe">Hoe het werkt</a>
@@ -153,7 +155,7 @@ footer{border-top:1px solid #241F18;padding:32px 0}
       <div class="panel">
         <div class="panel-head"><span>Buien komende 2 uur · live</span><span>Buienradar</span></div>
         <div class="bars" aria-hidden="true">
-          <i class="r" style="height:70%"></i><i class="r" style="height:85%"></i><i class="r" style="height:60%"></i><i class="r" style="height:40%"></i><i class="r" style="height:22%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i><i style="height:6%"></i>
+          <i class="r" style="height:70%"></i><i class="r" style="height:85%"></i><i class="r" style="height:60%"></i><i class="r" style="height:40%"></i><i class="r" style="height:22%"></i><i style="height:15%"></i><i style="height:25%"></i>
         </div>
         <div class="axis"><span>18:10</span><span>Droog vanaf 18:35</span><span>20:10</span></div>
       </div>
@@ -170,8 +172,8 @@ footer{border-top:1px solid #241F18;padding:32px 0}
     <h2 class="display">Zo werkt het</h2>
     <div class="steps">
       <div class="card step"><span class="n grad-text">1</span><h3>Koppel je runs</h3><p>Via je horloge (Fitbit, Samsung, Garmin en meer via Health Connect), Strava, een GPX-bestand of gewoon met de hand.</p></div>
-      <div class="card step"><span class="n grad-text">2</span><h3>Kies je route en training</h3><p>Rustig, tempo, lang of herstel, op je eigen rondje. Na 8 runs weet Kadans bij welk weer jij het snelst loopt.</p></div>
-      <div class="card step"><span class="n grad-text">3</span><h3>Vertrek op het beste moment</h3><p>Op 5 minuten nauwkeurig, met de buien van de komende 2 uur erbij. Geen gegok meer met de weer-app.</p></div>
+      <div class="card step"><span class="n grad-text">2</span><h3>Kies je route en training</h3><p>Rustig, tempo, lang of herstel, op je eigen rondje. Na 8 runs weet Kadans bij welk weer jij het best presteert.</p></div>
+      <div class="card step"><span class="n grad-text">3</span><h3>Vertrek op het beste moment</h3><p>Op 5 minuten nauwkeurig, met de buien van de komende 2 uur erbij. Geen gegok meer met het weer.</p></div>
     </div>
   </div>
 </section>
@@ -180,15 +182,15 @@ footer{border-top:1px solid #241F18;padding:32px 0}
   <h2 class="display">Alles om slimmer te trainen</h2>
   <div class="feats">
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l3 2"></path><path d="M9 2h6"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 5V13L16 15"></path></svg>
       <span class="tag">Gratis</span><h3>Op 5 minuten nauwkeurig</h3><p>Weer per kwartier en live buien, zodat je weet of je om 18:30 of 18:35 moet gaan.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3"></path><path d="M3 12h15a3 3 0 1 1-3 3"></path><path d="M3 16h7"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3"></path><path d="M3 20h11a3 3 0 1 1-3-3"></path><path d="M16 4l5 6-5 6"></path></svg>
       <span class="tag">Gratis</span><h3>Wind op jouw route</h3><p>Tegen- of rugwind per kilometer. Loop zo dat je de wind op het eind in je rug hebt.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"></path><path d="M15 8h5v5"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"></path><path d="M15 8h6v6"></path></svg>
       <span class="tag">Gratis</span><h3>Jouw loopprofiel</h3><p>Bij welke temperatuur en wind jij het snelst bent, en of je een ochtend- of avondloper bent.</p>
     </div>
     <div class="feat">
@@ -196,11 +198,11 @@ footer{border-top:1px solid #241F18;padding:32px 0}
       <span class="tag">Gratis</span><h3>Wedstrijddoelen</h3><p>Verwachte eindtijd met het weer van de wedstrijddag, plus advies over tempo, kleding en drinken.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 10h8"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 10h8M8 14h5"></path></svg>
       <span class="tag prem">Premium</span><h3>Je eigen AI-coach</h3><p>Een coach die je runs, je wedstrijd en het weer van de komende dagen kent. Vraag wat je deze week moet lopen.</p>
     </div>
     <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="3"></rect><path d="M10 7h4"></path></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="3"></rect><path d="M10 17h4"></path></svg>
       <span class="tag">Gratis</span><h3>Werkt met je horloge</h3><p>Runs komen vanzelf binnen via Health Connect of Strava, met het weer van dat moment erbij.</p>
     </div>
   </div>
@@ -229,10 +231,10 @@ footer{border-top:1px solid #241F18;padding:32px 0}
 <section class="wrap section">
   <h2 class="display">Veelgestelde vragen</h2>
   <div class="faq">
-    <details class="card"><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en je ranglijsten. Strava laat zien wat je liep; Kadans helpt je vóór je run. Ze werken prima naast elkaar.</p></details>
+    <details class="card"><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en je ranglijsten. Strava laat zien wat je liep; Kadans helpt je vóór je run. Ze werken mooi samen, maar Kadans is gemaakt om je te helpen kiezen op het juiste moment.</p></details>
     <details class="card"><summary>Heb ik een horloge nodig?</summary><p>Nee. Je kunt runs ook met de hand invoeren of een GPX-bestand uploaden. Met een horloge gaat het vanzelf.</p></details>
     <details class="card"><summary>Op welke telefoons werkt het?</summary><p>Kadans komt eerst voor Android. iPhone volgt later.</p></details>
-    <details class="card"><summary>Wat doen jullie met mijn gegevens?</summary><p>Alleen jij ziet je runs. We verkopen niets en tonen geen advertenties. Je kunt alles inzien en je account met één tik verwijderen. Lees de <a href="privacy.html">privacyverklaring</a>.</p></details>
+    <details class="card"><summary>Wat doen jullie met mijn gegevens?</summary><p>Alleen jij ziet je runs. We verkopen niets en tonen geen advertenties. Je kunt alles inzien en je account verwijderen via je profiel.</p></details>
   </div>
 </section>
 </main>
@@ -256,7 +258,7 @@ footer{border-top:1px solid #241F18;padding:32px 0}
 <footer>
   <div class="wrap foot">
     <span>© 2026 Kadans</span>
-    <span>Weer via Open-Meteo · Buien via Buienradar · <a href="privacy.html">Privacy</a></span>
+    <span><a href="mailto:sb.denhartog@hotmail.com">Contact</a> · <a href="privacy.html">Privacy</a></span>
   </div>
 </footer>
 <script>
