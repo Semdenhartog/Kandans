@@ -17,7 +17,7 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.meta('Versie 1.1 · laatst bijgewerkt: 26 oktober 2026'),
   PrivacyBlock.paragraph('Kadans (voorheen RunWise) is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we daarvoor gebruiken en wat je rechten zijn.'),
   PrivacyBlock.heading('Wie zijn wij?'),
-  PrivacyBlock.paragraph('Kadans wordt gemaakt door [NAAM], [PLAATS]. Vragen over privacy? Mail naar [E-MAILADRES].'),
+  PrivacyBlock.paragraph('Kadans is een app van Sem den Hartog (handelsnaam Kadans), Barneveld. Vragen over privacy? Mail naar sb.denhartog@hotmail.com.'),
   PrivacyBlock.heading('Welke gegevens gebruiken we?'),
   PrivacyBlock.row('E-mailadres en wachtwoord', 'Je account. Je wachtwoord wordt versleuteld opgeslagen door onze databasedienst; wij kunnen het niet zien.'),
   PrivacyBlock.row('Voornaam', 'Om je aan te spreken in de app.'),
