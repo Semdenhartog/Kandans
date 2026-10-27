@@ -39,6 +39,19 @@ final luxeAccessProvider = FutureProvider<bool>((ref) async {
   } catch (_) {}
   final cached = prefs?.getBool(_cacheKey) ?? false;
   final user = ref.watch(currentUserProvider);
+  // Luxe via een actiecode (tabel user_entitlements, migratie 0032).
+  if (user != null) {
+    try {
+      final rows = await ref.read(supabaseProvider).from('user_entitlements').select('until').eq('entitlement', 'luxe');
+      final now = DateTime.now();
+      if ((rows as List).any((r) => r['until'] == null || DateTime.parse(r['until'] as String).isAfter(now))) {
+        await prefs?.setBool(_cacheKey, true);
+        return true;
+      }
+    } catch (_) {
+      // Tabel bestaat nog niet (migratie niet gedraaid) of geen internet: gewoon verder.
+    }
+  }
   final billing = ref.read(billingServiceProvider);
   if (user == null || !billing.isAvailable) return cached;
   try {

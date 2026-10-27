@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/supabase.dart';
+import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
@@ -185,7 +187,7 @@ class ShopScreen extends ConsumerWidget {
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
                       style: TextButton.styleFrom(foregroundColor: _gold),
-                      onPressed: () => _redeem(context),
+                      onPressed: () => _redeem(context, ref),
                       icon: const Icon(Icons.confirmation_number_outlined, size: 18),
                       label: const Text('Heb je een code? Inwisselen'),
                     ),
@@ -237,7 +239,7 @@ class ShopScreen extends ConsumerWidget {
 }
 
 /// Actiecode inwisselen: Google Play opent met de code ingevuld; daarna staat het abonnement of de aankoop klaar.
-Future<void> _redeem(BuildContext context) async {
+Future<void> _redeem(BuildContext context, WidgetRef ref) async {
   final ctrl = TextEditingController();
   final code = await showDialog<String>(
     context: context,
@@ -247,7 +249,7 @@ Future<void> _redeem(BuildContext context) async {
         controller: ctrl,
         autofocus: true,
         textCapitalization: TextCapitalization.characters,
-        decoration: const InputDecoration(labelText: 'Actiecode', hintText: 'Bijv. KADANS-RUNNER'),
+        decoration: const InputDecoration(labelText: 'Actiecode of voucher', hintText: 'Bijv. LOPER30'),
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuleren')),
@@ -256,7 +258,40 @@ Future<void> _redeem(BuildContext context) async {
     ),
   );
   ctrl.dispose();
-  if (code == null || code.isEmpty) return;
+  if (code == null || code.isEmpty || !context.mounted) return;
+  // Eerst onze eigen codes (gratis acties); onbekend? Dan is het misschien een Google Play-code.
+  Map<String, dynamic>? r;
+  try {
+    r = (await ref.read(supabaseProvider).rpc('redeem_promo', params: {'code': code}) as Map).cast<String, dynamic>();
+  } catch (_) {
+    r = null;
+  }
+  if (!context.mounted) return;
+  if (r != null && r['ok'] == true) {
+    HapticFeedback.heavyImpact();
+    ref.invalidate(profileProvider);
+    ref.invalidate(luxeAccessProvider);
+    final what = switch (r['grants']) { 'premium' => 'Premium', 'luxe' => 'de Luxe-ontwerpen', _ => 'Premium en de Luxe-ontwerpen' };
+    final until = r['until'] == null ? 'voor altijd' : 'tot ${Fmt.date(DateTime.parse(r['until'] as String).toLocal())}';
+    showMessage(context, 'Gelukt! Je hebt nu $what, $until.');
+    return;
+  }
+  if (r != null && r['unknown'] != true) {
+    showMessage(context, '${r['message'] ?? 'Inwisselen lukte niet.'}', error: true);
+    return;
+  }
+  final play = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Google Play-code?'),
+      content: const Text('Deze code kennen we niet. Is het een code van Google Play? Dan wissel je hem daar in.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Nee')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Open Google Play')),
+      ],
+    ),
+  );
+  if (play != true || !context.mounted) return;
   final ok = await launchUrl(Uri.parse('https://play.google.com/redeem?code=${Uri.encodeQueryComponent(code)}'),
           mode: LaunchMode.externalApplication)
       .catchError((Object _) => false);
