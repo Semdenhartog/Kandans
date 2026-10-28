@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Kadans logo mark">
+  <defs>
+    <linearGradient id="kadansGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3e4c5"/>
+      <stop offset="28%" stop-color="#e2c88e"/>
+      <stop offset="55%" stop-color="#d1ab68"/>
+      <stop offset="100%" stop-color="#b98948"/>
+    </linearGradient>
+    <linearGradient id="kadansGoldSoft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f9f2e8"/>
+      <stop offset="50%" stop-color="#e5c992"/>
+      <stop offset="100%" stop-color="#dba66a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" rx="160" fill="#0f0f0f"/>
+  <path d="M268 110 L268 690 C268 719 292 742 321 742 C350 742 373 719 373 690 L373 460 L523 312 C548 287 588 287 614 312 C640 337 640 379 614 404 L459 548 L614 692 C640 717 640 759 614 784 C588 809 548 809 523 784 L373 636 L373 690 C373 719 350 742 321 742 C292 742 268 719 268 690 Z" fill="url(#kadansGold)"/>
+  <path d="M286 180 L286 670 C286 692 305 710 327 710 C349 710 368 692 368 670 L368 430 L510 290 C531 270 565 270 586 290 C607 310 607 346 586 366 L420 530 L586 694 C607 714 607 750 586 770 C565 790 531 790 510 770 L368 628 L368 670 C368 692 349 710 327 710 C305 710 286 692 286 670 Z" fill="url(#kadansGoldSoft)" opacity="0.9"/>
+</svg>
