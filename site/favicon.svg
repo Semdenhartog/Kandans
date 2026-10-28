@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Kadans favicon">
+  <defs>
+    <linearGradient id="faviconGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f2e0bb"/>
+      <stop offset="30%" stop-color="#e0c287"/>
+      <stop offset="62%" stop-color="#d2ab69"/>
+      <stop offset="100%" stop-color="#b47a39"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="#0f0f0f"/>
+  <path d="M188 92 L188 420 C188 446 210 468 236 468 C261 468 283 446 283 420 L283 265 L368 180 C388 160 424 160 444 180 C464 200 464 236 444 256 L309 391 L444 425 C464 445 464 481 444 501 C424 521 388 521 368 501 L283 416 L283 420 C283 446 261 468 236 468 C210 468 188 446 188 420 Z" fill="url(#faviconGold)"/>
+</svg>
