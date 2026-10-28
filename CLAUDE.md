@@ -48,7 +48,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 ## Huisstijl
 - Naam **Kadans**. Logo (28 okt): gouden K op zwart marmer met goudaders; origineel in `docs/merk/kadans-logo-origineel.png`,
   Play Store-icoon `docs/merk/play-store-icoon-512.png`. App-icoon (homescherm) = **exact het originele logo, geen aanpassingen** (wens van Sem):
-  `assets/icon/icon.png` is het origineel geschaald; adaptief = het hele origineel op 72% op zwart (gouden rand vult de Samsung-vorm; in een rond masker vallen de hoeken van de rand net weg), geen monochroom. In de app: `assets/logo/k_goud.webp` (gouden K in kleur: opstartscherm, inloggen, uitnodigingskaart),
+  `assets/icon/icon.png` is het origineel geschaald; adaptief = het hele origineel op 72% op zwart (gouden rand vult de Samsung-vorm; in een rond masker vallen de hoeken van de rand net weg); `adaptive_icon_foreground_inset: 0` is nodig, anders krimpt flutter_launcher_icons de voorgrond nog 16% per kant, geen monochroom. In de app: `assets/logo/k_goud.webp` (gouden K in kleur: opstartscherm, inloggen, uitnodigingskaart),
   `mark.png`/`wordmark.png`/`logo.png` zijn witte silhouetten (K en "KΛDΛNS") die de app inkleurt. Opnieuw maken:
   `tools/logo/1_uitsnijden.py` en `2_icoon_bouwen.py` (draaien in een map met `src/origineel.png`).
 - Kleuren: `RwPalette` in `lib/core/theme.dart` met `rwZand` (licht, brons/espresso) en `rwZandAvond` (donker, champagne).
@@ -75,7 +75,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   `site/route.html`, deeplink `runwise://app/route-delen?n=&p=` → `RouteImportScreen`. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
 - Community-tab: `lib/features/community/`, databasefuncties `community_*` (migratie 0033). Actiecodes: `redeem_promo`/`create_promo` (0032).
 - Bronnen: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
-- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 194). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
+- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 195). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
 - GitHub Pages aanzetten. Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.

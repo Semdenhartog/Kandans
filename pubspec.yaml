@@ -84,4 +84,6 @@ flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
   adaptive_icon_background: "assets/icon/background.png"
   adaptive_icon_foreground: "assets/icon/foreground.png"
+  # Geen extra marge om de voorgrond (standaard 16% per kant): de grootte zit al in foreground.png.
+  adaptive_icon_foreground_inset: 0
   min_sdk_android: 26
