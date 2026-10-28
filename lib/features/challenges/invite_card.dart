@@ -34,7 +34,7 @@ Future<Uint8List> inviteCardPng({String? code, required String name}) async {
   final rec = ui.PictureRecorder();
   final c = Canvas(rec, const Rect.fromLTWH(0, 0, w, h));
 
-  // Warme, donkere ondergrond met een zachte gloed achter de ringen.
+  // Warme, donkere ondergrond met een zachte gloed achter de K.
   c.drawRect(const Rect.fromLTWH(0, 0, w, h), Paint()..color = pal.background);
   c.drawCircle(
     const Offset(w / 2, 430),
@@ -69,22 +69,14 @@ Future<Uint8List> inviteCardPng({String? code, required String name}) async {
       ..shader = ui.Gradient.linear(const Offset(0, 0), const Offset(w, h), [goldLight, goldDeep, goldLight]),
   );
 
-  // Het merk (gouden ringen).
+  // Het merk (gouden K).
   try {
-    final data = await rootBundle.load('assets/logo/mark.png');
-    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: 520);
+    // Het merk: de gouden K, in zijn eigen kleuren.
+    final data = await rootBundle.load('assets/logo/k_goud.webp');
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: 440);
     final img = (await codec.getNextFrame()).image;
     final dst = Rect.fromCenter(center: const Offset(w / 2, 400), width: img.width.toDouble(), height: img.height.toDouble());
-    // Het merk is crème; in goud gieten met een verloop.
-    c.saveLayer(dst, Paint());
     c.drawImageRect(img, Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()), dst, Paint()..filterQuality = FilterQuality.high);
-    c.drawRect(
-      dst,
-      Paint()
-        ..blendMode = BlendMode.srcIn
-        ..shader = ui.Gradient.linear(dst.topLeft, dst.bottomRight, [goldLight, gold, goldDeep]),
-    );
-    c.restore();
   } catch (_) {
     // Zonder logo is de kaart nog steeds bruikbaar.
   }

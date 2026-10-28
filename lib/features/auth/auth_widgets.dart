@@ -123,7 +123,7 @@ class RunWiseLogo extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          kadansImage('assets/logo/mark.png', height: height),
+          Image.asset('assets/logo/k_goud.webp', height: height * 1.15, excludeFromSemantics: true),
           SizedBox(width: height * 0.35),
           kadansImage('assets/logo/wordmark.png', height: height * 0.46),
         ],

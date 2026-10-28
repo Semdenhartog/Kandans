@@ -171,7 +171,15 @@ class _IntroState extends State<_Intro> with TickerProviderStateMixin {
               opacity: appear,
               child: ScaleTransition(
                 scale: Tween(begin: 0.92, end: 1.0).animate(appear),
-                child: kadansImage('assets/logo/logo.png', width: 220, semanticLabel: 'Kadans'),
+                child: Semantics(
+                  label: 'Kadans',
+                  image: true,
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Image.asset('assets/logo/k_goud.webp', height: 150, excludeFromSemantics: true),
+                    const SizedBox(height: 22),
+                    kadansImage('assets/logo/wordmark.png', width: 200),
+                  ]),
+                ),
               ),
             ),
           ]),
