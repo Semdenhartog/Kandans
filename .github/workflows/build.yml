@@ -361,7 +361,7 @@ jobs:
       - name: App-icoon en donker opstartscherm
         run: |
           dart run flutter_launcher_icons
-          echo '--- adaptief icoon:'; cat android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml || true
+          echo "::notice::Adaptief icoon: $(tr -d '\n' < android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml | grep -o '<foreground>.*</foreground>' || echo 'niet gevonden')"
           # Opstartscherm in de kleur van de app: zand overdag, Zand avond als de telefoon op donker staat.
           R=android/app/src/main/res
           for spec in "drawable:#FFEDE6DA" "drawable-v21:#FFEDE6DA" "drawable-night:#FF13110E" "drawable-night-v21:#FF13110E"; do
