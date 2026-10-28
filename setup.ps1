@@ -1,4 +1,4 @@
-# RunWise - eenmalige installatie van het Android-project.
+# Kadans - eenmalige installatie van het Android-project.
 # Uitvoeren in PowerShell vanuit deze map:
 #   powershell -ExecutionPolicy Bypass -File .\setup.ps1
 
@@ -32,7 +32,7 @@ if ($xml -notmatch "android.intent.action.VIEW") {
 "@
     $xml = $xml -replace "</manifest>", $queries
 }
-$xml = $xml -replace 'android:label="runwise"', 'android:label="RunWise"'
+$xml = $xml -replace 'android:label="runwise"', 'android:label="Kadans"'
 [IO.File]::WriteAllText($manifest, $xml)
 
 Write-Host "3/5  Pakketten downloaden..." -ForegroundColor Green
