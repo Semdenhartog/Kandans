@@ -1,4 +1,4 @@
-# Kadans (voorheen RunWise) – Android-app (v1)
+# Kadans – Android-app (v1)
 
 Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het weer, de wind op je route en je eigen prestaties.
 
