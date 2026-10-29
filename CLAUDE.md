@@ -30,14 +30,14 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   (pakket `nl.runwise…`, deeplink `runwise://` — **niet wijzigen**, anders breken inloggen en updates).
 - Geen Flutter lokaal. Controle gaat via GitHub Actions:
   - `build.yml`: analyse (`--no-fatal-infos --no-fatal-warnings`), tests, APK. Bij falende tests staat de uitvoer op branch `testuitvoer-<branch>`.
-    Fouten lezen: `gh api repos/Semdenhartog/Runwise/check-runs/<job-id>/annotations` (max 10 per stap).
+    Repo heet nu `Semdenhartog/kandans` (gh-API alleen via `repos/Semdenhartog/kandans/...`, `-R Semdenhartog/kandans`). Fouten lezen: `gh api repos/Semdenhartog/kandans/check-runs/<job-id>/annotations` (max 10 per stap).
   - `screens.yml`: schermafbeeldingen (licht + `6x_donker_*`, ook grote letters) naar branch `schermen-<branch>`,
     incl. `screens.txt`; faalt op "overflowed by". Play Store-plaatjes in `playstore/`.
   - `supabase-functies.yml`: zet alle edge functions live, met de hand én vanzelf bij een push naar main die `supabase/functions/**` raakt
     (GitHub-secret `SUPABASE_ACCESS_TOKEN` is gezet en werkt sinds 26 okt; zonder token: waarschuwing, geen fout).
   - `geheimen.yml`: geheimen-scan.
-  - `site.yml`: zet `site/` op GitHub Pages (**Pages staat nog uit** → Settings → Pages → Source: GitHub Actions) en vult
-    `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in (wachtlijst). Links in `site/` zijn relatief (Pages draait op `/Runwise/`).
+  - `site.yml`: zet `site/` op GitHub Pages (**Pages staat aan** sinds 29 okt: https://semdenhartog.github.io/Kandans/ — let op de hoofdletter K) en vult
+    `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in (wachtlijst). Links in `site/` zijn relatief (Pages draait op `/Kandans/`).
 - Privacyverklaring: bron is `site/privacy.html`; `tools/privacy_naar_dart.py` maakt er `lib/features/profile/privacy_text.dart`
   van (draait in build.yml en screens.yml). In de app: `openPrivacy(context)`.
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0033** staan erin (0030 wachtlijst, 0031 foutoverzicht, 0032 actiecodes, 0033 community: **staan live sinds 27 okt**, eigenaarscode en moderator ook; lokaal getest met Postgres 16 + Supabase-stubs, zie /var/tmp/kadanspg als die er nog is) (`apply_migration` via MCP werkt sinds 27 okt; eerst lokaal testen, dan zelf toepassen).
@@ -86,7 +86,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 197). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
-- GitHub Pages aanzetten. Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
+- Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
 - Supabase Auth-mailtemplates zeggen nog "RunWise" → aanpassen (Authentication → Email Templates).
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
