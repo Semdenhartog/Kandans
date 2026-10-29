@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steun Kadans – word een van de eerste lopers</title>
+<meta name="description" content="Help Kadans live te gaan. Supporters krijgen na de lancering een jaar of langer Premium.">
+<meta property="og:title" content="Steun Kadans – word een van de eerste lopers">
+<meta property="og:description" content="Help Kadans live te gaan. Supporters krijgen na de lancering een jaar of langer Premium.">
+<meta property="og:image" content="og.png">
+<meta name="theme-color" content="#13110E">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#13110E; --surface:#1C1814; --surface-high:#25201B; --border:#352E26;
+  --accent:#D9BF92; --accent-deep:#B8955F; --accent-light:#F0DDB6;
+  --text:#F1E9DC; --muted:#BDB1A0; --subtle:#94897A; --good:#8CC99A;
+  --grad:linear-gradient(135deg,var(--accent-light) 0%,var(--accent) 50%,var(--accent-deep) 100%);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}a:hover{color:var(--accent-light)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.display{font-family:Saira,sans-serif;font-weight:800;letter-spacing:-0.01em;line-height:1.05;margin:0}
+.eyebrow{font-family:Saira,sans-serif;font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.lead{font-size:18px;color:var(--muted);margin:0;max-width:40rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 26px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--grad);color:var(--bg)}.btn-primary:hover{color:var(--bg);filter:brightness(1.07)}
+.btn-ghost{border:1.5px solid var(--border);background:transparent;color:var(--text)}
+
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-top:22px;padding-bottom:22px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{height:32px;width:auto}.brand span{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:16px}
+header nav{display:flex;gap:20px;font-size:15px}header nav a{color:var(--muted);text-decoration:none}
+
+.hero{padding:40px 0 56px;display:flex;flex-direction:column;gap:20px}
+.hero h1{font-size:clamp(38px,6vw,68px)}
+
+section{padding:48px 0;border-top:1px solid #221D17}
+h2{font-family:Saira,sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,38px);margin:6px 0 18px;line-height:1.1}
+
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.tier{padding:24px;display:flex;flex-direction:column;gap:12px;position:relative}
+.tier.featured{border-color:var(--accent-deep);box-shadow:0 18px 60px rgba(217,191,146,.10)}
+.tier .tag{position:absolute;top:-12px;left:20px;background:var(--grad);color:var(--bg);font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.tier h3{margin:0;font-family:Saira,sans-serif;font-size:20px}
+.tier .price{font-family:Saira,sans-serif;font-weight:800;font-size:40px;line-height:1}
+.tier .price small{font-size:14px;color:var(--subtle);font-weight:600}
+.tier ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px;display:flex;flex-direction:column;gap:4px}
+.tier .worth{font-size:13px;color:var(--good)}
+.tier button{margin-top:auto}
+
+.budget{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.budget .card{padding:22px}
+.budget h3{margin:0 0 10px;font-size:17px;display:flex;justify-content:space-between;gap:12px}
+.budget h3 span{color:var(--accent);font-family:Saira,sans-serif}
+.budget dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:14.5px}
+.budget dt{color:var(--muted)}.budget dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.total{margin-top:16px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.total b{font-family:Saira,sans-serif;font-size:26px;color:var(--accent)}
+
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:0;margin:0;list-style:none}
+.steps li{padding:20px;counter-increment:s}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(217,191,146,.14);color:var(--accent);font-weight:700;margin-bottom:8px}
+.steps li b{display:block;margin-bottom:4px}
+.steps li span{color:var(--muted);font-size:15px}
+
+.faq details{padding:16px 20px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{color:var(--muted);margin:10px 0 0}
+
+dialog{border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--text);padding:26px;width:min(440px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h3{margin:0 0 6px;font-family:Saira,sans-serif;font-size:22px}
+dialog p{color:var(--muted);margin:0 0 16px;font-size:15px}
+dialog input[type=email]{width:100%;min-height:50px;border-radius:14px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:0 16px;font-size:16px;font-family:inherit}
+dialog .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+dialog .row .btn{flex:1}
+dialog label.check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--muted);margin-top:12px}
+#msg{min-height:22px;font-size:14px;color:var(--accent-light);margin-top:10px}
+.hp{position:absolute;left:-9999px}
+
+footer{border-top:1px solid #221D17;padding:28px 0 40px;color:var(--subtle);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./" aria-label="Kadans, naar de startpagina"><img src="kadans-mark.png" alt="" width="35" height="32"><span>KADANS</span></a>
+    <nav aria-label="Menu"><a href="./">Kadans</a><a href="#pakketten">Pakketten</a><a href="#geld">Waar gaat het heen</a><a href="#vragen">Vragen</a></nav>
+  </header>
+
+  <div class="hero">
+    <span class="eyebrow">Word een van de eerste lopers</span>
+    <h1 class="display">Help Kadans<br><span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">de start op.</span></h1>
+    <p class="lead">Kadans wordt gebouwd door één loper uit Barneveld, zonder investeerders. Met <b>€1.500</b> gaat de app live in de Play Store en kan hij het eerste jaar draaien. Supporters krijgen na de lancering Premium, en meer.</p>
+    <p style="margin:0;color:var(--subtle)">Doel: €1.500 aan toezeggingen · Je betaalt pas als het doel gehaald is.</p>
+    <div><a class="btn btn-primary" href="#pakketten">Kies een pakket</a></div>
+  </div>
+</div>
+
+<section id="pakketten">
+  <div class="wrap">
+    <span class="eyebrow">Pakketten</span>
+    <h2>Steun nu, loop straks met Premium</h2>
+    <p class="lead" style="margin-bottom:28px">Je betaalt nu nog niets. Je zegt toe welk pakket je wilt; zodra de doelsom aan toezeggingen binnen is, krijg je een betaallink. Premium kost na de lancering €40 per jaar.</p>
+    <div class="tiers">
+      <div class="card tier">
+        <h3>Supporter</h3>
+        <div class="price">€25</div>
+        <ul>
+          <li>1 jaar Premium na de lancering</li>
+          <li>Je naam op de lijst "Eerste lopers" op deze site</li>
+        </ul>
+        <span class="worth">Waarde €40</span>
+        <button class="btn btn-ghost" data-tier="supporter" data-label="Supporter (€25)">Dit pakket</button>
+      </div>
+      <div class="card tier featured">
+        <span class="tag">Meest gekozen</span>
+        <h3>Eerste loper</h3>
+        <div class="price">€50</div>
+        <ul>
+          <li>2 jaar Premium na de lancering</li>
+          <li>Vroege toegang tot de testversie (Android)</li>
+          <li>Gouden ledenkaart "Eerste loper" in de app</li>
+          <li>Je naam op de lijst "Eerste lopers"</li>
+        </ul>
+        <span class="worth">Waarde €80</span>
+        <button class="btn btn-primary" data-tier="eerste-loper" data-label="Eerste loper (€50)">Dit pakket</button>
+      </div>
+      <div class="card tier">
+        <h3>Met poster</h3>
+        <div class="price">€75</div>
+        <ul>
+          <li>Alles van Eerste loper</li>
+          <li>Routeposter (A3) van jouw favoriete rondje, thuisbezorgd in Nederland</li>
+        </ul>
+        <span class="worth">Waarde €105</span>
+        <button class="btn btn-ghost" data-tier="poster" data-label="Met poster (€75)">Dit pakket</button>
+      </div>
+      <div class="card tier">
+        <h3>Lokale partner</h3>
+        <div class="price">€250</div>
+        <ul>
+          <li>Voor een hardloopwinkel, fysio, loopgroep of evenement</li>
+          <li>Je logo en link als partner op deze site</li>
+          <li>10 jaarcodes Premium voor je klanten of leden</li>
+        </ul>
+        <span class="worth">Waarde €400 aan codes</span>
+        <button class="btn btn-ghost" data-tier="partner" data-label="Lokale partner (€250)">Dit pakket</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="geld">
+  <div class="wrap">
+    <span class="eyebrow">Eerlijk overzicht</span>
+    <h2>Waar gaat de €1.500 heen?</h2>
+    <p class="lead" style="margin-bottom:24px">Bedragen voor het eerste jaar, met afgeronde prijzen van oktober 2026. Wat overblijft, gaat naar het volgende jaar draaien.</p>
+    <div class="budget">
+      <div class="card">
+        <h3>Officieel van start <span>€420</span></h3>
+        <dl>
+          <dt>Inschrijving Kamer van Koophandel</dt><dd>€85</dd>
+          <dt>Merkregistratie "Kadans" (Benelux, 2 klassen, 10 jaar)</dt><dd>€271</dd>
+          <dt>Google Play-ontwikkelaarsaccount</dt><dd>€25</dd>
+          <dt>Domeinnaam en e-mail (1 jaar)</dt><dd>€40</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Een jaar draaien <span>€400</span></h3>
+        <dl>
+          <dt>Server en database (Supabase Pro, 12 maanden)</dt><dd>€280</dd>
+          <dt>AI-coach (taalmodel, per vraag)</dt><dd>€120</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>iPhone-versie <span>€90</span></h3>
+        <dl>
+          <dt>Apple-ontwikkelaarsaccount (1 jaar)</dt><dd>€90</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Lancering en pakketten <span>€590</span></h3>
+        <dl>
+          <dt>Advertenties en winacties bij de lancering</dt><dd>€350</dd>
+          <dt>Posters voor supporters en betaalkosten</dt><dd>€240</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="card total"><span>Totaal</span><b>€1.500</b></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Zo werkt het</span>
+    <h2>Van toezegging tot Premium</h2>
+    <ol class="steps">
+      <li class="card"><b>Kies een pakket</b><span>Laat je e-mailadres achter. Je betaalt nu nog niets.</span></li>
+      <li class="card"><b>Doel gehaald</b><span>Bij €1.500 aan toezeggingen krijg je een betaallink per e-mail.</span></li>
+      <li class="card"><b>Lancering</b><span>Bij de lancering ontvang je je persoonlijke code.</span></li>
+      <li class="card"><b>Code invullen</b><span>In de app: Ik → Shop → Code inwisselen. Klaar.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="vragen" class="faq">
+  <div class="wrap">
+    <span class="eyebrow">Vragen</span>
+    <h2>Goed om te weten</h2>
+    <details class="card"><summary>Wat als het doel niet wordt gehaald?</summary><p>Dan vraag ik niemand om te betalen. Kadans gaat dan langzamer verder, en je hoort van mij wat het plan wordt.</p></details>
+    <details class="card"><summary>Wanneer gaat Kadans live?</summary><p>Eerst op Android, na een testperiode met supporters. Ik noem pas een datum als die vaststaat; je hoort het als eerste.</p></details>
+    <details class="card"><summary>Werkt het op mijn iPhone?</summary><p>De iPhone-versie zit in de plannen (zie het overzicht hierboven), maar komt na Android. Je Premium geldt dan ook op iPhone.</p></details>
+    <details class="card"><summary>Wordt mijn Premium automatisch verlengd?</summary><p>Nee. Je code geeft één of twee jaar Premium en stopt daarna vanzelf. Daarna kies je zelf of je verder wilt.</p></details>
+    <details class="card"><summary>Wat doen jullie met mijn e-mailadres?</summary><p>Alleen gebruiken voor je toezegging, de betaallink en je code. Zie de <a href="privacy.html">privacyverklaring</a>.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Kadans · Sem den Hartog, Barneveld</span>
+    <span><a href="contact.html">Contact</a> · <a href="privacy.html">Privacy</a></span>
+  </div>
+</footer>
+
+<dialog id="toezeggen" aria-labelledby="dlg-title">
+  <form id="form" method="dialog" novalidate>
+    <h3 id="dlg-title">Toezeggen</h3>
+    <p id="dlg-tier">Je kiest het pakket.</p>
+    <input type="email" name="email" placeholder="jouw@e-mailadres.nl" autocomplete="email" required aria-label="E-mailadres">
+    <input class="hp" type="text" name="bot-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <label class="check"><input type="checkbox" name="naam" checked> Je mag mijn voornaam op de lijst "Eerste lopers" zetten (ik vraag hem later per e-mail).</label>
+    <div id="msg" role="status"></div>
+    <div class="row">
+      <button type="button" class="btn btn-ghost" id="cancel">Annuleren</button>
+      <button type="submit" class="btn btn-primary" id="send">Toezeggen</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+// Toezeggingen gaan naar de wachtlijst (tabel waitlist) met het pakket als bron, bijv. "steun:eerste-loper".
+// URL en openbare sleutel worden bij het online zetten ingevuld (zie .github/workflows/site.yml).
+(function () {
+  var URL_ = '__SUPABASE_URL__', KEY = '__SUPABASE_ANON_KEY__';
+  var dlg = document.getElementById('toezeggen'), form = document.getElementById('form');
+  var msg = document.getElementById('msg'), send = document.getElementById('send');
+  var tier = null, label = '';
+  document.querySelectorAll('[data-tier]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      tier = b.getAttribute('data-tier'); label = b.getAttribute('data-label');
+      document.getElementById('dlg-tier').textContent = 'Je kiest: ' + label + '. Je betaalt nu nog niets.';
+      msg.textContent = ''; send.disabled = false;
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+      form.elements.email.focus();
+    });
+  });
+  document.getElementById('cancel').addEventListener('click', function () { dlg.close ? dlg.close() : dlg.removeAttribute('open'); });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.elements['bot-field'].value) return;
+    var email = form.elements.email.value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Vul een geldig e-mailadres in.'; return; }
+    if (URL_.indexOf('__') === 0) { msg.textContent = 'Toezeggen staat nog niet aan. Probeer het later nog eens.'; return; }
+    var source = 'steun:' + tier + (form.elements.naam.checked ? ':naam' : '');
+    send.disabled = true; msg.textContent = 'Even geduld…';
+    fetch(URL_ + '/rest/v1/waitlist', {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ email: email, source: source })
+    }).then(function (r) {
+      if (r.ok) { msg.textContent = 'Dank je wel! Je toezegging voor ' + label + ' staat genoteerd. Je hoort van mij per e-mail.'; return; }
+      if (r.status === 409) {
+        var m = 'mailto:sb.denhartog@hotmail.com?subject=' + encodeURIComponent('Toezegging Kadans: ' + label);
+        msg.innerHTML = 'Dit adres staat al op de lijst. <a href="' + m + '">Mail even welk pakket je kiest</a>, dan zet ik het erbij.';
+        return;
+      }
+      throw new Error(r.status);
+    }).catch(function () {
+      msg.textContent = 'Dat lukte niet. Probeer het over een paar minuten opnieuw.';
+      send.disabled = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>

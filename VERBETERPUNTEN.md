@@ -284,3 +284,4 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 194. ✅ Homescherm-icoon groter: de gouden rand van het logo vult nu de Samsung-vorm (was 56%, nu 72% van de laag).
 195. ✅ Oorzaak te klein icoon gevonden: flutter_launcher_icons zet standaard 16% extra marge om de voorgrond. Nu 0, zodat de gouden rand echt tot de rand van het Samsung-icoon loopt.
 196. ✅ Definitief logo: champagnegouden K + KADANS op zwarte tegel. Homescherm-icoon = dit logo met K en tekst 8% groter; de tegel sluit aan op de vorm van het icoon.
+197. ✅ **Steunpagina** `site/steun.html`: doel €1.500 met eerlijke begroting (KvK, merk, Supabase, AI-coach, Apple, lancering), vier pakketten (1–2 jaar Premium, poster, lokale partner), toezeggen zonder betalen (naar de wachtlijst). Privacyverklaring aangevuld.

@@ -78,8 +78,12 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Shop: `lib/features/shop/` (`/shop`, tasje met "nieuw"-stip, gouden tegel in Ik). Route delen: `domain/route_share.dart`,
   `site/route.html`, deeplink `runwise://app/route-delen?n=&p=` → `RouteImportScreen`. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
 - Community-tab: `lib/features/community/`, databasefuncties `community_*` (migratie 0033). Actiecodes: `redeem_promo`/`create_promo` (0032).
+- Steunpagina: `site/steun.html` (doel €1.500, pakketten €25/€50/€75/€250, begroting). Toezeggingen gaan naar `waitlist` met
+  `source` = `steun:<pakket>[:naam]` (overzicht: `select source, count(*) from waitlist group by 1`). Nog **geen betaling**: pas na KvK +
+  betaallink. **Niet** vanuit de app naar deze pagina linken (Google Play-betaalregels). Beloofd en nog te bouwen: ledenkaart "Eerste loper",
+  lijst "Eerste lopers" op de site; posters wachten op Stripe/Gelato.
 - Bronnen: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
-- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 196). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
+- Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 197). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
 - GitHub Pages aanzetten. Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
