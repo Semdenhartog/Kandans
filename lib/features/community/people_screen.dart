@@ -137,8 +137,8 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
   Widget _tile(RunnerItem p, {Widget? trailing, String? subtitle}) => ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 16),
         leading: RunnerAvatar(p.nickname),
-        title: Text(p.nickname, style: TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: subtitle == null ? null : Text(subtitle, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
+        title: Text(p.nickname, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: subtitle == null ? null : Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
         trailing: trailing ?? _followButton(p),
         onTap: () async {
           await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RunnerProfileScreen(nickname: p.nickname)));
@@ -207,10 +207,10 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
                     icon: Icon(Icons.close, color: RwColors.subtle),
                     onPressed: () => _act(() => _svc.answer(p.nickname, accept: false)),
                   ),
-                  FilledButton(
-                    style: _small,
+                  IconButton.filled(
+                    tooltip: tr('Goedkeuren'),
+                    icon: Icon(Icons.check),
                     onPressed: () => _act(() => _svc.answer(p.nickname, accept: true), done: trf('{naam} volgt je nu.', {'naam': p.nickname})),
-                    child: Text(tr('Goedkeuren')),
                   ),
                 ]),
               ),
