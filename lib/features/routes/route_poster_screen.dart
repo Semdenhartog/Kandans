@@ -9,6 +9,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
+import '../../data/services/poi_service.dart';
+import '../../domain/poster_map.dart';
 import '../../shared/widgets.dart';
 import '../luxe/luxe.dart';
 import 'poster_design.dart';
@@ -37,7 +39,8 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
   bool _busy = false;
   late String _title = widget.route.name;
   String? _subtitle;
-  bool _showElevation = true, _showKm = true, _showCoords = true;
+  bool _showElevation = true, _showKm = true, _showCoords = true, _showMap = true;
+  List<MapLine> _map = const [];
 
   PosterData get _data => PosterData(
         title: _title,
@@ -48,6 +51,8 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
         showElevation: _showElevation,
         showKm: _showKm,
         showCoords: _showCoords,
+        showMap: _showMap,
+        mapLines: _map,
         polyline: widget.route.polyline,
         distanceMeters: widget.route.distanceMeters,
         elevationGainMeters: widget.route.elevationGainMeters,
@@ -141,6 +146,9 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // De kaart onder de route komt van OpenStreetMap; zonder verbinding blijft de poster gewoon zonder kaart.
+    final mapState = ref.watch(posterMapProvider(widget.route.polyline));
+    _map = mapState.value ?? const [];
     final owned = ref.watch(luxeAccessProvider).value ?? false;
     final locked = _style.isLuxe && !owned;
     return Scaffold(
@@ -224,6 +232,20 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ActionChip(avatar: const Icon(Icons.edit_outlined, size: 18), label: const Text('Tekst'), onPressed: _editText),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  avatar: mapState.isLoading ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)) : null,
+                  label: Text(mapState.hasError ? 'Kaart (offline)' : 'Kaart'),
+                  selected: _showMap && _map.isNotEmpty,
+                  onSelected: _map.isEmpty
+                      ? (mapState.hasError ? (_) => ref.invalidate(posterMapProvider(widget.route.polyline)) : null)
+                      : (v) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _showMap = v);
+                        },
+                ),
               ),
               if (widget.route.elevationProfile.length >= 2) _option('Hoogteprofiel', _showElevation, (v) => _showElevation = v),
               _option('Kilometers', _showKm, (v) => _showKm = v),

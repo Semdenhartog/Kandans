@@ -41,6 +41,8 @@ import 'package:runwise/features/activities/strength_screen.dart';
 import 'package:runwise/features/activities/year_story_screen.dart';
 import 'package:runwise/domain/strength.dart';
 import 'package:runwise/domain/route_geometry.dart';
+import 'package:runwise/domain/poster_map.dart';
+import 'package:runwise/data/services/poi_service.dart';
 import 'package:runwise/features/coach/coach_screen.dart';
 import 'package:runwise/features/coach/paywall_screen.dart';
 import 'package:runwise/features/dashboard/dashboard_providers.dart';
@@ -132,6 +134,39 @@ List<LatLng> _loop(double km, double phase) {
         _home.lon + r * 1.6 * math.cos(i / 80 * 2 * math.pi + phase) * (1 + 0.1 * math.cos(i / 5)),
       ),
   ];
+}
+
+/// Nep-stratenkaart rond een route (geen netwerk in de test): een licht scheef stratenraster,
+/// een paar doorgaande wegen, een rivier, een meertje en een spoorlijn.
+List<MapLine> _fakeMap(String polyline) {
+  final pts = decodePolyline(polyline);
+  final b = posterMapBounds(pts);
+  final r = math.Random(3);
+  final out = <MapLine>[];
+  final dLat = (b.n - b.s), dLon = (b.e - b.w);
+  for (var i = 0; i <= 26; i++) {
+    final y = b.s + dLat * i / 26 + (r.nextDouble() - 0.5) * dLat * 0.01;
+    out.add(MapLine(i % 7 == 3 ? MapLineKind.path : MapLineKind.minor,
+        [for (var k = 0; k <= 12; k++) LatLng(y + math.sin(k / 2 + i) * dLat * 0.004, b.w + dLon * k / 12)]));
+  }
+  for (var i = 0; i <= 22; i++) {
+    final x = b.w + dLon * i / 22;
+    out.add(MapLine(i % 5 == 2 ? MapLineKind.path : MapLineKind.minor,
+        [for (var k = 0; k <= 12; k++) LatLng(b.s + dLat * k / 12, x + dLon * 0.03 * k / 12 + math.cos(k + i) * dLon * 0.003)]));
+  }
+  out.add(MapLine(MapLineKind.major, [LatLng(b.s, b.w + dLon * 0.1), LatLng(b.n, b.w + dLon * 0.75)]));
+  out.add(MapLine(MapLineKind.major, [LatLng(b.s + dLat * 0.62, b.w), LatLng(b.s + dLat * 0.55, b.e)]));
+  out.add(MapLine(MapLineKind.rail, [LatLng(b.s + dLat * 0.9, b.w), LatLng(b.s + dLat * 0.7, b.e)]));
+  out.add(MapLine(MapLineKind.water, [
+    for (var k = 0; k <= 30; k++) LatLng(b.s + dLat * (0.15 + 0.08 * math.sin(k / 4)), b.w + dLon * k / 30),
+  ]));
+  final c = LatLng(b.s + dLat * 0.78, b.w + dLon * 0.22);
+  out.add(MapLine(MapLineKind.waterArea, [
+    for (var k = 0; k <= 24; k++)
+      LatLng(c.lat + dLat * 0.05 * math.sin(k / 24 * 2 * math.pi), c.lon + dLon * 0.08 * math.cos(k / 24 * 2 * math.pi)),
+  ]));
+  out.sort((a, b) => a.kind.index.compareTo(b.kind.index));
+  return out;
 }
 
 final _routes = [
@@ -294,6 +329,7 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
       activityStreamsProvider(_runs.first.id!).overrideWith((ref) => _streams),
       routeDetailProvider('r1').overrideWith((ref) => _routes.first),
       luxeAccessProvider.overrideWith((ref) => false),
+      for (final r in _routes) posterMapProvider(r.polyline).overrideWith((ref) => _fakeMap(r.polyline)),
       shoeShopProvider.overrideWith((ref) => const ShoeShop(
           name: 'Hardloopwinkel', urlTemplate: 'https://winkel.example/zoek?q={q}', isPartner: true)),
       stravaRoutesProvider.overrideWith((ref) => StravaRouteList(
@@ -560,6 +596,8 @@ void main() {
       distanceMeters: r.distanceMeters,
       elevationGainMeters: r.elevationGainMeters,
       timesRun: 19,
+      fastestSeconds: 2652,
+      mapLines: _fakeMap(r.polyline),
       elevation: r.elevationProfile,
       startLat: r.startLatitude,
       startLon: r.startLongitude,
@@ -579,7 +617,7 @@ void main() {
         ),
         height: 1900);
   });
-  testWidgets('45b poster maken', (t) => _shot(t, '45b_poster_maken', RoutePosterScreen(route: _routes.first, timesRun: 19), height: 915));
+  testWidgets('45b poster maken', (t) => _shot(t, '45b_poster_maken', RoutePosterScreen(route: _routes.first, timesRun: 19, fastestSeconds: 2652), height: 915));
   testWidgets('46 gouden deelkaart', (t) => _shot(
       t, '46_gouden_deelkaart', Scaffold(body: Center(child: RunShareCard(activity: _runs.first, route: _routes.first, gold: true, badges: const ['Record 5 km']))),
       height: 700));

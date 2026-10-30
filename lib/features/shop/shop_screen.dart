@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/supabase.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
+import '../../data/services/poi_service.dart';
+import '../../domain/poster_map.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/poster_order_service.dart';
@@ -96,6 +98,8 @@ class ShopScreen extends ConsumerWidget {
                       final mine = runs.where((a) => a.routeId != null && a.routeId == r.id).toList();
                       final fastest = mine.isEmpty ? null : mine.map((a) => a.movingTimeSeconds).reduce((a, b) => a < b ? a : b);
                       const styles = [PosterStyle.goud, PosterStyle.marmer, PosterStyle.topo];
+                      // De kaart eronder alleen voor de eerste twee (Overpass laat maar een paar vragen tegelijk toe).
+                      final map = i < 2 ? ref.watch(posterMapProvider(r.polyline)).value ?? const <MapLine>[] : const <MapLine>[];
                       return Semantics(
                         button: true,
                         label: 'Poster van ${r.name}',
@@ -120,6 +124,7 @@ class ShopScreen extends ConsumerWidget {
                                     elevation: r.elevationProfile,
                                     startLat: r.startLatitude,
                                     startLon: r.startLongitude,
+                                    mapLines: map,
                                   ),
                                 ),
                               ),
@@ -144,6 +149,7 @@ class ShopScreen extends ConsumerWidget {
               Wrap(spacing: 8, runSpacing: 8, children: [
                 _Feature(icon: Icons.straighten, text: tr('30 × 40 of 50 × 70 cm')),
                 _Feature(icon: Icons.texture, text: tr('Mat papier, 200 g/m²')),
+                _Feature(icon: Icons.map_outlined, text: tr('Stratenkaart van je buurt')),
                 _Feature(icon: Icons.terrain_outlined, text: tr('Hoogteprofiel en kilometers')),
                 _Feature(icon: Icons.edit_outlined, text: tr('Eigen titel en tekst')),
               ]),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/geo.dart';
+import '../../domain/poster_map.dart';
 import '../../domain/route_geometry.dart';
 
 /// Achtergrondtextuur van een posterstijl.
@@ -77,6 +78,8 @@ class PosterData {
     this.showElevation = true,
     this.showKm = true,
     this.showCoords = true,
+    this.mapLines = const [],
+    this.showMap = true,
   });
 
   final String title;
@@ -97,6 +100,10 @@ class PosterData {
   final bool showElevation;
   final bool showKm;
   final bool showCoords;
+
+  /// Straten, water en spoor rond de route (OpenStreetMap), zacht onder de lijn.
+  final List<MapLine> mapLines;
+  final bool showMap;
 }
 
 /// Coördinaten van de start, zoals op een kaart: "52.1528° N · 5.6034° O".
@@ -154,6 +161,10 @@ class RoutePosterArt extends StatelessWidget {
         final third = data.fastestSeconds != null
             ? stat('Snelste', Fmt.duration(data.fastestSeconds!))
             : stat('Gelopen', '${data.timesRun}×');
+        // Met een snelste tijd ook het tempo erbij (zonder "/km", dat staat in het label).
+        final pace = data.fastestSeconds != null && data.distanceMeters > 200
+            ? stat('Tempo /km', Fmt.pace(data.fastestSeconds! / (data.distanceMeters / 1000)).replaceAll(' /km', ''))
+            : null;
 
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -197,6 +208,9 @@ class RoutePosterArt extends StatelessWidget {
                         background: s.background.last,
                         kmMarkers: data.showKm,
                         u: u,
+                        mapLines: data.showMap ? data.mapLines : const [],
+                        mapColor: s.fg,
+                        labelColor: s.fg,
                       ),
                       size: Size.infinite,
                     ),
@@ -244,6 +258,7 @@ class RoutePosterArt extends StatelessWidget {
                   Expanded(child: stat('Hoogtemeters', data.elevationGainMeters == null ? '–' : '${data.elevationGainMeters!.round()} m')),
                   divider(),
                   Expanded(child: third),
+                  if (pace != null) ...[divider(), Expanded(child: pace)],
                 ]),
                 SizedBox(height: 16 * u),
                 Text('K A D A N S',
@@ -270,8 +285,16 @@ class PosterRoutePainter extends CustomPainter {
     this.background = const Color(0xFF000000),
     this.kmMarkers = false,
     this.u = 1,
+    this.mapLines = const [],
+    this.mapColor = const Color(0xFFFFFFFF),
+    this.labelColor,
   });
   final List<LatLng> points;
+  final List<MapLine> mapLines;
+  final Color mapColor;
+
+  /// Kleur voor de woordjes START en FINISH; zonder kleur geen woordjes.
+  final Color? labelColor;
   final Color color;
   final double width;
   final bool glow;
@@ -297,6 +320,8 @@ class PosterRoutePainter extends CustomPainter {
     final ox = (size.width - w * scale) / 2;
     final oy = (size.height - h * scale) / 2;
     Offset at(LatLng p) => Offset(ox + (p.lon - minLon) * lonScale * scale, oy + (maxLat - p.lat) * scale);
+
+    if (mapLines.isNotEmpty) _paintMap(canvas, size, at);
 
     final path = Path()..moveTo(at(points.first).dx, at(points.first).dy);
     for (final p in points.skip(1)) {
@@ -380,7 +405,89 @@ class PosterRoutePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = width * 0.55,
     );
-    if ((start - end).distance <= ring * 2.2) canvas.drawCircle(start, ring * 0.4, Paint()..color = color);
+    final loop = (start - end).distance <= ring * 2.2;
+    if (loop) canvas.drawCircle(start, ring * 0.4, Paint()..color = color);
+
+    // START en FINISH als klein label, zoals op een wedstrijdkaart.
+    if (labelColor != null) {
+      void tag(String text, Offset at) {
+        final tp = TextPainter(
+          text: TextSpan(
+            text: text,
+            style: TextStyle(color: labelColor!.withValues(alpha: 0.75), fontSize: 5.4 * u, fontWeight: FontWeight.w700, letterSpacing: 1.2 * u, height: 1),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        // Rechts van de markering; past dat niet, dan links.
+        var x = at.dx + ring + 4 * u;
+        if (x + tp.width > size.width) x = at.dx - ring - 4 * u - tp.width;
+        tp.paint(canvas, Offset(x, at.dy - tp.height / 2));
+      }
+
+      if (loop) {
+        tag('START · FINISH', start);
+      } else {
+        tag('START', start);
+        tag('FINISH', end);
+      }
+    }
+  }
+
+  /// De kaart onder de route: water, paden, spoor en straten, met zachte randen die in de poster overlopen.
+  void _paintMap(Canvas canvas, Size size, Offset Function(LatLng) at) {
+    final rect = Offset.zero & size;
+    canvas.saveLayer(rect, Paint());
+    canvas.clipRect(rect);
+    final byKind = <MapLineKind, Path>{};
+    for (final l in mapLines) {
+      final p = byKind.putIfAbsent(l.kind, Path.new);
+      final first = at(l.points.first);
+      p.moveTo(first.dx, first.dy);
+      for (final q in l.points.skip(1)) {
+        final o = at(q);
+        p.lineTo(o.dx, o.dy);
+      }
+      if (l.kind == MapLineKind.waterArea) p.close();
+    }
+    Paint stroke(Color c, double alpha, double w) => Paint()
+      ..style = PaintingStyle.stroke
+      ..color = c.withValues(alpha: alpha)
+      ..strokeWidth = w * u
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    // Van onder naar boven: water, paden, spoor, straten, doorgaande wegen.
+    const order = [MapLineKind.waterArea, MapLineKind.water, MapLineKind.path, MapLineKind.rail, MapLineKind.minor, MapLineKind.major];
+    for (final kind in order) {
+      final p = byKind[kind];
+      if (p == null) continue;
+      switch (kind) {
+        case MapLineKind.waterArea:
+          canvas.drawPath(p, Paint()..color = color.withValues(alpha: 0.10));
+        case MapLineKind.water:
+          canvas.drawPath(p, stroke(color, 0.26, 1.3));
+        case MapLineKind.path:
+          canvas.drawPath(p, stroke(mapColor, 0.09, 0.35));
+        case MapLineKind.rail:
+          canvas.drawPath(p, stroke(mapColor, 0.15, 0.5));
+        case MapLineKind.minor:
+          canvas.drawPath(p, stroke(mapColor, 0.16, 0.55));
+        case MapLineKind.major:
+          canvas.drawPath(p, stroke(mapColor, 0.25, 1.0));
+      }
+    }
+    // Zachte rand: in het midden helder, naar de hoeken toe weg.
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..blendMode = BlendMode.dstIn
+        ..shader = ui.Gradient.radial(
+          rect.center,
+          math.max(size.width, size.height) * 0.62,
+          const [Color(0xFF000000), Color(0xFF000000), Color(0x00000000)],
+          const [0, 0.7, 1],
+        ),
+    );
+    canvas.restore();
   }
 
   @override
@@ -391,6 +498,9 @@ class PosterRoutePainter extends CustomPainter {
       old.glow != glow ||
       old.background != background ||
       old.kmMarkers != kmMarkers ||
+      old.mapLines != mapLines ||
+      old.mapColor != mapColor ||
+      old.labelColor != labelColor ||
       old.u != u;
 }
 

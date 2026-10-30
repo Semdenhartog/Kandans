@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../domain/geo.dart';
 import '../../domain/lighting.dart';
 import '../../domain/poi.dart';
+import '../../domain/poster_map.dart';
 import '../../domain/route_geometry.dart';
 import 'offline_cache.dart';
 
@@ -89,6 +90,23 @@ class PoiService {
   }
 
 
+  /// Straten, water en spoor rond een route, voor de kaart onder een poster. Twee maanden bewaard.
+  Future<List<MapLine>> posterMap(String polyline) async {
+    final pts = decodePolyline(polyline);
+    if (pts.length < 2) return const [];
+    final query = posterMapQuery(pts);
+    final key = 'map_${_key(query)}';
+    final cached = await OfflineCache.load(key, maxAge: const Duration(days: 60));
+    if (cached?.data is String) {
+      try {
+        return decodePosterMap(cached!.data! as String);
+      } catch (_) {}
+    }
+    final lines = parsePosterMap(await _race(query));
+    OfflineCache.save(key, encodePosterMap(lines)).ignore();
+    return lines;
+  }
+
   Future<List<RoutePoi>> alongRoute(String polyline) async {
     final track = RouteTrack(decodePolyline(polyline));
     if (!track.isValid) return const [];
@@ -119,6 +137,11 @@ final poiServiceProvider = Provider<PoiService>((ref) => PoiService());
 /// Voorzieningen per route (op polyline), onthouden zolang de app open is.
 final routePoisProvider = FutureProvider.family<List<RoutePoi>, String>((ref, polyline) {
   return ref.watch(poiServiceProvider).alongRoute(polyline);
+});
+
+/// Achtergrondkaart voor een routeposter (op polyline).
+final posterMapProvider = FutureProvider.family<List<MapLine>, String>((ref, polyline) {
+  return ref.watch(poiServiceProvider).posterMap(polyline);
 });
 
 /// Verlichting per route (op polyline).
