@@ -29,7 +29,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans
 .leaflet-bar a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
 header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:10px;pointer-events:none}
 .pill{pointer-events:auto;background:rgba(19,17,14,.9);border:1px solid var(--border);border-radius:999px;padding:8px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(6px)}
-.brand img{height:16px}
+.brand img{height:22px;display:block}.brand .adans{display:block;flex:none;aspect-ratio:737/102;background:currentColor;-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat;height:9px;color:#D9BF92;margin-bottom:0}.pill.brand{align-items:flex-end;gap:5px}
 .panel{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
 .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .name{font-family:Saira,sans-serif;font-weight:800;font-size:22px;margin:0;line-height:1.1}
@@ -54,7 +54,7 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
 </head>
 <body>
 <header>
-  <div class="pill brand"><img src="kadans-mark.png" alt=""><span style="font-family:Saira,sans-serif;font-weight:800;letter-spacing:.3em;color:#D9BF92;font-size:12px">KADANS</span></div>
+  <div class="pill brand"><img src="kadans-mark.png" alt="Kadans"><span class="adans" aria-hidden="true"></span></div>
   <button class="follow" id="follow" aria-pressed="true" type="button">Volgen</button>
 </header>
 <div id="map" role="region" aria-label="Kaart met de live locatie"></div>

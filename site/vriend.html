@@ -26,7 +26,7 @@ body{background:radial-gradient(120% 70% at 50% 18%,#3A2F22 0%,var(--bg) 62%);ba
   display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px 16px}
 .card{width:100%;max-width:420px;border:1.5px solid var(--gold-deep);border-radius:28px;padding:36px 24px 28px;text-align:center;
   background:rgba(28,24,20,.72);box-shadow:0 30px 80px rgba(0,0,0,.45)}
-.mark{width:120px;max-width:40%;height:auto;margin:0 auto 18px;display:block}
+.lockup{display:flex;align-items:flex-end;justify-content:center;gap:17px;margin:0 auto 26px}.mark{height:72px;width:auto;display:block}.lockup .adans{display:block;flex:none;aspect-ratio:737/102;background:currentColor;-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat;height:30px;color:var(--gold)}
 .brand{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.5em;color:var(--gold);font-size:13px;margin:0 0 18px}
 h1{font-family:Saira,sans-serif;font-weight:800;font-size:30px;line-height:1.1;margin:0 0 8px}
 p{color:var(--muted);line-height:1.5;margin:0 0 20px}
@@ -41,8 +41,7 @@ p{color:var(--muted);line-height:1.5;margin:0 0 20px}
 </head>
 <body>
 <main class="card">
-  <img class="mark" src="kadans-mark.png" alt="">
-  <div class="brand">KADANS</div>
+  <div class="lockup"><img class="mark" src="kadans-mark.png" alt="Kadans"><span class="adans" aria-hidden="true"></span></div>
   <h1 id="title">Je bent uitgenodigd om samen te lopen</h1>
   <p id="lead">Kadans zegt wanneer je het best kunt lopen. Met vrienden lopen jullie samen op de ranglijsten.</p>
   <div class="code" id="codebox" hidden>

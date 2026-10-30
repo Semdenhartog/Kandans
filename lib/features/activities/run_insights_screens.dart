@@ -391,9 +391,7 @@ class _RecapCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            kadansImage('assets/logo/mark.png', height: 18),
-            const SizedBox(width: 8),
-            kadansImage('assets/logo/wordmark.png', height: 9),
+            kadansLockup(height: 18, mark: kadansImage('assets/logo/mark.png', height: 18)),
             const Spacer(),
             Text('${r.year}', style: TextStyle(color: RwColors.muted, fontWeight: FontWeight.w700)),
           ]),

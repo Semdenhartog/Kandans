@@ -69,14 +69,28 @@ Future<Uint8List> inviteCardPng({String? code, required String name}) async {
       ..shader = ui.Gradient.linear(const Offset(0, 0), const Offset(w, h), [goldLight, goldDeep, goldLight]),
   );
 
-  // Het merk (gouden K).
+  // Het merk: de gouden K met "ADANS" erachter (één woord, geen dubbele K).
   try {
-    // Het merk: de gouden K, in zijn eigen kleuren.
-    final data = await rootBundle.load('assets/logo/k_goud.webp');
-    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: 440);
-    final img = (await codec.getNextFrame()).image;
-    final dst = Rect.fromCenter(center: const Offset(w / 2, 400), width: img.width.toDouble(), height: img.height.toDouble());
-    c.drawImageRect(img, Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()), dst, Paint()..filterQuality = FilterQuality.high);
+    Future<ui.Image> load(String asset, {int? height}) async {
+      final data = await rootBundle.load(asset);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetHeight: height);
+      return (await codec.getNextFrame()).image;
+    }
+
+    const kH = 200.0, textH = kH * 0.42, gap = textH * 0.56, bottom = 580.0;
+    final k = await load('assets/logo/k_goud.webp', height: kH.round());
+    final adans = await load('assets/logo/adans.png', height: textH.round());
+    final total = k.width + gap + adans.width;
+    final x = (w - total) / 2;
+    final hq = Paint()..filterQuality = FilterQuality.high;
+    c.drawImage(k, Offset(x, bottom - k.height), hq);
+    c.drawImage(
+      adans,
+      Offset(x + k.width + gap, bottom - adans.height),
+      Paint()
+        ..filterQuality = FilterQuality.high
+        ..colorFilter = const ColorFilter.mode(gold, BlendMode.srcIn),
+    );
   } catch (_) {
     // Zonder logo is de kaart nog steeds bruikbaar.
   }
@@ -95,7 +109,6 @@ Future<Uint8List> inviteCardPng({String? code, required String name}) async {
     tp.paint(c, Offset(80, y));
   }
 
-  text('KADANS', 660, size: 30, spacing: 14, weight: FontWeight.w800);
   if (code == null) {
     text(name.isEmpty ? 'Een uitnodiging voor jou' : '$name nodigt je uit', 730, size: 54, color: pal.text, weight: FontWeight.w800);
     text('Loop op het beste moment', 800, size: 34, color: pal.muted, weight: FontWeight.w500, font: RwFonts.body);
