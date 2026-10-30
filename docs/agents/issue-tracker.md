@@ -3,7 +3,7 @@
 Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
 
 
-Repo: `Semdenhartog/Kandans`. Schrijf issues in het Nederlands (eigenaar Sem leest mee, zonder programmeerervaring): korte titel, wat er mis is of wat je wilt, en hoe je het test.
+Repo: `Semdenhartog/Kandans`. In Claude-cloudsessies is GraphQL geblokkeerd: werkt `gh issue ...` niet, gebruik dan de REST-API (`gh api repos/Semdenhartog/kandans/issues`, `--method POST -f title=... -f body=...`). Schrijf issues in het Nederlands (eigenaar Sem leest mee, zonder programmeerervaring): korte titel, wat er mis is of wat je wilt, en hoe je het test.
 
 ## Conventions
 
