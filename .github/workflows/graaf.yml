@@ -1,0 +1,60 @@
+name: Codekaart (graphify)
+
+# Maakt na elke push naar main een kaart van de code (graphify, zonder AI, gratis)
+# en zet die op de aparte branch "graaf". Claude-sessies halen die kaart op met
+# tools/graaf.sh, zodat ze niet steeds hele bestanden hoeven te lezen.
+# De commit op "graaf" heeft [skip ci], dus er start geen APK-build.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'test_screens/**'
+      - 'integration_test/**'
+      - 'supabase/**'
+      - 'tools/**'
+      - 'site/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: graaf
+  cancel-in-progress: true
+
+jobs:
+  graaf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: graphify installeren (vaste versie)
+        run: pip install "graphifyy[sql]==0.9.97"
+
+      - name: Codekaart bouwen
+        run: |
+          graphify update . --force
+          ls -la graphify-out
+
+      - name: Naar branch graaf zetten
+        run: |
+          set -e
+          mkdir -p /tmp/graaf
+          cp graphify-out/graph.json graphify-out/GRAPH_REPORT.md /tmp/graaf/
+          echo "${GITHUB_SHA}" > /tmp/graaf/COMMIT
+          cd /tmp/graaf
+          git init -q -b graaf
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Codekaart voor ${GITHUB_SHA::8} [skip ci]"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" graaf

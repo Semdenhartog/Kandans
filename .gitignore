@@ -19,3 +19,6 @@ tests.txt
 *.keystore
 key.properties
 runwise-github-geheimen.txt
+
+# Codekaart (graphify): wordt opgehaald met tools/graaf.sh, staat op branch "graaf"
+graphify-out/

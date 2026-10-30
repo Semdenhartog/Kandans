@@ -45,6 +45,16 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Gratis kaartdata: PDOK-tegels, Overpass (verlichting, voorzieningen; per vraag eerst één server, na 4 s reserve),
   openrouteservice (routes, ondergrond met schatting uit wegtype), Open-Meteo (weer), Buienradar.
 
+## Codekaart (graphify) – eerst kijken, dan pas bestanden lezen
+- Na elke push naar main maakt `.github/workflows/graaf.yml` een kaart van de code (graphify 0.9.97, zonder AI, 0 tokens)
+  en zet die op branch **`graaf`** (`graph.json`, `GRAPH_REPORT.md`, `COMMIT`; commit met `[skip ci]`, dus geen APK).
+- Gebruik in een sessie: `tools/graaf.sh` (ophalen, meldt of de code sindsdien veranderd is), dan
+  `tools/graaf.sh explain <bestand of symbool>` (wat erin zit, wat het importeert, wie het gebruikt, met regelnummers) of
+  `tools/graaf.sh path <A> <B>`. Lees daarna **alleen** de regels die je echt nodig hebt (Read met offset/limit).
+- `query "vrije tekst"` is grof en geeft veel ruis; gebruik liever `explain` met een precieze naam (`bestand.dart` of `pad::Symbool`).
+- `GRAPH_REPORT.md` is groot (~12k tokens): niet in z'n geheel lezen, hooguit grep.
+- De kaart toont structuur, niet de code: voor wijzigen blijf je het stukje zelf lezen. SQL-migraties en Kotlin staan er alleen in als de workflow ze kon lezen.
+
 ## Huisstijl
 - Naam **Kadans**. Logo (28 okt, definitief): champagnegouden K + "KADANS" op een zwarte afgeronde tegel;
   origineel `docs/merk/kadans-logo-origineel.png`, met K en tekst 8% groter (wens van Sem) `docs/merk/kadans-logo-8procent.png`.
