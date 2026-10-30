@@ -536,7 +536,8 @@ class _ResultsState extends State<_Results> {
         air: airAt(widget.air, shown.start),
         pollen: widget.pollen,
         recentMaxTemp: widget.recentMaxTemp,
-        hasRoute: widget.planner.track.length >= 2);
+        hasRoute: widget.planner.track.length >= 2,
+        route: widget.planner.track.length >= 2 ? trackSegments(widget.planner.track) : const []);
 
     Widget? card(DashCard c) => switch (c) {
           DashCard.warnings => warnings.isEmpty ? null : _WarningsCard(warnings: warnings),
@@ -1347,6 +1348,7 @@ class _WarningsCard extends StatelessWidget {
         'dark' => Icons.dark_mode_outlined,
         'air' => Icons.masks_outlined,
         'pollen' => Icons.local_florist_outlined,
+        'sun' => Icons.wb_twilight,
         _ => Icons.info_outline,
       };
 

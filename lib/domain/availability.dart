@@ -1,3 +1,5 @@
+import 'roster.dart';
+
 /// Wanneer je kunt lopen: per dag van de week één of meer tijdvakken.
 /// Leeg = altijd (05:00 tot 22:00, zoals de app standaard rekent).
 class TimeWindow {
@@ -16,19 +18,32 @@ class TimeWindow {
 }
 
 class Availability {
-  const Availability(this.days);
+  const Availability(this.days, {this.busy = const []});
 
   /// Sleutel = weekdag (1 = maandag … 7 = zondag). Ontbrekende dag of lege lijst = die dag niet.
   final Map<int, List<TimeWindow>> days;
 
+  /// Vaste blokken waarin je niet kunt (diensten uit je rooster, reistijd, slapen na een nachtdienst).
+  final List<BusyBlock> busy;
+
   static const always = Availability({});
 
+  /// Geen eigen weektijden ingesteld (wel kan er een rooster zijn, zie [busy]).
   bool get isAlways => days.isEmpty;
+
+  /// Helemaal geen beperking: geen weektijden en geen rooster.
+  bool get unrestricted => days.isEmpty && busy.isEmpty;
+
+  Availability withBusy(List<BusyBlock> b) => Availability(days, busy: b);
 
   static const dayNames = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 
   /// Mag een run die om [start] begint en [minutes] duurt?
   bool allows(DateTime start, int minutes) {
+    if (busy.isNotEmpty) {
+      final end = start.add(Duration(minutes: minutes));
+      if (busy.any((b) => b.overlaps(start, end))) return false;
+    }
     if (isAlways) return true;
     final windows = days[start.weekday] ?? const [];
     final s = start.hour * 60 + start.minute;

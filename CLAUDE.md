@@ -70,6 +70,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `data/services/stride_sensor_service.dart` (koppelen in `profile/heart_rate_screen.dart`). Verloop-sleutels `cad`, `baro`, `marks`.
 - Opnamescherm-indelingen `domain/record_layout.dart` + `record/record_layout_screen.dart`; markeringen `domain/run_markers.dart`,
   `activities/markers_card.dart`; tussentijden per afstand `splitsOf(s, every:)`. Herkomst OpenTracks: zie `NOTICE`.
+- Rooster (ICS): `domain/roster.dart`, `data/services/roster_service.dart`, `planner/roster_screen.dart`; via `availabilityProvider` →
+  `Availability.busy`. Zon: `domain/sun_position.dart` (waarschuwing 'sun'). Terugblik: `domain/hindsight.dart` + `activities/hindsight_card.dart`.
+  Hartslagdrift: `domain/decoupling.dart`. Afspreken-momenten: `community/best_moments_text.dart`.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).

@@ -5,20 +5,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/models.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/roster_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/availability.dart';
 
 const _key = 'availability_v1';
 
 /// Je looptijden (op dit toestel bewaard).
+/// Met een gekoppeld rooster vallen je diensten, reistijd en slaap na een nachtdienst er ook af.
 final availabilityProvider = FutureProvider<Availability>((ref) async {
+  final roster = await ref.watch(rosterProvider.future);
+  Availability base;
   try {
     final p = await SharedPreferences.getInstance();
     final raw = p.getString(_key);
-    return raw == null ? Availability.always : Availability.fromJson(jsonDecode(raw));
+    base = raw == null ? Availability.always : Availability.fromJson(jsonDecode(raw));
   } catch (_) {
-    return Availability.always;
+    base = Availability.always;
   }
+  return roster.linked ? base.withBusy(roster.blocks) : base;
 });
 
 Future<void> saveAvailability(WidgetRef ref, Availability a) async {

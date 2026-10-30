@@ -100,6 +100,34 @@ class WeatherService {
     }
   }
 
+  /// Het weer per uur van één (afgelopen) dag, om je run achteraf met de rest van de dag te vergelijken.
+  Future<List<HourWeather>> dayHours(double lat, double lon, DateTime day) async {
+    final daysAgo = DateTime.now().difference(day).inDays;
+    final Uri uri;
+    if (daysAgo <= 6) {
+      uri = Uri.https('api.open-meteo.com', '/v1/forecast', {
+        'latitude': lat.toStringAsFixed(4),
+        'longitude': lon.toStringAsFixed(4),
+        'hourly': _historyHourly.join(','),
+        'timezone': 'auto',
+        'past_days': '7',
+        'forecast_days': '1',
+      });
+    } else {
+      final d = _isoDate(day);
+      uri = Uri.https('archive-api.open-meteo.com', '/v1/archive', {
+        'latitude': lat.toStringAsFixed(4),
+        'longitude': lon.toStringAsFixed(4),
+        'hourly': _historyHourly.join(','),
+        'timezone': 'auto',
+        'start_date': d,
+        'end_date': d,
+      });
+    }
+    final all = _parse(await _get(uri), lat, lon).hours;
+    return [for (final h in all) if (h.time.year == day.year && h.time.month == day.month && h.time.day == day.day) h];
+  }
+
   Future<Map<String, dynamic>> _get(Uri uri) async {
     final res = await _client.get(uri).timeout(const Duration(seconds: 15));
     if (res.statusCode != 200) {

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../data/models/models.dart';
+import 'sun_position.dart';
 
 /// Luchtkwaliteit en pollen op één moment (Open-Meteo / CAMS).
 class AirQuality {
@@ -87,6 +88,7 @@ List<RunWarning> runWarnings(
   PollenSensitivity pollen = PollenSensitivity.normal,
   double? recentMaxTemp,
   bool hasRoute = false,
+  List<({double bearing, double meters, double startKm})> route = const [],
 }) {
   final during = weatherDuring(f, start, minutes);
   if (during.isEmpty) return const [];
@@ -259,6 +261,36 @@ List<RunWarning> runWarnings(
   }
 
   out.sort((a, b) => b.level.index.compareTo(a.level.index));
+  // Lage zon recht in je gezicht (alleen bij zon, niet bij bewolking): jij en automobilisten zien slecht.
+  final low = <({DateTime time, double azimuth})>[];
+  for (final w in during) {
+    if (!w.isDay || (w.weatherCode != null && w.weatherCode! > 2)) continue;
+    final sp = sunPosition(w.time, f.latitude, f.longitude);
+    if (isLowSun(sp.elevation)) low.add((time: w.time, azimuth: sp.azimuth));
+  }
+  if (low.isNotEmpty) {
+    final az = low[low.length ~/ 2].azimuth;
+    final where = _compass(az);
+    if (route.isNotEmpty) {
+      final toward = fractionTowardSun(route, az);
+      final reversed = fractionTowardSun([for (final s in route) (bearing: (s.bearing + 180) % 360, meters: s.meters, startKm: s.startKm)], az);
+      if (toward >= 0.2) {
+        final tip = reversed < toward - 0.15
+            ? ' Loop je rondje andersom: dan heb je de zon ${reversed < 0.05 ? 'bijna nergens' : 'veel minder'} in je gezicht.'
+            : ' Neem een pet of zonnebril mee.';
+        out.add(RunWarning(WarningLevel.caution, 'Lage zon in je gezicht',
+            '${(toward * 100).round()}% van je route loop je recht tegen de lage zon in (uit het $where). '
+                'Automobilisten zien je dan slecht.$tip',
+            kind: 'sun'));
+      }
+    } else {
+      out.add(RunWarning(WarningLevel.info, 'Lage zon',
+          'De zon staat laag in het $where. Loop je die kant op, dan zie je slecht en zien automobilisten jou slecht. '
+              'Een pet of zonnebril helpt; kies liefst een rondje met de zon in je rug.',
+          kind: 'sun'));
+    }
+  }
+
   return out;
 }
 

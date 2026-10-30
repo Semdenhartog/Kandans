@@ -13,6 +13,7 @@ import '../onboarding/onboarding_screen.dart';
 import '../planner/training_plan_screen.dart';
 import '../routes/watch_export.dart';
 import 'heart_rate_screen.dart';
+import '../planner/roster_screen.dart' show openRosterScreen;
 import 'privacy_screen.dart';
 import 'sources_screen.dart';
 import '../../shared/whats_new.dart';
@@ -168,6 +169,7 @@ final settingsDestinations = <SettingsDestination>[
   SettingsDestination('Wedstrijden', Icons.flag_outlined, 'race wedstrijd doel eindtijd marathon', (c) => c.go('/me/races')),
   SettingsDestination('Trainingsschema', Icons.calendar_month_outlined, 'schema plan training', openTrainingPlan),
   SettingsDestination('Badges', Icons.military_tech_outlined, 'badge medaille mijlpaal', openBadges),
+  SettingsDestination('Werkrooster', Icons.event_busy_outlined, 'rooster diensten wisseldiensten nachtdienst agenda ics ical werk', openRosterScreen),
   SettingsDestination('Kracht en mobiliteit', Icons.fitness_center, 'kracht rekken warming-up stretch', openStrength),
   SettingsDestination('Hartslagband', Icons.monitor_heart_outlined, 'hartslag band bluetooth zones loopsensor voetsensor cadans stryd', openHeartRateScreen),
   SettingsDestination('Fitheid en vorm', Icons.trending_up, 'fitheid vorm belasting', openFitness),

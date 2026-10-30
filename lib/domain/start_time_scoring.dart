@@ -168,7 +168,7 @@ class StartTimePlanner {
     for (final h in forecast.hours) {
       if (h.time.isBefore(startFrom) || h.time.isAfter(end)) continue;
       if (h.time.hour < earliestHour || h.time.hour > latestHour) continue;
-      if (availability.isAlways) {
+      if (availability.unrestricted) {
         results.add(scoreAt(h.time, type));
       } else {
         // Eerste moment in dit uur dat binnen je looptijden valt.

@@ -310,3 +310,11 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 6. ✅ **Live tussentijden**: derde veegpagina tijdens het lopen.
 - Bewust niet: KML/KMZ-export, koppeling met Tasker/Gadgetbridge, fietssensoren.
 - Nog niet: markeringsfoto's van een run die zonder internet werd opgeslagen gaan niet mee (de markering zelf wel).
+
+## Ronde 30 oktober 2026 (4) – vijf verbeteringen "buiten de lijntjes"
+
+1. ✅ **Werkrooster koppelen** (#20, voor wisseldiensten): agenda-link (iCal/webcal, elke 6 uur ververst) of .ics-bestand. Diensten + reistijd (instelbaar) + 6 uur slapen na een nachtdienst vallen af in Vandaag, weekplanner en meldingen. Blijft op de telefoon. Weekplanner → Werkrooster.
+2. ✅ **Lage zon in je gezicht**: waarschuwing als de zon < 12° staat tijdens je run (bij helder weer). Met een route: welk deel je recht tegen de zon in loopt, en of andersom lopen helpt.
+3. ✅ **"Goed gekozen?" na je run** (#12-achtig): je run vergeleken met de rest van die dag: droog gebleven terwijl het om 15:00 regende, of "om 08:00 was het 5 °C koeler".
+4. ✅ **Hartslagdrift (aerobe ontkoppeling)** bij gelijkmatige duurlopen ≥ 40 min: hoeveel je hartslag in de tweede helft opliep. Maat voor duurvermogen.
+5. ✅ **Afspreken met je beste momenten**: in een "Samen lopen"-oproep met één tik je 3 beste loopmomenten van de komende dagen invoegen (houdt rekening met je rooster).

@@ -9,6 +9,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../domain/best_efforts.dart';
+import '../../domain/decoupling.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_recorder.dart' show GpsQuality;
 import '../../domain/run_streams.dart';
@@ -114,6 +115,7 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
                 Text(q.text, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
               ],
               ..._efforts(s, ref),
+              ..._drift(s),
               ..._zones(s, ref),
             ],
           );
@@ -154,6 +156,30 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
             ],
           ),
         ),
+    ];
+  }
+
+  /// Hartslagdrift (aerobe ontkoppeling) bij een gelijkmatige duurloop.
+  List<Widget> _drift(RunStreams s) {
+    if (_every != 1000) return const [];
+    final d = decouplingOf(s);
+    if (d == null) return const [];
+    final c = d.percent < 5 ? RwColors.good : (d.percent < 10 ? RwColors.accentLight : RwColors.warning);
+    return [
+      const Divider(height: 28),
+      Text(tr('HARTSLAGDRIFT'), style: _head),
+      const SizedBox(height: 8),
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('${d.percent.toStringAsFixed(1).replaceAll('.', ',')}%',
+            style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800, color: c)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            '${tr(d.verdict)} ${trf('Eerste helft gemiddeld {a} bpm, tweede helft {b} bpm.', {'a': d.firstHr.round(), 'b': d.secondHr.round()})}',
+            style: TextStyle(color: RwColors.muted, height: 1.4),
+          ),
+        ),
+      ]),
     ];
   }
 

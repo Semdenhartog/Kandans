@@ -12,6 +12,7 @@ import '../challenges/community_screen.dart';
 import 'people_screen.dart';
 import 'runner_profile_screen.dart';
 import 'shared_run_card.dart';
+import 'best_moments_text.dart';
 import '../../core/i18n.dart';
 
 /// "Een uur geleden", "gisteren", of een datum.
@@ -670,6 +671,28 @@ class _ComposerState extends ConsumerState<_Composer> {
               ),
               onChanged: (_) => setState(() {}),
             ),
+            if (_topic == 'afspreken') ...[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ActionChip(
+                  avatar: const Icon(Icons.auto_awesome_outlined, size: 18),
+                  label: Text(tr('Mijn beste momenten invoegen')),
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          final t = await bestMomentsText(ref);
+                          if (!mounted) return;
+                          if (t == null) {
+                            showMessage(context, tr('Kon je beste momenten nu niet berekenen.'), error: true);
+                            return;
+                          }
+                          final cur = _text.text.trim();
+                          setState(() => _text.text = cur.isEmpty ? t : '$cur\n\n$t');
+                        },
+                ),
+              ),
+              SizedBox(height: 8),
+            ],
             FilledButton.icon(
               onPressed: _busy || _text.text.trim().length < 2 ? null : _send,
               icon: _busy ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : Icon(Icons.send),

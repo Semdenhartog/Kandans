@@ -23,6 +23,7 @@ import 'run_replay_screen.dart';
 import 'share_run_screen.dart';
 import 'gps_spike_screen.dart';
 import '../community/share_to_feed.dart';
+import 'hindsight_card.dart';
 import 'markers_card.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
@@ -273,6 +274,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'coach'), child: _CoachSummaryCard(activity: a)),
           ],
+          if (HindsightCard.applies(a)) HindsightCard(key: ValueKey('hindsight-${a.id}'), activity: a),
           const SizedBox(height: 12),
           RwCard(
             key: _sectionKey(a, 'weer'),
