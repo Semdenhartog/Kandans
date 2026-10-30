@@ -40,7 +40,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in (wachtlijst). Links in `site/` zijn relatief (Pages draait op `/Kandans/`).
 - Privacyverklaring: bron is `site/privacy.html`; `tools/privacy_naar_dart.py` maakt er `lib/features/profile/privacy_text.dart`
   van (draait in build.yml en screens.yml). In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0033** staan erin (0030 wachtlijst, 0031 foutoverzicht, 0032 actiecodes, 0033 community: **staan live sinds 27 okt**, eigenaarscode en moderator ook; lokaal getest met Postgres 16 + Supabase-stubs, zie /var/tmp/kadanspg als die er nog is) (`apply_migration` via MCP werkt sinds 27 okt; eerst lokaal testen, dan zelf toepassen).
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0034** staan erin (0030 wachtlijst, 0031 foutoverzicht, 0032 actiecodes, 0033 community: **staan live sinds 27 okt**, eigenaarscode en moderator ook; 0034 volgen + runs delen **live sinds 30 okt** (via MCP in 5 delen 0034a–e: `apply_migration` met `drop` vraagt een bevestiging die kan verlopen, dus `drop` apart); lokaal getest met Postgres 16 + Supabase-stubs, zie /var/tmp/kadanspg als die er nog is) (`apply_migration` via MCP werkt sinds 27 okt; eerst lokaal testen, dan zelf toepassen).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Gratis kaartdata: PDOK-tegels, Overpass (verlichting, voorzieningen; per vraag eerst één server, na 4 s reserve),
   openrouteservice (routes, ondergrond met schatting uit wegtype), Open-Meteo (weer), Buienradar.
@@ -77,7 +77,12 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**, wacht op Stripe/Gelato-geheimen.
 - Shop: `lib/features/shop/` (`/shop`, tasje met "nieuw"-stip, gouden tegel in Ik). Route delen: `domain/route_share.dart`,
   `site/route.html`, deeplink `runwise://app/route-delen?n=&p=` → `RouteImportScreen`. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
-- Community-tab: `lib/features/community/`, databasefuncties `community_*` (migratie 0033). Actiecodes: `redeem_promo`/`create_promo` (0032).
+- Community-tab: `lib/features/community/`, databasefuncties `community_*` (migratie 0033). Bovenaan **Runs | Gesprekken**.
+- Volgen + runs delen (0034, zoals Strava): functies `social_*`, tabellen `run_shares`/`run_kudos`/`run_comments`, `community_follows.status`
+  (pending/accepted), `community_profiles.approve_followers`. App: `data/services/social_service.dart`, `community/shared_run_card.dart`,
+  `runner_profile_screen.dart`, `people_screen.dart` (Lopers), `share_to_feed.dart` (knop "Delen met volgers" onder een run).
+  Privacyzone in de app: `domain/privacy_zone.dart` (200/500/1000 m rond start én finish). Gedeeld = kopie zonder hartslag/tijdstip; Strava-runs geweigerd
+  (ook in SQL). Vriendcode volgen = meteen goedgekeurd (edge `community`). Actiecodes: `redeem_promo`/`create_promo` (0032).
 - Steunpagina: `site/steun.html` (doel €1.500, pakketten €25/€50/€75/€250, begroting). Toezeggingen gaan naar `waitlist` met
   `source` = `steun:<pakket>[:naam]` (overzicht: `select source, count(*) from waitlist group by 1`). Nog **geen betaling**: pas na KvK +
   betaallink. **Niet** vanuit de app naar deze pagina linken (Google Play-betaalregels). Beloofd en nog te bouwen: ledenkaart "Eerste loper",
