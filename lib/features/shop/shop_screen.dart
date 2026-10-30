@@ -177,6 +177,8 @@ class ShopScreen extends ConsumerWidget {
                       style: body),
                   SizedBox(height: 4),
                   Text(tr('1 maand gratis · daarna € 5 per maand of € 40 per jaar'), style: body.copyWith(color: _goldLight, fontWeight: FontWeight.w600)),
+                  SizedBox(height: 4),
+                  Text(tr('Wat gratis is, blijft gratis. Je runs exporteren kan altijd.'), style: body.copyWith(fontSize: 12.5)),
                   SizedBox(height: 12),
                   _GoldButton(
                     label: premium ? tr('Je lidmaatschap') : tr('Probeer 1 maand gratis'),

@@ -21,6 +21,7 @@ import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
 import 'run_replay_screen.dart';
 import 'share_run_screen.dart';
+import 'gps_spike_screen.dart';
 import '../community/share_to_feed.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
@@ -347,6 +348,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             _FeelCard(activity: a),
           ],
+          GpsSpikeCard(activity: a),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => openShareRun(context, a, route: route, badges: badges),

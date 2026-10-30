@@ -23,6 +23,7 @@ import '../activities/fitness_screen.dart';
 import '../activities/year_story_screen.dart';
 import '../planner/training_plan_screen.dart';
 import 'dashboard_providers.dart';
+import '../../data/services/run_pause_store.dart';
 
 /// "Jij vandaag": training uit je schema, je klaar-score, herstel en vorm.
 class TodayCard extends ConsumerWidget {
@@ -383,7 +384,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
     final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
     if (runs.isEmpty) return const SizedBox.shrink();
     final plan = ref.watch(planProvider).value ?? const <PlanSession>[];
-    final r = weeklyReport(runs, now, plan: plan, maxHr: HeartRateService.instance.maxHr.value);
+    final r = weeklyReport(runs, now, plan: plan, maxHr: HeartRateService.instance.maxHr.value, pausedWeeks: ref.watch(pausedWeeksProvider));
     final diff = r.avgKmBefore <= 0 ? null : (r.km - r.avgKmBefore) / r.avgKmBefore;
     return Padding(
       padding: const EdgeInsets.only(top: 12),

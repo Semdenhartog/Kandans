@@ -40,6 +40,7 @@ import 'fitness_screen.dart';
 import 'run_insights_screens.dart';
 import 'share_run_screen.dart';
 import 'year_story_screen.dart';
+import '../../data/services/run_pause_store.dart';
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
@@ -419,15 +420,15 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
 }
 
 /// Bovenaan Runs: de week in bolletjes (zoals Runna) en totalen per week, maand of jaar.
-class _Overview extends StatefulWidget {
+class _Overview extends ConsumerStatefulWidget {
   const _Overview({required this.activities});
   final List<Activity> activities;
 
   @override
-  State<_Overview> createState() => _OverviewState();
+  ConsumerState<_Overview> createState() => _OverviewState();
 }
 
-class _OverviewState extends State<_Overview> {
+class _OverviewState extends ConsumerState<_Overview> {
   Period _period = Period.week;
   double? _goalKm;
 
@@ -519,7 +520,8 @@ class _OverviewState extends State<_Overview> {
     final totals = periodTotals(runs, now, _period, count: switch (_period) { Period.week => 8, Period.month => 12, Period.year => 5 });
     final cur = totals.last;
     final check = loadCheck(runs, now);
-    final streak = weekStreak(runs, now);
+    final streak = weekStreak(runs, now, paused: ref.watch(pausedWeeksProvider));
+    final pausedNow = ref.watch(currentPauseProvider) != null;
     final maxKm = totals.map((w) => w.km).fold<double>(0, (a, b) => a > b ? a : b);
     final weekKm = strip.fold<double>(0, (s, d) => s + d.km);
     final msg = check.message;
@@ -644,7 +646,7 @@ class _OverviewState extends State<_Overview> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                      '$streak weken op rij gelopen${strip.every((d) => d.runs == 0) ? '. Loop deze week om je reeks te houden.' : '.'}',
+                      '$streak weken op rij gelopen${pausedNow ? '. Je reeks staat stil tijdens je pauze.' : strip.every((d) => d.runs == 0) ? '. Loop deze week om je reeks te houden.' : '.'}',
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ],

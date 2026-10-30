@@ -64,12 +64,21 @@ Badge _total(String id, String title, String desc, String icon, List<Activity> s
   return Badge(id: id, title: title, description: desc, icon: icon, progress: goal <= 0 ? 0 : (sum / goal).clamp(0, 1).toDouble());
 }
 
-Badge _streak(String id, String title, String desc, List<Activity> sorted, int weeks) {
+Badge _streak(String id, String title, String desc, List<Activity> sorted, int weeks, {Set<DateTime> paused = const {}}) {
   final ws = sorted.map((a) => weekStart(a.startedAt)).toSet().toList()..sort();
   var run = 0, best = 0;
   DateTime? prev, earned;
+  // Aansluitend = de week erna, of alleen pauzeweken (blessure/vakantie) ertussen.
+  bool follows(DateTime prev, DateTime w) {
+    var x = DateTime(prev.year, prev.month, prev.day + 7);
+    while (x.isBefore(w) && paused.contains(x)) {
+      x = DateTime(x.year, x.month, x.day + 7);
+    }
+    return x == w;
+  }
+
   for (final w in ws) {
-    run = prev != null && (w.difference(prev).inHours / 24).round() == 7 ? run + 1 : 1;
+    run = prev != null && follows(prev, w) ? run + 1 : 1;
     if (run > best) best = run;
     if (run >= weeks && earned == null) earned = w.add(const Duration(days: 6));
     prev = w;
@@ -182,7 +191,7 @@ List<({Activity run, LatLng start})> _starts(List<Activity> sorted) => [
 int _season(DateTime d) => switch (d.month) { 12 || 1 || 2 => 0, 3 || 4 || 5 => 1, 6 || 7 || 8 => 2, _ => 3 };
 
 /// Alle badges met je voortgang.
-List<Badge> computeBadges(List<Activity> runs, {DateTime? now}) {
+List<Badge> computeBadges(List<Activity> runs, {DateTime? now, Set<DateTime> pausedWeeks = const {}}) {
   final sorted = [...runs]..sort((a, b) => a.startedAt.compareTo(b.startedAt));
   final today = now ?? DateTime.now();
 
@@ -313,9 +322,9 @@ List<Badge> computeBadges(List<Activity> runs, {DateTime? now}) {
     ),
 
     // Volhouden.
-    _streak('streak4', '4 weken op rij', 'Vier weken achter elkaar minstens één run.', sorted, 4),
-    _streak('streak12', '12 weken op rij', 'Drie maanden lang elke week gelopen.', sorted, 12),
-    _streak('streak26', '26 weken op rij', 'Een half jaar lang elke week gelopen.', sorted, 26),
+    _streak('streak4', '4 weken op rij', 'Vier weken achter elkaar minstens één run.', sorted, 4, paused: pausedWeeks),
+    _streak('streak12', '12 weken op rij', 'Drie maanden lang elke week gelopen.', sorted, 12, paused: pausedWeeks),
+    _streak('streak26', '26 weken op rij', 'Een half jaar lang elke week gelopen.', sorted, 26, paused: pausedWeeks),
     _consecutive('days7', '7 dagen op rij', 'Een week lang elke dag gelopen.', 'event_repeat', sorted, 7, _dayNumber),
     _consecutive('months12', '12 maanden op rij', 'Een jaar lang elke maand minstens één run.', 'calendar_month', sorted, 12, _monthNumber),
     Badge(

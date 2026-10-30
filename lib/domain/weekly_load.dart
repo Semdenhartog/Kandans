@@ -85,14 +85,20 @@ LoadCheck loadCheck(List<Activity> runs, DateTime now) {
 
 /// Aantal weken op rij met minstens één run. Loop je deze week nog niet, dan telt
 /// de reeks tot en met vorige week (je hebt nog tot zondag).
-int weekStreak(List<Activity> runs, DateTime now) {
+/// Weken in [paused] (blessure, ziek, vakantie) breken de reeks niet, maar tellen ook niet mee.
+int weekStreak(List<Activity> runs, DateTime now, {Set<DateTime> paused = const {}}) {
   final weeks = <DateTime>{for (final a in runs) weekStart(a.startedAt)};
+  DateTime back(DateTime w) => DateTime(w.year, w.month, w.day - 7);
   var w = weekStart(now);
-  if (!weeks.contains(w)) w = w.subtract(const Duration(days: 7));
+  if (!weeks.contains(w)) w = back(w);
   var n = 0;
-  while (weeks.contains(w)) {
-    n++;
-    w = w.subtract(const Duration(days: 7));
+  for (var guard = 0; guard < 520; guard++) {
+    if (weeks.contains(w)) {
+      n++;
+    } else if (!paused.contains(w)) {
+      break;
+    }
+    w = back(w);
   }
   return n;
 }

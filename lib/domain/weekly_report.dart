@@ -15,7 +15,11 @@ class WeeklyReport {
     this.planTotal,
     this.longest,
     required this.easyShare,
+    this.paused = false,
   });
+
+  /// Viel deze week (grotendeels) in een pauze (blessure, ziek, vakantie)?
+  final bool paused;
 
   final DateTime weekStart;
   final double km;
@@ -32,6 +36,7 @@ class WeeklyReport {
   final double? easyShare;
 
   String get headline {
+    if (runs == 0 && paused) return 'Rustweek tijdens je pauze. Herstel gaat voor.';
     if (runs == 0) return 'Vorige week niet gelopen. Deze week weer een rondje?';
     final diff = avgKmBefore <= 0 ? 0 : (km - avgKmBefore) / avgKmBefore;
     if (diff > 0.3) return 'Flink meer gelopen dan normaal. Bouw rustig verder.';
@@ -40,7 +45,8 @@ class WeeklyReport {
   }
 }
 
-WeeklyReport weeklyReport(List<Activity> runs, DateTime now, {List<PlanSession> plan = const [], int? maxHr}) {
+WeeklyReport weeklyReport(List<Activity> runs, DateTime now,
+    {List<PlanSession> plan = const [], int? maxHr, Set<DateTime> pausedWeeks = const {}}) {
   final thisWeek = weekStart(now);
   final start = DateTime(thisWeek.year, thisWeek.month, thisWeek.day - 7);
   bool inWeek(DateTime t, DateTime s) {
@@ -72,5 +78,6 @@ WeeklyReport weeklyReport(List<Activity> runs, DateTime now, {List<PlanSession> 
     planTotal: planned.isEmpty ? null : planned.length,
     longest: longest,
     easyShare: balance?.easyShare,
+    paused: pausedWeeks.contains(start),
   );
 }
