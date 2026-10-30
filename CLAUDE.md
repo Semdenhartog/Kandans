@@ -67,7 +67,7 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   origineel `docs/merk/kadans-logo-origineel.png`, met K en tekst 8% groter (wens van Sem) `docs/merk/kadans-logo-8procent.png`.
   App-icoon (homescherm) = die 8%-versie, verder **niets aanpassen**: de tegel sluit aan op de icoonvorm (98,5% van het zichtbare deel,
   op #050504), `adaptive_icon_foreground_inset: 0` is nodig (anders krimpt flutter_launcher_icons de voorgrond 16% per kant),
-  geen monochroom. Maken: `tools/logo/3_app_icoon_minimaal.py`. Play Store-icoon: `docs/merk/play-store-icoon-512.png`.
+  geen monochroom. Maken: `tools/logo/3_app_icoon_minimaal.py`. Play Store-icoon: `docs/merk/play-store-icoon-512.png`, feature graphic: `docs/merk/play-store-feature-graphic-1024x500.png` (`tools/logo/4_feature_graphic.py`).
   Eerder marmerlogo: `docs/merk/kadans-logo-marmer.png`. In de app nog: `assets/logo/k_goud.webp` (gouden K van het marmerlogo:
   opstartscherm, inloggen, uitnodigingskaart),
   `mark.png`/`wordmark.png`/`logo.png` zijn witte silhouetten (K en "KΛDΛNS") die de app inkleurt. Opnieuw maken:
@@ -126,10 +126,10 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - KvK-inschrijving (gepland november, met KOR-keuze) → daarna Kickstarter-betaalgegevens + Submit for review, betaallinks steunpagina.
 - In de app staat nog de gouden K van het marmerlogo (opstartscherm, inloggen, uitnodiging); vervangen door de nieuwe K als Sem dat wil.
 - Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
-- Supabase Auth-mailtemplates zeggen nog "RunWise" → aanpassen (Authentication → Email Templates).
+- Supabase Auth-mails: workflow `mailtemplates.yml` (+ `tools/mailtemplates_kadans.py`) zet RunWise → Kadans via de Management API (30 okt). Daarna in Supabase even een testmail bekijken.
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
-- Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium; feature graphic (1024×500) voor de Play Store.
+- Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium. Feature graphic is klaar: `docs/merk/play-store-feature-graphic-1024x500.png`.
 - Testen op telefoon: licht/donker wisselen, Vivoactive 5-meldingen, Strava oude runs/routes, Samen.
 
 ## Agent skills
