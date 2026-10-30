@@ -112,8 +112,16 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
     await _act(() => _svc.setApprove(v));
   }
 
+  /// Knoppen in een lijstregel: niet over de volle breedte (zoals de app-stijl standaard doet).
+  static final _small = ButtonStyle(
+    minimumSize: WidgetStatePropertyAll(Size(0, 38)),
+    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 14)),
+    visualDensity: VisualDensity.compact,
+  );
+
   Widget _followButton(RunnerItem p) => switch (p.state) {
         FollowState.none => FilledButton.tonal(
+            style: _small,
             onPressed: () => _act(() async {
               final s = await _svc.follow(p.nickname);
               if (s == FollowState.pending && mounted) {
@@ -122,8 +130,8 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
             }),
             child: Text(p.followsMe ? tr('Terugvolgen') : tr('Volgen')),
           ),
-        FollowState.pending => OutlinedButton(onPressed: () => _act(() => _svc.unfollow(p.nickname)), child: Text(tr('Aangevraagd'))),
-        FollowState.accepted => OutlinedButton(onPressed: () => _act(() => _svc.unfollow(p.nickname)), child: Text(tr('Volgend'))),
+        FollowState.pending => OutlinedButton(style: _small, onPressed: () => _act(() => _svc.unfollow(p.nickname)), child: Text(tr('Aangevraagd'))),
+        FollowState.accepted => OutlinedButton(style: _small, onPressed: () => _act(() => _svc.unfollow(p.nickname)), child: Text(tr('Volgend'))),
       };
 
   Widget _tile(RunnerItem p, {Widget? trailing, String? subtitle}) => ListTile(
@@ -200,6 +208,7 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
                     onPressed: () => _act(() => _svc.answer(p.nickname, accept: false)),
                   ),
                   FilledButton(
+                    style: _small,
                     onPressed: () => _act(() => _svc.answer(p.nickname, accept: true), done: trf('{naam} volgt je nu.', {'naam': p.nickname})),
                     child: Text(tr('Goedkeuren')),
                   ),
