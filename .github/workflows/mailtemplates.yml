@@ -1,0 +1,23 @@
+# Zet "RunWise" in de Supabase Auth-mails (bevestigen, wachtwoord vergeten, magic link, ...) om naar "Kadans".
+# Draait vanzelf als dit bestand of het script verandert op main, of met de hand:
+# GitHub -> Actions -> "Supabase-mails naar Kadans" -> Run workflow.
+name: Supabase-mails naar Kadans
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mailtemplates.yml'
+      - 'tools/mailtemplates_kadans.py'
+
+jobs:
+  mails:
+    runs-on: ubuntu-24.04
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: jdswennyfczpqblfkrxt
+    steps:
+      - uses: actions/checkout@v7
+      - name: RunWise -> Kadans in de mails
+        run: python3 tools/mailtemplates_kadans.py

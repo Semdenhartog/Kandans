@@ -147,5 +147,5 @@ Kadans is gratis te gebruiken. Kadans Premium (onbeperkt de coach en schema's op
 - **Schermafbeeldingen:** staan klaar in de branch `schermen-main`, map `playstore/` (1080×1920, in de
   goede volgorde genummerd). Ze worden bij elke schermtest opnieuw gemaakt met voorbeeldgegevens.
   Download: GitHub → branch `schermen-main` → map `playstore` → bestand → "Download raw file".
-- **Feature graphic (1024×500):** nog niet gemaakt; dat is ontwerpwerk (logo + slogan). Kan in Claude Design of Canva.
+- **Feature graphic (1024×500):** `docs/merk/play-store-feature-graphic-1024x500.png` (gouden K + KADANS + "Loop op het beste moment"). Opnieuw maken: `python3 tools/logo/4_feature_graphic.py`.
 - **Contact-e-mail:** apart adres aanbevolen (niet je persoonlijke Gmail).
