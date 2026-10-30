@@ -50,9 +50,9 @@ def main() -> int:
         nieuw = vervang(waarde)
         if nieuw != waarde:
             wijzigingen[sleutel] = nieuw
-            print(f"- {sleutel}: {len(PATRONEN[1][0].findall(waarde)) + len(PATRONEN[0][0].findall(waarde))}x vervangen")
+            print(f"::notice::{sleutel}: {len(PATRONEN[1][0].findall(waarde)) + len(PATRONEN[0][0].findall(waarde))}x vervangen")
     if not wijzigingen:
-        print("Niets meer te doen: geen 'RunWise' gevonden in de mails.")
+        print("::notice::Niets meer te doen: geen 'RunWise' gevonden in de mails.")
         return 0
     verzoek("PATCH", wijzigingen)
     # Nog een keer ophalen en controleren.
@@ -61,7 +61,7 @@ def main() -> int:
     if rest:
         print(f"::error::Nog steeds 'RunWise' in: {', '.join(rest)}")
         return 1
-    print(f"Klaar: {len(wijzigingen)} velden bijgewerkt naar Kadans.")
+    print(f"::notice::Klaar: {len(wijzigingen)} velden bijgewerkt naar Kadans.")
     return 0
 
 
