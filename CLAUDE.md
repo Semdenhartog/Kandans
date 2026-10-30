@@ -82,10 +82,26 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   `source` = `steun:<pakket>[:naam]` (overzicht: `select source, count(*) from waitlist group by 1`). Nog **geen betaling**: pas na KvK +
   betaallink. **Niet** vanuit de app naar deze pagina linken (Google Play-betaalregels). Beloofd en nog te bouwen: ledenkaart "Eerste loper",
   lijst "Eerste lopers" op de site; posters wachten op Stripe/Gelato.
+- Kickstarter (concept, 29–30 okt): https://www.kickstarter.com/projects/941277233/819234441 (account "Kadans"). Ingevuld en gecontroleerd:
+  titel/ondertitel, Technology → Apps, Nederland, 30 dagen, doel **€1.650** (≈ €1.500 netto), story + risico's, 5 beloningen
+  (€5 Bedankt · €25 Supporter 1 jr Premium · €50 Eerste loper 2 jr + testversie + ledenkaart · €75 Met poster, max 50, NL €0 verzending ·
+  €250 Lokale partner, max 10), levering maart 2027 (aanpassen als lancering later is), projectafbeelding (gouden K, zonder tekst) en avatar
+  (app-logo), bio. Bronnen: `docs/merk/kickstarter/` (branch ai-coach). Campagnetekst: Claude-doc "Kickstarter-campagne Kadans"
+  (https://claude.ai/artifact/ACypfYHUKJJ53A5TMTxKjd). Sem doet zelf: Payment (ID + bank), video, Submit for review **na KvK**.
+  Bio staat verborgen ("Only show my name and avatar" aan). Kickstarter blokkeert de browser in de Claude-app (botcheck); Claude in Chrome werkt.
+- Wachtlijst → Google Sheets: functie `waitlist-to-sheets` staat **alleen in Supabase** (niet in repo), header `x-waitlist-webhook-secret`,
+  secrets `GOOGLE_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEETS_SPREADSHEET_ID`, `WAITLIST_WEBHOOK_SECRET` (Sem zet ze zelf). Problemen: Verify JWT staat
+  aan (moet uit) en tabnaam is vast `"Sheet 1"`. Nog geen databasewebhook op `waitlist`. Wacht op Sems keuze (tabnaam A/B, JWT uit, functie in repo,
+  privacyzin over Google).
+- Plugins (30 okt): Agent Skills, Graphify en Ponytail als .plugin/.zip aan Sem gegeven; installeren doet Sem zelf (Customize → Plugins →
+  Add marketplace `addyosmani/agent-skills`, `DietrichGebert/ponytail`; Graphify via upload). OmniRoute afgeraden (stuurt code/sleutels
+  naar onbekende aanbieders). Laptop = Windows; device_bash is een Linux-VM en kan geen Windows-apps aanpassen.
 - Bronnen: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
 - Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 197). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
+- KvK-inschrijving (gepland november, met KOR-keuze) → daarna Kickstarter-betaalgegevens + Submit for review, betaallinks steunpagina.
+- In de app staat nog de gouden K van het marmerlogo (opstartscherm, inloggen, uitnodiging); vervangen door de nieuwe K als Sem dat wil.
 - Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
 - Supabase Auth-mailtemplates zeggen nog "RunWise" → aanpassen (Authentication → Email Templates).
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
