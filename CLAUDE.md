@@ -54,6 +54,13 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - `query "vrije tekst"` is grof en geeft veel ruis; gebruik liever `explain` met een precieze naam (`bestand.dart` of `pad::Symbool`).
 - `GRAPH_REPORT.md` is groot (~12k tokens): niet in z'n geheel lezen, hooguit grep.
 - De kaart toont structuur, niet de code: voor wijzigen blijf je het stukje zelf lezen. SQL-migraties en Kotlin staan er alleen in als de workflow ze kon lezen.
+- Kaart alleen van **main**. Werk je op een branch (ai-coach e.d.), dan kloppen nieuwe/gewijzigde bestanden niet; `graaf.sh` meldt dat. Gewoon zelf lezen.
+- Status 30 okt: eerste kaart met de hand op `graaf` gezet (334 bestanden, 6.735 knopen, zonder SQL/Kotlin/PowerShell). Of `graaf.yml` in
+  Actions groen draait, is **nog niet gezien**: dat gebeurt pas bij de eerstvolgende push naar main die code raakt. Als hij faalt: workflow
+  "Codekaart (graphify)" bekijken; kaart blijft dan de oude. Branch `graphify` is een overblijfsel en mag weg.
+- PyPI is in Claude-sessies vaak geblokkeerd. Opvragen lukt toch (`graaf.sh` haalt graphify als broncode van GitHub). Zelf een kaart **bouwen** in
+  een sessie kan alleen met tree-sitter uit broncode: py-tree-sitter (tag v0.25.2) + grammatica's met `python3 setup.py build_ext --inplace`
+  en RapidFuzz met `RAPIDFUZZ_IMPLEMENTATION=python`, alles via `PYTHONPATH`. Meestal niet nodig: laat de workflow het doen.
 
 ## Huisstijl
 - Naam **Kadans**. Logo (28 okt, definitief): champagnegouden K + "KADANS" op een zwarte afgeronde tegel;
@@ -108,8 +115,9 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
   secrets `GOOGLE_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEETS_SPREADSHEET_ID`, `WAITLIST_WEBHOOK_SECRET` (Sem zet ze zelf). Problemen: Verify JWT staat
   aan (moet uit) en tabnaam is vast `"Sheet 1"`. Nog geen databasewebhook op `waitlist`. Wacht op Sems keuze (tabnaam A/B, JWT uit, functie in repo,
   privacyzin over Google).
-- Plugins (30 okt): Agent Skills, Graphify en Ponytail als .plugin/.zip aan Sem gegeven; installeren doet Sem zelf (Customize → Plugins →
-  Add marketplace `addyosmani/agent-skills`, `DietrichGebert/ponytail`; Graphify via upload). OmniRoute afgeraden (stuurt code/sleutels
+- Plugins (30 okt): Agent Skills en Ponytail als .plugin/.zip aan Sem gegeven; installeren doet Sem zelf (Customize → Plugins →
+  Add marketplace `addyosmani/agent-skills`, `DietrichGebert/ponytail`). Graphify zit sinds 30 okt **in de repo** (zie Codekaart),
+  een plugin daarvoor is niet meer nodig. OmniRoute afgeraden (stuurt code/sleutels
   naar onbekende aanbieders). Laptop = Windows; device_bash is een Linux-VM en kan geen Windows-apps aanpassen.
 - Bronnen: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
 - Overzicht van alles wat gebouwd is: `VERBETERPUNTEN.md` (t/m punt 197). Play Store-teksten: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
