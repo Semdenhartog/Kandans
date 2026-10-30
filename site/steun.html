@@ -35,7 +35,7 @@ a{color:var(--accent)}a:hover{color:var(--accent-light)}
 
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-top:22px;padding-bottom:22px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.brand img{height:32px;width:auto}.brand span{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:16px}
+.brand{align-items:flex-end;gap:7px}.brand img{height:32px;width:auto;display:block}.brand .adans{display:block;flex:none;aspect-ratio:737/102;background:currentColor;-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat;height:13.5px;color:var(--accent)}.brand span{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:16px}
 header nav{display:flex;gap:20px;font-size:15px}header nav a{color:var(--muted);text-decoration:none}
 
 .hero{padding:40px 0 56px;display:flex;flex-direction:column;gap:20px}
@@ -92,7 +92,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 <body>
 <div class="wrap">
   <header>
-    <a class="brand" href="./" aria-label="Kadans, naar de startpagina"><img src="kadans-mark.png" alt="" width="35" height="32"><span>KADANS</span></a>
+    <a class="brand" href="./" aria-label="Kadans, naar de startpagina"><img src="kadans-mark.png" alt="" width="35" height="32"><span class="adans"></span></a>
     <nav aria-label="Menu"><a href="./">Kadans</a><a href="#pakketten">Pakketten</a><a href="#geld">Waar gaat het heen</a><a href="#vragen">Vragen</a></nav>
   </header>
 

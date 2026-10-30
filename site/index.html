@@ -43,7 +43,7 @@ img{display:block;max-width:100%}
 
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-top:22px;padding-bottom:22px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.brand img.mark{height:34px;width:auto}.brand .word{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:17px}
+.brand{align-items:flex-end;gap:8px}.brand img.mark{height:34px;width:auto;display:block}.brand .adans{display:block;flex:none;aspect-ratio:737/102;background:currentColor;-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat;height:14px;color:var(--accent)}.brand .word{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:17px}
 nav{display:flex;flex-wrap:wrap;gap:24px;font-size:15px}
 nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 
@@ -125,8 +125,8 @@ footer{border-top:1px solid #241F18;padding:32px 0}
 
 <header class="wrap">
   <a class="brand" href="#top" aria-label="Kadans, naar boven">
-    <img class="mark" src="kadans-mark.png" alt="" width="38" height="34">
-    <span class="word">KADANS</span>
+    <img class="mark" src="kadans-mark.png" alt="Kadans" width="38" height="34">
+    <span class="adans" aria-hidden="true"></span>
   </a>
   <nav aria-label="Hoofdmenu">
     <a href="#hoe">Hoe het werkt</a>

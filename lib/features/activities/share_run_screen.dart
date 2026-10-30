@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/appearance.dart';
 import '../../core/format.dart';
 import '../../core/config.dart';
 import '../../core/theme.dart';
@@ -365,9 +366,11 @@ class RunShareCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _tint(Image.asset('assets/logo/mark.png', height: 18), orange),
-                      const SizedBox(width: 8),
-                      _tint(Image.asset('assets/logo/wordmark.png', height: 9), orange),
+                      kadansLockup(
+                        height: 18,
+                        mark: _tint(Image.asset('assets/logo/mark.png', height: 18), orange),
+                        color: orange ? RwColors.accentDark : Colors.white,
+                      ),
                       const Spacer(),
                       Text(
                         Fmt.date(a.startedAt),

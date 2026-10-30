@@ -120,14 +120,7 @@ class RunWiseLogo extends StatelessWidget {
     return Semantics(
       label: tr('Kadans'),
       image: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset('assets/logo/k_goud.webp', height: height * 1.15, excludeFromSemantics: true),
-          SizedBox(width: height * 0.35),
-          kadansImage('assets/logo/wordmark.png', height: height * 0.46),
-        ],
-      ),
+      child: kadansLockup(height: height * 1.15),
     );
   }
 }

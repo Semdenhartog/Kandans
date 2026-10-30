@@ -86,6 +86,21 @@ void rebuildAllChildren(BuildContext context) {
 }
 
 /// Het Kadans-logo in de kleur van de huidige weergave.
+/// Het Kadans-logo als één woord: de K van het logo met "ADANS" erachter, op de voet van de K (geen dubbele K).
+/// [height] is de hoogte van de K. Standaard de gouden K; met [mark] een eigen K (bijv. ingekleurd).
+Widget kadansLockup({required double height, Widget? mark, Color? color}) {
+  final textHeight = height * 0.42;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      mark ?? Image.asset('assets/logo/k_goud.webp', height: height, excludeFromSemantics: true),
+      SizedBox(width: textHeight * 0.56),
+      kadansImage('assets/logo/adans.png', height: textHeight, color: color),
+    ],
+  );
+}
+
 Widget kadansImage(String asset, {double? width, double? height, Color? color, String? semanticLabel}) => Image.asset(
       asset,
       width: width,
