@@ -21,6 +21,7 @@ import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
 import 'run_replay_screen.dart';
 import 'share_run_screen.dart';
+import '../community/share_to_feed.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
 import 'splits_card.dart';
@@ -352,6 +353,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             icon: const Icon(Icons.ios_share),
             label: const Text('Deel je run'),
           ),
+          ShareToFeedButton(activity: a),
           // Alleen eigen opnames: die hebben het verloop per seconde dat nodig is om te knippen.
           if (a.source == 'runwise' && a.id != null) ...[
             const SizedBox(height: 8),

@@ -55,6 +55,11 @@ import 'package:runwise/shared/home_shell.dart';
 import 'package:runwise/features/shop/shop_screen.dart';
 import 'package:runwise/features/community/community_feed_screen.dart';
 import 'package:runwise/data/services/community_feed_service.dart';
+import 'package:runwise/data/services/social_service.dart';
+import 'package:runwise/features/community/people_screen.dart';
+import 'package:runwise/features/community/runner_profile_screen.dart';
+import 'package:runwise/features/community/share_to_feed.dart';
+import 'package:runwise/domain/privacy_zone.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
 import 'package:runwise/features/record/run_summary_screen.dart';
@@ -302,6 +307,9 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
           )),
       joinedChallengesProvider.overrideWith(_FakeJoined.new),
       communityFeedServiceProvider.overrideWithValue(_FakeFeed()),
+      socialServiceProvider.overrideWithValue(_FakeSocial()),
+      followRequestCountProvider.overrideWith((ref) async => notInCommunity ? 0 : 2),
+      myShareProvider.overrideWith((ref, id) async => null),
       communityStatusProvider.overrideWith((ref) async => notInCommunity
           ? const CommunityStatus(joined: false)
           : const CommunityStatus(joined: true, nickname: 'Sem uit Utrecht', friendCode: 'K7QX2M', boards: [
@@ -462,10 +470,17 @@ void main() {
   testWidgets('14c rondleiding doel', (t) => _shot(t, '14c_rondleiding_doel', const OnboardingScreen(initialPage: 2), height: 915));
   testWidgets('16 privacy', (t) => _shot(t, '16_privacy', const PrivacyScreen(), height: 1600));
   testWidgets('17 shop', (t) => _shot(t, '17_shop', const ShopScreen(), height: 2000));
-  testWidgets('18 community', (t) => _shot(t, '18_community', const CommunityFeedScreen(), height: 1830));
+  testWidgets('18 community', (t) => _shot(t, '18_community', const CommunityFeedScreen(startWithTalk: true), height: 1830));
   testWidgets('18b community met balk', (t) => _shot(t, '18b_community_balk', const CommunityFeedScreen(), height: 915, nav: true, navIndex: 4));
   testWidgets('18c community balk grote letters',
       (t) => _shot(t, '18c_community_balk_groot', const CommunityFeedScreen(), height: 915, nav: true, navIndex: 4, textScale: 1.3));
+  testWidgets('18d community runs', (t) => _shot(t, '18d_community_runs', const CommunityFeedScreen(), height: 2000));
+  testWidgets('18e community runs donker', (t) => _shot(t, '18e_donker_community_runs', const CommunityFeedScreen(), height: 2000, dark: true));
+  testWidgets('18f lopers', (t) => _shot(t, '18f_lopers', const PeopleScreen(), height: 1400));
+  testWidgets('18g profiel', (t) => _shot(t, '18g_profiel', const RunnerProfileScreen(nickname: 'Anne'), height: 1900));
+  testWidgets('18h run delen', (t) => _shot(t, '18h_run_delen', Scaffold(body: SafeArea(child: ShareToFeedSheet(activity: _runs.first))), height: 1700));
+  testWidgets('18i lopers groot', (t) => _shot(t, '18i_lopers_groot', const PeopleScreen(), height: 1800, textScale: 1.6));
+  testWidgets('18j profiel groot', (t) => _shot(t, '18j_profiel_groot', const RunnerProfileScreen(nickname: 'Anne'), height: 2400, textScale: 1.6));
   testWidgets('19 strava-archief', (t) => _shot(t, '19_strava_archief', const StravaArchiveScreen(), height: 1900));
   testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 3), height: 915));
   testWidgets('15 na je run', (t) {
@@ -624,4 +639,56 @@ class _FakeFeed implements CommunityFeedService {
   Future<void> delete(String kind, int id) async {}
   @override
   Future<void> block(String nickname) async {}
+}
+
+
+/// Voorbeeldruns en lopers voor de schermafbeeldingen van volgen en runs delen.
+class _FakeSocial implements SocialService {
+  static final _now = DateTime.now();
+  static String? _map(int i) => privacyTrimmedPolyline(_routes[i % _routes.length].polyline, meters: 200);
+
+  static List<SharedRun> _sample() => [
+        SharedRun(id: 5, nickname: 'Anne', title: 'Zondagse duurloop over de hei', runDate: _now, distanceMeters: 15230, movingTimeSeconds: 5520, paceSecondsPerKm: 362, elevationGainMeters: 64, polyline: _map(0), createdAt: _now.subtract(const Duration(minutes: 40)), kudos: 7, comments: 2, kudoed: true),
+        SharedRun(id: 4, nickname: 'Sem uit Utrecht', title: 'Ochtendloopje 8,2 km', runDate: _now.subtract(const Duration(days: 1)), distanceMeters: 8210, movingTimeSeconds: 2470, paceSecondsPerKm: 301, elevationGainMeters: 21, polyline: _map(1), visibility: ShareVisibility.everyone, createdAt: _now.subtract(const Duration(hours: 20)), kudos: 3, comments: 1, mine: true, canDelete: true),
+        SharedRun(id: 3, nickname: 'Loper Lisa', title: 'Eerste 5 km zonder wandelen!', runDate: _now.subtract(const Duration(days: 2)), distanceMeters: 5020, movingTimeSeconds: 2010, paceSecondsPerKm: 400, createdAt: _now.subtract(const Duration(days: 2)), kudos: 21, comments: 9),
+      ];
+
+  @override
+  Future<List<SharedRun>> feed({bool everyone = false, String? nickname, int? before}) async {
+    if (before != null) return const [];
+    final all = _sample();
+    return nickname == null ? all : all.where((r) => r.nickname == nickname).toList();
+  }
+
+  @override
+  Future<SocialSettings> settings() async => const SocialSettings(nickname: 'Sem uit Utrecht', approveFollowers: true, requests: 2);
+
+  @override
+  Future<List<RunnerItem>> people(String kind) async => switch (kind) {
+        'requests' => const [RunnerItem(nickname: 'MarathonMark'), RunnerItem(nickname: 'een_heel_lange_bijnaam_x')],
+        'followers' => const [RunnerItem(nickname: 'Anne', state: FollowState.accepted, followsMe: true), RunnerItem(nickname: 'Dijkloper', followsMe: true)],
+        _ => const [RunnerItem(nickname: 'Anne', state: FollowState.accepted, followsMe: true), RunnerItem(nickname: 'Loper Lisa', state: FollowState.accepted)],
+      };
+
+  @override
+  Future<List<RunnerItem>> search(String query) async => const [];
+
+  @override
+  Future<RunnerProfile> profile(String nickname) async =>
+      RunnerProfile(nickname: nickname, followers: 38, following: 41, runs: 1, state: FollowState.accepted, followsMe: true, approveFollowers: true);
+
+  @override
+  Future<MyShare?> shareOf(String activityId) async => null;
+
+  @override
+  Future<bool> kudo(int shareId) async => true;
+
+  @override
+  Future<List<String>> kudosOf(int shareId) async => const ['Anne', 'Loper Lisa'];
+
+  @override
+  Future<List<CommunityComment>> comments(int shareId) async => const [];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
 }

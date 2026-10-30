@@ -6,8 +6,12 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/services/community_feed_service.dart';
 import '../../data/services/community_service.dart';
+import '../../data/services/social_service.dart';
 import '../../shared/widgets.dart';
 import '../challenges/community_screen.dart';
+import 'people_screen.dart';
+import 'runner_profile_screen.dart';
+import 'shared_run_card.dart';
 import '../../core/i18n.dart';
 
 /// "Een uur geleden", "gisteren", of een datum.
@@ -30,15 +34,62 @@ const _rules = [
   'Iets niet in orde? Meld het: na 3 meldingen verdwijnt het tot het bekeken is.',
 ];
 
-/// Tabblad Community: berichten per onderwerp, reacties en duimpjes. Ranglijsten via de knop rechtsboven.
+/// Huisregels één keer laten accepteren vóór het eerste bericht, de eerste reactie of de eerste gedeelde run.
+Future<bool> ensureCommunityRules(BuildContext context, WidgetRef ref) async {
+  final svc = ref.read(communityFeedServiceProvider);
+  try {
+    if (await svc.rulesAccepted()) return true;
+  } catch (e) {
+    if (context.mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+    return false;
+  }
+  if (!context.mounted) return false;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(tr('Huisregels')),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        for (final r in _rules)
+          Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(padding: EdgeInsets.only(top: 6, right: 8), child: Icon(Icons.circle, size: 6, color: RwColors.accent)),
+              Expanded(child: Text(tr(r), style: TextStyle(height: 1.35))),
+            ]),
+          ),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Later'))),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Akkoord'))),
+      ],
+    ),
+  );
+  if (ok != true) return false;
+  try {
+    await svc.acceptRules();
+    return true;
+  } catch (e) {
+    if (context.mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+    return false;
+  }
+}
+
+/// Tabblad Community: runs van wie je volgt (zoals bij Strava) en gesprekken per onderwerp.
+/// Lopers zoeken en volgverzoeken via het personen-icoon, ranglijsten via de knop rechtsboven.
 class CommunityFeedScreen extends ConsumerStatefulWidget {
-  const CommunityFeedScreen({super.key});
+  const CommunityFeedScreen({super.key, this.startWithTalk = false});
+
+  /// Open op "Gesprekken" in plaats van "Runs" (voor schermafbeeldingen).
+  final bool startWithTalk;
 
   @override
   ConsumerState<CommunityFeedScreen> createState() => _CommunityFeedScreenState();
 }
 
 class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
+  late bool _talk = widget.startWithTalk;
+  bool _everyone = false;
+  List<SharedRun> _runs = const [];
   String? _topic;
   List<CommunityPost> _posts = const [];
   bool _loading = true;
@@ -76,6 +127,16 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         if (mounted) setState(() => _loading = false);
         return;
       }
+      if (!_talk) {
+        final runs = await ref.read(socialServiceProvider).feed(everyone: _everyone);
+        if (!mounted) return;
+        setState(() {
+          _runs = runs;
+          _end = runs.length < 20;
+          _loading = false;
+        });
+        return;
+      }
       final list = await _svc.feed(topic: _topic);
       if (!mounted) return;
       setState(() {
@@ -94,7 +155,25 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
   }
 
   Future<void> _more() async {
-    if (_loadingMore || _end || _posts.isEmpty) return;
+    if (_loadingMore || _end) return;
+    if (!_talk) {
+      if (_runs.isEmpty) return;
+      _loadingMore = true;
+      try {
+        final list = await ref.read(socialServiceProvider).feed(everyone: _everyone, before: _runs.last.id);
+        if (mounted) {
+          setState(() {
+            _runs = [..._runs, ...list];
+            _end = list.length < 20;
+          });
+        }
+      } catch (_) {
+      } finally {
+        _loadingMore = false;
+      }
+      return;
+    }
+    if (_posts.isEmpty) return;
     _loadingMore = true;
     try {
       final list = await _svc.feed(topic: _topic, before: _posts.last.id);
@@ -110,44 +189,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
     }
   }
 
-  /// Huisregels één keer laten accepteren vóór het eerste bericht.
-  Future<bool> _ensureRules() async {
-    try {
-      if (await _svc.rulesAccepted()) return true;
-    } catch (e) {
-      if (mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
-      return false;
-    }
-    if (!mounted) return false;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Huisregels')),
-        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          for (final r in _rules)
-            Padding(
-              padding: EdgeInsets.only(bottom: 8),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Padding(padding: EdgeInsets.only(top: 6, right: 8), child: Icon(Icons.circle, size: 6, color: RwColors.accent)),
-                Expanded(child: Text(tr(r), style: TextStyle(height: 1.35))),
-              ]),
-            ),
-        ]),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Later'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Akkoord'))),
-        ],
-      ),
-    );
-    if (ok != true) return false;
-    try {
-      await _svc.acceptRules();
-      return true;
-    } catch (e) {
-      if (mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
-      return false;
-    }
-  }
+  Future<bool> _ensureRules() => ensureCommunityRules(context, ref);
 
   Future<void> _newPost() async {
     if (!await _ensureRules() || !mounted) return;
@@ -211,7 +253,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
           await _svc.delete('post', p.id);
           if (mounted) showMessage(context, tr('Bericht verwijderd.'));
         case 'report':
-          final reason = await _askReason(context);
+          final reason = await askReportReason(context);
           if (reason == null) return;
           await _svc.report('post', p.id, reason);
           if (mounted) showMessage(context, tr('Bedankt, we kijken ernaar.'));
@@ -235,9 +277,17 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         actions: [
           if (joined)
             IconButton(
-              tooltip: tr('Nieuw bericht'),
-              icon: const Icon(Icons.edit_square),
-              onPressed: _newPost,
+              tooltip: tr('Lopers zoeken en volgen'),
+              icon: Badge(
+                isLabelVisible: (ref.watch(followRequestCountProvider).value ?? 0) > 0,
+                label: Text('${ref.watch(followRequestCountProvider).value ?? 0}'),
+                child: Icon(Icons.person_search_outlined),
+              ),
+              onPressed: () async {
+                await openPeopleAndWait(context);
+                ref.invalidate(followRequestCountProvider);
+                _load();
+              },
             ),
           IconButton(
             tooltip: tr('Ranglijsten en vrienden'),
@@ -250,7 +300,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
           ),
         ],
       ),
-      floatingActionButton: joined && _error == null
+      floatingActionButton: joined && _error == null && _talk
           ? FloatingActionButton.extended(
               heroTag: 'community-new',
               onPressed: _newPost,
@@ -259,6 +309,44 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
             )
           : null,
       body: Column(children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: SegmentedButton<bool>(
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(value: false, icon: Icon(Icons.directions_run), label: Text(tr('Runs'))),
+              ButtonSegment(value: true, icon: Icon(Icons.forum_outlined), label: Text(tr('Gesprekken'))),
+            ],
+            selected: {_talk},
+            onSelectionChanged: (v) {
+              setState(() => _talk = v.first);
+              _load();
+            },
+          ),
+        ),
+        if (!_talk)
+          SizedBox(
+            height: 52,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
+              children: [
+                for (final e in [(false, tr('Volgend')), (true, tr('Iedereen'))])
+                  Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(e.$2),
+                      selected: _everyone == e.$1,
+                      onSelected: (_) {
+                        setState(() => _everyone = e.$1);
+                        _load();
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        if (_talk)
         SizedBox(
           height: 52,
           child: ListView(
@@ -280,8 +368,84 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
             ],
           ),
         ),
-        Expanded(child: _body(joined)),
+        Expanded(child: _talk ? _body(joined) : _runsBody(joined)),
       ]),
+    );
+  }
+
+  void _replaceRun(SharedRun r) => setState(() => _runs = [for (final x in _runs) x.id == r.id ? r : x]);
+
+  Widget _runsBody(bool joined) {
+    if (_loading) return LoadingView(cards: 3);
+    if (_error is CommunityNotReady) {
+      return EmptyState(
+        icon: Icons.directions_run,
+        title: tr('Runs delen gaat binnenkort open'),
+        message: tr('Straks volg je andere lopers, zie je hun runs en geef je applaus.'),
+        actionLabel: tr('Opnieuw proberen'),
+        onAction: _load,
+      );
+    }
+    if (_error != null) {
+      return ErrorView(message: _error.toString().replaceFirst('Exception: ', ''), onRetry: _load);
+    }
+    if (!joined) {
+      return EmptyState(
+        icon: Icons.groups_outlined,
+        title: tr('Volg andere lopers'),
+        message: tr('Kies een bijnaam en doe mee. Je deelt alleen runs die je zelf kiest, zonder hartslag en zonder begin en eind van je route.'),
+        actionLabel: tr('Meedoen'),
+        onAction: () async {
+          await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CommunityScreen()));
+          ref.invalidate(communityStatusProvider);
+          _load();
+        },
+      );
+    }
+    if (_runs.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(physics: AlwaysScrollableScrollPhysics(), children: [
+          SizedBox(height: 40),
+          EmptyState(
+            icon: Icons.person_search_outlined,
+            title: _everyone ? tr('Nog geen openbare runs') : tr('Nog geen runs van wie je volgt'),
+            message: _everyone
+                ? tr('Deel je eigen run met "Iedereen" en wees de eerste.')
+                : tr('Zoek lopers om te volgen, of deel zelf een run: open een run en kies "Delen met volgers".'),
+            actionLabel: tr('Lopers zoeken'),
+            onAction: () async {
+              await openPeopleAndWait(context);
+              _load();
+            },
+          ),
+        ]),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView.separated(
+        controller: _scroll,
+        physics: AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(16, 4, 16, 96),
+        itemCount: _runs.length,
+        separatorBuilder: (_, _) => SizedBox(height: 10),
+        itemBuilder: (context, i) {
+          final r = _runs[i];
+          final act = SharedRunActions(context, ref);
+          return SharedRunCard(
+            run: r,
+            onKudo: () => act.kudo(r, _replaceRun),
+            onKudosList: () => act.kudosList(r),
+            onComments: () async {
+              if (await act.comments(r)) _load();
+            },
+            onMenu: () async {
+              if (await act.menu(r)) _load();
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -346,7 +510,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
   }
 }
 
-Future<String?> _askReason(BuildContext context) => showModalBottomSheet<String>(
+Future<String?> askReportReason(BuildContext context) => showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
@@ -361,8 +525,9 @@ Future<String?> _askReason(BuildContext context) => showModalBottomSheet<String>
       ),
     );
 
-class _Avatar extends StatelessWidget {
-  const _Avatar(this.name, {this.size = 36});
+/// Rondje met de eerste letter van de bijnaam (geen foto's: minder risico op misbruik).
+class RunnerAvatar extends StatelessWidget {
+  const RunnerAvatar(this.name, {super.key, this.size = 36});
   final String name;
   final double size;
 
@@ -394,11 +559,18 @@ class _PostCard extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16, 14, 8, 6),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          _Avatar(p.nickname),
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () => openRunnerProfile(context, p.nickname),
+            child: RunnerAvatar(p.nickname),
+          ),
           SizedBox(width: 10),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(p.nickname, style: TextStyle(fontWeight: FontWeight.w700)),
+              GestureDetector(
+                onTap: () => openRunnerProfile(context, p.nickname),
+                child: Text(p.nickname, style: TextStyle(fontWeight: FontWeight.w700)),
+              ),
               Text('${tr(communityTopics[p.topic] ?? p.topic)} · ${communityAgo(p.createdAt)}',
                   style: TextStyle(color: RwColors.subtle, fontSize: 12)),
             ]),
@@ -567,7 +739,7 @@ class _ThreadState extends ConsumerState<_Thread> {
     try {
       if (action == 'delete') await svc.delete('comment', c.id);
       if (action == 'report') {
-        final reason = await _askReason(context);
+        final reason = await askReportReason(context);
         if (reason == null) return;
         await svc.report('comment', c.id, reason);
         if (mounted) showMessage(context, tr('Bedankt, we kijken ernaar.'));
@@ -591,7 +763,7 @@ class _ThreadState extends ConsumerState<_Thread> {
           Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _Avatar(p.nickname, size: 30),
+              RunnerAvatar(p.nickname, size: 30),
               SizedBox(width: 10),
               Expanded(child: Text(p.body, style: TextStyle(height: 1.4))),
             ]),
@@ -613,7 +785,7 @@ class _ThreadState extends ConsumerState<_Thread> {
                             Padding(
                               padding: EdgeInsets.only(bottom: 10),
                               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                _Avatar(x.nickname, size: 26),
+                                RunnerAvatar(x.nickname, size: 26),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

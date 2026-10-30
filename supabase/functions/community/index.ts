@@ -8,7 +8,7 @@
 //   POST { action: "leave" }                  -> stoppen; alles van jou wordt verwijderd
 //   POST { action: "refresh" }                -> jouw standen opnieuw uitrekenen
 //   POST { action: "board", board, scope }    -> ranglijst ("all" of "friends")
-//   POST { action: "follow", code }           -> vriend toevoegen met zijn vriendcode
+//   POST { action: "follow", code }           -> vriend toevoegen met zijn vriendcode (meteen goedgekeurd)
 //   POST { action: "unfollow", nickname }     -> vriend weghalen
 //   POST { action: "friends" }                -> je vrienden
 
@@ -58,7 +58,7 @@ async function refresh(userId: string, boards: BoardDef[]) {
 }
 
 async function friendIds(userId: string): Promise<Set<string>> {
-  const { data } = await db.from("community_follows").select("followee").eq("follower", userId);
+  const { data } = await db.from("community_follows").select("followee").eq("follower", userId).eq("status", "accepted");
   return new Set((data ?? []).map((r) => r.followee as string));
 }
 
@@ -147,6 +147,10 @@ Deno.serve(async (req) => {
       }
       case "leave": {
         await db.from("board_entries").delete().eq("user_id", userId);
+        // Gedeelde runs, applaus en reacties (migratie 0034) gaan ook weg.
+        await db.from("run_shares").delete().eq("user_id", userId);
+        await db.from("run_kudos").delete().eq("user_id", userId);
+        await db.from("run_comments").delete().eq("user_id", userId);
         await db.from("community_follows").delete().or(`follower.eq.${userId},followee.eq.${userId}`);
         await db.from("community_profiles").delete().eq("user_id", userId);
         return json(200, { joined: false });
@@ -168,7 +172,11 @@ Deno.serve(async (req) => {
         const { data: other } = await db.from("community_profiles").select("user_id, nickname").eq("friend_code", code).maybeSingle();
         if (!other) return json(404, { error: "Geen loper gevonden met deze code." });
         if (other.user_id === userId) return json(400, { error: "Dit is je eigen code." });
-        await db.from("community_follows").upsert({ follower: userId, followee: other.user_id }, { onConflict: "follower,followee" });
+        const { data: blocked } = await db.from("community_blocks").select("blocker")
+          .or(`and(blocker.eq.${userId},blocked.eq.${other.user_id}),and(blocker.eq.${other.user_id},blocked.eq.${userId})`).limit(1);
+        if (blocked && blocked.length) return json(404, { error: "Geen loper gevonden met deze code." });
+        // Wie je zijn vriendcode geeft, keurt je daarmee goed: meteen volgen, ook als hij volgers goedkeurt.
+        await db.from("community_follows").upsert({ follower: userId, followee: other.user_id, status: "accepted" }, { onConflict: "follower,followee" });
         return json(200, { nickname: other.nickname });
       }
       case "unfollow": {

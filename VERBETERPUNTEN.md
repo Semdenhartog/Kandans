@@ -285,3 +285,9 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 195. ✅ Oorzaak te klein icoon gevonden: flutter_launcher_icons zet standaard 16% extra marge om de voorgrond. Nu 0, zodat de gouden rand echt tot de rand van het Samsung-icoon loopt.
 196. ✅ Definitief logo: champagnegouden K + KADANS op zwarte tegel. Homescherm-icoon = dit logo met K en tekst 8% groter; de tegel sluit aan op de vorm van het icoon.
 197. ✅ **Steunpagina** `site/steun.html`: doel €1.500 met eerlijke begroting (KvK, merk, Supabase, AI-coach, Apple, lancering), vier pakketten (1–2 jaar Premium, poster, lokale partner), toezeggen zonder betalen (naar de wachtlijst). Privacyverklaring aangevuld.
+
+## Ronde 30 oktober 2026 – volgen en runs delen (zoals Strava)
+198. ✅ **Volgen** (migratie 0034): lopers zoeken op bijnaam, volgen, terugvolgen, ontvolgen, volgers weghalen. Optie **"Volgers zelf goedkeuren"** met volgverzoeken (stipje bij het personen-icoon). Vriendcode = meteen goedgekeurd.
+199. ✅ **Runs delen**: per run kiezen tussen *Volgers* (standaard) en *Iedereen*, eigen titel, **privacyzone** 200 m / 500 m / 1 km rond start én finish (ook als je halverwege langs huis loopt). Gedeeld wordt een kopie zonder hartslag en zonder tijdstip. Strava-runs kunnen niet gedeeld worden. Delen stoppen kan altijd.
+200. ✅ **Community → Runs**: feed *Volgend* en *Iedereen*, kaart met de vorm van de route (tik = kaart), **applaus** en reacties, melden (3× = verborgen), blokkeren (haalt ook het volgen weg). *Gesprekken* = het bestaande forum. Tik op een naam → **profiel** met runs, volgers en volgend.
+201. ✅ Privacyverklaring aangevuld (Samen/community en gedeelde runs). Migratie lokaal getest op Postgres 16 met een scenario van drie lopers.
