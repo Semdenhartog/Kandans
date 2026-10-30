@@ -205,7 +205,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
             ),
             const SizedBox(height: 16),
             for (final (icon, text) in const [
-              (Icons.image_outlined, 'Vier posterstijlen: Goud, Marmer, Oceaan en Blauwdruk'),
+              (Icons.image_outlined, 'Vijf posterstijlen: Goud, Marmer, Topo, Oceaan en Blauwdruk'),
               (Icons.ios_share, 'Een gouden deelkaart voor je runs'),
               (Icons.print_outlined, 'Ook voor posters die je laat drukken'),
               (Icons.workspace_premium_outlined, 'Al inbegrepen als je Premium hebt'),

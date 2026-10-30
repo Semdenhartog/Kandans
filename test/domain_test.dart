@@ -1709,7 +1709,14 @@ void main() {
     test('routines: links/rechts uitgeschreven en een redelijke duur', () {
       for (final r in Routine.all) {
         expect(r.blocks.length, greaterThanOrEqualTo(r.exercises.length));
-        expect(r.totalSeconds, inInclusiveRange(4 * 60, 20 * 60));
+        expect(r.totalSeconds, inInclusiveRange(2 * 60, 20 * 60), reason: r.id);
+      }
+      expect(Routine.all.map((r) => r.id).toSet().length, Routine.all.length, reason: 'unieke ids');
+      for (final c in RoutineCategory.values) {
+        expect(Routine.all.where((r) => r.category == c).length, greaterThanOrEqualTo(3), reason: c.label);
+      }
+      for (final id in ['warmup', 'strength', 'cooldown']) {
+        expect(Routine.all.any((r) => r.id == id), isTrue, reason: 'bestaande id $id');
       }
     });
     test('speler: oefening, pauze, volgende, klaar', () {

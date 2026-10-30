@@ -35,14 +35,74 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
   final _key = GlobalKey();
   PosterStyle _style = PosterStyle.nacht;
   bool _busy = false;
+  late String _title = widget.route.name;
+  String? _subtitle;
+  bool _showElevation = true, _showKm = true, _showCoords = true;
 
   PosterData get _data => PosterData(
-        title: widget.route.name,
+        title: _title,
+        subtitle: _subtitle,
+        elevation: widget.route.elevationProfile,
+        startLat: widget.route.startLatitude,
+        startLon: widget.route.startLongitude,
+        showElevation: _showElevation,
+        showKm: _showKm,
+        showCoords: _showCoords,
         polyline: widget.route.polyline,
         distanceMeters: widget.route.distanceMeters,
         elevationGainMeters: widget.route.elevationGainMeters,
         fastestSeconds: widget.fastestSeconds,
         timesRun: widget.timesRun,
+      );
+
+  /// Titel en onderregel zelf invullen.
+  Future<void> _editText() async {
+    final title = TextEditingController(text: _title);
+    final sub = TextEditingController(text: _subtitle ?? '');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tekst op de poster'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(
+            controller: title,
+            maxLength: 32,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(labelText: 'Titel'),
+          ),
+          TextField(
+            controller: sub,
+            maxLength: 40,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(labelText: 'Onderregel', hintText: 'Bijv. Barneveld · oktober 2026'),
+          ),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuleren')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Opslaan')),
+        ],
+      ),
+    );
+    if (ok == true && mounted) {
+      setState(() {
+        _title = title.text.trim().isEmpty ? widget.route.name : title.text.trim();
+        _subtitle = sub.text.trim().isEmpty ? null : sub.text.trim();
+      });
+    }
+    title.dispose();
+    sub.dispose();
+  }
+
+  Widget _option(String label, bool on, ValueChanged<bool> set) => Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: FilterChip(
+          label: Text(label),
+          selected: on,
+          onSelected: (v) {
+            HapticFeedback.selectionClick();
+            setState(() => set(v));
+          },
+        ),
       );
 
   /// Luxe stijl gekozen maar nog niet ontgrendeld? Dan eerst het verkoopvenster.
@@ -156,6 +216,19 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
                 );
               },
             ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(20, 2, 20, 6),
+            child: Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(avatar: const Icon(Icons.edit_outlined, size: 18), label: const Text('Tekst'), onPressed: _editText),
+              ),
+              if (widget.route.elevationProfile.length >= 2) _option('Hoogteprofiel', _showElevation, (v) => _showElevation = v),
+              _option('Kilometers', _showKm, (v) => _showKm = v),
+              _option('Coördinaten', _showCoords, (v) => _showCoords = v),
+            ]),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),

@@ -40,6 +40,7 @@ import 'package:runwise/features/activities/fitness_screen.dart';
 import 'package:runwise/features/activities/strength_screen.dart';
 import 'package:runwise/features/activities/year_story_screen.dart';
 import 'package:runwise/domain/strength.dart';
+import 'package:runwise/domain/route_geometry.dart';
 import 'package:runwise/features/coach/coach_screen.dart';
 import 'package:runwise/features/coach/paywall_screen.dart';
 import 'package:runwise/features/dashboard/dashboard_providers.dart';
@@ -69,6 +70,7 @@ import 'package:runwise/domain/run_streams.dart';
 import 'package:runwise/features/routes/route_detail_screen.dart';
 import 'package:runwise/features/routes/routes_screen.dart';
 import 'package:runwise/features/routes/poster_design.dart';
+import 'package:runwise/features/routes/route_poster_screen.dart';
 import 'package:runwise/features/routes/poster_order_screen.dart';
 import 'package:runwise/features/activities/share_run_screen.dart' show RunShareCard;
 import 'package:runwise/features/luxe/luxe.dart' show luxeAccessProvider;
@@ -139,6 +141,7 @@ final _routes = [
       polyline: encodePolyline(_loop(8.2, 0)),
       elevationGainMeters: 34,
       estimatedDurationSeconds: 2700,
+      elevationProfile: [for (var i = 0; i <= 82; i++) ElevationSample(i * 100.0, 8 + 10 * math.sin(i / 9) + 4 * math.sin(i / 3.3))],
       isFavorite: true),
   RunRoute(
       id: 'r2',
@@ -527,7 +530,7 @@ void main() {
           hrStatus: HrStatus.connected,
         );
       }));
-  testWidgets('26 kracht', (t) => _shot(t, '26_kracht', const StrengthScreen(), height: 915));
+  testWidgets('26 kracht', (t) => _shot(t, '26_kracht', const StrengthScreen(), height: 3400));
   testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
   testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
   testWidgets('29 premium', (t) => _shot(t, '29_premium', const PaywallScreen(), height: 1300));
@@ -539,7 +542,17 @@ void main() {
   testWidgets('44 schoenen aan vervanging toe', (t) => _shot(t, '44_schoenen', const ShoesScreen(), height: 1400, wornShoe: true));
   testWidgets('45 luxe posters', (t) {
     final r = _routes.first;
-    final data = PosterData(title: r.name, polyline: r.polyline, distanceMeters: r.distanceMeters, elevationGainMeters: r.elevationGainMeters, timesRun: 19);
+    final data = PosterData(
+      title: r.name,
+      subtitle: 'Barneveld · oktober 2026',
+      polyline: r.polyline,
+      distanceMeters: r.distanceMeters,
+      elevationGainMeters: r.elevationGainMeters,
+      timesRun: 19,
+      elevation: r.elevationProfile,
+      startLat: r.startLatitude,
+      startLon: r.startLongitude,
+    );
     return _shot(
         t,
         '45_luxe_posters',
@@ -550,11 +563,12 @@ void main() {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             childAspectRatio: 4 / 5,
-            children: [for (final st in PosterStyle.values.where((x) => x.isLuxe)) RoutePosterArt(data: data, style: st)],
+            children: [for (final st in PosterStyle.values) RoutePosterArt(data: data, style: st)],
           ),
         ),
-        height: 1000);
+        height: 1900);
   });
+  testWidgets('45b poster maken', (t) => _shot(t, '45b_poster_maken', RoutePosterScreen(route: _routes.first, timesRun: 19), height: 915));
   testWidgets('46 gouden deelkaart', (t) => _shot(
       t, '46_gouden_deelkaart', Scaffold(body: Center(child: RunShareCard(activity: _runs.first, route: _routes.first, gold: true, badges: const ['Record 5 km']))),
       height: 700));

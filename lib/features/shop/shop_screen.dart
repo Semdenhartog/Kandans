@@ -86,7 +86,7 @@ class ShopScreen extends ConsumerWidget {
                 )
               else
                 SizedBox(
-                  height: 236,
+                  height: 262,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: shown.length,
@@ -95,6 +95,7 @@ class ShopScreen extends ConsumerWidget {
                       final r = shown[i];
                       final mine = runs.where((a) => a.routeId != null && a.routeId == r.id).toList();
                       final fastest = mine.isEmpty ? null : mine.map((a) => a.movingTimeSeconds).reduce((a, b) => a < b ? a : b);
+                      const styles = [PosterStyle.goud, PosterStyle.marmer, PosterStyle.topo];
                       return Semantics(
                         button: true,
                         label: 'Poster van ${r.name}',
@@ -104,29 +105,34 @@ class ShopScreen extends ConsumerWidget {
                             openRoutePoster(context, r, fastestSeconds: fastest, timesRun: mine.length);
                           },
                           child: SizedBox(
-                            width: 150,
+                            width: 168,
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: AspectRatio(
-                                  aspectRatio: 3 / 4,
-                                  child: IgnorePointer(
-                                    child: RoutePosterArt(
-                                      style: i.isEven ? PosterStyle.goud : PosterStyle.marmer,
-                                      data: PosterData(
-                                        title: r.name,
-                                        polyline: r.polyline,
-                                        distanceMeters: r.distanceMeters,
-                                        elevationGainMeters: r.elevationGainMeters,
-                                        fastestSeconds: fastest,
-                                        timesRun: mine.length,
-                                      ),
-                                    ),
+                              _FramedPoster(
+                                child: RoutePosterArt(
+                                  style: styles[i % styles.length],
+                                  data: PosterData(
+                                    title: r.name,
+                                    polyline: r.polyline,
+                                    distanceMeters: r.distanceMeters,
+                                    elevationGainMeters: r.elevationGainMeters,
+                                    fastestSeconds: fastest,
+                                    timesRun: mine.length,
+                                    elevation: r.elevationProfile,
+                                    startLat: r.startLatitude,
+                                    startLon: r.startLongitude,
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 6),
+                              SizedBox(height: 8),
                               Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: pal.text, fontWeight: FontWeight.w600)),
+                              Text(
+                                [
+                                  Fmt.km(r.distanceMeters, decimals: 1),
+                                  if (r.elevationGainMeters != null) '${r.elevationGainMeters!.round()} hm',
+                                ].join(' · '),
+                                maxLines: 1,
+                                style: TextStyle(color: pal.muted, fontSize: 12),
+                              ),
                             ]),
                           ),
                         ),
@@ -134,6 +140,13 @@ class ShopScreen extends ConsumerWidget {
                     },
                   ),
                 ),
+              SizedBox(height: 12),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                _Feature(icon: Icons.straighten, text: tr('30 × 40 of 50 × 70 cm')),
+                _Feature(icon: Icons.texture, text: tr('Mat papier, 200 g/m²')),
+                _Feature(icon: Icons.terrain_outlined, text: tr('Hoogteprofiel en kilometers')),
+                _Feature(icon: Icons.edit_outlined, text: tr('Eigen titel en tekst')),
+              ]),
               SizedBox(height: 8),
               Row(children: [
                 Expanded(
@@ -154,7 +167,7 @@ class ShopScreen extends ConsumerWidget {
               SizedBox(height: 10),
               _Panel(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(tr('4 posterstijlen (Goud, Marmer, Oceaan, Blauwdruk) en een gouden deelkaart. Eén keer kopen, voor altijd van jou. Bij Premium inbegrepen.'),
+                  Text(tr('5 posterstijlen (Goud, Marmer, Topo, Oceaan, Blauwdruk) en een gouden deelkaart. Eén keer kopen, voor altijd van jou. Bij Premium inbegrepen.'),
                       style: body),
                   SizedBox(height: 12),
                   _GoldButton(
@@ -373,6 +386,71 @@ class _GoldButton extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: child,
+    );
+  }
+}
+
+/// Een poster in een dunne zwarte lijst met een wit passe-partout, tegen een warme muur.
+class _FramedPoster extends StatelessWidget {
+  const _FramedPoster({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 4 / 5,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2A241C), Color(0xFF1A160F)],
+          ),
+        ),
+        child: Center(
+          child: FractionallySizedBox(
+            heightFactor: 0.86,
+            child: AspectRatio(
+              aspectRatio: 3 / 4,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF0B0A08),
+                  boxShadow: [BoxShadow(color: Color(0x99000000), blurRadius: 14, offset: Offset(0, 8))],
+                ),
+                child: Container(
+                  color: const Color(0xFFF7F3EC),
+                  padding: const EdgeInsets.all(8),
+                  child: IgnorePointer(child: ClipRect(child: child)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Feature extends StatelessWidget {
+  const _Feature({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0x55D9BF92)),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 14, color: const Color(0xFFD9BF92)),
+        const SizedBox(width: 6),
+        Flexible(child: Text(text, style: const TextStyle(color: Color(0xFFE9DFCD), fontSize: 12, fontWeight: FontWeight.w600))),
+      ]),
     );
   }
 }

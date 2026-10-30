@@ -1,13 +1,15 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/geo.dart';
+import '../../domain/route_geometry.dart';
 
 /// Achtergrondtextuur van een posterstijl.
-enum PosterTexture { none, marble, grid }
+enum PosterTexture { none, marble, grid, topo }
 
 /// Een posterstijl. De stijlen met [isLuxe] horen bij de Luxe-ontwerpen (losse aankoop, gratis bij Premium).
 enum PosterStyle {
@@ -18,6 +20,8 @@ enum PosterStyle {
       isLuxe: true, frame: Color(0xFFD9B45A), goldText: true, glow: true),
   marmer('Marmer', [Color(0xFFF6F4EF), Color(0xFFE9E5DC)], Color(0xFF1F1D1A), Color(0xFF2B2824),
       isLuxe: true, frame: Color(0xFFB8964A), texture: PosterTexture.marble),
+  topo('Topo', [Color(0xFFF0E9DB), Color(0xFFE5DAC6)], Color(0xFF2A2620), Color(0xFF8A3B1E),
+      isLuxe: true, frame: Color(0xFF8A7A5C), texture: PosterTexture.topo),
   oceaan('Oceaan', [Color(0xFF0B3B5C), Color(0xFF041A2B)], Color(0xFFE6F6FB), Color(0xFF7DE3F4),
       isLuxe: true, glow: true),
   blauwdruk('Blauwdruk', [Color(0xFF0F4C81), Color(0xFF0B3A63)], Color(0xFFF2F7FC), Color(0xFFFFFFFF),
@@ -43,7 +47,7 @@ enum PosterStyle {
   final Color line;
   final bool isLuxe;
 
-  /// Dunne lijst rondom (bijv. goud).
+  /// Dunne dubbele lijst rondom (bijv. goud).
   final Color? frame;
 
   /// Titel en cijfers met een gouden verloop.
@@ -52,9 +56,12 @@ enum PosterStyle {
   /// Zachte gloed onder de routelijn.
   final bool glow;
   final PosterTexture texture;
+
+  /// Kleur voor sierlijnen.
+  Color get accent => frame ?? line;
 }
 
-/// De cijfers op de poster.
+/// De cijfers en keuzes op de poster.
 class PosterData {
   const PosterData({
     required this.title,
@@ -64,6 +71,12 @@ class PosterData {
     this.fastestSeconds,
     this.timesRun = 0,
     this.subtitle,
+    this.elevation = const [],
+    this.startLat,
+    this.startLon,
+    this.showElevation = true,
+    this.showKm = true,
+    this.showCoords = true,
   });
 
   final String title;
@@ -73,8 +86,24 @@ class PosterData {
   final int? fastestSeconds;
   final int timesRun;
 
-  /// Kleine regel onder de titel (bijv. plaats of datum).
+  /// Kleine regel onder de titel (bijv. plaats en datum of een eigen tekst).
   final String? subtitle;
+
+  /// Hoogteprofiel langs de route (voor de strook onder de lijn).
+  final List<ElevationSample> elevation;
+  final double? startLat;
+  final double? startLon;
+
+  final bool showElevation;
+  final bool showKm;
+  final bool showCoords;
+}
+
+/// Coördinaten van de start, zoals op een kaart: "52.1528° N · 5.6034° O".
+String posterCoordinates(double lat, double lon) {
+  final ns = lat >= 0 ? 'N' : 'Z';
+  final eo = lon >= 0 ? 'O' : 'W';
+  return '${lat.abs().toStringAsFixed(4)}° $ns  ·  ${lon.abs().toStringAsFixed(4)}° $eo';
 }
 
 /// De poster zelf, op elke maat. Alles schaalt mee met de breedte, zodat dezelfde poster
@@ -86,101 +115,169 @@ class RoutePosterArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, c) {
-      // Ontworpen op 360 breed; daarna geschaald.
-      final u = c.maxWidth / 360;
-      final s = style;
-      Widget gold(Widget child) => s.goldText
-          ? ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (r) => const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF3DC95), Color(0xFFD9B45A), Color(0xFF9C7A2E), Color(0xFFE8C977)],
-                stops: [0, 0.4, 0.75, 1],
-              ).createShader(r),
-              child: child,
-            )
-          : child;
+    // Een poster is een vast ontwerp: niet meeschalen met de lettergrootte van de telefoon.
+    return MediaQuery.withNoTextScaling(
+      child: LayoutBuilder(builder: (context, c) {
+        // Ontworpen op 360 breed; daarna geschaald.
+        final u = c.maxWidth / 360;
+        final s = style;
+        Widget gold(Widget child) => s.goldText
+            ? ShaderMask(
+                blendMode: BlendMode.srcIn,
+                shaderCallback: (r) => const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFF3DC95), Color(0xFFD9B45A), Color(0xFF9C7A2E), Color(0xFFE8C977)],
+                  stops: [0, 0.4, 0.75, 1],
+                ).createShader(r),
+                child: child,
+              )
+            : child;
 
-      Widget stat(String label, String value) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label.toUpperCase(),
-                style: TextStyle(color: s.fg.withValues(alpha: 0.55), fontSize: 10 * u, letterSpacing: 1.6 * u, fontWeight: FontWeight.w600)),
-            SizedBox(height: 3 * u),
-            gold(Text(value,
-                maxLines: 1,
-                style: TextStyle(color: s.fg, fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24 * u, fontWeight: FontWeight.w800))),
-          ]);
+        Widget stat(String label, String value) => Column(mainAxisSize: MainAxisSize.min, children: [
+              gold(Text(value,
+                  maxLines: 1,
+                  style: TextStyle(
+                      color: s.fg, fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18 * u, fontWeight: FontWeight.w700, height: 1.1))),
+              SizedBox(height: 3 * u),
+              Text(label.toUpperCase(),
+                  maxLines: 1,
+                  style: TextStyle(color: s.fg.withValues(alpha: 0.55), fontSize: 7 * u, letterSpacing: 1.8 * u, fontWeight: FontWeight.w600)),
+            ]);
 
-      final pts = decodePolyline(data.polyline);
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: s.background),
-        ),
-        child: Stack(children: [
-          if (s.texture != PosterTexture.none) Positioned.fill(child: CustomPaint(painter: _TexturePainter(s.texture, u))),
-          if (s.frame != null)
-            Positioned.fill(
-              child: Padding(
-                padding: EdgeInsets.all(12 * u),
-                child: DecoratedBox(decoration: BoxDecoration(border: Border.all(color: s.frame!.withValues(alpha: 0.8), width: 1 * u))),
-              ),
-            ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(30 * u, 34 * u, 30 * u, 26 * u),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              gold(Text(data.title.toUpperCase(),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: s.fg, fontFamily: RwFonts.display, fontSize: 30 * u, fontWeight: FontWeight.w800, height: 1.05))),
-              if (data.subtitle != null) ...[
-                SizedBox(height: 4 * u),
-                Text(data.subtitle!, style: TextStyle(color: s.fg.withValues(alpha: 0.6), fontSize: 11 * u, letterSpacing: 0.6 * u)),
-              ],
-              SizedBox(height: 8 * u),
-              Align(alignment: Alignment.centerLeft, child: Container(height: 3 * u, width: 48 * u, color: s.frame ?? s.line)),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 22 * u),
-                  child: CustomPaint(painter: PosterRoutePainter(pts, color: s.line, width: 4.5 * u, glow: s.glow), size: Size.infinite),
-                ),
-              ),
-              Row(children: [
-                Expanded(child: stat('Afstand', Fmt.km(data.distanceMeters, decimals: 1))),
-                Expanded(child: stat('Hoogte', data.elevationGainMeters == null ? '–' : '${data.elevationGainMeters!.round()} m')),
-                Expanded(
-                  child: data.fastestSeconds != null
-                      ? stat('Snelste', Fmt.duration(data.fastestSeconds!))
-                      : stat('Gelopen', '${data.timesRun}×'),
-                ),
-              ]),
-              SizedBox(height: 18 * u),
-              Row(children: [
-                gold(Text('KADANS',
-                    style: TextStyle(
-                        color: s.fg.withValues(alpha: 0.7),
-                        fontFamily: RwFonts.display,
-                        fontSize: 13 * u,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 3 * u))),
-                const Spacer(),
-                Text('loop op het beste moment', style: TextStyle(color: s.fg.withValues(alpha: 0.45), fontSize: 10 * u)),
-              ]),
-            ]),
+        Widget divider() => Container(width: 0.6 * u, height: 26 * u, color: s.fg.withValues(alpha: 0.22));
+
+        final pts = decodePolyline(data.polyline);
+        final lat = data.startLat ?? (pts.isEmpty ? null : pts.first.lat);
+        final lon = data.startLon ?? (pts.isEmpty ? null : pts.first.lon);
+        final ele = data.showElevation && data.elevation.length >= 2 ? data.elevation : null;
+        final third = data.fastestSeconds != null
+            ? stat('Snelste', Fmt.duration(data.fastestSeconds!))
+            : stat('Gelopen', '${data.timesRun}×');
+
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: s.background),
           ),
-        ]),
-      );
-    });
+          child: Stack(children: [
+            if (s.texture != PosterTexture.none) Positioned.fill(child: CustomPaint(painter: _TexturePainter(s.texture, u, s.fg))),
+            Positioned.fill(child: CustomPaint(painter: _GrainPainter(u, s.fg))),
+            if (s.frame != null) ...[
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.all(11 * u),
+                  child: DecoratedBox(decoration: BoxDecoration(border: Border.all(color: s.frame!.withValues(alpha: 0.85), width: 1.1 * u))),
+                ),
+              ),
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.all(15 * u),
+                  child: DecoratedBox(decoration: BoxDecoration(border: Border.all(color: s.frame!.withValues(alpha: 0.45), width: 0.5 * u))),
+                ),
+              ),
+            ],
+            Padding(
+              padding: EdgeInsets.fromLTRB(30 * u, 28 * u, 30 * u, 22 * u),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                if (data.showCoords && lat != null && lon != null)
+                  Text(posterCoordinates(lat, lon),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: TextStyle(
+                          color: s.fg.withValues(alpha: 0.5), fontFeatures: rwTnum, fontSize: 7.5 * u, letterSpacing: 1.6 * u, fontWeight: FontWeight.w500)),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 14 * u),
+                    child: CustomPaint(
+                      painter: PosterRoutePainter(
+                        pts,
+                        color: s.line,
+                        width: 3.6 * u,
+                        glow: s.glow,
+                        background: s.background.last,
+                        kmMarkers: data.showKm,
+                        u: u,
+                      ),
+                      size: Size.infinite,
+                    ),
+                  ),
+                ),
+                if (ele != null) ...[
+                  SizedBox(
+                    height: 30 * u,
+                    child: CustomPaint(painter: _ElevationStripPainter(ele, color: s.line, text: s.fg, u: u), size: Size.infinite),
+                  ),
+                  SizedBox(height: 14 * u),
+                ],
+                gold(Text(data.title.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: s.fg, fontFamily: RwFonts.display, fontSize: 25 * u, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: 2.6 * u))),
+                if (data.subtitle != null && data.subtitle!.trim().isNotEmpty) ...[
+                  SizedBox(height: 5 * u),
+                  Text(data.subtitle!.trim().toUpperCase(),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: s.fg.withValues(alpha: 0.6), fontSize: 8 * u, letterSpacing: 2.4 * u, fontWeight: FontWeight.w600)),
+                ],
+                // Sierlijn met een ruitje in het midden.
+                Padding(
+                  padding: EdgeInsets.fromLTRB(80 * u, 11 * u, 80 * u, 12 * u),
+                  child: Row(children: [
+                    Expanded(child: Container(height: 0.6 * u, color: s.accent.withValues(alpha: 0.7))),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 7 * u),
+                      child: Transform.rotate(
+                        angle: math.pi / 4,
+                        child: Container(width: 4.5 * u, height: 4.5 * u, color: s.accent),
+                      ),
+                    ),
+                    Expanded(child: Container(height: 0.6 * u, color: s.accent.withValues(alpha: 0.7))),
+                  ]),
+                ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Expanded(child: stat('Afstand', Fmt.km(data.distanceMeters, decimals: 1))),
+                  divider(),
+                  Expanded(child: stat('Hoogtemeters', data.elevationGainMeters == null ? '–' : '${data.elevationGainMeters!.round()} m')),
+                  divider(),
+                  Expanded(child: third),
+                ]),
+                SizedBox(height: 16 * u),
+                Text('K A D A N S',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: s.fg.withValues(alpha: 0.45), fontFamily: RwFonts.display, fontSize: 7.5 * u, fontWeight: FontWeight.w700, letterSpacing: 2 * u)),
+              ]),
+            ),
+          ]),
+        );
+      }),
+    );
   }
 }
 
-/// Routelijn voor de poster: past in het vak, ronde hoeken, eventueel met gloed.
+/// Routelijn voor de poster: past in het vak, ronde hoeken, eventueel met gloed,
+/// een open rondje bij de start, een stip bij de finish en (als gewenst) kilometerpunten.
 class PosterRoutePainter extends CustomPainter {
-  PosterRoutePainter(this.points, {required this.color, required this.width, this.glow = false});
+  PosterRoutePainter(
+    this.points, {
+    required this.color,
+    required this.width,
+    this.glow = false,
+    this.background = const Color(0xFF000000),
+    this.kmMarkers = false,
+    this.u = 1,
+  });
   final List<LatLng> points;
   final Color color;
   final double width;
   final bool glow;
+  final Color background;
+  final bool kmMarkers;
+  final double u;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -195,7 +292,7 @@ class PosterRoutePainter extends CustomPainter {
     final lonScale = math.cos((minLat + maxLat) / 2 * math.pi / 180);
     final w = math.max((maxLon - minLon) * lonScale, 1e-9);
     final h = math.max(maxLat - minLat, 1e-9);
-    final pad = width * 2;
+    final pad = width * 3;
     final scale = math.min((size.width - 2 * pad) / w, (size.height - 2 * pad) / h);
     final ox = (size.width - w * scale) / 2;
     final oy = (size.height - h * scale) / 2;
@@ -227,21 +324,183 @@ class PosterRoutePainter extends CustomPainter {
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
     );
-    final start = at(points.first);
-    canvas.drawCircle(start, width * 1.6, Paint()..color = color);
+
+    // Kilometerpunten: elke km (tot 21 km), elke 5 km (tot 60 km).
+    if (kmMarkers) {
+      var total = 0.0;
+      for (var i = 1; i < points.length; i++) {
+        total += distanceMeters(points[i - 1], points[i]);
+      }
+      final step = total <= 21500 ? 1000.0 : (total <= 60000 ? 5000.0 : 0.0);
+      if (step > 0) {
+        final r = 5.2 * u;
+        var next = step, run = 0.0;
+        for (var i = 1; i < points.length && next < total - step * 0.4; i++) {
+          final d = distanceMeters(points[i - 1], points[i]);
+          while (d > 0 && run + d >= next && next < total - step * 0.4) {
+            final t = (next - run) / d;
+            final a = at(points[i - 1]), b = at(points[i]);
+            final o = Offset(a.dx + (b.dx - a.dx) * t, a.dy + (b.dy - a.dy) * t);
+            canvas.drawCircle(o, r, Paint()..color = background);
+            canvas.drawCircle(
+              o,
+              r,
+              Paint()
+                ..color = color
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 0.9 * u,
+            );
+            final tp = TextPainter(
+              text: TextSpan(
+                text: '${(next / 1000).round()}',
+                style: TextStyle(color: color, fontSize: 5.2 * u, fontWeight: FontWeight.w800, fontFamily: RwFonts.display, height: 1),
+              ),
+              textDirection: TextDirection.ltr,
+            )..layout();
+            tp.paint(canvas, o - Offset(tp.width / 2, tp.height / 2));
+            next += step;
+          }
+          run += d;
+        }
+      }
+    }
+
+    // Start (open rondje) en finish (stip). Bij een rondje vallen ze samen: rondje met stip.
+    final start = at(points.first), end = at(points.last);
+    final ring = width * 1.7;
+    if ((start - end).distance > ring * 2.2) {
+      canvas.drawCircle(end, ring * 0.85, Paint()..color = color);
+    }
+    canvas.drawCircle(start, ring, Paint()..color = background);
+    canvas.drawCircle(
+      start,
+      ring,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width * 0.55,
+    );
+    if ((start - end).distance <= ring * 2.2) canvas.drawCircle(start, ring * 0.4, Paint()..color = color);
   }
 
   @override
   bool shouldRepaint(PosterRoutePainter old) =>
-      old.points != points || old.color != color || old.width != width || old.glow != glow;
+      old.points != points ||
+      old.color != color ||
+      old.width != width ||
+      old.glow != glow ||
+      old.background != background ||
+      old.kmMarkers != kmMarkers ||
+      old.u != u;
 }
 
-/// Marmeraders of een blauwdruk-raster, altijd hetzelfde (vaste startwaarde), zodat de poster
+/// Smalle strook met het hoogteprofiel, met de hoogste en laagste meter erbij.
+class _ElevationStripPainter extends CustomPainter {
+  _ElevationStripPainter(this.samples, {required this.color, required this.text, required this.u});
+  final List<ElevationSample> samples;
+  final Color color;
+  final Color text;
+  final double u;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final first = samples.first.meters, last = samples.last.meters;
+    final span = math.max(last - first, 1.0);
+    var lo = samples.first.ele, hi = lo;
+    for (final s in samples) {
+      lo = math.min(lo, s.ele);
+      hi = math.max(hi, s.ele);
+    }
+    // Minstens 20 m bereik, anders lijkt een vlak rondje een berg.
+    final mid = (lo + hi) / 2;
+    final range = math.max(hi - lo, 20.0);
+    final bottom = mid - range / 2;
+    final labelW = 26 * u;
+    final w = size.width - labelW;
+    Offset at(ElevationSample s) =>
+        Offset(labelW + (s.meters - first) / span * w, size.height - (s.ele - bottom) / range * (size.height - 2 * u) - 1 * u);
+
+    final line = Path()..moveTo(at(samples.first).dx, at(samples.first).dy);
+    for (final s in samples.skip(1)) {
+      final o = at(s);
+      line.lineTo(o.dx, o.dy);
+    }
+    final area = Path.from(line)
+      ..lineTo(size.width, size.height)
+      ..lineTo(labelW, size.height)
+      ..close();
+    canvas.drawPath(
+      area,
+      Paint()
+        ..shader = ui.Gradient.linear(Offset(0, 0), Offset(0, size.height), [color.withValues(alpha: 0.32), color.withValues(alpha: 0.02)]),
+    );
+    canvas.drawPath(
+      line,
+      Paint()
+        ..color = color.withValues(alpha: 0.9)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.9 * u
+        ..strokeJoin = StrokeJoin.round,
+    );
+    canvas.drawLine(
+      Offset(labelW, size.height),
+      Offset(size.width, size.height),
+      Paint()
+        ..color = text.withValues(alpha: 0.25)
+        ..strokeWidth = 0.5 * u,
+    );
+
+    void label(String s, double y) {
+      final tp = TextPainter(
+        text: TextSpan(
+          text: s,
+          style: TextStyle(color: text.withValues(alpha: 0.5), fontSize: 5.6 * u, fontFeatures: rwTnum, fontWeight: FontWeight.w600, height: 1),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(labelW - 4 * u - tp.width, y - tp.height / 2));
+    }
+
+    label('${hi.round()} m', at(ElevationSample(first, hi)).dy);
+    label('${lo.round()} m', at(ElevationSample(first, lo)).dy);
+  }
+
+  @override
+  bool shouldRepaint(_ElevationStripPainter old) => old.samples != samples || old.color != color || old.u != u;
+}
+
+/// Heel fijne papierkorrel, altijd hetzelfde (vaste startwaarde).
+class _GrainPainter extends CustomPainter {
+  _GrainPainter(this.u, this.fg);
+  final double u;
+  final Color fg;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = math.Random(11);
+    final n = (size.width * size.height / (16 * u * u)).clamp(0, 6000).toInt();
+    final pts = [for (var i = 0; i < n; i++) Offset(r.nextDouble() * size.width, r.nextDouble() * size.height)];
+    canvas.drawPoints(
+      ui.PointMode.points,
+      pts,
+      Paint()
+        ..color = fg.withValues(alpha: 0.05)
+        ..strokeWidth = 0.8 * u
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_GrainPainter old) => old.u != u || old.fg != fg;
+}
+
+/// Marmeraders, een blauwdruk-raster of hoogtelijnen, altijd hetzelfde (vaste startwaarde), zodat de poster
 /// op het scherm en bij de drukker gelijk is.
 class _TexturePainter extends CustomPainter {
-  _TexturePainter(this.texture, this.u);
+  _TexturePainter(this.texture, this.u, this.fg);
   final PosterTexture texture;
   final double u;
+  final Color fg;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -263,6 +522,41 @@ class _TexturePainter extends CustomPainter {
         i = 0;
         for (var y = 0.0; y <= size.height; y += step, i++) {
           canvas.drawLine(Offset(0, y), Offset(size.width, y), i % 5 == 0 ? thick : thin);
+        }
+      case PosterTexture.topo:
+        // Hoogtelijnen rond een paar "heuvels", zoals op een stafkaart.
+        final r = math.Random(5);
+        final hills = [
+          Offset(size.width * 0.18, size.height * 0.22),
+          Offset(size.width * 0.86, size.height * 0.5),
+          Offset(size.width * 0.3, size.height * 0.9),
+        ];
+        for (final c in hills) {
+          final phases = [for (var k = 0; k < 3; k++) r.nextDouble() * math.pi * 2];
+          for (var ring = 1; ring <= 11; ring++) {
+            final base = ring * 17.0 * u;
+            final path = Path();
+            for (var a = 0; a <= 90; a++) {
+              final t = a / 90 * math.pi * 2;
+              final wobble = 1 +
+                  0.16 * math.sin(2 * t + phases[0]) +
+                  0.09 * math.sin(3 * t + phases[1] + ring * 0.25) +
+                  0.05 * math.sin(5 * t + phases[2]);
+              final p = c + Offset(math.cos(t), math.sin(t) * 0.82) * base * wobble;
+              if (a == 0) {
+                path.moveTo(p.dx, p.dy);
+              } else {
+                path.lineTo(p.dx, p.dy);
+              }
+            }
+            canvas.drawPath(
+              path,
+              Paint()
+                ..style = PaintingStyle.stroke
+                ..color = fg.withValues(alpha: ring % 5 == 0 ? 0.13 : 0.07)
+                ..strokeWidth = (ring % 5 == 0 ? 0.9 : 0.55) * u,
+            );
+          }
         }
       case PosterTexture.marble:
         final r = math.Random(7);
@@ -288,5 +582,5 @@ class _TexturePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TexturePainter old) => old.texture != texture || old.u != u;
+  bool shouldRepaint(_TexturePainter old) => old.texture != texture || old.u != u || old.fg != fg;
 }

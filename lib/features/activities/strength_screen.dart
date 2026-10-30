@@ -22,6 +22,17 @@ IconData _icon(String name) => switch (name) {
       'local_fire_department' => Icons.local_fire_department_outlined,
       'fitness_center' => Icons.fitness_center,
       'self_improvement' => Icons.self_improvement,
+      'bolt' => Icons.bolt,
+      'speed' => Icons.speed,
+      'accessibility_new' => Icons.accessibility_new,
+      'directions_run' => Icons.directions_run,
+      'hiking' => Icons.hiking,
+      'trending_up' => Icons.trending_up,
+      'airline_seat_legroom_extra' => Icons.airline_seat_legroom_extra,
+      'airline_seat_recline_normal' => Icons.airline_seat_recline_normal,
+      'spa' => Icons.spa_outlined,
+      'directions_walk' => Icons.directions_walk,
+      'bedtime' => Icons.bedtime_outlined,
       _ => Icons.sports_gymnastics,
     };
 
@@ -36,30 +47,36 @@ class StrengthScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Twee keer per week kracht maakt je sneller en minder blessuregevoelig. Geen materiaal nodig; '
+              'Warming-up, kracht, mobiliteit en cooling-down voor lopers. Geen materiaal nodig; '
               'de stem telt mee, dus je hoeft niet op je scherm te kijken.',
               style: TextStyle(color: RwColors.muted, height: 1.45),
             ),
-            const SizedBox(height: 16),
-            for (final (i, r) in Routine.all.indexed)
-              StaggerIn(index: i, child: Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Card(
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    leading: CircleAvatar(
-                      radius: 24,
-                      backgroundColor: RwColors.accent.withValues(alpha: 0.15),
-                      child: Icon(_icon(r.icon), color: RwColors.accent),
+            for (final cat in RoutineCategory.values) ...[
+              const SizedBox(height: 18),
+              Text(cat.label, style: TextStyle(fontFamily: RwFonts.display, fontSize: 19, fontWeight: FontWeight.w800, color: RwColors.text)),
+              const SizedBox(height: 2),
+              Text(cat.intro, style: TextStyle(color: RwColors.subtle, fontSize: 13, height: 1.35)),
+              const SizedBox(height: 10),
+              for (final (i, r) in Routine.all.where((r) => r.category == cat).indexed)
+                StaggerIn(index: i, child: Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Card(
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      leading: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: RwColors.accent.withValues(alpha: 0.15),
+                        child: Icon(_icon(r.icon), color: RwColors.accent),
+                      ),
+                      title: Text(r.title),
+                      subtitle: Text('${(r.totalSeconds / 60).round()} min · ${r.exercises.length} oefeningen\n${r.subtitle}'),
+                      isThreeLine: true,
+                      trailing: Icon(Icons.play_circle_outline, color: RwColors.accent, size: 32),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RoutinePlayerScreen(routine: r))),
                     ),
-                    title: Text(r.title),
-                    subtitle: Text('${(r.totalSeconds / 60).round()} min · ${r.exercises.length} oefeningen\n${r.subtitle}'),
-                    isThreeLine: true,
-                    trailing: Icon(Icons.play_circle_outline, color: RwColors.accent, size: 32),
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RoutinePlayerScreen(routine: r))),
                   ),
-                ),
-              )),
+                )),
+            ],
             const SizedBox(height: 8),
             Text('Pijn bij een oefening? Stop ermee. Twijfel je, vraag een fysiotherapeut.',
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),
@@ -164,6 +181,18 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
               ),
               const SizedBox(height: 6),
               Text(_p.finished ? 'Klaar' : 'Oefening ${_p.index + 1} van ${_p.count}', style: TextStyle(color: RwColors.subtle)),
+              if (!_started && widget.routine.note != null) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                  child: Row(children: [
+                    Icon(Icons.info_outline, color: RwColors.accent, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(widget.routine.note!, style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35))),
+                  ]),
+                ),
+              ],
               const Spacer(),
               if (c == null) ...[
                 Icon(Icons.check_circle, color: RwColors.good, size: 72),
