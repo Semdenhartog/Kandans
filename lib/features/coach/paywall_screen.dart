@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
@@ -10,13 +10,8 @@ import '../../data/services/billing_service.dart';
 import '../../shared/widgets.dart';
 import '../profile/privacy_screen.dart';
 
-final _plansProvider = FutureProvider.autoDispose<List<PlanOption>>((ref) async {
-  final billing = ref.watch(billingServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (!billing.isAvailable || user == null) return const [];
-  return billing.plans(user.id);
-});
-
+/// Premium-pagina: uitleg in donker-goud, daarna de paywall van RevenueCat
+/// (maand, jaar of lifetime). Met Premium: het Customer Center om te beheren.
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
 
@@ -25,7 +20,6 @@ class PaywallScreen extends ConsumerStatefulWidget {
 }
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
-  bool _yearly = true;
   bool _busy = false;
 
   /// Wacht tot de server het abonnement heeft verwerkt (meestal een paar seconden).
@@ -39,22 +33,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return false;
   }
 
-  Future<void> _buy(PlanOption plan) async {
+  /// Voert een betaalactie uit met laadrondje en nette foutmelding.
+  Future<void> _run(Future<void> Function(String userId) action) async {
     final user = ref.read(currentUserProvider);
-    if (user == null) return;
+    if (user == null || _busy) return;
     setState(() => _busy = true);
     try {
-      final bought = await ref.read(billingServiceProvider).buy(user.id, plan);
-      if (!bought || !mounted) return;
-      final active = await _waitForPremium();
-      if (!mounted) return;
-      showMessage(
-        context,
-        active
-            ? 'Welkom bij Kadans Premium! Je coach staat klaar.'
-            : 'Betaling ontvangen. Je Premium wordt zo geactiveerd.',
-      );
-      if (context.canPop()) context.pop();
+      await action(user.id);
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
     } finally {
@@ -62,32 +47,47 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
-  Future<void> _restore() async {
-    final user = ref.read(currentUserProvider);
-    if (user == null) return;
-    setState(() => _busy = true);
-    try {
-      final found = await ref.read(billingServiceProvider).restore(user.id);
-      if (!mounted) return;
-      if (found) {
+  Future<void> _openPaywall() => _run((userId) async {
+        final outcome = await ref.read(billingServiceProvider).presentPaywall(userId);
+        if (outcome == PaywallOutcome.closed || !mounted) return;
+        final active = await _waitForPremium();
+        if (!mounted) return;
+        showMessage(
+          context,
+          active
+              ? tr('Welkom bij Kadans Premium! Je coach staat klaar.')
+              : tr('Betaling ontvangen. Je Premium wordt zo geactiveerd.'),
+        );
+        if (active && context.canPop()) context.pop();
+      });
+
+  Future<void> _openCustomerCenter() => _run((userId) async {
+        await ref.read(billingServiceProvider).presentCustomerCenter(
+              userId,
+              onRestored: () => ref.invalidate(profileProvider),
+            );
+        // Opgezegd of gewijzigd? De server weet het via de webhook; even verversen.
+        ref.invalidate(profileProvider);
+      });
+
+  Future<void> _restore() => _run((userId) async {
+        final found = await ref.read(billingServiceProvider).restore(userId);
+        if (!mounted) return;
+        if (!found) {
+          showMessage(context, tr('Geen aankoop gevonden op dit Google-account.'));
+          return;
+        }
         await _waitForPremium();
         if (!mounted) return;
-        showMessage(context, 'Je abonnement is teruggezet.');
-        if (context.canPop()) context.pop();
-      } else {
-        showMessage(context, 'Geen actief abonnement gevonden op dit Google-account.');
-      }
-    } catch (e) {
-      if (mounted) showMessage(context, friendlyError(e), error: true);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
+        showMessage(context, tr('Je aankoop is teruggezet.'));
+      });
 
   @override
   Widget build(BuildContext context) {
-    final plans = ref.watch(_plansProvider);
     final billing = ref.watch(billingServiceProvider);
+    final serverPremium = ref.watch(profileProvider).value?.isPremium ?? false;
+    final storePremium = ref.watch(revenueCatPremiumProvider).value ?? false;
+    final premium = serverPremium || storePremium;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -136,75 +136,47 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           const SizedBox(height: 22),
           if (!billing.isAvailable)
             _DarkNote(
-              text: 'Abonnementen zijn binnenkort beschikbaar. Zodra de app in de Play Store staat, '
-                  'kun je hier je gratis proefmaand starten.',
+              text: billing.isTestStoreKey
+                  ? tr('Deze versie gebruikt de testsleutel van RevenueCat. Die werkt alleen in een testversie van de app, '
+                      'niet in deze APK. Abonnementen zijn hier daarom nog niet beschikbaar.')
+                  : 'Abonnementen zijn binnenkort beschikbaar. Zodra de app in de Play Store staat, '
+                      'kun je hier je gratis proefmaand starten.',
             )
-          else
-            plans.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, _) => ErrorView(
-                message: 'Abonnementen konden niet worden geladen.',
-                onRetry: () => ref.invalidate(_plansProvider),
-              ),
-              data: (list) {
-                if (list.isEmpty) {
-                  return const _DarkNote(text: 'Er zijn nu geen abonnementen beschikbaar. Probeer het later opnieuw.');
-                }
-                final selected = list.firstWhere((p) => p.isYearly == _yearly, orElse: () => list.first);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final p in list) ...[
-                      _PlanTile(
-                        plan: p,
-                        selected: identical(p, selected),
-                        onTap: () => setState(() => _yearly = p.isYearly),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                    const SizedBox(height: 6),
-                    _GoldButton(
-                      onPressed: _busy ? null : () => _buy(selected),
-                      child: _busy
-                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: _ink))
-                          : Text(selected.hasFreeTrial ? 'Start 1 maand gratis' : 'Abonneren',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _ink, letterSpacing: 0.3)),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      selected.hasFreeTrial
-                          ? 'De eerste maand is gratis. Daarna ${selected.price} per ${selected.isYearly ? 'jaar' : 'maand'}, '
-                              'automatisch verlengd. Zeg op tot 24 uur voor het einde van de proefmaand in Google Play '
-                              'en je betaalt niets.'
-                          : '${selected.price} per ${selected.isYearly ? 'jaar' : 'maand'}, automatisch verlengd. '
-                              'Opzeggen kan altijd in Google Play.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: rwZandAvond.subtle, fontSize: 12, height: 1.5),
-                    ),
-                    const SizedBox(height: 14),
-                    const _Promise(),
-                  ],
-                );
-              },
+          else if (premium) ...[
+            _DarkNote(text: tr('Je hebt Kadans Premium. Bedankt voor je steun!')),
+            const SizedBox(height: 16),
+            _GoldButton(
+              onPressed: _busy ? null : _openCustomerCenter,
+              child: _busy
+                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: _ink))
+                  : Text(tr('Abonnement beheren'),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _ink, letterSpacing: 0.3)),
             ),
+          ] else ...[
+            _GoldButton(
+              onPressed: _busy ? null : _openPaywall,
+              child: _busy
+                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: _ink))
+                  : Text(tr('Kies je lidmaatschap'),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _ink, letterSpacing: 0.3)),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              tr('Per maand, per jaar of één keer voor altijd. Abonnementen verlengen automatisch; '
+                  'opzeggen kan altijd in Google Play.'),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: rwZandAvond.subtle, fontSize: 12, height: 1.5),
+            ),
+            const SizedBox(height: 14),
+            const _Promise(),
+          ],
           const SizedBox(height: 16),
-          if (billing.isAvailable)
+          if (billing.isAvailable && !premium)
             TextButton(
               style: TextButton.styleFrom(foregroundColor: _gold),
               onPressed: _busy ? null : _restore,
-              child: const Text('Aankoop terugzetten'),
+              child: Text(tr('Aankoop terugzetten')),
             ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: _gold),
-            onPressed: () => launchUrl(
-              Uri.parse('https://play.google.com/store/account/subscriptions'),
-              mode: LaunchMode.externalApplication,
-            ),
-            child: const Text('Abonnement beheren in Google Play'),
-          ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: _gold),
             onPressed: () => openPrivacy(context),
@@ -349,61 +321,6 @@ class _Benefit extends StatelessWidget {
           ],
         ),
       );
-}
-
-class _PlanTile extends StatelessWidget {
-  const _PlanTile({required this.plan, required this.selected, required this.onTap});
-  final PlanOption plan;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFF15110A) : const Color(0xFF0E0E10),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: selected ? _gold : const Color(0x22FFFFFF), width: selected ? 1.6 : 1),
-          boxShadow: selected ? [BoxShadow(color: _gold.withValues(alpha: 0.18), blurRadius: 20)] : null,
-        ),
-        child: Row(
-          children: [
-            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? _gold : rwZandAvond.subtle),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Text(plan.isYearly ? 'Per jaar' : 'Per maand',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                    if (plan.isYearly) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(gradient: _goldGradient, borderRadius: BorderRadius.circular(20)),
-                        child: const Text('BESTE KEUZE',
-                            style: TextStyle(color: _ink, fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                      ),
-                    ],
-                  ]),
-                  if (plan.isYearly)
-                    const Text('4 maanden gratis vergeleken met per maand',
-                        style: TextStyle(color: _gold, fontSize: 12)),
-                ],
-              ),
-            ),
-            Text(plan.price, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, fontFamily: RwFonts.display, fontFeatures: rwTnum)),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 /// Onze belofte (antwoord op de grootste ergernis bij andere loopapps: gratis functies die achter een betaalmuur verdwijnen).

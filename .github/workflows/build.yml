@@ -49,7 +49,11 @@ jobs:
         run: |
           if [ -n "$RC_KEY" ]; then
             python3 -c "import json,os; p='app_config.json'; d=json.load(open(p)); d['REVENUECAT_ANDROID_KEY']=os.environ['RC_KEY']; json.dump(d, open(p,'w'), indent=2)"
-            echo "::notice::RevenueCat-sleutel ingevuld: Premium kan gekocht worden"
+            case "$RC_KEY" in
+              test_*) echo "::warning::REVENUECAT_ANDROID_KEY is een Test Store-sleutel (test_…). Die werkt niet in een release-APK: de app toont Premium dan als 'nog niet beschikbaar'. Gebruik de goog_…-sleutel." ;;
+              goog_*) echo "::notice::RevenueCat-sleutel ingevuld: Premium kan gekocht worden" ;;
+              *) echo "::warning::REVENUECAT_ANDROID_KEY begint niet met goog_ of test_. Controleer de sleutel in RevenueCat → Project settings → API keys." ;;
+            esac
           else
             echo "::warning::Geen REVENUECAT_ANDROID_KEY in GitHub Secrets: Premium kopen werkt nog niet"
           fi

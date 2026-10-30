@@ -8,8 +8,10 @@
 //
 // Deploy met "Verify JWT" UIT: RevenueCat heeft geen Kadans-login.
 // De app logt bij RevenueCat in met de Supabase user-id, dus app_user_id = user_id.
+// Premium = recht kadans_pro (monthly, yearly, lifetime). Logica: ../_shared/revenuecat.ts
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { decide, type Existing } from "../_shared/revenuecat.ts";
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 
@@ -54,36 +56,15 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const productId = String(e.product_id ?? "");
-  const plan = /year|jaar|annual/i.test(productId) ? "yearly" : "monthly";
-  const periodEnd = e.expiration_at_ms ? new Date(e.expiration_at_ms) : new Date();
-  const trial = e.period_type === "TRIAL";
+  const { data: existing } = await db.from("subscriptions")
+    .select("plan,status,current_period_end")
+    .eq("user_id", userId).eq("provider", "revenuecat")
+    .maybeSingle();
 
-  let status: "active" | "trialing" | "expired" | "cancelled";
-  switch (e.type) {
-    case "INITIAL_PURCHASE":
-    case "RENEWAL":
-    case "PRODUCT_CHANGE":
-    case "UNCANCELLATION":
-    case "SUBSCRIPTION_EXTENDED":
-    case "TEMPORARY_ENTITLEMENT_GRANT":
-    case "TRANSFER":
-      status = trial ? "trialing" : "active";
-      break;
-    case "CANCELLATION":
-      // Automatisch verlengen staat uit, maar de betaalde periode loopt nog door.
-      status = periodEnd.getTime() > Date.now() ? (trial ? "trialing" : "active") : "cancelled";
-      break;
-    case "BILLING_ISSUE":
-      // Google geeft een respijtperiode; zolang die loopt houdt de gebruiker toegang.
-      status = periodEnd.getTime() > Date.now() ? "active" : "expired";
-      break;
-    case "EXPIRATION":
-      status = "expired";
-      break;
-    default:
-      return ok({ ignored: e.type });
-  }
+  const d = decide(e, (existing as Existing | null) ?? null);
+  if (d.kind === "ignore") return ok({ ignored: d.reason });
+  const { plan, status } = d;
+  const periodEnd = d.periodEnd;
 
   const { error } = await db.from("subscriptions").upsert({
     user_id: userId,
