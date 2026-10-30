@@ -38,6 +38,8 @@ import '../../domain/run_goal.dart';
 import '../../domain/run_warnings.dart';
 import 'sources_screen.dart';
 import '../../core/i18n.dart';
+import '../../data/services/run_pause_store.dart';
+import 'run_pause_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -102,7 +104,7 @@ class ProfileScreen extends ConsumerWidget {
           Consumer(builder: (context, ref, _) {
             final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
             final km = runs.fold<double>(0, (s, a) => s + a.distanceMeters / 1000);
-            final badges = computeBadges(runs).where((b) => b.earned).length;
+            final badges = computeBadges(runs, pausedWeeks: ref.watch(pausedWeeksProvider)).where((b) => b.earned).length;
             DateTime? since;
             for (final r in runs) {
               if (since == null || r.startedAt.isBefore(since)) since = r.startedAt;
@@ -288,6 +290,8 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ReminderTile(),
+                Divider(height: 1, indent: 56),
+                RunPauseTile(),
                 Divider(height: 1, indent: 56),
                 EmergencyContactTile(),
                 Divider(height: 1, indent: 56),

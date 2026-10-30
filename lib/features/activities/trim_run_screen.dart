@@ -193,8 +193,8 @@ class _TrimRunScreenState extends ConsumerState<TrimRunScreen> {
                                 if (r.distanceMeters > 0)
                                   _Stat(
                                     label: 'Tempo',
-                                    value: '${Fmt.pace(r.movingSeconds / (r.distanceMeters / 1000))} /km',
-                                    was: '${Fmt.pace(widget.activity.paceSecondsPerKm)} /km',
+                                    value: Fmt.pace(r.movingSeconds / (r.distanceMeters / 1000)),
+                                    was: Fmt.pace(widget.activity.paceSecondsPerKm),
                                   ),
                               ],
                             ),

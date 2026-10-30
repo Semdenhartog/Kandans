@@ -113,3 +113,13 @@ Lees dit eerst. Daarna niets opnieuw uitzoeken wat hier staat.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
 - Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium; feature graphic (1024×500) voor de Play Store.
 - Testen op telefoon: licht/donker wisselen, Vivoactive 5-meldingen, Strava oude runs/routes, Samen.
+
+## Agent skills
+
+### Issue tracker
+
+Taken en bugs staan in GitHub Issues van `Semdenhartog/Kandans` (via `gh`). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: één `GLOSSARY.md` en `docs/adr/` in de root (worden pas gemaakt als ze nodig zijn). See `docs/agents/domain.md`.

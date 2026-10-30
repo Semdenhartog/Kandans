@@ -11,6 +11,7 @@ import '../../data/repositories/repositories.dart';
 import '../../domain/badges.dart' as bd;
 import '../../shared/widgets.dart';
 import '../challenges/challenges.dart' show challengeMedalsProvider, ChallengeMedal;
+import '../../data/services/run_pause_store.dart';
 
 void openBadges(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const BadgesScreen()));
@@ -57,7 +58,7 @@ class BadgesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
-    final all = bd.computeBadges(runs);
+    final all = bd.computeBadges(runs, pausedWeeks: ref.watch(pausedWeeksProvider));
     final earned = all.where((b) => b.earned).length;
     return Scaffold(
       appBar: AppBar(title: const Text('Badges')),

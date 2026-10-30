@@ -196,10 +196,31 @@ async function config(db: SupabaseClient) {
   };
 }
 
+const PAUSE_REASONS: Record<string, string> = {
+  injury: "herstelt van een blessure",
+  sick: "is ziek",
+  holiday: "is op vakantie",
+  rest: "neemt bewust even rust",
+};
+
+/** Pauze (blessure, ziek, vakantie) uit de app → vaste zin voor de coach. Alleen bekende waarden, geen vrije tekst. */
+function pauseNote(p: unknown): string {
+  if (!p || typeof p !== "object") return "";
+  const o = p as Record<string, unknown>;
+  const why = PAUSE_REASONS[String(o.reason ?? "")];
+  const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null);
+  const since = day(o.start);
+  if (!why || !since) return "";
+  const until = day(o.end);
+  const care = o.reason === "injury" || o.reason === "sick" ? "Adviseer bij twijfel een arts of fysiotherapeut. " : "";
+  return `\nPauze: de loper ${why} (sinds ${since}${until ? `, tot en met ${until}` : ", zonder einddatum"}). ` +
+    `Geef geen trainingsdruk en geen schuldgevoel over gemiste runs. ${care}Help met een rustige, veilige herstart als de loper daarom vraagt.`;
+}
+
 /** Korte analyse van één eigen run (zoals Strava's Athlete Intelligence, maar met je schema, doelen en het weer). */
 async function summarize(
   db: SupabaseClient, userId: string, profile: Record<string, unknown>, activityId: string,
-  apiKey: string, premium: boolean, freeUsed: number, freeLimit: number,
+  apiKey: string, premium: boolean, freeUsed: number, freeLimit: number, pause?: unknown,
 ) {
   const { data: a } = await db.from("activities")
     .select("id, user_id, source, started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, humidity_pct, feel, note, best_efforts, streams, ai_summary, external_id")
@@ -241,7 +262,7 @@ async function summarize(
     session ? `Gepland in het schema voor deze dag: ${session.title}. ${session.description}` : "Geen geplande training in het schema voor deze dag.",
   ].filter(Boolean).join("\n");
 
-  const context = await buildContext(db, userId, profile);
+  const context = (await buildContext(db, userId, profile)) + pauseNote(pause);
   const ai = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
@@ -335,7 +356,7 @@ Deno.serve(async (req) => {
   }
 
   if (summaryOf) {
-    return await summarize(db, userId, profile, summaryOf, apiKey, premium, freeUsed, limits.free);
+    return await summarize(db, userId, profile, summaryOf, apiKey, premium, freeUsed, limits.free, body.pause);
   }
 
   // Eerdere berichten zodat de coach het gesprek kent.
@@ -367,7 +388,7 @@ Deno.serve(async (req) => {
     long: "De loper wil meer uitleg: geef de kern en daarna gerust achtergrond en het waarom (maximaal ongeveer 250 woorden).",
   };
   const lengthNote = lengths[String(body.length ?? "")] ?? "";
-  const context = (await buildContext(db, userId, profile)) + (goal ? `\nDoel van de loper: ${goal}.` : "");
+  const context = (await buildContext(db, userId, profile)) + (goal ? `\nDoel van de loper: ${goal}.` : "") + pauseNote(body.pause);
 
   const ai = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

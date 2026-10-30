@@ -14,6 +14,7 @@ import '../../domain/extras.dart' show weekendLongRun, weekendText;
 import '../../domain/start_time_scoring.dart';
 import '../../domain/usual_time.dart';
 import '../models/models.dart';
+import 'run_pause_store.dart';
 
 /// Instellingen voor de dagelijkse melding.
 class DailyReminderSettings {
@@ -249,6 +250,11 @@ class NotificationService {
     final s = await settings();
     if (!s.enabled) return;
     await init();
+    // Pauze (blessure, ziek, vakantie): geen loopherinneringen, ook geen weekend- of weekseintje.
+    if (await RunPauseStore.current() != null) {
+      await cancelPlanned();
+      return;
+    }
     final type = await lastTrainingType();
     final planner = StartTimePlanner(
       forecast: forecast,
@@ -352,6 +358,17 @@ class NotificationService {
   static const _weeklyId = 103;
   static const _soonId = 104;
 
+  /// Alle geplande seintjes weghalen (bij een pauze). De live run-melding blijft.
+  Future<void> cancelPlanned() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await init();
+      for (final id in [..._ids, _soonId, _weekendId, _weeklyId]) {
+        await _plugin.cancel(id);
+      }
+    } catch (_) {}
+  }
+
   /// Elke maandag om 8:00 een seintje dat je weekoverzicht klaarstaat (alleen als meldingen aan staan).
   Future<void> scheduleWeeklyReport() async {
     if (!Platform.isAndroid) return;
@@ -359,7 +376,7 @@ class NotificationService {
       final s = await settings();
       await init();
       await _plugin.cancel(_weeklyId);
-      if (!s.enabled) return;
+      if (!s.enabled || await RunPauseStore.current() != null) return;
       final now = DateTime.now();
       var at = DateTime(now.year, now.month, now.day, 8);
       while (at.weekday != DateTime.monday || !at.isAfter(now)) {

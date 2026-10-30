@@ -50,6 +50,7 @@ import 'dashboard_providers.dart';
 import 'weather_ambience.dart';
 import '../shop/shop_tile.dart';
 import '../profile/sources_screen.dart';
+import '../profile/run_pause_tile.dart' show PauseBanner;
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -250,6 +251,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 padding: EdgeInsets.only(bottom: 14),
                 text: 'Vandaag zie je het beste moment om te lopen. Tik op een uur in de grafiek voor het weer en kledingadvies op dat moment. Kaarten verplaatsen of verbergen kan met het schuifje rechtsboven.',
               ),
+              const PauseBanner(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

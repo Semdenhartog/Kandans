@@ -96,7 +96,7 @@ worden verkocht of voor advertenties gebruikt. Controleer dit in site/privacy.ht
 
 - **App-naam (max. 30 tekens):** Kadans – Beste loopmoment
 - **Korte beschrijving (max. 80 tekens):** Loop op het beste moment: weer, wind en jouw route in één advies. Naast Strava.
-- **Volledige beschrijving (max. 4000 tekens, nu 2362):**
+- **Volledige beschrijving (max. 4000 tekens, nu 2683):**
 
 ```
 Strava laat zien wat je gelopen hebt. Kadans zorgt dat je loopt op het beste moment.
@@ -138,6 +138,9 @@ Koppel Strava en Kadans haalt je oude runs en routes binnen. Koppel je horloge v
 
 PRIVACY
 Je locatie wordt alleen gebruikt terwijl je de app gebruikt. We bewaren hooguit een grove thuisplaats en verkopen niets. Runs uit Strava gaan niet naar de AI-coach en worden nooit aan anderen getoond.
+
+ONZE BELOFTE
+Wat gratis is, blijft gratis: we zetten nooit functies achter een betaalmuur die je nu gratis hebt. Gaat de prijs ooit omhoog, dan hoor je dat ruim van tevoren. Je runs zijn van jou: alles exporteren kan altijd. De feed met lopers die je volgt staat op volgorde van tijd, zonder reclame.
 
 Kadans is gratis te gebruiken. Kadans Premium (onbeperkt de coach en schema's op maat) is een maand gratis, daarna €5 per maand of €40 per jaar.
 ```

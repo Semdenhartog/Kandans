@@ -291,3 +291,11 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 199. ✅ **Runs delen**: per run kiezen tussen *Volgers* (standaard) en *Iedereen*, eigen titel, **privacyzone** 200 m / 500 m / 1 km rond start én finish (ook als je halverwege langs huis loopt). Gedeeld wordt een kopie zonder hartslag en zonder tijdstip. Strava-runs kunnen niet gedeeld worden. Delen stoppen kan altijd.
 200. ✅ **Community → Runs**: feed *Volgend* en *Iedereen*, kaart met de vorm van de route (tik = kaart), **applaus** en reacties, melden (3× = verborgen), blokkeren (haalt ook het volgen weg). *Gesprekken* = het bestaande forum. Tik op een naam → **profiel** met runs, volgers en volgend.
 201. ✅ Privacyverklaring aangevuld (Samen/community en gedeelde runs). Migratie lokaal getest op Postgres 16 met een scenario van drie lopers.
+
+## Ronde 30 oktober 2026 (2) – lessen uit Strava-klachten (`docs/concurrentie-strava.md`)
+202. ✅ **Belofte "wat gratis is, blijft gratis"** + prijswijziging altijd vooraf + export altijd: op de Premium-pagina, in de shop, op de site en in de Play Store-tekst.
+203. ✅ Feed Runs: label **"Op volgorde van tijd, zonder reclame"**.
+204. ✅ **Pauzeknop** (Ik → Pauze nemen; balk op Vandaag): blessure, ziek, vakantie of rust, 3 dagen t/m "tot ik weer begin". Geen loopherinneringen (ook geen weekend-/weekseintje), reeks en badges "weken op rij" breken niet (pauzeweek = ≥4 dagen pauze), weekoverzicht zegt "Rustweek", de coach krijgt een vaste zin mee (geen trainingsdruk, bij blessure/ziek: arts of fysio). Alleen op de telefoon; privacyverklaring aangevuld.
+205. ✅ **GPS-sprongen**: onder een run (niet bij Strava-runs) een kaartje als de GPS sneller ging dan lopen kan (> 25 km/u of ~2× je tempo, > 15 m te veel). Loper kiest per sprong: herstellen (rechte lijn, tijd blijft) of "Klopt wel". Nooit vanzelf aanpassen.
+206. ✅ Beste vertrektijd blijft **op 5 minuten**: onderzocht, per minuut is schijnnauwkeurigheid (weer per kwartier, buienradar per 5 min).
+207. ✅ Bijsnijden: tempo stond er als "5:30 /km /km".

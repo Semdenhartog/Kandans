@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase.dart';
 import '../models/models.dart';
+import '../services/run_pause_store.dart';
 import '../services/elevation_service.dart';
 import '../services/offline_cache.dart';
 import '../../domain/best_efforts.dart';
@@ -460,10 +461,12 @@ class RunWiseRepository {
     try {
       final goal = await savedRunGoal();
       final style = await savedCoachStyle();
+      final pause = await RunPauseStore.current();
       final res = await _db.functions.invoke('coach', body: {
         'message': message,
         if (goal != null) 'goal': goal.name,
         if (style != CoachLength.normal) 'length': style.name,
+        if (pause != null) 'pause': pause.toJson(),
       });
       final data = (res.data as Map).cast<String, dynamic>();
       return CoachReply(
@@ -480,7 +483,12 @@ class RunWiseRepository {
   /// Korte analyse van één run door de coach (wordt op de server bewaard).
   Future<String> summarizeRun(String activityId) async {
     try {
-      final res = await _db.functions.invoke('coach', body: {'mode': 'summary', 'activity_id': activityId});
+      final pause = await RunPauseStore.current();
+      final res = await _db.functions.invoke('coach', body: {
+        'mode': 'summary',
+        'activity_id': activityId,
+        if (pause != null) 'pause': pause.toJson(),
+      });
       final data = (res.data as Map).cast<String, dynamic>();
       return data['summary'] as String;
     } on FunctionException catch (e) {

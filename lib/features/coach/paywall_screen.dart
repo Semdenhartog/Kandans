@@ -184,6 +184,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(color: rwZandAvond.subtle, fontSize: 12, height: 1.5),
                     ),
+                    const SizedBox(height: 14),
+                    const _Promise(),
                   ],
                 );
               },
@@ -402,6 +404,28 @@ class _PlanTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Onze belofte (antwoord op de grootste ergernis bij andere loopapps: gratis functies die achter een betaalmuur verdwijnen).
+class _Promise extends StatelessWidget {
+  const _Promise();
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        for (final (icon, text) in [
+          (Icons.lock_open, 'Wat gratis is, blijft gratis. We zetten nooit iets achter de betaalmuur dat je nu gratis hebt.'),
+          (Icons.notifications_active_outlined, 'Gaat de prijs ooit omhoog, dan hoor je dat ruim van tevoren in de app.'),
+          (Icons.download_outlined, 'Je runs zijn van jou: alles exporteren kan altijd, ook zonder Premium.'),
+        ])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(icon, size: 16, color: _gold),
+              const SizedBox(width: 10),
+              Expanded(child: Text(text, style: TextStyle(color: rwZandAvond.muted, fontSize: 12.5, height: 1.45))),
+            ]),
+          ),
+      ]);
 }
 
 /// Mededeling in de donker-gouden stijl van Premium (ook als de app licht staat).

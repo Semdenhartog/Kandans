@@ -61,6 +61,10 @@ import 'package:runwise/features/community/people_screen.dart';
 import 'package:runwise/features/community/runner_profile_screen.dart';
 import 'package:runwise/features/community/share_to_feed.dart';
 import 'package:runwise/domain/privacy_zone.dart';
+import 'package:runwise/domain/run_pause.dart';
+import 'package:runwise/data/services/run_pause_store.dart';
+import 'package:runwise/features/profile/run_pause_tile.dart';
+import 'package:runwise/features/activities/gps_spike_screen.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
 import 'package:runwise/features/record/run_summary_screen.dart';
@@ -346,14 +350,14 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const []}) async {
   RwColors.use(dark ? rwZandAvond : rwZand);
   addTearDown(() => RwColors.use(rwZand));
   tester.view.physicalSize = Size(_w * 2, height * 2);
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(ProviderScope(
-    overrides: _overrides(emptyPlan: emptyPlan, newUser: newUser, wornShoe: wornShoe, notInCommunity: notInCommunity),
+    overrides: [..._overrides(emptyPlan: emptyPlan, newUser: newUser, wornShoe: wornShoe, notInCommunity: notInCommunity), ...extra],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
@@ -482,6 +486,13 @@ void main() {
   testWidgets('18f lopers', (t) => _shot(t, '18f_lopers', const PeopleScreen(), height: 1400));
   testWidgets('18g profiel', (t) => _shot(t, '18g_profiel', const RunnerProfileScreen(nickname: 'Anne'), height: 1900));
   testWidgets('18h run delen', (t) => _shot(t, '18h_run_delen', Scaffold(body: SafeArea(child: ShareToFeedSheet(activity: _runs.first))), height: 1700));
+  testWidgets('18k pauze starten', (t) => _shot(t, '18k_pauze', const Scaffold(body: SafeArea(child: PauseSheet())), height: 1300));
+  testWidgets('18l vandaag met pauze', (t) => _shot(t, '18l_vandaag_pauze', const DashboardScreen(), height: 1400, extra: [
+        currentPauseProvider.overrideWithValue(PausePeriod(reason: PauseReason.injury, start: DateTime.now(), end: DateTime.now().add(const Duration(days: 6)))),
+      ]));
+  testWidgets('18m gps-sprong', (t) => _shot(t, '18m_gps_sprong', GpsSpikeScreen(activity: _spikeRun), height: 1700, extra: [
+        activityStreamsProvider('spike1').overrideWith((ref) async => _spikeStreams),
+      ]));
   testWidgets('18i lopers groot', (t) => _shot(t, '18i_lopers_groot', const PeopleScreen(), height: 1800, textScale: 1.6));
   testWidgets('18j profiel groot', (t) => _shot(t, '18j_profiel_groot', const RunnerProfileScreen(nickname: 'Anne'), height: 2400, textScale: 1.6));
   testWidgets('19 strava-archief', (t) => _shot(t, '19_strava_archief', const StravaArchiveScreen(), height: 1900));
@@ -706,3 +717,45 @@ class _FakeSocial implements SocialService {
   @override
   dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
 }
+
+
+/// Run met twee GPS-sprongen, voor de schermafbeelding van het herstelscherm.
+final Map<String, dynamic> _spikeStreams = () {
+  final route = decodePolyline(_routes.first.polyline);
+  final ll = <List<double>>[];
+  final t = <double>[];
+  final d = <double>[];
+  var dist = 0.0;
+  LatLng? prev;
+  // Elke seconde ~3 m langs de route; twee punten flink ernaast.
+  var seg = 0;
+  var along = 0.0;
+  for (var s = 0; s < 1500 && seg < route.length - 1; s++) {
+    final a = route[seg], b = route[seg + 1];
+    final len = distanceMeters(a, b);
+    final f = len <= 0 ? 0.0 : (along / len).clamp(0.0, 1.0);
+    var p = LatLng(a.lat + (b.lat - a.lat) * f, a.lon + (b.lon - a.lon) * f);
+    if (s == 300) p = LatLng(p.lat + 0.0025, p.lon);
+    if (s == 900) p = LatLng(p.lat, p.lon - 0.004);
+    if (prev != null) dist += distanceMeters(prev, p);
+    prev = p;
+    t.add(s.toDouble());
+    d.add(double.parse(dist.toStringAsFixed(1)));
+    ll.add([p.lat, p.lon]);
+    along += 3;
+    while (seg < route.length - 1 && along > distanceMeters(route[seg], route[seg + 1])) {
+      along -= distanceMeters(route[seg], route[seg + 1]);
+      seg++;
+    }
+  }
+  return {'t': t, 'd': d, 'll': ll};
+}();
+
+final Activity _spikeRun = Activity(
+  id: 'spike1',
+  startedAt: DateTime.now().subtract(const Duration(hours: 3)),
+  distanceMeters: (_spikeStreams['d'] as List).last as double,
+  movingTimeSeconds: (_spikeStreams['t'] as List).length - 1,
+  source: 'runwise',
+  trackPolyline: encodePolyline([for (final p in (_spikeStreams['ll'] as List)) LatLng((p as List)[0] as double, p[1] as double)]),
+);

@@ -428,10 +428,21 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         controller: _scroll,
         physics: AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16, 4, 16, 96),
-        itemCount: _runs.length,
-        separatorBuilder: (_, _) => SizedBox(height: 10),
+        itemCount: _runs.length + 1,
+        separatorBuilder: (_, i) => SizedBox(height: i == 0 ? 6 : 10),
         itemBuilder: (context, i) {
-          final r = _runs[i];
+          if (i == 0) {
+            // Bewuste keuze (zie docs/concurrentie-strava.md): geen algoritme, geen reclame.
+            return Row(children: [
+              Icon(Icons.schedule, size: 14, color: RwColors.subtle),
+              SizedBox(width: 6),
+              Expanded(
+                child: Text(tr('Op volgorde van tijd, zonder reclame'),
+                    style: TextStyle(color: RwColors.subtle, fontSize: 12.5)),
+              ),
+            ]);
+          }
+          final r = _runs[i - 1];
           final act = SharedRunActions(context, ref);
           return SharedRunCard(
             run: r,
