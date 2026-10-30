@@ -22,3 +22,4 @@ runwise-github-geheimen.txt
 
 # Codekaart (graphify): wordt opgehaald met tools/graaf.sh, staat op branch "graaf"
 graphify-out/
+__pycache__/
