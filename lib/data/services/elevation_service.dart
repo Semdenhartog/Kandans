@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../domain/barometer.dart';
 import '../../domain/geo.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/zones.dart';
@@ -37,6 +38,10 @@ class ElevationService {
     final ele = await _lookup(pointsAt(pos, idx));
     if (ele.length != idx.length) return null;
     final alt = interpolateElevation(s.distance, idx, ele);
-    return (streams: {...streams, 'alt': alt, 'alt_src': 'dem'}, gain: elevationGain(alt));
+    // Gemeten met de barometer? Dan zijn die hoogtemeters nauwkeuriger dan de hoogtekaart
+    // (die mist bruggen, dijken en viaducten). De kaart gebruiken we dan alleen voor de grafiek.
+    final baro = baroSeries(streams);
+    final gain = baro != null ? barometricGain(baro) : elevationGain(alt);
+    return (streams: {...streams, 'alt': alt, 'alt_src': 'dem'}, gain: gain);
   }
 }

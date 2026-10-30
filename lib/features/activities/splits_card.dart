@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -18,16 +19,26 @@ import '../../shared/widgets.dart';
 import '../routes/route_map.dart' show windColor;
 
 /// Tijden per kilometer en een grafiek van tempo, hoogte en hartslag (runs uit Strava).
-class SplitsCard extends ConsumerWidget {
+class SplitsCard extends ConsumerStatefulWidget {
   const SplitsCard({super.key, required this.activity});
   final Activity activity;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SplitsCard> createState() => _SplitsCardState();
+}
+
+class _SplitsCardState extends ConsumerState<SplitsCard> {
+  Activity get activity => widget.activity;
+
+  /// Tussentijden per zoveel meter (400 m, 1 km, 1 mijl of 5 km).
+  double _every = 1000;
+
+  @override
+  Widget build(BuildContext context) {
     final a = activity;
     final async = ref.watch(activityStreamsProvider(a.id!));
     return RwCard(
-      title: 'PER KILOMETER',
+      title: _every == 1000 ? 'PER KILOMETER' : '${tr('TUSSENTIJDEN')} · ${splitDistanceLabel(_every).toUpperCase()}',
       child: async.when(
         loading: () => Row(
           children: [
@@ -47,10 +58,11 @@ class SplitsCard extends ConsumerWidget {
           if (s == null) {
             return Text('Voor deze run zijn geen tijden per km beschikbaar.', style: TextStyle(color: RwColors.muted));
           }
-          final splits = splitsOf(s);
+          final splits = splitsOf(s, every: _every);
           final ex = extremes(splits);
           final hasHr = splits.any((x) => x.heartRate != null);
           final hasEle = splits.any((x) => x.elevationGain != null);
+          final hasCad = splits.any((x) => x.cadence != null);
           // Windkolom alleen als we de looprichting én het weer kennen (anders een lege kolom).
           final hasWind = a.windDirectionDegrees != null && a.windSpeedKmh != null && splits.any((x) => x.bearing != null);
           return Column(
@@ -65,20 +77,37 @@ class SplitsCard extends ConsumerWidget {
                   if (s.heartRate != null) _legend(RwColors.danger, 'hartslag'),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(children: [
+                  for (final e in splitDistances)
+                    if (e <= s.totalDistance || e == 1000)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(splitDistanceLabel(e)),
+                          selected: _every == e,
+                          onSelected: (_) => setState(() => _every = e),
+                        ),
+                      ),
+                ]),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  SizedBox(width: 44, child: Text('km', style: _head)),
-                  Expanded(child: Text('tempo', style: _head)),
+                  SizedBox(width: 44, child: Text(_every == 1000 ? 'km' : '#', style: _head)),
+                  Expanded(child: Text(_every == 1000 ? 'tempo' : tr('tijd · tempo'), style: _head)),
+                  if (hasCad) SizedBox(width: 52, child: Text(tr('cadans'), style: _head, textAlign: TextAlign.right)),
                   if (hasHr) SizedBox(width: 52, child: Text('hart', style: _head, textAlign: TextAlign.right)),
                   if (hasEle) SizedBox(width: 52, child: Text('omhoog', style: _head, textAlign: TextAlign.right)),
                   if (hasWind) SizedBox(width: 72, child: Text('wind', style: _head, textAlign: TextAlign.right)),
                 ],
               ),
               const Divider(height: 12),
-              for (final sp in splits) _row(sp, ex, hasHr, hasEle, hasWind),
+              for (final sp in splits) _row(sp, ex, hasHr, hasEle, hasWind, hasCad),
               const SizedBox(height: 6),
-              Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}.${hasWind ? ' Wind = het weer bij de start van je run.' : ''}',
+              Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}.${hasWind ? ' Wind = het weer bij de start van je run.' : ''}${s.baroAltitude != null ? ' Hoogtemeters gemeten met de barometer van je telefoon.' : ''}${s.cadence != null ? ' Cadans van je loopsensor.' : ''}',
                   style: TextStyle(color: RwColors.subtle, fontSize: 11)),
               if (GpsQuality.fromJson(s.gpsQuality) case final q?) ...[
                 const SizedBox(height: 2),
@@ -95,6 +124,7 @@ class SplitsCard extends ConsumerWidget {
 
   /// Snelste stukken binnen deze run, met een kroontje als het je snelste ooit is.
   List<Widget> _efforts(RunStreams s, WidgetRef ref) {
+    if (_every != 1000) return const [];
     final list = bestEfforts(s);
     if (list.isEmpty) return const [];
     final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
@@ -184,7 +214,7 @@ class SplitsCard extends ConsumerWidget {
         ]),
       );
 
-  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle, bool hasWind) {
+  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle, bool hasWind, bool hasCad) {
     final a = activity;
     final cls = sp.bearing == null || a.windDirectionDegrees == null || a.windSpeedKmh == null
         ? null
@@ -241,6 +271,7 @@ class SplitsCard extends ConsumerWidget {
           ),
           Expanded(
             child: Row(children: [
+              if (_every != 1000) Text('${Fmt.duration(sp.seconds)}  ', style: const TextStyle(fontWeight: FontWeight.w700)),
               Text(Fmt.pace(sp.paceSecPerKm).replaceAll(' /km', ''),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
@@ -249,6 +280,12 @@ class SplitsCard extends ConsumerWidget {
               if (isFast) Text('  snelst', style: TextStyle(color: RwColors.isDark ? const Color(0xFFD9B45A) : const Color(0xFF8A6A22), fontSize: 12, fontWeight: FontWeight.w700)),
             ]),
           ),
+          if (hasCad)
+            SizedBox(
+              width: 52,
+              child: Text(sp.cadence == null ? '–' : '${sp.cadence!.round()}',
+                  textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted)),
+            ),
           if (hasHr)
             SizedBox(
               width: 52,

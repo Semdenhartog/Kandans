@@ -299,3 +299,14 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 205. ✅ **GPS-sprongen**: onder een run (niet bij Strava-runs) een kaartje als de GPS sneller ging dan lopen kan (> 25 km/u of ~2× je tempo, > 15 m te veel). Loper kiest per sprong: herstellen (rechte lijn, tijd blijft) of "Klopt wel". Nooit vanzelf aanpassen.
 206. ✅ Beste vertrektijd blijft **op 5 minuten**: onderzocht, per minuut is schijnnauwkeurigheid (weer per kwartier, buienradar per 5 min).
 207. ✅ Bijsnijden: tempo stond er als "5:30 /km /km".
+
+## Ronde 30 oktober 2026 (3) – ideeën uit OpenTracks (open-source sporttracker, Apache 2.0)
+
+1. ✅ **Hoogtemeters met de barometer.** Heeft je telefoon een luchtdrukmeter, dan meet Kadans hoogtemeters daarmee (afvlakken + per 3 m tellen). Nauwkeuriger dan GPS en de hoogtekaart (die mist bruggen, dijken en viaducten). Zonder barometer: zoals altijd.
+2. ✅ **Loopsensor via Bluetooth** (Stryd, Polar Stride, Garmin/Wahoo-voetsensor; Tickr X/HRM-Pro via de hartslagband): echte cadans tijdens en na de run; op de loopband het tempo van de sensor. Koppelen: Profiel → Hartslagband en loopsensor.
+3. ✅ **Tussentijden per 400 m, 1 km, 1 mijl of 5 km** in het rundetail (met tijd per stuk, cadans en hartslag).
+4. ✅ **Markeringen tijdens de run**, met soort (uitzicht, water, toilet, slecht pad, gevaarlijk, hond) en optioneel een foto. Op de kaartpagina tijdens het lopen; terug te zien in het rundetail (kaart + lijst).
+5. ✅ **Opnamescherm zelf indelen** (#23 minimaal scherm): Standaard, Minimaal (twee grote cijfers), Hartslag, Compleet, of je eigen indeling. Tik op de naam boven de cijfers om te wisselen, houd vast om aan te passen.
+6. ✅ **Live tussentijden**: derde veegpagina tijdens het lopen.
+- Bewust niet: KML/KMZ-export, koppeling met Tasker/Gadgetbridge, fietssensoren.
+- Nog niet: markeringsfoto's van een run die zonder internet werd opgeslagen gaan niet mee (de markering zelf wel).

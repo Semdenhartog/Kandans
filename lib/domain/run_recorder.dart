@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
+import 'barometer.dart';
 import 'geo.dart';
+import 'run_markers.dart';
 
 /// Eén GPS-meting tijdens het lopen.
 class GpsFix {
@@ -20,14 +22,19 @@ class GpsFix {
 
 enum RecorderStatus { idle, running, paused, autoPaused, finished }
 
-/// Eén meetpunt van de run: bewegende tijd, afstand, positie en eventueel hoogte en hartslag.
+/// Eén meetpunt van de run: bewegende tijd, afstand, positie en eventueel hoogte, hartslag,
+/// cadans (loopsensor) en barometerhoogte.
 class RunSample {
-  const RunSample(this.t, this.d, this.point, {this.alt, this.hr});
+  const RunSample(this.t, this.d, this.point, {this.alt, this.hr, this.cad, this.baro});
   final double t;
   final double d;
   final LatLng point;
   final double? alt;
   final int? hr;
+  final int? cad;
+  final double? baro;
+
+  RunSample withDistance(double d2) => RunSample(t, d2, point, alt: alt, hr: hr, cad: cad, baro: baro);
 }
 
 /// Hoe goed de GPS was tijdens een run: wat er is weggefilterd en hoe vaak hij even weg was.
@@ -103,6 +110,24 @@ class RunRecording {
   /// Gemiddelde hartslag over de bewegende tijd.
   int? get averageHeartRate => _hrCount == 0 ? null : (_hrSum / _hrCount).round();
 
+  /// Huidige cadans van een loopsensor (stappen per minuut), null = geen sensor.
+  int? cadence;
+
+  /// Huidige barometerhoogte (m), null = geen barometer.
+  double? baroAltitude;
+
+  /// Markeringen die je tijdens het lopen zette.
+  final List<RunMarker> markers = [];
+
+  /// Hoogtemeters volgens de barometer (null = geen barometer gebruikt).
+  double? get baroGain {
+    final b = [for (final x in samples) if (x.baro != null) x.baro!];
+    return b.length < 2 ? null : barometricGain(b);
+  }
+
+  RunSample _sample(LatLng p, {double? alt, int? hr}) =>
+      RunSample(movingSeconds, distance, p, alt: alt, hr: hr, cad: cadence, baro: baroAltitude);
+
   /// Hoe goed de GPS was (wordt bij de run bewaard).
   GpsQuality gps = GpsQuality();
 
@@ -155,7 +180,7 @@ class RunRecording {
     _last = fix;
     if (prev == null) {
       if (track.isEmpty) track.add(fix.point);
-      if (samples.isEmpty) samples.add(RunSample(movingSeconds, distance, fix.point, alt: fix.altitude, hr: heartRate));
+      if (samples.isEmpty) samples.add(_sample(fix.point, alt: fix.altitude, hr: heartRate));
       return null;
     }
     final dt = fix.time.difference(prev.time).inMilliseconds / 1000;
@@ -178,7 +203,7 @@ class RunRecording {
             ..add(fix.point);
           samples
             ..clear()
-            ..add(RunSample(movingSeconds, distance, fix.point, alt: fix.altitude, hr: heartRate));
+            ..add(_sample(fix.point, alt: fix.altitude, hr: heartRate));
         }
         return null; // _last is al het nieuwe punt
       }
@@ -227,7 +252,7 @@ class RunRecording {
       _hrCount++;
     }
     if (samples.isEmpty || movingSeconds - samples.last.t >= 3) {
-      samples.add(RunSample(movingSeconds, distance, fix.point, alt: fix.altitude, hr: hr));
+      samples.add(_sample(fix.point, alt: fix.altitude, hr: hr));
     }
     // Punt bewaren zodra je minstens 3 m van het vorige bewaarde punt bent.
     if (track.isEmpty || distanceMeters(track.last, fix.point) >= 3) track.add(fix.point);
@@ -274,7 +299,7 @@ class RunRecording {
       _recent.removeAt(0);
     }
     if (samples.isEmpty || movingSeconds - samples.last.t >= 3) {
-      samples.add(RunSample(movingSeconds, distance, const LatLng(0, 0), hr: hr));
+      samples.add(_sample(const LatLng(0, 0), hr: hr));
     }
     final km = (distance / 1000).floor();
     if (km > kmTimes.length) {
@@ -293,7 +318,7 @@ class RunRecording {
       final f = meters / distance;
       for (var i = 0; i < samples.length; i++) {
         final x = samples[i];
-        samples[i] = RunSample(x.t, x.d * f, x.point, alt: x.alt, hr: x.hr);
+        samples[i] = x.withDistance(x.d * f);
       }
     }
     distance = meters;
@@ -313,8 +338,9 @@ class RunRecording {
         'hrN': _hrCount,
         'track': [for (final p in track) [p.lat, p.lon]],
         'samples': [
-          for (final x in samples) [x.t, x.d, x.point.lat, x.point.lon, x.alt, x.hr],
+          for (final x in samples) [x.t, x.d, x.point.lat, x.point.lon, x.alt, x.hr, x.cad, x.baro],
         ],
+        if (markers.isNotEmpty) 'marks': [for (final m in markers) m.toJson(includeLocal: true)],
         'gps': gps.toJson(),
         'saved': DateTime.now().toIso8601String(),
       };
@@ -342,7 +368,13 @@ class RunRecording {
           LatLng((l[2] as num).toDouble(), (l[3] as num).toDouble()),
           alt: (l[4] as num?)?.toDouble(),
           hr: (l[5] as num?)?.toInt(),
+          cad: l.length > 6 ? (l[6] as num?)?.toInt() : null,
+          baro: l.length > 7 ? (l[7] as num?)?.toDouble() : null,
         ));
+      }
+      for (final m in (j['marks'] as List? ?? const [])) {
+        final mk = RunMarker.fromJson(m);
+        if (mk != null) r.markers.add(mk);
       }
       r.gps = GpsQuality.fromJson(j['gps']) ?? GpsQuality();
       r.status = RecorderStatus.paused;
@@ -408,12 +440,17 @@ class RunRecording {
     }
 
     final hr = fill([for (final s in samples) s.hr?.toDouble()]);
+    final cad = fill([for (final s in samples) s.cad?.toDouble()]);
+    final baro = fill([for (final s in samples) s.baro]);
     return {
       't': t,
       'd': d,
       if (!indoor) 'll': ll,
       if (alt != null) 'alt': smooth(alt, 3),
       if (hr != null) 'hr': hr,
+      if (cad != null) 'cad': cad,
+      if (baro != null && !indoor) 'baro': [for (final x in baro) double.parse(x.toStringAsFixed(1))],
+      if (markers.isNotEmpty) 'marks': [for (final m in markers) m.toJson()],
       if (!indoor) 'gps': gps.toJson(),
       'src': indoor ? 'loopband' : 'runwise',
     };

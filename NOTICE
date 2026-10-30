@@ -1,0 +1,6 @@
+Kadans bevat rekenregels die zijn gebaseerd op OpenTracks
+(https://github.com/OpenTracksApp/OpenTracks), Copyright de OpenTracks-auteurs,
+uitgegeven onder de Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0):
+- hoogtemeters uit de barometer (lib/domain/barometer.dart)
+- uitlezen van Bluetooth-loopsensoren (lib/domain/stride_sensor.dart)
+De code is opnieuw geschreven in Dart en aangepast.

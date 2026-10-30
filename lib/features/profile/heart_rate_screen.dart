@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
 import '../../core/theme.dart';
+import '../../core/i18n.dart';
 import '../../data/services/heart_rate_service.dart';
+import '../../data/services/stride_sensor_service.dart';
 import '../../domain/heart_rate.dart';
 import '../../shared/widgets.dart';
 
@@ -70,7 +72,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
   Widget build(BuildContext context) {
     final scanning = _scan != null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Hartslagband')),
+      appBar: AppBar(title: Text(tr('Hartslagband en loopsensor'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -188,6 +190,8 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          const _StrideSensorCard(),
           const SizedBox(height: 12),
           Text(
             'Werkt met banden die standaard Bluetooth-hartslag uitzenden, zoals Polar H9/H10, Garmin HRM-Dual, Wahoo TICKR en Coros. '
@@ -195,6 +199,132 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
             style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Loopsensor (voetsensor) koppelen: cadans en, op de loopband, je snelheid.
+class _StrideSensorCard extends StatefulWidget {
+  const _StrideSensorCard();
+
+  @override
+  State<_StrideSensorCard> createState() => _StrideSensorCardState();
+}
+
+class _StrideSensorCardState extends State<_StrideSensorCard> {
+  final _s = StrideSensorService.instance;
+  final _found = <String, DiscoveredDevice>{};
+  StreamSubscription<DiscoveredDevice>? _scan;
+  Timer? _stop;
+  String? _error;
+
+  @override
+  void dispose() {
+    _stopScan();
+    super.dispose();
+  }
+
+  Future<void> _startScan() async {
+    setState(() {
+      _error = null;
+      _found.clear();
+    });
+    if (!await HeartRateService.instance.ensurePermissions()) {
+      setState(() => _error = tr('Kadans mag Bluetooth niet gebruiken. Zet "Apparaten in de buurt" aan bij de app-rechten.'));
+      return;
+    }
+    _scan = _s.scan().listen((d) {
+      if (mounted) setState(() => _found[d.id] = d);
+    }, onError: (Object e) {
+      if (mounted) setState(() => _error = tr('Zoeken lukt niet. Staat Bluetooth aan?'));
+      _stopScan();
+    });
+    _stop = Timer(const Duration(seconds: 15), _stopScan);
+    setState(() {});
+  }
+
+  void _stopScan() {
+    _stop?.cancel();
+    _scan?.cancel();
+    _scan = null;
+    _s.stopScan();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _connect(DiscoveredDevice d) async {
+    _stopScan();
+    await _s.connect(d.id, d.name);
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scanning = _scan != null;
+    return RwCard(
+      title: tr('LOOPSENSOR'),
+      child: ValueListenableBuilder<HrStatus>(
+        valueListenable: _s.status,
+        builder: (context, st, _) => ValueListenableBuilder<int?>(
+          valueListenable: _s.cadence,
+          builder: (context, cad, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(children: [
+                Icon(Icons.directions_run, color: cad == null ? RwColors.subtle : RwColors.accent, size: 32),
+                const SizedBox(width: 12),
+                Text(cad == null ? '–' : '$cad',
+                    style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 40, fontWeight: FontWeight.w800)),
+                const SizedBox(width: 6),
+                Text(tr('stappen/min'), style: TextStyle(color: RwColors.muted)),
+              ]),
+              const SizedBox(height: 6),
+              Text(
+                switch (st) {
+                  HrStatus.connected => trf('Verbonden met {naam}', {'naam': _s.deviceName ?? tr('je sensor')}),
+                  HrStatus.connecting => trf('Verbinden met {naam}…', {'naam': _s.deviceName ?? tr('je sensor')}),
+                  HrStatus.lost => tr('Verbinding kwijt, we proberen het opnieuw…'),
+                  HrStatus.scanning => tr('Zoeken naar loopsensoren…'),
+                  HrStatus.off => _s.hasSavedDevice
+                      ? trf('{naam} is onthouden. Hij verbindt vanzelf als je een run start.', {'naam': _s.deviceName ?? ''})
+                      : tr('Optioneel. Met een voetsensor zie je je echte cadans, en op de loopband je tempo zonder GPS.'),
+                },
+                style: TextStyle(color: RwColors.muted, height: 1.4),
+              ),
+              const SizedBox(height: 10),
+              Wrap(spacing: 8, children: [
+                OutlinedButton.icon(
+                  onPressed: scanning ? _stopScan : _startScan,
+                  icon: Icon(scanning ? Icons.stop : Icons.bluetooth_searching),
+                  label: Text(scanning ? tr('Stoppen met zoeken') : tr('Zoek een loopsensor')),
+                ),
+                if (_s.hasSavedDevice)
+                  TextButton(
+                    onPressed: () => _s.forget().then((_) => setState(() {})),
+                    child: Text(tr('Vergeten'), style: TextStyle(color: RwColors.danger)),
+                  ),
+              ]),
+              if (_error != null) ...[
+                const SizedBox(height: 8),
+                Text(_error!, style: TextStyle(color: RwColors.danger)),
+              ],
+              for (final d in _found.values)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: TileIcon(Icons.directions_run, color: RwColors.accent),
+                  title: Text(d.name.isEmpty ? tr('Onbekende sensor') : d.name),
+                  subtitle: Text(trf('Signaal {n} dBm', {'n': d.rssi})),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _connect(d),
+                ),
+              const SizedBox(height: 6),
+              Text(
+                tr('Werkt met Stryd, Polar Stride, Garmin- en Wahoo-voetsensoren. Een Wahoo TICKR X of Garmin HRM-Pro als hartslagband geeft de cadans vaak al vanzelf door.'),
+                style: TextStyle(color: RwColors.subtle, fontSize: 12, height: 1.4),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

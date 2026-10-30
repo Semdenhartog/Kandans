@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/heart_rate.dart';
+import 'stride_sensor_service.dart';
 
 enum HrStatus { off, scanning, connecting, connected, lost }
 
@@ -31,6 +32,7 @@ class HeartRateService {
 
   StreamSubscription<ConnectionStateUpdate>? _conn;
   StreamSubscription<List<int>>? _data;
+  StreamSubscription<List<int>>? _rsc;
   Timer? _retry;
 
   Future<void> load() async {
@@ -129,6 +131,13 @@ class HeartRateService {
       final v = parseHeartRateMeasurement(d);
       if (v != null && v > 25 && v < 240) bpm.value = v;
     }, onError: (Object _) {});
+    // Sommige banden (Wahoo Tickr X, Garmin HRM-Pro) geven ook cadans via de loopsensor-dienst.
+    // Heeft de band die niet, dan komt er een fout die we negeren.
+    _rsc?.cancel();
+    _rsc = _ble
+        .subscribeToCharacteristic(QualifiedCharacteristic(
+            characteristicId: StrideSensorService.measurement, serviceId: StrideSensorService.service, deviceId: id))
+        .listen(StrideSensorService.instance.onPayload, onError: (Object _) {});
   }
 
   void _scheduleRetry() {
@@ -142,8 +151,10 @@ class HeartRateService {
   Future<void> _close() async {
     _retry?.cancel();
     await _data?.cancel();
+    await _rsc?.cancel();
     await _conn?.cancel();
     _data = null;
+    _rsc = null;
     _conn = null;
   }
 

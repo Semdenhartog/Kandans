@@ -15,6 +15,7 @@ import 'data/services/notification_service.dart';
 import 'shared/config_missing_app.dart';
 import 'data/services/app_lock_service.dart';
 import 'data/services/heart_rate_service.dart';
+import 'data/services/stride_sensor_service.dart';
 import 'core/appearance.dart';
 import 'core/i18n.dart';
 import 'domain/run_goal.dart';
@@ -65,6 +66,7 @@ class _BootstrapState extends State<_Bootstrap> {
     await NotificationService.instance.init().catchError((_) {});
     await AppLockService.instance.load();
     await HeartRateService.instance.load();
+    await StrideSensorService.instance.load();
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       publishableKey: AppConfig.supabaseAnonKey,

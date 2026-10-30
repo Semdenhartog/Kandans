@@ -66,6 +66,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Uitdagingen + Samen: `lib/features/challenges/`, functie `community` · Coach: functie `coach`, app `lib/features/coach/`
 - Community: `lib/features/community/` (Runs | Gesprekken), SQL `community_*` (0033), volgen/delen `social_*` (0034),
   `data/services/social_service.dart`, privacyzone `domain/privacy_zone.dart`. Strava-runs worden geweigerd (ook in SQL).
+- Sensoren: barometer `data/services/barometer_service.dart` (hoogtemeters, `domain/barometer.dart`), loopsensor BLE 0x1814
+  `data/services/stride_sensor_service.dart` (koppelen in `profile/heart_rate_screen.dart`). Verloop-sleutels `cad`, `baro`, `marks`.
+- Opnamescherm-indelingen `domain/record_layout.dart` + `record/record_layout_screen.dart`; markeringen `domain/run_markers.dart`,
+  `activities/markers_card.dart`; tussentijden per afstand `splitsOf(s, every:)`. Herkomst OpenTracks: zie `NOTICE`.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).

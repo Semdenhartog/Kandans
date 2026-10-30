@@ -120,6 +120,7 @@ class RouteMap extends StatefulWidget {
     this.borderRadius = 16,
     this.pois = const [],
     this.animateIn = false,
+    this.extraMarkers = const [],
   });
 
   final String polyline;
@@ -152,6 +153,9 @@ class RouteMap extends StatefulWidget {
 
   /// Watertappunten en toiletten langs de route.
   final List<RoutePoi> pois;
+
+  /// Eigen punten op de kaart (bijv. markeringen uit een run).
+  final List<({LatLng point, Widget child})> extraMarkers;
 
   @override
   State<RouteMap> createState() => _RouteMapState();
@@ -334,6 +338,8 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                     Marker(point: _ll(k.point), width: 24, height: 24, child: _KmBadge(k.km)),
                   for (final p in widget.pois)
                     Marker(point: _ll(p.point), width: 26, height: 26, child: PoiIcon(p.kind)),
+                  for (final m in widget.extraMarkers)
+                    Marker(point: _ll(m.point), width: 28, height: 28, child: m.child),
                   if (separateFinish)
                     Marker(point: _ll(finish), width: 30, height: 30, child: _Pin(icon: Icons.sports_score, color: RwColors.text)),
                   Marker(

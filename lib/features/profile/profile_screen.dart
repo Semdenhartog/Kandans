@@ -279,7 +279,7 @@ class ProfileScreen extends ConsumerWidget {
           Card(
             child: ListTile(
               leading: TileIcon(Icons.monitor_heart_outlined),
-              title: Text(tr('Hartslagband')),
+              title: Text(tr('Hartslagband en loopsensor')),
               subtitle: Text(tr('Live hartslag en zones via Bluetooth')),
               trailing: Icon(Icons.chevron_right),
               onTap: () => openHeartRateScreen(context),

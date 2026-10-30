@@ -1,4 +1,5 @@
 import 'geo.dart';
+import 'run_markers.dart';
 
 /// Resultaat van een bijgesneden run.
 class TrimmedRun {
@@ -46,6 +47,8 @@ TrimmedRun? trimRun(Map<String, dynamic> streams, int from, int to) {
       out['t'] = [for (var i = from; i <= to; i++) _round1(t[i] - t0)];
     } else if (e.key == 'd') {
       out['d'] = [for (var i = from; i <= to; i++) _round1(d[i] - d0)];
+    } else if (e.key == 'marks') {
+      out['marks'] = shiftMarkers(v, fromT: t0, fromD: d0, toD: d[to]);
     } else if (v is List && v.length == n) {
       out[e.key] = v.sublist(from, to + 1);
     } else {

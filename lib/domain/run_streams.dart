@@ -5,13 +5,28 @@ import 'geo.dart';
 /// Het verloop van een run: per meetpunt de tijd (s), afstand (m) en eventueel
 /// hoogte, hartslag en positie. Uit Strava.
 class RunStreams {
-  const RunStreams({required this.time, required this.distance, this.altitude, this.heartRate, this.positions, this.gpsQuality});
+  const RunStreams({
+    required this.time,
+    required this.distance,
+    this.altitude,
+    this.heartRate,
+    this.positions,
+    this.gpsQuality,
+    this.cadence,
+    this.baroAltitude,
+  });
 
   final List<double> time;
   final List<double> distance;
   final List<double>? altitude;
   final List<double>? heartRate;
   final List<LatLng>? positions;
+
+  /// Stappen per minuut (loopsensor via Bluetooth), als die er was.
+  final List<double>? cadence;
+
+  /// Hoogte volgens de barometer van de telefoon (alleen verschillen kloppen), als die er was.
+  final List<double>? baroAltitude;
 
   /// Hoe goed de GPS was (alleen bij runs die met Kadans zijn opgenomen), zie GpsQuality.
   final Map<String, dynamic>? gpsQuality;
@@ -42,6 +57,8 @@ class RunStreams {
       heartRate: same(nums(json['hr'])),
       positions: pos,
       gpsQuality: gps is Map ? gps.cast<String, dynamic>() : null,
+      cadence: same(nums(json['cad'])),
+      baroAltitude: same(nums(json['baro'])),
     );
   }
 
@@ -79,31 +96,55 @@ class KmSplit {
     this.heartRate,
     this.elevationGain,
     this.bearing,
+    this.cadence,
+    this.endMeters,
+    this.planned = 1000,
   });
 
-  /// 1 = eerste kilometer.
+  /// 1 = eerste stuk.
   final int index;
   final double meters;
   final double seconds;
   final double? heartRate;
   final double? elevationGain;
 
+  /// Gemiddelde cadans (stappen per minuut), als er een loopsensor was.
+  final double? cadence;
+
+  /// Afstand vanaf de start aan het eind van dit stuk.
+  final double? endMeters;
+
+  /// Geplande lengte van een stuk (1000 = per km, 400 = per baanronde).
+  final double planned;
+
   /// Looprichting in deze kilometer (voor de wind), als er posities zijn.
   final double? bearing;
 
   double get paceSecPerKm => meters <= 0 ? 0 : seconds / (meters / 1000);
-  bool get partial => meters < 990;
+  bool get partial => meters < planned * 0.99;
 }
 
-/// Tijden per kilometer. Een laatste stuk korter dan 100 m wordt bij de vorige km geteld.
-List<KmSplit> splitsOf(RunStreams s) {
+/// Afstanden waarop je tussentijden kunt kiezen (meter).
+const splitDistances = <double>[400, 1000, 1609.344, 5000];
+
+/// Korte naam van een tussentijd-afstand: "400 m", "1 km", "1 mijl", "5 km".
+String splitDistanceLabel(double every) => switch (every) {
+      400.0 => '400 m',
+      1000.0 => '1 km',
+      1609.344 => '1 mijl',
+      5000.0 => '5 km',
+      _ => every >= 1000 ? '${(every / 1000).toStringAsFixed(every % 1000 == 0 ? 0 : 1)} km' : '${every.round()} m',
+    };
+
+/// Tijden per [every] meter (standaard per km). Een laatste stuk korter dan 10% wordt bij het vorige geteld.
+List<KmSplit> splitsOf(RunStreams s, {double every = 1000}) {
   final total = s.totalDistance;
-  if (total < 200) return const [];
+  if (total < 200 || every < 100) return const [];
   final marks = <double>[0];
-  for (var k = 1000.0; k < total; k += 1000) {
+  for (var k = every; k < total; k += every) {
     marks.add(k);
   }
-  if (total - marks.last < 100 && marks.length > 1) marks.removeLast();
+  if (total - marks.last < every * 0.1 && marks.length > 1) marks.removeLast();
   marks.add(total);
 
   final out = <KmSplit>[];
@@ -124,22 +165,45 @@ List<KmSplit> splitsOf(RunStreams s) {
     }
 
     double? gain;
-    if (s.altitude != null) {
+    final elev = s.baroAltitude ?? s.altitude;
+    if (elev != null) {
       gain = 0;
       double? prev;
       for (var j = 0; j < s.length; j++) {
         if (s.distance[j] < a || s.distance[j] > b) continue;
-        final e = s.altitude![j];
+        final e = elev[j];
         if (prev != null && e > prev) gain = gain! + (e - prev);
         prev = e;
       }
+    }
+
+    double? cad;
+    if (s.cadence != null) {
+      var sum = 0.0, n = 0;
+      for (var j = 0; j < s.length; j++) {
+        if (s.distance[j] >= a && s.distance[j] <= b && s.cadence![j] > 0) {
+          sum += s.cadence![j];
+          n++;
+        }
+      }
+      if (n > 0) cad = sum / n;
     }
 
     double? bearing;
     final pa = s.positionAt(a), pb = s.positionAt(b);
     if (pa != null && pb != null && distanceMeters(pa, pb) > 50) bearing = bearingDegrees(pa, pb);
 
-    out.add(KmSplit(index: i, meters: b - a, seconds: t, heartRate: hr, elevationGain: gain, bearing: bearing));
+    out.add(KmSplit(
+      index: i,
+      meters: b - a,
+      seconds: t,
+      heartRate: hr,
+      elevationGain: gain,
+      bearing: bearing,
+      cadence: cad,
+      endMeters: b,
+      planned: every,
+    ));
   }
   return out;
 }

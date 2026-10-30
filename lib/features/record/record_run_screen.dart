@@ -1,16 +1,19 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -39,6 +42,8 @@ import '../../domain/run_streams.dart';
 import '../../domain/intervals.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_helpers.dart';
+import '../../domain/run_markers.dart';
+import '../../domain/record_layout.dart';
 import '../../domain/run_recorder.dart';
 import '../../domain/training_plan.dart';
 import '../../domain/route_geometry.dart';
@@ -57,6 +62,9 @@ import 'interval_picker.dart';
 import 'quick_start.dart';
 import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
+import 'record_layout_screen.dart';
+import '../activities/markers_card.dart' show markerIcon;
+import '../activities/photos_card.dart' show PhotosCard;
 import '../challenges/community_screen.dart' show refreshCommunityQuietly;
 import '../../data/services/community_service.dart' show communityServiceProvider;
 
@@ -114,6 +122,14 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   /// Ronde-knop naast Pauze en Stop.
   bool _lapButton = true;
+
+  /// Eigen indelingen van het opnamescherm en welke nu actief is.
+  List<RecordLayout> _layouts = List.of(RecordLayout.presets);
+  int _layoutIdx = 0;
+  RecordLayout get _layout => _layouts[_layoutIdx.clamp(0, _layouts.length - 1)];
+
+  /// Tussentijden tijdens het lopen: per hoeveel meter.
+  double _liveEvery = 1000;
 
   /// Doelafstand (km): de ring loopt vol naar dit doel. Null = per kilometer.
   double? _targetKm;
@@ -180,6 +196,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _questGap = gap == 3 || gap == 5 || gap == 8 ? gap! : 5;
           _screenOn = p.getBool('rec_screen_on') ?? false;
           _lapButton = p.getBool('rec_lap_button') ?? true;
+          _layouts = RecordLayout.decodeAll(p.getString('rec_layouts'));
+          _layoutIdx = (p.getInt('rec_layout') ?? 0).clamp(0, _layouts.length - 1);
+          final le = p.getDouble('rec_live_every');
+          if (le != null && splitDistances.contains(le)) _liveEvery = le;
           _turnByTurn = p.getBool('rec_turns') ?? true;
           final sr = p.getDouble('rec_speech_rate');
           if (sr != null && sr >= 0.3 && sr <= 0.7) _svc.speechRate = sr;
@@ -693,6 +713,82 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     } catch (_) {}
   }
 
+  void _setLiveEvery(double e) {
+    setState(() => _liveEvery = e);
+    SharedPreferences.getInstance().then((p) => p.setDouble('rec_live_every', e)).ignore();
+  }
+
+  void _nextLayout() {
+    HapticFeedback.selectionClick();
+    setState(() => _layoutIdx = (_layoutIdx + 1) % _layouts.length);
+    SharedPreferences.getInstance().then((p) => p.setInt('rec_layout', _layoutIdx)).ignore();
+  }
+
+  Future<void> _editLayouts() async {
+    final res = await Navigator.of(context).push<({List<RecordLayout> layouts, int selected})>(
+      MaterialPageRoute(builder: (_) => RecordLayoutScreen(layouts: _layouts, selected: _layoutIdx)),
+    );
+    if (res == null || !mounted) return;
+    setState(() {
+      _layouts = res.layouts;
+      _layoutIdx = res.selected.clamp(0, _layouts.length - 1);
+    });
+    final p = await SharedPreferences.getInstance();
+    await p.setString('rec_layouts', RecordLayout.encodeAll(_layouts));
+    await p.setInt('rec_layout', _layoutIdx);
+  }
+
+  /// Markering zetten: eerst meteen het punt (je loopt door), daarna eventueel soort en foto.
+  Future<void> _addMarker() async {
+    final m = _svc.addMarker(MarkerKind.note);
+    if (m == null) {
+      showMessage(context, tr('Nog geen GPS-positie. Probeer het zo opnieuw.'));
+      return;
+    }
+    final choice = await showModalBottomSheet<({MarkerKind kind, bool photo})>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(tr('Markering gezet. Wat is het?'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            const SizedBox(height: 12),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final k in MarkerKind.values)
+                ActionChip(
+                  avatar: Icon(markerIcon(k), size: 18),
+                  label: Text(tr(k.label)),
+                  onPressed: () => Navigator.pop(ctx, (kind: k, photo: false)),
+                ),
+            ]),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.pop(ctx, (kind: MarkerKind.view, photo: true)),
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: Text(tr('Foto maken')),
+            ),
+          ]),
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    _svc.setLastMarkerKind(choice.kind);
+    if (!choice.photo) return;
+    try {
+      final file = await ImagePicker().pickImage(source: ImageSource.camera, maxWidth: 1600, maxHeight: 1600, imageQuality: 82);
+      if (file == null) return;
+      // Naar een eigen map, zodat de foto er nog is als de app tussendoor wordt afgesloten.
+      final dir = await getApplicationDocumentsDirectory();
+      final dest = File('${dir.path}/marker_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await File(file.path).copy(dest.path);
+      _svc.attachPhotoToLastMarker(dest.path);
+      if (mounted) showMessage(context, tr('Foto bewaard bij je markering.'));
+    } catch (e) {
+      if (mounted) showMessage(context, tr('Foto maken lukte niet.'), error: true);
+    }
+  }
+
   Future<void> _stop() async {
     HapticFeedback.mediumImpact();
     final ok = await confirmDialog(
@@ -1144,6 +1240,26 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     Navigator.of(context).pop();
   }
 
+  /// Markeringsfoto's uploaden (maximaal zoveel als bij een run past). Mislukt er één, dan blijft de markering zonder foto.
+  Future<List<Map<String, dynamic>>> _uploadMarkerPhotos(RunWiseRepository repo, String id, List<RunMarker> markers) async {
+    var left = PhotosCard.maxPhotos;
+    final out = <Map<String, dynamic>>[];
+    for (final m in markers) {
+      var mk = m;
+      final local = m.localPhoto;
+      if (local != null && left > 0) {
+        try {
+          final path = await repo.addActivityPhoto(id, await File(local).readAsBytes());
+          mk = m.copyWith(photo: path, clearLocal: true);
+          left--;
+          File(local).delete().ignore();
+        } catch (_) {}
+      }
+      out.add(mk.toJson());
+    }
+    return out;
+  }
+
   Future<void> _save(RunRecording rec) async {
     setState(() => _saving = true);
     try {
@@ -1174,6 +1290,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         movingTimeSeconds: rec.movingSeconds.round(),
         source: 'runwise',
         averageHeartRate: rec.averageHeartRate,
+        elevationGainMeters: rec.baroGain == null ? null : double.parse(rec.baroGain!.toStringAsFixed(1)),
         temperatureCelsius: w?.temperature,
         feelsLikeCelsius: w?.feelsLike,
         windSpeedKmh: w?.windSpeed,
@@ -1196,6 +1313,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           bestEfforts: streamsJson == null ? null : bestEffortsToJson(efforts),
         ));
         return;
+      }
+      // Foto's bij markeringen uploaden en het pad in de markering zetten.
+      if (streamsJson != null && rec.markers.any((m) => m.localPhoto != null)) {
+        streamsJson['marks'] = await _uploadMarkerPhotos(repo, id, rec.markers);
       }
       if (streamsJson != null) {
         await repo
@@ -1331,6 +1452,63 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     );
   }
 
+  /// Waarde van een veld voor het opnamescherm.
+  String _fieldValue(RecField f, RecorderView v) {
+    String pace(double p) => p <= 0 ? '–' : Fmt.pace(p).replaceAll(' /km', '');
+    return switch (f) {
+      RecField.distance => (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
+      RecField.time => Fmt.duration(v.movingSeconds),
+      RecField.currentPace => pace(v.currentPace),
+      RecField.averagePace => pace(v.averagePace),
+      RecField.kmPace => pace(v.kmPace),
+      RecField.lastKm => v.lastKmPace == null ? '–' : pace(v.lastKmPace!),
+      RecField.heartRate => v.heartRate?.toString() ?? '–',
+      RecField.cadence => v.cadence?.toString() ?? '–',
+      RecField.elevationGain => v.elevationGain == null ? '–' : '${v.elevationGain!.round()} m',
+      RecField.clock => () {
+          final n = DateTime.now();
+          return '${n.hour.toString().padLeft(2, '0')}:${n.minute.toString().padLeft(2, '0')}';
+        }(),
+    };
+  }
+
+  /// Kleine cijfers in rijen van 2 of 3.
+  List<Widget> _fieldGrid(RecorderView v, List<RecField> fields, int columns) {
+    if (fields.isEmpty) return const [];
+    final rows = <Widget>[];
+    for (var i = 0; i < fields.length; i += columns) {
+      final row = fields.sublist(i, (i + columns).clamp(0, fields.length));
+      if (rows.isNotEmpty) rows.add(const SizedBox(height: 14));
+      rows.add(Row(children: [
+        for (final f in row) Expanded(child: _Big(label: tr(f.label), value: _fieldValue(f, v))),
+        for (var k = row.length; k < columns; k++) const Expanded(child: SizedBox.shrink()),
+      ]));
+    }
+    return rows;
+  }
+
+  /// Minimaal: twee enorme cijfers, verder niets.
+  List<Widget> _bigLayout(RecorderView v) {
+    Widget huge(RecField f, double size) => Semantics(
+          label: '${f.label} ${_fieldValue(f, v)}',
+          excludeSemantics: true,
+          child: Column(children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: RollingText(
+                _fieldValue(f, v),
+                style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: size, fontWeight: FontWeight.w800, height: 1),
+              ),
+            ),
+            Text(tr(f.unit), textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 18)),
+          ]),
+        );
+    return [
+      huge(_layout.main, 104),
+      if (_layout.fields.isNotEmpty) ...[const SizedBox(height: 28), huge(_layout.fields.first, 88)],
+    ];
+  }
+
   Widget _stats(RecorderView v) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1380,21 +1558,25 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           ],
           const Spacer(),
         ] else ...[
+        _LayoutChip(name: _layout.name, onTap: _nextLayout, onLongPress: _editLayouts),
+        if (_layout.style == RecStyle.big && !v.hasIntervals)
+          ..._bigLayout(v)
+        else ...[
         if (v.hasIntervals) ...[
           Semantics(
-            label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
+            label: '${_layout.main.label} ${_fieldValue(_layout.main, v)}',
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: RollingText(
-                (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
+                _fieldValue(_layout.main, v),
                 style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 72, fontWeight: FontWeight.w800, height: 1),
               ),
             ),
           ),
-          Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 18)),
+          Text(tr(_layout.main.unit), textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 18)),
           const SizedBox(height: 28),
         ] else ...[
-          // De afstand in een ring die per kilometer volloopt.
+          // Het hoofdcijfer in een ring die per kilometer volloopt.
           Center(
             child: GestureDetector(
               onTap: () {
@@ -1405,16 +1587,16 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               fraction: _targetKm == null ? (v.distance % 1000) / 1000 : (v.distance / (_targetKm! * 1000)).clamp(0.0, 1.0),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Semantics(
-                  label: 'Afstand ${Fmt.km(v.distance, decimals: 2)}',
+                  label: '${_layout.main.label} ${_fieldValue(_layout.main, v)}',
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: RollingText(
-                      (v.distance / 1000).toStringAsFixed(2).replaceAll('.', ','),
+                      _fieldValue(_layout.main, v),
                       style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 84, fontWeight: FontWeight.w800, height: 1),
                     ),
                   ),
                 ),
-                Text('kilometer', textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
+                Text(tr(_layout.main.unit), textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
                 const SizedBox(height: 4),
                 Text(
                   _targetKm != null
@@ -1435,14 +1617,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           ),
           const SizedBox(height: 20),
         ],
-        Row(
-          children: [
-            Expanded(child: _Big(label: 'Tijd', value: Fmt.duration(v.movingSeconds))),
-            Expanded(child: _Big(label: 'Tempo nu', value: v.currentPace <= 0 ? '–' : Fmt.pace(v.currentPace).replaceAll(' /km', ''))),
-            Expanded(child: _Big(label: 'Gemiddeld', value: v.averagePace <= 0 ? '–' : Fmt.pace(v.averagePace).replaceAll(' /km', ''))),
-          ],
-        ),
-        if (v.heartRate != null || v.hrStatus == HrStatus.connecting || v.hrStatus == HrStatus.lost) ...[
+        ..._fieldGrid(v, _layout.fields, _layout.columns),
+        ],
+        if ((v.heartRate != null || v.hrStatus == HrStatus.connecting || v.hrStatus == HrStatus.lost) &&
+            _layout.main != RecField.heartRate && !_layout.fields.contains(RecField.heartRate)) ...[
           const SizedBox(height: 18),
           _HeartRow(view: v),
         ],
@@ -1669,6 +1847,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                             SharedPreferences.getInstance().then((p) => p.setBool('rec_lap_button', x)).ignore();
                           },
                         ),
+                      if (_moreOpts)
+                        ActionChip(
+                          avatar: const Icon(Icons.dashboard_customize_outlined, size: 18),
+                          label: Text(trf('Scherm: {naam}', {'naam': _layout.name})),
+                          tooltip: tr('Kies welke cijfers je tijdens het lopen ziet'),
+                          onPressed: _editLayouts,
+                        ),
                       if (_moreOpts || _sunMode)
                       FilterChip(
                         avatar: const Icon(Icons.wb_sunny_outlined, size: 18),
@@ -1890,18 +2075,33 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                                   ),
                                                 ],
                                               ),
+                                              if (!v.indoor) ...[
+                                                const SizedBox(height: 8),
+                                                OutlinedButton.icon(
+                                                  onPressed: _addMarker,
+                                                  icon: const Icon(Icons.add_location_alt_outlined),
+                                                  label: Text(v.markers == 0
+                                                      ? tr('Markeren')
+                                                      : trf('Markeren ({n} gezet)', {'n': v.markers})),
+                                                ),
+                                              ],
                                             ],
                                           ),
                                         ),
+                                        _LiveSplits(view: v, recording: _svc.recording, every: _liveEvery, onEvery: _setLiveEvery),
                                       ],
                                     ),
                                   ),
                                   Semantics(
-                                    label: _page == 0 ? 'Cijfers, veeg voor de kaart' : 'Kaart, veeg terug voor de cijfers',
+                                    label: switch (_page) {
+                                      0 => 'Cijfers, veeg voor de kaart',
+                                      1 => 'Kaart, veeg voor de tussentijden',
+                                      _ => 'Tussentijden, veeg terug voor de kaart',
+                                    },
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        for (var i = 0; i < 2; i++)
+                                        for (var i = 0; i < 3; i++)
                                           AnimatedContainer(
                                             duration: const Duration(milliseconds: 200),
                                             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
@@ -3098,4 +3298,118 @@ class _QuestTally extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w600)),
         ]),
       );
+}
+
+/// Naam van de actieve indeling: tik = volgende, lang drukken = aanpassen.
+class _LayoutChip extends StatelessWidget {
+  const _LayoutChip({required this.name, required this.onTap, required this.onLongPress});
+  final String name;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Semantics(
+          button: true,
+          label: trf('Indeling {naam}. Tik voor de volgende, houd vast om aan te passen.', {'naam': name}),
+          excludeSemantics: true,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.dashboard_customize_outlined, size: 15, color: RwColors.subtle),
+                const SizedBox(width: 6),
+                Text(name, style: TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w600)),
+                Icon(Icons.unfold_more, size: 15, color: RwColors.subtle),
+              ]),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Derde pagina tijdens het lopen: tussentijden per gekozen afstand, live bijgewerkt.
+class _LiveSplits extends StatelessWidget {
+  const _LiveSplits({required this.view, required this.recording, required this.every, required this.onEvery});
+  final RecorderView view;
+  final RunRecording? recording;
+  final double every;
+  final ValueChanged<double> onEvery;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = recording;
+    final samples = r?.samples ?? const <RunSample>[];
+    List<KmSplit> splits = const [];
+    if (samples.length >= 2) {
+      final s = RunStreams(
+        time: [for (final x in samples) x.t],
+        distance: [for (final x in samples) x.d],
+        heartRate: samples.any((x) => x.hr != null) ? [for (final x in samples) (x.hr ?? 0).toDouble()] : null,
+        cadence: samples.any((x) => x.cad != null) ? [for (final x in samples) (x.cad ?? 0).toDouble()] : null,
+      );
+      splits = splitsOf(s, every: every);
+    }
+    final hasHr = splits.any((x) => x.heartRate != null);
+    final hasCad = splits.any((x) => x.cadence != null);
+    final head = TextStyle(color: RwColors.subtle, fontSize: 12, fontWeight: FontWeight.w600);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(tr('TUSSENTIJDEN'), style: head),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, children: [
+          for (final e in splitDistances.take(3))
+            ChoiceChip(label: Text(splitDistanceLabel(e)), selected: every == e, onSelected: (_) => onEvery(e)),
+        ]),
+        const SizedBox(height: 10),
+        Row(children: [
+          SizedBox(width: 56, child: Text(every == 1000 ? 'km' : '#', style: head)),
+          Expanded(child: Text(tr('tijd'), style: head)),
+          Expanded(child: Text(tr('tempo'), style: head)),
+          if (hasHr) SizedBox(width: 48, child: Text(tr('hart'), style: head, textAlign: TextAlign.right)),
+          if (hasCad) SizedBox(width: 48, child: Text(tr('cadans'), style: head, textAlign: TextAlign.right)),
+        ]),
+        const Divider(height: 12),
+        Expanded(
+          child: splits.isEmpty
+              ? Center(child: Text(tr('Je tussentijden verschijnen hier zodra je loopt.'), style: TextStyle(color: RwColors.muted)))
+              : ListView(
+                  reverse: false,
+                  children: [
+                    for (final sp in splits.reversed)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(children: [
+                          SizedBox(
+                            width: 56,
+                            child: Text(sp.partial ? tr('nu') : '${sp.index}',
+                                style: TextStyle(fontWeight: FontWeight.w700, color: sp.partial ? RwColors.accent : RwColors.text)),
+                          ),
+                          Expanded(
+                            child: Text(Fmt.duration(sp.seconds),
+                                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w700)),
+                          ),
+                          Expanded(child: Text(Fmt.pace(sp.paceSecPerKm).replaceAll(' /km', ''), style: TextStyle(color: RwColors.muted, fontFeatures: rwTnum))),
+                          if (hasHr)
+                            SizedBox(
+                                width: 48,
+                                child: Text(sp.heartRate == null ? '–' : '${sp.heartRate!.round()}',
+                                    textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted))),
+                          if (hasCad)
+                            SizedBox(
+                                width: 48,
+                                child: Text(sp.cadence == null ? '–' : '${sp.cadence!.round()}',
+                                    textAlign: TextAlign.right, style: TextStyle(color: RwColors.muted))),
+                        ]),
+                      ),
+                  ],
+                ),
+        ),
+      ]),
+    );
+  }
 }

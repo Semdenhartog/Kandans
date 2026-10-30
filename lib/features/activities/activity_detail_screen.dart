@@ -23,6 +23,7 @@ import 'run_replay_screen.dart';
 import 'share_run_screen.dart';
 import 'gps_spike_screen.dart';
 import '../community/share_to_feed.dart';
+import 'markers_card.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
 import 'splits_card.dart';
@@ -340,6 +341,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'hoogte'), child: ElevationCard(activity: a)),
           ],
+          if (a.id != null && a.source == 'runwise') MarkersCard(activity: a),
           if (a.id != null) ...[
             const SizedBox(height: 12),
             PhotosCard(activity: a),

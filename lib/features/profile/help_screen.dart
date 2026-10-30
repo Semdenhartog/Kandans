@@ -169,7 +169,7 @@ final settingsDestinations = <SettingsDestination>[
   SettingsDestination('Trainingsschema', Icons.calendar_month_outlined, 'schema plan training', openTrainingPlan),
   SettingsDestination('Badges', Icons.military_tech_outlined, 'badge medaille mijlpaal', openBadges),
   SettingsDestination('Kracht en mobiliteit', Icons.fitness_center, 'kracht rekken warming-up stretch', openStrength),
-  SettingsDestination('Hartslagband', Icons.monitor_heart_outlined, 'hartslag band bluetooth zones', openHeartRateScreen),
+  SettingsDestination('Hartslagband', Icons.monitor_heart_outlined, 'hartslag band bluetooth zones loopsensor voetsensor cadans stryd', openHeartRateScreen),
   SettingsDestination('Fitheid en vorm', Icons.trending_up, 'fitheid vorm belasting', openFitness),
   SettingsDestination('Mijn heatmap', Icons.map_outlined, 'heatmap kaart waar gelopen', openHeatmap),
   SettingsDestination('Kalender', Icons.event_outlined, 'kalender maand overzicht', openCalendar),

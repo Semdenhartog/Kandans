@@ -13,11 +13,15 @@ import '../../domain/route_geometry.dart';
 import '../../domain/guided_runs.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_streams.dart';
+import '../../domain/run_markers.dart';
+import '../../domain/zones.dart' show elevationGain;
 import '../../domain/run_recorder.dart';
 import '../../domain/route_turns.dart';
 import '../../domain/route_heads_up.dart';
 import '../../domain/poi.dart';
+import 'barometer_service.dart';
 import 'heart_rate_service.dart';
+import 'stride_sensor_service.dart';
 import 'metronome_service.dart';
 import 'live_share_service.dart';
 import 'notification_service.dart';
@@ -68,6 +72,11 @@ class RecorderView {
     this.questsTotal = 0,
     this.questsOn = false,
     this.laps = const [],
+    this.cadence,
+    this.elevationGain,
+    this.kmPace = 0,
+    this.lastKmPace,
+    this.markers = 0,
   });
 
   final RecorderStatus status;
@@ -135,6 +144,21 @@ class RecorderView {
 
   /// Handmatige rondes: per ronde de tijd (s) en afstand (m).
   final List<({double seconds, double meters})> laps;
+
+  /// Cadans van de loopsensor (stappen per minuut), null = geen sensor.
+  final int? cadence;
+
+  /// Hoogtemeters tot nu toe (barometer, anders GPS-schatting), null = onbekend.
+  final double? elevationGain;
+
+  /// Tempo in de lopende kilometer (s/km), 0 = nog te kort.
+  final double kmPace;
+
+  /// Tijd van de vorige hele kilometer (s), null = nog geen.
+  final double? lastKmPace;
+
+  /// Aantal markeringen in deze run.
+  final int markers;
 
   bool get gpsReady => gpsAccuracy != null && gpsAccuracy! <= RunRecording.maxAccuracy;
 }
@@ -214,6 +238,9 @@ class RunRecorderService {
   }
   FuelReminder? _fuel;
   GuidedPlayer? _guided;
+  bool _speedFromPod = false;
+  double? _gpsGain;
+  int _gpsGainAt = -1;
   int _ticks = 0;
 
   /// Doeltempo van de huidige run (s/km), of null.
@@ -404,8 +431,10 @@ class RunRecorderService {
     await _ensurePermission();
     _rec = RunRecording();
     _listen();
-    // Onthouden hartslagband alvast verbinden.
+    // Onthouden hartslagband en loopsensor alvast verbinden; barometer aan voor hoogtemeters.
     HeartRateService.instance.autoConnect().catchError((Object _) {});
+    StrideSensorService.instance.autoConnect().catchError((Object _) {});
+    BarometerService.instance.start();
   }
 
   void _listen({bool indoor = false}) {
@@ -433,6 +462,14 @@ class RunRecorderService {
   void _onTick() {
     final r = _rec;
     if (r != null && r.indoor) {
+      r.heartRate = HeartRateService.instance.bpm.value;
+      r.cadence = StrideSensorService.instance.cadence.value;
+      // Loopband met voetsensor: de snelheid van de sensor gebruiken, tenzij je zelf een snelheid koos.
+      final pod = StrideSensorService.instance.speed.value;
+      if (pod != null && (r.treadmillKmh == null || _speedFromPod)) {
+        r.treadmillKmh = double.parse((pod * 3.6).toStringAsFixed(1));
+        _speedFromPod = true;
+      }
       final km = r.tick(1);
       if (km != null) {
         _buzz(const [0, 180, 140, 180]);
@@ -581,6 +618,7 @@ class RunRecorderService {
         _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
       }
       HeartRateService.instance.autoConnect().catchError((Object _) {});
+      StrideSensorService.instance.autoConnect().catchError((Object _) {});
     } else {
       if (_sub == null) await warmUp();
       _rec ??= RunRecording();
@@ -647,6 +685,7 @@ class RunRecorderService {
     final r = _rec;
     if (r == null || !r.indoor) return;
     r.treadmillKmh = kmh == null || kmh <= 0 ? null : kmh;
+    _speedFromPod = false;
     view.value = _snapshot();
     RecordingStore.save(r).ignore();
   }
@@ -678,6 +717,8 @@ class RunRecorderService {
     _lastFixAt = DateTime.now();
     final before = r.status;
     r.heartRate = HeartRateService.instance.bpm.value;
+    r.cadence = StrideSensorService.instance.cadence.value;
+    r.baroAltitude = BarometerService.instance.altitude;
     final km = r.add(GpsFix(LatLng(p.latitude, p.longitude), p.timestamp,
         accuracy: p.accuracy, speed: p.speed >= 0 ? p.speed : null, altitude: p.altitude == 0 ? null : p.altitude));
     if (before == RecorderStatus.running && r.status == RecorderStatus.autoPaused) _say('Automatisch gepauzeerd.');
@@ -961,7 +1002,62 @@ class RunRecorderService {
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
       nextTurn: turnByTurn ? _turns?.next : null,
       nextTurnIn: turnByTurn && _follower != null ? _turns?.distanceTo(_follower!.progress) : null,
+      cadence: StrideSensorService.instance.cadence.value,
+      elevationGain: r.indoor ? null : _liveGain(r),
+      kmPace: _kmPace(r, moving),
+      lastKmPace: r.lastKmSeconds,
+      markers: r.markers.length,
     );
+  }
+
+  /// Tempo in de lopende kilometer (s/km).
+  double _kmPace(RunRecording r, double moving) {
+    final start = r.kmTimes.isEmpty ? 0.0 : r.kmTimes.last;
+    final meters = r.distance - r.kmTimes.length * 1000;
+    if (meters < 50) return 0;
+    return (moving - start) / (meters / 1000);
+  }
+
+  /// Hoogtemeters tijdens het lopen: barometer als die er is, anders (grof) de GPS. Niet elke seconde opnieuw rekenen.
+  double? _liveGain(RunRecording r) {
+    if (_gpsGainAt == r.samples.length) return _gpsGain;
+    _gpsGainAt = r.samples.length;
+    final baro = r.baroGain;
+    if (baro != null) return _gpsGain = baro;
+    final alt = [for (final x in r.samples) if (x.alt != null) x.alt!];
+    return _gpsGain = alt.length < 10 ? null : elevationGain(alt);
+  }
+
+  /// Markering zetten op je huidige plek (met eventueel een foto die al op de telefoon staat).
+  RunMarker? addMarker(MarkerKind kind, {String? note, String? localPhoto}) {
+    final r = _rec;
+    if (r == null || r.indoor) return null;
+    final at = _position ?? (r.track.isEmpty ? null : r.track.last);
+    if (at == null) return null;
+    final m = RunMarker(seconds: _movingNow(), meters: r.distance, point: at, kind: kind, note: note, localPhoto: localPhoto);
+    r.markers.add(m);
+    _buzz(const [0, 60]);
+    view.value = _snapshot();
+    RecordingStore.save(r).ignore();
+    return m;
+  }
+
+  /// Soort van de laatste markering aanpassen (gekozen na het zetten).
+  void setLastMarkerKind(MarkerKind kind) {
+    final r = _rec;
+    if (r == null || r.markers.isEmpty) return;
+    final m = r.markers.last;
+    r.markers[r.markers.length - 1] =
+        RunMarker(seconds: m.seconds, meters: m.meters, point: m.point, kind: kind, note: m.note, photo: m.photo, localPhoto: m.localPhoto);
+    RecordingStore.save(r).ignore();
+  }
+
+  /// Foto achteraf aan de laatste markering hangen (camera duurt even).
+  void attachPhotoToLastMarker(String localPhoto) {
+    final r = _rec;
+    if (r == null || r.markers.isEmpty) return;
+    r.markers[r.markers.length - 1] = r.markers.last.copyWith(localPhoto: localPhoto);
+    RecordingStore.save(r).ignore();
   }
 
   /// Stopt de opname en geeft de run terug om op te slaan (of null als er niets is).
@@ -981,6 +1077,11 @@ class RunRecorderService {
     if (r != null && r.indoor) _say('Training gestopt. Goed gedaan.');
     view.value = const RecorderView(status: RecorderStatus.finished);
     HeartRateService.instance.disconnect().catchError((Object _) {});
+    StrideSensorService.instance.disconnect().catchError((Object _) {});
+    BarometerService.instance.stop();
+    _speedFromPod = false;
+    _gpsGain = null;
+    _gpsGainAt = -1;
     RecordingStore.clear().ignore();
     NotificationService.instance.cancelRunProgress().ignore();
     _cues = null;
@@ -1020,6 +1121,7 @@ class RunRecorderService {
       _tick?.cancel();
       _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
     }
+    if (!r.indoor) BarometerService.instance.start();
     if (voice) {
       _tts ??= FlutterTts();
       await _configureTts();
