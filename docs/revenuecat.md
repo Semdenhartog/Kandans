@@ -25,8 +25,15 @@ De app is klaar. Wat nog in het dashboard moet, in deze volgorde.
    Authorization = zelfde waarde als Supabase-geheim `REVENUECAT_WEBHOOK_SECRET`.
 
 ## Sleutels (nooit in de code)
-- **`test_…` (Test Store)**: nep-aankopen, alleen in een **debug**-build. In een release-APK laat RevenueCat de app
-  bewust crashen; daarom zet de app Premium dan op "nog niet beschikbaar" en waarschuwt de build.
+- **`test_…` (Test Store)**: nep-aankopen. Zet hem in GitHub Secrets als **`REVENUECAT_TEST_KEY`**.
+  Elke build van main maakt dan ook een testversie (debug-APK) die náást de gewone app staat:
+  naam "Kadans test", pakket `nl.runwise.runwise.test`.
+  Link: https://github.com/Semdenhartog/Kandans/releases/download/laatste/kadans-test.apk
+  - Niet als `REVENUECAT_ANDROID_KEY` gebruiken: in een release-APK laat RevenueCat de app bewust crashen;
+    de app zet Premium dan op "nog niet beschikbaar".
+  - Nep-aankopen gaan ook via de webhook: je eigen account wordt dan op de server ook Premium (tot de testaankoop verloopt).
+  - Inloggen met e-mail en wachtwoord werkt. Links die de app openen (`runwise://`, zoals Strava-terugkeer)
+    vragen welke van de twee apps je wilt gebruiken.
 - **`goog_…` (Google Play)**: voor de echte APK en de Play Store. Zet hem in GitHub → Settings → Secrets →
   `REVENUECAT_ANDROID_KEY`.
 

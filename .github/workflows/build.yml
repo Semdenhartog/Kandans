@@ -21,6 +21,8 @@ jobs:
     env:
       # Ondertekeningssleutel voor de Play Store (staat in GitHub Secrets, nooit in de code).
       HAS_UPLOAD_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      # Testsleutel van RevenueCat (test_…) voor de testversie met nep-aankopen.
+      HAS_TEST_KEY: ${{ secrets.REVENUECAT_TEST_KEY != '' }}
     steps:
       - name: Schijfruimte vrijmaken
         run: |
@@ -50,7 +52,7 @@ jobs:
           if [ -n "$RC_KEY" ]; then
             python3 -c "import json,os; p='app_config.json'; d=json.load(open(p)); d['REVENUECAT_ANDROID_KEY']=os.environ['RC_KEY']; json.dump(d, open(p,'w'), indent=2)"
             case "$RC_KEY" in
-              test_*) echo "::warning::REVENUECAT_ANDROID_KEY is een Test Store-sleutel (test_…). Die werkt niet in een release-APK: de app toont Premium dan als 'nog niet beschikbaar'. Gebruik de goog_…-sleutel." ;;
+              test_*) echo "::warning::REVENUECAT_ANDROID_KEY is een Test Store-sleutel (test_…). Die werkt niet in een release-APK: de app toont Premium dan als 'nog niet beschikbaar'. Zet hier de goog_…-sleutel en de test_…-sleutel in REVENUECAT_TEST_KEY." ;;
               goog_*) echo "::notice::RevenueCat-sleutel ingevuld: Premium kan gekocht worden" ;;
               *) echo "::warning::REVENUECAT_ANDROID_KEY begint niet met goog_ of test_. Controleer de sleutel in RevenueCat → Project settings → API keys." ;;
             esac
@@ -528,3 +530,42 @@ jobs:
       - name: Uitleg als de sleutel nog ontbreekt
         if: ${{ !inputs.snel && (env.HAS_UPLOAD_KEY != 'true') }}
         run: echo "::notice::Geen Play Store-bundle gebouwd - voer eerst maak-sleutel.ps1 uit en zet de 4 geheimen in GitHub (zie README)."
+
+      # Testversie met RevenueCat's Test Store (nep-aankopen, er wordt niets betaald).
+      # Alleen als het geheim REVENUECAT_TEST_KEY (test_…) bestaat. Een release-APK crasht met die sleutel,
+      # daarom een debug-APK. Die staat NAAST de gewone app (pakket nl.runwise.runwise.test, naam "Kadans test").
+      # Link: https://github.com/Semdenhartog/Kandans/releases/download/laatste/kadans-test.apk
+      - name: Testversie met nep-aankopen bouwen (RevenueCat Test Store)
+        if: ${{ !inputs.snel && github.ref == 'refs/heads/main' && env.HAS_TEST_KEY == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RC_TEST_KEY: ${{ secrets.REVENUECAT_TEST_KEY }}
+        run: |
+          set -o pipefail
+          case "$RC_TEST_KEY" in
+            test_*) ;;
+            *) echo "::error::REVENUECAT_TEST_KEY moet met test_ beginnen (Test Store-sleutel uit RevenueCat)"; exit 1 ;;
+          esac
+          python3 - <<'EOF2'
+          import json, os
+          d = json.load(open("app_config.json"))
+          d["REVENUECAT_ANDROID_KEY"] = os.environ["RC_TEST_KEY"]
+          json.dump(d, open("app_config_test.json", "w"), indent=2)
+          p = "android/app/build.gradle.kts"
+          s = open(p).read()
+          assert "    buildTypes {" in s, "buildTypes niet gevonden"
+          s = s.replace("    buildTypes {", '    buildTypes {\n        getByName("debug") { applicationIdSuffix = ".test" }', 1)
+          open(p, "w").write(s)
+          m = "android/app/src/main/AndroidManifest.xml"
+          t = open(m).read()
+          assert 'android:label="Kadans"' in t, "app-naam niet gevonden"
+          open(m, "w").write(t.replace('android:label="Kadans"', 'android:label="Kadans test"', 1))
+          EOF2
+          flutter build apk --debug --dart-define-from-file=app_config_test.json --build-number=${{ github.run_number }} --build-name=1.1.${{ github.run_number }} --dart-define=APP_VERSION=1.1.${{ github.run_number }}-test 2>&1 | tee build_test.txt || {
+            grep -E -A8 "What went wrong|^e: |error:|Error:|FAILURE:" build_test.txt | grep -v "^--$" | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          }
+          rm -f app_config_test.json
+          cp build/app/outputs/flutter-apk/app-debug.apk kadans-test.apk
+          gh release upload laatste kadans-test.apk --clobber
+          echo "::notice::Testversie (nep-aankopen) staat klaar op https://github.com/${GITHUB_REPOSITORY}/releases/download/laatste/kadans-test.apk"
