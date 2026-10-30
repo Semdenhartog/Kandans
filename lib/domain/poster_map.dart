@@ -15,7 +15,7 @@ class MapLine {
 
 /// Kader rond de route, iets ruimer en ongeveer in de vorm van het kaartvlak op de poster (breedte/hoogte ≈ [aspect]),
 /// zodat de kaart het hele vlak vult en niet alleen de route.
-({double s, double w, double n, double e}) posterMapBounds(List<LatLng> track, {double aspect = 0.9, double margin = 0.18}) {
+({double s, double w, double n, double e}) posterMapBounds(List<LatLng> track, {double aspect = 1.25, double margin = 0.3}) {
   var s = track.first.lat, n = s, w = track.first.lon, e = w;
   for (final p in track) {
     s = math.min(s, p.lat);

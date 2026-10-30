@@ -5,7 +5,7 @@ import 'package:runwise/domain/poster_map.dart';
 void main() {
   const track = [LatLng(52.14, 5.58), LatLng(52.15, 5.60), LatLng(52.16, 5.59)];
 
-  test('kader rond de route is ruimer en ongeveer staand', () {
+  test('kader rond de route is ruimer en ongeveer zo breed als het kaartvlak', () {
     final b = posterMapBounds(track);
     expect(b.s, lessThan(52.14));
     expect(b.n, greaterThan(52.16));
@@ -13,7 +13,7 @@ void main() {
     expect(b.e, greaterThan(5.60));
     final h = distanceMeters(LatLng(b.s, b.w), LatLng(b.n, b.w));
     final w = distanceMeters(LatLng(b.s, b.w), LatLng(b.s, b.e));
-    expect(w / h, closeTo(0.9, 0.05));
+    expect(w / h, closeTo(1.25, 0.05));
   });
 
   test('klein gebied: ook paden; groot gebied: alleen grote wegen', () {

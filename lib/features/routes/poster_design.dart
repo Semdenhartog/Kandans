@@ -142,14 +142,17 @@ class RoutePosterArt extends StatelessWidget {
             : child;
 
         Widget stat(String label, String value) => Column(mainAxisSize: MainAxisSize.min, children: [
-              gold(Text(value,
+              FittedBox(fit: BoxFit.scaleDown, child: gold(Text(value,
                   maxLines: 1,
                   style: TextStyle(
-                      color: s.fg, fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18 * u, fontWeight: FontWeight.w700, height: 1.1))),
+                      color: s.fg, fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18 * u, fontWeight: FontWeight.w700, height: 1.1)))),
               SizedBox(height: 3 * u),
-              Text(label.toUpperCase(),
-                  maxLines: 1,
-                  style: TextStyle(color: s.fg.withValues(alpha: 0.55), fontSize: 7 * u, letterSpacing: 1.8 * u, fontWeight: FontWeight.w600)),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(label.toUpperCase(),
+                    maxLines: 1,
+                    style: TextStyle(color: s.fg.withValues(alpha: 0.55), fontSize: 7 * u, letterSpacing: 1.8 * u, fontWeight: FontWeight.w600)),
+              ),
             ]);
 
         Widget divider() => Container(width: 0.6 * u, height: 26 * u, color: s.fg.withValues(alpha: 0.22));
@@ -462,9 +465,9 @@ class PosterRoutePainter extends CustomPainter {
       if (p == null) continue;
       switch (kind) {
         case MapLineKind.waterArea:
-          canvas.drawPath(p, Paint()..color = color.withValues(alpha: 0.10));
+          canvas.drawPath(p, Paint()..color = mapColor.withValues(alpha: 0.07));
         case MapLineKind.water:
-          canvas.drawPath(p, stroke(color, 0.26, 1.3));
+          canvas.drawPath(p, stroke(mapColor, 0.2, 1.4));
         case MapLineKind.path:
           canvas.drawPath(p, stroke(mapColor, 0.09, 0.35));
         case MapLineKind.rail:
@@ -475,18 +478,32 @@ class PosterRoutePainter extends CustomPainter {
           canvas.drawPath(p, stroke(mapColor, 0.25, 1.0));
       }
     }
-    // Zachte rand: in het midden helder, naar de hoeken toe weg.
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..blendMode = BlendMode.dstIn
-        ..shader = ui.Gradient.radial(
-          rect.center,
-          math.max(size.width, size.height) * 0.62,
-          const [Color(0xFF000000), Color(0xFF000000), Color(0x00000000)],
-          const [0, 0.7, 1],
-        ),
-    );
+    // Zachte randen: de kaart loopt naar alle kanten weg, ook waar de kaartgegevens ophouden.
+    var minX = double.infinity, minY = double.infinity, maxX = -double.infinity, maxY = -double.infinity;
+    for (final l in mapLines) {
+      for (final q in l.points) {
+        final o = at(q);
+        minX = math.min(minX, o.dx);
+        maxX = math.max(maxX, o.dx);
+        minY = math.min(minY, o.dy);
+        maxY = math.max(maxY, o.dy);
+      }
+    }
+    final area = Rect.fromLTRB(math.max(minX, 0), math.max(minY, 0), math.min(maxX, size.width), math.min(maxY, size.height));
+    if (!area.isEmpty) {
+      const fade = [Color(0x00000000), Color(0xFF000000), Color(0xFF000000), Color(0x00000000)];
+      const stops = [0.0, 0.2, 0.8, 1.0];
+      canvas.drawRect(
+          rect,
+          Paint()
+            ..blendMode = BlendMode.dstIn
+            ..shader = ui.Gradient.linear(area.centerLeft, area.centerRight, fade, stops));
+      canvas.drawRect(
+          rect,
+          Paint()
+            ..blendMode = BlendMode.dstIn
+            ..shader = ui.Gradient.linear(area.topCenter, area.bottomCenter, fade, stops));
+    }
     canvas.restore();
   }
 
