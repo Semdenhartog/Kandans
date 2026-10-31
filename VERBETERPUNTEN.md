@@ -335,3 +335,12 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 3. ✅ **Pijntjes-dagboek**: "Pijntje" na de run vraagt plek en ernst (staat in de notitie, bijv. "Pijntje: scheen 5"). Ik → Pijntjes toont terugkerende pijntjes met mogelijke oorzaak (lange/snelle runs, snelle opbouw, zelfde schoenen) en wanneer naar de fysio.
 4. ✅ **Hartslagherstel-test**: met hartslagband (≥ 110 bpm bij stoppen) een minuut rustig staan; daling in 1 min + trend in rundetail en Hartslagband-scherm. Lokaal bewaard.
 5. ✅ **Kadans-effect**: na elke run (en bij openen van een run) wordt de terugblik bewaard; in Runs "Het Kadans-effect": goed gekozen runs, ontlopen regen en hitte dit jaar. Badge "Slim gekozen" (5 runs). Telt vanaf 31-10-2026.
+
+## Ronde 31 oktober 2026 (3) – zes ideeën, door Sem gekozen (2, 3, 5, 6, 11, 15)
+
+1. ✅ **Hoe zeker is dit moment?** Op Vandaag een chip onder de grote tijd: Kadans vergelijkt 40 varianten van het ICON-weermodel (Open-Meteo ensemble). "Zeker droog", "Vrij zeker droog" of "Kan omslaan, kijk om 14:30 nog even". Tik voor uitleg.
+2. ✅ **Klopte de voorspelling?** Het beste moment van elke dag wordt op de telefoon bewaard en na afloop vergeleken met het echte weer (droog/nat goed en temperatuur binnen 2,5°). Score staat in het zekerheidsblad.
+3. ✅ **Telefoonagenda**: Werkrooster → "Afspraken overslaan". Leest alleen begin en eind (geen titels, hele-dag-afspraken en "vrij" tellen niet) via een eigen Android-kanaal; vraagt alleen leesrecht (READ_CALENDAR).
+4. ✅ **Knop op je oortjes**: in de steminstellingen bij het opnemen (standaard uit). Eén druk = pauze/verder, twee keer of "volgende" = ronde. Werkt via een eigen mediasessie; speelt er muziek, dan kan die app de knop overnemen.
+5. ✅ **Loop-bingo**: nieuwe kaart op Vandaag. Elke maand 8 opdrachten (zelfde voor iedereen, passend bij het seizoen) + gratis midden. Melding als er een lijn bij komt.
+6. ✅ **Eigen runs naar Strava**: in het Strava-menu (Koppelingen) aan te zetten, of per run "Naar Strava sturen". GPX met hartslag, cadans en hoogte; loopband als handmatige activiteit. Komt niet dubbel terug via de sync. Strava moet hiervoor één keer opnieuw gekoppeld worden (recht `activity:write`).

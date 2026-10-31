@@ -48,6 +48,7 @@ th{color:var(--text);background:var(--surface)}
 <tr><td>Routes die je importeert (GPS-punten)</td><td>Om de wind op je looprichting te berekenen.</td></tr>
 <tr><td>Wedstrijddoelen</td><td>Voor je wedstrijdvoorspelling en advies.</td></tr>
 <tr><td>Trainingen, afstand en hartslag uit Health Connect (alleen als je je horloge koppelt)</td><td>Om je runs automatisch toe te voegen. Kadans leest alleen hardlooptrainingen.</td></tr>
+<tr><td>Afspraken uit je telefoonagenda (alleen als je dat aanzet): begin- en eindtijd</td><td>Om geen loopmoment voor te stellen tijdens een afspraak. Dit blijft op je telefoon en gaat niet naar onze servers. De titels lezen we niet.</td></tr>
 <tr><td>Runs uit Strava (alleen als je Strava koppelt)</td><td>Om je runs automatisch toe te voegen. Ontkoppel je Strava, dan verwijderen we deze runs.</td></tr>
 <tr><td>Vragen aan de coach en de antwoorden</td><td>Om je persoonlijk trainingsadvies te geven en het gesprek te onthouden. Je kunt het gesprek altijd wissen.</td></tr>
 <tr><td>Abonnementsstatus</td><td>Om te weten of je Premium hebt. Betalingen lopen via Google Play; wij zien geen betaalgegevens.</td></tr>
@@ -82,7 +83,7 @@ th{color:var(--text);background:var(--surface)}
 <li><strong>Supabase</strong> – slaat je account en gegevens op, op servers in de EU.</li>
 <li><strong>Open-Meteo</strong> en <strong>Buienradar</strong> – leveren het weer en de buien. Daarvoor sturen we alleen afgeronde coördinaten (zonder naam of e-mailadres).</li>
 <li><strong>Anthropic</strong> – levert de AI achter de coach. Als je een vraag stelt of om een analyse van een run vraagt, sturen we je vraag, je voornaam en een samenvatting van je runs (inclusief relevante data) om een persoonlijk antwoord te geven.</li>
-<li><strong>Strava</strong> – alleen als je Strava koppelt, om je runs op te halen.</li>
+<li><strong>Strava</strong> – alleen als je Strava koppelt, om je runs op te halen. Zet je "Eigen runs naar Strava" aan (of tik je bij een run op "Naar Strava sturen"), dan sturen we die run (tijd, afstand, route, hoogte, hartslag en cadans) naar je eigen Strava-account.</li>
 <li><strong>Mapillary</strong> (Meta) – straatfoto's langs je route. Onze server stuurt een paar punten van de route (zonder je naam of account) om foto's in de buurt te zoeken.</li>
 <li><strong>Open-Meteo</strong> – hoogtekaart: om de hoogtemeters van je opgenomen runs te verbeteren sturen we punten van je spoor (zonder naam of account).</li>
 <li><strong>Wikipedia</strong> (Wikimedia Foundation) – foto's van bezienswaardigheden langs je route. De app vraagt daarvoor het gebied rond de route op.</li>

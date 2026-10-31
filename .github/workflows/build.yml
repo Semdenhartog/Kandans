@@ -156,6 +156,7 @@ jobs:
               open(p, "w").write(s)
           kdir = os.path.dirname(glob.glob("android/app/src/main/kotlin/**/MainActivity.kt", recursive=True)[0])
           shutil.copy("android_extra/kotlin/BestMomentWidget.kt", kdir)
+          shutil.copy("android_extra/kotlin/KadansChannels.kt", kdir)
           for sub in ("layout", "xml", "drawable", "values"):
               os.makedirs(f"android/app/src/main/res/{sub}", exist_ok=True)
               for f in glob.glob(f"android_extra/res/{sub}/*.xml"):
@@ -167,6 +168,20 @@ jobs:
               k = open(m).read()
               k = k.replace("io.flutter.embedding.android.FlutterActivity", "io.flutter.embedding.android.FlutterFragmentActivity")
               k = re.sub(r":\s*FlutterActivity\(\)", ": FlutterFragmentActivity()", k)
+              # Eigen kanalen (telefoonagenda, knop op oortjes) registreren.
+              if "KadansChannels" not in k:
+                  k = k.replace("import io.flutter.embedding.android.FlutterFragmentActivity",
+                                "import io.flutter.embedding.android.FlutterFragmentActivity\nimport io.flutter.embedding.engine.FlutterEngine", 1)
+                  k = re.sub(r": FlutterFragmentActivity\(\)\s*(\{\s*\})?",
+                             (": FlutterFragmentActivity() {\n"
+                              "    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {\n"
+                              "        super.configureFlutterEngine(flutterEngine)\n"
+                              "        KadansChannels.register(this, flutterEngine)\n"
+                              "    }\n"
+                              "}\n"), k, count=1)
+                  if "KadansChannels" not in k:
+                      print("::error::MainActivity kon niet worden aangepast")
+                      raise SystemExit(1)
               open(m, "w").write(k)
               print("::notice::MainActivity aangepast:", m)
 
@@ -237,6 +252,17 @@ jobs:
                   '    <application'), 1)
               open(p, "w").write(s)
           print("::notice::Voorgrondservice voor live delen ingesteld")
+          EOF2
+
+      - name: Telefoonagenda (alleen lezen)
+        run: |
+          python3 - <<'EOF2'
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          if "READ_CALENDAR" not in s:
+              s = s.replace("<application", '<uses-permission android:name="android.permission.READ_CALENDAR"/>\n    <application', 1)
+              open(p, "w").write(s)
+          print("::notice::Agenda lezen toegevoegd")
           EOF2
 
       - name: Stemcoach (tekst-naar-spraak)

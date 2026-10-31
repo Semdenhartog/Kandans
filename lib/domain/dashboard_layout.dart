@@ -12,6 +12,7 @@ enum DashCard {
   bestRoute('Beste route met deze wind', 'Welke van je routes nu de minste tegenwind heeft'),
   planner('Weekplanner', 'De beste momenten deze week'),
   month('Maanduitdaging', 'Je doel voor deze maand'),
+  bingo('Loop-bingo', 'Elke maand negen kleine opdrachten, drie op een rij is bingo'),
   live('Veilig onderweg', 'Live je locatie delen'),
   goldenHour('Gouden uur', 'Het mooiste licht van de dag en het loopweer dan'),
   weekend('Weekend', 'Vanaf donderdag: beste moment voor je lange duurloop'),

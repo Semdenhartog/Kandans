@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/models.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/phone_calendar_service.dart';
 import '../../data/services/roster_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/availability.dart';
@@ -12,7 +13,8 @@ import '../../domain/availability.dart';
 const _key = 'availability_v1';
 
 /// Je looptijden (op dit toestel bewaard).
-/// Met een gekoppeld rooster vallen je diensten, reistijd en slaap na een nachtdienst er ook af.
+/// Met een gekoppeld rooster vallen je diensten, reistijd en slaap na een nachtdienst er ook af,
+/// en met de telefoonagenda aan ook je afspraken.
 final availabilityProvider = FutureProvider<Availability>((ref) async {
   final roster = await ref.watch(rosterProvider.future);
   Availability base;
@@ -23,7 +25,9 @@ final availabilityProvider = FutureProvider<Availability>((ref) async {
   } catch (_) {
     base = Availability.always;
   }
-  return roster.linked ? base.withBusy(roster.blocks) : base;
+  final phone = await ref.watch(phoneCalendarBusyProvider.future);
+  final blocks = [if (roster.linked) ...roster.blocks, ...phone];
+  return blocks.isEmpty ? base : base.withBusy(blocks);
 });
 
 Future<void> saveAvailability(WidgetRef ref, Availability a) async {

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
+import '../../data/services/phone_calendar_service.dart';
 import '../../data/services/roster_service.dart';
 import '../../domain/roster.dart';
 import '../../shared/widgets.dart';
@@ -22,21 +23,24 @@ class RosterCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final r = ref.watch(rosterProvider).value ?? const RosterState();
     final next = r.upcoming.isEmpty ? null : r.upcoming.first;
+    final phone = ref.watch(phoneCalendarOnProvider).value ?? false;
     return RwCard(
-      title: tr('WERKROOSTER'),
+      title: tr('ROOSTER EN AGENDA'),
       onTap: () => openRosterScreen(context),
       child: Row(children: [
         Expanded(
           child: Text(
-            !r.linked
-                ? tr('Werk je in diensten? Koppel je rooster, dan stelt Kadans nooit een moment voor tijdens je dienst, je reistijd of je slaap na een nachtdienst.')
+            !r.linked && phone
+                ? tr('Telefoonagenda staat aan: Kadans slaat je afspraken over. Werk je in diensten? Koppel hier ook je rooster.')
+                : !r.linked
+                ? tr('Werk je in diensten of heb je afspraken in je telefoonagenda? Koppel ze, dan stelt Kadans nooit een moment voor als je niet kunt.')
                 : next == null
                     ? tr('Rooster gekoppeld, maar er staan geen diensten meer in.')
                     : trf('Rooster gekoppeld. Volgende dienst: {dienst}', {'dienst': shiftLabel(next)}),
             style: const TextStyle(height: 1.45),
           ),
         ),
-        Icon(r.linked ? Icons.event_busy_outlined : Icons.add_link, color: RwColors.subtle),
+        Icon(r.linked || phone ? Icons.event_busy_outlined : Icons.add_link, color: RwColors.subtle),
       ]),
     );
   }
@@ -146,6 +150,25 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
             icon: const Icon(Icons.upload_file_outlined),
             label: Text(tr('Of kies een .ics-bestand')),
           ),
+          if (PhoneCalendarService.supported) ...[
+            const SizedBox(height: 16),
+            RwCard(
+              title: tr('TELEFOONAGENDA'),
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(tr('Afspraken overslaan')),
+                subtitle: Text(tr('Kadans kijkt alleen wanneer je iets hebt (begin en eind), niet wat. Dit blijft op je telefoon.')),
+                value: ref.watch(phoneCalendarOnProvider).value ?? false,
+                onChanged: (v) async {
+                  final ok = await ref.read(phoneCalendarServiceProvider).setEnabled(v);
+                  ref.invalidate(phoneCalendarOnProvider);
+                  if (!ok && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Zonder toestemming kan Kadans je agenda niet lezen.'))));
+                  }
+                },
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           RwCard(
             title: tr('INSTELLINGEN'),

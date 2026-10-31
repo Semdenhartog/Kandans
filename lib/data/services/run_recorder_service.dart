@@ -24,6 +24,7 @@ import 'heart_rate_service.dart';
 import 'stride_sensor_service.dart';
 import 'metronome_service.dart';
 import 'live_share_service.dart';
+import 'media_button_service.dart';
 import 'notification_service.dart';
 import 'sound_service.dart';
 import 'rain_service.dart';
@@ -670,7 +671,26 @@ class RunRecorderService {
         // Delen is een extraatje; de opname gaat gewoon door.
       }
     }
+    _startEarbuds();
     view.value = _snapshot();
+  }
+
+  /// Knop op je oortjes: één druk = pauze/verder, twee keer = ronde.
+  void _startEarbuds() {
+    MediaButtonService.instance
+        .start(
+          onToggle: () {
+            final r = _rec;
+            if (r == null || r.status == RecorderStatus.finished || r.status == RecorderStatus.idle) return;
+            if (r.status == RecorderStatus.paused) {
+              resume();
+            } else {
+              pause();
+            }
+          },
+          onLap: lap,
+        )
+        .ignore();
   }
 
   /// Water en toiletten langs de route (komen binnen terwijl je al loopt): dan ook aankondigen.
@@ -1062,6 +1082,7 @@ class RunRecorderService {
 
   /// Stopt de opname en geeft de run terug om op te slaan (of null als er niets is).
   Future<RunRecording?> stop() async {
+    MediaButtonService.instance.stop().ignore();
     SoundService.instance.play(RwSound.finish).ignore();
     MetronomeService.instance.stop().ignore();
     final r = _rec;
@@ -1126,6 +1147,7 @@ class RunRecorderService {
       _tts ??= FlutterTts();
       await _configureTts();
     }
+    _startEarbuds();
     view.value = _snapshot();
   }
 

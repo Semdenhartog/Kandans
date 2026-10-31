@@ -41,8 +41,10 @@ import '../profile/shoe_replace_card.dart';
 import '../challenges/challenges.dart' show ChallengesCard;
 import '../../domain/training_plan.dart';
 import '../../domain/verdict.dart';
+import 'confidence_chip.dart';
 import 'dashboard_layout_sheet.dart';
 import 'best_route_card.dart';
+import 'bingo_card.dart';
 import 'extra_cards.dart';
 import 'month_challenge_card.dart';
 import 'today_card.dart';
@@ -212,6 +214,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     const extras = <DashCard, Widget>{
       DashCard.planner: WeekPlannerEntry(),
       DashCard.month: MonthChallengeCard(),
+      DashCard.bingo: BingoCardView(),
       DashCard.live: LiveShareEntryCard(),
       DashCard.bestRoute: BestRouteNowCard(),
       DashCard.again: AgainCard(),
@@ -834,6 +837,7 @@ class _HeroCard extends StatelessWidget {
                 ],
               ),
             ),
+            ConfidenceChip(lat: lat, lon: lon, start: s.start, minutes: durationMinutes, weather: w, isBest: isBest),
             const SizedBox(height: 8),
             Text(isBest ? v.detail : 'Je bekijkt ${Fmt.time(s.start)}. Het beste moment is ${Fmt.time(v.best.start)} (score ${v.best.score}).',
                 style: TextStyle(color: RwColors.muted, height: 1.4)),

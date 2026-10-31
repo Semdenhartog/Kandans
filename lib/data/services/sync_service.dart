@@ -132,6 +132,30 @@ class SyncService {
 
   Future<void> disconnectStrava() => _strava('disconnect');
 
+  static const _autoUploadKey = 'strava_auto_upload';
+
+  /// Eigen Kadans-runs automatisch naar Strava sturen?
+  Future<bool> stravaAutoUpload() async {
+    try {
+      return (await SharedPreferences.getInstance()).getBool(_autoUploadKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> setStravaAutoUpload(bool on) async => (await SharedPreferences.getInstance()).setBool(_autoUploadKey, on);
+
+  /// Eén eigen run naar Strava sturen. Gooit een fout met uitleg (bijv. "Koppel Strava opnieuw").
+  Future<void> uploadToStrava(String activityId) => _strava('upload', {'activity_id': activityId});
+
+  /// Na het opslaan van een run: naar Strava als dat aan staat. Fouten zijn stil (de run staat al in Kadans).
+  Future<void> maybeAutoUploadToStrava(String activityId) async {
+    if (!await stravaAutoUpload()) return;
+    try {
+      await uploadToStrava(activityId);
+    } catch (_) {}
+  }
+
   /// Eén stap van "oude runs ophalen": 200 Strava-activiteiten ouder dan [before] (epoch-seconden).
   /// Strava te druk? Dan [StravaHistoryPage.rateLimited] in plaats van een fout, zodat je later verder kunt.
   Future<StravaHistoryPage> stravaHistoryPage({int? before}) async {
@@ -582,6 +606,7 @@ class _PendingUploader implements PendingRunUploader {
     if (streams == null) return;
     await repo.setActivityStreams(id, streams, bestEfforts: run.bestEfforts);
     if (run.activity.hasTrack) repo.improveElevation(id, streams).ignore();
+    maybeAutoUploadToStrava(id).ignore();
   }
 
   @override

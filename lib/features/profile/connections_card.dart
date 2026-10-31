@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
@@ -117,6 +118,18 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
               subtitle: const Text('Kies welke routes je in Kadans wilt'),
               onTap: () => Navigator.pop(ctx, 'routes'),
             ),
+            FutureBuilder<bool>(
+              future: _sync.stravaAutoUpload(),
+              builder: (ctx2, snap) => ListTile(
+                leading: const TileIcon(Icons.upload_outlined),
+                title: Text(tr('Eigen runs naar Strava')),
+                subtitle: Text((snap.data ?? false)
+                    ? tr('Aan: elke run die je met Kadans opneemt gaat ook naar Strava')
+                    : tr('Uit: tik om je Kadans-runs ook op Strava te zetten')),
+                trailing: Icon((snap.data ?? false) ? Icons.toggle_on : Icons.toggle_off, color: (snap.data ?? false) ? RwColors.accent : RwColors.subtle, size: 34),
+                onTap: () => Navigator.pop(ctx, (snap.data ?? false) ? 'upload_off' : 'upload_on'),
+              ),
+            ),
             ListTile(
               leading: TileIcon(Icons.link_off, color: RwColors.danger),
               title: Text('Strava ontkoppelen', style: TextStyle(color: RwColors.danger)),
@@ -127,6 +140,20 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
       ),
     );
     if (!mounted || choice == null) return;
+    if (choice == 'upload_off') {
+      await _sync.setStravaAutoUpload(false);
+      if (mounted) showMessage(context, tr('Je runs gaan niet meer vanzelf naar Strava.'));
+      return;
+    }
+    if (choice == 'upload_on') {
+      await _sync.setStravaAutoUpload(true);
+      // Strava vraagt één keer om toestemming om te uploaden (nieuwe rechten).
+      await _run(() async {
+        await _sync.connectStrava();
+        return null;
+      });
+      return;
+    }
     if (choice == 'history') {
       openStravaHistory(context);
       return;

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -372,6 +373,21 @@ class ActivityDetailScreen extends ConsumerWidget {
               icon: const Icon(Icons.content_cut),
               label: const Text('Run bijsnijden'),
             ),
+            if (ref.watch(stravaConnectionProvider).value != null) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  try {
+                    await ref.read(syncServiceProvider).uploadToStrava(a.id!);
+                    if (context.mounted) showMessage(context, tr('Verstuurd. Over een minuut staat je run op Strava.'));
+                  } catch (e) {
+                    if (context.mounted) showMessage(context, friendlyError(e), error: true);
+                  }
+                },
+                icon: const Icon(Icons.upload_outlined),
+                label: Text(tr('Naar Strava sturen')),
+              ),
+            ],
           ],
           if (a.viaStrava) ...[
             const SizedBox(height: 12),

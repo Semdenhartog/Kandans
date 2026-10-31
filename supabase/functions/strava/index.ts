@@ -9,6 +9,7 @@
 //   POST  { action: "history", before? }   -> oudere runs (ouder dan het eerste jaar), 200 activiteiten per keer
 //   POST  { action: "routes" }    -> je routes in Strava (lijst)
 //   POST  { action: "route", route_id }  -> één route met de volledige lijn, om te importeren
+//   POST  { action: "upload", activity_id } -> een eigen Kadans-run naar Strava sturen (scope activity:write)
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets):
 //   STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET
@@ -18,6 +19,7 @@
 // De POST-acties controleren de login zelf.
 
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { isKadansUpload, runToGpx } from "../_shared/gpx.ts";
 
 const APP_RETURN_URL = "runwise://app/strava-connected";
 const STRAVA = "https://www.strava.com";
@@ -205,7 +207,8 @@ async function connect(db: SupabaseClient, userId: string) {
   url.searchParams.set("response_type", "code");
   url.searchParams.set("approval_prompt", "auto");
   // read_all: ook je privéroutes kunnen importeren.
-  url.searchParams.set("scope", "read,read_all,activity:read_all");
+  // activity:write: eigen Kadans-runs naar Strava kunnen sturen.
+  url.searchParams.set("scope", "read,read_all,activity:read_all,activity:write");
   url.searchParams.set("state", state);
   return json(200, { url: url.toString() });
 }
@@ -267,6 +270,7 @@ type StravaActivity = {
   average_heartrate?: number;
   trainer?: boolean;
   manual?: boolean;
+  external_id?: string | null;
   start_latlng?: [number, number] | [];
   map?: { summary_polyline?: string | null };
 };
@@ -300,7 +304,8 @@ async function toRows(list: StravaActivity[], userId: string) {
 
 /// Is dit een run die we bewaren? (geen fiets, geen loopband, niet te kort)
 function isRun(a: StravaActivity) {
-  return RUN_TYPES.has(a.sport_type ?? a.type ?? "") && !a.trainer && a.distance > 500 && a.moving_time > 0;
+  // Runs die Kadans zelf naar Strava stuurde staan al in Kadans: niet dubbel importeren.
+  return RUN_TYPES.has(a.sport_type ?? a.type ?? "") && !a.trainer && a.distance > 500 && a.moving_time > 0 && !isKadansUpload(a.external_id);
 }
 
 /// Runs die al vóór deze versie waren opgehaald hebben nog geen GPS-spoor.
@@ -677,6 +682,63 @@ async function route(db: SupabaseClient, userId: string, routeId: string) {
   }
 }
 
+/// Een eigen Kadans-run naar Strava sturen. Buiten met GPS als GPX-bestand, loopband als handmatige activiteit.
+async function upload(db: SupabaseClient, userId: string, activityId: string) {
+  const { scope } = await tokenInfo(db, userId);
+  if (!scope.includes("activity:write")) {
+    return json(409, { error: "Koppel Strava één keer opnieuw en geef toestemming om runs te uploaden.", reconnect: true });
+  }
+  const { data: a } = await db.from("activities")
+    .select("id, source, started_at, distance_meters, moving_time_seconds, streams, note")
+    .eq("id", activityId).eq("user_id", userId).maybeSingle();
+  if (!a) return json(404, { error: "Run niet gevonden." });
+  if (a.source !== "runwise") return json(400, { error: "Alleen runs die je met Kadans opnam kunnen naar Strava." });
+  const token = await accessToken(db, userId);
+  const start = new Date(a.started_at as string);
+  const hour = Number(start.toLocaleString("en-GB", { timeZone: "Europe/Amsterdam", hour: "2-digit", hour12: false }));
+  const name = hour < 12 ? "Ochtendrun" : hour < 18 ? "Middagrun" : "Avondrun";
+  const description = "Gelopen met Kadans – op het beste moment.";
+  const streams = (a.streams ?? {}) as Record<string, unknown>;
+  const gpx = runToGpx({ name, startedAt: start.toISOString(), streams });
+
+  if (gpx) {
+    const form = new FormData();
+    form.append("file", new Blob([gpx], { type: "application/gpx+xml" }), `kadans-${a.id}.gpx`);
+    form.append("data_type", "gpx");
+    form.append("name", name);
+    form.append("description", description);
+    form.append("external_id", `kadans-${a.id}`);
+    const res = await fetch(`${STRAVA}/api/v3/uploads`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      console.error("strava upload failed", res.status, JSON.stringify(body).slice(0, 300));
+      const dup = JSON.stringify(body).toLowerCase().includes("duplicate");
+      return json(dup ? 409 : 502, { error: dup ? "Deze run staat al op Strava." : "Strava nam de run niet aan. Probeer het later opnieuw." });
+    }
+    return json(200, { uploaded: true, upload_id: body.id ?? null });
+  }
+
+  // Zonder GPS (loopband): handmatige activiteit.
+  const res = await fetch(`${STRAVA}/api/v3/activities`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: `${name} (loopband)`,
+      sport_type: "Run",
+      start_date_local: start.toISOString(),
+      elapsed_time: a.moving_time_seconds,
+      distance: a.distance_meters,
+      trainer: 1,
+      description,
+    }),
+  });
+  if (!res.ok) {
+    console.error("strava manual activity failed", res.status);
+    return json(502, { error: "Strava nam de run niet aan. Probeer het later opnieuw." });
+  }
+  return json(200, { uploaded: true });
+}
+
 async function disconnect(db: SupabaseClient, userId: string) {
   try {
     const token = await accessToken(db, userId);
@@ -728,9 +790,11 @@ Deno.serve(async (req) => {
       case "history": return await history(db, userId, body.before);
       case "routes": return await routes(db, userId);
       case "route": return await route(db, userId, String(body.route_id ?? ""));
+      case "upload": return await upload(db, userId, String(body.activity_id ?? ""));
       default: return json(400, { error: "Onbekende actie." });
     }
   } catch (e) {
+    if (e instanceof ReconnectNeeded) return json(409, { error: "Koppel Strava opnieuw.", reconnect: true });
     console.error("strava action failed", body.action, e instanceof Error ? e.message : e);
     return json(500, { error: "Er ging iets mis. Probeer het later opnieuw." });
   }

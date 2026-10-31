@@ -79,6 +79,11 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `data/services/age_grade_service.dart` (in `activities/records_screen.dart`), pijntjes `domain/pain_log.dart` + `profile/pain_screen.dart`
   (in notitie "Pijntje: <plek> <1-10>"), hartslagherstel `domain/hrr.dart` + `record/hrr_test_dialog.dart` + `data/services/hrr_store.dart`,
   Kadans-effect `data/services/kadans_effect_store.dart` + `activities/kadans_effect_row.dart` (badge 'wise').
+- Weerzekerheid `domain/forecast_confidence.dart` + `data/services/forecast_confidence_service.dart` (ensemble + "klopte het?"),
+  chip `dashboard/confidence_chip.dart`. Loop-bingo `domain/bingo.dart` + `dashboard/bingo_card.dart` (DashCard.bingo).
+- Eigen Android-kanalen `android_extra/kotlin/KadansChannels.kt` (via build.yml in MainActivity): `kadans/calendar`
+  (`data/services/phone_calendar_service.dart`, READ_CALENDAR) en `kadans/media` (oortjesknop, `media_button_service.dart`).
+- Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).
@@ -90,7 +95,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Wachtlijst → Google Sheets: wacht op Sems keuzes (zie archief).
 - Gouden K van het marmerlogo in de app vervangen door de nieuwe K, als Sem dat wil.
 - Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
-- Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes.
+- Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes en uploaden (`activity:write`).
+- Play Console → gegevensveiligheid: agenda (alleen op toestel, niet gedeeld) toevoegen.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
 - Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium.
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes, Samen.

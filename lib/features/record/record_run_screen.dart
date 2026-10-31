@@ -69,6 +69,7 @@ import '../../data/services/kadans_effect_store.dart';
 import '../../data/services/hrr_store.dart';
 import '../activities/markers_card.dart' show markerIcon;
 import '../activities/photos_card.dart' show PhotosCard;
+import 'earbuds_tile.dart';
 import '../challenges/community_screen.dart' show refreshCommunityQuietly;
 import '../../data/services/community_service.dart' show communityServiceProvider;
 
@@ -1049,6 +1050,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   value: c.fuel,
                   onChanged: (v) => set(() => c = c.copyWith(fuel: v)),
                 ),
+                const EarbudsTile(),
                 const SizedBox(height: 8),
                 const Text('Spreektempo', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
@@ -1338,6 +1340,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             });
         // Hoogte verbeteren met de hoogtekaart (op de achtergrond).
         if (!rec.indoor) repo.improveElevation(id, streamsJson).then((_) => ref.invalidate(activitiesProvider)).ignore();
+        // Naar Strava als dat aan staat (na het verloop, anders mist Strava de GPS-punten).
+        ref.read(syncServiceProvider).maybeAutoUploadToStrava(id).ignore();
       }
       // Ranglijsten van Samen bijwerken (alleen als je meedoet; op de achtergrond).
       refreshCommunityQuietly(ref.read(communityServiceProvider)).ignore();
