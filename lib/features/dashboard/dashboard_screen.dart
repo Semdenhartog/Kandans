@@ -534,6 +534,12 @@ class _ResultsState extends State<_Results> {
             label: switch (verdict.kind) { VerdictKind.goNow => 'NU LOPEN', VerdictKind.later => 'BESTE MOMENT', VerdictKind.tough => 'LASTIGE DAG' },
             time: verdict.kind == VerdictKind.goNow ? 'Nu' : Fmt.time(best.start),
             detail: '${_dayLabel(best.start)} · ${Fmt.temp(best.weather.feelsLike ?? best.weather.temperature)} · wind ${Fmt.wind(best.weather.windSpeed)} · score ${best.score}',
+            glyph: switch (glyphFor(best.weather.weatherCode, day: best.weather.isDay)) {
+              WeatherGlyph.moon || WeatherGlyph.partlyNight => 'moon',
+              WeatherGlyph.partly || WeatherGlyph.cloud || WeatherGlyph.fog => 'cloud',
+              WeatherGlyph.drizzle || WeatherGlyph.rain || WeatherGlyph.thunder || WeatherGlyph.snow => 'rain',
+              WeatherGlyph.sun => 'sun',
+            },
           )
           .ignore();
     });

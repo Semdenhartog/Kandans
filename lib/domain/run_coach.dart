@@ -585,6 +585,25 @@ class GhostRace {
     return best.valueAt(best.time, meters);
   }
 
+  /// Hoe ver je record was na [seconds] seconden (voor de ghost-loper op de kaart).
+  double? distanceAt(double seconds) {
+    final t = best.time, d = best.distance;
+    if (t.isEmpty || seconds <= 0) return null;
+    if (seconds >= t.last) return d.last;
+    var lo = 0, hi = t.length - 1;
+    while (hi - lo > 1) {
+      final mid = (lo + hi) >> 1;
+      if (t[mid] <= seconds) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    final span = t[hi] - t[lo];
+    final f = span <= 0 ? 0.0 : (seconds - t[lo]) / span;
+    return d[lo] + (d[hi] - d[lo]) * f;
+  }
+
   /// Seconden achter (positief) of voor (negatief) op je record.
   double? delta(double progress, double movingSeconds) {
     final t = bestTimeAt(progress);

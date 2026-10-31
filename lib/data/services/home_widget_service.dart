@@ -9,9 +9,9 @@ class HomeWidgetService {
 
   String? _last;
 
-  Future<void> update({required String label, required String time, required String detail}) async {
+  Future<void> update({required String label, required String time, required String detail, String glyph = 'sun'}) async {
     if (!Platform.isAndroid) return;
-    final key = '$label|$time|$detail';
+    final key = '$label|$time|$detail|$glyph';
     if (key == _last) return;
     _last = key;
     try {
@@ -19,6 +19,7 @@ class HomeWidgetService {
       await HomeWidget.saveWidgetData<String>('label', label);
       await HomeWidget.saveWidgetData<String>('time', time);
       await HomeWidget.saveWidgetData<String>('detail', detail);
+      await HomeWidget.saveWidgetData<String>('glyph', glyph);
       await HomeWidget.saveWidgetData<String>(
           'updated', 'bijgewerkt ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}');
       await HomeWidget.updateWidget(androidName: 'BestMomentWidget', qualifiedAndroidName: 'nl.runwise.runwise.BestMomentWidget');

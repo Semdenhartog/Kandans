@@ -766,3 +766,26 @@ T.update({
     "Mist en vroege schemer. Zichtbaar blijven.": ("Fog and early dusk. Stay visible.", "Nebel und frühe Dämmerung. Sichtbar bleiben.", "Brouillard et crépuscule précoce. Reste visible.", "Niebla y anochecer temprano. Hazte visible."),
     "Donkere dagen. Kadans zoekt je lichtste moment.": ("Dark days. Kadans finds your brightest moment.", "Dunkle Tage. Kadans sucht deinen hellsten Moment.", "Jours sombres. Kadans trouve ton moment le plus lumineux.", "Días oscuros. Kadans busca tu momento más luminoso."),
 })
+
+# Ronde: beeld 2 (fotomuur, avatars, ghost)
+T.update({
+    "MARKERINGEN EN FOTO'S": ("MARKERS AND PHOTOS", "MARKIERUNGEN UND FOTOS", "REPÈRES ET PHOTOS", "MARCAS Y FOTOS"),
+    "Fotomuur": ("Photo wall", "Fotowand", "Mur de photos", "Muro de fotos"),
+    "Nog geen foto's": ("No photos yet", "Noch keine Fotos", "Pas encore de photos", "Aún no hay fotos"),
+    "Voeg een foto toe bij een run, of maak er een met \"Markeren\" tijdens het lopen. Ze komen hier per maand te staan.": ("Add a photo to a run, or take one with \"Mark\" while running. They'll appear here by month.", "Füge einem Lauf ein Foto hinzu oder mach eins mit \"Markieren\" beim Laufen. Sie erscheinen hier nach Monat.", "Ajoute une photo à une course, ou prends-en une avec « Marquer » en courant. Elles apparaissent ici par mois.", "Añade una foto a una carrera o haz una con \"Marcar\" mientras corres. Aparecerán aquí por mes."),
+    "Foto, tik om de run te openen": ("Photo, tap to open the run", "Foto, tippe, um den Lauf zu öffnen", "Photo, touche pour ouvrir la course", "Foto, toca para abrir la carrera"),
+    "Winter": ("Winter", "Winter", "Hiver", "Invierno"),
+    "Lente": ("Spring", "Frühling", "Printemps", "Primavera"),
+    "Zomer": ("Summer", "Sommer", "Été", "Verano"),
+    "Paarse hei": ("Purple heath", "Lila Heide", "Lande violette", "Brezo morado"),
+    "Herfst": ("Autumn", "Herbst", "Automne", "Otoño"),
+    "Mist": ("Fog", "Nebel", "Brouillard", "Niebla"),
+    "Seizoen van nu": ("Current season", "Aktuelle Jahreszeit", "Saison actuelle", "Estación actual"),
+    "Opslaan lukte niet. Probeer het later nog eens.": ("Saving failed. Please try again later.", "Speichern hat nicht geklappt. Versuch es später noch mal.", "L'enregistrement a échoué. Réessaie plus tard.", "No se pudo guardar. Inténtalo más tarde."),
+    "Plaatje": ("Picture", "Bild", "Image", "Imagen"),
+    "Kleur": ("Colour", "Farbe", "Couleur", "Color"),
+    "Kleur {n}": ("Colour {n}", "Farbe {n}", "Couleur {n}", "Color {n}"),
+    "Omslag": ("Cover", "Titelbild", "Couverture", "Portada"),
+    "Plaatje en omslag": ("Picture and cover", "Bild und Titelbild", "Image et couverture", "Imagen y portada"),
+    "Je record": ("Your record", "Dein Rekord", "Ton record", "Tu récord"),
+})

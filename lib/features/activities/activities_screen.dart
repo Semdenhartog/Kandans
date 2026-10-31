@@ -17,6 +17,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
+import 'photo_wall_screen.dart';
 import '../../shared/art/season_banner.dart';
 import '../../shared/segmented.dart';
 import '../../shared/first_tips.dart';
@@ -276,6 +277,8 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                   openCalendar(context);
                 case 'heatmap':
                   openHeatmap(context);
+                case 'photos':
+                  openPhotoWall(context);
                 case 'year':
                   final now = DateTime.now();
                   openYearStory(context, year: now.month == 1 ? now.year - 1 : now.year);
@@ -288,6 +291,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'calendar', child: ListTile(leading: Icon(Icons.calendar_month_outlined), title: Text('Kalender'))),
               PopupMenuItem(value: 'heatmap', child: ListTile(leading: Icon(Icons.map_outlined), title: Text('Mijn heatmap'))),
+              PopupMenuItem(value: 'photos', child: ListTile(leading: Icon(Icons.photo_library_outlined), title: Text('Fotomuur'))),
               PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text('Jaaroverzicht'))),
               PopupMenuDivider(),
               PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),

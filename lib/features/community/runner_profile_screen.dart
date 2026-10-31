@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'avatar_picker.dart';
+import 'runner_avatar.dart' show ProfileCover;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -157,8 +159,22 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
   }
 
   Widget _header(RunnerProfile p) => RwCard(
-        padding: EdgeInsets.fromLTRB(18, 18, 18, 16),
+        padding: EdgeInsets.fromLTRB(18, 0, 18, 16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          // Omslag: het seizoenslandschap dat de loper koos.
+          Padding(
+            padding: EdgeInsets.only(top: 14, bottom: 12),
+            child: ClipRRect(borderRadius: BorderRadius.circular(14), child: ProfileCover(nickname: p.nickname, height: 92)),
+          ),
+          if (p.isMe)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => openAvatarPicker(context, p.nickname),
+                icon: Icon(Icons.brush_outlined, size: 18),
+                label: Text(tr('Plaatje en omslag')),
+              ),
+            ),
           Row(children: [
             RunnerAvatar(p.nickname, size: 64),
             SizedBox(width: 16),

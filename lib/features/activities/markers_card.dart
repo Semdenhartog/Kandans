@@ -10,6 +10,7 @@ import '../../data/repositories/repositories.dart';
 import '../../domain/run_markers.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
+import 'photo_wall_screen.dart' show PhotoPin;
 
 /// Pictogram per soort markering.
 IconData markerIcon(MarkerKind k) => switch (k) {
@@ -55,7 +56,7 @@ class MarkersCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: RwCard(
-        title: tr('MARKERINGEN'),
+        title: photos.isEmpty ? tr('MARKERINGEN') : tr('MARKERINGEN EN FOTO\'S'),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           if (activity.trackPolyline != null && activity.trackPolyline!.isNotEmpty) ...[
             SizedBox(
@@ -65,7 +66,10 @@ class MarkersCard extends ConsumerWidget {
                 compact: true,
                 interactive: true,
                 showLayerToggle: false,
-                extraMarkers: [for (final m in markers) (point: m.point, child: MarkerPin(m.kind))],
+                extraMarkers: [
+                  for (final m in markers)
+                    (point: m.point, child: m.photo != null && urls[m.photo] != null ? PhotoPin(url: urls[m.photo]!, path: m.photo!) : MarkerPin(m.kind)),
+                ],
               ),
             ),
             const SizedBox(height: 10),

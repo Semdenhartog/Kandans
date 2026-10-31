@@ -14,6 +14,8 @@ import 'runner_profile_screen.dart';
 import 'shared_run_card.dart';
 import 'best_moments_text.dart';
 import '../../core/i18n.dart';
+import 'runner_avatar.dart';
+export 'runner_avatar.dart' show RunnerAvatar;
 
 /// "Een uur geleden", "gisteren", of een datum.
 String communityAgo(DateTime t, [DateTime? now]) {
@@ -538,25 +540,6 @@ Future<String?> askReportReason(BuildContext context) => showModalBottomSheet<St
     );
 
 /// Rondje met de eerste letter van de bijnaam (geen foto's: minder risico op misbruik).
-class RunnerAvatar extends StatelessWidget {
-  const RunnerAvatar(this.name, {super.key, this.size = 36});
-  final String name;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(colors: [RwColors.accentLight, RwColors.accentDeep]),
-        ),
-        child: Text(name.isEmpty ? '?' : name.characters.first.toUpperCase(),
-            style: TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w800, fontSize: size * 0.42)),
-      );
-}
-
 class _PostCard extends StatelessWidget {
   const _PostCard({required this.post, required this.onLike, required this.onComments, required this.onMenu});
   final CommunityPost post;

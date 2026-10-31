@@ -8,6 +8,7 @@ import '../../data/services/location_service.dart';
 import '../../data/services/notification_service.dart';
 import '../../domain/availability.dart';
 import '../../domain/run_goal.dart';
+import '../../shared/art/best_moment_demo.dart';
 import '../../shared/route_backdrop.dart';
 import '../planner/availability_provider.dart';
 import '../routes/watch_export.dart' show WatchBrand, WatchBrandInfo, saveWatchBrand;
@@ -119,6 +120,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final pages = [
       _Page(
         icon: Icons.wb_sunny_outlined,
+        art: const BestMomentDemo(),
         title: tr('Loop op het beste moment'),
         text: tr('Strava laat zien wat je gelopen hebt. Kadans zegt wanneer je het best kunt gaan: '
             'op het weer, de wind op jouw route en de buien van het komende uur. En welke kant je op moet en wat je aantrekt.'),
@@ -389,8 +391,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 }
 
 class _Page extends StatelessWidget {
-  const _Page({required this.icon, required this.title, required this.text, required this.children});
+  const _Page({required this.icon, required this.title, required this.text, required this.children, this.art});
   final IconData icon;
+
+  /// Eigen plaatje/animatie in plaats van het icoon.
+  final Widget? art;
   final String title;
   final String text;
   final List<Widget> children;
@@ -407,7 +412,7 @@ class _Page extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Spacer(),
-                  Center(
+                  if (art != null) art! else Center(
                     child: Container(
                       width: 168,
                       height: 168,

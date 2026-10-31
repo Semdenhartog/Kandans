@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landschapje onderin de widget (eigen tekening): heuvels, bomenrij en een gestippeld pad. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="60dp"
+    android:viewportWidth="320" android:viewportHeight="60">
+    <path android:fillColor="#14F4F4F5" android:pathData="M0,30 C40,18 80,22 120,26 C170,31 210,14 260,18 C290,20 305,26 320,24 L320,60 L0,60 Z"/>
+    <path android:fillColor="#245E8A4E" android:pathData="M0,40 C50,32 90,36 140,38 C190,40 230,30 280,33 C300,34 312,36 320,35 L320,60 L0,60 Z"/>
+    <path android:fillColor="#3D5E8A4E" android:pathData="M30,36 a7,7 0 1,1 14,0 a7,7 0 1,1 -14,0 M52,34 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0 M78,36 a6,6 0 1,1 12,0 a6,6 0 1,1 -12,0 M200,32 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0 M222,33 a6,6 0 1,1 12,0 a6,6 0 1,1 -12,0 M250,31 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0"/>
+    <path android:fillColor="#2E9A8A5A" android:pathData="M0,50 C60,44 120,48 180,47 C240,46 290,44 320,46 L320,60 L0,60 Z"/>
+    <path android:strokeColor="#B3FD8A26" android:strokeWidth="2.2" android:strokeLineCap="round"
+        android:pathData="M160,60 L162,56 M165,52 L168,49 M172,46 L176,44 M181,42 L185,41"/>
+</vector>

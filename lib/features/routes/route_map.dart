@@ -10,7 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/theme.dart';
+import '../../shared/art/runner.dart';
 import '../../domain/geo.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
@@ -339,7 +341,7 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                   for (final p in widget.pois)
                     Marker(point: _ll(p.point), width: 26, height: 26, child: PoiIcon(p.kind)),
                   for (final m in widget.extraMarkers)
-                    Marker(point: _ll(m.point), width: 28, height: 28, child: m.child),
+                    Marker(point: _ll(m.point), width: 36, height: 36, child: m.child),
                   if (separateFinish)
                     Marker(point: _ll(finish), width: 30, height: 30, child: _Pin(icon: Icons.sports_score, color: RwColors.text)),
                   Marker(
@@ -800,11 +802,75 @@ Widget _dot(Color c, {double size = 20}) => Container(
       ),
     );
 
+/// Je positie tijdens het lopen: een stip met een rustig uitdijende ring (zoals een hartslag).
+class _PulseDot extends StatefulWidget {
+  const _PulseDot({required this.color});
+  final Color color;
+
+  @override
+  State<_PulseDot> createState() => _PulseDotState();
+}
+
+class _PulseDotState extends State<_PulseDot> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800));
+
+  @override
+  void initState() {
+    super.initState();
+    if (!WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) _c.repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _c,
+        builder: (_, child) {
+          final t = Curves.easeOut.transform(_c.value);
+          return Stack(alignment: Alignment.center, children: [
+            Container(
+              width: 22 + 38 * t,
+              height: 22 + 38 * t,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color.withValues(alpha: 0.35 * (1 - t))),
+            ),
+            child!,
+          ]);
+        },
+        child: _dot(widget.color, size: 22),
+      );
+}
+
+/// Je record als lopend figuurtje op de kaart.
+class _GhostRunner extends StatelessWidget {
+  const _GhostRunner();
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: tr('Je record'),
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.black.withValues(alpha: 0.45),
+            border: Border.all(color: RwColors.accentLight, width: 2),
+          ),
+          padding: const EdgeInsets.all(3),
+          child: RunnerFigure(size: 30, color: RwColors.accentLight, speed: 1.2),
+        ),
+      );
+}
+
 /// Je gelopen spoor en waar je nu bent; volgt je, tenzij je zelf de kaart verschuift.
 class LiveTrackMap extends StatefulWidget {
-  const LiveTrackMap({super.key, required this.track, this.position, this.planned = const []});
+  const LiveTrackMap({super.key, required this.track, this.position, this.planned = const [], this.ghost});
   final List<LatLng> track;
   final LatLng? position;
+
+  /// Waar je record nu zou zijn: een lopend figuurtje op de kaart.
+  final LatLng? ghost;
 
   /// Route die je volgt (onder je spoor getekend).
   final List<LatLng> planned;
@@ -904,7 +970,9 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                     ]),
                   MarkerLayer(markers: [
                     if (pts.isNotEmpty) Marker(point: pts.first, width: 28, height: 28, child: _Pin(icon: Icons.flag, color: RwColors.accent)),
-                    if (pos != null && !_headingUp) Marker(point: _ll(pos), width: 22, height: 22, child: _dot(const Color(0xFF4C8DFF))),
+                    if (widget.ghost != null)
+                      Marker(point: _ll(widget.ghost!), width: 40, height: 40, rotate: true, child: const _GhostRunner()),
+                    if (pos != null && !_headingUp) Marker(point: _ll(pos), width: 60, height: 60, child: const _PulseDot(color: Color(0xFF4C8DFF))),
                     if (pos != null && _headingUp)
                       Marker(
                         point: _ll(pos),

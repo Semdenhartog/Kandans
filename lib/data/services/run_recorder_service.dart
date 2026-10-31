@@ -62,6 +62,7 @@ class RecorderView {
     this.approachingRoute = false,
     this.wayToRoute,
     this.ghostDelta,
+    this.ghostPoint,
     this.nextTurn,
     this.nextTurnIn,
     this.walkRun = false,
@@ -122,6 +123,9 @@ class RecorderView {
 
   /// Tegen je record op deze route: seconden achter (+) of voor (-). Null = geen record-race.
   final double? ghostDelta;
+
+  /// Waar je record nu zou zijn (ghost-loper op de kaart).
+  final LatLng? ghostPoint;
 
   /// Volgende afslag op je route en hoeveel meter je er nog van af bent.
   final RouteTurn? nextTurn;
@@ -675,6 +679,14 @@ class RunRecorderService {
     view.value = _snapshot();
   }
 
+  LatLng? _ghostPoint(double moving) {
+    final g = _ghost, f = _follower;
+    if (g == null || f == null) return null;
+    final d = g.distanceAt(moving);
+    if (d == null || d <= 0) return null;
+    return f.track.at(d);
+  }
+
   /// Knop op je oortjes: één druk = pauze/verder, twee keer = ronde.
   void _startEarbuds() {
     MediaButtonService.instance
@@ -1020,6 +1032,7 @@ class RunRecorderService {
       questsOn: _quests != null,
       laps: List.unmodifiable(_laps),
       ghostDelta: _ghost == null || _follower == null ? null : _ghost!.delta(_follower!.progress, moving),
+      ghostPoint: _ghostPoint(moving),
       nextTurn: turnByTurn ? _turns?.next : null,
       nextTurnIn: turnByTurn && _follower != null ? _turns?.distanceTo(_follower!.progress) : null,
       cadence: StrideSensorService.instance.cadence.value,

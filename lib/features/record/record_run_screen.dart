@@ -2080,7 +2080,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.stretch,
                                             children: [
-                                              Expanded(child: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute)),
+                                              Expanded(child: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute, ghost: v.ghostPoint)),
                                               const SizedBox(height: 10),
                                               Row(
                                                 children: [

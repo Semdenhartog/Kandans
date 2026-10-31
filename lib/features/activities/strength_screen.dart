@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../shared/art/exercise_figure.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/strength.dart';
@@ -193,7 +194,19 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                   ]),
                 ),
               ],
-              const Spacer(),
+              Expanded(
+                flex: 3,
+                child: c == null
+                    ? const SizedBox.shrink()
+                    : Center(
+                        child: ExerciseFigure(
+                          name: _p.resting ? (n?.name ?? c.name) : c.name,
+                          color: _p.resting ? RwColors.subtle : RwColors.text,
+                          accent: RwColors.accent,
+                          ground: RwColors.border,
+                        ),
+                      ),
+              ),
               if (c == null) ...[
                 Icon(Icons.check_circle, color: RwColors.good, size: 72),
                 const SizedBox(height: 12),
