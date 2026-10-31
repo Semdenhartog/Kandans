@@ -9,6 +9,7 @@ import '../../data/services/heart_rate_service.dart';
 import '../../data/services/stride_sensor_service.dart';
 import '../../domain/heart_rate.dart';
 import '../../shared/widgets.dart';
+import '../activities/hrr_card.dart';
 
 void openHeartRateScreen(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HeartRateScreen()));
@@ -190,6 +191,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
               ),
             ),
           ),
+          const HrrCard(),
           const SizedBox(height: 16),
           const _StrideSensorCard(),
           const SizedBox(height: 12),

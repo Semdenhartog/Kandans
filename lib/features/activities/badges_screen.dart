@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/services/kadans_effect_store.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -19,6 +20,7 @@ void openBadges(BuildContext context) {
 
 IconData badgeIcon(String name) => switch (name) {
       'flag' => Icons.flag,
+      'verified' => Icons.verified_outlined,
       'looks_5' => Icons.looks_5,
       'filter_9_plus' => Icons.filter_9_plus,
       'military_tech' => Icons.military_tech,
@@ -58,7 +60,8 @@ class BadgesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
-    final all = bd.computeBadges(runs, pausedWeeks: ref.watch(pausedWeeksProvider));
+    final all = bd.computeBadges(runs,
+        pausedWeeks: ref.watch(pausedWeeksProvider), wellChosen: ref.watch(kadansEffectProvider).value?.wellChosenIds ?? const {});
     final earned = all.where((b) => b.earned).length;
     return Scaffold(
       appBar: AppBar(title: const Text('Badges')),

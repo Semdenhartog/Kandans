@@ -15,7 +15,9 @@ import '../../domain/extras.dart';
 import '../../domain/geo.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/confetti.dart';
+import '../../domain/pain_log.dart';
 import '../../shared/widgets.dart';
+import '../profile/pain_screen.dart';
 import '../activities/badges_screen.dart';
 import '../activities/share_run_screen.dart';
 import '../activities/strength_screen.dart';
@@ -438,12 +440,29 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                 label: Text(t),
                 selected: _note.text.contains(t),
                 visualDensity: VisualDensity.compact,
-                onSelected: (on) {
+                onSelected: (on) async {
                   HapticFeedback.selectionClick();
                   final parts = _note.text.split(',').map((x) => x.trim()).where((x) => x.isNotEmpty).toList();
-                  on ? parts.add(t) : parts.remove(t);
+                  if (t == 'Pijntje') {
+                    // Waar en hoe erg, zodat Kadans patronen kan zien.
+                    parts.removeWhere((x) => x.startsWith('Pijntje'));
+                    if (on) {
+                      final p = await askPain(context);
+                      if (p == null || !mounted) return;
+                      parts.add(painNote(p.$1, p.$2));
+                    }
+                  } else {
+                    on ? parts.add(t) : parts.remove(t);
+                  }
                   setState(() => _note.text = parts.join(', '));
-                  _repo.setActivityFeel(widget.activityId, feel: _feel, note: _note.text).then((_) => ref.invalidate(activitiesProvider)).ignore();
+                  await _repo.setActivityFeel(widget.activityId, feel: _feel, note: _note.text).catchError((Object _) {});
+                  ref.invalidate(activitiesProvider);
+                  if (t == 'Pijntje' && on && mounted) {
+                    final spot = parsePain(_note.text).firstOrNull?.$1;
+                    final runs = await ref.read(activitiesProvider.future).catchError((Object _) => const <Activity>[]);
+                    final msg = spot == null ? null : painPatternMessage(runs, spot);
+                    if (msg != null && mounted) showMessage(context, msg);
+                  }
                 },
               ),
           ]),

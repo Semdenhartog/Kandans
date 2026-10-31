@@ -13,7 +13,9 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/route_generator_service.dart';
 import '../../data/services/sync_service.dart';
+import '../../core/i18n.dart';
 import '../../domain/geo.dart';
+import '../../domain/gps_art.dart';
 import '../../domain/gpx_parser.dart';
 import '../../domain/route_drawing.dart';
 import '../../shared/discard_guard.dart';
@@ -35,6 +37,10 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
   final _taps = <LatLng>[];
   DrawShape _shape = DrawShape.loop;
   GeneratedLoop? _routed;
+
+  /// GPS-kunst: de getekende vorm (om te laten zien hoe goed de route hem volgt).
+  ArtShape? _art;
+  List<LatLng> _artShape = const [];
   bool _busy = false;
   bool _saving = false;
   String? _error;
@@ -85,6 +91,54 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
       return;
     }
     _taps.add(p);
+    _art = null;
+    _changed();
+  }
+
+  /// Vorm kiezen: hartje, ster, ... van een gekozen afstand, midden op de kaart.
+  Future<void> _pickArt(LatLng fallback) async {
+    var shape = _art ?? ArtShape.heart;
+    var km = 6.0;
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text(tr('GPS-kunst'), style: RwText.title),
+              const SizedBox(height: 4),
+              Text(tr('Kies een vorm. Kadans legt hem midden op de kaart over echte paden. Schuif de kaart eerst naar waar je hem wilt.'),
+                  style: TextStyle(color: RwColors.muted, height: 1.4)),
+              const SizedBox(height: 12),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                for (final a in ArtShape.values)
+                  ChoiceChip(label: Text(tr(a.label)), selected: shape == a, onSelected: (_) => set(() => shape = a)),
+              ]),
+              const SizedBox(height: 12),
+              Text(trf('Ongeveer {km} km', {'km': km.round()}), style: const TextStyle(fontWeight: FontWeight.w700)),
+              Slider(value: km, min: 3, max: 21, divisions: 18, onChanged: (v) => set(() => km = v)),
+              FilledButton.icon(onPressed: () => Navigator.pop(ctx, true), icon: const Icon(Icons.gesture), label: Text(tr('Vorm tekenen'))),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    var center = fallback;
+    try {
+      final c = _map.camera.center;
+      center = LatLng(c.latitude, c.longitude);
+    } catch (_) {}
+    final pts = artWaypoints(shape, center, km * 1000);
+    _taps
+      ..clear()
+      ..addAll(pts.take(_maxTaps));
+    _art = shape;
+    _artShape = pts;
+    _shape = DrawShape.loop;
     _changed();
   }
 
@@ -104,6 +158,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
       return;
     }
     _taps.clear();
+    _art = null;
     _changed();
   }
 
@@ -111,7 +166,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
     final loop = _routed;
     if (loop == null || loop.points.length < 2) return;
     final km = (loop.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
-    final name = await _askName('Eigen route $km km');
+    final name = await _askName(_art != null ? '${tr(_art!.label)} $km km' : 'Eigen route $km km');
     if (name == null) return;
     setState(() => _saving = true);
     try {
@@ -171,6 +226,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
       appBar: AppBar(
         title: const Text('Route tekenen'),
         actions: [
+          IconButton(tooltip: tr('GPS-kunst: een vorm lopen'), onPressed: () => _pickArt(center), icon: const Icon(Icons.gesture)),
           IconButton(tooltip: 'Laatste punt weghalen', onPressed: _taps.isEmpty ? null : _undo, icon: const Icon(Icons.undo)),
           IconButton(tooltip: 'Alles wissen', onPressed: _taps.isEmpty ? null : _clear, icon: const Icon(Icons.delete_sweep_outlined)),
         ],
@@ -257,6 +313,22 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
                       Expanded(child: StatTile(label: 'Looptijd', value: _taps.length < 2 ? '–' : Fmt.duration(secs))),
                     ],
                   ),
+                  if (_art != null && loop != null) ...[
+                    const SizedBox(height: 8),
+                    Builder(builder: (context) {
+                      final f = artFidelity(loop.points, _artShape);
+                      return Text(
+                        trf('{vorm}: {pct}% gelukt. {tip}', {
+                          'vorm': tr(_art!.label),
+                          'pct': f,
+                          'tip': f >= 70
+                              ? tr('Dat wordt herkenbaar op je kaart!')
+                              : tr('Schuif de kaart iets op of kies een andere afstand voor een mooiere vorm.'),
+                        }),
+                        style: TextStyle(color: f >= 70 ? RwColors.good : RwColors.muted, height: 1.35),
+                      );
+                    }),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: 8),
                     Text(_error!, style: TextStyle(color: RwColors.danger)),

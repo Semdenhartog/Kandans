@@ -130,7 +130,6 @@ class WeekPlannerScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               const RosterCard(),
               PlanSwapCard(forecast: f, profile: insights, availability: availability),
-              CommuteCard(forecast: f),
               const SizedBox(height: 12),
               RwCard(
                 title: 'AANRADERS DEZE WEEK',

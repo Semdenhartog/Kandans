@@ -63,6 +63,10 @@ import 'quick_start.dart';
 import '../profile/emergency_contact.dart';
 import 'run_summary_screen.dart';
 import 'record_layout_screen.dart';
+import 'hrr_test_dialog.dart';
+import '../activities/hindsight_card.dart' show recordKadansEffect;
+import '../../data/services/kadans_effect_store.dart';
+import '../../data/services/hrr_store.dart';
 import '../activities/markers_card.dart' show markerIcon;
 import '../activities/photos_card.dart' show PhotosCard;
 import '../challenges/community_screen.dart' show refreshCommunityQuietly;
@@ -804,6 +808,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       indoorMeters = await _askDistance(estimate: _svc.recording!.distance);
       if (indoorMeters == null) return; // Toch nog niet stoppen.
     }
+    // Hartslagherstel-test: alleen met een band en na echte inspanning.
+    final bpm = HeartRateService.instance.bpm.value;
+    if (HeartRateService.instance.status.value == HrStatus.connected && bpm != null && bpm >= 110 && mounted) {
+      _svc.pause();
+      final hrr = await runHrrTest(context);
+      if (hrr != null) HrrStore.add(hrr).ignore();
+    }
     WakelockPlus.disable().catchError((Object _) {});
     final rec = await _svc.stop();
     if (indoorMeters != null) rec?.setIndoorDistance(indoorMeters);
@@ -1338,6 +1349,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       ref.invalidate(activitiesProvider);
       await sync.autoLinkRuns().catchError((_) => 0);
       if (!mounted) return;
+      // Kadans-effect: later vandaag (als het weer van de hele dag bekend is) is de terugblik het eerlijkst;
+      // nu alvast berekenen met wat er is, op de achtergrond.
+      final weatherSvc = ref.read(weatherServiceProvider);
       final saved = Activity(
         id: id,
         startedAt: activity.startedAt,
@@ -1354,6 +1368,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         shoeId: activity.shoeId,
         bestEfforts: bestEffortsToJson(efforts),
       );
+      recordKadansEffect(weatherSvc, saved).then((_) => ref.invalidate(kadansEffectProvider)).catchError((Object _) {}).ignore();
       // Na de 5e eigen run één keer om een beoordeling vragen (even later, na het felicitatiescherm).
       final ownRuns = before.where((x) => x.source == 'runwise').length + 1;
       final gotRecord = previousBest.isNotEmpty &&

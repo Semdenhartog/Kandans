@@ -1,11 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/data/models/models.dart';
-import 'package:runwise/domain/commute.dart';
-import 'package:runwise/domain/geo.dart';
 import 'package:runwise/domain/hydration.dart';
 import 'package:runwise/domain/plan_swap.dart';
 import 'package:runwise/domain/record_weather.dart';
-import 'package:runwise/domain/roster.dart';
 import 'package:runwise/domain/run_warnings.dart';
 import 'package:runwise/domain/training_plan.dart';
 
@@ -93,46 +90,6 @@ void main() {
       expect(recordTarget({10000: 3000, 5000: 1400})!.label, '5 km');
       expect(recordTarget({10000: 3000})!.label, '10 km');
       expect(recordTarget({}), isNull);
-    });
-  });
-
-  group('rennend naar je werk', () {
-    final home = const LatLng(52.1500, 5.5900);
-    final work = const LatLng(52.1500, 5.6900); // ± 6,8 km hemelsbreed
-    final shifts = [
-      BusyBlock(DateTime(2026, 11, 3, 8), DateTime(2026, 11, 3, 16)),
-      BusyBlock(DateTime(2026, 11, 4, 22), DateTime(2026, 11, 5, 7)), // nacht
-    ];
-    Forecast fc({double rain = 0}) => Forecast(latitude: 52.15, longitude: 5.6, hours: [
-          for (var h = 0; h < 96; h++)
-            HourWeather(
-              time: DateTime(2026, 11, 2).add(Duration(hours: h)),
-              temperature: 9,
-              feelsLike: 9,
-              windSpeed: 15,
-              windDirection: 270, // westenwind: waait naar het oosten
-              precipitation: rain,
-              precipitationProbability: rain > 0 ? 80 : 5,
-            ),
-        ]);
-
-    test('afstand en ritten heen en terug; na nachtdienst niet naar huis', () {
-      final c = CommuteSettings(home: home, work: work, maxKm: 12);
-      expect(c.km, inInclusiveRange(8, 10));
-      final runs = commuteRuns(c, shifts, fc(), paceSecPerKm: 360, now: now);
-      expect(runs.where((r) => r.toWork).length, 2);
-      expect(runs.where((r) => !r.toWork).length, 1); // alleen na de dagdienst
-      final first = runs.first;
-      expect(first.good, isTrue);
-      expect(first.start.isBefore(DateTime(2026, 11, 3, 8)), isTrue);
-      expect(first.text, contains('wind mee')); // oostwaarts met westenwind
-    });
-
-    test('regen = geen fijne rit; te ver = niets', () {
-      final c = CommuteSettings(home: home, work: work, maxKm: 12);
-      expect(commuteRuns(c, shifts, fc(rain: 1), now: now).every((r) => !r.good), isTrue);
-      expect(commuteRuns(c.copyWith(maxKm: 5), shifts, fc(), now: now), isEmpty);
-      expect(CommuteSettings.fromJson(c.toJson()).km, closeTo(c.km, 0.01));
     });
   });
 

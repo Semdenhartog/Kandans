@@ -5,7 +5,7 @@ import '../data/models/models.dart';
 /// Terugblik na je run: was dit een goed moment, vergeleken met de rest van die dag?
 /// Maakt de belofte van Kadans ("loop op het beste moment") zichtbaar na afloop.
 class Hindsight {
-  const Hindsight({required this.title, required this.text, required this.good, this.rainAvoided = 0});
+  const Hindsight({required this.title, required this.text, required this.good, this.rainAvoided = 0, this.heatAvoided = 0});
   final String title;
   final String text;
 
@@ -14,6 +14,12 @@ class Hindsight {
 
   /// Regen (mm) die je ontliep vergeleken met het natste andere moment van die dag.
   final double rainAvoided;
+
+  /// Graden (gevoel) die je ontliep vergeleken met het warmste andere moment, alleen op warme dagen.
+  final double heatAvoided;
+
+  Hindsight _with(double rain, double heat) =>
+      Hindsight(title: title, text: text, good: good, rainAvoided: rain, heatAvoided: heat);
 }
 
 class _Window {
@@ -52,6 +58,23 @@ String _mm(double v) => v < 1 ? v.toStringAsFixed(1).replaceAll('.', ',') : v.ro
 /// Vergelijkt jouw run met elk ander heel uur die dag (tussen [earliest] en [latest] uur).
 /// Null als er te weinig weerdata is.
 Hindsight? hindsight(List<HourWeather> day, DateTime start, int minutes, {int earliest = 6, int latest = 22}) {
+  final r = _hindsight(day, start, minutes, earliest, latest);
+  if (r == null) return null;
+  final mine = _window(day, start, minutes)!;
+  final d0 = DateTime(start.year, start.month, start.day);
+  final others = [
+    for (var h = earliest; h * 60 + minutes <= latest * 60; h++)
+      if (_window(day, d0.add(Duration(hours: h)), minutes) case final w?) w,
+  ];
+  final wettest = others.fold<double>(0, (m, w) => math.max(m, w.rain));
+  final hottest = others.fold<double>(-100, (m, w) => math.max(m, w.feels));
+  return r._with(
+    math.max(0, wettest - mine.rain),
+    hottest >= 20 ? math.max(0, hottest - mine.feels) : 0,
+  );
+}
+
+Hindsight? _hindsight(List<HourWeather> day, DateTime start, int minutes, int earliest, int latest) {
   if (minutes < 10) return null;
   final mine = _window(day, start, minutes);
   if (mine == null) return null;

@@ -7,11 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
-import '../../data/services/commute_service.dart';
-import '../../data/services/location_service.dart';
 import '../../data/services/roster_service.dart';
-import '../../domain/commute.dart';
-import '../../domain/geo.dart';
 import '../../domain/roster.dart';
 import '../../shared/widgets.dart';
 
@@ -175,10 +171,6 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
           ),
           if (r.linked) ...[
             const SizedBox(height: 16),
-            const _CommuteSettingsCard(),
-          ],
-          if (r.linked) ...[
-            const SizedBox(height: 16),
             RwCard(
               title: tr('KOMENDE DIENSTEN'),
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -218,88 +210,6 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Rennend naar je werk: thuis en werk instellen, maximale afstand en richting.
-class _CommuteSettingsCard extends ConsumerStatefulWidget {
-  const _CommuteSettingsCard();
-
-  @override
-  ConsumerState<_CommuteSettingsCard> createState() => _CommuteSettingsCardState();
-}
-
-class _CommuteSettingsCardState extends ConsumerState<_CommuteSettingsCard> {
-  bool _busy = false;
-
-  Future<void> _here(CommuteSettings c, {required bool work}) async {
-    setState(() => _busy = true);
-    final pos = await currentPosition();
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (pos == null) {
-      showMessage(context, tr('Je locatie is niet bekend. Staat locatie aan?'), error: true);
-      return;
-    }
-    final p = LatLng(pos.latitude, pos.longitude);
-    await saveCommuteSettings(ref, work ? c.copyWith(work: p) : c.copyWith(home: p));
-    if (mounted) showMessage(context, work ? tr('Werkplek bewaard.') : tr('Thuis bewaard.'));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = ref.watch(commuteSettingsProvider).value ?? const CommuteSettings();
-    return RwCard(
-      title: tr('RENNEND NAAR JE WERK'),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(
-          tr('Kadans zoekt in de weekplanner de diensten waarop je droog naar je werk of naar huis kunt lopen. Je plekken blijven op je telefoon.'),
-          style: TextStyle(color: RwColors.muted, height: 1.4, fontSize: 13),
-        ),
-        const SizedBox(height: 10),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          OutlinedButton.icon(
-            onPressed: _busy ? null : () => _here(c, work: false),
-            icon: Icon(c.home == null ? Icons.home_outlined : Icons.check),
-            label: Text(tr('Ik ben nu thuis')),
-          ),
-          OutlinedButton.icon(
-            onPressed: _busy ? null : () => _here(c, work: true),
-            icon: Icon(c.work == null ? Icons.work_outline : Icons.check),
-            label: Text(tr('Ik ben nu op mijn werk')),
-          ),
-        ]),
-        if (c.ready) ...[
-          const SizedBox(height: 8),
-          Text(trf('Geschat ±{km} km lopen.', {'km': c.km.toStringAsFixed(1).replaceAll('.', ',')}),
-              style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-        const SizedBox(height: 12),
-        Text(tr('Maximaal'), style: const TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        Wrap(spacing: 8, children: [
-          for (final km in const [5.0, 8.0, 12.0, 16.0, 21.0])
-            ChoiceChip(
-              label: Text('${km.round()} km'),
-              selected: c.maxKm == km,
-              onSelected: (_) => saveCommuteSettings(ref, c.copyWith(maxKm: km)),
-            ),
-        ]),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(tr('Naar je werk')),
-          value: c.toWork,
-          onChanged: (v) => saveCommuteSettings(ref, c.copyWith(toWork: v)),
-        ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(tr('Naar huis')),
-          subtitle: Text(tr('Niet na een nachtdienst.')),
-          value: c.fromWork,
-          onChanged: (v) => saveCommuteSettings(ref, c.copyWith(fromWork: v)),
-        ),
-      ]),
     );
   }
 }

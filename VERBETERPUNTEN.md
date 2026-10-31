@@ -322,7 +322,16 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 ## Ronde 31 oktober 2026 – vijf verbeteringen "buiten de lijntjes" (2)
 
 1. ✅ **Weerslim schema**: in de weekplanner een voorstel om een zware training (lang, tempo, intervallen) naar een dag ±2 met duidelijk beter weer te schuiven (≥ 12 punten). Eén tik "Verschuiven"; een rustige duurloop op die dag wisselt mee. Nooit twee zware dagen achter elkaar, wedstrijden schuiven niet.
-2. ✅ **Rennend naar je werk**: met je gekoppelde rooster en thuis/werk (Werkrooster → "Ik ben nu thuis/op mijn werk") toont de weekplanner de diensten waarop je droog naar je werk of naar huis kunt lopen, met tijd, wind mee/tegen en donker. Niet naar huis na een nachtdienst.
+2. ❌ (31-10 op verzoek van Sem weer verwijderd) **Rennend naar je werk**: met je gekoppelde rooster en thuis/werk (Werkrooster → "Ik ben nu thuis/op mijn werk") toont de weekplanner de diensten waarop je droog naar je werk of naar huis kunt lopen, met tijd, wind mee/tegen en donker. Niet naar huis na een nachtdienst.
 3. ✅ **Vocht**: na je run een schatting van je zweetverlies en hoeveel je de komende uren drinkt (gewicht instelbaar, op de telefoon). Vooraf: "Neem ~500 ml mee" bij runs ≥ 60 min en ≥ 15 °C gevoel.
 4. ✅ **Met je hond**: Ik → "Ik loop met mijn hond": waarschuwingen voor heet asfalt (geschat uit temperatuur, zon en uv), strooizout bij vorst en lange runs.
 5. ✅ **Recordweer**: nieuwe kaart op Vandaag die alleen verschijnt als er de komende 2 dagen koel, windstil en droog weer is, met je 5 km-record als doel en "In je agenda".
+
+## Ronde 31 oktober 2026 (2) – vijf verbeteringen, eerst voorgelegd aan Sem
+
+- ❌ "Rennend naar je werk" verwijderd (op verzoek).
+1. ✅ **GPS-kunst**: Route tekenen → vorm-knop: hartje, ster, ruit, cirkel, pijl of letter K van 3–21 km, midden op de kaart over echte paden, met "x% gelukt".
+2. ✅ **Leeftijdsniveau** (age grading) in Mijn records: je beste tijden als % van wereldniveau voor je leeftijd/geslacht (benadering WMA-normen). Geboortejaar en geslacht blijven op de telefoon.
+3. ✅ **Pijntjes-dagboek**: "Pijntje" na de run vraagt plek en ernst (staat in de notitie, bijv. "Pijntje: scheen 5"). Ik → Pijntjes toont terugkerende pijntjes met mogelijke oorzaak (lange/snelle runs, snelle opbouw, zelfde schoenen) en wanneer naar de fysio.
+4. ✅ **Hartslagherstel-test**: met hartslagband (≥ 110 bpm bij stoppen) een minuut rustig staan; daling in 1 min + trend in rundetail en Hartslagband-scherm. Lokaal bewaard.
+5. ✅ **Kadans-effect**: na elke run (en bij openen van een run) wordt de terugblik bewaard; in Runs "Het Kadans-effect": goed gekozen runs, ontlopen regen en hitte dit jaar. Badge "Slim gekozen" (5 runs). Telt vanaf 31-10-2026.

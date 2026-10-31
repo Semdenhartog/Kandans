@@ -25,6 +25,7 @@ import 'gps_spike_screen.dart';
 import '../community/share_to_feed.dart';
 import 'hindsight_card.dart';
 import 'hydration_card.dart';
+import 'hrr_card.dart';
 import 'markers_card.dart';
 import 'photos_card.dart';
 import 'elevation_card.dart';
@@ -277,6 +278,7 @@ class ActivityDetailScreen extends ConsumerWidget {
           ],
           if (HindsightCard.applies(a)) HindsightCard(key: ValueKey('hindsight-${a.id}'), activity: a),
           if (HydrationCard.applies(a)) HydrationCard(activity: a),
+          if (a.averageHeartRate != null && a.source == 'runwise') HrrCard(activity: a),
           const SizedBox(height: 12),
           RwCard(
             key: _sectionKey(a, 'weer'),

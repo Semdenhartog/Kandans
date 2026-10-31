@@ -191,7 +191,7 @@ List<({Activity run, LatLng start})> _starts(List<Activity> sorted) => [
 int _season(DateTime d) => switch (d.month) { 12 || 1 || 2 => 0, 3 || 4 || 5 => 1, 6 || 7 || 8 => 2, _ => 3 };
 
 /// Alle badges met je voortgang.
-List<Badge> computeBadges(List<Activity> runs, {DateTime? now, Set<DateTime> pausedWeeks = const {}}) {
+List<Badge> computeBadges(List<Activity> runs, {DateTime? now, Set<DateTime> pausedWeeks = const {}, Set<String> wellChosen = const {}}) {
   final sorted = [...runs]..sort((a, b) => a.startedAt.compareTo(b.startedAt));
   final today = now ?? DateTime.now();
 
@@ -297,6 +297,11 @@ List<Badge> computeBadges(List<Activity> runs, {DateTime? now, Set<DateTime> pau
 
     // Weer en seizoen.
     _single('wind', 'Windtrotser', 'Gelopen met 30 km/u wind of meer.', 'air', sorted, (a) => (a.windSpeedKmh ?? 0) >= 30, category: w),
+    () {
+      final b = _total('wise', 'Slim gekozen', 'Vijf runs op een van de fijnste momenten van de dag (terugblik "Goed gekozen?").', 'verified',
+          sorted, 5, (a) => a.id != null && wellChosen.contains(a.id) ? 1 : 0);
+      return Badge(id: b.id, title: b.title, description: b.description, icon: b.icon, earnedAt: b.earnedAt, progress: b.progress, category: w);
+    }(),
     _single('storm', 'Stormloper', 'Gelopen met 45 km/u wind of meer.', 'storm', sorted, (a) => (a.windSpeedKmh ?? 0) >= 45, category: w),
     _single('heat', 'Hittebestendig', 'Gelopen bij 25 °C of warmer.', 'local_fire_department', sorted, (a) => feels(a, 0) >= 25, category: w),
     _single('tropical', 'Tropenloper', 'Gelopen bij een gevoelstemperatuur van 30 °C of meer.', 'wb_sunny', sorted, (a) => feels(a, 0) >= 30,

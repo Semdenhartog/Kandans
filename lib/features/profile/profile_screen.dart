@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/services/kadans_effect_store.dart';
 import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/supabase.dart';
@@ -29,6 +30,8 @@ import 'fingerprint_tile.dart';
 import '../planner/training_plan_screen.dart';
 import 'privacy_screen.dart';
 import 'heart_rate_screen.dart';
+import 'pain_screen.dart';
+import '../../domain/pain_log.dart';
 import 'help_screen.dart';
 import 'member_card.dart';
 import 'reminder_tile.dart';
@@ -104,7 +107,7 @@ class ProfileScreen extends ConsumerWidget {
           Consumer(builder: (context, ref, _) {
             final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
             final km = runs.fold<double>(0, (s, a) => s + a.distanceMeters / 1000);
-            final badges = computeBadges(runs, pausedWeeks: ref.watch(pausedWeeksProvider)).where((b) => b.earned).length;
+            final badges = computeBadges(runs, pausedWeeks: ref.watch(pausedWeeksProvider), wellChosen: ref.watch(kadansEffectProvider).value?.wellChosenIds ?? const {}).where((b) => b.earned).length;
             DateTime? since;
             for (final r in runs) {
               if (since == null || r.startedAt.isBefore(since)) since = r.startedAt;
@@ -296,6 +299,22 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () => openHeartRateScreen(context),
             ),
           ),
+          SizedBox(height: 8),
+          Consumer(builder: (context, ref, _) {
+            final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
+            final p = painPatterns(runs);
+            return Card(
+              child: ListTile(
+                leading: TileIcon(Icons.healing_outlined, color: p.isEmpty ? RwColors.accent : RwColors.warning),
+                title: Text(tr('Pijntjes')),
+                subtitle: Text(p.isEmpty
+                    ? tr('Patronen in je pijntjes na runs')
+                    : trf('{plek} komt terug ({n}× in 2 weken)', {'plek': tr(p.first.spot.label), 'n': p.first.count})),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () => openPainScreen(context),
+              ),
+            );
+          }),
           const _SectionTitle('MELDINGEN EN VEILIGHEID'),
           Card(
             child: Column(

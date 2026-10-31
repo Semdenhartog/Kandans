@@ -7,16 +7,12 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
-import '../../data/services/commute_service.dart';
-import '../../data/services/roster_service.dart';
 import '../../domain/availability.dart';
-import '../../domain/commute.dart';
 import '../../domain/performance_model.dart';
 import '../../domain/plan_swap.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../domain/training_plan.dart';
 import '../../shared/widgets.dart';
-import 'roster_screen.dart';
 
 const _dayNames = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 String _dayName(DateTime d) => _dayNames[d.weekday - 1];
@@ -118,66 +114,6 @@ class _PlanSwapCardState extends ConsumerState<PlanSwapCard> {
             ),
           ],
           Text(tr('Zware trainingen komen nooit op twee dagen achter elkaar.'), style: TextStyle(color: RwColors.subtle, fontSize: 12)),
-        ]),
-      ),
-    );
-  }
-}
-
-/// Rennend naar je werk: met je rooster en de verwachting de beste woon-werk-runs.
-class CommuteCard extends ConsumerWidget {
-  const CommuteCard({super.key, required this.forecast});
-  final Forecast forecast;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final roster = ref.watch(rosterProvider).value;
-    final c = ref.watch(commuteSettingsProvider).value;
-    if (roster == null || !roster.linked || c == null) return const SizedBox.shrink();
-    if (!c.ready) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: RwCard(
-          title: tr('RENNEND NAAR JE WERK'),
-          onTap: () => openRosterScreen(context),
-          child: Text(tr('Stel je thuis- en werkplek in (Werkrooster), dan zoekt Kadans de dagen waarop je droog naar je werk of naar huis kunt lopen.'),
-              style: const TextStyle(height: 1.45)),
-        ),
-      );
-    }
-    final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
-    final paces = [for (final a in runs.take(15)) if (a.paceSecondsPerKm > 240 && a.paceSecondsPerKm < 600) a.paceSecondsPerKm]..sort();
-    final pace = paces.isEmpty ? 360.0 : paces[paces.length ~/ 2] * 1.05;
-    final list = commuteRuns(c, roster.upcoming, forecast, paceSecPerKm: pace);
-    final good = list.where((r) => r.good).take(4).toList();
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: RwCard(
-        title: tr('RENNEND NAAR JE WERK'),
-        onTap: () => openRosterScreen(context),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          if (c.km > c.maxKm || c.km < 2)
-            Text(
-              trf('Je werk is ±{km} km lopen; dat valt buiten je grens van {max} km.', {'km': c.km.toStringAsFixed(1).replaceAll('.', ','), 'max': c.maxKm.round()}),
-              style: TextStyle(color: RwColors.muted),
-            )
-          else if (good.isEmpty)
-            Text(tr('Deze week geen fijne woon-werk-runs: regen, kou of harde wind rond je diensten.'), style: TextStyle(color: RwColors.muted))
-          else
-            for (final r in good)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Icon(r.toWork ? Icons.work_outline : Icons.home_outlined, size: 18, color: RwColors.accent),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text('${_dayName(r.start)[0].toUpperCase()}${_dayName(r.start).substring(1)}: ${r.text}', style: const TextStyle(height: 1.4)),
-                  ),
-                ]),
-              ),
-          const SizedBox(height: 6),
-          Text(tr('Afstand geschat (hemelsbreed × 1,3). Tijd om je om te kleden is meegerekend.'),
-              style: TextStyle(color: RwColors.subtle, fontSize: 12)),
         ]),
       ),
     );

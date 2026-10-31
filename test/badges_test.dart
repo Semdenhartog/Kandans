@@ -100,6 +100,6 @@ void main() {
       'early', 'night', 'climb', 'explorer', 'wind', 'storm', 'heat', 'frost', 'humid']) {
       expect(ids, contains(old));
     }
-    expect(ids.length, 49);
+    expect(ids.length, 50);
   });
 }

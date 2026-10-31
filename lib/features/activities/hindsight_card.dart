@@ -4,9 +4,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
+import '../../data/services/kadans_effect_store.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/hindsight.dart';
+
+/// Terugblik voor een run (weer van die dag ophalen en vergelijken). Null als het niet kan.
+Future<Hindsight?> evaluateHindsight(WeatherService weather, Activity a) async {
+  if (!HindsightCard.applies(a)) return null;
+  final pts = decodePolyline(a.trackPolyline!);
+  if (pts.isEmpty) return null;
+  final start = a.startedAt.toLocal();
+  try {
+    final day = await weather.dayHours(pts.first.lat, pts.first.lon, start);
+    return hindsight(day, start, (a.movingTimeSeconds / 60).round());
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Na het opslaan van een run: terugblik op de achtergrond berekenen en bewaren voor het Kadans-effect.
+Future<void> recordKadansEffect(WeatherService weather, Activity a) async {
+  if (a.id == null) return;
+  final h = await evaluateHindsight(weather, a);
+  if (h != null) await KadansEffectStore.save(a.id!, h, a.startedAt);
+}
 
 /// "Goed gekozen?": je run vergeleken met het weer op de andere momenten van die dag.
 class HindsightCard extends ConsumerStatefulWidget {
@@ -25,16 +47,12 @@ class _HindsightCardState extends ConsumerState<HindsightCard> {
   late final Future<Hindsight?> _future = _load();
 
   Future<Hindsight?> _load() async {
-    final a = widget.activity;
-    final pts = decodePolyline(a.trackPolyline!);
-    if (pts.isEmpty) return null;
-    final start = a.startedAt.toLocal();
-    try {
-      final day = await ref.read(weatherServiceProvider).dayHours(pts.first.lat, pts.first.lon, start);
-      return hindsight(day, start, (a.movingTimeSeconds / 60).round());
-    } catch (_) {
-      return null;
+    final h = await evaluateHindsight(ref.read(weatherServiceProvider), widget.activity);
+    if (h != null && widget.activity.id != null) {
+      final isNew = await KadansEffectStore.save(widget.activity.id!, h, widget.activity.startedAt);
+      if (isNew) ref.invalidate(kadansEffectProvider);
     }
+    return h;
   }
 
   @override

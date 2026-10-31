@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'kadans_effect_row.dart';
 import '../../core/format.dart';
 import '../../domain/weather_correction.dart';
 import '../../core/supabase.dart';
@@ -679,6 +680,7 @@ class _OverviewState extends ConsumerState<_Overview> {
               ]),
             ),
           ),
+          const KadansEffectRow(),
           const Divider(height: 20),
           RwSegmented<Period>(
             items: const [
