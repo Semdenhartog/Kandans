@@ -249,6 +249,17 @@ class ProfileScreen extends ConsumerWidget {
                 }),
                 Divider(height: 1, indent: 56),
                 Consumer(builder: (context, ref, _) {
+                  final dog = ref.watch(dogModeProvider);
+                  return SwitchListTile(
+                    secondary: TileIcon(Icons.pets_outlined, color: RwColors.accent),
+                    title: Text(tr('Ik loop met mijn hond')),
+                    subtitle: Text(tr('Waarschuwingen voor heet asfalt, strooizout en lange runs')),
+                    value: dog,
+                    onChanged: (v) => ref.read(dogModeProvider.notifier).set(v),
+                  );
+                }),
+                Divider(height: 1, indent: 56),
+                Consumer(builder: (context, ref, _) {
                   final shoes = ref.watch(shoesProvider).value ?? <Shoe>[];
                   final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
                   final worn = shoes.where((s) => !s.retired && shoeWornOut(s, runs)).toList();

@@ -47,6 +47,7 @@ import 'extra_cards.dart';
 import 'month_challenge_card.dart';
 import 'today_card.dart';
 import 'dashboard_providers.dart';
+import 'record_weather_card.dart';
 import 'weather_ambience.dart';
 import '../shop/shop_tile.dart';
 import '../profile/sources_screen.dart';
@@ -331,6 +332,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       clothingFeel: ref.watch(clothingFeelProvider),
                       pollen: ref.watch(pollenSensitivityProvider),
                       recentMaxTemp: ref.watch(recentMaxRunTempProvider),
+                      dog: ref.watch(dogModeProvider),
                     ),
                   ];
                 },
@@ -455,9 +457,11 @@ class _Results extends StatefulWidget {
     this.clothingFeel = ClothingFeel.normal,
     this.pollen = PollenSensitivity.normal,
     this.recentMaxTemp,
+    this.dog = false,
   });
   final ClothingFeel clothingFeel;
   final PollenSensitivity pollen;
+  final bool dog;
   final double? recentMaxTemp;
   final StartTimePlanner planner;
   final TrainingType type;
@@ -537,10 +541,15 @@ class _ResultsState extends State<_Results> {
         pollen: widget.pollen,
         recentMaxTemp: widget.recentMaxTemp,
         hasRoute: widget.planner.track.length >= 2,
-        route: widget.planner.track.length >= 2 ? trackSegments(widget.planner.track) : const []);
+        route: widget.planner.track.length >= 2 ? trackSegments(widget.planner.track) : const [],
+        dog: widget.dog);
 
     Widget? card(DashCard c) => switch (c) {
           DashCard.warnings => warnings.isEmpty ? null : _WarningsCard(warnings: warnings),
+          DashCard.recordWeather => switch (RecordWeatherCard.bestMoment(widget.planner)) {
+              final b? => RecordWeatherCard(best: b),
+              null => null,
+            },
           DashCard.clothing => _ClothingCard(
               advice: clothingFor(shown.weather, widget.type, durationMinutes: widget.planner.durationMinutes, feel: widget.clothingFeel),
               at: shown.start,
@@ -1349,6 +1358,8 @@ class _WarningsCard extends StatelessWidget {
         'air' => Icons.masks_outlined,
         'pollen' => Icons.local_florist_outlined,
         'sun' => Icons.wb_twilight,
+        'dog' => Icons.pets_outlined,
+        'water' => Icons.water_drop_outlined,
         _ => Icons.info_outline,
       };
 

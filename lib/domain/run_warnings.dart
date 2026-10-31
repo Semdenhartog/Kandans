@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../data/models/models.dart';
+import 'hydration.dart';
 import 'sun_position.dart';
 
 /// Luchtkwaliteit en pollen op één moment (Open-Meteo / CAMS).
@@ -89,6 +90,7 @@ List<RunWarning> runWarnings(
   double? recentMaxTemp,
   bool hasRoute = false,
   List<({double bearing, double meters, double startKm})> route = const [],
+  bool dog = false,
 }) {
   final during = weatherDuring(f, start, minutes);
   if (during.isEmpty) return const [];
@@ -261,6 +263,44 @@ List<RunWarning> runWarnings(
   }
 
   out.sort((a, b) => b.level.index.compareTo(a.level.index));
+  // Drinken mee bij lange, warme runs.
+  final hum = during.map((w) => w.humidity ?? 60).reduce((a, b) => a + b) / during.length;
+  final ml = carryMl(minutes: minutes, feelsLike: feels, humidity: hum);
+  if (ml != null) {
+    out.add(RunWarning(WarningLevel.info, 'Neem drinken mee',
+        'Je verliest naar schatting flink wat vocht. Neem zo\'n $ml ml mee en drink om de 15–20 minuten een paar slokken.',
+        kind: 'water'));
+  }
+
+  // Met de hond: heet asfalt, strooizout en lange afstanden.
+  if (dog) {
+    final air = during.map((w) => w.temperature).reduce(math.max);
+    final sunny = during.any((w) => w.isDay && (w.weatherCode ?? 0) <= 2);
+    final uv = during.map((w) => w.uvIndex ?? 0).reduce(math.max);
+    final asphalt = air + (sunny ? math.min(27.0, 5 + uv * 4) : 4);
+    if (asphalt >= 50 || air >= 27) {
+      out.add(RunWarning(WarningLevel.danger, 'Te heet voor je hond',
+          'Het asfalt wordt naar schatting ${asphalt.round()} °C: dat verbrandt hondenpoten. Houd je hand 7 seconden op de stoep: '
+              'te heet voor jou is te heet voor je hond. Loop vroeg of laat, op gras of in het bos.',
+          kind: 'dog'));
+    } else if (air >= 20 || asphalt >= 42) {
+      out.add(const RunWarning(WarningLevel.caution, 'Warm voor je hond',
+          'Honden koelen slecht af (alleen door te hijgen). Kies schaduw en gras, neem water voor je hond mee en houd het korter.',
+          kind: 'dog'));
+    }
+    final freezing = during.any((w) => w.temperature <= 1);
+    if (freezing) {
+      out.add(const RunWarning(WarningLevel.info, 'Strooizout',
+          'Bij vorst wordt er gestrooid. Spoel na de run de poten van je hond af; zout geeft kloofjes en is giftig als hij likt.',
+          kind: 'dog'));
+    }
+    if (minutes >= 75 && air >= 10) {
+      out.add(const RunWarning(WarningLevel.info, 'Lange run met je hond',
+          'Ruim een uur is veel voor de meeste honden. Neem water mee en let op of hij achterblijft.',
+          kind: 'dog'));
+    }
+  }
+
   // Lage zon recht in je gezicht (alleen bij zon, niet bij bewolking): jij en automobilisten zien slecht.
   final low = <({DateTime time, double azimuth})>[];
   for (final w in during) {

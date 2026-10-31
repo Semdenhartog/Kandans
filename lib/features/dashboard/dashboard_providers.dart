@@ -97,6 +97,35 @@ final clothingFeelProvider = NotifierProvider<_EnumPref<ClothingFeel>, ClothingF
 final pollenSensitivityProvider = NotifierProvider<_EnumPref<PollenSensitivity>, PollenSensitivity>(
     () => _EnumPref('pollen_sensitivity', PollenSensitivity.values, PollenSensitivity.normal));
 
+/// Aan/uit-keuze, bewaard op de telefoon.
+class BoolPref extends Notifier<bool> {
+  BoolPref(this._key);
+  final String _key;
+
+  @override
+  bool build() {
+    _load();
+    return false;
+  }
+
+  Future<void> _load() async {
+    try {
+      final v = (await SharedPreferences.getInstance()).getBool(_key);
+      if (v != null) state = v;
+    } catch (_) {}
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    try {
+      await (await SharedPreferences.getInstance()).setBool(_key, value);
+    } catch (_) {}
+  }
+}
+
+/// Ik → Ik loop met mijn hond: extra waarschuwingen (heet asfalt, strooizout, lange runs).
+final dogModeProvider = NotifierProvider<BoolPref, bool>(() => BoolPref('runs_with_dog'));
+
 /// Warmste run (°C) van de afgelopen 3 weken, om "eerste warme dag" te herkennen (null = te weinig runs).
 final recentMaxRunTempProvider = Provider<double?>((ref) {
   final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];

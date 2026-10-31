@@ -73,6 +73,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Rooster (ICS): `domain/roster.dart`, `data/services/roster_service.dart`, `planner/roster_screen.dart`; via `availabilityProvider` →
   `Availability.busy`. Zon: `domain/sun_position.dart` (waarschuwing 'sun'). Terugblik: `domain/hindsight.dart` + `activities/hindsight_card.dart`.
   Hartslagdrift: `domain/decoupling.dart`. Afspreken-momenten: `community/best_moments_text.dart`.
+- Weerslim schema `domain/plan_swap.dart`, woon-werk `domain/commute.dart` + `data/services/commute_service.dart` (kaarten in
+  `planner/weather_smart_cards.dart`), vocht `domain/hydration.dart` + `activities/hydration_card.dart`, hond `dogModeProvider`
+  (waarschuwingen 'dog'/'water' in `run_warnings.dart`), recordweer `domain/record_weather.dart` + `dashboard/record_weather_card.dart`.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).

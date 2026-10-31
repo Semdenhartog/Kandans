@@ -14,6 +14,7 @@ import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart';
 import 'availability_provider.dart';
 import 'roster_screen.dart';
+import 'weather_smart_cards.dart';
 
 void openWeekPlanner(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const WeekPlannerScreen()));
@@ -128,6 +129,8 @@ class WeekPlannerScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               const RosterCard(),
+              PlanSwapCard(forecast: f, profile: insights, availability: availability),
+              CommuteCard(forecast: f),
               const SizedBox(height: 12),
               RwCard(
                 title: 'AANRADERS DEZE WEEK',

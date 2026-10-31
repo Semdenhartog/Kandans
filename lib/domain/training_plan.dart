@@ -39,6 +39,20 @@ class PlanSession {
   /// Week in het schema (1 = eerste).
   final int week;
 
+  PlanSession copyWith({DateTime? date}) => PlanSession(
+        date: date ?? this.date,
+        kind: kind,
+        title: title,
+        description: description,
+        distanceMeters: distanceMeters,
+        targetPace: targetPace,
+        intervals: intervals,
+        week: week,
+      );
+
+  /// Zware training (lang, tempo, intervallen, wedstrijd): niet twee dagen achter elkaar.
+  bool get isKey => kind != SessionKind.easy;
+
   Map<String, dynamic> toRow(String userId) => {
         'user_id': userId,
         'session_date': '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',

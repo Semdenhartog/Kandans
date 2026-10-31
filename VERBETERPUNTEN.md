@@ -318,3 +318,11 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 3. ✅ **"Goed gekozen?" na je run** (#12-achtig): je run vergeleken met de rest van die dag: droog gebleven terwijl het om 15:00 regende, of "om 08:00 was het 5 °C koeler".
 4. ✅ **Hartslagdrift (aerobe ontkoppeling)** bij gelijkmatige duurlopen ≥ 40 min: hoeveel je hartslag in de tweede helft opliep. Maat voor duurvermogen.
 5. ✅ **Afspreken met je beste momenten**: in een "Samen lopen"-oproep met één tik je 3 beste loopmomenten van de komende dagen invoegen (houdt rekening met je rooster).
+
+## Ronde 31 oktober 2026 – vijf verbeteringen "buiten de lijntjes" (2)
+
+1. ✅ **Weerslim schema**: in de weekplanner een voorstel om een zware training (lang, tempo, intervallen) naar een dag ±2 met duidelijk beter weer te schuiven (≥ 12 punten). Eén tik "Verschuiven"; een rustige duurloop op die dag wisselt mee. Nooit twee zware dagen achter elkaar, wedstrijden schuiven niet.
+2. ✅ **Rennend naar je werk**: met je gekoppelde rooster en thuis/werk (Werkrooster → "Ik ben nu thuis/op mijn werk") toont de weekplanner de diensten waarop je droog naar je werk of naar huis kunt lopen, met tijd, wind mee/tegen en donker. Niet naar huis na een nachtdienst.
+3. ✅ **Vocht**: na je run een schatting van je zweetverlies en hoeveel je de komende uren drinkt (gewicht instelbaar, op de telefoon). Vooraf: "Neem ~500 ml mee" bij runs ≥ 60 min en ≥ 15 °C gevoel.
+4. ✅ **Met je hond**: Ik → "Ik loop met mijn hond": waarschuwingen voor heet asfalt (geschat uit temperatuur, zon en uv), strooizout bij vorst en lange runs.
+5. ✅ **Recordweer**: nieuwe kaart op Vandaag die alleen verschijnt als er de komende 2 dagen koel, windstil en droog weer is, met je 5 km-record als doel en "In je agenda".
