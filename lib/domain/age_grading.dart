@@ -23,7 +23,8 @@ double ageFactor(Sex sex, int age) {
   if (age <= t.first.$1) return t.first.$2;
   if (age >= t.last.$1) return t.last.$2;
   for (var i = 1; i < t.length; i++) {
-    final (a1, f1) = t[i - 1], (a2, f2) = t[i];
+    final (a1, f1) = t[i - 1];
+    final (a2, f2) = t[i];
     if (age <= a2) return f1 + (f2 - f1) * (age - a1) / (a2 - a1);
   }
   return t.last.$2;
