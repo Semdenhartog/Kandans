@@ -158,14 +158,18 @@ class _SunArcPainter extends CustomPainter {
     // Tijden onder zon op en zon onder.
     void label(String s, double x) {
       final tp = TextPainter(
-        text: TextSpan(text: s, style: TextStyle(color: text, fontSize: fontSize, fontWeight: FontWeight.w600)),
+        text: TextSpan(text: s, style: TextStyle(color: text, fontSize: fontSize, fontWeight: FontWeight.w600, fontFamily: RwFonts.body)),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset((x - tp.width / 2).clamp(0, w - tp.width), baseY + 4));
     }
 
-    label('↑ $riseLabel', left);
-    label('↓ $setLabel', right);
+    label(riseLabel, left);
+    label(setLabel, right);
+    // Klein zonnetje op de horizon bij op- en ondergang.
+    for (final x in [left, right]) {
+      canvas.drawArc(Rect.fromCircle(center: Offset(x, baseY), radius: 5), math.pi, math.pi, true, Paint()..color = sun.withValues(alpha: 0.8));
+    }
   }
 
   @override

@@ -356,5 +356,11 @@ Vandaag:
 - ✅ 16 **Medailles**: gekartelde rand, lint, en in het grote beeld kantelt de medaille en de glans mee met je telefoon.
 - ✅ 18 **Bingo-icoontjes** per vakje.
 
-Nog te doen (volgende sessie): 8 foto's op de kaart + fotomuur, 14 uitleg-animatie eerste start, 17 opnamescherm (live-kaart, ghost-runner, pulserende stip),
-19 startscherm-widget met illustratie, 21 oefenanimaties (warming-up, kuitheffingen e.d.), 23 profielfoto/omslag/avatar in Samen, 25 Play Store-video en winkelplaatjes.
+Daarna (zelfde dag, op verzoek):
+- ✅ 8 **Foto's op de kaart + Fotomuur**: markeringen met foto staan als fotootje op de kaart; Runs → ⋮ → Fotomuur (al je runfoto's per maand). Foto's die je ná de run toevoegt hebben geen plek, die staan alleen op de muur.
+- ✅ 14 **Uitleg-animatie** op de eerste pagina van de rondleiding: uren met weer, scores die groeien, Kadans zoekt en het beste moment gaat gloeien.
+- ✅ 17 **Opnamescherm**: pulserende stip op de live-kaart en je record als lopend figuurtje (ghost-loper) als je een route met record volgt. De kaart zelf is niet groter gemaakt (die pagina is al schermvullend).
+- ✅ 19 **Startscherm-widget**: landschapje onderin en een weericoon (zon, maan, wolk, regen).
+- ✅ 21 **Oefenanimaties**: lopend lijnfiguurtje dat elke kracht-/warming-up-oefening voordoet (± 20 bewegingen, gekozen op naam).
+- ✅ 23 **Profielplaatje en omslag in Samen**: icoon + kleur met gouden rand, omslag = seizoenslandschap naar keuze (migratie 0036). Bewust **geen eigen foto's** (zou moderatie vragen).
+- ✅ 25 **Play Store**: winkelplaatjes met kop en telefoonframe (`.github/scripts/store_screens.py`) en een promovideo van 30 s (`store_video.sh`), beide automatisch in branch `schermen-<branch>/playstore`.

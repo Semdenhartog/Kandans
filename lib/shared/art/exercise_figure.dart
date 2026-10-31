@@ -287,7 +287,7 @@ class ExercisePainter extends CustomPainter {
             ..strokeCap = StrokeCap.round);
     }
 
-    final w = unit / 22;
+    final w = (unit / 34).clamp(2.0, 7.0);
     Paint pen(bool far) => Paint()
       ..color = far ? color.withValues(alpha: 0.4) : color
       ..strokeWidth = w
