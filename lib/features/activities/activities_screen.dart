@@ -17,6 +17,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
+import '../../shared/art/season_banner.dart';
 import '../../shared/segmented.dart';
 import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
@@ -373,7 +374,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               itemCount: rows.length + 2,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, i) => StaggerIn(index: i, since: _since, child: Builder(builder: (context) {
-                if (i == 0) return _Overview(activities: list);
+                if (i == 0) return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [const SeasonBanner(), const SizedBox(height: 8), _Overview(activities: list)]);
                 if (i == 1) {
                   if (_filter.isEmpty) return const SizedBox.shrink();
                   return Padding(

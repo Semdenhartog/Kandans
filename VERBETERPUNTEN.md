@@ -344,3 +344,17 @@ Status: ✅ gedaan · 📄 voorbereid, Sem moet het zelf indienen · ⬜ open.
 4. ✅ **Knop op je oortjes**: in de steminstellingen bij het opnemen (standaard uit). Eén druk = pauze/verder, twee keer of "volgende" = ronde. Werkt via een eigen mediasessie; speelt er muziek, dan kan die app de knop overnemen.
 5. ✅ **Loop-bingo**: nieuwe kaart op Vandaag. Elke maand 8 opdrachten (zelfde voor iedereen, passend bij het seizoen) + gratis midden. Melding als er een lijn bij komt.
 6. ✅ **Eigen runs naar Strava**: in het Strava-menu (Koppelingen) aan te zetten, of per run "Naar Strava sturen". GPX met hartslag, cadans en hoogte; loopband als handmatige activiteit. Komt niet dubbel terug via de sync. Strava moet hiervoor één keer opnieuw gekoppeld worden (recht `activity:write`).
+
+## Ronde 31 oktober 2026 (4) – beeld en beweging (Sem koos 1, 2, 3, 8, 12, 13, 14, 16, 17, 18, 19, 21, 23, 25)
+
+Vandaag:
+- ✅ 1 **Levende weerscène**: seizoenslandschap onderin de hoofdkaart (bomen wiegen met de wind, kantelen = diepte), warme lucht rond zon op/onder, diepblauw 's nachts.
+- ✅ 2 **Bewegende weericonen** (zelf getekend, geen extra pakket) in de hoofdkaart en de weekplanner.
+- ✅ 3 **Zonneboog** in de hoofdkaart: zon op/onder, de zon nu, je run als gouden stuk, donker op de lijn eronder.
+- ✅ 12 **Seizoensplaatje** boven Runs: elke maand een ander landschap (sneeuw, krokus, tulpen, bloesem, hei, bladeren, mist) met een zin.
+- ✅ 13 **Lege schermen**: landschap met een lopend figuurtje in plaats van het rondje.
+- ✅ 16 **Medailles**: gekartelde rand, lint, en in het grote beeld kantelt de medaille en de glans mee met je telefoon.
+- ✅ 18 **Bingo-icoontjes** per vakje.
+
+Nog te doen (volgende sessie): 8 foto's op de kaart + fotomuur, 14 uitleg-animatie eerste start, 17 opnamescherm (live-kaart, ghost-runner, pulserende stip),
+19 startscherm-widget met illustratie, 21 oefenanimaties (warming-up, kuitheffingen e.d.), 23 profielfoto/omslag/avatar in Samen, 25 Play Store-video en winkelplaatjes.

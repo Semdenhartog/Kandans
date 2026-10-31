@@ -27,6 +27,9 @@ import '../../shared/alarm.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../domain/run_helpers.dart';
 import '../../shared/calendar.dart';
+import '../../shared/art/landscape.dart';
+import '../../shared/art/sun_arc.dart';
+import '../../shared/art/weather_icon.dart';
 import '../../shared/shine_text.dart';
 import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
@@ -767,7 +770,15 @@ class _HeroCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(children: [
-          Positioned.fill(child: WeatherAmbience(weather: w)),
+          Positioned.fill(child: WeatherAmbience(weather: w, golden: _golden(s.start, lat, lon))),
+          // Seizoenslandschap onderin, heel zacht, beweegt mee als je de telefoon kantelt.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 150,
+            child: KadansLandscape(date: s.start, wind: w.windSpeed, opacity: 0.55, showPath: false),
+          ),
           Padding(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
         child: Column(
@@ -826,6 +837,10 @@ class _HeroCard extends StatelessWidget {
                       height: 1,
                       letterSpacing: -1.5,
                     ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: AnimatedWeatherIcon(code: w.weatherCode, day: w.isDay, size: 40),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -899,7 +914,9 @@ class _HeroCard extends StatelessWidget {
                   ),
               ]);
             }),
-            const SizedBox(height: 14),
+            const SizedBox(height: 8),
+            SunArc(start: s.start, minutes: durationMinutes, lat: lat, lon: lon),
+            const SizedBox(height: 10),
             Row(
               children: [
                 if (goNowShown)
@@ -1436,4 +1453,11 @@ IconData _clothingIcon(String item) {
   if (i.contains('pet')) return Icons.wb_sunny_outlined;
   if (i.contains('muts')) return Icons.ac_unit;
   return Icons.checkroom;
+}
+
+/// Binnen een uur van zonsopkomst of -ondergang (gouden uur).
+bool _golden(DateTime t, double lat, double lon) {
+  final st = sunTimes(t, lat, lon);
+  bool near(DateTime? x) => x != null && t.difference(x).inMinutes.abs() <= 60;
+  return near(st.sunrise) || near(st.sunset);
 }

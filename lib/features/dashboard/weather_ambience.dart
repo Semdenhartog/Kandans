@@ -18,8 +18,11 @@ _Kind _kindOf(HourWeather w) {
 /// Zachte, levende weerachtergrond in de hoofdkaart: regen die met de wind meewaait, sneeuw,
 /// drijvende wolken, een zonnegloed of fonkelende sterren. Heel subtiel, zodat de tekst leesbaar blijft.
 class WeatherAmbience extends StatefulWidget {
-  const WeatherAmbience({super.key, required this.weather});
+  const WeatherAmbience({super.key, required this.weather, this.golden = false});
   final HourWeather weather;
+
+  /// Rond zonsopkomst of -ondergang: een warme gloed in de lucht.
+  final bool golden;
 
   @override
   State<WeatherAmbience> createState() => _WeatherAmbienceState();
@@ -50,7 +53,7 @@ class _WeatherAmbienceState extends State<WeatherAmbience> with SingleTickerProv
           child: AnimatedBuilder(
             animation: _c,
             builder: (_, _) => CustomPaint(
-              painter: _AmbiencePainter(_kindOf(widget.weather), _still ? 0.3 : _c.value, _bits, widget.weather.windSpeed),
+              painter: _AmbiencePainter(_kindOf(widget.weather), _still ? 0.3 : _c.value, _bits, widget.weather.windSpeed, golden: widget.golden, night: !widget.weather.isDay),
               size: Size.infinite,
             ),
           ),
@@ -59,7 +62,8 @@ class _WeatherAmbienceState extends State<WeatherAmbience> with SingleTickerProv
 }
 
 class _AmbiencePainter extends CustomPainter {
-  _AmbiencePainter(this.kind, this.t, this.bits, this.wind);
+  _AmbiencePainter(this.kind, this.t, this.bits, this.wind, {this.golden = false, this.night = false});
+  final bool golden, night;
   final _Kind kind;
   final double t;
   final List<({double x, double y, double s})> bits;
@@ -68,6 +72,19 @@ class _AmbiencePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width, h = size.height;
+    // Kleur van de lucht: warme gloed bij zon op/onder, diepblauw 's nachts.
+    if (golden || night) {
+      final sky = golden ? const Color(0xFFFF9F43) : const Color(0xFF3B4A8C);
+      canvas.drawRect(
+        Offset.zero & size,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [sky.withValues(alpha: golden ? 0.16 : 0.12), sky.withValues(alpha: 0)],
+          ).createShader(Offset.zero & size),
+      );
+    }
     switch (kind) {
       case _Kind.sun:
         final pulse = 0.85 + 0.15 * math.sin(t * 2 * math.pi);
@@ -131,5 +148,5 @@ class _AmbiencePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AmbiencePainter old) => old.t != t || old.kind != kind;
+  bool shouldRepaint(covariant _AmbiencePainter old) => old.t != t || old.kind != kind || old.golden != golden || old.night != night;
 }

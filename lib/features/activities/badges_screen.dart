@@ -10,6 +10,7 @@ import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/badges.dart' as bd;
+import '../../shared/art/tilt.dart';
 import '../../shared/widgets.dart';
 import '../challenges/challenges.dart' show challengeMedalsProvider, ChallengeMedal;
 import '../../data/services/run_pause_store.dart';
@@ -257,6 +258,8 @@ class _MedalState extends State<_Medal> with SingleTickerProviderStateMixin {
         child: ClipOval(
           child: Stack(fit: StackFit.expand, children: [
             DecoratedBox(decoration: BoxDecoration(gradient: metal)),
+            // Gekartelde rand, zoals bij een echte munt.
+            CustomPaint(painter: _ReedPainter(deep, light)),
             Padding(
               padding: EdgeInsets.all(size * 0.1),
               child: DecoratedBox(
@@ -272,6 +275,23 @@ class _MedalState extends State<_Medal> with SingleTickerProviderStateMixin {
                 ),
               ),
             ),
+            // Grote medaille: de glans volgt hoe je de telefoon kantelt.
+            if (size >= 100)
+              AnimatedBuilder(
+                animation: Tilt.instance,
+                builder: (_, _) {
+                  final g = Tilt.instance.value;
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(-1.2 + g.dx * 1.4, -1 + g.dy),
+                        end: Alignment(-0.2 + g.dx * 1.4, 1 + g.dy),
+                        colors: [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: 0.32), Colors.white.withValues(alpha: 0)],
+                      ),
+                    ),
+                  );
+                },
+              ),
             AnimatedBuilder(
               animation: _c,
               builder: (_, _) {
@@ -360,6 +380,7 @@ class _MedalShowcaseState extends State<_MedalShowcase> with SingleTickerProvide
               child: CustomPaint(size: const Size(220, 220), painter: _RaysPainter(widget.color)),
             ),
           ),
+        if (b.earned) CustomPaint(size: const Size(220, 190), painter: _RibbonPainter(widget.color)),
         TweenAnimationBuilder<double>(
           tween: Tween(begin: b.earned ? 0 : 1, end: 1),
           duration: const Duration(milliseconds: 1400),
@@ -372,7 +393,21 @@ class _MedalShowcaseState extends State<_MedalShowcase> with SingleTickerProvide
               ..scale(0.7 + 0.3 * t, 0.7 + 0.3 * t),
             child: child,
           ),
-          child: _Medal(badge: b, size: 130, color: widget.color),
+          child: AnimatedBuilder(
+            animation: Tilt.instance,
+            builder: (_, child) {
+              final g = b.earned ? Tilt.instance.value : Offset.zero;
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.0015)
+                  ..rotateX(-g.dy * 0.35)
+                  ..rotateY(g.dx * 0.35),
+                child: child,
+              );
+            },
+            child: _Medal(badge: b, size: 130, color: widget.color),
+          ),
         ),
       ]),
     );
@@ -406,4 +441,61 @@ class _RaysPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RaysPainter old) => old.color != color;
+}
+
+/// Fijne kartels langs de rand van de medaille.
+class _ReedPainter extends CustomPainter {
+  _ReedPainter(this.dark, this.light);
+  final Color dark, light;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.width / 2;
+    final n = (r * 1.6).round().clamp(36, 120);
+    final p1 = Paint()
+      ..color = dark.withValues(alpha: 0.45)
+      ..strokeWidth = 1;
+    final p2 = Paint()
+      ..color = light.withValues(alpha: 0.35)
+      ..strokeWidth = 1;
+    for (var i = 0; i < n; i++) {
+      final a = i / n * 2 * math.pi;
+      final d = Offset(math.cos(a), math.sin(a));
+      canvas.drawLine(c + d * (r * 0.93), c + d * r, i.isEven ? p1 : p2);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ReedPainter old) => old.dark != dark;
+}
+
+/// Lint achter een verdiende medaille.
+class _RibbonPainter extends CustomPainter {
+  _RibbonPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final top = 0.0, join = size.height / 2 - 40;
+    final dark = HSLColor.fromColor(color).withLightness((HSLColor.fromColor(color).lightness - 0.25).clamp(0.0, 1.0)).toColor();
+    for (final (dx, c) in [(-1.0, color), (1.0, dark)]) {
+      final path = Path()
+        ..moveTo(cx + dx * 46, top)
+        ..lineTo(cx + dx * 18, top)
+        ..lineTo(cx - dx * 6, join)
+        ..lineTo(cx + dx * 20, join)
+        ..close();
+      canvas.drawPath(path, Paint()..color = c.withValues(alpha: 0.9));
+      // Streep in het lint.
+      canvas.drawLine(Offset(cx + dx * 32, top), Offset(cx + dx * 7, join),
+          Paint()
+            ..color = Colors.white.withValues(alpha: 0.35)
+            ..strokeWidth = 3);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RibbonPainter old) => old.color != color;
 }

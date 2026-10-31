@@ -123,10 +123,18 @@ class _Cell extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: ExcludeSemantics(
-                  child: Text(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Flexible(
+                      child: FittedBox(
+                        child: Icon(t == null ? Icons.star_rounded : bingoIcon(t.id),
+                            size: 26, color: done ? color : RwColors.subtle.withValues(alpha: 0.8)),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
                     label,
                     textAlign: TextAlign.center,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
@@ -136,6 +144,7 @@ class _Cell extends StatelessWidget {
                       color: done ? RwColors.text : RwColors.muted,
                     ),
                   ),
+                  ]),
                 ),
               ),
             ),
@@ -147,3 +156,26 @@ class _Cell extends StatelessWidget {
     );
   }
 }
+
+/// Plaatje per bingo-opdracht.
+IconData bingoIcon(String id) => switch (id) {
+      'dark' => Icons.nights_stay_outlined,
+      'wind' => Icons.air,
+      'cold' => Icons.ac_unit,
+      'warm' => Icons.wb_sunny_outlined,
+      'ten' => Icons.straighten,
+      'long' => Icons.timer_outlined,
+      'short' => Icons.loop,
+      'week3' => Icons.calendar_view_week_outlined,
+      'weekend' => Icons.free_breakfast_outlined,
+      'early' => Icons.alarm,
+      'evening' => Icons.bedtime_outlined,
+      'twoDays' => Icons.repeat,
+      'newRoute' => Icons.explore_outlined,
+      'climb' => Icons.terrain_outlined,
+      'photo' => Icons.photo_camera_outlined,
+      'top' => Icons.sentiment_very_satisfied_outlined,
+      'wise' => Icons.auto_awesome_outlined,
+      'hr' => Icons.favorite_border,
+      _ => Icons.directions_run,
+    };

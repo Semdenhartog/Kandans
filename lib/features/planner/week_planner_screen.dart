@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../shared/art/weather_icon.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -214,6 +215,10 @@ class _DayCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: Row(
         children: [
+          if (e != null) ...[
+            AnimatedWeatherIcon(code: e.weather.weatherCode, day: e.weather.isDay, size: 34),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
