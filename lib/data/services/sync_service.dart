@@ -606,7 +606,7 @@ class _PendingUploader implements PendingRunUploader {
     if (streams == null) return;
     await repo.setActivityStreams(id, streams, bestEfforts: run.bestEfforts);
     if (run.activity.hasTrack) repo.improveElevation(id, streams).ignore();
-    maybeAutoUploadToStrava(id).ignore();
+    _ref.read(syncServiceProvider).maybeAutoUploadToStrava(id).ignore();
   }
 
   @override
