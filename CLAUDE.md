@@ -40,6 +40,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   - `geheimen.yml`: geheimen-scan.
   - `site.yml`: zet `site/` op GitHub Pages (https://semdenhartog.github.io/Kandans/ — hoofdletter K), vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in. Links in `site/` zijn relatief.
+- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.4. Aanmelden vraagt 16+ en akkoord (versies in user metadata).
+  Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
+  Site gebruikt eigen lettertypes (`site/fonts.css`) en Leaflet uit `site.yml` (geen Google Fonts/unpkg → geen cookiebanner nodig).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live. Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
