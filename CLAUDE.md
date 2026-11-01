@@ -39,7 +39,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   - `site.yml`: zet `site/` op GitHub Pages (https://semdenhartog.github.io/Kandans/ — hoofdletter K), vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in. Links in `site/` zijn relatief.
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0036** staan live. Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live. Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Gratis kaartdata: PDOK-tegels, Overpass (eerst één server, na 4 s reserve), openrouteservice, Open-Meteo, Buienradar.
@@ -86,6 +86,11 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Tekeningen/animaties (eigen, geen pakketten) in `lib/shared/art/`: landschap (seizoenen), weericonen, zonneboog, lopend figuur,
   oefenfiguren (`motionFor(naam)`), uitleg-animatie, seizoensplaatje, kantelen (`Tilt`). Avatars/omslag Samen: `community/runner_avatar.dart` (0036).
   Fotomuur `activities/photo_wall_screen.dart`. Play Store-plaatjes + promovideo: `.github/scripts/store_screens.py` / `store_video.sh`.
+- Valdetectie `domain/fall_detector.dart` + recorder (`fallCountdown`, `record/fall_alert.dart`); live-pagina toont `alert`, aanmoedigen
+  via POST op functie `live-share` (`live_cheers`, 0037). Donker-route: `compareForDark` in `domain/lighting.dart`.
+- Stukken `domain/segments.dart` + `data/services/segment_store.dart` + `activities/segments_screen.dart`. Runtitel `domain/run_title.dart`.
+  Pijntjes-routine `domain/pain_routine.dart`. Samen-extra's (loopmaatjes, weddenschappen, loopgroepen): `community/together_screens.dart`,
+  `data/services/together_service.dart`, SQL 0037. Snelkoppeling `runwise://app/moment` (`core/voice_shortcut.dart`, `android_extra/res/xml/shortcuts.xml`).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`

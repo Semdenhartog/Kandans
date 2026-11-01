@@ -28,6 +28,7 @@ import 'hindsight_card.dart';
 import 'hydration_card.dart';
 import 'hrr_card.dart';
 import 'markers_card.dart';
+import 'segments_screen.dart' show SegmentEffortsCard;
 import 'photos_card.dart';
 import 'elevation_card.dart';
 import 'splits_card.dart';
@@ -349,6 +350,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             KeyedSubtree(key: _sectionKey(a, 'hoogte'), child: ElevationCard(activity: a)),
           ],
           if (a.id != null && a.source == 'runwise') MarkersCard(activity: a),
+          if (a.id != null && a.source == 'runwise') SegmentEffortsCard(activity: a),
           if (a.id != null) ...[
             const SizedBox(height: 12),
             PhotosCard(activity: a),

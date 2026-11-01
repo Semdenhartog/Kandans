@@ -2,15 +2,17 @@
 // Publiek leesadres voor "live locatie delen". De kijker heeft alleen het geheime
 // token uit de link; zonder token is niets op te vragen.
 //
-//   GET ?t=<token>  ->  { name, active, started_at, expires_at, ended_at, last, trail }
+//   GET  ?t=<token>                          ->  { name, active, started_at, expires_at, ended_at, last, trail, alert }
+//   POST { t, kind, name? }  (aanmoedigen)   ->  { ok: true }   kind: hup | top | bijna | trots
 //
-// Schrijven doet de app zelf (met Row Level Security). Deze functie leest alleen.
+// Locatie schrijven doet de app zelf (met Row Level Security). Kijkers kunnen alleen aanmoedigen:
+// hooguit één keer per 20 seconden per run, en alleen zolang de run live is.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
 function json(status: number, body: Record<string, unknown>) {
@@ -26,14 +28,15 @@ const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
-  if (req.method !== "GET") return json(405, { error: "Alleen GET is toegestaan." });
+  if (req.method === "POST") return cheer(req);
+  if (req.method !== "GET") return json(405, { error: "Alleen GET en POST zijn toegestaan." });
 
   const token = new URL(req.url).searchParams.get("t") ?? "";
   if (!/^[A-Za-z0-9]{24,64}$/.test(token)) return json(404, { error: "Deze link bestaat niet (meer)." });
 
   const { data: share, error } = await db
     .from("live_shares")
-    .select("id, display_name, started_at, expires_at, ended_at, last_lat, last_lon, last_accuracy, last_at")
+    .select("id, display_name, started_at, expires_at, ended_at, last_lat, last_lon, last_accuracy, last_at, alert, alert_at")
     .eq("token", token)
     .maybeSingle();
   if (error) {
@@ -71,5 +74,44 @@ Deno.serve(async (req) => {
       ? { lat: share.last_lat, lon: share.last_lon, accuracy: share.last_accuracy, at: share.last_at }
       : null,
     trail,
+    alert: active && share.alert ? { kind: share.alert, at: share.alert_at } : null,
   });
 });
+
+const KINDS = ["hup", "top", "bijna", "trots"];
+
+async function cheer(req: Request): Promise<Response> {
+  let body: Record<string, unknown> = {};
+  try {
+    body = await req.json();
+  } catch {
+    return json(400, { error: "Ongeldig verzoek." });
+  }
+  const token = String(body.t ?? "");
+  const kind = String(body.kind ?? "");
+  const name = String(body.name ?? "").trim().slice(0, 30).replace(/[<>]/g, "");
+  if (!/^[A-Za-z0-9]{24,64}$/.test(token) || !KINDS.includes(kind)) return json(400, { error: "Ongeldig verzoek." });
+
+  const { data: share } = await db
+    .from("live_shares")
+    .select("id, expires_at, ended_at")
+    .eq("token", token)
+    .maybeSingle();
+  if (!share || share.ended_at || Date.parse(share.expires_at) < Date.now()) {
+    return json(404, { error: "De run is niet (meer) live." });
+  }
+  const since = new Date(Date.now() - 20_000).toISOString();
+  const { count } = await db
+    .from("live_cheers")
+    .select("id", { count: "exact", head: true })
+    .eq("share_id", share.id)
+    .gte("created_at", since);
+  if ((count ?? 0) > 0) return json(429, { error: "Even wachten, er is net al aangemoedigd." });
+
+  const { error } = await db.from("live_cheers").insert({ share_id: share.id, kind, from_name: name || null });
+  if (error) {
+    console.error("cheer failed", error.message);
+    return json(500, { error: "Aanmoedigen lukte niet." });
+  }
+  return json(200, { ok: true });
+}

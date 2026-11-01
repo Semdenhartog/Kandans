@@ -10,7 +10,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'kadans_effect_row.dart';
+import '../../core/i18n.dart';
 import '../../core/format.dart';
+import '../../domain/run_title.dart';
 import '../../domain/weather_correction.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
@@ -883,17 +885,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   }
 }
 
-String runTitle(Activity a, {String? routeName}) {
-  if (routeName != null) return routeName;
-  // Opgenomen zonder GPS-spoor en zonder weer: loopband.
-  if (a.source == 'runwise' && !a.hasTrack && a.temperatureCelsius == null) return 'Loopbandrun';
-  final h = a.startedAt.toLocal().hour;
-  if (h < 6) return 'Nachtrun';
-  if (h < 12) return 'Ochtendrun';
-  if (h < 17) return 'Middagrun';
-  if (h < 22) return 'Avondrun';
-  return 'Nachtrun';
-}
+/// Titel van een run: automatisch op weer, moment en afstand (zie [smartTitle]).
+String runTitle(Activity a, {String? routeName}) => smartTitle(a, routeName: routeName, fill: (t, v) => trf(t, v));
 
 class _ActivityTile extends StatelessWidget {
   const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete, this.routeName, this.onRunAgain, this.onShare});

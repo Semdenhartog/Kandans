@@ -70,6 +70,7 @@ import '../../data/services/hrr_store.dart';
 import '../activities/markers_card.dart' show markerIcon;
 import '../activities/photos_card.dart' show PhotosCard;
 import 'earbuds_tile.dart';
+import 'fall_alert.dart';
 import '../challenges/community_screen.dart' show refreshCommunityQuietly;
 import '../../data/services/community_service.dart' show communityServiceProvider;
 
@@ -1051,6 +1052,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   onChanged: (v) => set(() => c = c.copyWith(fuel: v)),
                 ),
                 const EarbudsTile(),
+                const FallDetectTile(),
                 const SizedBox(height: 8),
                 const Text('Spreektempo', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
@@ -2023,7 +2025,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) showMessage(context, 'Je run loopt nog. Stop eerst, of ga met de thuisknop naar een andere app.');
           },
-          child: MediaQuery(
+          child: FallAlertWatcher(child: MediaQuery(
             // Zonmodus: tijdens het lopen alles een maat groter.
             data: _sunMode && started
                 ? MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(MediaQuery.textScalerOf(context).scale(1) * 1.12))
@@ -2153,7 +2155,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             ]),
             ),
           ),
-          ),
+          )),
         );
       },
     );

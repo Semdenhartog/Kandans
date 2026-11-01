@@ -370,3 +370,19 @@ Daarna (zelfde dag, op verzoek):
 - ✅ Oefenfiguur in de krachtroutine opnieuw ontworpen: gouden "tekenpop" met kogelgewrichten, vaste lichtval, op een donker podium
   met spotlicht, gouden vloerlijn en spiegeling; de spier die werkt gloeit warm. Altijd donker-goud (ook in licht thema).
   Schermtest `27b_oefenfiguren` toont alle houdingen naast elkaar.
+
+## Ronde 1 november 2026 – tien gekozen ideeën (17, 18 uit lijst 25; 12, 16, 21, 26, 27, 28, 29, 36 uit lijst 50)
+
+1. ✅ **Valdetectie** (opnemen, standaard aan, schakelaar bij de steminstellingen): harde klap + 15 s stil en telefoon niet rechtop →
+   "Gaat het?" met 60 s aftellen, stem en trillen. Geen reactie → melding op de live-pagina (als je live deelt), alarmgeluid en knoppen
+   om je noodcontact of 112 te bellen. Automatisch sms'en kan niet (Google Play staat sms-rechten hiervoor niet toe).
+2. ✅ **Donker-route** (Route maken): schakelaar die vanzelf aan staat rond/na zonsondergang; vraagt 5 rondjes en sorteert op % verlicht (OSM).
+3. ✅ **Krachtroutine op maat**: bovenaan Kracht en in Pijntjes een routine voor je pijntjes van de laatste 2 weken.
+4. ✅ **Eigen stukken** (Mijn records → Stukken): vaste stukken uit je laatste 40 eigen opnames, record per stuk; in het rundetail je tijden + "Nieuw record!".
+5. ✅ **Automatische runtitel**: weer, licht en bijzondere dagen ("Stormrondje", "Rondje bos bij zonsopkomst", "Oudejaarsrun").
+6. ✅ **Loopmaatjes** (Samen → Loopmaatjes): zelf aanzetten; plek afgerond op ± 5 km, tempo en momenten uit eigen runs (geen Strava).
+7. ✅ **Live aanmoedigen**: knoppen op de live-pagina; de loper hoort "Anna moedigt je aan: Hup!" (hooguit 1× per 20 s).
+8. ✅ **Weddenschappen**: wie loopt meer km in 7/14/30 dagen, alleen met wie je volgt/die jou volgt; inzet als tekst.
+9. ✅ **Loopgroepen**: maken of meedoen met een code (max 50), ranglijst week/maand, route van de week (eigenaar kiest).
+10. ✅ **"Wanneer lopen?"**: snelkoppeling (lang drukken op het app-icoon) opent Vandaag en leest het beste moment voor.
+    Een echte vraag aan Google Assistent in het Nederlands ("Hey Google, wanneer kan ik lopen?") is voor gewone apps niet mogelijk.

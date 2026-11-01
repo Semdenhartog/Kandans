@@ -140,6 +140,9 @@ jobs:
                   '        </activity-alias>')
               s = s.replace("</activity>", alias, 1)
               s = s.replace("<queries>", '<queries>\n        <package android:name="com.google.android.apps.healthdata" />', 1)
+          # Snelkoppeling "Wanneer lopen?" (android_extra/res/xml/shortcuts.xml) aan de hoofdactiviteit hangen.
+          if "android.app.shortcuts" not in s:
+              s = s.replace("</activity>", '    <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />\n        </activity>', 1)
           open(p, "w").write(s)
 
           # 1b) Startscherm-widget (bestanden in android_extra/)

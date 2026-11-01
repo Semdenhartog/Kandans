@@ -7,6 +7,8 @@ import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
+import '../../domain/pain_routine.dart';
+import '../activities/strength_screen.dart' show RoutinePlayerScreen;
 import '../../domain/pain_log.dart';
 import '../../shared/widgets.dart';
 
@@ -97,6 +99,18 @@ class PainScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
             ],
+          if (routineForPains(recentPainSpots(history)) case final routine?) ...[
+            const SizedBox(height: 6),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RoutinePlayerScreen(routine: routine))),
+              icon: const Icon(Icons.healing_outlined),
+              label: Text(trf('Oefeningen voor je {plekken} ({min} min)', {
+                'plekken': recentPainSpots(history).map((s) => tr(s.label)).join(', '),
+                'min': (routine.totalSeconds / 60).round(),
+              })),
+            ),
+            const SizedBox(height: 10),
+          ],
           if (history.isNotEmpty) ...[
             const SizedBox(height: 6),
             RwCard(

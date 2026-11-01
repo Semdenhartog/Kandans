@@ -50,6 +50,12 @@ header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));lef
 .runner{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 6px rgba(253,138,38,.3),0 2px 8px rgba(0,0,0,.6)}
 button.follow{pointer-events:auto;margin-left:auto;background:rgba(19,17,14,.9);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
 button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.cheers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.cheers button{flex:1 1 auto;min-width:72px;border:1px solid var(--border);background:var(--surface-high);color:inherit;border-radius:999px;padding:9px 12px;font:600 14px 'DM Sans',sans-serif;cursor:pointer}
+.cheers button:disabled{opacity:.5;cursor:default}
+.cheers button.sent{border-color:#D9BF92;color:#D9BF92}
+.alert{display:none;background:#B42318;color:#fff;padding:12px 20px;font:600 15px 'DM Sans',sans-serif}
+.alert.on{display:block}
 </style>
 </head>
 <body>
@@ -57,6 +63,7 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
   <div class="pill brand"><img src="kadans-mark.png" alt="Kadans"><span class="adans" aria-hidden="true"></span></div>
   <button class="follow" id="follow" aria-pressed="true" type="button">Volgen</button>
 </header>
+<div class="alert" id="alert" role="alert"></div>
 <div id="map" role="region" aria-label="Kaart met de live locatie"></div>
 <div class="panel" id="panel">
   <div class="row"><p class="name" id="name">Laden…</p><span class="status ended" id="status"><span class="dot"></span><span id="statusText">verbinden</span></span></div>
@@ -64,6 +71,12 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
     <div class="stat"><b id="dist">–</b><span>afgelegd</span></div>
     <div class="stat"><b id="time">–</b><span>onderweg</span></div>
     <div class="stat"><b id="seen">–</b><span>laatste update</span></div>
+  </div>
+  <div class="cheers" id="cheers" aria-label="Aanmoedigen">
+    <button data-k="hup">👏 Hup!</button>
+    <button data-k="top">💪 Top bezig</button>
+    <button data-k="bijna">🏁 Bijna!</button>
+    <button data-k="trots">❤️ Trots</button>
   </div>
   <p class="note" id="note">De kaart ververst vanzelf elke 15 seconden.</p>
 </div>
@@ -142,6 +155,16 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
       $('note').textContent = 'De kaart ververst vanzelf elke 15 seconden.';
     }
 
+    var al = $('alert');
+    if (data.active && data.alert && data.alert.kind === 'fall') {
+      al.className = 'alert on';
+      al.textContent = '⚠️ Mogelijk gevallen' + (data.alert.at ? ' (om ' + new Date(data.alert.at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) + ')' : '') +
+        '. De loper reageerde niet. Bel hem of haar, of bel 112 als je geen contact krijgt. De laatste plek staat op de kaart.';
+    } else {
+      al.className = 'alert';
+    }
+    $('cheers').style.display = data.active ? 'flex' : 'none';
+
     line.setLatLngs(trail);
     glow.setLatLngs(trail);
     if (data.last) {
@@ -158,6 +181,28 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
       map.removeLayer(marker); map.removeLayer(accuracy); marker = null;
     }
   }
+
+  // Aanmoedigen: de loper hoort het in zijn oortjes ("Hup van Anna!").
+  var myName = '';
+  try { myName = localStorage.getItem('kadans_cheer_name') || ''; } catch (e) {}
+  document.querySelectorAll('#cheers button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (!myName) {
+        myName = (prompt('Je naam (die hoort de loper):', '') || '').trim().slice(0, 30);
+        try { localStorage.setItem('kadans_cheer_name', myName); } catch (e) {}
+      }
+      var all = document.querySelectorAll('#cheers button');
+      all.forEach(function (x) { x.disabled = true; });
+      fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ t: token, kind: b.dataset.k, name: myName }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          $('note').textContent = res.ok ? 'Verstuurd! De loper hoort het zo.' : (res.j.error || 'Dat lukte niet.');
+          if (res.ok) b.classList.add('sent');
+        })
+        .catch(function () { $('note').textContent = 'Geen verbinding.'; })
+        .finally(function () { setTimeout(function () { all.forEach(function (x) { x.disabled = false; }); }, 20000); });
+    });
+  });
 
   function load() {
     fetch(API + '?t=' + encodeURIComponent(token), { cache: 'no-store' })

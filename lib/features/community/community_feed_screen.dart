@@ -15,6 +15,7 @@ import 'shared_run_card.dart';
 import 'best_moments_text.dart';
 import '../../core/i18n.dart';
 import 'runner_avatar.dart';
+import 'together_screens.dart' show TogetherChips;
 export 'runner_avatar.dart' show RunnerAvatar;
 
 /// "Een uur geleden", "gisteren", of een datum.
@@ -327,6 +328,11 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
             },
           ),
         ),
+        if (!_talk && joined)
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Align(alignment: Alignment.centerLeft, child: TogetherChips()),
+          ),
         if (!_talk)
           SizedBox(
             height: 52,

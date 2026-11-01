@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Snelkoppelingen (lang drukken op het app-icoon; ook te gebruiken met de spraakassistent:
+     "Hey Google, open Wanneer lopen"). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="wanneer_lopen"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_when_short"
+        android:shortcutLongLabel="@string/shortcut_when_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="nl.runwise.runwise"
+            android:targetClass="nl.runwise.runwise.MainActivity"
+            android:data="runwise://app/moment" />
+    </shortcut>
+</shortcuts>

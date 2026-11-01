@@ -4,15 +4,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/poi_service.dart';
 import '../../data/services/route_generator_service.dart';
 import '../../data/services/sync_service.dart';
 import '../../domain/geo.dart';
 import '../../domain/gpx_parser.dart';
+import '../../domain/lighting.dart';
+import '../../domain/run_helpers.dart' show sunTimes;
 import '../../domain/route_direction.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
@@ -22,8 +26,11 @@ import 'route_map_screen.dart';
 
 /// Een voorgesteld rondje met het beste vertrekmoment en de beste looprichting.
 class _Candidate {
-  _Candidate({required this.route, required this.best, required this.directionLabel});
+  _Candidate({required this.route, required this.best, required this.directionLabel, this.lit});
   final RunRoute route;
+
+  /// Aandeel verlicht (0–1), alleen bij de donker-route.
+  final double? lit;
   final StartTimeScore best;
   final String? directionLabel;
 }
@@ -48,6 +55,16 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
 
   bool _busy = false;
   List<_Candidate> _results = const [];
+
+  /// Na zonsondergang: alleen langs verlichte straten. Staat vanzelf aan als het donker is.
+  late bool _dark = _isDarkNow();
+
+  bool _isDarkNow() {
+    final now = DateTime.now();
+    final st = sunTimes(now, 52.1, 5.6);
+    return (st.sunset != null && now.isAfter(st.sunset!.subtract(const Duration(minutes: 30)))) ||
+        (st.sunrise != null && now.isBefore(st.sunrise!));
+  }
   String? _saving;
 
   @override
@@ -131,13 +148,26 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
         startLabel = p.label.split(',').first;
       }
 
-      final loops = await ref.read(routeGeneratorProvider).generate(lat, lon, _targetMeters);
+      final loops = await ref.read(routeGeneratorProvider).generate(lat, lon, _targetMeters, count: _dark ? 5 : 4);
+      // Donker-route: per rondje kijken hoeveel er verlicht is (OpenStreetMap), tegelijk opgevraagd.
+      final lit = <int, double>{};
+      if (_dark) {
+        final poi = ref.read(poiServiceProvider);
+        await Future.wait([
+          for (final (i, l) in loops.indexed)
+            poi
+                .lighting(encodePolyline(l.points))
+                .timeout(const Duration(seconds: 20))
+                .then((v) => lit[i] = litShare(v))
+                .catchError((Object _) => 0.0),
+        ]);
+      }
       final forecast = await ref.read(forecastProvider.future);
       final profile = ref.read(insightsProvider);
       final pace = _pace();
 
       final candidates = <_Candidate>[];
-      for (final loop in loops) {
+      for (final (li, loop) in loops.indexed) {
         _Candidate? bestOfTwo;
         for (final reversed in [false, true]) {
           final pts = reversed ? loop.points.reversed.toList() : loop.points;
@@ -156,6 +186,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
             route: route,
             best: best,
             directionLabel: isLoop(track) ? (signedArea(track) > 0 ? 'linksom' : 'rechtsom') : null,
+            lit: lit[li],
           );
           if (bestOfTwo == null || cand.best.score > bestOfTwo.best.score) bestOfTwo = cand;
         }
@@ -163,6 +194,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
       }
       final target = _targetMeters;
       candidates.sort((a, b) {
+        if (_dark) return compareForDark((lit: a.lit ?? 0, score: a.best.score), (lit: b.lit ?? 0, score: b.best.score));
         final s = b.best.score.compareTo(a.best.score);
         if (s != 0) return s;
         return (a.route.distanceMeters - target).abs().compareTo((b.route.distanceMeters - target).abs());
@@ -308,7 +340,16 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          SwitchListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            secondary: Icon(Icons.light_outlined, color: _dark ? RwColors.accent : RwColors.subtle),
+            title: Text(tr('Donker-route')),
+            subtitle: Text(tr('Zoveel mogelijk langs verlichte straten. Staat vanzelf aan na zonsondergang.')),
+            value: _dark,
+            onChanged: (v) => setState(() => _dark = v),
+          ),
+          const SizedBox(height: 8),
           FilledButton.icon(
             onPressed: _busy ? null : _generate,
             icon: _busy
@@ -403,6 +444,19 @@ class _CandidateCard extends StatelessWidget {
                       'Kleuren op de kaart: de wind om ${Fmt.time(b.start)}',
                       style: TextStyle(color: RwColors.subtle, fontSize: 12),
                     ),
+                    if (candidate.lit != null) ...[
+                      const SizedBox(height: 4),
+                      Row(children: [
+                        Icon(Icons.light_outlined, size: 15, color: candidate.lit! >= 0.7 ? RwColors.good : RwColors.warning),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            trf('{pct}% verlicht', {'pct': (candidate.lit! * 100).round()}),
+                            style: TextStyle(color: candidate.lit! >= 0.7 ? RwColors.good : RwColors.warning, fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ]),
+                    ],
                     if (candidate.directionLabel != null) ...[
                       const SizedBox(height: 4),
                       Text(

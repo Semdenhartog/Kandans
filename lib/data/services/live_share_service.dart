@@ -254,6 +254,38 @@ class LiveShareService {
     }
   }
 
+  DateTime? _lastCheerCheck;
+
+  /// Nieuwe aanmoedigingen van kijkers (hooguit elke 20 s opgehaald). Worden meteen als gehoord gemarkeerd.
+  Future<List<({String? name, String kind})>> newCheers() async {
+    final s = state.value;
+    if (s.shareId == null) return const [];
+    final now = DateTime.now();
+    if (_lastCheerCheck != null && now.difference(_lastCheerCheck!).inSeconds < 20) return const [];
+    _lastCheerCheck = now;
+    try {
+      final rows = await _db.from('live_cheers').select('id, from_name, kind').eq('share_id', s.shareId!).eq('heard', false).order('created_at') as List;
+      if (rows.isEmpty) return const [];
+      final ids = [for (final r in rows.cast<Map<String, dynamic>>()) r['id']];
+      await _db.from('live_cheers').update({'heard': true}).inFilter('id', ids);
+      return [for (final r in rows.cast<Map<String, dynamic>>()) (name: r['from_name'] as String?, kind: r['kind'] as String)];
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Valmelding op de live-pagina zetten of weghalen.
+  Future<void> setFallAlert(bool on) async {
+    final s = state.value;
+    if (s.shareId == null) return;
+    try {
+      await _db.from('live_shares').update({
+        'alert': on ? 'fall' : null,
+        'alert_at': on ? DateTime.now().toUtc().toIso8601String() : null,
+      }).eq('id', s.shareId!);
+    } catch (_) {}
+  }
+
   /// Stopt delen. Je route en locatie worden direct van de server gewist.
   Future<void> stop() async {
     final s = state.value;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'voice_shortcut.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -103,6 +104,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/posters', builder: (c, s) => const PosterOrdersScreen()),
+      // Snelkoppeling "Wanneer lopen?": runwise://app/moment → Vandaag, en het beste moment wordt voorgelezen.
+      GoRoute(
+        path: '/moment',
+        redirect: (c, s) {
+          VoiceShortcut.request();
+          return '/today';
+        },
+      ),
       GoRoute(path: '/shop', builder: (c, s) => const ShopScreen()),
       // Gedeelde route: runwise://app/route-delen?n=<naam>&p=<polyline> (via de pagina route.html).
       GoRoute(path: '/route-delen', builder: (c, s) => RouteImportScreen(params: s.uri.queryParameters)),

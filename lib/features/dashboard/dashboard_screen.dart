@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
+import '../../core/voice_shortcut.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -529,6 +530,12 @@ class _ResultsState extends State<_Results> {
     final verdict = runVerdict(now, best,
         nowAllowed: widget.planner.availability.allows(nowStart, widget.planner.durationMinutes), time: Fmt.time);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (VoiceShortcut.consume()) {
+        final w = verdict.best.weather;
+        RunRecorderService.instance.say(verdict.kind == VerdictKind.goNow
+            ? 'Nu is een goed moment om te lopen: ${(w.feelsLike ?? w.temperature).round()} graden gevoel en wind ${w.windSpeed.round()} kilometer per uur.'
+            : 'Het beste moment is om ${Fmt.time(verdict.best.start)}, met ${(w.feelsLike ?? w.temperature).round()} graden gevoel en wind ${w.windSpeed.round()} kilometer per uur.');
+      }
       HomeWidgetService.instance
           .update(
             label: switch (verdict.kind) { VerdictKind.goNow => 'NU LOPEN', VerdictKind.later => 'BESTE MOMENT', VerdictKind.tough => 'LASTIGE DAG' },

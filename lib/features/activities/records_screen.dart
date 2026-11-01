@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'segments_screen.dart' show openSegments;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,7 +20,9 @@ class RecordsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final records = ref.watch(recordsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mijn records')),
+      appBar: AppBar(title: const Text('Mijn records'), actions: [
+        TextButton.icon(onPressed: () => openSegments(context), icon: const Icon(Icons.timeline), label: Text(tr('Stukken'))),
+      ]),
       body: records.isEmpty
           ? const EmptyState(
               icon: Icons.emoji_events_outlined,

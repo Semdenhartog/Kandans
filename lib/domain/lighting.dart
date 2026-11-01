@@ -91,3 +91,17 @@ double _toSegment(LatLng p, LatLng a, LatLng b) {
   }
   return (lit: lit, unlit: unlit, unknown: unknown);
 }
+
+
+/// Aandeel van de route dat verlicht is (0–1). Onbekend telt als niet verlicht.
+double litShare(({double lit, double unlit, double unknown}) l) {
+  final total = l.lit + l.unlit + l.unknown;
+  return total <= 0 ? 0 : l.lit / total;
+}
+
+/// Volgorde voor de donker-route: eerst de best verlichte (per 10%), daarna de beste score.
+int compareForDark(({double lit, int score}) a, ({double lit, int score}) b) {
+  final la = (a.lit * 10).floor(), lb = (b.lit * 10).floor();
+  if (la != lb) return lb.compareTo(la);
+  return b.score.compareTo(a.score);
+}

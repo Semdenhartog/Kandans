@@ -1,11 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../domain/pain_routine.dart';
+import '../../domain/pain_log.dart';
+import '../../data/repositories/repositories.dart';
+import '../../data/models/models.dart';
 import '../../shared/art/exercise_figure.dart';
 import '../../core/i18n.dart';
 import '../../core/format.dart';
@@ -53,6 +58,7 @@ class StrengthScreen extends StatelessWidget {
               'de stem telt mee, dus je hoeft niet op je scherm te kijken.',
               style: TextStyle(color: RwColors.muted, height: 1.45),
             ),
+            const _PainRoutineCard(),
             for (final cat in RoutineCategory.values) ...[
               const SizedBox(height: 18),
               Text(cat.label, style: TextStyle(fontFamily: RwFonts.display, fontSize: 19, fontWeight: FontWeight.w800, color: RwColors.text)),
@@ -353,4 +359,34 @@ class _CountdownPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CountdownPainter old) => old.f != f || old.color != color;
+}
+
+
+/// Bovenaan: een routine voor je pijntjes van de laatste twee weken (alleen als die er zijn).
+class _PainRoutineCard extends ConsumerWidget {
+  const _PainRoutineCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final runs = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final spots = recentPainSpots(painEntries(runs));
+    final routine = routineForPains(spots);
+    if (routine == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Card(
+        child: ListTile(
+          contentPadding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
+          leading: Icon(Icons.healing_outlined, color: RwColors.accent),
+          title: Text(tr('Voor jouw pijntjes'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(trf('{plekken} · {min} min · op maat van je laatste runs', {
+            'plekken': spots.map((s) => tr(s.label)).join(', '),
+            'min': (routine.totalSeconds / 60).round(),
+          })),
+          trailing: const Icon(Icons.play_circle_outline),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RoutinePlayerScreen(routine: routine))),
+        ),
+      ),
+    );
+  }
 }

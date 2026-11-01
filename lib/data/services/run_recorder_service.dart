@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/fall_detector.dart';
 import '../../domain/geo.dart';
 import '../../core/format.dart';
 import '../../domain/intervals.dart';
@@ -487,6 +489,7 @@ class RunRecorderService {
     if (r == null || !isRecording || r.status == RecorderStatus.idle) return;
     _ticks++;
     _watchdog(r);
+    if (shareLive && _ticks % 20 == 0) _checkCheers().ignore();
     if (_ticks % 5 == 0) _updateNotification(r);
     if (_ticks % 15 == 0) RecordingStore.save(r).ignore();
   }
@@ -676,6 +679,7 @@ class RunRecorderService {
       }
     }
     _startEarbuds();
+    _startFallWatch().ignore();
     view.value = _snapshot();
   }
 
@@ -685,6 +689,111 @@ class RunRecorderService {
     final d = g.distanceAt(moving);
     if (d == null || d <= 0) return null;
     return f.track.at(d);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Valdetectie en aanmoedigingen
+  // ---------------------------------------------------------------------------
+
+  static const fallPrefKey = 'fall_detect';
+
+  /// Seconden tot Kadans alarm slaat na een vermoedelijke val; 0 = alarm geslagen; null = niets aan de hand.
+  final fallCountdown = ValueNotifier<int?>(null);
+  StreamSubscription<AccelerometerEvent>? _accSub;
+  FallDetector? _fall;
+  Timer? _fallTimer;
+  final _sw = Stopwatch();
+
+  Future<void> _startFallWatch() async {
+    final r = _rec;
+    if (r == null || r.indoor || _accSub != null) return;
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (!(p.getBool(fallPrefKey) ?? true)) return;
+      _fall = FallDetector();
+      _sw
+        ..reset()
+        ..start();
+      _accSub = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval).listen((e) {
+        final rec = _rec;
+        if (rec == null || rec.status == RecorderStatus.paused || fallCountdown.value != null) return;
+        if (_fall!.add(_sw.elapsedMilliseconds / 1000, e.x, e.y, e.z)) _suspectFall();
+      }, onError: (Object _) {});
+    } catch (_) {}
+  }
+
+  void _stopFallWatch() {
+    _accSub?.cancel();
+    _accSub = null;
+    _fall = null;
+    _sw.stop();
+    _fallTimer?.cancel();
+    _fallTimer = null;
+    fallCountdown.value = null;
+  }
+
+  void _suspectFall() {
+    if (fallCountdown.value != null) return;
+    fallCountdown.value = 60;
+    Vibration.vibrate(pattern: const [0, 800, 300, 800, 300, 800]).catchError((_) {});
+    _tts ??= FlutterTts();
+    _tts!.speak('Gaat het? Tik op je scherm als alles goed is.', focus: true).catchError((_) => 0);
+    _fallTimer?.cancel();
+    _fallTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      final left = (fallCountdown.value ?? 0) - 1;
+      if (left > 0) {
+        fallCountdown.value = left;
+        if (left % 15 == 0) {
+          Vibration.vibrate(pattern: const [0, 600, 200, 600]).catchError((_) {});
+          _tts?.speak('Gaat het? Tik op je scherm.', focus: true).catchError((_) => 0);
+        }
+        return;
+      }
+      // Geen reactie: alarm.
+      fallCountdown.value = 0;
+      if (shareLive) LiveShareService.instance.setFallAlert(true).ignore();
+      _tts?.speak('Ik geef een waarschuwing door. Hulp nodig? Bel 112.', focus: true).catchError((_) => 0);
+      t.cancel();
+      // Blijf geluid en trillen geven, zodat omstanders het merken (2 minuten).
+      var n = 0;
+      _fallTimer = Timer.periodic(const Duration(seconds: 5), (a) {
+        if (++n > 24 || fallCountdown.value != 0) {
+          a.cancel();
+          return;
+        }
+        SoundService.instance.play(RwSound.interval).ignore();
+        Vibration.vibrate(pattern: const [0, 1000, 300, 1000]).catchError((_) {});
+      });
+    });
+  }
+
+  /// "Het gaat goed": alles terugzetten.
+  void fallOk() {
+    final wasAlarm = fallCountdown.value == 0;
+    _fallTimer?.cancel();
+    _fallTimer = null;
+    fallCountdown.value = null;
+    _fall?.reset();
+    if (wasAlarm && shareLive) LiveShareService.instance.setFallAlert(false).ignore();
+    _say('Fijn. We gaan verder.');
+  }
+
+  /// Voor tests en de knop "Test valmelding".
+  void simulateFall() => _suspectFall();
+
+  Future<void> _checkCheers() async {
+    final cheers = await LiveShareService.instance.newCheers();
+    for (final c in cheers.take(3)) {
+      final what = switch (c.kind) {
+        'top' => 'Top bezig!',
+        'bijna' => 'Bijna!',
+        'trots' => 'Trots op je!',
+        _ => 'Hup!',
+      };
+      final who = (c.name ?? '').trim();
+      _buzz(const [0, 80, 60, 80]);
+      _say(who.isEmpty ? 'Iemand moedigt je aan: $what' : '$who moedigt je aan: $what');
+    }
   }
 
   /// Knop op je oortjes: één druk = pauze/verder, twee keer = ronde.
@@ -1096,6 +1205,7 @@ class RunRecorderService {
   /// Stopt de opname en geeft de run terug om op te slaan (of null als er niets is).
   Future<RunRecording?> stop() async {
     MediaButtonService.instance.stop().ignore();
+    _stopFallWatch();
     SoundService.instance.play(RwSound.finish).ignore();
     MetronomeService.instance.stop().ignore();
     final r = _rec;
@@ -1161,6 +1271,7 @@ class RunRecorderService {
       await _configureTts();
     }
     _startEarbuds();
+    _startFallWatch().ignore();
     view.value = _snapshot();
   }
 

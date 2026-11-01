@@ -57,13 +57,13 @@ class RouteGeneratorService {
   }
 
   /// Vraagt een paar rondjes van ongeveer [distanceMeters] aan vanaf het startpunt.
-  Future<List<GeneratedLoop>> generate(double lat, double lon, double distanceMeters) async {
+  Future<List<GeneratedLoop>> generate(double lat, double lon, double distanceMeters, {int count = 4}) async {
     try {
       final res = await _db.functions.invoke('route-generator', body: {
         'lat': lat,
         'lon': lon,
         'distance_m': distanceMeters.round(),
-        'count': 4,
+        'count': count,
       });
       final routes = ((res.data as Map)['routes'] as List).cast<Map>();
       return [
