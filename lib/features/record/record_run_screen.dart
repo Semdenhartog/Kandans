@@ -3122,6 +3122,11 @@ class _VoicePickerState extends State<_VoicePicker> {
     return 'Stem ${i + 1} · $region · $q${v.network ? ' · alleen met internet' : ''}';
   }
 
+  Future<void> _test() async {
+    final msg = await KadansVoice.instance.check();
+    if (mounted) showMessage(context, msg, error: msg != 'De Kadans-stem werkt.');
+  }
+
   Future<void> _pick(({String name, String locale})? v) async {
     HapticFeedback.selectionClick();
     setState(() {});
@@ -3157,9 +3162,18 @@ class _VoicePickerState extends State<_VoicePicker> {
           await KadansVoice.instance.setEnabled(v);
           if (!mounted) return;
           setState(() => _kadans = v);
-          if (v) _svc.say(_sample);
+          if (v) _test();
         },
       ),
+      if (_kadans)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.record_voice_over_outlined, size: 18),
+            label: const Text('Test de Kadans-stem'),
+            onPressed: _test,
+          ),
+        ),
       const Divider(height: 1),
       ListTile(
         contentPadding: EdgeInsets.zero,

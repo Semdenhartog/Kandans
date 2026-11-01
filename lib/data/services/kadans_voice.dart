@@ -101,12 +101,44 @@ class KadansVoice {
       await f.writeAsBytes(bytes, flush: true);
       return f;
     } on FunctionException catch (e) {
-      // Niet ingesteld: een paar uur niet meer proberen. Andere fout (credits op, storing): 10 minuten.
-      _pauseUntil = DateTime.now().add(e.status == 503 ? const Duration(hours: 6) : const Duration(minutes: 10));
+      // Niet ingesteld, credits op of storing: 2 minuten de telefoonstem, daarna opnieuw proberen.
+      _pauseUntil = DateTime.now().add(const Duration(minutes: 2));
       return null;
     } catch (_) {
       // Geen internet of te traag: deze zin met de telefoonstem, de volgende probeert het opnieuw.
       return null;
+    }
+  }
+
+  /// Test de Kadans-stem (zonder cache) en zegt in gewone woorden wat er aan de hand is. Speelt hem af als het werkt.
+  Future<String> check() async {
+    _pauseUntil = null;
+    try {
+      final res = await Supabase.instance.client.functions
+          .invoke('tts', body: {'text': 'Hoi, dit is de Kadans-stem.'})
+          .timeout(const Duration(seconds: 10));
+      final data = res.data;
+      final bytes = data is Uint8List ? data : (data is List<int> ? Uint8List.fromList(data) : null);
+      if (bytes == null || bytes.isEmpty) return 'De Kadans-stem gaf geen geluid terug.';
+      final f = File('${(await _dir()).path}/check.mp3');
+      await f.writeAsBytes(bytes, flush: true);
+      await _play(f);
+      return 'De Kadans-stem werkt.';
+    } on FunctionException catch (e) {
+      final d = e.details;
+      final reason = d is Map ? '${d['reason'] ?? ''}' : '';
+      if (e.status == 503) return 'Nog niet ingesteld: zet ELEVENLABS_API_KEY in Supabase (Edge Functions → Secrets).';
+      if (e.status == 404) return 'De stemfunctie staat nog niet op de server.';
+      if (e.status == 401) return 'Log opnieuw in en probeer het nog eens.';
+      return switch (reason) {
+        'key' => 'De ElevenLabs-sleutel klopt niet. Maak een nieuwe en zet hem opnieuw in Supabase.',
+        'permissions' => 'De sleutel mag geen spraak maken: zet "Text to Speech" aan bij de sleutel in ElevenLabs.',
+        'quota' => 'Je ElevenLabs-credits zijn op voor deze maand. Je hoort nu de telefoonstem.',
+        'voice' => 'Deze stem werkt niet met je ElevenLabs-plan. Kies een andere stem (ELEVENLABS_VOICE_ID).',
+        _ => 'ElevenLabs gaf een fout (${d is Map ? d['status'] : e.status}). Je hoort nu de telefoonstem.',
+      };
+    } catch (_) {
+      return 'Geen verbinding met de Kadans-stem. Controleer je internet.';
     }
   }
 

@@ -48,23 +48,39 @@ Deno.serve(async (req) => {
   if (!text) return json(400, { error: "Geen tekst." });
   if (text.length > MAX_CHARS) return json(400, { error: "Tekst te lang." });
 
-  const voice = env("ELEVENLABS_VOICE_ID") || "pb6qe8wKy786fK6M05tq";
+  // Eerst de gekozen stem; lukt die niet (bijv. bibliotheekstem niet toegestaan op het gratis plan),
+  // dan "Marvin" (Nederlands, in het account) en als laatste de standaardstem "George".
+  const voices = [env("ELEVENLABS_VOICE_ID") || "pb6qe8wKy786fK6M05tq", "XWw6BayktH5jsnELw9Bc", "JBFqnCBsd6RMkjVDRZzb"];
   const model = env("ELEVENLABS_MODEL") || "eleven_flash_v2_5";
-  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}?output_format=mp3_44100_64`, {
-    method: "POST",
-    headers: { "xi-api-key": apiKey, "Content-Type": "application/json", Accept: "audio/mpeg" },
-    body: JSON.stringify({
-      text,
-      model_id: model,
-      language_code: "nl",
-      voice_settings: { stability: 0.55, similarity_boost: 0.75, speed: 1.0 },
-    }),
-  });
-  if (!res.ok) {
-    // Bijv. credits op (401/402/429): de app gebruikt dan de telefoonstem.
-    const detail = (await res.text().catch(() => "")).slice(0, 200);
-    console.error("elevenlabs", res.status, detail);
-    return json(502, { error: "De Kadans-stem is even niet beschikbaar.", status: res.status });
+  let res: Response | null = null;
+  let lastStatus = 0;
+  let lastDetail = "";
+  for (const voice of [...new Set(voices)]) {
+    res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}?output_format=mp3_44100_64`, {
+      method: "POST",
+      headers: { "xi-api-key": apiKey, "Content-Type": "application/json", Accept: "audio/mpeg" },
+      body: JSON.stringify({
+        text,
+        model_id: model,
+        language_code: "nl",
+        voice_settings: { stability: 0.55, similarity_boost: 0.75, speed: 1.0 },
+      }),
+    });
+    if (res.ok) break;
+    lastStatus = res.status;
+    lastDetail = (await res.text().catch(() => "")).slice(0, 300);
+    console.error("elevenlabs", voice, res.status, lastDetail);
+    // Sleutel ongeldig of credits op: een andere stem helpt niet.
+    if (res.status === 401 || res.status === 429 || /quota|credits/i.test(lastDetail)) break;
+    res = null;
+  }
+  if (!res || !res.ok) {
+    let reason = "unknown";
+    if (lastStatus === 401 && /missing_permissions|permission/i.test(lastDetail)) reason = "permissions";
+    else if (lastStatus === 401) reason = "key";
+    else if (lastStatus === 429 || /quota|credits/i.test(lastDetail)) reason = "quota";
+    else if (/voice/i.test(lastDetail)) reason = "voice";
+    return json(502, { error: "De Kadans-stem is even niet beschikbaar.", status: lastStatus, reason });
   }
   const audio = new Uint8Array(await res.arrayBuffer());
   return new Response(audio, {
