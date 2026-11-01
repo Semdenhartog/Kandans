@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
 import '../../core/i18n.dart';
+import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
@@ -461,7 +462,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
   }
 
   Future<void> _pickRoute() async {
-    final routes = ref.read(routesProvider).value ?? await ref.read(routesProvider.future);
+    final List<RunRoute> routes = ref.read(routesProvider).value ?? await ref.read(routesProvider.future) ?? const [];
     if (!mounted) return;
     final r = await showModalBottomSheet<RunRoute>(
       context: context,

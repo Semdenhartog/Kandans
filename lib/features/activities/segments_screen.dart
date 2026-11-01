@@ -31,7 +31,7 @@ class _SegmentsScreenState extends ConsumerState<SegmentsScreen> {
   Future<void> _scan() async {
     setState(() => _progress = 0);
     try {
-      final runs = ref.read(activitiesProvider).value ?? await ref.read(activitiesProvider.future);
+      final List<Activity> runs = ref.read(activitiesProvider).value ?? await ref.read(activitiesProvider.future) ?? const [];
       await SegmentStore.scan(ref.read(repositoryProvider), runs, progress: (p) {
         if (mounted) setState(() => _progress = p);
       });
