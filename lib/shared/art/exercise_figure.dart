@@ -131,7 +131,7 @@ _Pose _poseFor(Motion m, double p) {
       q.hip = Offset(0.05, hy);
       q.torso = -math.acos(((0.035 - hy) / _torsoL).clamp(-1.0, 1.0));
       q.foot = [const Offset(0.36, 0.0), const Offset(0.33, 0.0)];
-      q.hand = [const Offset(-0.12, 0.0), const Offset(-0.1, 0.0)];
+      q.hand = [const Offset(0.02, 0.0), const Offset(0.0, 0.0)];
     case Motion.plank:
       q.lying = true;
       q.hip = Offset(0, 0.25 + 0.008 * s);
@@ -219,13 +219,13 @@ _Body _solve(_Pose q) {
   } else {
     // Zet de standvoet op de grond.
     final i = q.plant;
-    final low = math.min(toeRel[i].dy, ankleRel[i].dy);
-    hip = Offset(q.plantX, -low + 0.035 + q.air);
+    final low = math.min(toeRel[i].dy - 0.017, ankleRel[i].dy - 0.026);
+    hip = Offset(q.plantX, -low + q.air);
   }
   final knee = <Offset>[], ankle = <Offset>[], toe = <Offset>[];
   for (var i = 0; i < 2; i++) {
     if (q.foot[i] != null) {
-      final target = q.foot[i]! + const Offset(0, 0.035);
+      final target = q.foot[i]! + const Offset(0, 0.026);
       final k = _ik(hip, target, _thighL, _shinL, 1);
       knee.add(k);
       ankle.add(target);
@@ -242,7 +242,7 @@ _Body _solve(_Pose q) {
   final elbow = <Offset>[], hand = <Offset>[];
   for (var i = 0; i < 2; i++) {
     if (q.hand[i] != null) {
-      final target = q.hand[i]! + const Offset(0, 0.01);
+      final target = q.hand[i]! + const Offset(0, 0.021);
       final e = _ik(shoulder, target, _upperL, _foreL, 1);
       elbow.add(e);
       hand.add(target);
@@ -264,14 +264,14 @@ class ExercisePainter extends CustomPainter {
 
   // Vaste kleuren: dit podium is altijd donker-goud (zoals Premium), in licht én donker thema.
   static const _bgTop = Color(0xFF1E1913), _bgBottom = Color(0xFF0A0908);
-  static const _hi = Color(0xFFFBF0D2), _base = Color(0xFFCFAA62), _shade = Color(0xFF6B4E22);
-  static const _farHi = Color(0xFFB59457), _farBase = Color(0xFF8A6B37), _farShade = Color(0xFF3E2D14);
+  static const _hi = Color(0xFFF2DFB3), _base = Color(0xFFD0AB66), _shade = Color(0xFF8A6630);
+  static const _farHi = Color(0xFFA88A52), _farBase = Color(0xFF85683A), _farShade = Color(0xFF4A3619);
   static const _glow = Color(0xFFFF9F43);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final unit = size.height * 0.78;
-    final gy = size.height * 0.86;
+    final unit = size.height * 0.8;
+    final gy = size.height * 0.87;
     final cx = size.width / 2;
     final q = _poseFor(motion, phase);
     final b = _solve(q);
@@ -368,7 +368,8 @@ class ExercisePainter extends CustomPainter {
     }
     final n = Offset(-d.dy / len, d.dx / len);
     // Kant naar het licht (boven/links op het scherm).
-    final lit = (n.dy < 0 || (n.dy == 0 && n.dx < 0)) ? n : -n;
+    const light = Offset(-0.6, -0.8);
+    final lit = (n.dx * light.dx + n.dy * light.dy) >= 0 ? n : -n;
     final mid = Offset.lerp(a, b, 0.5)!;
     final rm = (ra + rb) / 2;
     final hi = far ? _farHi : _hi, base = far ? _farBase : _base, sh = far ? _farShade : _shade;
@@ -376,8 +377,8 @@ class ExercisePainter extends CustomPainter {
       ..isAntiAlias = true
       ..shader = LinearGradient(
         colors: reflection ? [base, sh] : [hi, base, sh],
-        stops: reflection ? null : const [0.0, 0.45, 1.0],
-      ).createShader(Rect.fromPoints(mid + lit * rm * 1.1, mid - lit * rm * 1.1));
+        stops: reflection ? null : const [0.0, 0.5, 1.0],
+      ).createShader(Rect.fromPoints(mid + lit * rm * 1.3, mid - lit * rm * 1.3));
     final path = Path()
       ..moveTo((a + n * ra).dx, (a + n * ra).dy)
       ..lineTo((b + n * rb).dx, (b + n * rb).dy)
@@ -406,12 +407,34 @@ class ExercisePainter extends CustomPainter {
       canvas.drawCircle(px(b.hand[i]), r(0.021), Paint()..color = far ? _farBase : _base);
     }
 
+    void joint(Offset o, double rad, bool far) {
+      final c = px(o);
+      final rr = r(rad);
+      canvas.drawCircle(
+        c,
+        rr,
+        Paint()
+          ..shader = RadialGradient(
+            center: const Alignment(-0.4, -0.45),
+            colors: far ? const [_farHi, _farBase, _farShade] : const [_hi, _base, _shade],
+            stops: const [0, 0.55, 1],
+          ).createShader(Rect.fromCircle(center: c, radius: rr)),
+      );
+      // Fijne naad rond het gewricht.
+      canvas.drawCircle(c, rr, Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(0.6, rr * 0.08)
+        ..color = (far ? _farShade : _shade).withValues(alpha: 0.55));
+    }
+
     leg(1, true);
+    joint(b.knee[1], 0.034, true);
     arm(1, true);
+    joint(b.elbow[1], 0.024, true);
     // Romp: bekken, buik en borst als één gebeeldhouwde vorm.
     final chest = Offset.lerp(b.hip, b.shoulder, 0.78)!;
-    _limb(canvas, px(b.hip), px(chest), r(0.062), r(0.072), far: false, reflection: reflection);
-    _limb(canvas, px(chest), px(b.shoulder), r(0.072), r(0.05), far: false, reflection: reflection);
+    _limb(canvas, px(b.hip), px(chest), r(0.066), r(0.08), far: false, reflection: reflection);
+    _limb(canvas, px(chest), px(b.shoulder), r(0.08), r(0.052), far: false, reflection: reflection);
     final neckTop = Offset.lerp(b.shoulder, b.head, 0.55)!;
     _limb(canvas, px(b.shoulder), px(neckTop), r(0.025), r(0.022), far: false, reflection: reflection);
     // Hoofd: ovaal, gekanteld met de romp.
@@ -428,8 +451,13 @@ class ExercisePainter extends CustomPainter {
             .createShader(head),
     );
     canvas.restore();
+    joint(b.hip, 0.05, false);
     leg(0, false);
+    joint(b.knee[0], 0.036, false);
+    joint(b.ankle[0], 0.022, false);
+    joint(b.shoulder, 0.036, false);
     arm(0, false);
+    joint(b.elbow[0], 0.025, false);
   }
 
   void _muscleGlow(Canvas canvas, _Body b, Offset Function(Offset) px, double unit) {
