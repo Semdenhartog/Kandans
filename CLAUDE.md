@@ -108,8 +108,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem (TESTFASE, ElevenLabs gratis plan = niet commercieel):** edge function `tts` (geheimen `ELEVENLABS_API_KEY`, optioneel
   `ELEVENLABS_VOICE_ID` standaard Berend `pb6qe8wKy786fK6M05tq`, `ELEVENLABS_MODEL` standaard `eleven_flash_v2_5`) → app
-  `data/services/kadans_voice.dart` (cache per zin op toestel, terugval op telefoonstem). Schakelaar in de stemkeuze bij Opnemen.
+  `data/services/kadans_voice.dart` (cache per zin op toestel, terugval op telefoonstem). Schakelaar + knop "Test de Kadans-stem"
+  (toont de oorzaak bij een fout) in de stemkeuze bij Opnemen. Reservestemmen in `tts`: Marvin, George. Na een fout 2 min pauze.
+  **Nooit twee stemmen tegelijk:** `speak(..., fallback, stopFallback)` zet flutter_tts stil vóór het afspelen, een gestarte zin
+  valt niet meer terug, en `_configureTts` gebruikt `awaitSpeakCompletion(true)`. Sem meldde nog twee stemmen bij "beste looptijd
+  voorlezen"; de fix (commit 6da79f1) is nog niet door Sem bevestigd.
   **Vóór de lancering vervangen of betaald plan nemen** (Sem wil dan een andere stem).
+- Marketing (buiten de repo): Instagram **@kadans.app**. Instagram-skills (`/ig-reel`, `/ig-caption`, `/ig-plan` enz.) en
+  `frontend-design` zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).
@@ -127,6 +133,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Promovideo (`schermen-main/playstore/kadans_promo.mp4`) zelf op YouTube zetten ("niet vermeld") voor de Play Store.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
 - Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium.
+- Na KvK: bedrijfsgegevens (naam, adres, KvK-nummer) invullen in `site/voorwaarden.html` (en versie ophogen).
+- Play Console → verwijder-URL invullen: https://semdenhartog.github.io/Kandans/verwijderen.html
+- Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
+- ElevenLabs-stem vóór de lancering vervangen of betaald plan nemen.
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
   loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
   stukken, live aanmoedigen, kantelen (landschap/medailles), widget, oefenfiguur (gouden tekenpop, schermtest `27b_oefenfiguren`).
