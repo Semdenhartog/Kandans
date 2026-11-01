@@ -22,6 +22,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 5. Werk op branch `ai-coach`; merge naar `main` pas als de build groen is. Elke push naar main maakt een APK
    (release "laatste": https://github.com/Semdenhartog/Runwise/releases/download/laatste/runwise.apk).
    Sem wil pas een nieuwe APK als een wijziging af is. Alleen tekst/docs: commit met `[skip ci]`.
+   Let op: staat een `[skip ci]`-commit **bovenaan** bij een merge naar main, dan wordt er géén APK gebouwd → zet er dan
+   een lege commit zonder `[skip ci]` achter.
 6. Commit-regels eindigen met `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` en de
    `Claude-Session:`-link van de **huidige** sessie.
 
@@ -42,6 +44,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live. Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
+- Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
+  starten met `-o '-p 5499 -k /tmp/pgt'`), met kleine stubs voor `auth.uid()`, `community_profiles` e.d.
+- Bewuste keuzes: geen sms-rechten (Google Play staat ze voor valmeldingen niet toe), geen "Hey Google"-vragen in het Nederlands
+  (niet mogelijk voor gewone apps; wel snelkoppeling), geen eigen profielfoto's in Samen (zou moderatie vragen).
 - Gratis kaartdata: PDOK-tegels, Overpass (eerst één server, na 4 s reserve), openrouteservice, Open-Meteo, Buienradar.
 
 ## Codekaart (graphify) – eerst kijken, dan pas bestanden lezen
@@ -104,10 +110,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Gouden K van het marmerlogo in de app vervangen door de nieuwe K, als Sem dat wil.
 - Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes en uploaden (`activity:write`).
-- Play Console → gegevensveiligheid: agenda (alleen op toestel, niet gedeeld) toevoegen.
+- Play Console → gegevensveiligheid: agenda (alleen op toestel, niet gedeeld) en afgeronde locatie voor loopmaatjes
+  (alleen als de gebruiker het aanzet) toevoegen.
+- Promovideo (`schermen-main/playstore/kadans_promo.mp4`) zelf op YouTube zetten ("niet vermeld") voor de Play Store.
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
 - Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium.
-- Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes, Samen.
+- Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
+  loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
+  stukken, live aanmoedigen, kantelen (landschap/medailles), widget, oefenfiguur (gouden tekenpop, schermtest `27b_oefenfiguren`).
 
 ## Agent skills
 - Issues: GitHub Issues van `Semdenhartog/Kandans` (via `gh`), zie `docs/agents/issue-tracker.md`.
