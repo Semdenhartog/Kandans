@@ -325,6 +325,7 @@ class RunRecorderService {
       if (choice != null) await t.setVoice({'name': choice.name, 'locale': choice.locale});
       // Achter elkaar uitspreken in plaats van elkaar af te kappen, en muziek even zachter zetten.
       await t.setQueueMode(1);
+      await t.awaitSpeakCompletion(true);
       await t.setAudioAttributesForNavigation();
     } catch (_) {}
   }
@@ -1086,8 +1087,12 @@ class RunRecorderService {
   void _say(String text) {
     if (!voice) return;
     // Testfase: eerst de Kadans-stem (ElevenLabs); lukt dat niet, dan de telefoonstem.
-    KadansVoice.instance.speak(text, (t) {
-      _ensureTts().then((_) => _tts?.speak(t, focus: true)).catchError((Object _) => null);
+    KadansVoice.instance.speak(text, (t) async {
+      // Wacht tot de telefoonstem klaar is (awaitSpeakCompletion), zodat de volgende zin er niet doorheen praat.
+      try {
+        await _ensureTts();
+        await _tts?.speak(t, focus: true).timeout(const Duration(seconds: 20));
+      } catch (_) {}
     });
   }
 

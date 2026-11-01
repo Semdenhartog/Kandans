@@ -11,7 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 ///
 /// Elke zin wordt opgehaald, op de telefoon bewaard (dezelfde zin kost dus maar één keer) en afgespeeld.
 /// Lukt dat niet (geen internet, geen sleutel, credits op, te traag), dan valt hij stil terug op de telefoonstem.
-/// Zinnen blijven in volgorde: de volgende wacht tot de vorige klaar is.
+/// Zinnen blijven in volgorde en praten nooit door elkaar: de volgende wacht tot de vorige (Kadans- of telefoonstem) klaar is.
 class KadansVoice {
   KadansVoice._();
   static final instance = KadansVoice._();
@@ -45,25 +45,26 @@ class KadansVoice {
   }
 
   /// Spreekt [text] uit met de Kadans-stem; lukt dat niet, dan met [fallback] (de telefoonstem).
-  void speak(String text, void Function(String text) fallback) {
+  void speak(String text, Future<void> Function(String text) fallback) {
     _chain = _chain.then((_) => _speakOne(text, fallback)).catchError((Object _) {});
   }
 
-  Future<void> _speakOne(String text, void Function(String) fallback) async {
+  Future<void> _speakOne(String text, Future<void> Function(String) fallback) async {
     try {
       final until = _pauseUntil;
       if (!await enabled() || (until != null && DateTime.now().isBefore(until))) {
-        fallback(text);
+        await fallback(text);
         return;
       }
       final file = await _cached(text) ?? await _fetch(text);
       if (file == null) {
-        fallback(text);
+        await fallback(text);
         return;
       }
       await _play(file);
     } catch (_) {
-      fallback(text);
+      // Nooit twee stemmen tegelijk: ook de terugval wacht tot hij klaar is, pas dan de volgende zin.
+      await fallback(text).catchError((Object _) {});
     }
   }
 
