@@ -51,7 +51,7 @@ class _Pose {
   bool lying = false;
 }
 
-const _thighL = 0.245, _shinL = 0.245, _footL = 0.07, _torsoL = 0.3, _upperL = 0.16, _foreL = 0.15, _headR = 0.055;
+const _thighL = 0.245, _shinL = 0.235, _footL = 0.075, _torsoL = 0.29, _upperL = 0.165, _foreL = 0.15, _headR = 0.058;
 
 Offset _down(double a, double l) => Offset(math.sin(a) * l, -math.cos(a) * l); // y omhoog
 Offset _up(double a, double l) => Offset(math.sin(a) * l, math.cos(a) * l);
@@ -220,12 +220,12 @@ _Body _solve(_Pose q) {
     // Zet de standvoet op de grond.
     final i = q.plant;
     final low = math.min(toeRel[i].dy, ankleRel[i].dy);
-    hip = Offset(q.plantX, -low + 0.02 + q.air);
+    hip = Offset(q.plantX, -low + 0.035 + q.air);
   }
   final knee = <Offset>[], ankle = <Offset>[], toe = <Offset>[];
   for (var i = 0; i < 2; i++) {
     if (q.foot[i] != null) {
-      final target = q.foot[i]! + const Offset(0, 0.02);
+      final target = q.foot[i]! + const Offset(0, 0.035);
       final k = _ik(hip, target, _thighL, _shinL, 1);
       knee.add(k);
       ankle.add(target);
@@ -255,78 +255,219 @@ _Body _solve(_Pose q) {
   return _Body(hip, shoulder, head, knee, ankle, toe, elbow, hand);
 }
 
+/// Luxe weergave: een gebeeldhouwd figuur in champagnegoud op een donker podium,
+/// met spotlicht, een spiegelende vloer en een warme gloed op de spier die werkt.
 class ExercisePainter extends CustomPainter {
-  ExercisePainter({required this.motion, required this.phase, required this.color, required this.accent, required this.ground});
+  ExercisePainter({required this.motion, required this.phase});
   final Motion motion;
   final double phase;
-  final Color color, accent, ground;
+
+  // Vaste kleuren: dit podium is altijd donker-goud (zoals Premium), in licht én donker thema.
+  static const _bgTop = Color(0xFF1E1913), _bgBottom = Color(0xFF0A0908);
+  static const _hi = Color(0xFFFBF0D2), _base = Color(0xFFCFAA62), _shade = Color(0xFF6B4E22);
+  static const _farHi = Color(0xFFB59457), _farBase = Color(0xFF8A6B37), _farShade = Color(0xFF3E2D14);
+  static const _glow = Color(0xFFFF9F43);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final unit = size.height * 0.82;
-    final gy = size.height * 0.92;
+    final unit = size.height * 0.78;
+    final gy = size.height * 0.86;
     final cx = size.width / 2;
     final q = _poseFor(motion, phase);
     final b = _solve(q);
     Offset px(Offset o) => Offset(cx + o.dx * unit, gy - o.dy * unit);
 
-    // Grond, schaduw en (soms) een muur.
-    canvas.drawLine(Offset(size.width * 0.06, gy), Offset(size.width * 0.94, gy),
-        Paint()
-          ..color = ground
-          ..strokeWidth = 1.5
-          ..strokeCap = StrokeCap.round);
-    canvas.drawOval(Rect.fromCenter(center: Offset(px(b.hip).dx, gy + 2), width: unit * (q.lying ? 0.7 : 0.32), height: 6),
-        Paint()..color = ground.withValues(alpha: 0.5));
-    if (q.wall) {
-      final wx = px(Offset(math.max(b.hand[0].dx, b.hand[1].dx) + 0.01, 0)).dx;
-      canvas.drawLine(Offset(wx, gy), Offset(wx, gy - unit * 1.05),
-          Paint()
-            ..color = ground
-            ..strokeWidth = 4
-            ..strokeCap = StrokeCap.round);
+    _stage(canvas, size, gy, unit, px(b.hip).dx);
+
+    // Spiegeling in de vloer: het figuur ondersteboven, zacht vervagend.
+    canvas.saveLayer(Rect.fromLTWH(0, gy, size.width, size.height - gy), Paint());
+    canvas.save();
+    canvas.translate(0, gy * 2);
+    canvas.scale(1, -1);
+    _figure(canvas, b, q, px, unit, reflection: true);
+    canvas.restore();
+    canvas.drawRect(
+      Rect.fromLTWH(0, gy, size.width, size.height - gy),
+      Paint()
+        ..blendMode = BlendMode.dstIn
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white.withValues(alpha: 0.22), Colors.white.withValues(alpha: 0)],
+        ).createShader(Rect.fromLTWH(0, gy, size.width, (size.height - gy) * 0.9)),
+    );
+    canvas.restore();
+
+    if (q.wall) _wall(canvas, size, px(Offset(math.max(b.hand[0].dx, b.hand[1].dx) + 0.012, 0)).dx, gy, unit);
+    _figure(canvas, b, q, px, unit);
+    _muscleGlow(canvas, b, px, unit);
+  }
+
+  void _stage(Canvas canvas, Size size, double gy, double unit, double figureX) {
+    final r = Offset.zero & size;
+    canvas.drawRect(r, Paint()..shader = const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [_bgTop, _bgBottom]).createShader(r));
+    // Spotlicht van boven.
+    final cone = Path()
+      ..moveTo(figureX - unit * 0.12, 0)
+      ..lineTo(figureX + unit * 0.12, 0)
+      ..lineTo(figureX + unit * 0.75, gy)
+      ..lineTo(figureX - unit * 0.75, gy)
+      ..close();
+    canvas.drawPath(
+      cone,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFFFFE7B0).withValues(alpha: 0.10), const Color(0xFFFFE7B0).withValues(alpha: 0.02)],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, gy))
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
+    );
+    // Vloer: lichtvlek, gouden rand en een fijne horizon.
+    final floor = Rect.fromCenter(center: Offset(figureX, gy + 2), width: unit * 1.5, height: unit * 0.16);
+    canvas.drawOval(
+      floor,
+      Paint()..shader = RadialGradient(colors: [const Color(0xFFFFE7B0).withValues(alpha: 0.16), const Color(0xFFFFE7B0).withValues(alpha: 0)]).createShader(floor),
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.04, gy),
+      Offset(size.width * 0.96, gy),
+      Paint()
+        ..strokeWidth = 1
+        ..shader = LinearGradient(colors: [
+          const Color(0xFFCFAA62).withValues(alpha: 0),
+          const Color(0xFFCFAA62).withValues(alpha: 0.55),
+          const Color(0xFFCFAA62).withValues(alpha: 0),
+        ]).createShader(Rect.fromLTWH(0, gy, size.width, 1)),
+    );
+    // Contactschaduw onder het figuur.
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(figureX, gy + 1), width: unit * 0.34, height: unit * 0.035),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.55)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    );
+  }
+
+  void _wall(Canvas canvas, Size size, double x, double gy, double unit) {
+    final rect = Rect.fromLTWH(x, gy - unit * 1.05, unit * 0.05, unit * 1.05);
+    canvas.drawRRect(
+      RRect.fromRectAndCorners(rect, topLeft: const Radius.circular(4), topRight: const Radius.circular(4)),
+      Paint()..shader = const LinearGradient(colors: [Color(0xFF3A3024), Color(0xFF1A1611)]).createShader(rect),
+    );
+    canvas.drawLine(rect.topLeft, rect.bottomLeft, Paint()..color = const Color(0xFFCFAA62).withValues(alpha: 0.6)..strokeWidth = 1.2);
+  }
+
+  /// Een ledemaat als taps toelopende, belichte vorm (licht van linksboven).
+  void _limb(Canvas canvas, Offset a, Offset b, double ra, double rb, {required bool far, bool reflection = false}) {
+    final d = b - a;
+    final len = d.distance;
+    if (len < 0.5) {
+      canvas.drawCircle(a, ra, Paint()..color = far ? _farBase : _base);
+      return;
+    }
+    final n = Offset(-d.dy / len, d.dx / len);
+    // Kant naar het licht (boven/links op het scherm).
+    final lit = (n.dy < 0 || (n.dy == 0 && n.dx < 0)) ? n : -n;
+    final mid = Offset.lerp(a, b, 0.5)!;
+    final rm = (ra + rb) / 2;
+    final hi = far ? _farHi : _hi, base = far ? _farBase : _base, sh = far ? _farShade : _shade;
+    final paint = Paint()
+      ..isAntiAlias = true
+      ..shader = LinearGradient(
+        colors: reflection ? [base, sh] : [hi, base, sh],
+        stops: reflection ? null : const [0.0, 0.45, 1.0],
+      ).createShader(Rect.fromPoints(mid + lit * rm * 1.1, mid - lit * rm * 1.1));
+    final path = Path()
+      ..moveTo((a + n * ra).dx, (a + n * ra).dy)
+      ..lineTo((b + n * rb).dx, (b + n * rb).dy)
+      ..arcToPoint(b - n * rb, radius: Radius.circular(rb), clockwise: false)
+      ..lineTo((a - n * ra).dx, (a - n * ra).dy)
+      ..arcToPoint(a + n * ra, radius: Radius.circular(ra), clockwise: false)
+      ..close();
+    // Gekozen draairichting kan per hoek verschillen: vul daarom ook de eindcirkels.
+    canvas.drawPath(path, paint);
+    canvas.drawCircle(a, ra, paint);
+    canvas.drawCircle(b, rb, paint);
+  }
+
+  void _figure(Canvas canvas, _Body b, _Pose q, Offset Function(Offset) px, double unit, {bool reflection = false}) {
+    double r(double v) => v * unit;
+    void leg(int i, bool far) {
+      _limb(canvas, px(b.hip), px(b.knee[i]), r(0.052), r(0.036), far: far, reflection: reflection);
+      _limb(canvas, px(b.knee[i]), px(b.ankle[i]), r(0.036), r(0.022), far: far, reflection: reflection);
+      // Schoen: iets breder bij de hak, slank naar de neus.
+      _limb(canvas, px(b.ankle[i]), px(b.toe[i]), r(0.026), r(0.017), far: far, reflection: reflection);
     }
 
-    final w = (unit / 34).clamp(2.0, 7.0);
-    Paint pen(bool far) => Paint()
-      ..color = far ? color.withValues(alpha: 0.4) : color
-      ..strokeWidth = w
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..style = PaintingStyle.stroke;
-    void chain(List<Offset> pts, bool far) {
-      final path = Path()..moveTo(px(pts.first).dx, px(pts.first).dy);
-      for (final p in pts.skip(1)) {
-        path.lineTo(px(p).dx, px(p).dy);
-      }
-      canvas.drawPath(path, pen(far));
+    void arm(int i, bool far) {
+      _limb(canvas, px(b.shoulder), px(b.elbow[i]), r(0.03), r(0.023), far: far, reflection: reflection);
+      _limb(canvas, px(b.elbow[i]), px(b.hand[i]), r(0.023), r(0.017), far: far, reflection: reflection);
+      canvas.drawCircle(px(b.hand[i]), r(0.021), Paint()..color = far ? _farBase : _base);
     }
 
-    // Verre kant eerst.
-    chain([b.hip, b.knee[1], b.ankle[1], b.toe[1]], true);
-    chain([b.shoulder, b.elbow[1], b.hand[1]], true);
-    chain([b.hip, b.shoulder], false);
-    chain([b.hip, b.knee[0], b.ankle[0], b.toe[0]], false);
-    chain([b.shoulder, b.elbow[0], b.hand[0]], false);
-    canvas.drawCircle(px(b.head), _headR * unit, pen(false));
-    // Accent: de spier die werkt (stip op de knie of heup).
-    final dot = switch (motion) {
-      Motion.calfRaise || Motion.wallStretch => Offset.lerp(b.knee[motion == Motion.wallStretch ? 1 : 0], b.ankle[motion == Motion.wallStretch ? 1 : 0], 0.4)!,
-      Motion.squat || Motion.lunge || Motion.bridge || Motion.hipCircles => b.hip,
-      Motion.plank || Motion.birdDog || Motion.allFours => Offset.lerp(b.hip, b.shoulder, 0.5)!,
-      _ => null,
+    leg(1, true);
+    arm(1, true);
+    // Romp: bekken, buik en borst als één gebeeldhouwde vorm.
+    final chest = Offset.lerp(b.hip, b.shoulder, 0.78)!;
+    _limb(canvas, px(b.hip), px(chest), r(0.062), r(0.072), far: false, reflection: reflection);
+    _limb(canvas, px(chest), px(b.shoulder), r(0.072), r(0.05), far: false, reflection: reflection);
+    final neckTop = Offset.lerp(b.shoulder, b.head, 0.55)!;
+    _limb(canvas, px(b.shoulder), px(neckTop), r(0.025), r(0.022), far: false, reflection: reflection);
+    // Hoofd: ovaal, gekanteld met de romp.
+    final hc = px(b.head);
+    final tilt = math.atan2(px(b.head).dx - px(b.shoulder).dx, -(px(b.head).dy - px(b.shoulder).dy));
+    canvas.save();
+    canvas.translate(hc.dx, hc.dy);
+    canvas.rotate(tilt);
+    final head = Rect.fromCenter(center: Offset.zero, width: r(_headR * 1.8), height: r(_headR * 2.15));
+    canvas.drawOval(
+      head,
+      Paint()
+        ..shader = RadialGradient(center: const Alignment(-0.45, -0.5), radius: 0.95, colors: reflection ? [_base, _shade] : [_hi, _base, _shade], stops: reflection ? null : const [0, 0.5, 1])
+            .createShader(head),
+    );
+    canvas.restore();
+    leg(0, false);
+    arm(0, false);
+  }
+
+  void _muscleGlow(Canvas canvas, _Body b, Offset Function(Offset) px, double unit) {
+    final spots = switch (motion) {
+      Motion.calfRaise || Motion.wallStretch => [Offset.lerp(b.knee[motion == Motion.wallStretch ? 1 : 0], b.ankle[motion == Motion.wallStretch ? 1 : 0], 0.35)!],
+      Motion.squat || Motion.lunge => [Offset.lerp(b.hip, b.knee[0], 0.5)!, b.hip],
+      Motion.bridge || Motion.hipCircles => [b.hip],
+      Motion.plank || Motion.birdDog || Motion.allFours || Motion.dog => [Offset.lerp(b.hip, b.shoulder, 0.45)!],
+      Motion.legSwing || Motion.balance => [b.hip],
+      Motion.armCircles || Motion.jacks => [b.shoulder],
+      Motion.highKnees || Motion.buttKick || Motion.jog || Motion.hop => [Offset.lerp(b.hip, b.knee[0], 0.5)!],
+      Motion.fold => [Offset.lerp(b.hip, b.knee[0], 0.5)!],
+      _ => <Offset>[],
     };
-    if (dot != null) canvas.drawCircle(px(dot), w * 0.9, Paint()..color = accent);
+    final pulse = 0.75 + 0.25 * math.sin(phase * 2 * math.pi);
+    for (final s in spots) {
+      final c = px(s);
+      final rr = unit * 0.11;
+      canvas.drawCircle(
+        c,
+        rr,
+        Paint()
+          ..blendMode = BlendMode.plus
+          ..shader = RadialGradient(colors: [_glow.withValues(alpha: 0.55 * pulse), _glow.withValues(alpha: 0)]).createShader(Rect.fromCircle(center: c, radius: rr)),
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant ExercisePainter old) => old.phase != phase || old.motion != motion || old.color != color;
+  bool shouldRepaint(covariant ExercisePainter old) => old.phase != phase || old.motion != motion;
 }
 
 class ExerciseFigure extends StatefulWidget {
-  const ExerciseFigure({super.key, required this.name, this.color, this.accent, this.ground});
+  const ExerciseFigure({super.key, required this.name, this.label});
   final String name;
-  final Color? color, accent, ground;
+
+  /// Kleine tekst linksboven op het podium (bijvoorbeeld "Hierna").
+  final String? label;
 
   @override
   State<ExerciseFigure> createState() => _ExerciseFigureState();
@@ -336,10 +477,10 @@ class _ExerciseFigureState extends State<ExerciseFigure> with SingleTickerProvid
   late final _c = AnimationController(vsync: this, duration: _durationFor(motionFor(widget.name)));
 
   static Duration _durationFor(Motion m) => switch (m) {
-        Motion.jog || Motion.highKnees || Motion.buttKick || Motion.hop => const Duration(milliseconds: 800),
-        Motion.walk || Motion.jacks => const Duration(milliseconds: 1100),
-        Motion.rest || Motion.fold || Motion.wallStretch || Motion.plank => const Duration(milliseconds: 4200),
-        _ => const Duration(milliseconds: 2200),
+        Motion.jog || Motion.highKnees || Motion.buttKick || Motion.hop => const Duration(milliseconds: 900),
+        Motion.walk || Motion.jacks => const Duration(milliseconds: 1200),
+        Motion.rest || Motion.fold || Motion.wallStretch || Motion.plank => const Duration(milliseconds: 4800),
+        _ => const Duration(milliseconds: 2600),
       };
 
   @override
@@ -368,24 +509,37 @@ class _ExerciseFigureState extends State<ExerciseFigure> with SingleTickerProvid
   }
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return ExcludeSemantics(
-      child: AspectRatio(
-        aspectRatio: 1.25,
-        child: AnimatedBuilder(
-          animation: _c,
-          builder: (_, _) => CustomPaint(
-            painter: ExercisePainter(
-              motion: motionFor(widget.name),
-              phase: _c.value,
-              color: widget.color ?? cs.onSurface,
-              accent: widget.accent ?? cs.primary,
-              ground: widget.ground ?? cs.onSurface.withValues(alpha: 0.2),
+  Widget build(BuildContext context) => ExcludeSemantics(
+        child: AspectRatio(
+          aspectRatio: 1.2,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFFCFAA62).withValues(alpha: 0.35)),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 24, offset: const Offset(0, 10))],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(27),
+              child: Stack(fit: StackFit.expand, children: [
+                RepaintBoundary(
+                  child: AnimatedBuilder(
+                    animation: _c,
+                    builder: (_, _) => CustomPaint(painter: ExercisePainter(motion: motionFor(widget.name), phase: _ease(_c.value))),
+                  ),
+                ),
+                if (widget.label != null)
+                  Positioned(
+                    left: 18,
+                    top: 14,
+                    child: Text(widget.label!.toUpperCase(),
+                        style: const TextStyle(color: Color(0xFFCFAA62), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.6)),
+                  ),
+              ]),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+
+  /// Iets langer stilstaan in de uiterste standen: oogt rustiger en echter.
+  static double _ease(double t) => t - math.sin(t * 4 * math.pi) / (4 * math.pi) * 0.6;
 }

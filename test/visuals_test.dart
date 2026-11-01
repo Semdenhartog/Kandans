@@ -6,7 +6,6 @@ import 'package:runwise/features/community/runner_avatar.dart';
 import 'package:runwise/shared/art/best_moment_demo.dart';
 import 'package:runwise/shared/art/exercise_figure.dart';
 import 'package:runwise/shared/art/landscape.dart';
-import 'package:runwise/shared/art/runner.dart';
 import 'package:runwise/shared/art/sun_arc.dart';
 import 'package:runwise/shared/art/weather_icon.dart';
 
@@ -39,7 +38,6 @@ void main() {
         body: ListView(children: [
           for (final m in [1, 4, 8, 10, 11]) SizedBox(height: 120, child: KadansLandscape(date: DateTime(2026, m, 5))),
           for (final c in [0, 2, 3, 45, 53, 63, 73, 95]) AnimatedWeatherIcon(code: c),
-          const RunnerFigure(),
           SunArc(start: DateTime(2026, 11, 2, 16, 30), minutes: 60, lat: 52.1, lon: 5.6),
         ]),
       ),

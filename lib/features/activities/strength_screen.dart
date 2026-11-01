@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../shared/art/exercise_figure.dart';
+import '../../core/i18n.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/strength.dart';
@@ -199,11 +200,12 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                 child: c == null
                     ? const SizedBox.shrink()
                     : Center(
-                        child: ExerciseFigure(
-                          name: _p.resting ? (n?.name ?? c.name) : c.name,
-                          color: _p.resting ? RwColors.subtle : RwColors.text,
-                          accent: RwColors.accent,
-                          ground: RwColors.border,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: ExerciseFigure(
+                            name: _p.resting ? (n?.name ?? c.name) : c.name,
+                            label: _p.resting ? tr('Hierna') : null,
+                          ),
                         ),
                       ),
               ),

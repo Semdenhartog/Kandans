@@ -12,7 +12,6 @@ import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/i18n.dart';
 import '../../core/theme.dart';
-import '../../shared/art/runner.dart';
 import '../../domain/geo.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
@@ -844,7 +843,7 @@ class _PulseDotState extends State<_PulseDot> with SingleTickerProviderStateMixi
       );
 }
 
-/// Je record als lopend figuurtje op de kaart.
+/// Je record op de kaart: een gouden baken met een vlaggetje.
 class _GhostRunner extends StatelessWidget {
   const _GhostRunner();
 
@@ -854,11 +853,12 @@ class _GhostRunner extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.black.withValues(alpha: 0.45),
-            border: Border.all(color: RwColors.accentLight, width: 2),
+            gradient: const RadialGradient(colors: [Color(0xFFF6E7C1), Color(0xFFC9A15A), Color(0xFF7A5A2A)], stops: [0, 0.6, 1]),
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [BoxShadow(color: const Color(0xFFC9A15A).withValues(alpha: 0.6), blurRadius: 12)],
           ),
-          padding: const EdgeInsets.all(3),
-          child: RunnerFigure(size: 30, color: RwColors.accentLight, speed: 1.2),
+          alignment: Alignment.center,
+          child: const Icon(Icons.emoji_events, size: 16, color: Color(0xFF3A2A12)),
         ),
       );
 }
@@ -971,7 +971,7 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                   MarkerLayer(markers: [
                     if (pts.isNotEmpty) Marker(point: pts.first, width: 28, height: 28, child: _Pin(icon: Icons.flag, color: RwColors.accent)),
                     if (widget.ghost != null)
-                      Marker(point: _ll(widget.ghost!), width: 40, height: 40, rotate: true, child: const _GhostRunner()),
+                      Marker(point: _ll(widget.ghost!), width: 30, height: 30, rotate: true, child: const _GhostRunner()),
                     if (pos != null && !_headingUp) Marker(point: _ll(pos), width: 60, height: 60, child: const _PulseDot(color: Color(0xFF4C8DFF))),
                     if (pos != null && _headingUp)
                       Marker(

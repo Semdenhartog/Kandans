@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:runwise/shared/art/exercise_figure.dart';
 import 'package:runwise/core/supabase.dart';
 import 'package:runwise/features/profile/shoes_screen.dart';
 import 'package:runwise/core/theme.dart';
@@ -579,6 +580,7 @@ void main() {
       }));
   testWidgets('26 kracht', (t) => _shot(t, '26_kracht', const StrengthScreen(), height: 3400));
   testWidgets('27 kracht bezig', (t) => _shot(t, '27_kracht_bezig', RoutinePlayerScreen(routine: Routine.all[1]), height: 915));
+  testWidgets('27b oefenfiguren', (t) => _shot(t, '27b_oefenfiguren', const _ExerciseGallery(), height: 1500));
   testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
   testWidgets('29 premium', (t) => _shot(t, '29_premium', const PaywallScreen(), height: 1300));
   // Nieuwe gebruiker: nog geen runs, routes, schema of coachgesprek. Zo ziet de eerste indruk eruit.
@@ -797,3 +799,29 @@ final Activity _spikeRun = Activity(
   source: 'runwise',
   trackPolyline: encodePolyline([for (final p in (_spikeStreams['ll'] as List)) LatLng((p as List)[0] as double, p[1] as double)]),
 );
+
+
+/// Alle oefenhoudingen naast elkaar (op hun uiterste stand), om het podium-figuur te beoordelen.
+class _ExerciseGallery extends StatelessWidget {
+  const _ExerciseGallery();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: GridView.count(
+          crossAxisCount: 2,
+          padding: const EdgeInsets.all(8),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 1.2,
+          children: [
+            for (final (m, p) in const [
+              (Motion.squat, 0.5), (Motion.lunge, 0.5), (Motion.calfRaise, 0.5), (Motion.bridge, 0.5),
+              (Motion.plank, 0.2), (Motion.dog, 0.5), (Motion.birdDog, 0.5), (Motion.highKnees, 0.25),
+              (Motion.jog, 0.25), (Motion.wallStretch, 0.5), (Motion.legSwing, 0.25), (Motion.armCircles, 0.4),
+              (Motion.balance, 0.3), (Motion.jacks, 0.5), (Motion.fold, 0.5), (Motion.rest, 0.3),
+            ])
+              ClipRRect(borderRadius: BorderRadius.circular(20), child: CustomPaint(painter: ExercisePainter(motion: m, phase: p))),
+          ],
+        ),
+      );
+}

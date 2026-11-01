@@ -789,3 +789,5 @@ T.update({
     "Plaatje en omslag": ("Picture and cover", "Bild und Titelbild", "Image et couverture", "Imagen y portada"),
     "Je record": ("Your record", "Dein Rekord", "Ton record", "Tu récord"),
 })
+
+T.update({"Hierna": ("Up next", "Als Nächstes", "Ensuite", "A continuación")})

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 import 'art/landscape.dart';
-import 'art/runner.dart';
 import 'rolling_text.dart';
 
 /// Kaart met optionele titel, in Kadans-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
@@ -180,7 +179,7 @@ class EmptyState extends StatelessWidget {
 }
 
 /// Illustratie voor lege schermen: een Hollands landschap dat met het seizoen meekleurt,
-/// met een hardloper op het pad en het icoon van het scherm. Komt zacht binnen.
+/// met het icoon van het scherm erboven. Komt zacht binnen.
 class EmptyArt extends StatelessWidget {
   const EmptyArt({super.key, required this.icon, this.size = 168});
   final IconData icon;
@@ -213,22 +212,20 @@ class EmptyArt extends StatelessWidget {
             child: Stack(children: [
               const Positioned.fill(child: KadansLandscape()),
               Positioned(
-                left: w * 0.5 - size * 0.16,
-                bottom: size * 0.2,
-                child: RunnerFigure(size: size * 0.42, color: RwColors.text.withValues(alpha: 0.85), accent: RwColors.accent),
-              ),
-              Positioned(
-                right: 14,
-                top: 14,
-                child: Container(
-                  width: size * 0.28,
-                  height: size * 0.28,
+                left: 0,
+                right: 0,
+                top: size * 0.16,
+                child: Center(
+                  child: Container(
+                  width: size * 0.34,
+                  height: size * 0.34,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: RwColors.surfaceHigh,
                     border: Border.all(color: RwColors.accent.withValues(alpha: 0.6), width: 1.5),
                   ),
-                  child: Icon(icon, size: size * 0.14, color: RwColors.accent),
+                  child: Icon(icon, size: size * 0.16, color: RwColors.accent),
+                ),
                 ),
               ),
             ]),
