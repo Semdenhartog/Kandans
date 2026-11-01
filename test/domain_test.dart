@@ -918,7 +918,7 @@ void main() {
       final v = runVerdict(sc(t, 50), sc(t.add(const Duration(hours: 2)), 80));
       expect(v.kind, VerdictKind.later);
       expect(v.title, 'Later lopen: 19:00');
-      expect(v.detail, startsWith('30 punten beter dan nu'));
+      expect(v.detail, startsWith('Veel beter dan nu'));
     });
     test('vandaag lastig', () {
       expect(runVerdict(sc(t, 20), sc(t, 35)).kind, VerdictKind.tough);
@@ -935,7 +935,7 @@ void main() {
       final later = StartTimeScore(start: t.add(const Duration(hours: 2)), score: 80, weather: hour(t), reasons: const ['Wind (14 km/u)'],
           factors: const {WeatherFactor.warm: 8, WeatherFactor.wind: 6});
       expect(whyBetter(now, later), 'minder warm en droger');
-      expect(runVerdict(now, later).detail, '30 punten beter dan nu: minder warm en droger.');
+      expect(runVerdict(now, later).detail, 'Veel beter dan nu: minder warm en droger.');
       // Geen duidelijk verschil: terug naar de oude uitleg.
       expect(whyBetter(later, later), isNull);
       expect(factorOf('Tegenwind op je route (14 km/u)'), WeatherFactor.wind);
@@ -949,7 +949,7 @@ void main() {
       final l = DashLayout.standard.move(DashCard.values.indexOf(DashCard.month), 0).toggle(DashCard.rain);
       final back = DashLayout.decode(l.encode());
       expect(back.order.first, DashCard.month);
-      expect(back.hidden, {DashCard.rain});
+      expect(back.hidden, {...DashLayout.standard.hidden, DashCard.rain});
       expect(back.visible, isNot(contains(DashCard.rain)));
       final old = DashLayout.decode('month,-rain,onbekend');
       expect(old.order.length, DashCard.values.length);

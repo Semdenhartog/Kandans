@@ -21,7 +21,7 @@ import 'route_photos_strip.dart';
 import 'route_undo.dart';
 import 'routes_overview_map.dart';
 import 'strava_routes_screen.dart';
-import '../shop/shop_tile.dart';
+import '../../shared/nav_buttons.dart';
 
 class RoutesScreen extends ConsumerStatefulWidget {
   const RoutesScreen({super.key});
@@ -177,7 +177,6 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
       appBar: AppBar(
         title: const Text('Mijn routes'),
         actions: [
-          const ShopIconButton(),
           IconButton(
             tooltip: _mapView ? 'Toon als lijst' : 'Toon op de kaart',
             onPressed: () => setState(() => _mapView = !_mapView),
@@ -197,6 +196,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
               onPressed: () => openStravaRoutes(context),
               icon: const Icon(Icons.cloud_download_outlined),
             ),
+          const MeButton(),
         ],
       ),
       body: Column(children: [

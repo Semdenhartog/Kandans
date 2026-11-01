@@ -279,8 +279,6 @@ class ActivityDetailScreen extends ConsumerWidget {
             KeyedSubtree(key: _sectionKey(a, 'coach'), child: _CoachSummaryCard(activity: a)),
           ],
           if (HindsightCard.applies(a)) HindsightCard(key: ValueKey('hindsight-${a.id}'), activity: a),
-          if (HydrationCard.applies(a)) HydrationCard(activity: a),
-          if (a.averageHeartRate != null && a.source == 'runwise') HrrCard(activity: a),
           const SizedBox(height: 12),
           RwCard(
             key: _sectionKey(a, 'weer'),
@@ -349,8 +347,16 @@ class ActivityDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'hoogte'), child: ElevationCard(activity: a)),
           ],
-          if (a.id != null && a.source == 'runwise') MarkersCard(activity: a),
-          if (a.id != null && a.source == 'runwise') SegmentEffortsCard(activity: a),
+          // Verdieping (vocht, hartslagherstel, markeringen, stukken) achter één kopje: de run zelf blijft overzichtelijk.
+          ...() {
+            final extra = <Widget>[
+              if (HydrationCard.applies(a)) HydrationCard(activity: a),
+              if (a.averageHeartRate != null && a.source == 'runwise') HrrCard(activity: a),
+              if (a.id != null && a.source == 'runwise') MarkersCard(activity: a),
+              if (a.id != null && a.source == 'runwise') SegmentEffortsCard(activity: a),
+            ];
+            return extra.isEmpty ? const <Widget>[] : <Widget>[const SizedBox(height: 12), _MoreAnalysis(children: extra)];
+          }(),
           if (a.id != null) ...[
             const SizedBox(height: 12),
             PhotosCard(activity: a),
@@ -732,6 +738,34 @@ class _JumpChips extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Inklapbaar kopje "Meer analyse" in een run: standaard dicht, zodat de run zelf overzichtelijk blijft.
+class _MoreAnalysis extends StatefulWidget {
+  const _MoreAnalysis({required this.children});
+  final List<Widget> children;
+
+  @override
+  State<_MoreAnalysis> createState() => _MoreAnalysisState();
+}
+
+class _MoreAnalysisState extends State<_MoreAnalysis> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OutlinedButton.icon(
+          onPressed: () => setState(() => _open = !_open),
+          icon: Icon(_open ? Icons.expand_less : Icons.expand_more, size: 18),
+          label: Text(_open ? 'Minder analyse' : 'Meer analyse (${widget.children.length})'),
+        ),
+        if (_open) ...widget.children,
+      ],
     );
   }
 }

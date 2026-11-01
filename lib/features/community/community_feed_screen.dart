@@ -16,6 +16,7 @@ import 'best_moments_text.dart';
 import '../../core/i18n.dart';
 import 'runner_avatar.dart';
 import 'together_screens.dart' show TogetherChips;
+import '../../shared/nav_buttons.dart';
 export 'runner_avatar.dart' show RunnerAvatar;
 
 /// "Een uur geleden", "gisteren", of een datum.
@@ -277,7 +278,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
     final joined = status.value?.joined ?? false;
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('Community')),
+        title: Text(tr('Samen')),
         actions: [
           if (joined)
             IconButton(
@@ -302,6 +303,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
               _load();
             },
           ),
+          const MeButton(),
         ],
       ),
       floatingActionButton: joined && _error == null && _talk

@@ -35,6 +35,7 @@ import '../shared/tab_scroll.dart';
 import 'appearance.dart';
 import 'supabase.dart';
 import '../features/shop/shop_screen.dart';
+import '../shared/nav_buttons.dart';
 
 /// Laat GoRouter opnieuw de redirect uitvoeren bij in- of uitloggen.
 class _AuthRefresh extends ChangeNotifier {
@@ -172,7 +173,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/coach', builder: (c, s) => const CoachScreen()),
+            GoRoute(path: '/coach', builder: (c, s) => const BackToTabScope(child: CoachScreen())),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/community', builder: (c, s) => const CommunityFeedScreen()),
@@ -180,7 +181,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/me',
-              builder: (c, s) => const ScrollToTopOnReselect(tab: 5, child: ProfileScreen()),
+              builder: (c, s) => const BackToTabScope(child: ScrollToTopOnReselect(tab: 5, child: ProfileScreen())),
               routes: [
                 GoRoute(path: 'shoes', builder: (c, s) => const ShoesScreen()),
                 GoRoute(

@@ -27,7 +27,15 @@ enum DashCard {
 class DashLayout {
   const DashLayout(this.order, this.hidden);
 
-  static const standard = DashLayout(DashCard.values, {});
+  /// Nieuwe gebruikers: de spelvormen staan in Doelen (Logboek) en hoeven niet ook op Vandaag.
+  static const standard = DashLayout(DashCard.values, {
+    DashCard.bingo,
+    DashCard.month,
+    DashCard.yearGoal,
+    DashCard.challenges,
+    DashCard.onThisDay,
+    DashCard.goldenHour,
+  });
 
   final List<DashCard> order;
   final Set<DashCard> hidden;

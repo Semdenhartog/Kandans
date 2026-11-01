@@ -69,6 +69,11 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `python3 tools/maak_vertalingen.py`. Nieuw scherm: `python3 tools/tr_codemod.py <bestand>`, daarna vertalingen aanvullen.
 
 ## Waar staat wat
+- **Navigatie (sinds 1-11-2026, zie `docs/herindeling.md`):** balk = Vandaag · Routes · ● Lopen (knop, lang drukken = snelmenu) · Logboek · Samen.
+  Router-takken blijven 0 today, 1 runs (Logboek), 2 routes, 3 coach, 4 community (Samen), 5 me; plaats↔tak in `home_shell.dart`
+  (`homeBranchForSlot`). Ik = `MeButton` rechtsboven, Coach = `CoachButton`; terug via `BackToTabScope`/`lastMainBranch` (`shared/nav_buttons.dart`).
+  Vandaag: max 3 slimme kaarten (`_smartCards`) + "Deze week" (`planner/this_week_screen.dart`) + "Meer vandaag". Doelen: `challenges/goals_screen.dart`.
+  Logboek-menu ontgrendelt vorm/records na 5 runs, heatmap/jaaroverzicht na 20. Rundetail: verdieping onder "Meer analyse".
 - Vandaag: `lib/features/dashboard/` · Opnemen: `lib/features/record/`, `lib/data/services/run_recorder_service.dart`
 - Routes: `lib/features/routes/` · Horloges: `watch_export.dart` (`WatchBrand.garminBasic` = Vivoactive 5, alleen ← → op de pols)
 - Strava: `supabase/functions/strava`, app `profile/strava_history_screen.dart`, `routes/strava_routes_screen.dart`, archief-import `profile/strava_archive_screen.dart`

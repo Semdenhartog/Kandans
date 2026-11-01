@@ -90,6 +90,8 @@ import 'package:runwise/features/challenges/challenges.dart';
 import 'package:runwise/features/challenges/community_screen.dart';
 import 'package:runwise/data/services/community_service.dart';
 import 'package:runwise/domain/challenges.dart';
+import 'package:runwise/features/planner/this_week_screen.dart';
+import 'package:runwise/features/challenges/goals_screen.dart';
 
 const _w = 412.0;
 
@@ -471,6 +473,9 @@ void main() {
   testWidgets('04 routes', (t) => _shot(t, '04_routes', const RoutesScreen(), height: 1600));
   testWidgets('05 coach', (t) => _shot(t, '05_coach', const CoachScreen(), height: 915));
   testWidgets('06 ik', (t) => _shot(t, '06_ik', const ProfileScreen(), height: 2600));
+  testWidgets('70 deze week', (t) => _shot(t, '70_deze_week', const ThisWeekScreen(), height: 2000));
+  testWidgets('71 doelen', (t) => _shot(t, '71_doelen', const GoalsScreen(), height: 2600));
+  testWidgets('72 vandaag groot', (t) => _shot(t, '72_vandaag_groot_balk', const DashboardScreen(), height: 915, nav: true, textScale: 1.3));
   testWidgets('07 fitheid', (t) => _shot(t, '07_fitheid', const FitnessScreen(), height: 1800));
   testWidgets('08 badges', (t) => _shot(t, '08_badges', const BadgesScreen(), height: 1900));
   testWidgets('10 opnemen start', (t) => _shot(t, '10_opnemen_start', const RecordRunScreen(), height: 915));

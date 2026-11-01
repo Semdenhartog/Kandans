@@ -25,7 +25,7 @@ class AppearanceController extends ChangeNotifier {
   Appearance get mode => _mode;
 
   /// Met welk tabblad de app opent: /today, /runs of /routes.
-  static const startTabs = {'/today': 'Vandaag', '/runs': 'Runs', '/routes': 'Routes'};
+  static const startTabs = {'/today': 'Vandaag', '/runs': 'Logboek', '/routes': 'Routes'};
   String _startTab = '/today';
   String get startTab => _startTab;
 

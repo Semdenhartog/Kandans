@@ -38,7 +38,6 @@ import '../live/live_share_screen.dart';
 import '../../domain/availability.dart';
 import '../planner/availability_provider.dart';
 import '../planner/week_planner_screen.dart';
-import '../record/quick_start.dart';
 import '../record/record_run_screen.dart';
 import '../../domain/dashboard_layout.dart';
 import '../profile/shoe_replace_card.dart';
@@ -55,9 +54,10 @@ import 'today_card.dart';
 import 'dashboard_providers.dart';
 import 'record_weather_card.dart';
 import 'weather_ambience.dart';
-import '../shop/shop_tile.dart';
 import '../profile/sources_screen.dart';
 import '../profile/run_pause_tile.dart' show PauseBanner;
+import '../../shared/nav_buttons.dart';
+import '../planner/this_week_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -236,15 +236,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: RwFab(
-        heroTag: 'start-run-today',
-        label: 'Start run',
-        icon: Icons.play_arrow,
-        extended: _fabExtended,
-        onPressed: () => openRecorder(context),
-        // Lang drukken: snelmenu (training van vandaag, vast rondje, buiten, loopband).
-        onLongPress: () => showQuickStart(context, ref),
-      ),
+      // Starten gaat via de grote Lopen-knop in de balk (lang drukken: snelmenu).
       body: SafeArea(
         child: FabScrollWatcher(
         extended: _fabExtended,
@@ -272,12 +264,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                     ),
                   ),
-                  const ShopIconButton(),
+                  const CoachButton(),
                   IconButton(
                     tooltip: 'Indeling van Vandaag aanpassen',
                     icon: Icon(Icons.tune, color: RwColors.subtle),
                     onPressed: () => showDashLayoutSheet(context),
                   ),
+                  const MeButton(),
                 ],
               ),
               const SizedBox(height: 2),
@@ -483,9 +476,20 @@ class _Results extends StatefulWidget {
   State<_Results> createState() => _ResultsState();
 }
 
+/// Kaarten die bovenaan mogen als ze nu iets te zeggen hebben (de rest staat achter "Meer vandaag").
+const _smartCards = {
+  DashCard.warnings,
+  DashCard.rain,
+  DashCard.clothing,
+  DashCard.routeWind,
+  DashCard.shoes,
+  DashCard.again,
+};
+
 class _ResultsState extends State<_Results> {
   DateTime? _selected;
   bool _goodOnly = false;
+  bool _more = false;
 
   @override
   void initState() {
@@ -668,10 +672,40 @@ class _ResultsState extends State<_Results> {
         const SizedBox(height: 12),
         const TodayCard(),
         const RaceCountdownCard(),
-        const WeeklyReportCard(),
-        const YearStoryCard(),
-        for (final c in widget.layout.visible)
-          if (card(c) case final w?) ...[const SizedBox(height: 12), w],
+        ...() {
+          // Hooguit drie kaarten die er nú toe doen (waarschuwing, buien, aantrekken, wind op je route...);
+          // de rest staat achter "Meer vandaag". Volgorde en verbergen blijven zoals je ze instelt.
+          final smart = <Widget>[];
+          final more = <Widget>[];
+          for (final c in widget.layout.visible) {
+            final w = card(c);
+            if (w == null) continue;
+            if (_smartCards.contains(c) && smart.length < 3) {
+              smart.add(w);
+            } else {
+              more.add(w);
+            }
+          }
+          more.addAll(const [WeeklyReportCard(), YearStoryCard()]);
+          return <Widget>[
+            for (final w in smart) ...[const SizedBox(height: 12), w],
+            const SizedBox(height: 12),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              OutlinedButton.icon(
+                onPressed: () => openThisWeek(context),
+                icon: const Icon(Icons.date_range_outlined, size: 18),
+                label: const Text('Deze week'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => setState(() => _more = !_more),
+                icon: Icon(_more ? Icons.expand_less : Icons.expand_more, size: 18),
+                label: Text(_more ? 'Minder' : 'Meer vandaag'),
+              ),
+            ]),
+            if (_more)
+              for (final w in more) ...[const SizedBox(height: 12), w],
+          ];
+        }(),
         const SizedBox(height: 12),
         Text(
           widget.insightsPersonal
@@ -1013,7 +1047,7 @@ class _HeroCard extends StatelessWidget {
                     Icon(Icons.directions_run, size: 16, color: RwColors.subtle),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text('Nu vertrekken kan ook: score ${v.now.score} (${gain <= 3 ? 'bijna even goed' : '$gain punten minder'}).',
+                      child: Text('Nu vertrekken kan ook: ${gain <= 3 ? 'bijna even goed' : (gain >= 25 ? 'een stuk minder' : 'iets minder')}.',
                           style: TextStyle(color: RwColors.subtle, fontSize: 13)),
                     ),
                     TextButton(

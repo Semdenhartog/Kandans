@@ -36,7 +36,6 @@ import '../../domain/shoes.dart';
 import '../../domain/run_filter.dart';
 import '../../domain/run_helpers.dart';
 import '../../domain/weekly_load.dart';
-import '../record/quick_start.dart';
 import '../record/record_run_screen.dart';
 import '../routes/route_shape.dart';
 import 'activity_detail_screen.dart';
@@ -46,6 +45,10 @@ import 'run_insights_screens.dart';
 import 'share_run_screen.dart';
 import 'year_story_screen.dart';
 import '../../data/services/run_pause_store.dart';
+import '../../shared/nav_buttons.dart';
+import '../challenges/goals_screen.dart';
+import '../profile/pain_screen.dart' show openPainScreen;
+import 'strength_screen.dart' show openStrength;
 
 class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
@@ -240,7 +243,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                 style: const TextStyle(fontSize: 17),
                 onChanged: (v) => setState(() => _query = v),
               )
-            : const Text('Mijn runs'),
+            : const Text('Logboek'),
         actions: [
           IconButton(
             tooltip: _searching ? 'Zoeken sluiten' : 'Zoeken',
@@ -261,14 +264,26 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             onPressed: _openFilter,
           ),
           IconButton(
-            tooltip: 'Mijn records',
+            tooltip: 'Doelen, badges en records',
             icon: const Icon(Icons.emoji_events_outlined),
-            onPressed: () => context.go('/runs/records'),
+            onPressed: () => openGoals(context),
           ),
           PopupMenuButton<String>(
             tooltip: 'Meer',
             onSelected: (v) {
               switch (v) {
+                case 'coach':
+                  context.go('/coach');
+                case 'form':
+                  openFitness(context);
+                case 'records':
+                  context.go('/runs/records');
+                case 'shoes':
+                  context.go('/me/shoes');
+                case 'pain':
+                  openPainScreen(context);
+                case 'strength':
+                  openStrength(context);
                 case 'new':
                   context.go('/runs/new');
                 case 'import':
@@ -290,29 +305,33 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                   _export(true);
               }
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'calendar', child: ListTile(leading: Icon(Icons.calendar_month_outlined), title: Text('Kalender'))),
-              PopupMenuItem(value: 'heatmap', child: ListTile(leading: Icon(Icons.map_outlined), title: Text('Mijn heatmap'))),
-              PopupMenuItem(value: 'photos', child: ListTile(leading: Icon(Icons.photo_library_outlined), title: Text('Fotomuur'))),
-              PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text('Jaaroverzicht'))),
-              PopupMenuDivider(),
-              PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
-              PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX/FIT)'))),
-              PopupMenuItem(value: 'archive', child: ListTile(leading: Icon(Icons.folder_zip_outlined), title: Text('Strava-archief importeren'))),
-              PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
-              PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text('Exporteer GPS-sporen (GPX)'))),
-            ],
+            itemBuilder: (_) {
+              // Ontgrendelen: vorm en records na 5 runs, heatmap en jaaroverzicht na 20.
+              final n = ref.read(activitiesProvider).value?.length ?? 0;
+              return [
+              const PopupMenuItem(value: 'coach', child: ListTile(leading: Icon(Icons.auto_awesome_outlined), title: Text('Vraag de coach'))),
+              const PopupMenuDivider(),
+              if (n >= 5) const PopupMenuItem(value: 'form', child: ListTile(leading: Icon(Icons.monitor_heart_outlined), title: Text('Vorm'))),
+              if (n >= 5) const PopupMenuItem(value: 'records', child: ListTile(leading: Icon(Icons.timer_outlined), title: Text('Mijn records'))),
+              const PopupMenuItem(value: 'shoes', child: ListTile(leading: Icon(Icons.directions_run), title: Text('Mijn schoenen'))),
+              const PopupMenuItem(value: 'pain', child: ListTile(leading: Icon(Icons.healing_outlined), title: Text('Pijntjes'))),
+              const PopupMenuItem(value: 'strength', child: ListTile(leading: Icon(Icons.fitness_center), title: Text('Kracht en mobiliteit'))),
+              const PopupMenuDivider(),
+              const PopupMenuItem(value: 'calendar', child: ListTile(leading: Icon(Icons.calendar_month_outlined), title: Text('Kalender'))),
+              if (n >= 20) const PopupMenuItem(value: 'heatmap', child: ListTile(leading: Icon(Icons.map_outlined), title: Text('Mijn heatmap'))),
+              const PopupMenuItem(value: 'photos', child: ListTile(leading: Icon(Icons.photo_library_outlined), title: Text('Fotomuur'))),
+              if (n >= 20) const PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text('Jaaroverzicht'))),
+              const PopupMenuDivider(),
+              const PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
+              const PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX/FIT)'))),
+              const PopupMenuItem(value: 'archive', child: ListTile(leading: Icon(Icons.folder_zip_outlined), title: Text('Strava-archief importeren'))),
+              const PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
+              const PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text('Exporteer GPS-sporen (GPX)'))),
+            ];
+            },
           ),
+          const MeButton(),
         ],
-      ),
-      floatingActionButton: RwFab(
-        heroTag: 'start-run',
-        label: 'Start run',
-        icon: Icons.play_arrow,
-        extended: _fabExtended,
-        onPressed: () => openRecorder(context),
-        // Lang drukken: snelmenu (training van vandaag, vast rondje, buiten, loopband).
-        onLongPress: () => showQuickStart(context, ref),
       ),
       body: Column(children: [
         const FirstTip(id: 'runs', icon: Icons.directions_run, text: 'Hier staan al je runs. Tik op een run voor kaart, tussentijden en weer. Houd een run ingedrukt om hem te delen of te verwijderen.'),
@@ -329,7 +348,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             return EmptyState(
               icon: Icons.directions_run,
               title: 'Nog geen runs',
-              message: 'Neem een run op met Start run, voeg er een met de hand toe of koppel je horloge of Strava (tabblad Ik). Na 8 runs leert Kadans bij welk weer jij het snelst loopt.',
+              message: 'Neem een run op met de ronde knop onderin, voeg er een met de hand toe of koppel je horloge of Strava (Ik, rechtsboven). Na 8 runs leert Kadans bij welk weer jij het snelst loopt.',
               actionLabel: 'Eerste run toevoegen',
               onAction: () => context.go('/runs/new'),
             );

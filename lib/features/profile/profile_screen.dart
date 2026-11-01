@@ -16,21 +16,16 @@ import '../../data/repositories/repositories.dart';
 import '../../domain/performance_model.dart';
 import '../../data/services/offline_cache.dart';
 import '../../domain/badges.dart' show computeBadges;
-import '../../domain/shoes.dart';
 import '../../shared/widgets.dart';
 import '../challenges/invite_card.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../activities/badges_screen.dart';
-import '../challenges/challenges.dart' show openChallenges;
-import '../activities/strength_screen.dart';
 import 'appearance_tile.dart';
 import 'connections_card.dart';
 import 'emergency_contact.dart';
 import 'fingerprint_tile.dart';
-import '../planner/training_plan_screen.dart';
 import 'privacy_screen.dart';
 import 'heart_rate_screen.dart';
-import 'pain_screen.dart';
 import '../../domain/pain_log.dart';
 import 'help_screen.dart';
 import 'member_card.dart';
@@ -46,6 +41,7 @@ import 'run_pause_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/config.dart';
 import 'health_consent_tile.dart';
+import '../../shared/nav_buttons.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -90,6 +86,7 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        leading: const BackToTabButton(),
         title: Text(tr('Ik')),
         actions: [
           IconButton(
@@ -137,50 +134,10 @@ class ProfileScreen extends ConsumerWidget {
           ),
           SizedBox(height: 14),
           ShopTile(),
-          const _SectionTitle('TRAINING'),
+          const _SectionTitle('INSTELLINGEN'),
           Card(
             child: Column(
               children: [
-                ListTile(
-                  leading: TileIcon(Icons.calendar_month_outlined, color: RwColors.accent),
-                  title: Text(tr('Trainingsschema')),
-                  subtitle: Text(tr('Een schema op maat naar je wedstrijd of afstand')),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: () => openTrainingPlan(context),
-                ),
-                Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: TileIcon(Icons.flag_outlined, color: RwColors.accent),
-                  title: Text(tr('Wedstrijden')),
-                  subtitle: Text(tr('Je doelen, voorspelde eindtijd en wedstrijdadvies')),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: () => context.go('/me/races'),
-                ),
-                Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: TileIcon(Icons.emoji_events_outlined, color: RwColors.accent),
-                  title: Text(tr('Uitdagingen')),
-                  subtitle: Text(tr('Doe mee aan een maand- of seizoensuitdaging')),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: () => openChallenges(context),
-                ),
-                Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: TileIcon(Icons.military_tech_outlined, color: RwColors.accent),
-                  title: Text(tr('Badges')),
-                  subtitle: Text(tr('Mijlpalen en weerbadges')),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: () => openBadges(context),
-                ),
-                Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: TileIcon(Icons.fitness_center, color: RwColors.accent),
-                  title: Text(tr('Kracht en mobiliteit')),
-                  subtitle: Text(tr('Warming-up, kracht voor lopers en rekken, met de stem erbij')),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: () => openStrength(context),
-                ),
-                Divider(height: 1, indent: 56),
                 Consumer(builder: (context, ref, _) {
                   final rain = ref.watch(rainPreferenceProvider);
                   return ListTile(
@@ -264,33 +221,12 @@ class ProfileScreen extends ConsumerWidget {
                     onChanged: (v) => ref.read(dogModeProvider.notifier).set(v),
                   );
                 }),
-                Divider(height: 1, indent: 56),
-                Consumer(builder: (context, ref, _) {
-                  final shoes = ref.watch(shoesProvider).value ?? <Shoe>[];
-                  final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
-                  final worn = shoes.where((s) => !s.retired && shoeWornOut(s, runs)).toList();
-                  final d = defaultShoe(shoes);
-                  return ListTile(
-                    leading: TileIcon(Icons.directions_walk, color: worn.isEmpty ? RwColors.accent : RwColors.danger),
-                    title: Text(tr('Mijn schoenen')),
-                    subtitle: Text(
-                      worn.isNotEmpty
-                          ? '${worn.first.name} is aan vervanging toe'
-                          : d == null
-                              ? tr('Houd bij hoeveel km je schoenen hebben')
-                              : '${d.name} \u00b7 ${shoeKm(d, runs).round()} km',
-                      style: TextStyle(color: worn.isEmpty ? null : RwColors.danger),
-                    ),
-                    trailing: Icon(Icons.chevron_right),
-                    onTap: () => context.go('/me/shoes'),
-                  );
-                }),
               ],
             ),
           ),
           SizedBox(height: 16),
           _InsightsCard(insights: insights),
-          const _SectionTitle('APPARATEN EN KOPPELINGEN'),
+          const _SectionTitle('KOPPELINGEN'),
           ConnectionsCard(),
           SizedBox(height: 8),
           Card(
@@ -302,23 +238,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () => openHeartRateScreen(context),
             ),
           ),
-          SizedBox(height: 8),
-          Consumer(builder: (context, ref, _) {
-            final runs = ref.watch(activitiesProvider).value ?? <Activity>[];
-            final p = painPatterns(runs);
-            return Card(
-              child: ListTile(
-                leading: TileIcon(Icons.healing_outlined, color: p.isEmpty ? RwColors.accent : RwColors.warning),
-                title: Text(tr('Pijntjes')),
-                subtitle: Text(p.isEmpty
-                    ? tr('Patronen in je pijntjes na runs')
-                    : trf('{plek} komt terug ({n}× in 2 weken)', {'plek': tr(p.first.spot.label), 'n': p.first.count})),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () => openPainScreen(context),
-              ),
-            );
-          }),
-          const _SectionTitle('MELDINGEN EN VEILIGHEID'),
+          const _SectionTitle('VEILIGHEID EN MELDINGEN'),
           Card(
             child: Column(
               children: [

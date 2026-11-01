@@ -8,6 +8,8 @@ import '../core/theme.dart';
 import 'tab_scroll.dart';
 import 'aura.dart';
 import 'whats_new.dart';
+import 'nav_buttons.dart';
+import '../features/record/quick_start.dart';
 import '../data/services/location_service.dart';
 import '../data/services/offline_cache.dart';
 import '../data/services/pending_runs.dart';
@@ -20,7 +22,7 @@ import '../data/services/run_recorder_service.dart';
 import '../features/record/record_run_screen.dart';
 import '../core/i18n.dart';
 
-/// Onderste navigatiebalk met de vijf hoofdtabbladen.
+/// Onderste navigatiebalk: vier tabbladen en de Lopen-knop.
 /// Haalt bij het openen (en terugkomen in) de app automatisch nieuwe runs op
 /// uit gekoppelde bronnen (horloge via Health Connect, Strava).
 class HomeShell extends ConsumerStatefulWidget {
@@ -177,13 +179,16 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
             ),
             child: NavigationBar(
               backgroundColor: Colors.transparent,
-              // Zes tabbladen: alleen het gekozen tabblad met naam, anders wordt het te krap.
-              labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-              selectedIndex: shell.currentIndex,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              // Ik en Coach zitten niet in de balk: dan staat de "selectie" op de Lopen-knop, die geen markering toont.
+              selectedIndex: homeSlotForBranch(shell.currentIndex),
               animationDuration: Duration(milliseconds: 450),
-              onDestinationSelected: (i) {
+              onDestinationSelected: (slot) {
+                final i = homeBranchForSlot(slot);
+                if (i < 0) return; // de Lopen-knop regelt zijn eigen tik
                 if (i != shell.currentIndex) HapticFeedback.selectionClick();
                 if (i == shell.currentIndex) notifyTabReselected(i);
+                lastMainBranch = i;
                 shell.goBranch(i, initialLocation: i == shell.currentIndex);
               },
               destinations: homeDestinations(),
@@ -195,15 +200,73 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   }
 }
 
-/// De zes tabbladen onderin (ook gebruikt voor de schermafbeelding van de balk).
-List<NavigationDestination> homeDestinations() => [
+/// Plaatsen in de balk → takken in de router (0 Vandaag, 1 Logboek, 2 Routes, 3 Coach, 4 Samen, 5 Ik).
+/// Plaats 2 is de grote Lopen-knop (geen tak).
+const _slotToBranch = [0, 2, -1, 1, 4];
+
+int homeBranchForSlot(int slot) => _slotToBranch[slot];
+
+int homeSlotForBranch(int branch) => switch (branch) {
+      0 => 0,
+      2 => 1,
+      1 => 3,
+      4 => 4,
+      _ => 2,
+    };
+
+/// De balk onderin: Vandaag · Routes · ● Lopen · Logboek · Samen (ook gebruikt voor de schermafbeelding van de balk).
+/// Ik zit rechtsboven op elk tabblad, de coach als knop waar de vraag ontstaat.
+List<Widget> homeDestinations() => [
   NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny), label: tr('Vandaag')),
-  NavigationDestination(icon: Icon(Icons.directions_run_outlined), selectedIcon: Icon(Icons.directions_run), label: tr('Runs')),
   NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: tr('Routes')),
-  NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: tr('Coach')),
-  NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('Forum')),
-  NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: tr('Ik')),
+  const _RunButton(),
+  NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: tr('Logboek')),
+  NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups), label: tr('Samen')),
     ];
+
+/// Grote ronde knop in het midden: meteen een run starten. Lang drukken: snelmenu.
+class _RunButton extends ConsumerWidget {
+  const _RunButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Semantics(
+      button: true,
+      label: tr('Run starten'),
+      child: Center(
+        child: Tooltip(
+          message: tr('Run starten (lang drukken: snelmenu)'),
+          child: Material(
+            shape: const CircleBorder(),
+            elevation: 3,
+            color: Colors.transparent,
+            child: Ink(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
+                ),
+              ),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  openRecorder(context);
+                },
+                onLongPress: () => showQuickStart(context, ref),
+                child: Icon(Icons.play_arrow_rounded, size: 34, color: RwColors.accentDark),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// Smalle balk als de app geen internet heeft en bewaarde gegevens toont.
 class _OfflineBanner extends StatelessWidget {

@@ -41,9 +41,11 @@ RunVerdict runVerdict(StartTimeScore now, StartTimeScore best, {bool nowAllowed 
     title: 'Later lopen: ${t(best.start)}',
     detail: gain > 0
         ? (() {
+            // Woorden in plaats van punten: "Veel beter dan nu" leest sneller dan "30 punten beter".
+            final how = gain >= 25 ? 'Veel beter' : (gain >= 10 ? 'Beter' : 'Iets beter');
             final better = whyBetter(now, best);
-            if (better != null) return '$gain punten beter dan nu: $better.';
-            return '$gain punten beter dan nu${why.isEmpty ? '' : '. ${_cap(why)}'}';
+            if (better != null) return '$how dan nu: $better.';
+            return '$how dan nu${why.isEmpty ? '' : '. ${_cap(why)}'}';
           })()
         : (why.isEmpty ? 'Het beste moment binnen je looptijden.' : _cap(why)),
     best: best,

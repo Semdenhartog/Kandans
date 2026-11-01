@@ -4,11 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme.dart';
 
 /// Versie van het "Nieuw in Kadans"-overzicht. Ophogen als er iets nieuws te vertellen is.
-const whatsNewVersion = 'kadans-2026-10b';
+const whatsNewVersion = 'kadans-2026-11a';
 
 const _items = <(IconData, String, String)>[
+  (Icons.dashboard_customize_outlined, 'Rustiger en overzichtelijker',
+      'Onderin nu Vandaag, Routes, Logboek en Samen, met in het midden een grote knop om meteen te lopen (lang drukken: snelmenu). Ik zit rechtsboven, de coach als knop.'),
+  (Icons.date_range_outlined, 'Deze week',
+      'Weekplanner, werkrooster, schema en wedstrijden op één plek: tik op Vandaag op "Deze week". Vandaag toont de drie kaarten die er nu toe doen; de rest staat onder "Meer vandaag".'),
+  (Icons.emoji_events_outlined, 'Doelen',
+      'Maanduitdaging, jaardoel, bingo, uitdagingen, badges en records samen in Logboek → Doelen.'),
   (Icons.shopping_bag_outlined, 'De Kadans-shop',
-      'Routeposters, Luxe-ontwerpen, Premium en schoenen op één plek: tik op het tasje op Vandaag of Routes, of op Shop in Ik.'),
+      'Routeposters, Luxe-ontwerpen, Premium en schoenen op één plek: Ik → Shop.'),
   (Icons.bolt_outlined, 'Live opdrachten en rondes',
       'Zet bij de start "Live opdrachten" aan voor sprintjes onderweg, en tik tijdens het lopen op Ronde voor je eigen rondetijden.'),
   (Icons.card_giftcard, 'Vrienden uitnodigen',
@@ -22,7 +28,7 @@ const _items = <(IconData, String, String)>[
   (Icons.content_cut, 'Run bijsnijden',
       'Vergeten te stoppen? Schuif in het rundetail het begin en eind naar waar je echt liep. Tijd, tempo en kaart rekenen mee.'),
   (Icons.lightbulb_outline, 'Waarom later beter is',
-      'Vandaag zegt nu ook waarom wachten loont, bijvoorbeeld "12 punten beter dan nu: minder warm en droger".'),
+      'Vandaag zegt nu ook waarom wachten loont, bijvoorbeeld "Veel beter dan nu: minder warm en droger".'),
   (Icons.umbrella_outlined, 'Lopen in de regen',
       'Vind je regen niet erg? Zeg het in Ik, dan telt regen minder mee. Onweer telt nu altijd zwaar mee.'),
   (Icons.notifications_none, 'Slimmere ochtendmelding',

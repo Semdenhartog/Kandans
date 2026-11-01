@@ -11,6 +11,7 @@ import '../../domain/run_goal.dart';
 import '../../shared/art/best_moment_demo.dart';
 import '../../shared/route_backdrop.dart';
 import '../planner/availability_provider.dart';
+import '../planner/roster_screen.dart' show openRosterScreen;
 import '../routes/watch_export.dart' show WatchBrand, WatchBrandInfo, saveWatchBrand;
 import '../../core/i18n.dart';
 import '../../shared/language_picker.dart';
@@ -189,6 +190,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   setState(() => _when = key);
                   await saveAvailability(ref, Availability.preset(key));
                 },
+              ),
+            ),
+          // Diensten? Dan meteen je rooster koppelen: Kadans plant dan nooit een run tijdens je dienst.
+          if (_when == 'altijd')
+            Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: OutlinedButton.icon(
+                onPressed: () => openRosterScreen(context),
+                icon: Icon(Icons.event_busy_outlined),
+                label: Text(tr('Koppel je rooster: nooit een run tijdens je dienst')),
               ),
             ),
           SwitchListTile(

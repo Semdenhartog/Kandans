@@ -1,6 +1,6 @@
 # Kadans herindeling – voorstel (1 november 2026)
 
-Status: **voorstel, nog niets gebouwd.** Sem kiest; daarna bouwen in 3 rondes.
+Status: **gebouwd op 1 november 2026** (Sem: "bouw het geheel"; ja op Coach-knop en Doelen). Zie onderaan wat wel/niet is gedaan.
 Gebaseerd op de code (router, home_shell, dashboard_layout, profile_screen, help_screen) en de schermen op `schermen-main`.
 Niet getest met echte gebruikers: de "tests" hieronder zijn een doordenkoefening.
 
@@ -32,7 +32,7 @@ Nog een keer, Waarschuwingen, Recordweer, Nieuwe schoenen, Uitdagingen, Aantrekk
 
 ### Verstopt (belangrijk!)
 
-- **Werkrooster** is alleen te vinden via de zoeklijst in Hulp. Juist dé functie voor jouw doelgroep (wisseldiensten).
+- **Werkrooster** zit diep: Vandaag → Weekplanner → rooster-kaartje, of via de zoeklijst in Hulp. Juist dé functie voor jouw doelgroep (wisseldiensten).
 - Loopmaatjes, weddenschappen en loopgroepen zitten als chips in Forum.
 - 25 bestemmingen zijn alleen via zoeken in Hulp te vinden.
 
@@ -161,7 +161,7 @@ Bovenaan Vandaag een klein bericht als er iets nieuws vrijkomt: "Nieuw voor jou:
 | Per uur, gouden uur | Vandaag | Meer vandaag | verbergen |
 | Weekplanner, weekend, recordweer | 3 kaarten op Vandaag | Deze week | samenvoegen |
 | Trainingsschema, wedstrijden | Ik | Deze week | verhuizen |
-| Werkrooster | alleen via Hulp-zoeken | Deze week + vraag bij start | **zichtbaar maken** |
+| Werkrooster | in de weekplanner (2 tikken) en Hulp-zoeken | Deze week + vraag bij start | **zichtbaar maken** |
 | Wind op route, beste route, nog een keer | Vandaag | Vandaag (na 1e route) | ontgrendelen |
 | Veilig onderweg (live) | Vandaag-kaart | startscherm van Lopen | verhuizen |
 | Opnemen | knoppen op 9 plekken | grote ● Lopen-knop (+ bestaande knoppen) | tonen |
@@ -214,3 +214,19 @@ Niets wordt verwijderd: alles wat "samenvoegen" of "verbergen" heet, blijft in d
 1. **Coach als knop in plaats van tab?** (Ik: ja. Minder tabs en de coach staat waar de vraag ontstaat.)
 2. **Zes spelvormen samenvoegen tot Doelen?** (Ik: ja. Bingo en weddenschappen gaan dan op in Doelen.)
 3. **Ronde 1 meteen bouwen?** (Veilig: er verdwijnt niets, alleen standaard minder in beeld.)
+
+---
+
+## Wat is gebouwd (1 november 2026)
+
+- Balk: Vandaag · Routes · ● Lopen · Logboek · Samen. Ik rechtsboven, Coach als knop (Vandaag-kop, Logboek-menu, coach-samenvatting in een run).
+- Vandaag: max 3 slimme kaarten, knoppen "Deze week" en "Meer vandaag"; Start-run-knop en shop-icoon weg (shop staat in Ik).
+- Nieuwe gebruikers: bingo, maanduitdaging, jaardoel, uitdagingen, op deze dag en gouden uur standaard verborgen op Vandaag (staan in Doelen / Meer).
+- Deze week: weekplanner, rooster, weekend, schema, wedstrijden. Rondleiding: bij "Wisselend (diensten)" meteen "Koppel je rooster".
+- Logboek: Doelen-knop; menu met coach, vorm, records, schoenen, pijntjes, kracht (ontgrendelen na 5/20 runs voor vorm/records/heatmap/jaaroverzicht).
+- Ik in groepen: Instellingen · Koppelingen · Veiligheid en meldingen · Account (schema/wedstrijden/uitdagingen/badges/schoenen/pijntjes/kracht verhuisd).
+- Woorden: "punten" → "Veel beter / Beter / Iets beter dan nu"; Forum/Community → Samen; Runs → Logboek.
+- Rundetail: vocht, hartslagherstel, markeringen en stukken onder "Meer analyse".
+
+Nog niet gedaan (bewust klein gehouden): "Nieuw voor jou"-bericht bij ontgrendelen, pijntje als vraag direct na de run,
+live delen naar het startscherm van Lopen, run-detail in drie kopjes (nu één kopje "Meer analyse").

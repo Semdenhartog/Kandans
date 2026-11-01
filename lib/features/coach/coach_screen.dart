@@ -9,6 +9,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
+import '../../shared/nav_buttons.dart';
 
 const _suggestions = [
   'Wat zal ik deze week lopen?',
@@ -148,6 +149,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        leading: const BackToTabButton(),
         title: const Text('Coach'),
         actions: [
           if (!premium)
