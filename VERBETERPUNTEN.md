@@ -364,3 +364,9 @@ Daarna (zelfde dag, op verzoek):
 - ✅ 21 **Oefenanimaties**: lopend lijnfiguurtje dat elke kracht-/warming-up-oefening voordoet (± 20 bewegingen, gekozen op naam).
 - ✅ 23 **Profielplaatje en omslag in Samen**: icoon + kleur met gouden rand, omslag = seizoenslandschap naar keuze (migratie 0036). Bewust **geen eigen foto's** (zou moderatie vragen).
 - ✅ 25 **Play Store**: winkelplaatjes met kop en telefoonframe (`.github/scripts/store_screens.py`) en een promovideo van 30 s (`store_video.sh`), beide automatisch in branch `schermen-<branch>/playstore`.
+
+## 1 november 2026 – oefenfiguur luxe, poppetje elders weg
+- ✅ Lopend poppetje weg bij lege schermen (alleen landschap + icoon) en op de live-kaart (record = gouden baken met beker).
+- ✅ Oefenfiguur in de krachtroutine opnieuw ontworpen: gouden "tekenpop" met kogelgewrichten, vaste lichtval, op een donker podium
+  met spotlicht, gouden vloerlijn en spiegeling; de spier die werkt gloeit warm. Altijd donker-goud (ook in licht thema).
+  Schermtest `27b_oefenfiguren` toont alle houdingen naast elkaar.

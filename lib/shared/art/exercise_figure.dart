@@ -155,7 +155,7 @@ _Pose _poseFor(Motion m, double p) {
         q.thigh = [-1.45 * d, 0];
         q.knee = [1.57 * (1 - d), 1.57];
         q.hand = [null, const Offset(0.29, 0)];
-        q.arm = [0.1 + 2.95 * d, 0];
+        q.arm = [0.1 + 1.5 * d, 0];
         q.elbow = [0, 0];
       }
     case Motion.balance:
