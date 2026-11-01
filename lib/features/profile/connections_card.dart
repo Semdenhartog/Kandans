@@ -11,6 +11,7 @@ import '../../shared/widgets.dart';
 import '../routes/strava_routes_screen.dart';
 import 'strava_archive_screen.dart';
 import 'strava_history_screen.dart';
+import '../../data/services/health_consent.dart';
 
 /// Strava-oranje (huisstijl van Strava voor de "Koppel met Strava"-knop).
 const _stravaOrange = Color(0xFFFC5200);
@@ -71,6 +72,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard> with WidgetsB
             await _sync.installHealthConnect();
             return 'Installeer Health Connect en kom daarna terug naar Kadans.';
           case HealthStatus.notConnected:
+            if (!await HealthConsent.ensure(context)) return tr('Zonder toestemming koppelen we Health Connect niet.');
             final ok = await _sync.connectHealth();
             ref.invalidate(healthStatusProvider);
             if (!ok) return 'Geen toestemming gegeven. Je kunt het later opnieuw proberen.';

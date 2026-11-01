@@ -140,9 +140,9 @@ class _AgeGradeCard extends ConsumerWidget {
           content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Text(tr('Geboortejaar'), style: const TextStyle(fontWeight: FontWeight.w600)),
             Row(children: [
-              IconButton(onPressed: () => set(() => year--), icon: const Icon(Icons.remove_circle_outline)),
+              IconButton(tooltip: tr('Jaar eerder'), onPressed: () => set(() => year--), icon: const Icon(Icons.remove_circle_outline)),
               Text('$year', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-              IconButton(onPressed: () => set(() => year++), icon: const Icon(Icons.add_circle_outline)),
+              IconButton(tooltip: tr('Jaar later'), onPressed: () => set(() => year++), icon: const Icon(Icons.add_circle_outline)),
             ]),
             const SizedBox(height: 8),
             SegmentedButton<Sex>(

@@ -11,12 +11,14 @@ import '../../domain/pain_routine.dart';
 import '../activities/strength_screen.dart' show RoutinePlayerScreen;
 import '../../domain/pain_log.dart';
 import '../../shared/widgets.dart';
+import '../../data/services/health_consent.dart';
 
 void openPainScreen(BuildContext context) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const PainScreen()));
 
 /// Waar en hoe erg? Geeft null als je annuleert.
-Future<(PainSpot, int)?> askPain(BuildContext context) {
+Future<(PainSpot, int)?> askPain(BuildContext context) async {
+  if (!await HealthConsent.ensure(context) || !context.mounted) return null;
   var spot = PainSpot.shin;
   var sev = 3.0;
   return showModalBottomSheet<(PainSpot, int)>(

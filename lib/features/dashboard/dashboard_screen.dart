@@ -1017,7 +1017,7 @@ class _HeroCard extends StatelessWidget {
                           style: TextStyle(color: RwColors.subtle, fontSize: 13)),
                     ),
                     TextButton(
-                      style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accentLight),
+                      style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accent),
                       onPressed: () => openRecorder(context),
                       child: const Text('Toch nu'),
                     ),

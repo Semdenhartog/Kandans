@@ -16,6 +16,7 @@ import '../models/models.dart';
 import '../repositories/repositories.dart';
 import 'pending_runs.dart';
 import 'weather_service.dart';
+import 'health_consent.dart';
 
 /// Status van de Strava-koppeling (rij in external_connections).
 class StravaConnection {
@@ -279,7 +280,7 @@ class SyncService {
 
   /// Afgelopen nacht en je normaal (gemiddelde van de 14 dagen ervoor). Null als niets gekoppeld is.
   Future<BodySignals?> bodySignals() async {
-    if (!Platform.isAndroid || !await bodySignalsEnabled()) return null;
+    if (!Platform.isAndroid || !await bodySignalsEnabled() || !await HealthConsent.granted()) return null;
     try {
       await _configureHealth();
       final now = DateTime.now();
@@ -381,6 +382,7 @@ class SyncService {
 
   /// Leest hardloopsessies uit Health Connect en slaat nieuwe op (met het weer van dat moment).
   Future<int> syncHealth() async {
+    if (!await HealthConsent.granted()) return 0;
     if (await healthStatus() != HealthStatus.connected) return 0;
     final uid = _db.auth.currentUser?.id;
     if (uid == null) return 0;

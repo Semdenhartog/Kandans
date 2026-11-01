@@ -24,6 +24,7 @@ import '../activities/year_story_screen.dart';
 import '../planner/training_plan_screen.dart';
 import 'dashboard_providers.dart';
 import '../../data/services/run_pause_store.dart';
+import '../../data/services/health_consent.dart';
 
 /// "Jij vandaag": training uit je schema, je klaar-score, herstel en vorm.
 class TodayCard extends ConsumerWidget {
@@ -284,6 +285,7 @@ class _ReadinessSheet extends ConsumerWidget {
               const SizedBox(height: 14),
               FilledButton.icon(
                 onPressed: () async {
+                  if (!await HealthConsent.ensure(context)) return;
                   final ok = await ref.read(syncServiceProvider).connectBody();
                   ref.invalidate(bodySignalsProvider);
                   if (!context.mounted) return;

@@ -10,6 +10,7 @@ import '../../data/services/stride_sensor_service.dart';
 import '../../domain/heart_rate.dart';
 import '../../shared/widgets.dart';
 import '../activities/hrr_card.dart';
+import '../../data/services/health_consent.dart';
 
 void openHeartRateScreen(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HeartRateScreen()));
@@ -65,6 +66,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
 
   Future<void> _connect(DiscoveredDevice d) async {
     _stopScan();
+    if (!await HealthConsent.ensure(context)) return;
     await _hr.connect(d.id, d.name);
     if (mounted) setState(() {});
   }

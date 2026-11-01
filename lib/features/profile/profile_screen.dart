@@ -43,6 +43,9 @@ import 'sources_screen.dart';
 import '../../core/i18n.dart';
 import '../../data/services/run_pause_store.dart';
 import 'run_pause_tile.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/config.dart';
+import 'health_consent_tile.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -372,6 +375,14 @@ class ProfileScreen extends ConsumerWidget {
                   leading: TileIcon(Icons.privacy_tip_outlined),
                   title: Text(tr('Privacyverklaring')),
                   onTap: () => openPrivacy(context),
+                ),
+                Divider(height: 1, indent: 56),
+                const HealthConsentTile(),
+                Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: TileIcon(Icons.description_outlined),
+                  title: Text(tr('Algemene voorwaarden')),
+                  onTap: () => launchUrl(Uri.parse('${AppConfig.siteUrl}/voorwaarden.html'), mode: LaunchMode.externalApplication).catchError((_) => false),
                 ),
                 Divider(height: 1, indent: 56),
                 ListTile(

@@ -10,10 +10,8 @@
 <meta property="og:title" content="Een route uit Kadans">
 <meta property="og:description" content="Bekijk de route en bewaar hem in Kadans.">
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Saira:wght@700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,600&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <style>
 :root{--bg:#13110E;--surface:#1C1814;--border:#352E26;--gold:#D9BF92;--gold-deep:#B8955F;--gold-light:#F0DDB6;--text:#F1E9DC;--muted:#BDB1A0;--subtle:#94897A}
 *{box-sizing:border-box}
@@ -45,7 +43,7 @@ h1{font-family:Saira,sans-serif;font-weight:800;font-size:26px;margin:0 0 4px;li
   <a class="btn secondary" id="gpx" href="#" download="route.gpx">Download als GPX</a>
   <p class="note">Met Kadans zie je het beste moment om deze route te lopen, de wind onderweg en zet je hem op je horloge.</p>
 </div></section>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {
   var params = new URLSearchParams(location.hash.replace(/^#/, ''));

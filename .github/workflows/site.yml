@@ -1,6 +1,6 @@
 name: Website (GitHub Pages)
 
-# Zet de map site/ online op https://semdenhartog.github.io/Runwise/
+# Zet de map site/ online op https://semdenhartog.github.io/Kandans/
 # (live meekijken via live.html, de privacyverklaring en de landingspagina).
 # Eenmalig nodig: Settings → Pages → Source: "GitHub Actions".
 
@@ -40,6 +40,12 @@ jobs:
                   f.write_text(s, encoding="utf-8")
                   print(f"::notice::Wachtlijst gekoppeld in {f.name}")
           PY
+      # Kaartbibliotheek Leaflet zelf meeleveren (geen unpkg.com): zo gaan er geen IP-adressen van bezoekers naar derden.
+      - name: Leaflet meeleveren
+        run: |
+          cd "$RUNNER_TEMP" && npm pack leaflet@1.9.4 --silent && tar -xzf leaflet-1.9.4.tgz
+          mkdir -p "$GITHUB_WORKSPACE/site/vendor/leaflet"
+          cp -r package/dist/leaflet.js package/dist/leaflet.css package/dist/images package/LICENSE "$GITHUB_WORKSPACE/site/vendor/leaflet/"
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

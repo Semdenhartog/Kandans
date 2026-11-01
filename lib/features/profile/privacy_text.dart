@@ -14,7 +14,7 @@ class PrivacyBlock {
 }
 
 const privacyBlocks = <PrivacyBlock>[
-  PrivacyBlock.meta('Versie 1.3 · laatst bijgewerkt: 27 oktober 2026'),
+  PrivacyBlock.meta('Versie 1.4 · laatst bijgewerkt: 1 november 2026'),
   PrivacyBlock.paragraph('Kadans is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we verzamelen, waarom we dat doen en hoe je je rechten kunt uitoefenen.'),
   PrivacyBlock.heading('Wie zijn wij?'),
   PrivacyBlock.paragraph('Kadans is een app van Sem den Hartog, gevestigd in Barneveld. De verantwoordelijke voor de verwerking van je persoonsgegevens is Sem den Hartog.'),
@@ -58,6 +58,7 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.paragraph('We gebruiken geen advertenties, verkopen geen gegevens en volgen je niet buiten de app.'),
   PrivacyBlock.heading('Grondslag'),
   PrivacyBlock.paragraph('We verwerken deze gegevens omdat ze nodig zijn om de app te laten werken (uitvoering van de overeenkomst). Voor je locatie vragen we eerst toestemming in je telefoon; die kun je altijd intrekken in je telefooninstellingen.'),
+  PrivacyBlock.paragraph('**Gezondheidsgegevens** (hartslag, slaap, rusthartslag, HRV en pijntjes die je noteert) zijn bijzondere persoonsgegevens. Die verwerken we alleen met je **uitdrukkelijke toestemming**, die we apart vragen. Je kunt die toestemming altijd intrekken in de app via Ik → Gezondheidsgegevens. Daarna lezen en bewaren we geen nieuwe gezondheidsgegevens meer. Wil je ook wat al is opgeslagen laten wissen, mail ons dan of verwijder de betreffende runs. Kadans is bedoeld voor mensen van 16 jaar en ouder.'),
   PrivacyBlock.heading('Met wie delen we gegevens?'),
   PrivacyBlock.bullet('**Supabase** – slaat je account en gegevens op, op servers in de EU.'),
   PrivacyBlock.bullet('**Open-Meteo** en **Buienradar** – leveren het weer en de buien. Daarvoor sturen we alleen afgeronde coördinaten (zonder naam of e-mailadres).'),
@@ -74,14 +75,16 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.bullet('**Gelato** – drukt en bezorgt je poster. Gelato krijgt het drukbestand, je naam, bezorgadres en e-mailadres.'),
   PrivacyBlock.bullet('**Hardloopwinkel** – tik je bij "Tijd voor nieuwe schoenen" op de knop naar een winkel, dan open je hun website. Wij sturen daarbij alleen het schoenmodel mee, geen persoonlijke gegevens.'),
   PrivacyBlock.heading('Hoe lang bewaren we gegevens?'),
-  PrivacyBlock.paragraph('Zolang je account bestaat. Verwijder je je account, dan worden al je gegevens direct en definitief verwijderd. Eén uitzondering: heb je een poster besteld, dan bewaren we die bestelling (naam, bezorgadres, e-mailadres en aantal) zolang dat nodig is om de bestelling te kunnen uitvoeren en eventueel te kunnen oplossen. Een e-mailadres op de wachtlijst of bij een toezegging bewaren we tot de lancering en het versturen van je code; daarna verwijderen we het, of eerder als je dat vraagt.'),
+  PrivacyBlock.paragraph('Zolang je account bestaat. Verwijder je je account, dan worden al je gegevens direct en definitief verwijderd. Eén uitzondering: heb je een poster besteld, dan bewaren we die bestelling (naam, bezorgadres, e-mailadres, aantal en bedrag) zolang dat nodig is om de bestelling uit te voeren en op te lossen, en zolang de wet ons verplicht om de boekhouding te bewaren (7 jaar). Een e-mailadres op de wachtlijst of bij een toezegging bewaren we tot de lancering en het versturen van je code; daarna verwijderen we het, of eerder als je dat vraagt.'),
   PrivacyBlock.heading('Jouw rechten'),
   PrivacyBlock.bullet('**Inzien:** in de app via Ik → Mijn gegevens kopiëren.'),
-  PrivacyBlock.bullet('**Verwijderen:** in de app via Ik → Account verwijderen. Je Strava-koppeling wordt dan ook ingetrokken. Een Premium-abonnement zeg je apart op in Google Play. Kun je de app niet meer openen, mail ons dan.'),
+  PrivacyBlock.bullet('**Verwijderen:** in de app via Ik → Account verwijderen. Je Strava-koppeling wordt dan ook ingetrokken. Een Premium-abonnement zeg je apart op in Google Play. Kun je de app niet meer openen, volg dan de stappen op Account verwijderen.'),
+  PrivacyBlock.bullet('**Toestemming intrekken:** voor gezondheidsgegevens in de app via Ik → Gezondheidsgegevens, voor locatie, agenda en Health Connect in je telefooninstellingen.'),
   PrivacyBlock.bullet('**Corrigeren, bezwaar maken of overdragen:** mail ons.'),
   PrivacyBlock.bullet('Ben je het niet eens met hoe we met je gegevens omgaan? Dan kun je een klacht indienen bij de Autoriteit Persoonsgegevens.'),
   PrivacyBlock.heading('Beveiliging'),
   PrivacyBlock.paragraph('Alle verbindingen zijn versleuteld (HTTPS). In de database kan elke gebruiker alleen zijn eigen gegevens zien.'),
   PrivacyBlock.heading('Wijzigingen'),
   PrivacyBlock.paragraph('Als deze verklaring verandert, passen we de datum bovenaan aan. Bij grote wijzigingen laten we het je in de app weten.'),
+  PrivacyBlock.paragraph('Zie ook de algemene voorwaarden.'),
 ];

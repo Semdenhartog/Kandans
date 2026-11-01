@@ -259,7 +259,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                       FilledButton.icon(
                         style: FilledButton.styleFrom(
                           backgroundColor: RwColors.accent.withValues(alpha: 0.16),
-                          foregroundColor: RwColors.accentLight,
+                          foregroundColor: RwColors.accent,
                           side: BorderSide(color: RwColors.accent.withValues(alpha: 0.35)),
                         ),
                         onPressed: () => openRecorder(context, route: route),

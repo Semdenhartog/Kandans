@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../core/config.dart';
 import '../profile/privacy_screen.dart';
 import 'auth_widgets.dart';
 import '../../core/i18n.dart';
@@ -37,7 +40,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
     if (!_accepted) {
-      setState(() => _error = tr('Ga akkoord met de privacyverklaring om verder te gaan.'));
+      setState(() => _error = tr('Bevestig dat je 16 jaar of ouder bent en ga akkoord met de voorwaarden en de privacyverklaring.'));
       return;
     }
     setState(() {
@@ -52,6 +55,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         data: {
           'first_name': _firstName.text.trim(),
           'full_name': _firstName.text.trim(),
+          // Bewijs van akkoord: welke versie en wanneer.
+          'age_16_plus': true,
+          'terms_version': '1.0',
+          'privacy_version': '1.4',
+          'accepted_at': DateTime.now().toUtc().toIso8601String(),
         },
       );
       if (!mounted) return;
@@ -131,7 +139,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         TextSpan(
                           style: TextStyle(color: RwColors.muted, height: 1.4),
                           children: [
-                            TextSpan(text: tr('Ik ga akkoord met de ')),
+                            TextSpan(text: tr('Ik ben 16 jaar of ouder en ga akkoord met de ')),
+                            TextSpan(
+                              text: tr('voorwaarden'),
+                              style: TextStyle(
+                                color: RwColors.accent,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () => launchUrl(Uri.parse('${AppConfig.siteUrl}/voorwaarden.html'),
+                                        mode: LaunchMode.externalApplication)
+                                    .catchError((_) => false),
+                            ),
+                            TextSpan(text: tr(' en de ')),
                             TextSpan(
                               text: tr('privacyverklaring'),
                               style: TextStyle(

@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/heart_rate.dart';
 import 'stride_sensor_service.dart';
+import 'health_consent.dart';
 
 enum HrStatus { off, scanning, connecting, connected, lost }
 
@@ -88,6 +89,7 @@ class HeartRateService {
   /// Verbinden met de onthouden band (bijv. bij het starten van een run).
   Future<void> autoConnect() async {
     if (_deviceId == null || status.value == HrStatus.connected || status.value == HrStatus.connecting) return;
+    if (!await HealthConsent.granted()) return;
     if (!await ensurePermissions()) return;
     _wanted = true;
     await _open();

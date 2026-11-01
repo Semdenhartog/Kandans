@@ -1,0 +1,9 @@
+/* Lettertypes zelf gehost (SIL Open Font License, zie fonts/OFL-*.txt). Geen Google Fonts: geen IP-adressen naar derden. */
+@font-face{font-family:'Saira';font-weight:600 700;font-style:normal;font-display:swap;src:url(fonts/Saira-Bold.woff) format('woff')}
+@font-face{font-family:'Saira';font-weight:800;font-style:normal;font-display:swap;src:url(fonts/Saira-ExtraBold.woff) format('woff')}
+@font-face{font-family:'DM Sans';font-weight:400;font-style:normal;font-display:swap;src:url(fonts/DMSans-Regular.woff) format('woff')}
+@font-face{font-family:'DM Sans';font-weight:500;font-style:normal;font-display:swap;src:url(fonts/DMSans-Medium.woff) format('woff')}
+@font-face{font-family:'DM Sans';font-weight:600;font-style:normal;font-display:swap;src:url(fonts/DMSans-SemiBold.woff) format('woff')}
+@font-face{font-family:'DM Sans';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/DMSans-Bold.woff) format('woff')}
+/* Zichtbare focusrand voor wie met het toetsenbord navigeert. */
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid #D9BF92;outline-offset:3px;border-radius:6px}

@@ -8,10 +8,8 @@
 <title>Live meelopen – Kadans</title>
 <meta name="theme-color" content="#13110E">
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Saira:wght@700;800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,600&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <style>
 :root{
   --bg:#13110E; --surface:#1C1814; --surface-high:#25201B; --border:#352E26;
@@ -80,7 +78,7 @@ button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);bord
   </div>
   <p class="note" id="note">De kaart ververst vanzelf elke 15 seconden.</p>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {
   var API = 'https://jdswennyfczpqblfkrxt.supabase.co/functions/v1/live-share';

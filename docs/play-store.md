@@ -37,7 +37,7 @@ Er is **geen** `ACCESS_BACKGROUND_LOCATION` nodig; vink bij "Locatie op de achte
 ## 2. Gegevensveiligheid (Data safety)
 
 **Worden gegevens verzameld of gedeeld?** Ja, verzameld. Niet gedeeld met derden voor hun eigen doeleinden.
-**Versleuteld tijdens verzending?** Ja (HTTPS). **Kan de gebruiker verwijdering aanvragen?** Ja, in de app (Ik → Account verwijderen).
+**Versleuteld tijdens verzending?** Ja (HTTPS). **Kan de gebruiker verwijdering aanvragen?** Ja, in de app (Ik → Account verwijderen) en via de website: https://semdenhartog.github.io/Kandans/verwijderen.html (deze URL invullen bij "Verwijderen van account" in de Play Console).
 
 | Gegevenstype (Play-categorie) | Verzameld | Waarom | Optioneel? |
 |---|---|---|---|
