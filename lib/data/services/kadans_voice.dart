@@ -45,11 +45,13 @@ class KadansVoice {
   }
 
   /// Spreekt [text] uit met de Kadans-stem; lukt dat niet, dan met [fallback] (de telefoonstem).
-  void speak(String text, Future<void> Function(String text) fallback) {
-    _chain = _chain.then((_) => _speakOne(text, fallback)).catchError((Object _) {});
+  /// [stopFallback] legt de telefoonstem stil vlak voordat de Kadans-stem begint: nooit twee stemmen tegelijk.
+  void speak(String text, Future<void> Function(String text) fallback, {Future<void> Function()? stopFallback}) {
+    _chain = _chain.then((_) => _speakOne(text, fallback, stopFallback)).catchError((Object _) {});
   }
 
-  Future<void> _speakOne(String text, Future<void> Function(String) fallback) async {
+  Future<void> _speakOne(String text, Future<void> Function(String) fallback, Future<void> Function()? stopFallback) async {
+    var started = false;
     try {
       final until = _pauseUntil;
       if (!await enabled() || (until != null && DateTime.now().isBefore(until))) {
@@ -61,11 +63,20 @@ class KadansVoice {
         await fallback(text);
         return;
       }
+      if (stopFallback != null) await stopFallback().catchError((Object _) {});
+      started = true;
       await _play(file);
     } catch (_) {
-      // Nooit twee stemmen tegelijk: ook de terugval wacht tot hij klaar is, pas dan de volgende zin.
-      await fallback(text).catchError((Object _) {});
+      // Was de Kadans-stem al begonnen, dan niet alsnog de telefoonstem eroverheen.
+      if (!started) await fallback(text).catchError((Object _) {});
     }
+  }
+
+  /// Zet een lopende Kadans-zin stil (vlak voordat de telefoonstem iets zegt).
+  Future<void> stopPlayback() async {
+    try {
+      await _player?.stop();
+    } catch (_) {}
   }
 
   /// Vaste sleutel per zin (FNV-1a, 64 bit), los van de Dart-versie.
@@ -94,7 +105,7 @@ class KadansVoice {
     try {
       final res = await Supabase.instance.client.functions
           .invoke('tts', body: {'text': text})
-          .timeout(const Duration(seconds: 6));
+          .timeout(const Duration(seconds: 10));
       final data = res.data;
       final bytes = data is Uint8List ? data : (data is List<int> ? Uint8List.fromList(data) : null);
       if (bytes == null || bytes.isEmpty) return null;

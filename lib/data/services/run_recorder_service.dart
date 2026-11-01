@@ -1087,13 +1087,20 @@ class RunRecorderService {
   void _say(String text) {
     if (!voice) return;
     // Testfase: eerst de Kadans-stem (ElevenLabs); lukt dat niet, dan de telefoonstem.
-    KadansVoice.instance.speak(text, (t) async {
-      // Wacht tot de telefoonstem klaar is (awaitSpeakCompletion), zodat de volgende zin er niet doorheen praat.
-      try {
-        await _ensureTts();
-        await _tts?.speak(t, focus: true).timeout(const Duration(seconds: 20));
-      } catch (_) {}
-    });
+    KadansVoice.instance.speak(
+      text,
+      (t) async {
+        // Wacht tot de telefoonstem klaar is (awaitSpeakCompletion), zodat de volgende zin er niet doorheen praat.
+        try {
+          await KadansVoice.instance.stopPlayback();
+          await _ensureTts();
+          await _tts?.speak(t, focus: true).timeout(const Duration(seconds: 20));
+        } catch (_) {}
+      },
+      stopFallback: () async {
+        await _tts?.stop();
+      },
+    );
   }
 
   /// Bewegende tijd inclusief de seconden sinds de laatste GPS-meting (hooguit 5 s).
