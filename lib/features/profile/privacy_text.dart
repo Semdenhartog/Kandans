@@ -14,7 +14,7 @@ class PrivacyBlock {
 }
 
 const privacyBlocks = <PrivacyBlock>[
-  PrivacyBlock.meta('Versie 1.4 · laatst bijgewerkt: 1 november 2026'),
+  PrivacyBlock.meta('Versie 1.5 · laatst bijgewerkt: 1 november 2026'),
   PrivacyBlock.paragraph('Kadans is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we verzamelen, waarom we dat doen en hoe je je rechten kunt uitoefenen.'),
   PrivacyBlock.heading('Wie zijn wij?'),
   PrivacyBlock.paragraph('Kadans is een app van Sem den Hartog, gevestigd in Barneveld. De verantwoordelijke voor de verwerking van je persoonsgegevens is Sem den Hartog.'),
@@ -70,6 +70,7 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.bullet('**openrouteservice** (HeiGIT) – maakt rondjes als je Route maken gebruikt. Daarvoor sturen we alleen het startpunt en de gewenste afstand. Teken je zelf een route, dan sturen we alleen de routepunten om de route te maken.'),
   PrivacyBlock.bullet('**PDOK** (Kadaster) – zoekt adressen en levert de kaarten en luchtfoto\'s. Daarvoor sturen we je zoekopdracht en het kaartgebied dat je bekijkt.'),
   PrivacyBlock.bullet('**OpenStreetMap / Overpass** – zoekt watertappunten en toiletten langs je route. Daarvoor sturen we alleen het gebied rond de route.'),
+  PrivacyBlock.bullet('**ElevenLabs** – maakt in de testfase de gesproken coachzinnen tijdens je run, als de Kadans-stem aanstaat. We sturen alleen de tekst van de zin (bijvoorbeeld afstand, tempo of een aanmoediging met de naam die de aanmoediger zelf invulde), zonder je account of locatie. Uit te zetten bij de stemkeuze voor het opnemen.'),
   PrivacyBlock.bullet('**Google Play** en **RevenueCat** – voor het afhandelen en bijhouden van je Premium-abonnement en losse aankopen (zoals de Luxe-ontwerpen).'),
   PrivacyBlock.bullet('**Stripe** – handelt de betaling van een posterbestelling af (iDEAL, bankpas of creditcard). Stripe krijgt je e-mailadres en het bedrag; je betaalgegevens zien wij niet.'),
   PrivacyBlock.bullet('**Gelato** – drukt en bezorgt je poster. Gelato krijgt het drukbestand, je naam, bezorgadres en e-mailadres.'),

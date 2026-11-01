@@ -40,7 +40,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   - `geheimen.yml`: geheimen-scan.
   - `site.yml`: zet `site/` op GitHub Pages (https://semdenhartog.github.io/Kandans/ — hoofdletter K), vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in. Links in `site/` zijn relatief.
-- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.4. Aanmelden vraagt 16+ en akkoord (versies in user metadata).
+- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.5. Aanmelden vraagt 16+ en akkoord (versies in user metadata).
   Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
   Site gebruikt eigen lettertypes (`site/fonts.css`) en Leaflet uit `site.yml` (geen Google Fonts/unpkg → geen cookiebanner nodig).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
@@ -106,6 +106,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   Pijntjes-routine `domain/pain_routine.dart`. Samen-extra's (loopmaatjes, weddenschappen, loopgroepen): `community/together_screens.dart`,
   `data/services/together_service.dart`, SQL 0037. Snelkoppeling `runwise://app/moment` (`core/voice_shortcut.dart`, `android_extra/res/xml/shortcuts.xml`).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
+- **Kadans-stem (TESTFASE, ElevenLabs gratis plan = niet commercieel):** edge function `tts` (geheimen `ELEVENLABS_API_KEY`, optioneel
+  `ELEVENLABS_VOICE_ID` standaard Berend `pb6qe8wKy786fK6M05tq`, `ELEVENLABS_MODEL` standaard `eleven_flash_v2_5`) → app
+  `data/services/kadans_voice.dart` (cache per zin op toestel, terugval op telefoonstem). Schakelaar in de stemkeuze bij Opnemen.
+  **Vóór de lancering vervangen of betaald plan nemen** (Sem wil dan een andere stem).
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).

@@ -38,6 +38,7 @@ const _sources = <(String, String, String, String)>[
   ('Kaarten en adressen', 'PDOK / Kadaster', 'Achtergrondkaart, luchtfoto (Beeldmateriaal.nl) en adressen zoeken. CC BY 4.0.', 'https://www.pdok.nl'),
   ('Wegen, paden en voorzieningen', 'OpenStreetMap-bijdragers', 'Paden, ondergrond, verlichting, water en toiletten. © OpenStreetMap-bijdragers, ODbL.', 'https://www.openstreetmap.org/copyright'),
   ('Rondjes maken', 'openrouteservice (HeiGIT)', 'Berekent routes over echte paden.', 'https://openrouteservice.org'),
+  ('Kadans-stem (testfase)', 'ElevenLabs', 'Gesproken coachzinnen tijdens je run. Stem gemaakt met ElevenLabs.', 'https://elevenlabs.io'),
   ('Straatfoto\'s', 'Mapillary', 'Foto\'s langs je route. CC BY-SA 4.0, met de naam van de maker bij elke foto.', 'https://www.mapillary.com'),
   ('Bezienswaardigheden', 'Wikipedia / Wikimedia Commons', 'Foto\'s en uitleg van plekken langs je route; licentie per foto.', 'https://commons.wikimedia.org'),
   ('Coach', 'Anthropic (Claude)', 'De AI achter de coach.', 'https://www.anthropic.com'),

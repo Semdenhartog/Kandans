@@ -33,6 +33,7 @@ import 'rain_service.dart';
 import 'recording_store.dart';
 import '../../domain/live_quests.dart';
 import '../../domain/run_helpers.dart';
+import 'kadans_voice.dart';
 
 /// Wat het opnamescherm laat zien.
 @immutable
@@ -1083,8 +1084,11 @@ class RunRecorderService {
   }
 
   void _say(String text) {
-    if (!voice || _tts == null) return;
-    _tts!.speak(text, focus: true).catchError((_) => 0);
+    if (!voice) return;
+    // Testfase: eerst de Kadans-stem (ElevenLabs); lukt dat niet, dan de telefoonstem.
+    KadansVoice.instance.speak(text, (t) {
+      _ensureTts().then((_) => _tts?.speak(t, focus: true)).catchError((Object _) => null);
+    });
   }
 
   /// Bewegende tijd inclusief de seconden sinds de laatste GPS-meting (hooguit 5 s).

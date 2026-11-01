@@ -73,6 +73,7 @@ import 'earbuds_tile.dart';
 import 'fall_alert.dart';
 import '../challenges/community_screen.dart' show refreshCommunityQuietly;
 import '../../data/services/community_service.dart' show communityServiceProvider;
+import '../../data/services/kadans_voice.dart';
 
 /// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
 void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle, RunRoute? route, bool? indoor}) {
@@ -3102,12 +3103,16 @@ class _VoicePickerState extends State<_VoicePicker> {
   final _svc = RunRecorderService.instance;
   List<({String name, String locale, bool network, int quality})>? _voices;
   static const _sample = 'Kilometer 3. Dit stuk 5 minuten 30 per kilometer. Lekker bezig!';
+  bool _kadans = false;
 
   @override
   void initState() {
     super.initState();
     _svc.dutchVoices().then((v) {
       if (mounted) setState(() => _voices = v);
+    });
+    KadansVoice.instance.enabled().then((v) {
+      if (mounted) setState(() => _kadans = v);
     });
   }
 
@@ -3140,6 +3145,22 @@ class _VoicePickerState extends State<_VoicePicker> {
     }
     final chosen = _svc.voiceChoice;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      // Testfase: de Kadans-stem (ElevenLabs). Zonder internet of als hij niet lukt: de telefoonstem hieronder.
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: _kadans,
+        title: const Text('Kadans-stem (test)'),
+        subtitle: Text('Natuurlijke stem via ElevenLabs, alleen met internet. Anders de telefoonstem hieronder.',
+            style: TextStyle(color: RwColors.muted, fontSize: 12, height: 1.35)),
+        onChanged: (v) async {
+          HapticFeedback.selectionClick();
+          await KadansVoice.instance.setEnabled(v);
+          if (!mounted) return;
+          setState(() => _kadans = v);
+          if (v) _svc.say(_sample);
+        },
+      ),
+      const Divider(height: 1),
       ListTile(
         contentPadding: EdgeInsets.zero,
         dense: true,
