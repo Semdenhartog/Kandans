@@ -249,7 +249,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 id: 'today',
                 icon: Icons.wb_sunny_outlined,
                 padding: EdgeInsets.only(bottom: 14),
-                text: 'Vandaag zie je het beste moment om te lopen. Tik op een uur in de grafiek voor het weer en kledingadvies op dat moment. Kaarten verplaatsen of verbergen kan met het schuifje rechtsboven.',
+                text: 'Vandaag zie je het beste moment om te lopen. Tik op een uur in de grafiek voor het weer en kledingadvies op dat moment. Kaarten kiezen en ordenen doe je onder \"Meer vandaag\".',
               ),
               const PauseBanner(),
               Row(
@@ -265,11 +265,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                   const CoachButton(),
-                  IconButton(
-                    tooltip: 'Indeling van Vandaag aanpassen',
-                    icon: Icon(Icons.tune, color: RwColors.subtle),
-                    onPressed: () => showDashLayoutSheet(context),
-                  ),
                   const MeButton(),
                 ],
               ),
@@ -702,8 +697,18 @@ class _ResultsState extends State<_Results> {
                 label: Text(_more ? 'Minder' : 'Meer vandaag'),
               ),
             ]),
-            if (_more)
+            if (_more) ...[
               for (final w in more) ...[const SizedBox(height: 12), w],
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => showDashLayoutSheet(context),
+                  icon: const Icon(Icons.tune, size: 18),
+                  label: const Text('Kaarten kiezen en ordenen'),
+                ),
+              ),
+            ],
           ];
         }(),
         const SizedBox(height: 12),
