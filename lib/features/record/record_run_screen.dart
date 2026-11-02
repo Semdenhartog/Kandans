@@ -2090,7 +2090,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                               Positioned(
                                                 left: 10,
                                                 right: 10,
-                                                bottom: 10,
+                                                bottom: 30, // vrij van de kaartvermelding (© Kadaster/PDOK)
                                                 child: GlassPanel(
                                                   padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
                                                   child: Column(
