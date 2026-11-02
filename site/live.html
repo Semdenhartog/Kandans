@@ -26,12 +26,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans
 .leaflet-control-attribution a{color:#ddd!important}
 .leaflet-bar a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
 header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:10px;pointer-events:none}
-.pill{pointer-events:auto;background:rgba(19,17,14,.9);border:1px solid var(--border);border-radius:999px;padding:8px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(6px)}
+.pill{pointer-events:auto;background:rgba(19,17,14,.9);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(6px)}
 .brand img{height:22px;display:block}.brand .adans{display:block;flex:none;aspect-ratio:737/102;background:currentColor;-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat;height:9px;color:#D9BF92;margin-bottom:0}.pill.brand{align-items:flex-end;gap:5px}
 .panel{background:var(--surface);border-top:1px solid var(--border);padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
 .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .name{font-family:Saira,sans-serif;font-weight:800;font-size:22px;margin:0;line-height:1.1}
-.status{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;border-radius:999px;padding:4px 10px}
+.status{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;border-radius:8px;padding:4px 10px}
 .status.live{background:rgba(74,222,128,.14);color:var(--good)}
 .status.stale{background:rgba(245,197,66,.14);color:#F5C542}
 .status.ended{background:rgba(141,141,152,.16);color:var(--muted)}
@@ -39,21 +39,22 @@ header{position:absolute;z-index:1000;top:max(12px,env(safe-area-inset-top));lef
 .live .dot{animation:pulse 1.6s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.stat{background:var(--surface-high);border-radius:14px;padding:10px 12px}
+.stat{background:var(--surface-high);border-radius:8px;padding:10px 12px}
 .stat b{display:block;font-family:Saira,sans-serif;font-weight:800;font-size:20px}
 .stat span{font-size:12px;color:var(--subtle)}
 .note{color:var(--subtle);font-size:12px;margin:10px 0 0}
 .msg{padding:40px 24px;text-align:center;color:var(--muted)}
 .msg h1{font-family:Saira,sans-serif;font-weight:800;color:var(--text);font-size:26px;margin:0 0 8px}
 .runner{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 6px rgba(253,138,38,.3),0 2px 8px rgba(0,0,0,.6)}
-button.follow{pointer-events:auto;margin-left:auto;background:rgba(19,17,14,.9);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
+button.follow{pointer-events:auto;margin-left:auto;background:rgba(19,17,14,.9);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
 button.follow[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
 .cheers{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.cheers button{flex:1 1 auto;min-width:72px;border:1px solid var(--border);background:var(--surface-high);color:inherit;border-radius:999px;padding:9px 12px;font:600 14px 'DM Sans',sans-serif;cursor:pointer}
+.cheers button{flex:1 1 auto;min-width:72px;border:1px solid var(--border);background:var(--surface-high);color:inherit;border-radius:8px;padding:9px 12px;font:600 14px 'DM Sans',sans-serif;cursor:pointer}
 .cheers button:disabled{opacity:.5;cursor:default}
 .cheers button.sent{border-color:#D9BF92;color:#D9BF92}
 .alert{display:none;background:#B42318;color:#fff;padding:12px 20px;font:600 15px 'DM Sans',sans-serif}
 .alert.on{display:block}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>

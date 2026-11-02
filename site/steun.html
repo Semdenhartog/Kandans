@@ -26,8 +26,8 @@ a{color:var(--accent)}a:hover{color:var(--accent-light)}
 .display{font-family:Saira,sans-serif;font-weight:800;letter-spacing:-0.01em;line-height:1.05;margin:0}
 .eyebrow{font-family:Saira,sans-serif;font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
 .lead{font-size:18px;color:var(--muted);margin:0;max-width:40rem}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:22px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 26px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 26px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}/* unslop-ignore: pil alleen voor knoppen, bewuste keuze */
 .btn-primary{background:var(--accent);color:var(--bg)}.btn-primary:hover{color:var(--bg);filter:brightness(1.07)}
 .btn-ghost{border:1.5px solid var(--border);background:transparent;color:var(--text)}
 
@@ -45,7 +45,7 @@ h2{font-family:Saira,sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,38px)
 .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
 .tier{padding:24px;display:flex;flex-direction:column;gap:12px;position:relative}
 .tier.featured{border-color:var(--accent-deep);box-shadow:0 18px 60px rgba(217,191,146,.10)}
-.tier .tag{position:absolute;top:-12px;left:20px;background:var(--accent);color:var(--bg);font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.tier .tag{position:absolute;top:-12px;left:20px;background:var(--accent);color:var(--bg);font-size:12px;font-weight:700;padding:3px 10px;border-radius:8px}
 .tier h3{margin:0;font-family:Saira,sans-serif;font-size:20px}
 .tier .price{font-family:Saira,sans-serif;font-weight:800;font-size:40px;line-height:1}
 .tier .price small{font-size:14px;color:var(--subtle);font-weight:600}
@@ -72,11 +72,11 @@ h2{font-family:Saira,sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,38px)
 .faq summary{cursor:pointer;font-weight:600}
 .faq p{color:var(--muted);margin:10px 0 0}
 
-dialog{border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--text);padding:26px;width:min(440px,calc(100vw - 32px))}
+dialog{border:1px solid var(--border);border-radius:16px;background:var(--surface);color:var(--text);padding:26px;width:min(440px,calc(100vw - 32px))}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog h3{margin:0 0 6px;font-family:Saira,sans-serif;font-size:22px}
 dialog p{color:var(--muted);margin:0 0 16px;font-size:15px}
-dialog input[type=email]{width:100%;min-height:50px;border-radius:14px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:0 16px;font-size:16px;font-family:inherit}
+dialog input[type=email]{width:100%;min-height:50px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:0 16px;font-size:16px;font-family:inherit}
 dialog .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 dialog .row .btn{flex:1}
 dialog label.check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--muted);margin-top:12px}
