@@ -389,7 +389,7 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const []}) async {
+    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const [], Future<void> Function(WidgetTester)? act}) async {
   RwColors.use(dark ? rwZandAvond : rwZand);
   addTearDown(() => RwColors.use(rwZand));
   tester.view.physicalSize = Size(_w * 2, height * 2);
@@ -417,6 +417,12 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
   if (after != null) {
     after();
     for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+  }
+  if (act != null) {
+    await act(tester);
+    for (var i = 0; i < 8; i++) {
       await tester.pump(const Duration(milliseconds: 120));
     }
   }
@@ -497,6 +503,30 @@ void main() {
           nextTurnIn: 120,
         );
       }));
+  // PROEF glas: kaartpagina met cijfers in matglas (licht + donker).
+  RecorderView glasView() {
+    final pts = decodePolyline(_routes.first.polyline);
+    final half = pts.length ~/ 2;
+    return RecorderView(
+        status: RecorderStatus.running,
+        distance: 5230,
+        movingSeconds: 1652,
+        currentPace: 309,
+        averagePace: 316,
+        km: 5,
+        gpsAccuracy: 4,
+        followRoute: pts,
+        track: pts.take(half + 1).toList(),
+        position: pts[half],
+      );
+  }
+  Future<void> naarKaart(WidgetTester t) async {
+    await t.drag(find.byType(PageView), const Offset(-500, 0));
+  }
+  testWidgets('11g glas kaart', (t) => _shot(t, '11g_glas_kaart', const RecordRunScreen(), height: 915,
+      after: () => RunRecorderService.instance.view.value = glasView(), act: naarKaart));
+  testWidgets('65g donker glas kaart', (t) => _shot(t, '65g_donker_glas_kaart', const RecordRunScreen(), height: 915, dark: true,
+      after: () => RunRecorderService.instance.view.value = glasView(), act: naarKaart));
   testWidgets('11b afslag nu, groot', (t) => _shot(t, '11b_afslag_groot', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
         RunRecorderService.instance.view.value = RecorderView(
           status: RecorderStatus.running,

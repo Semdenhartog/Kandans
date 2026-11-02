@@ -52,6 +52,7 @@ import '../../domain/start_time_scoring.dart' show RouteWind, routeWind;
 import '../../domain/route_turns.dart';
 import '../../domain/extras.dart' show daysAgoWords, calendarDaysBetween;
 import '../../domain/shoes.dart';
+import '../../shared/glass.dart';
 import '../../shared/permission_primer.dart';
 import '../../shared/rolling_text.dart';
 import '../../shared/segmented.dart';
@@ -2080,11 +2081,22 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                         _stats(v),
                                         Padding(
                                           padding: const EdgeInsets.only(top: 12, bottom: 8),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          // PROEF glas: kaart over de volle hoogte, cijfers in matglas eroverheen.
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(16),
+                                            child: Stack(
                                             children: [
-                                              Expanded(child: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute, ghost: v.ghostPoint)),
-                                              const SizedBox(height: 10),
+                                              Positioned.fill(child: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute, ghost: v.ghostPoint)),
+                                              Positioned(
+                                                left: 10,
+                                                right: 10,
+                                                bottom: 10,
+                                                child: GlassPanel(
+                                                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                    children: [
                                               Row(
                                                 children: [
                                                   Expanded(child: _Big(label: 'Afstand', value: Fmt.km(v.distance, decimals: 2), small: true)),
@@ -2107,7 +2119,12 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                                       : trf('Markeren ({n} gezet)', {'n': v.markers})),
                                                 ),
                                               ],
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
                                             ],
+                                            ),
                                           ),
                                         ),
                                         _LiveSplits(view: v, recording: _svc.recording, every: _liveEvery, onEvery: _setLiveEvery),
