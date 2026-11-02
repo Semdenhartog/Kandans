@@ -115,7 +115,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   voorlezen"; de fix (commit 6da79f1) is nog niet door Sem bevestigd.
   **Vóór de lancering vervangen of betaald plan nemen** (Sem wil dan een andere stem).
 - Marketing (buiten de repo): Instagram **@kadans.app**. Instagram-skills (`/ig-reel`, `/ig-caption`, `/ig-plan` enz.) en
-  `frontend-design` zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
+  `frontend-design` en `unslop-ui` (controle op AI-look, scanner: `devibe_scan.py` uit JCarterJohnson/vibecoded-design-tells) zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).
@@ -140,6 +140,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
   loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
   stukken, live aanmoedigen, kantelen (landschap/medailles), widget, oefenfiguur (gouden tekenpop, schermtest `27b_oefenfiguren`).
+- **Later (aparte ronde, als de app stabiel is): app ont-AI'en met skill `unslop-ui`** (site is al gedaan, score 0, 2-11-2026).
+  Stap 1: vaste schaal voor afronding/schaduw in `theme.dart` (bijv. `RwRadius.s/m/l`; nu 12+ losse waarden en 21× pil).
+  Stap 2: verlooptekst (`ShaderMask`, 7×) → effen goud; verlopen bij Premium/Luxe/ledenkaart mogen blijven (huisstijl).
+  Daarna: 16 gouden gloed-schaduwen en emoji (5 bestanden) per geval beoordelen. Controle via `screens.yml`. Scanner leest geen Dart → met de hand.
 
 ## Agent skills
 - Issues: GitHub Issues van `Semdenhartog/Kandans` (via `gh`), zie `docs/agents/issue-tracker.md`.
