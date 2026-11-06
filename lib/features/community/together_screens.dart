@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
@@ -104,7 +105,7 @@ class _BuddiesScreenState extends ConsumerState<BuddiesScreen> {
                 ? ErrorView(message: _error!, onRetry: _load)
                 : RefreshIndicator(
                     onRefresh: _load,
-                    child: ListView(padding: const EdgeInsets.all(16), children: [
+                    child: ListView(physics: const AlwaysScrollableScrollPhysics(), padding: const EdgeInsets.all(16), children: [
                       RwCard(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                           SwitchListTile(
@@ -255,7 +256,7 @@ class _BetsScreenState extends State<BetsScreen> {
                       )
                     : RefreshIndicator(
                         onRefresh: _load,
-                        child: ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), children: [
+                        child: ListView(physics: const AlwaysScrollableScrollPhysics(), padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), children: [
                           for (final b in _bets) ...[_BetCard(bet: b, onAnswer: (y) => _answer(b, y)), const SizedBox(height: 10)],
                         ]),
                       ),
@@ -408,7 +409,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
             ? const LoadingView(cards: 2)
             : _error != null
                 ? ErrorView(message: _error!, onRetry: _load)
-                : ListView(padding: const EdgeInsets.all(16), children: [
+                : RefreshIndicator(onRefresh: _load, child: ListView(physics: const AlwaysScrollableScrollPhysics(), padding: const EdgeInsets.all(16), children: [
                     Text(tr('Een eigen groep met je loopclub, collega\'s of vrienden: een ranglijst per week en maand, en een route van de week.'),
                         style: TextStyle(color: RwColors.muted, height: 1.45)),
                     const SizedBox(height: 12),
@@ -431,7 +432,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
                           },
                         ),
                       ),
-                  ]),
+                  ])),
       );
 }
 
@@ -446,6 +447,7 @@ class GroupScreen extends ConsumerStatefulWidget {
 class _GroupScreenState extends ConsumerState<GroupScreen> {
   final _svc = TogetherService();
   List<GroupRow> _rows = const [];
+  List<GroupRun> _runs = const [];
   bool _month = false, _loading = true;
   late RunGroup _g = widget.group;
 
@@ -460,8 +462,69 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
       _rows = await _svc.board(_g.id);
       _g = (await _svc.groups()).where((x) => x.id == _g.id).firstOrNull ?? _g;
     } catch (_) {}
+    try {
+      _runs = await _svc.groupRuns(_g.id);
+    } catch (_) {}
     if (mounted) setState(() => _loading = false);
   }
+
+  Future<void> _answer(GroupRun r, bool going) async {
+    try {
+      await _svc.answerGroupRun(r.id, r.myAnswer == going ? null : going);
+      await _load();
+    } catch (e) {
+      if (mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+    }
+  }
+
+  Future<void> _deleteRun(GroupRun r) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Groepsrun schrappen?')),
+        content: Text(tr('Iedereen in de groep ziet hem dan niet meer.')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Annuleren'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Schrappen'))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await _svc.deleteGroupRun(r.id);
+      await _load();
+    } catch (e) {
+      if (mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+    }
+  }
+
+  Future<void> _plan() async {
+    final res = await showModalBottomSheet<({DateTime at, String place, double? km, String note})>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => const _PlanGroupRunSheet(),
+    );
+    if (res == null) return;
+    try {
+      await _svc.planGroupRun(_g.id, res.at, place: res.place, km: res.km, note: res.note);
+      await _load();
+      if (mounted) showMessage(context, tr('Gepland. De groep ziet het in de agenda.'));
+    } catch (e) {
+      if (mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+    }
+  }
+
+  Widget _agenda() => RwCard(
+        title: tr('AGENDA'),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if (_runs.isEmpty)
+            Text(tr('Nog niets gepland. Prik een moment, dan ziet iedereen wie er komt.'), style: TextStyle(color: RwColors.muted, height: 1.4)),
+          for (final r in _runs) _GroupRunTile(run: r, onAnswer: (g) => _answer(r, g), onDelete: r.canDelete ? () => _deleteRun(r) : null),
+          const SizedBox(height: 4),
+          TextButton.icon(onPressed: _plan, icon: const Icon(Icons.event_outlined), label: Text(tr('Groepsrun plannen'))),
+        ]),
+      );
 
   Future<void> _pickRoute() async {
     final List<RunRoute> routes = ref.read(routesProvider).value ?? await ref.read(routesProvider.future) ?? const [];
@@ -523,7 +586,9 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
           ? const LoadingView(cards: 2)
           : RefreshIndicator(
               onRefresh: _load,
-              child: ListView(padding: const EdgeInsets.all(16), children: [
+              child: ListView(physics: const AlwaysScrollableScrollPhysics(), padding: const EdgeInsets.all(16), children: [
+                _agenda(),
+                const SizedBox(height: 12),
                 SegmentedButton<bool>(
                   segments: [ButtonSegment(value: false, label: Text(tr('Deze week'))), ButtonSegment(value: true, label: Text(tr('Deze maand')))],
                   selected: {_month},
@@ -573,4 +638,143 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
             ),
     );
   }
+}
+
+/// Eén groepsrun in de agenda: wanneer, waar, wie komt, en "Ik kom" / "Kan niet".
+class _GroupRunTile extends StatelessWidget {
+  const _GroupRunTile({required this.run, required this.onAnswer, this.onDelete});
+  final GroupRun run;
+  final ValueChanged<bool> onAnswer;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = run;
+    final when = DateFormat('EEE d MMM · HH:mm', LanguageController.instance.lang.intlLocale).format(r.startsAt);
+    final facts = [
+      if (r.place != null) r.place!,
+      if (r.distanceKm != null) Fmt.km(r.distanceKm! * 1000, decimals: r.distanceKm! % 1 == 0 ? 0 : 1),
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.event_outlined, size: 18, color: RwColors.accent),
+          const SizedBox(width: 8),
+          Expanded(child: Text(when, style: const TextStyle(fontWeight: FontWeight.w800))),
+          if (onDelete != null)
+            IconButton(
+              tooltip: tr('Schrappen'),
+              visualDensity: VisualDensity.compact,
+              icon: Icon(Icons.close, size: 18, color: RwColors.subtle),
+              onPressed: onDelete,
+            ),
+        ]),
+        if (facts.isNotEmpty) Text(facts, style: TextStyle(color: RwColors.muted)),
+        if (r.note != null) Text(r.note!, style: TextStyle(color: RwColors.muted, height: 1.4)),
+        const SizedBox(height: 4),
+        Text(
+          r.going == 0
+              ? tr('Nog niemand aangemeld.')
+              : trf('{n} komen: {namen}', {'n': r.going, 'namen': r.goingNames.join(', ')}) +
+                  (r.notGoing > 0 ? ' · ${trf('{n} kunnen niet', {'n': r.notGoing})}' : ''),
+          style: TextStyle(color: RwColors.subtle, fontSize: 12.5, height: 1.4),
+        ),
+        const SizedBox(height: 6),
+        Row(children: [
+          Expanded(
+            child: r.myAnswer == true
+                ? FilledButton.icon(onPressed: () => onAnswer(true), icon: const Icon(Icons.check, size: 18), label: Text(tr('Ik kom')))
+                : OutlinedButton(onPressed: () => onAnswer(true), child: Text(tr('Ik kom'))),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: r.myAnswer == false
+                ? FilledButton.tonal(onPressed: () => onAnswer(false), child: Text(tr('Kan niet')))
+                : OutlinedButton(onPressed: () => onAnswer(false), child: Text(tr('Kan niet'))),
+          ),
+        ]),
+      ]),
+    );
+  }
+}
+
+/// Formulier om een groepsrun te plannen.
+class _PlanGroupRunSheet extends StatefulWidget {
+  const _PlanGroupRunSheet();
+
+  @override
+  State<_PlanGroupRunSheet> createState() => _PlanGroupRunSheetState();
+}
+
+class _PlanGroupRunSheetState extends State<_PlanGroupRunSheet> {
+  late DateTime _at = () {
+    final n = DateTime.now().add(const Duration(days: 1));
+    return DateTime(n.year, n.month, n.day, 19);
+  }();
+  final _place = TextEditingController();
+  final _note = TextEditingController();
+  double? _km = 8;
+
+  @override
+  void dispose() {
+    _place.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _at,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 89)),
+    );
+    if (d == null || !mounted) return;
+    final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(_at));
+    if (!mounted) return;
+    setState(() => _at = DateTime(d.year, d.month, d.day, t?.hour ?? _at.hour, t?.minute ?? _at.minute));
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(tr('Groepsrun plannen'), style: TextStyle(fontFamily: RwFonts.display, fontSize: 20, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _pickDate,
+            icon: const Icon(Icons.schedule),
+            label: Text(DateFormat('EEEE d MMMM · HH:mm', LanguageController.instance.lang.intlLocale).format(_at)),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _place,
+            maxLength: 60,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(labelText: tr('Verzamelplek'), hintText: tr('bijv. ingang van het park')),
+          ),
+          Text(tr('Afstand'), style: TextStyle(color: RwColors.muted)),
+          Wrap(spacing: 8, children: [
+            for (final k in [5.0, 8.0, 10.0, 15.0, 21.1])
+              ChoiceChip(
+                label: Text(Fmt.km(k * 1000, decimals: k % 1 == 0 ? 0 : 1)),
+                selected: _km == k,
+                onSelected: (on) => setState(() => _km = on ? k : null),
+              ),
+          ]),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _note,
+            maxLength: 140,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(labelText: tr('Notitie (optioneel)'), hintText: tr('bijv. rustig tempo, koffie na afloop')),
+          ),
+          const SizedBox(height: 8),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, (at: _at, place: _place.text.trim(), km: _km, note: _note.text.trim())),
+            child: Text(tr('Plannen')),
+          ),
+        ]),
+      );
 }

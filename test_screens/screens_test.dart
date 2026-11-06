@@ -72,11 +72,13 @@ import 'package:runwise/features/profile/run_pause_tile.dart';
 import 'package:runwise/features/activities/gps_spike_screen.dart';
 import 'package:runwise/features/profile/profile_screen.dart';
 import 'package:runwise/features/record/record_run_screen.dart';
+import 'package:runwise/features/record/record_celebration_screen.dart';
 import 'package:runwise/features/record/run_summary_screen.dart';
 import 'package:runwise/domain/badges.dart' as bd;
 import 'package:runwise/domain/best_efforts.dart';
 import 'package:runwise/domain/run_streams.dart';
 import 'package:runwise/features/routes/route_detail_screen.dart';
+import 'package:runwise/features/routes/route_flyover_screen.dart';
 import 'package:runwise/features/routes/routes_screen.dart';
 import 'package:runwise/features/routes/poster_design.dart';
 import 'package:runwise/features/routes/route_poster_screen.dart';
@@ -515,6 +517,7 @@ void main() {
         );
       }));
   testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));
+  testWidgets('12f vlieg over route', (t) => _shot(t, '12f_vlieg_over', RouteFlyoverScreen(route: _routes.first), height: 915));
   testWidgets('13 inloggen', (t) => _shot(t, '13_inloggen', const LoginScreen(), height: 915));
   testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
   testWidgets('14c rondleiding doel', (t) => _shot(t, '14c_rondleiding_doel', const OnboardingScreen(initialPage: 1), height: 915));
@@ -555,9 +558,21 @@ void main() {
           previousBest: const {1000: (seconds: 999.0, activityId: 'x')},
           badges: bd.computeBadges(_runs).where((b) => b.earned).take(2).toList(),
           batteryUsedPct: 9,
+          autoCelebrate: false,
         ),
         height: 2600);
   });
+  testWidgets('15b record feest', (t) => _shot(
+      t,
+      '15b_record_feest',
+      RecordCelebrationScreen(
+        date: DateTime(2026, 11, 6),
+        records: const [
+          (label: '5 km', meters: 5000, seconds: 1412, previous: 1449),
+          (label: '1 km', meters: 1000, seconds: 262, previous: 270),
+        ],
+      ),
+      height: 1900));
   testWidgets('20 groot vandaag', (t) => _shot(t, '20_groot_vandaag', const DashboardScreen(), height: 3200, nav: true, textScale: 1.6));
   testWidgets('21 groot opnemen', (t) => _shot(t, '21_groot_opnemen', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
         RunRecorderService.instance.view.value = RecorderView(

@@ -290,7 +290,19 @@ class Turnaround {
 
 /// Doeltempo-coach: zegt het als je duidelijk te snel of te langzaam gaat.
 class PaceCoach {
-  PaceCoach(this.targetSecPerKm, {this.tolerance = 15, this.holdSeconds = 20, this.quietSeconds = 60});
+  PaceCoach(this.targetSecPerKm, {this.tolerance = 15, this.holdSeconds = 20, this.quietSeconds = 60}) : band = false;
+
+  /// Tempo-alarm met een bandbreedte (punt 56), bijv. 5:20–5:40: sneller dan [fastSec] of langzamer
+  /// dan [slowSec] gedurende 10 s geeft een tril + stem. Daarna minstens 45 s stil.
+  PaceCoach.band(double fastSec, double slowSec)
+      : targetSecPerKm = (fastSec + slowSec) / 2,
+        tolerance = (slowSec - fastSec).abs() / 2,
+        holdSeconds = 10,
+        quietSeconds = 45,
+        band = true;
+
+  /// Bandbreedte-alarm in plaats van "rond je doeltempo".
+  final bool band;
 
   final double targetSecPerKm;
 
@@ -330,6 +342,12 @@ class PaceCoach {
     if (t - _offSince! < holdSeconds || t - _lastSaid < quietSeconds) return null;
     _lastSaid = t;
     _lastDir = dir;
+    if (band) {
+      final range = '${spokenPace(targetSecPerKm - tolerance)} tot ${spokenPace(targetSecPerKm + tolerance)}';
+      return dir > 0
+          ? 'Te langzaam. Je loopt ${spokenPace(pace)}, houd $range aan.'
+          : 'Te snel. Je loopt ${spokenPace(pace)}, houd $range aan.';
+    }
     return dir > 0
         ? 'Iets sneller. Je loopt ${spokenPace(pace)}, je doel is ${spokenPace(targetSecPerKm)}.'
         : 'Rustiger aan. Je loopt ${spokenPace(pace)}, je doel is ${spokenPace(targetSecPerKm)}.';

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/i18n.dart';
+import '../../data/repositories/repositories.dart' show activitiesProvider;
 import '../../shared/widgets.dart';
 import '../activities/badges_screen.dart' show openBadges;
 import '../dashboard/bingo_card.dart';
@@ -14,16 +16,22 @@ void openGoals(BuildContext context) =>
 
 /// Doelen: alle spelvormen op één plek (deze maand, je jaar, bingo, uitdagingen, badges en records)
 /// in plaats van verspreid over Vandaag, Ik en Samen.
-class GoalsScreen extends StatelessWidget {
+class GoalsScreen extends ConsumerWidget {
   const GoalsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: Text(tr('Doelen'))),
       body: SafeArea(
         top: false,
-        child: ListView(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(activitiesProvider);
+            await ref.read(activitiesProvider.future);
+          },
+          child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
             const MonthChallengeCard(),
@@ -61,6 +69,7 @@ class GoalsScreen extends StatelessWidget {
               ]),
             ),
           ],
+        ),
         ),
       ),
     );

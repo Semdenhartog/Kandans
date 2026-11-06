@@ -58,6 +58,48 @@ String _msg(Object e) {
   return e.toString().replaceFirst('Exception: ', '');
 }
 
+/// Een geplande groepsrun in de agenda van een loopgroep (0040).
+class GroupRun {
+  const GroupRun({
+    required this.id,
+    required this.startsAt,
+    this.place,
+    this.distanceKm,
+    this.note,
+    this.planner = '',
+    this.going = 0,
+    this.notGoing = 0,
+    this.goingNames = const [],
+    this.myAnswer,
+    this.canDelete = false,
+  });
+  final int id;
+  final DateTime startsAt;
+  final String? place;
+  final double? distanceKm;
+  final String? note;
+  final String planner;
+  final int going;
+  final int notGoing;
+  final List<String> goingNames;
+  final bool? myAnswer;
+  final bool canDelete;
+
+  factory GroupRun.fromJson(Map<String, dynamic> j) => GroupRun(
+        id: (j['id'] as num).toInt(),
+        startsAt: DateTime.tryParse(j['starts_at'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+        place: j['place'] as String?,
+        distanceKm: (j['distance_km'] as num?)?.toDouble(),
+        note: j['note'] as String?,
+        planner: j['planner'] as String? ?? '',
+        going: (j['going'] as num?)?.toInt() ?? 0,
+        notGoing: (j['not_going'] as num?)?.toInt() ?? 0,
+        goingNames: [for (final n in (j['going_names'] as List?) ?? const []) n.toString()],
+        myAnswer: j['my_answer'] as bool?,
+        canDelete: j['can_delete'] == true,
+      );
+}
+
 class TogetherService {
   SupabaseClient get _db => Supabase.instance.client;
 
@@ -135,6 +177,24 @@ class TogetherService {
             GroupRow(r['nickname'] as String, r['is_me'] as bool, (r['week_km'] as num).toDouble(), (r['month_km'] as num).toDouble()),
         ];
       });
+  // Loopgroep-agenda (0040)
+  Future<List<GroupRun>> groupRuns(int groupId) => _call(() async {
+        final rows = await _db.rpc('group_runs_of', params: {'p_group': groupId}) as List;
+        return [for (final r in rows.cast<Map<String, dynamic>>()) GroupRun.fromJson(r)];
+      });
+
+  Future<void> planGroupRun(int groupId, DateTime startsAt, {String? place, double? km, String? note}) => _call(() => _db.rpc('group_run_plan', params: {
+        'p_group': groupId,
+        'p_starts': startsAt.toUtc().toIso8601String(),
+        'p_place': place,
+        'p_km': km,
+        'p_note': note,
+      }));
+
+  /// [going] null = antwoord intrekken.
+  Future<void> answerGroupRun(int runId, bool? going) => _call(() => _db.rpc('group_run_answer', params: {'p_run': runId, 'p_going': going}));
+
+  Future<void> deleteGroupRun(int runId) => _call(() => _db.rpc('group_run_delete', params: {'p_run': runId}));
 }
 
 final togetherServiceProvider = Provider((ref) => TogetherService());

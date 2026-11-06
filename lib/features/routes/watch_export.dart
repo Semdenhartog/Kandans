@@ -451,7 +451,7 @@ Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, S
       if (when != null) 'Beste moment volgens Kadans: ${moment(when)}${weather == null ? '' : ' ($weather)'}.',
       'Route: ${r.name}, $km km. Het routebestand zit erbij (open het in je horloge-app of in Komoot).',
       'Start: https://www.google.com/maps/search/?api=1&query=${r.startLatitude.toStringAsFixed(5)},${r.startLongitude.toStringAsFixed(5)}',
-      'Bekijk of bewaar de route: ${SharedRoute(r.name, pts).webLink(AppConfig.siteUrl)}',
+      'Bekijk of bewaar de route: ${_sharedOf(r, pts).webLink(AppConfig.siteUrl)}',
     ].join('\n');
     final safe = r.name.replaceAll(RegExp(r'[^A-Za-z0-9 _-]'), '').trim().replaceAll(' ', '-');
     await SharePlus.instance.share(ShareParams(
@@ -467,6 +467,14 @@ Future<void> inviteRunBuddy(BuildContext context, RunRoute r, {DateTime? when, S
 String _weekday(DateTime t) => const ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'][t.weekday - 1];
 
 /// Route delen als link: wie hem opent ziet de route op een kaart en kan hem in Kadans bewaren.
+/// Route als deel-link, met hoogtemeters en een grof hoogteprofiel erbij (punt 75).
+SharedRoute _sharedOf(RunRoute r, List<LatLng> pts) => SharedRoute(
+      r.name,
+      pts,
+      ascent: r.elevationGainMeters,
+      elevations: SharedRoute.sampleProfile([for (final s in r.profileOrKmPoints) (meters: s.meters, ele: s.ele)]),
+    );
+
 Future<void> shareRouteLink(BuildContext context, RunRoute r) async {
   final pts = decodePolyline(r.polyline);
   if (pts.length < 2) {
@@ -475,7 +483,7 @@ Future<void> shareRouteLink(BuildContext context, RunRoute r) async {
   }
   final km = (r.distanceMeters / 1000).toStringAsFixed(1).replaceAll('.', ',');
   await SharePlus.instance.share(ShareParams(
-    text: '${r.name} ($km km), een route uit Kadans:\n${SharedRoute(r.name, pts).webLink(AppConfig.siteUrl)}',
+    text: '${r.name} ($km km), een route uit Kadans:\n${_sharedOf(r, pts).webLink(AppConfig.siteUrl)}',
     subject: 'Route: ${r.name}',
   ));
 }

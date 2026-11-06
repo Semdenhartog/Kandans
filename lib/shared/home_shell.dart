@@ -21,6 +21,7 @@ import '../data/services/recording_store.dart';
 import '../data/services/run_recorder_service.dart';
 import '../features/record/record_run_screen.dart';
 import '../core/i18n.dart';
+import '../data/services/mention_sync.dart';
 import '../data/services/steps_sync.dart';
 
 /// Onderste navigatiebalk: vier tabbladen en de Lopen-knop.
@@ -44,6 +45,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       PendingRunStore.refreshCount().ignore();
       _autoSync();
       StepsSync.run(ref).ignore();
+      MentionSync.run(ref).ignore();
       _onboarding();
       _setupShortcuts();
     });
@@ -86,7 +88,10 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _autoSync();
+    if (state == AppLifecycleState.resumed) {
+      _autoSync();
+      MentionSync.run(ref).ignore();
+    }
   }
 
   Future<void> _onboarding() async {

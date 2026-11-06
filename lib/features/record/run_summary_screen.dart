@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../core/supabase.dart';
 import '../../data/models/models.dart';
@@ -24,6 +25,7 @@ import '../activities/strength_screen.dart';
 import '../profile/emergency_contact.dart';
 import '../routes/route_map.dart';
 import '../routes/route_poster_screen.dart';
+import 'record_celebration_screen.dart';
 
 /// Direct na het opslaan: je run in één oogopslag, met snelste stukken en records.
 class RunSummaryScreen extends StatelessWidget {
@@ -37,7 +39,11 @@ class RunSummaryScreen extends StatelessWidget {
     this.badges = const [],
     this.batteryUsedPct,
     this.laps = const [],
+    this.autoCelebrate = true,
   });
+
+  /// Bij een nieuw record vanzelf het feestscherm tonen (uit in schermtests).
+  final bool autoCelebrate;
 
   /// Handmatige rondes (knop tijdens het lopen).
   final List<({double seconds, double meters})> laps;
@@ -61,6 +67,11 @@ class RunSummaryScreen extends StatelessWidget {
     final prev = previousBest[b.meters.round()];
     return prev == null || b.seconds + 0.5 < prev.seconds;
   }
+
+  List<RecordWin> _wins(List<BestEffort> records) => [
+        for (final r in records)
+          (label: r.label, meters: r.meters, seconds: r.seconds, previous: previousBest[r.meters.round()]?.seconds),
+      ];
 
   void _close(BuildContext context) {
     Navigator.of(context).pop();
@@ -124,7 +135,19 @@ class RunSummaryScreen extends StatelessWidget {
             ),
             if (records.isNotEmpty) ...[
               const SizedBox(height: 16),
-              _RecordPlaque(records: [for (final r in records) (label: r.label, seconds: r.seconds)]),
+              if (autoCelebrate) _AutoCelebrate(wins: _wins(records), date: a.startedAt),
+              GestureDetector(
+                onTap: () => openRecordCelebration(context, _wins(records), date: a.startedAt),
+                child: _RecordPlaque(records: [for (final r in records) (label: r.label, seconds: r.seconds)]),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => openRecordCelebration(context, _wins(records), date: a.startedAt),
+                  icon: const Icon(Icons.ios_share, size: 18),
+                  label: Text(tr('Deel je record')),
+                ),
+              ),
             ],
             if (laps.length >= 2) ...[
               const SizedBox(height: 16),
@@ -704,4 +727,29 @@ class _PosterTip extends ConsumerWidget {
       ]),
     );
   }
+}
+
+/// Opent het recordfeest één keer vanzelf, zodra de samenvatting in beeld is.
+class _AutoCelebrate extends StatefulWidget {
+  const _AutoCelebrate({required this.wins, required this.date});
+  final List<RecordWin> wins;
+  final DateTime date;
+
+  @override
+  State<_AutoCelebrate> createState() => _AutoCelebrateState();
+}
+
+class _AutoCelebrateState extends State<_AutoCelebrate> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 900), () {
+        if (mounted && ModalRoute.of(context)?.isCurrent == true) openRecordCelebration(context, widget.wins, date: widget.date);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

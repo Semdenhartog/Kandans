@@ -357,6 +357,51 @@ class _RunThreadState extends ConsumerState<_RunThread> {
     }
   }
 
+  Future<void> _react(CommunityComment c, String emoji) async {
+    final list = _comments;
+    if (list == null) return;
+    // Meteen tonen, daarna pas naar de server.
+    setState(() => _comments = [for (final x in list) x.id == c.id ? x.toggled(emoji) : x]);
+    try {
+      await _svc.react(c.id, emoji);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _comments = list);
+        showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+      }
+    }
+  }
+
+  /// Bijnamen die je met @ kunt noemen: de loper van de run en wie al reageerde.
+  List<String> get _mentionable {
+    final names = <String>{widget.run.nickname, for (final x in _comments ?? const <CommunityComment>[]) if (!x.mine) x.nickname};
+    return names.where((n) => n.isNotEmpty).toList();
+  }
+
+  /// Het woord met @ waar de cursor nu staat, of null.
+  String? get _typingMention {
+    final t = _text.text;
+    final pos = _text.selection.baseOffset < 0 ? t.length : _text.selection.baseOffset;
+    final before = t.substring(0, pos.clamp(0, t.length));
+    final m = RegExp(r'@([A-Za-z0-9_.\-]{0,30})$').firstMatch(before);
+    return m?.group(1);
+  }
+
+  void _insertMention(String name) {
+    final t = _text.text;
+    final pos = _text.selection.baseOffset < 0 ? t.length : _text.selection.baseOffset.clamp(0, t.length);
+    final start = t.substring(0, pos).lastIndexOf('@');
+    if (start < 0) return;
+    final next = '${t.substring(0, start)}@$name ${t.substring(pos)}';
+    _text.value = TextEditingValue(text: next, selection: TextSelection.collapsed(offset: start + name.length + 2));
+    setState(() {});
+  }
+
+  Future<void> _quickSend(String emoji) async {
+    _text.text = emoji;
+    await _send();
+  }
+
   Future<void> _commentMenu(CommunityComment c) async {
     final action = await showModalBottomSheet<String>(
       context: context,
@@ -430,7 +475,9 @@ class _RunThreadState extends ConsumerState<_RunThread> {
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                     Text('${x.nickname} · ${communityAgo(x.createdAt)}', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                                     SizedBox(height: 2),
-                                    Text(x.body, style: TextStyle(height: 1.4)),
+                                    MentionText(x.body),
+                                    SizedBox(height: 4),
+                                    _ReactionRow(comment: x, onToggle: (e) => _react(x, e)),
                                   ]),
                                 ),
                                 IconButton(
@@ -444,6 +491,49 @@ class _RunThreadState extends ConsumerState<_RunThread> {
                         ],
                       ),
           ),
+          Builder(builder: (context) {
+            final typing = _typingMention;
+            if (typing == null) {
+              if (_text.text.isNotEmpty) return SizedBox.shrink();
+              return Padding(
+                padding: EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: Row(children: [
+                  for (final e in CommunityComment.quickReactions)
+                    Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(e, style: TextStyle(fontSize: 18)),
+                        tooltip: tr('Snel reageren'),
+                        onPressed: _busy ? null : () => _quickSend(e),
+                      ),
+                    ),
+                ]),
+              );
+            }
+            final options = [
+              for (final n in _mentionable)
+                if (n.toLowerCase().startsWith(typing.toLowerCase())) n,
+            ];
+            if (options.isEmpty) return SizedBox.shrink();
+            return SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.fromLTRB(16, 6, 16, 0),
+                children: [
+                  for (final n in options)
+                    Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        avatar: RunnerAvatar(n, size: 20),
+                        label: Text('@$n'),
+                        onPressed: () => _insertMention(n),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
           SafeArea(
             top: false,
             child: Padding(
@@ -456,7 +546,7 @@ class _RunThreadState extends ConsumerState<_RunThread> {
                     maxLines: 4,
                     maxLength: 500,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(hintText: tr('Reageer…'), counterText: ''),
+                    decoration: InputDecoration(hintText: tr('Reageer… (noem iemand met @)'), counterText: ''),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -471,5 +561,61 @@ class _RunThreadState extends ConsumerState<_RunThread> {
         ]),
       ),
     );
+  }
+}
+
+/// Snelle reacties onder een reactie: 👏 🔥 💪 met aantallen; tik = aan/uit.
+class _ReactionRow extends StatelessWidget {
+  const _ReactionRow({required this.comment, required this.onToggle});
+  final CommunityComment comment;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(spacing: 6, children: [
+      for (final e in CommunityComment.quickReactions)
+        Semantics(
+          button: true,
+          selected: comment.myReactions.contains(e),
+          label: trf('{emoji} reactie, {n} keer', {'emoji': e, 'n': '${comment.reactions[e] ?? 0}'}),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(RwRadius.s),
+            onTap: () => onToggle(e),
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 180),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(RwRadius.s),
+                color: comment.myReactions.contains(e) ? RwColors.accent.withValues(alpha: 0.16) : Colors.transparent,
+                border: Border.all(color: comment.myReactions.contains(e) ? RwColors.accent : RwColors.border),
+              ),
+              child: Text(
+                (comment.reactions[e] ?? 0) > 0 ? '$e ${comment.reactions[e]}' : e,
+                style: TextStyle(fontSize: 13, color: RwColors.muted),
+              ),
+            ),
+          ),
+        ),
+    ]);
+  }
+}
+
+/// Tekst waarin @bijnamen goud en vet staan.
+class MentionText extends StatelessWidget {
+  const MentionText(this.text, {super.key});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = DefaultTextStyle.of(context).style.merge(TextStyle(height: 1.4));
+    final spans = <TextSpan>[];
+    var last = 0;
+    for (final m in mentionPattern.allMatches(text)) {
+      if (m.start > last) spans.add(TextSpan(text: text.substring(last, m.start)));
+      spans.add(TextSpan(text: m.group(0), style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w700)));
+      last = m.end;
+    }
+    if (last < text.length) spans.add(TextSpan(text: text.substring(last)));
+    return Text.rich(TextSpan(style: base, children: spans));
   }
 }

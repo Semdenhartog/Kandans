@@ -31,6 +31,11 @@ h1{font-family:Saira,sans-serif;font-weight:800;font-size:26px;margin:0 0 4px;li
 .note{font-size:13px;color:var(--subtle);margin:6px 0 0}
 .wrap{max-width:560px;margin:0 auto}
 .err{padding:40px 16px;text-align:center;color:var(--muted)}
+.facts{display:flex;gap:8px;margin:0 0 12px}
+.fact{flex:1;background:var(--bg,#13110E);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+.fact b{display:block;font-family:Saira,sans-serif;font-weight:800;font-size:20px;color:var(--text)}
+.fact span{font-size:12px;color:var(--subtle)}
+#profile{display:block;width:100%;height:64px;margin:0 0 14px}
 </style>
 </head>
 <body>
@@ -39,6 +44,12 @@ h1{font-family:Saira,sans-serif;font-weight:800;font-size:26px;margin:0 0 4px;li
   <p class="brand">KADANS</p>
   <h1 id="name">Gedeelde route</h1>
   <p class="meta" id="meta"></p>
+  <div class="facts" id="facts" hidden>
+    <div class="fact"><b id="f-km">–</b><span>afstand</span></div>
+    <div class="fact"><b id="f-up">–</b><span>omhoog</span></div>
+    <div class="fact"><b id="f-time">–</b><span>op 6:00/km</span></div>
+  </div>
+  <svg id="profile" viewBox="0 0 300 64" preserveAspectRatio="none" aria-label="Hoogteprofiel" hidden></svg>
   <a class="btn primary" id="open" href="#">Opslaan in Kadans</a>
   <a class="btn secondary" id="gpx" href="#" download="route.gpx">Download als GPX</a>
   <p class="note">Met Kadans zie je het beste moment om deze route te lopen, de wind onderweg en zet je hem op je horloge.</p>
@@ -82,7 +93,28 @@ h1{font-family:Saira,sans-serif;font-weight:800;font-size:26px;margin:0 0 4px;li
   }
   var m = 0;
   for (var k = 1; k < pts.length; k++) m += dist(pts[k - 1], pts[k]);
-  document.getElementById('meta').textContent = (m / 1000).toFixed(1).replace('.', ',') + ' km';
+  var km = (m / 1000).toFixed(1).replace('.', ',') + ' km';
+  var up = parseInt(params.get('h') || '', 10);
+  var ele = (params.get('e') || '').split('.').map(Number).filter(function (x) { return isFinite(x); }).slice(0, 48);
+  var min = Math.round(m / 1000 * 6);
+  var time = min >= 60 ? Math.floor(min / 60) + ' u ' + (min % 60) + ' min' : min + ' min';
+  document.getElementById('meta').textContent = 'Start bij de witte stip.';
+  document.getElementById('f-km').textContent = km;
+  document.getElementById('f-up').textContent = isFinite(up) ? up + ' m' : '–';
+  document.getElementById('f-time').textContent = time;
+  document.getElementById('facts').hidden = false;
+  if (ele.length >= 3) {
+    var lo = Math.min.apply(null, ele), hi = Math.max.apply(null, ele);
+    var span = Math.max(hi - lo, 15);
+    var xy = ele.map(function (v, i) {
+      return (i / (ele.length - 1) * 300).toFixed(1) + ',' + (60 - (v - lo) / span * 52).toFixed(1);
+    });
+    var svg = document.getElementById('profile');
+    svg.innerHTML = '<polygon points="0,64 ' + xy.join(' ') + ' 300,64" fill="#D9BF92" fill-opacity=".22"/>'
+      + '<polyline points="' + xy.join(' ') + '" fill="none" stroke="#D9BF92" stroke-width="2" vector-effect="non-scaling-stroke"/>';
+    svg.setAttribute('aria-label', 'Hoogteprofiel: tussen ' + Math.round(lo) + ' en ' + Math.round(hi) + ' meter');
+    svg.hidden = false;
+  }
 
   var map = L.map('map', { zoomControl: true, attributionControl: true });
   L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', {

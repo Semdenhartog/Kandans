@@ -67,13 +67,44 @@ class CommunityPost {
 }
 
 class CommunityComment {
-  const CommunityComment({required this.id, required this.body, required this.createdAt, required this.nickname, this.mine = false, this.canDelete = false});
+  const CommunityComment({
+    required this.id,
+    required this.body,
+    required this.createdAt,
+    required this.nickname,
+    this.mine = false,
+    this.canDelete = false,
+    this.reactions = const {},
+    this.myReactions = const {},
+  });
   final int id;
   final String body;
   final DateTime createdAt;
   final String nickname;
   final bool mine;
   final bool canDelete;
+
+  /// Snelle reacties (👏 🔥 💪) met aantallen, en welke ik zelf gaf (0040).
+  final Map<String, int> reactions;
+  final Set<String> myReactions;
+
+  static const quickReactions = ['👏', '🔥', '💪'];
+
+  CommunityComment toggled(String emoji) {
+    final on = !myReactions.contains(emoji);
+    final counts = {...reactions};
+    counts[emoji] = ((counts[emoji] ?? 0) + (on ? 1 : -1)).clamp(0, 1 << 30);
+    return CommunityComment(
+      id: id,
+      body: body,
+      createdAt: createdAt,
+      nickname: nickname,
+      mine: mine,
+      canDelete: canDelete,
+      reactions: counts,
+      myReactions: on ? {...myReactions, emoji} : ({...myReactions}..remove(emoji)),
+    );
+  }
 
   factory CommunityComment.fromJson(Map<String, dynamic> j) => CommunityComment(
         id: (j['id'] as num).toInt(),
@@ -82,8 +113,15 @@ class CommunityComment {
         nickname: j['nickname'] as String? ?? 'loper',
         mine: j['mine'] == true,
         canDelete: j['can_delete'] == true,
+        reactions: {
+          for (final e in ((j['reactions'] as Map?) ?? const {}).entries) e.key.toString(): (e.value as num).toInt(),
+        },
+        myReactions: {for (final e in (j['my_reactions'] as List?) ?? const []) e.toString()},
       );
 }
+
+/// Woorden die met @ beginnen in een reactie (zelfde regel als de database: 2-30 tekens).
+final mentionPattern = RegExp(r'@([A-Za-z0-9_.\-]{2,30})');
 
 /// De community komt via databasefuncties (migratie 0033); die controleren lidmaatschap, regels en limieten.
 class CommunityFeedService {

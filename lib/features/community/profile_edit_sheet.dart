@@ -71,7 +71,7 @@ class _EditorState extends ConsumerState<_Editor> {
     setState(() => _photoBusy = true);
     try {
       final bytes = await file.readAsBytes();
-      if (bytes.length > 500 * 1024) throw Exception(tr('Deze foto is te groot. Kies een andere.'));
+      if (bytes.length > 2 * 1024 * 1024) throw Exception(tr('Deze foto is te groot. Kies een andere.'));
       await _svc.uploadPhoto(bytes);
       AvatarCache.instance.forget(widget.nickname);
       _changed = true;

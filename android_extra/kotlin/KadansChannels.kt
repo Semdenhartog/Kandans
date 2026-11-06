@@ -9,10 +9,12 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.CalendarContract
 import android.view.KeyEvent
+import android.view.WindowManager
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -21,6 +23,7 @@ import io.flutter.plugin.common.MethodChannel
  * Eigen kanalen van Kadans (geen extra pakketten nodig):
  *  - kadans/calendar: drukke tijden uit de telefoonagenda (alleen begin en eind, geen titels).
  *  - kadans/media (+ /events): de knop op je oortjes tijdens een run.
+ *  - kadans/screen: tijdens een run het opnamescherm boven het vergrendelscherm tonen (geen ontgrendelen nodig).
  */
 object KadansChannels {
     private var media: MediaButtons? = null
@@ -55,6 +58,28 @@ object KadansChannels {
             when (call.method) {
                 "start" -> { m.start(); result.success(null) }
                 "stop" -> { m.stop(); result.success(null) }
+                else -> result.notImplemented()
+            }
+        }
+        MethodChannel(messenger, "kadans/screen").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "showOnLock" -> {
+                    val on = call.argument<Boolean>("on") ?: false
+                    activity.runOnUiThread {
+                        try {
+                            if (Build.VERSION.SDK_INT >= 27) {
+                                activity.setShowWhenLocked(on)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                if (on) activity.window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+                                else activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+                            }
+                            result.success(true)
+                        } catch (e: Exception) {
+                            result.error("failed", e.message, null)
+                        }
+                    }
+                }
                 else -> result.notImplemented()
             }
         }

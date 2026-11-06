@@ -239,7 +239,7 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
           title: tr('Nog geen volgers'),
           message: tr('Deel je vriendcode of uitnodiging via Ranglijsten en vrienden, of deel je eerste run.'),
         )
-      : ListView(padding: EdgeInsets.only(top: 8, bottom: 32), children: [
+      : RefreshIndicator(onRefresh: _load, child: ListView(physics: const AlwaysScrollableScrollPhysics(), padding: EdgeInsets.only(top: 8, bottom: 32), children: [
           for (final p in _followers)
             _tile(
               p,
@@ -255,7 +255,7 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
                 ],
               ),
             ),
-        ]);
+        ]));
 
   Widget _followingTab() => _following.isEmpty
       ? EmptyState(
@@ -263,9 +263,9 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
           title: tr('Je volgt nog niemand'),
           message: tr('Zoek lopers op bijnaam, of tik in de feed op iemands naam.'),
         )
-      : ListView(padding: EdgeInsets.only(top: 8, bottom: 32), children: [
+      : RefreshIndicator(onRefresh: _load, child: ListView(physics: const AlwaysScrollableScrollPhysics(), padding: EdgeInsets.only(top: 8, bottom: 32), children: [
           for (final p in _following) _tile(p, subtitle: p.followsMe ? tr('Volgt jou') : null),
-        ]);
+        ]));
 }
 
 /// Zoals [openPeople], maar wacht tot het scherm weer dicht is.

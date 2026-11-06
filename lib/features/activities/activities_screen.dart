@@ -395,6 +395,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             },
             child: ListView.separated(
               controller: _listCtrl,
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               itemCount: rows.length + 2,
               separatorBuilder: (_, _) => const SizedBox(height: 8),

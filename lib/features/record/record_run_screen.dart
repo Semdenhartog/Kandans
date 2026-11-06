@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vibration/vibration.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../core/format.dart';
@@ -29,6 +30,7 @@ import '../../data/services/review_service.dart';
 import '../../data/services/poi_service.dart';
 import '../../data/services/route_photos_service.dart' show routePhotosProvider;
 import '../../data/services/run_recorder_service.dart';
+import '../../data/services/lock_screen_service.dart';
 import '../../data/services/sound_service.dart';
 import '../../data/services/sync_service.dart';
 import '../../data/services/weather_service.dart';
@@ -120,6 +122,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   bool _indoor = false;
   bool _sounds = true;
 
+  /// Opnamescherm tonen op het vergrendelscherm tijdens de run (punt 52).
+  bool _lockScreen = true;
+
   /// Live opdrachten (sprints, snelle minuut) tijdens een gewone run.
   bool _quests = false;
   QuestLevel _questLevel = QuestLevel.normal;
@@ -161,6 +166,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   /// Loopbandsnelheid (km/u) om mee te starten; null = alleen de klok.
   double? _tmKmh;
   double? _targetPace;
+
+  /// Tempo-alarm: halve bandbreedte in s/km (0 = gewoon doeltempo met ±15 s, punt 56).
+  int _paceBand = 0;
   CueSettings _cues = const CueSettings();
   String? _shoeId;
   bool _shoeChosen = false;
@@ -224,8 +232,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           _nightMode = !_sunMode && (p.getBool('rec_night') ?? false);
           _tmKmh = p.getDouble('rec_tm_kmh');
           _sounds = p.getBool('sounds_on') ?? true;
+          _lockScreen = p.getBool('rec_lockscreen') ?? true;
+          if (_lockScreen && _svc.isRecording && _svc.recording?.status != RecorderStatus.idle) LockScreenDisplay.show(true).ignore();
           final tp = p.getDouble('rec_target_pace');
           _targetPace = tp == null || tp <= 0 ? null : tp;
+          _paceBand = p.getInt('rec_pace_band') ?? 0;
           try {
             final c = p.getString('rec_cues');
             if (c != null) _cues = CueSettings.fromJson(jsonDecode(c));
@@ -277,6 +288,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     // Weggegaan zonder te starten: GPS weer uit.
     if (_svc.recording?.status == RecorderStatus.idle) _svc.discard();
     if (_screenOn) WakelockPlus.disable().catchError((Object _) {});
+    LockScreenDisplay.show(false).ignore();
     _pages.dispose();
     super.dispose();
   }
@@ -445,11 +457,16 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     for (final n in [3, 2, 1]) {
       if (!mounted) return;
       setState(() => _countdown = n);
+      // Piep + korte tril per tel, zodat je het ook voelt met de telefoon in je zak (punt 53).
+      SoundService.instance.beep().ignore();
+      Vibration.vibrate(duration: 120).catchError((_) {});
       HapticFeedback.mediumImpact();
-      await Future<void>.delayed(const Duration(milliseconds: 750));
+      await Future<void>.delayed(const Duration(seconds: 1));
     }
     if (!mounted) return;
     setState(() => _countdown = 0);
+    SoundService.instance.beep(go: true).ignore();
+    Vibration.vibrate(duration: 400).catchError((_) {});
     await _begin();
     await Future<void>.delayed(const Duration(milliseconds: 450));
     if (mounted) setState(() => _countdown = null);
@@ -587,6 +604,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   Future<void> _begin() async {
     HapticFeedback.heavyImpact();
+    if (_lockScreen) LockScreenDisplay.show(true).ignore();
     try {
       final name = ref.read(profileProvider).value?.displayName ?? '';
       _svc.turnByTurn = _turnByTurn;
@@ -601,6 +619,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         indoor: _indoor,
         cues: _cues,
         targetPace: _targetPace,
+        paceBand: _paceBand > 0 ? _paceBand.toDouble() : null,
         followRoute: _route == null ? const [] : decodePolyline(_route!.polyline),
         followProfile: _route == null ? const [] : _route!.profileOrKmPoints,
         ghost: _raceGhost ? _ghost : null,
@@ -822,6 +841,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (hrr != null) HrrStore.add(hrr).ignore();
     }
     WakelockPlus.disable().catchError((Object _) {});
+    LockScreenDisplay.show(false).ignore();
     final rec = await _svc.stop();
     if (indoorMeters != null) rec?.setIndoorDistance(indoorMeters);
     if (rec == null || rec.distance < 200 || rec.movingSeconds < 60) {
@@ -869,7 +889,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
 
   Future<void> _chooseTargetPace() async {
     var sec = (_targetPace ?? 330).round();
-    final result = await showModalBottomSheet<int>(
+    var band = _paceBand;
+    final result = await showModalBottomSheet<({int sec, int band})>(
       context: context,
       showDragHandle: true,
       builder: (ctx) => StatefulBuilder(
@@ -880,25 +901,40 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Doeltempo', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
+                Text(tr('Doeltempo'), style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
-                Text('De stem zegt het als je langer dan 20 seconden meer dan 15 s/km te snel of te langzaam gaat.',
+                Text(
+                    band == 0
+                        ? tr('De stem zegt het als je langer dan 20 seconden meer dan 15 s/km te snel of te langzaam gaat.')
+                        : tr('Tempo-alarm: buiten je bandbreedte trilt je telefoon na 10 seconden en zegt de stem het.'),
                     style: TextStyle(color: RwColors.muted, height: 1.4)),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(tooltip: '5 seconden sneller', onPressed: () => set(() => sec = (sec - 5).clamp(180, 600)), icon: const Icon(Icons.remove_circle_outline)),
-                    Text(Fmt.pace(sec), style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 34, fontWeight: FontWeight.w800)),
-                    IconButton(tooltip: '5 seconden langzamer', onPressed: () => set(() => sec = (sec + 5).clamp(180, 600)), icon: const Icon(Icons.add_circle_outline)),
+                    IconButton(tooltip: tr('5 seconden sneller'), onPressed: () => set(() => sec = (sec - 5).clamp(180, 600)), icon: const Icon(Icons.remove_circle_outline)),
+                    Text(band == 0 ? Fmt.pace(sec) : '${Fmt.pace(sec - band)}–${Fmt.pace(sec + band)}',
+                        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: band == 0 ? 34 : 28, fontWeight: FontWeight.w800)),
+                    IconButton(tooltip: tr('5 seconden langzamer'), onPressed: () => set(() => sec = (sec + 5).clamp(180, 600)), icon: const Icon(Icons.add_circle_outline)),
                   ],
                 ),
+                const SizedBox(height: 8),
+                Text(tr('Tempo-alarm (bandbreedte)'), style: TextStyle(color: RwColors.muted, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                Wrap(spacing: 8, runSpacing: 6, children: [
+                  for (final b in const [0, 5, 10, 15, 20, 30])
+                    ChoiceChip(
+                      label: Text(b == 0 ? tr('Uit') : '±$b s'),
+                      selected: band == b,
+                      onSelected: (_) => set(() => band = b),
+                    ),
+                ]),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, 0), child: const Text('Geen doeltempo'))),
+                    Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx, (sec: 0, band: band)), child: Text(tr('Geen doeltempo')))),
                     const SizedBox(width: 12),
-                    Expanded(child: FilledButton(onPressed: () => Navigator.pop(ctx, sec), child: const Text('Gebruiken'))),
+                    Expanded(child: FilledButton(onPressed: () => Navigator.pop(ctx, (sec: sec, band: band)), child: Text(tr('Gebruiken')))),
                   ],
                 ),
               ],
@@ -908,9 +944,13 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       ),
     );
     if (result == null) return;
-    setState(() => _targetPace = result == 0 ? null : result.toDouble());
+    setState(() {
+      _targetPace = result.sec == 0 ? null : result.sec.toDouble();
+      _paceBand = result.band;
+    });
     final p = await SharedPreferences.getInstance();
-    await p.setDouble('rec_target_pace', result.toDouble());
+    await p.setDouble('rec_target_pace', result.sec.toDouble());
+    await p.setInt('rec_pace_band', result.band);
   }
 
   /// Begeleide run kiezen (de coach praat je erdoorheen).
@@ -1788,6 +1828,17 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                         },
                       ),
                       FilterChip(
+                        avatar: const Icon(Icons.lock_clock_outlined, size: 18),
+                        label: Text(tr('Op vergrendelscherm')),
+                        tooltip: tr('Druk tijdens de run op de aan/uit-knop: je ziet tijd, afstand en tempo zonder te ontgrendelen'),
+                        selected: _lockScreen,
+                        onSelected: (x) {
+                          setState(() => _lockScreen = x);
+                          LockScreenDisplay.setEnabled(x).ignore();
+                          if (x && _svc.isRecording && _svc.recording?.status != RecorderStatus.idle) LockScreenDisplay.show(true).ignore();
+                        },
+                      ),
+                      FilterChip(
                         avatar: const Icon(Icons.vibration, size: 18),
                         label: const Text('Trillen'),
                         tooltip: 'Bij elke kilometer en bij intervalwissels',
@@ -1898,7 +1949,11 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                       if (!_indoor && (_moreOpts || _targetPace != null))
                         ActionChip(
                           avatar: const Icon(Icons.speed, size: 18),
-                          label: Text(_targetPace == null ? 'Doeltempo' : 'Doel ${Fmt.pace(_targetPace!)}'),
+                          label: Text(_targetPace == null
+                              ? tr('Doeltempo')
+                              : _paceBand > 0
+                                  ? '${Fmt.pace(_targetPace! - _paceBand)}–${Fmt.pace(_targetPace! + _paceBand)}'
+                                  : trf('Doel {tempo}', {'tempo': Fmt.pace(_targetPace!)})),
                           onPressed: _chooseTargetPace,
                         ),
                       if (!_indoor && _route == null)

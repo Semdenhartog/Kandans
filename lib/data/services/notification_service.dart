@@ -131,6 +131,29 @@ class NotificationService {
 
   static const _turnId = 75416;
   static const _stepsId = 75417;
+  static const _mentionId = 75418;
+
+  /// Melding als iemand je met @ noemt in een reactie (0040).
+  Future<void> showMention(String title, String body) async {
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        _mentionId,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'samen',
+            'Samen',
+            channelDescription: 'Als iemand je noemt in een reactie',
+            importance: Importance.defaultImportance,
+            autoCancel: true,
+            color: Color(0xFF7A5A34),
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
 
   /// Stappenwedstrijd: iemand heeft je ingehaald (punt 42).
   Future<void> showSteps(String title, String body) async {

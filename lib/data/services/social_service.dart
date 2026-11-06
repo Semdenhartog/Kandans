@@ -321,8 +321,27 @@ class SocialService {
   Future<List<String>> kudosOf(int shareId) async =>
       [for (final r in _rows(await _rpc<dynamic>('social_kudos_of', {'p_share': shareId}))) r['nickname'] as String? ?? ''];
 
-  Future<List<CommunityComment>> comments(int shareId) async =>
-      [for (final r in _rows(await _rpc<dynamic>('social_comments_of', {'p_share': shareId}))) CommunityComment.fromJson(r)];
+  Future<List<CommunityComment>> comments(int shareId) async {
+    dynamic rows;
+    try {
+      rows = await _rpc<dynamic>('social_comments_of2', {'p_share': shareId});
+    } catch (_) {
+      // Oudere database zonder snelle reacties.
+      rows = await _rpc<dynamic>('social_comments_of', {'p_share': shareId});
+    }
+    return [for (final r in _rows(rows)) CommunityComment.fromJson(r)];
+  }
+
+  /// Zet een snelle reactie aan of uit; geeft terug of hij nu aan staat.
+  Future<bool> react(int commentId, String emoji) async =>
+      await _rpc<bool?>('social_react', {'p_comment': commentId, 'p_emoji': emoji}) ?? false;
+
+  /// Nieuwe @vermeldingen (worden meteen als gezien gemarkeerd).
+  Future<List<({int shareId, String by, String body})>> newMentions() async => [
+        for (final r in _rows(await _rpc<dynamic>('social_mentions_new')))
+          (shareId: (r['share_id'] as num).toInt(), by: r['by_nickname'] as String? ?? 'loper', body: r['body'] as String? ?? ''),
+      ];
+
 
   Future<void> comment(int shareId, String body) => _rpc<dynamic>('social_comment', {'p_share': shareId, 'p_body': body});
 
@@ -347,8 +366,15 @@ class SocialService {
     if (uid == null) throw Exception('Log eerst in.');
     // Elke keer een nieuwe naam, zodat telefoons niet de oude foto uit hun cache blijven tonen.
     final path = '$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
-    await _db.storage.from('avatars').uploadBinary(path, jpg,
-        fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true, cacheControl: '604800'));
+    try {
+      // Geen upsert: elke foto heeft een nieuwe naam, en upsert vraagt extra leesrechten in Storage.
+      await _db.storage.from('avatars').uploadBinary(path, jpg,
+          fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: false, cacheControl: '604800'));
+    } on StorageException catch (e) {
+      final code = e.statusCode ?? '';
+      if (code == '413' || e.message.toLowerCase().contains('size')) throw Exception('Deze foto is te groot. Kies een andere.');
+      throw Exception('Je foto uploaden lukte niet ($code). Probeer het zo opnieuw.');
+    }
     final old = await _rpc<String?>('social_set_photo', {'p_path': path});
     if (old != null && old != path) _db.storage.from('avatars').remove([old]).ignore();
     return path;
@@ -396,3 +422,4 @@ final followRequestCountProvider = FutureProvider.autoDispose<int>((ref) async {
     return 0;
   }
 });
+

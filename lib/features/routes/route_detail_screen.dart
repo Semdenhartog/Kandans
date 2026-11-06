@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -16,11 +17,13 @@ import '../../domain/poi.dart';
 import '../../domain/route_direction.dart';
 import '../../domain/records.dart';
 import '../../domain/route_geometry.dart';
+import '../../domain/route_reverse.dart';
 import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import '../dashboard/dashboard_providers.dart' show routeBestProvider;
 import '../record/record_run_screen.dart';
 import 'elevation_profile.dart';
+import 'route_flyover_screen.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
 import 'route_map_screen.dart';
@@ -51,6 +54,26 @@ class RouteDetailScreen extends ConsumerWidget {
       await ref.read(repositoryProvider).setFavorite(r.id!, !r.isFavorite);
       ref.invalidate(routeDetailProvider(routeId));
       ref.invalidate(routesProvider);
+    } catch (e) {
+      if (context.mounted) showMessage(context, friendlyError(e), error: true);
+    }
+  }
+
+  /// Maakt de route andersom als nieuwe route, met een gespiegeld hoogteprofiel (punt 70).
+  Future<void> _reverse(BuildContext context, WidgetRef ref, RunRoute r) async {
+    try {
+      final rev = reversedRoute(r, suffix: tr('(andersom)'));
+      final id = await ref.read(repositoryProvider).addRoute(rev);
+      ref.invalidate(routesProvider);
+      if (!context.mounted) return;
+      final up = r.elevationGainMeters, upRev = rev.elevationGainMeters;
+      showMessage(
+        context,
+        up != null && upRev != null && (up - upRev).abs() >= 3
+            ? trf('Andersom opgeslagen: {nieuw} m omhoog in plaats van {oud} m.', {'nieuw': upRev.round(), 'oud': up.round()})
+            : tr('Andersom opgeslagen als nieuwe route.'),
+      );
+      context.go('/routes/$id');
     } catch (e) {
       if (context.mounted) showMessage(context, friendlyError(e), error: true);
     }
@@ -168,6 +191,18 @@ class RouteDetailScreen extends ConsumerWidget {
                 icon: const Icon(Icons.link),
                 label: const Text('Deel als link'),
               ),
+              if (r.polyline.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () => _reverse(context, ref, r),
+                  icon: const Icon(Icons.swap_horiz),
+                  label: Text(tr('Andersom lopen')),
+                ),
+              if (r.polyline.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () => openRouteFlyover(context, r),
+                  icon: const Icon(Icons.flight_takeoff),
+                  label: Text(tr('Vlieg over de route')),
+                ),
               ]),
               const SizedBox(height: 4),
               _MapAndProfile(

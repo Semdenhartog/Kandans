@@ -593,6 +593,7 @@ class RunRecorderService {
     bool indoor = false,
     CueSettings cues = const CueSettings(),
     double? targetPace,
+    double? paceBand,
     List<LatLng> followRoute = const [],
     List<ElevationSample> followProfile = const [],
     RunStreams? ghost,
@@ -640,7 +641,9 @@ class RunRecorderService {
     _fuel = cues.fuel ? FuelReminder() : null;
     _guided = guided == null ? null : GuidedPlayer(guided);
     if (guided != null) this.voice = true;
-    _coach = targetPace == null || indoor ? null : PaceCoach(targetPace);
+    _coach = targetPace == null || indoor
+        ? null
+        : (paceBand != null && paceBand > 0 ? PaceCoach.band(targetPace - paceBand, targetPace + paceBand) : PaceCoach(targetPace));
     // Live opdrachten alleen bij een gewone buitenrun (niet naast intervallen of een begeleide run).
     _laps.clear();
     _lapStartT = 0;
@@ -966,7 +969,8 @@ class RunRecorderService {
         final c = coach.update(r.movingSeconds, r.currentPace);
         if (c != null) {
           _say(c);
-          _buzz(const [0, 90, 90, 90]);
+          // Bandbreedte-alarm: duidelijk anders dan een km-tik, ook voelbaar zonder oortjes.
+          _buzz(coach.band ? const [0, 350, 150, 350, 150, 350] : const [0, 90, 90, 90]);
         }
       }
     }
