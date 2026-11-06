@@ -47,7 +47,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   afrondingen 8/16/24 px, pil alleen voor `.btn` (gemarkeerd `unslop-ignore`), `button{font-family:inherit}`. Functies toont `site/app-coach.jpg`
   (uitsnede van `schermen-main/playstore/6_coach.png`). Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live; **0038** (profielen + stappen) nog níet (zie open punten). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0038** staan live (0038 = profielen + stappen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -157,8 +157,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Play Console → verwijder-URL invullen: https://semdenhartog.github.io/Kandans/verwijderen.html
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - ElevenLabs: vóór de lancering betaald plan (Roos en Anna staan in "My Voices").
-- **Migratie 0038 live zetten** (Supabase vroeg om bevestiging; daarna pas merge naar main).
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 6-11): stemkeuze + voorbeeld (Jamie/Marvin/Roos/Anna), hoogtemeters, rondje met richting,
+  stappen van de maand, profielfoto/bio/melden, Kadans delen, laadtijd water/toilet/verlichting.
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
   loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
   stukken, live aanmoedigen, kantelen (landschap/medailles), widget, oefenfiguur (gouden tekenpop, schermtest `27b_oefenfiguren`).
