@@ -277,7 +277,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _Page(
         icon: Icons.record_voice_over_outlined,
         title: tr('Kies je coachstem'),
-        text: tr('Deze stem praat tijdens het lopen: tempo, afstand en afslagen. Tik op ▶ om een kort voorbeeld te horen. '
+        text: tr('Deze stem praat tijdens het lopen: tempo, afstand en afslagen. Tik op de afspeelknop voor een kort voorbeeld. '
             'Je wisselt later altijd bij Opnemen → Stem.'),
         children: [
           KadansVoiceChooser(onPicked: (_) => setState(() => _voicePicked = true)),
