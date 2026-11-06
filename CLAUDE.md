@@ -43,6 +43,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.5. Aanmelden vraagt 16+ en akkoord (versies in user metadata).
   Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
   Site gebruikt eigen lettertypes (`site/fonts.css`) en Leaflet uit `site.yml` (geen Google Fonts/unpkg → geen cookiebanner nodig).
+  Site-stijl (unslop-controle 2-11-2026, score 0): geen tekst met kleurverloop (effen goud), kleurverloop alleen op het CTA-blok,
+  afrondingen 8/16/24 px, pil alleen voor `.btn` (gemarkeerd `unslop-ignore`), `button{font-family:inherit}`. Functies toont `site/app-coach.jpg`
+  (uitsnede van `schermen-main/playstore/6_coach.png`). Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live. Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
@@ -52,6 +55,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Bewuste keuzes: geen sms-rechten (Google Play staat ze voor valmeldingen niet toe), geen "Hey Google"-vragen in het Nederlands
   (niet mogelijk voor gewone apps; wel snelkoppeling), geen eigen profielfoto's in Samen (zou moderatie vragen).
 - Gratis kaartdata: PDOK-tegels, Overpass (eerst één server, na 4 s reserve), openrouteservice, Open-Meteo, Buienradar.
+- Plugins: `/plugin` werkt niet in cloud-sessies (alleen in de terminal-CLI). Voor cloud: `enabledPlugins` (+ marketplace) in `.claude/settings.json`.
+  ECC (affaan-m/ECC) is **niet** geïnstalleerd: Sem wilde het, advies was eerst doorlichten (groot, hooks, botst met zuinig werken).
 
 ## Codekaart (graphify) – eerst kijken, dan pas bestanden lezen
 - Branch **`graaf`** (wordt na elke push naar main bijgewerkt door `graaf.yml`).
@@ -100,6 +105,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Tekeningen/animaties (eigen, geen pakketten) in `lib/shared/art/`: landschap (seizoenen), weericonen, zonneboog, lopend figuur,
   oefenfiguren (`motionFor(naam)`), uitleg-animatie, seizoensplaatje, kantelen (`Tilt`). Avatars/omslag Samen: `community/runner_avatar.dart` (0036).
   Fotomuur `activities/photo_wall_screen.dart`. Play Store-plaatjes + promovideo: `.github/scripts/store_screens.py` / `store_video.sh`.
+- **Glas-proef (alleen op branch `glas-proef`, niet op main):** `GlassPanel` in `lib/shared/glass.dart` (matglas met BackdropFilter, effen
+  terugval bij "minder beweging"). Kaartpagina van Opnemen: kaart volle hoogte, cijfers + Markeren in glas (bottom 30, vrij van © Kadaster/PDOK).
+  Schermtests `11g_glas_kaart` / `65g_donker_glas_kaart` (`_shot` heeft nu een `act:`-parameter om te vegen). Build + schermen groen.
+  Advies: géén glas in de hele app (accu, leesbaarheid in de zon, huisstijl), alleen over kaarten/navigatiebalk.
 - Valdetectie `domain/fall_detector.dart` + recorder (`fallCountdown`, `record/fall_alert.dart`); live-pagina toont `alert`, aanmoedigen
   via POST op functie `live-share` (`live_cheers`, 0037). Donker-route: `compareForDark` in `domain/lighting.dart`.
 - Stukken `domain/segments.dart` + `data/services/segment_store.dart` + `activities/segments_screen.dart`. Runtitel `domain/run_title.dart`.
@@ -144,6 +153,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   Stap 1: vaste schaal voor afronding/schaduw in `theme.dart` (bijv. `RwRadius.s/m/l`; nu 12+ losse waarden en 21× pil).
   Stap 2: verlooptekst (`ShaderMask`, 7×) → effen goud; verlopen bij Premium/Luxe/ledenkaart mogen blijven (huisstijl).
   Daarna: 16 gouden gloed-schaduwen en emoji (5 bestanden) per geval beoordelen. Controle via `screens.yml`. Scanner leest geen Dart → met de hand.
+- **Glas-proef: Sem kiest** → goed (meenemen in de unslop-ronde, + navigatiebalk en kaarten bij Routes), weggooien, of eerst als APK testen
+  (tijdelijk naar main, daarna terugdraaien).
 
 ## Agent skills
 - Issues: GitHub Issues van `Semdenhartog/Kandans` (via `gh`), zie `docs/agents/issue-tracker.md`.
