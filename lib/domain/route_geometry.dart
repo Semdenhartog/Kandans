@@ -258,8 +258,10 @@ List<ElevationSample> reverseProfile(List<ElevationSample> profile) {
 /// Totaal aantal meters omhoog in een profiel. De hoogtekaart telt bomen en gebouwen mee, dus eerst
 /// gladstrijken en pas een klim vanaf 3 m.
 double profileAscent(List<ElevationSample> profile) {
-  if (profile.isEmpty) return 0;
-  return cleanElevationGain([for (final s in profile) s.ele], radius: 1, threshold: 3);
+  if (profile.length < 2) return 0;
+  // Alleen gladstrijken bij dichte punten (≤ 150 m uit elkaar); bij grove punten zou je echte heuvels wegpoetsen.
+  final spacing = (profile.last.meters - profile.first.meters) / (profile.length - 1);
+  return cleanElevationGain([for (final s in profile) s.ele], radius: spacing <= 150 ? 1 : 0, threshold: 3);
 }
 
 /// Privacyzone: haalt het begin en eind van een track weg (binnen [radius] meter

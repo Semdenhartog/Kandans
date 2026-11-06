@@ -22,6 +22,7 @@ void main() {
     final paint = find.descendant(of: find.byType(ElevationProfileChart), matching: find.byType(CustomPaint)).last;
     expect(tester.getSize(paint).height, 120);
     expect(paint, paints..line()..line()..path()..path());
-    expect(find.text('6 m omhoog'), findsOneWidget);
+    // Vlak rondje: kleine schommelingen van de hoogtekaart tellen niet meer mee (vroeger 6 m).
+    expect(find.text('4 m omhoog'), findsOneWidget);
   });
 }
