@@ -47,7 +47,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   afrondingen 8/16/24 px, pil alleen voor `.btn` (gemarkeerd `unslop-ignore`), `button{font-family:inherit}`. Functies toont `site/app-coach.jpg`
   (uitsnede van `schermen-main/playstore/6_coach.png`). Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0038** staan live (0038 = profielen + stappen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0039** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -123,6 +123,13 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   melden `social_report_profile`, moderator `social_mod_photo`. App: `community/profile_edit_sheet.dart`, `runner_profile_screen.dart`.
 - Stappen van de maand (0038, `steps_submit`/`steps_board`): `community/steps_contest_screen.dart`, Health Connect `READ_STEPS`
   (`SyncService.connectSteps/monthSteps`), alleen maandtotaal naar server. Ranglijst vrienden + per loopgroep.
+- Ronde 6-11 (17 verbeteringen): stem vooraf laden (`KadansVoice.prefetch/commonPhrases`) + `volume()`; `whyNotNow` (verdict.dart) +
+  `typicalRunMinutes` (dashboard onthoudt `plan_duration_minutes`); route-generator stelt rondjes >5% bij; tekenscherm toont ondergrond
+  (`routes/surface_bar.dart`, path-modus geeft `surface` mee); tussentijden groen/oranje t.o.v. gemiddelde; kaart op tempo/hartslag
+  (`valueSegments`/`relativeScale`, `RouteMap.colorSegments`); runtitel wijzigen (`setActivityTitle`, 0039); run-deelkaart ook als verhaal 9:16;
+  route naar bekend horloge in één tik (`sendRouteToWatch(full:)`); profiel-voortgang; applaus-pop + dubbel tikken; stappen: vandaag,
+  afstand tot volgende, `StepsSync` (bij openen app, melding bij inhalen); lege Samen-schermen met uitnodigen; introductie 5 stappen;
+  unslop deels: `RwRadius.s/m/l` overal, `ShineText` effen zonder eigen kleuren, gouden gloed neutraal (emoji nog niet nagelopen).
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -158,14 +165,12 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
 - Testen op telefoon (nieuw 6-11): stemkeuze + voorbeeld (Daan/Bram/Emma/Fleur, na GOOGLE_TTS_KEY), hoogtemeters, rondje met richting,
-  stappen van de maand, profielfoto/bio/melden, Kadans delen, laadtijd water/toilet/verlichting.
+  stappen van de maand, profielfoto/bio/melden, Kadans delen, laadtijd water/toilet/verlichting, en de 17 verbeteringen van 6-11 avond
+  (stemvolume, tussentijden-kleuren, kaart op tempo, runtitel, verhaal-deelkaart, introductie, melding bij ingehaald).
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
   loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
   stukken, live aanmoedigen, kantelen (landschap/medailles), widget, oefenfiguur (gouden tekenpop, schermtest `27b_oefenfiguren`).
-- **Later (aparte ronde, als de app stabiel is): app ont-AI'en met skill `unslop-ui`** (site is al gedaan, score 0, 2-11-2026).
-  Stap 1: vaste schaal voor afronding/schaduw in `theme.dart` (bijv. `RwRadius.s/m/l`; nu 12+ losse waarden en 21× pil).
-  Stap 2: verlooptekst (`ShaderMask`, 7×) → effen goud; verlopen bij Premium/Luxe/ledenkaart mogen blijven (huisstijl).
-  Daarna: 16 gouden gloed-schaduwen en emoji (5 bestanden) per geval beoordelen. Controle via `screens.yml`. Scanner leest geen Dart → met de hand.
+- Unslop (6-11 grotendeels gedaan): nog over: 21× pil (999) nalopen, emoji in 5 bestanden, gloed bij uitdagingen.
 - **Glas-proef: Sem kiest** → goed (meenemen in de unslop-ronde, + navigatiebalk en kaarten bij Routes), weggooien, of eerst als APK testen
   (tijdelijk naar main, daarna terugdraaien).
 
