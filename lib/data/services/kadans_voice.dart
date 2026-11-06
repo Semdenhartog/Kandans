@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../core/config.dart';
 
 /// TESTFASE: de "Kadans-stem" (ElevenLabs, via de edge function `tts`, zodat de sleutel nooit in de app zit).
 ///
@@ -103,12 +107,25 @@ class KadansVoice {
     await stopPlayback();
     try {
       final file = await _cached(option.sample, option.key) ?? await _fetchOrThrow(option.sample, option.key);
-      await _play(file);
-      return null;
-    } on FunctionException catch (e) {
+      return await _playOrExplain(file);
+    } on TtsError catch (e) {
       return _explain(e);
-    } catch (_) {
+    } on TimeoutException {
+      return 'De Kadans-stem reageert te traag. Probeer het zo nog eens.';
+    } on SocketException {
       return 'Geen verbinding met de Kadans-stem. Controleer je internet.';
+    } catch (e) {
+      return 'Er ging iets mis met de Kadans-stem ($e).';
+    }
+  }
+
+  /// Speelt af; lukt het afspelen niet, dan een uitleg (de stem kwam wél binnen).
+  Future<String?> _playOrExplain(File f) async {
+    try {
+      await _play(f);
+      return null;
+    } catch (e) {
+      return 'De stem kwam binnen, maar afspelen lukte niet op deze telefoon ($e).';
     }
   }
 
@@ -171,14 +188,37 @@ class KadansVoice {
     return await f.exists() && await f.length() > 0 ? f : null;
   }
 
-  /// Haalt de zin op bij de server en bewaart hem. Gooit [FunctionException] bij een serverfout.
+  /// Vraagt de zin op bij de functie `tts`. Rechtstreeks via http (de bytes komen zo altijd ongeschonden binnen).
+  /// Gooit [TtsError] bij een serverfout.
+  Future<Uint8List> _request(String text, String voice) async {
+    final token = Supabase.instance.client.auth.currentSession?.accessToken;
+    if (token == null) throw const TtsError(401, '');
+    final res = await http
+        .post(
+          Uri.parse('${AppConfig.supabaseUrl}/functions/v1/tts'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'apikey': AppConfig.supabaseAnonKey,
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({'text': text, 'voice': voice}),
+        )
+        .timeout(const Duration(seconds: 12));
+    if (res.statusCode != 200) {
+      var reason = '';
+      try {
+        final j = jsonDecode(res.body);
+        if (j is Map) reason = '${j['reason'] ?? ''}';
+      } catch (_) {}
+      throw TtsError(res.statusCode, reason);
+    }
+    if (res.bodyBytes.isEmpty) throw const TtsError(502, 'empty');
+    return res.bodyBytes;
+  }
+
+  /// Haalt de zin op bij de server en bewaart hem.
   Future<File> _fetchOrThrow(String text, String voice) async {
-    final res = await Supabase.instance.client.functions
-        .invoke('tts', body: {'text': text, 'voice': voice})
-        .timeout(const Duration(seconds: 10));
-    final data = res.data;
-    final bytes = data is Uint8List ? data : (data is List<int> ? Uint8List.fromList(data) : null);
-    if (bytes == null || bytes.isEmpty) throw StateError('leeg');
+    final bytes = await _request(text, voice);
     final f = File('${(await _dir()).path}/${_hash(text, voice)}.mp3');
     await f.writeAsBytes(bytes, flush: true);
     return f;
@@ -187,7 +227,7 @@ class KadansVoice {
   Future<File?> _fetch(String text, String voice) async {
     try {
       return await _fetchOrThrow(text, voice);
-    } on FunctionException {
+    } on TtsError {
       // Niet ingesteld, credits op of storing: 2 minuten de telefoonstem, daarna opnieuw proberen.
       _pauseUntil = DateTime.now().add(const Duration(minutes: 2));
       return null;
@@ -201,30 +241,28 @@ class KadansVoice {
   Future<String> check() async {
     _pauseUntil = null;
     try {
-      final res = await Supabase.instance.client.functions
-          .invoke('tts', body: {'text': 'Hoi, dit is de Kadans-stem.', 'voice': await choice()})
-          .timeout(const Duration(seconds: 10));
-      final data = res.data;
-      final bytes = data is Uint8List ? data : (data is List<int> ? Uint8List.fromList(data) : null);
-      if (bytes == null || bytes.isEmpty) return 'De Kadans-stem gaf geen geluid terug.';
+      final bytes = await _request('Hoi, dit is de Kadans-stem.', await choice());
       final f = File('${(await _dir()).path}/check.mp3');
       await f.writeAsBytes(bytes, flush: true);
-      await _play(f);
-      return 'De Kadans-stem werkt.';
-    } on FunctionException catch (e) {
+      return await _playOrExplain(f) ?? 'De Kadans-stem werkt.';
+    } on TtsError catch (e) {
       return _explain(e);
-    } catch (_) {
+    } on TimeoutException {
+      return 'De Kadans-stem reageert te traag. Probeer het zo nog eens.';
+    } on SocketException {
       return 'Geen verbinding met de Kadans-stem. Controleer je internet.';
+    } catch (e) {
+      return 'Er ging iets mis met de Kadans-stem ($e).';
     }
   }
 
-  static String _explain(FunctionException e) {
-    final d = e.details;
-    final reason = d is Map ? '${d['reason'] ?? ''}' : '';
-    if (e.status == 503) return 'Nog niet ingesteld: zet ELEVENLABS_API_KEY in Supabase (Edge Functions → Secrets).';
+  static String _explain(TtsError e) {
+    final reason = e.reason;
+    if (e.status == 503) return 'Nog niet ingesteld: zet GOOGLE_TTS_KEY in Supabase (Edge Functions → Secrets).';
     if (e.status == 404) return 'De stemfunctie staat nog niet op de server.';
     if (e.status == 401) return 'Log opnieuw in en probeer het nog eens.';
     return switch (reason) {
+      'key_restricted' => 'De Google-sleutel mag Text-to-Speech niet gebruiken. Zet bij de sleutel "Cloud Text-to-Speech API" aan.',
       'key' => 'De stemsleutel klopt niet. Maak een nieuwe en zet hem opnieuw in Supabase (GOOGLE_TTS_KEY).',
       'api_off' => 'Zet in Google Cloud de "Cloud Text-to-Speech API" aan. Tot die tijd hoor je de telefoonstem.',
       'billing' => 'Zet in Google Cloud betalen aan voor dit project (het gratis deel blijft gratis).',
@@ -232,7 +270,7 @@ class KadansVoice {
       'plan' => 'Deze stem werkt pas met een betaald ElevenLabs-plan. Je hoort nu de telefoonstem.',
       'quota' => 'Het gratis aantal stemzinnen is op voor deze maand. Je hoort nu de telefoonstem.',
       'voice' => 'Deze stem is nu niet beschikbaar. Kies een andere stem; tot die tijd hoor je de telefoonstem.',
-      _ => 'ElevenLabs gaf een fout (${d is Map ? d['status'] : e.status}). Je hoort nu de telefoonstem.',
+      _ => 'De stemdienst gaf een fout (${e.status}). Je hoort nu de telefoonstem.',
     };
   }
 
@@ -249,4 +287,14 @@ class KadansVoice {
     await p.play(DeviceFileSource(f.path));
     await done.timeout(const Duration(seconds: 25), onTimeout: () {});
   }
+}
+
+/// Fout van de functie `tts` (HTTP-status + reden uit het antwoord).
+class TtsError implements Exception {
+  const TtsError(this.status, this.reason);
+  final int status;
+  final String reason;
+
+  @override
+  String toString() => 'TtsError($status, $reason)';
 }
