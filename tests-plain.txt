@@ -1,0 +1,369 @@
+00:00 +0: loading /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart
+00:00 +0: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: Valdetectie val en stil liggen: melding
+00:00 +1: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: Valdetectie hard neerkomen en doorlopen: geen melding
+00:00 +2: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: Valdetectie klap en dan stilstaan bij een stoplicht (rechtop): geen melding
+00:00 +3: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: donker-route: best verlicht eerst
+00:00 +4: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: krachtroutine op maat
+00:00 +5: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: eigen segmenten: herkennen en tijd per stuk
+00:00 +6: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: Automatische runtitel weer en moment
+00:00 +7: /home/runner/work/Kandans/Kandans/test/ten_ideas_test.dart: loopmaatje: tempo en momenten uit eigen runs, zonder Strava
+00:00 +8: /home/runner/work/Kandans/Kandans/test/challenges_test.dart: kilometers in de maand; runs erbuiten tellen niet
+00:00 +9: /home/runner/work/Kandans/Kandans/test/challenges_test.dart: hoogtemeters, uren, runs en één lange run
+00:00 +10: /home/runner/work/Kandans/Kandans/test/challenges_test.dart: elke dag: gemiste dag stopt de telling
+00:00 +11: /home/runner/work/Kandans/Kandans/test/challenges_test.dart: elke week 3 runs, 2 weken
+00:00 +12: /home/runner/work/Kandans/Kandans/test/challenges_test.dart: aanbod: maand, seizoen en vaste sleutels
+00:01 +13: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Hoe zeker is dit moment alle varianten droog = zeker droog
+00:01 +14: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Hoe zeker is dit moment de helft nat = twijfel, met een moment om nog te kijken
+00:01 +15: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Hoe zeker is dit moment vlak voor de start geen "kijk later nog even"
+00:01 +16: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Hoe zeker is dit moment ensemble-antwoord van Open-Meteo lezen
+00:01 +17: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Klopte de voorspelling droog voorspeld, droog geweest, temperatuur dichtbij
+00:01 +18: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Klopte de voorspelling score over 30 dagen, ongecontroleerde tellen niet mee
+00:01 +19: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Loop-bingo elke maand acht opdrachten, vast per maand, midden gratis
+00:01 +20: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Loop-bingo runs vullen vakjes, alleen in deze maand
+00:01 +21: /home/runner/work/Kandans/Kandans/test/six_ideas_test.dart: Loop-bingo drie op een rij is bingo
+00:01 +22: /home/runner/work/Kandans/Kandans/test/billing_test.dart: zonder sleutel kan betalen niet
+00:01 +23: /home/runner/work/Kandans/Kandans/test/billing_test.dart: Test Store-sleutel wordt herkend en alleen buiten release gebruikt
+00:01 +24: /home/runner/work/Kandans/Kandans/test/billing_test.dart: Google Play-sleutel werkt altijd
+00:01 +25: /home/runner/work/Kandans/Kandans/test/billing_test.dart: Premium-recht heet kadans_pro
+00:02 +26: /home/runner/work/Kandans/Kandans/test/widget_test.dart: toont uitleg als Supabase niet is ingesteld
+00:02 +27: /home/runner/work/Kandans/Kandans/test/widget_test.dart: hoogteprofiel tekent lijn, vlak en labels (vlak rondje uit km-punten)
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "6 m omhoog": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///home/runner/work/Kandans/Kandans/test/widget_test.dart:25:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/Kandans/Kandans/test/widget_test.dart line 25
+The test description was:
+  hoogteprofiel tekent lijn, vlak en labels (vlak rondje uit km-punten)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +27 -1: /home/runner/work/Kandans/Kandans/test/widget_test.dart: hoogteprofiel tekent lijn, vlak en labels (vlak rondje uit km-punten) [E]
+  Test failed. See exception logs above.
+  The test description was: hoogteprofiel tekent lijn, vlak en labels (vlak rondje uit km-punten)
+  
+00:12 +27 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: balk: runs die wachten op internet verborgen zonder wachtende runs
+00:12 +28 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: balk: runs die wachten op internet telt mee en verdwijnt weer
+00:12 +29 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: run bijsnijden toont afstand, tijd en de knop
+00:12 +30 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: run bijsnijden toont afstand, tijd en de knop
+00:12 +31 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: run bijsnijden toont afstand, tijd en de knop
+00:12 +32 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: run bijsnijden toont afstand, tijd en de knop
+00:13 +33 -1: /home/runner/work/Kandans/Kandans/test/new_screens_test.dart: run bijsnijden zonder verloop een duidelijke uitleg
+00:13 +34 -1: /home/runner/work/Kandans/Kandans/test/lighting_test.dart: verlichting langs de route
+00:14 +35 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: je gewone looptijd meestal rond half zeven
+00:14 +36 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: je gewone looptijd wisselende tijden (diensten): geen gewone tijd
+00:14 +37 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: je gewone looptijd te weinig runs, of te lang geleden
+00:14 +38 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: ochtendmelding alleen als het uitmaakt zonder gewone tijd altijd sturen
+00:14 +39 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: ochtendmelding alleen als het uitmaakt gewone tijd is prima: stil
+00:14 +40 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: ochtendmelding alleen als het uitmaakt ander moment duidelijk beter: sturen met uitleg
+00:14 +41 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: ochtendmelding alleen als het uitmaakt gewone tijd slecht: waarschuwen
+00:14 +42 -1: /home/runner/work/Kandans/Kandans/test/usual_time_test.dart: ochtendmelding alleen als het uitmaakt je kunt die dag niet op je gewone tijd (dienst): sturen
+00:14 +43 -1: /home/runner/work/Kandans/Kandans/test/pending_runs_test.dart: runs die wachten op internet heen en terug naar tekst zonder verlies
+00:14 +44 -1: /home/runner/work/Kandans/Kandans/test/pending_runs_test.dart: runs die wachten op internet met weer of zonder spoor is geen weer meer nodig
+00:14 +45 -1: /home/runner/work/Kandans/Kandans/test/pending_runs_test.dart: runs die wachten op internet kapotte bestanden geven null in plaats van een crash
+00:14 +46 -1: /home/runner/work/Kandans/Kandans/test/pending_runs_test.dart: runs die wachten op internet sleutels zijn uniek en bruikbaar als bestandsnaam
+00:14 +47 -1: /home/runner/work/Kandans/Kandans/test/pending_runs_test.dart: runs die wachten op internet versturen: oudste eerst, stopt bij geen internet en bewaart de rest
+00:15 +48 -1: /home/runner/work/Kandans/Kandans/test/pace_band_test.dart: tempobandje wordt een PNG-plaatje
+00:16 +49 -1: /home/runner/work/Kandans/Kandans/test/run_trim_test.dart: run bijsnijden begin en eind eraf, alles schuift naar 0
+00:16 +50 -1: /home/runner/work/Kandans/Kandans/test/run_trim_test.dart: run bijsnijden grenzen buiten het bereik worden bijgesteld
+00:16 +51 -1: /home/runner/work/Kandans/Kandans/test/run_trim_test.dart: run bijsnijden te weinig over of kapotte data geeft null
+00:16 +52 -1: /home/runner/work/Kandans/Kandans/test/run_trim_test.dart: run bijsnijden dichtstbijzijnde meetpunt bij een afstand
+00:16 +53 -1: /home/runner/work/Kandans/Kandans/test/invite_link_test.dart: uitnodigingslink bevat de code
+00:16 +54 -1: /home/runner/work/Kandans/Kandans/test/invite_link_test.dart: vriendcode uit klembord
+00:16 +55 -1: /home/runner/work/Kandans/Kandans/test/i18n_test.dart: vertalen en terugvallen op Nederlands
+00:16 +56 -1: /home/runner/work/Kandans/Kandans/test/i18n_test.dart: elke vertaling heeft 4 talen en is niet leeg
+00:16 +57 -1: /home/runner/work/Kandans/Kandans/test/i18n_test.dart: invullen met trf
+00:18 +58 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: rooster diensten lezen; hele dag, vrij en voorbij tellen niet
+00:18 +59 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: rooster regels die doorlopen (folding) en UTC-tijden
+00:18 +60 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: rooster reistijd en slapen na een nachtdienst blokkeren loopmomenten
+00:18 +61 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: zon midzomer in Amsterdam: hoog in het zuiden
+00:18 +62 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: zon winteravond: laag in het zuidwesten
+00:18 +63 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: zon deel van de route tegen de zon in
+00:18 +64 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: terugblik droog gebleven terwijl het later regende
+00:18 +65 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: terugblik nat geworden terwijl het kort ervoor droog was
+00:18 +66 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: terugblik heel weinig data = geen oordeel
+00:18 +67 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: hartslagdrift stabiele hartslag = weinig drift
+00:18 +68 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: hartslagdrift oplopende hartslag = flinke drift
+00:18 +69 -1: /home/runner/work/Kandans/Kandans/test/five_ideas_test.dart: hartslagdrift te kort = geen uitkomst
+00:18 +70 -1: /home/runner/work/Kandans/Kandans/test/strava_origin_test.dart: Strava-data niet naar de coach herkomst van een Health Connect-run
+00:18 +71 -1: /home/runner/work/Kandans/Kandans/test/strava_origin_test.dart: Strava-data niet naar de coach runs van de Strava-app krijgen een herkenbaar id
+00:18 +72 -1: /home/runner/work/Kandans/Kandans/test/strava_origin_test.dart: Strava-data niet naar de coach viaStrava: direct, via Health Connect, en gewone runs
+00:19 +73 -1: /home/runner/work/Kandans/Kandans/test/review_test.dart: om een beoordeling vragen: pas na 5 eigen runs, en maar één keer
+00:19 +74 -1: /home/runner/work/Kandans/Kandans/test/review_test.dart: na een record al vanaf de 3e run
+00:20 +75 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: stemcoach vergelijkt met het vorige stuk
+00:20 +76 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: stemcoach verwachte eindtijd bij een route
+00:20 +77 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: stemcoach korte stem: alleen afstand en tempo
+00:20 +78 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: stemcoach motiverende stem moedigt aan
+00:20 +79 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: stemcoach nieuwe instellingen worden bewaard
+00:20 +80 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: recordjacht seintje, record en langste run
+00:20 +81 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: recordjacht geen seintje als het niet gaat lukken
+00:20 +82 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: heen en terug: één minuut vooraf en halverwege
+00:20 +83 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: briefing bij de start
+00:20 +84 -1: /home/runner/work/Kandans/Kandans/test/live_coach_test.dart: bezienswaardigheden onderweg, niet te vaak
+00:20 +85 -1: /home/runner/work/Kandans/Kandans/test/run_pause_test.dart: pauze: actief op de juiste dagen, ook zonder einddatum
+00:20 +86 -1: /home/runner/work/Kandans/Kandans/test/run_pause_test.dart: pauzeweek telt pas bij minstens 4 dagen
+00:20 +87 -1: /home/runner/work/Kandans/Kandans/test/run_pause_test.dart: reeks breekt niet door een pauzeweek, maar die week telt niet mee
+00:20 +88 -1: /home/runner/work/Kandans/Kandans/test/run_pause_test.dart: badge "4 weken op rij" springt over pauzeweken heen
+00:20 +89 -1: /home/runner/work/Kandans/Kandans/test/run_pause_test.dart: opslaan en teruglezen
+00:21 +90 -1: /home/runner/work/Kandans/Kandans/test/gps_quality_test.dart: GPS-kwaliteit per run schone run
+00:21 +91 -1: /home/runner/work/Kandans/Kandans/test/gps_quality_test.dart: GPS-kwaliteit per run onnauwkeurig, sprong en een tunnel van 40 s
+00:21 +92 -1: /home/runner/work/Kandans/Kandans/test/gps_quality_test.dart: GPS-kwaliteit per run pauze is geen GPS-gat
+00:22 +93 -1: /home/runner/work/Kandans/Kandans/test/best_route_test.dart: kiest de route met de minste tegenwind
+00:22 +94 -1: /home/runner/work/Kandans/Kandans/test/best_route_test.dart: bij weinig wind of één route geen advies
+00:22 +95 -1: /home/runner/work/Kandans/Kandans/test/best_route_test.dart: routes ver weg tellen niet mee
+00:22 +96 -1: /home/runner/work/Kandans/Kandans/test/route_filter_test.dart: zoeken, filteren en sorteren
+00:22 +97 -1: /home/runner/work/Kandans/Kandans/test/run_helpers_test.dart: zonsondergang Barneveld eind oktober rond 16:25 UTC
+00:22 +98 -1: /home/runner/work/Kandans/Kandans/test/run_helpers_test.dart: donker-waarschuwing alleen als je na zonsondergang terug bent
+00:22 +99 -1: /home/runner/work/Kandans/Kandans/test/run_helpers_test.dart: terug naar start: achter je als je er recht vanaf loopt
+00:22 +100 -1: /home/runner/work/Kandans/Kandans/test/run_helpers_test.dart: weekdoel-voorstellen rond je gemiddelde
+00:23 +101 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: snelheid: snelste stuk telt, een lange run wordt niet omgerekend
+00:23 +102 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: volhouden: dagen en maanden op rij
+00:23 +103 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: een jaar loper
+00:23 +104 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: weer en seizoen
+00:23 +105 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: ontdekken: routes, plekken en op reis
+00:23 +106 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: eerste punt van een polyline zonder alles te ontcijferen
+00:23 +107 -1: /home/runner/work/Kandans/Kandans/test/badges_test.dart: bestaande badges houden hun id
+00:23 +108 -1: /home/runner/work/Kandans/Kandans/test/route_share_test.dart: link heen en terug
+00:23 +109 -1: /home/runner/work/Kandans/Kandans/test/route_share_test.dart: webpagina-link met hash
+00:23 +110 -1: /home/runner/work/Kandans/Kandans/test/route_share_test.dart: ongeldige link
+00:24 +111 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: nog een keer laatste route die nog bestaat, met aantal keer
+00:24 +112 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: nog een keer dagen in woorden
+00:24 +113 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: op deze dag: langste run per jaar, nieuwste eerst
+00:24 +114 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: gouden uur: eerstvolgende, vandaag of morgen
+00:24 +115 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: jaardoel: voorspelling en nodig per week
+00:24 +116 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: hoogtemeters vergelijken
+00:24 +117 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: hersteltip hangt af van duur, hartslag en warmte
+00:24 +118 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: nieuwe wegen
+00:24 +119 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: weekend alleen van donderdag tot en met zaterdag
+00:24 +120 -1: /home/runner/work/Kandans/Kandans/test/extras_test.dart: weekend tekst noemt de beste dag eerst
+00:24 +121 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: afslagen herkennen rechtsaf en linksaf
+00:24 +122 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: afslagen herkennen rechtdoor en een flauwe bocht in de weg geven geen afslag
+00:24 +123 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: afslagen herkennen keerpunt, scherpe en flauwe afslag
+00:24 +124 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: afslagen herkennen even oversteken (links-rechts binnen 20 m) is geen afslag
+00:24 +125 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: afslagen herkennen vierkant rondje: drie keer rechtsaf
+00:24 +126 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: afslagen herkennen GPS-ruis geeft geen nep-afslagen
+00:24 +127 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: aanwijzingen tijdens het lopen vooraankondiging en nu
+00:24 +128 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: aanwijzingen tijdens het lopen afslag die je voorbij bent wordt overgeslagen
+00:24 +129 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: aanwijzingen tijdens het lopen teksten
+00:24 +130 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: bestanden voor je horloge FIT-koers: kop, lengte en controlegetal kloppen
+00:24 +131 -1: /home/runner/work/Kandans/Kandans/test/route_turns_test.dart: bestanden voor je horloge GPX met afslagen als waypoints, en nog steeds in te lezen
+00:26 +132 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: Fmt pace en duur
+00:26 +133 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: geo polyline encode/decode (voorbeeld van Google)
+00:26 +134 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: geo afstand en richting
+00:26 +135 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: GPX leest punten, afstand en km-punten
+00:26 +136 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: GPX ongeldige invoer geeft nette fout
+00:26 +137 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: wind langs route noordelijke wind is tegenwind als je naar het noorden loopt
+00:26 +138 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: wind langs route heen en terug: tegenwind op de terugweg
+00:26 +139 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: vertrektijd kiest het koele, droge, windstille uur
+00:26 +140 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: vertrektijd regen-voorkeur: wie regen niet erg vindt, krijgt minder strafpunten
+00:26 +141 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: vertrektijd onweer telt altijd zwaar mee, ook als je regen niet erg vindt
+00:26 +142 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: prestatiemodel vindt de snelste temperatuurgroep
+00:26 +143 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: op de minuut afronden naar boven op 5 minuten
+00:26 +144 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: op de minuut kwartierweer wordt tussen twee kwartieren geschat
+00:26 +145 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: op de minuut Buienradar-tekst lezen, ook over middernacht
+00:26 +146 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: op de minuut wacht tot de bui voorbij is, op 5 minuten nauwkeurig
+00:26 +147 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kledingadvies koud: lange tight, jack en handschoenen
+00:26 +148 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kledingadvies warm: korte broek, en drinken bij een lange run
+00:26 +149 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kledingadvies donker en regen geven extra tips
+00:26 +150 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: looprichting rondje herkennen en richting bepalen
+00:26 +151 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: looprichting wind uit het zuidwesten: rechtsom geeft minder tegenwind op het eind
+00:26 +152 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: looprichting geen advies bij weinig wind of heen-en-terug
+00:26 +153 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route maken PDOK-adres lezen
+00:26 +154 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route maken rondje uit punten bouwen
+00:26 +155 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route op de kaart punt en richting op afstand
+00:26 +156 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route op de kaart westenwind: heen wind mee, terug tegenwind
+00:26 +157 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route op de kaart zijwind en weinig wind
+00:26 +158 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route op de kaart pijltjes en kilometerbordjes
+00:26 +159 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route op de kaart hoogteprofiel
+00:26 +160 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route op de kaart route krijgt een hoogteprofiel
+00:26 +161 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: records en weercorrectie wind en warmte kosten tijd, windstil en koel niet
+00:26 +162 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: records en weercorrectie records per afstand, met weer-record
+00:26 +163 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: records en weercorrectie runs op een vaste route met trend
+00:26 +164 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: water en toilet langs de route Overpass lezen en privé overslaan
+00:26 +165 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: water en toilet langs de route zoekopdracht bevat het gebied
+00:26 +166 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: maanduitdaging voorstel uit vorige maanden
+00:26 +167 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: maanduitdaging voortgang en schema
+00:26 +168 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: live delen token is lang en zonder rare tekens
+00:26 +169 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: live delen niet te vaak versturen
+00:26 +170 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs automatisch aan routes koppelen zelfde rondje, andersom en elders gestart, met GPS-ruis
+00:26 +171 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs automatisch aan routes koppelen ander rondje of maar een stukje: geen koppeling
+00:26 +172 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs automatisch aan routes koppelen Strava-polyline (alleen hoekpunten) wordt ook herkend
+00:26 +173 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: foutmeldingen zelfde fout herkennen en lange teksten inkorten
+00:26 +174 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: privacyzone begin en eind worden verborgen
+00:26 +175 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route naar horloge GPX maken en weer inlezen
+00:26 +176 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen rustig weer: geen waarschuwingen
+00:26 +177 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen onweer, windstoten en hitte
+00:26 +178 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen glad en donker
+00:26 +179 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen luchtkwaliteit en pollen
+00:26 +180 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen mist, natte bladeren en twijfelbui
+00:26 +181 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen wind: begin tegen de wind in (niet als je een route volgt)
+00:26 +182 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: waarschuwingen eerste warme dag, benauwd en kou
+00:26 +183 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kledingadvies snel koud = een laagje warmer
+00:26 +184 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kledingadvies drinkadvies bij warmte
+00:26 +185 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: tijden per km splits met tempo, hartslag en hoogte
+00:26 +186 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: tijden per km tempo-lijn en onvolledige gegevens
+00:26 +187 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: weekoverzicht weken, reeks en opbouw
+00:26 +188 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: weekoverzicht reeks loopt door als je deze week nog niet liep
+00:26 +189 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: looptijden alleen binnen je tijden, hele run moet passen
+00:26 +190 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: looptijden planner kiest alleen tijden binnen je looptijden
+00:26 +191 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: run opnemen afstand, tijd en kilometers
+00:26 +192 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: run opnemen automatisch pauzeren bij stilstaan en GPS-sprongen negeren
+00:26 +193 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: run opnemen één losse sprong negeren, maar niet vastlopen op een fout beginpunt
+00:26 +194 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: run opnemen stem: tijden uitspreken
+00:26 +195 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: oordeel bovenaan nu lopen als nu bijna net zo goed is
+00:26 +196 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: oordeel bovenaan later lopen als wachten duidelijk beter is
+00:26 +197 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: oordeel bovenaan vandaag lastig
+00:26 +198 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: oordeel bovenaan nu valt buiten je looptijden
+00:26 +199 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: oordeel bovenaan alleen goede uren
+00:26 +200 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: oordeel bovenaan uitleg: waarom later beter is dan nu
+00:26 +201 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: indeling Vandaag opslaan, lezen en nieuwe kaarten achteraan
+00:26 +202 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs filteren en per periode maand en jaar
+00:26 +203 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs filteren en per periode weekstrook
+00:26 +204 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs filteren en per periode filters
+00:26 +205 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: runs filteren en per periode export
+00:26 +206 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: intervallen schema bouwen
+00:26 +207 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: intervallen stappen doorlopen op tijd en afstand
+00:26 +208 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route tekenen vormen
+00:26 +209 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: GPS-ruis stilstaan zonder autopauze telt geen afstand
+00:26 +210 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: foto's langs de route punten gelijkmatig verdeeld met looprichting
+00:26 +211 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: foto's langs de route straatfoto's van de server
+00:26 +212 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: foto's langs de route bezienswaardigheden dicht bij de route
+00:26 +213 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: foto's langs de route vakje om de route
+00:26 +214 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: snelste stukken en verloop van eigen opnames snelste km midden in een run
+00:26 +215 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: snelste stukken en verloop van eigen opnames opname bewaart verloop met hoogte en hartslag
+00:26 +216 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: hartslagband meting lezen (8 en 16 bits)
+00:26 +217 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: hartslagband zones
+00:26 +218 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import onderbroken run terughalen
+00:26 +219 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import loopband: klok zonder GPS
+00:26 +220 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import stemmeldingen op afstand en op tijd
+00:26 +221 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import loopband: stem noemt alleen de tijd, geen afstand of tempo
+00:26 +222 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import doeltempo-coach
+00:26 +223 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import fitheid en vorm
+00:26 +224 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 2: opname veilig, coach, belasting, import run uit GPX en TCX importeren
+00:26 +225 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route volgen van de route af en weer terug
+00:26 +226 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route volgen halverwege instappen op een gewone route
+00:26 +227 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route volgen naar de route toe lopen: richting en afstand
+00:26 +228 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route volgen rondje halverwege oppakken: hele rondje vanaf daar
+00:26 +229 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: route volgen kompaswoorden en afstanden voor de stem
+00:26 +230 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: trainingsschema schema tot de wedstrijd met opbouw en afbouw
+00:26 +231 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: trainingsschema opslaan en terug lezen
+00:26 +232 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: trainingsschema gedaan en herstel
+00:26 +233 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: zones, hoogte en tempoplan tijd in hartslag- en tempozones
+00:26 +234 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: zones, hoogte en tempoplan hoogte verdelen en hoogtemeters
+00:26 +235 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: zones, hoogte en tempoplan tempoplan komt precies op de doeltijd uit
+00:26 +236 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: jaaroverzicht totalen, favorieten en reeks
+00:26 +237 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 4 klaar-score
+00:26 +238 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 4 lichtere training, warmte en nieuwe tempo's
+00:26 +239 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 4 race tegen je record
+00:26 +240 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 4 badges
+00:26 +241 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 4 weekrapport en 80/20
+00:26 +242 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 6 drink- en gelherinnering
+00:26 +243 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: ronde 6 stemcoach-instellingen bewaren de herinnering
+00:26 +244 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: begeleide runs teksten op tijd, sprongen geven alleen de laatste
+00:26 +245 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: begeleide runs elke begeleide run begint op 0 en eindigt op zijn duur
+00:26 +246 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: beginners en bijsturen van nul naar 5 km: opbouw van lopen/wandelen naar 30 minuten
+00:26 +247 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: beginners en bijsturen terugkomen: 4 tot 12 weken, eindigt op 40 minuten
+00:26 +248 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: beginners en bijsturen lopen/wandelen: stem zegt hardlopen en wandelen
+00:26 +249 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: beginners en bijsturen lichtere versie van lopen/wandelen houdt het lopen/wandelen
+00:26 +250 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: beginners en bijsturen schema-check: gemist, te veel en op schema
+00:26 +251 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: loopband met snelheid afstand, km-tijden en tempo uit de snelheid; afstand achteraf schaalt het verloop
+00:26 +252 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: loopband met snelheid zonder snelheid alleen de klok
+00:26 +253 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kracht en mobiliteit routines: links/rechts uitgeschreven en een redelijke duur
+00:26 +254 -1: /home/runner/work/Kandans/Kandans/test/domain_test.dart: kracht en mobiliteit speler: oefening, pauze, volgende, klaar
+00:26 +255 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: GPS-kunst elke vorm: gesloten, binnen 25 punten, ongeveer de gevraagde lengte
+00:26 +256 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: GPS-kunst route precies over de vorm = 100%, ver ernaast = 0%
+00:26 +257 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: leeftijdsniveau wereldrecord-tijd op topleeftijd ≈ 100%
+00:26 +258 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: leeftijdsniveau ouder = zelfde tijd scoort hoger
+00:26 +259 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: leeftijdsniveau factoren lopen af met de leeftijd; vrouwen eigen norm
+00:26 +260 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: pijntjes notitie heen en terug
+00:26 +261 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: pijntjes 2× scheen na lange runs = patroon met oorzaak
+00:26 +262 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: pijntjes één keer erg = meteen advies naar de fysio; één keer licht = niets
+00:26 +263 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: hartslagherstel niveau en trend
+00:26 +264 -1: /home/runner/work/Kandans/Kandans/test/round31b_test.dart: terugblik telt ontweken regen en hitte ochtendrun op een hete dag met avondbui
+00:27 +265 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: weercode naar plaatje
+00:27 +266 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: seizoenen
+00:27 +267 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: tekeningen bouwen zonder fouten
+00:27 +268 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: tekeningen bouwen zonder fouten
+00:27 +269 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: tekeningen bouwen zonder fouten
+00:27 +270 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: tekeningen bouwen zonder fouten
+00:27 +271 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: tekeningen bouwen zonder fouten
+00:28 +272 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: oefening naar beweging
+00:28 +273 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: ghost: hoe ver was je record na zoveel seconden
+00:28 +274 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: omslagkeuze naar seizoen
+00:28 +275 -1: /home/runner/work/Kandans/Kandans/test/visuals_test.dart: oefenfiguren en uitleg-animatie bouwen zonder fouten
+00:28 +276 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: weerslim schema lange duurloop gaat van natte woensdag naar droge dinsdag
+00:28 +277 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: weerslim schema nooit naast een andere zware training en nooit naar het verleden
+00:28 +278 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: weerslim schema rustige dag die er staat schuift mee terug
+00:28 +279 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: weerslim schema klein verschil = geen voorstel
+00:28 +280 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: vocht warmer en sneller = meer zweet
+00:28 +281 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: vocht advies na een uur bij 24 °C
+00:28 +282 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: vocht drinken mee alleen bij lang en warm
+00:28 +283 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: recordweer koel, windstil en droog
+00:28 +284 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: recordweer 5 km eerst, anders 10 km
+00:28 +285 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: hond heet asfalt bij zon en 24 °C
+00:28 +286 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: hond zonder hond geen hondenwaarschuwing
+00:28 +287 -1: /home/runner/work/Kandans/Kandans/test/round31_test.dart: hond drinken mee bij lange warme run
+00:29 +288 -1: /home/runner/work/Kandans/Kandans/test/heads_up_test.dart: klimmetjes herkent een klim en negeert vlak en kleine bultjes
+00:29 +289 -1: /home/runner/work/Kandans/Kandans/test/heads_up_test.dart: klimmetjes lange flauwe helling telt niet
+00:29 +290 -1: /home/runner/work/Kandans/Kandans/test/heads_up_test.dart: klimmetjes profiel op andere schaal wordt omgerekend naar de route
+00:29 +291 -1: /home/runner/work/Kandans/Kandans/test/heads_up_test.dart: vooraankondigingen klim en watertappunt op tijd, elk één keer
+00:29 +292 -1: /home/runner/work/Kandans/Kandans/test/heads_up_test.dart: vooraankondigingen daglicht-seintje één keer, 20 minuten vooraf
+00:29 +293 -1: /home/runner/work/Kandans/Kandans/test/heads_up_test.dart: cadans-tik: geldig WAV-bestand met de juiste lengte
+00:30 +294 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: geen opdracht tijdens het inlopen
+00:30 +295 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: sprint komt na het inlopen en wordt gehaald als je sneller loopt
+00:30 +296 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: te langzaam = net niet
+00:30 +297 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: rust tussen twee opdrachten
+00:30 +298 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: sterke finish bij een geplande afstand
+00:30 +299 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: tempo-tekst
+00:30 +300 -1: /home/runner/work/Kandans/Kandans/test/live_quests_test.dart: overslaan telt niet mee
+00:30 +301 -1: /home/runner/work/Kandans/Kandans/test/gps_spikes_test.dart: schone run: geen sprongen
+00:30 +302 -1: /home/runner/work/Kandans/Kandans/test/gps_spikes_test.dart: één punt 200 m ernaast: gevonden, hersteld tot de echte afstand
+00:30 +303 -1: /home/runner/work/Kandans/Kandans/test/gps_spikes_test.dart: twee sprongen, alleen de eerste herstellen
+00:30 +304 -1: /home/runner/work/Kandans/Kandans/test/gps_spikes_test.dart: kleine GPS-ruis telt niet
+00:30 +305 -1: /home/runner/work/Kandans/Kandans/test/gps_spikes_test.dart: snelle loper (interval 6 m/s) is geen sprong
+00:31 +306 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: barometer luchtdruk naar hoogte: zeeniveau 0 m, ~12 Pa per meter
+00:31 +307 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: barometer ruis onder 3 m telt niet, een echte klim wel
+00:31 +308 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: barometer afvlakking dempt een uitschieter
+00:31 +309 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: loopsensor (RSC) snelheid, cadans, paslengte en afstand
+00:31 +310 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: loopsensor (RSC) cadans al in stappen per minuut blijft gelijk; wandelen niet verdubbelen
+00:31 +311 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: tussentijden per afstand per 400 m: 6 stukken van 100 s
+00:31 +312 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: tussentijden per afstand per km blijft zoals het was
+00:31 +313 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: tussentijden per afstand labels
+00:31 +314 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: opnamescherm-indeling bewaren en teruglezen
+00:31 +315 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: opnamescherm-indeling kapot of leeg = standaardindelingen; eerste is het oude scherm
+00:31 +316 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: opnamescherm-indeling maximaal 6 kleine cijfers
+00:31 +317 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: markeringen json heen en terug, lokale foto alleen als gevraagd
+00:31 +318 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: markeringen bijsnijden verschuift en filtert markeringen
+00:31 +319 -1: /home/runner/work/Kandans/Kandans/test/opentracks_ideas_test.dart: markeringen opname bewaart markeringen, cadans en barometer in het verloop
+00:31 +320 -1: /home/runner/work/Kandans/Kandans/test/poster_map_test.dart: kader rond de route is ruimer en ongeveer zo breed als het kaartvlak
+00:31 +321 -1: /home/runner/work/Kandans/Kandans/test/poster_map_test.dart: klein gebied: ook paden; groot gebied: alleen grote wegen
+00:31 +322 -1: /home/runner/work/Kandans/Kandans/test/poster_map_test.dart: antwoord lezen, sorteren en compact bewaren
+00:32 +323 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: soorten hardlopen in meerdere talen
+00:32 +324 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: csv met komma, aanhalingstekens en regeleinde in een veld
+00:32 +325 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: strava_export.zip inhoud en activiteitenlijst
+00:32 +326 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: strava_export.zip FIT (ingepakt, met compacte tijdstempels en ontwikkelaarsveld)
+00:32 +327 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: strava_export.zip GPX en TCX (met spaties voor de XML-kop)
+00:32 +328 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: strava_export_zip64.zip inhoud en activiteitenlijst
+00:32 +329 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: strava_export_zip64.zip FIT (ingepakt, met compacte tijdstempels en ontwikkelaarsveld)
+00:32 +330 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: strava_export_zip64.zip GPX en TCX (met spaties voor de XML-kop)
+00:32 +331 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: FIT van een andere sport wordt geweigerd
+00:32 +332 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: kapotte bestanden geven een nette melding
+00:32 +333 -1: /home/runner/work/Kandans/Kandans/test/strava_archive_test.dart: geen zip
+00:32 +334 -1: /home/runner/work/Kandans/Kandans/test/shoe_shop_test.dart: schoenenwinkel zonder instelling: gewone zoeklink, geen partner
+00:33 +335 -1: /home/runner/work/Kandans/Kandans/test/shoe_shop_test.dart: schoenenwinkel ingestelde partnerwinkel
+00:33 +336 -1: /home/runner/work/Kandans/Kandans/test/shoe_shop_test.dart: schoenenwinkel onveilige of onvolledige link wordt niet gebruikt
+00:33 +337 -1: /home/runner/work/Kandans/Kandans/test/shoe_shop_test.dart: schoenenwinkel welke schoen eerst vervangen moet worden
+00:33 +338 -1: Some tests failed.
+
+Failing tests:
+  /home/runner/work/Kandans/Kandans/test/widget_test.dart: hoogteprofiel tekent lijn, vlak en labels (vlak rondje uit km-punten)
