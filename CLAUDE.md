@@ -128,8 +128,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - **Kadans-stem (TESTFASE, ElevenLabs gratis plan = niet commercieel):** edge function `tts` (geheim `ELEVENLABS_API_KEY`, optioneel
   `ELEVENLABS_MODEL` standaard `eleven_flash_v2_5`). Vaste stemmenlijst `VOICES` in `tts` = `kadansVoices` in `data/services/kadans_voice.dart`:
   Jamie `YxbOqEAPD1TsKmU3TFJz` (m, standaard; in Sems account), Marvin `XWw6BayktH5jsnELw9Bc` (m, in account), Roos `7qdUFMklKPaaAVMsBTBt`
-  (v) en Sanne `mNOlrB5V39qx4wQwSjG3` (v) — Roos/Sanne zijn bibliotheekstemmen: werken pas als Sem ze in "My Voices" zet. Berend is vervangen
-  (oude keuze → Jamie). Terugval alleen binnen hetzelfde geslacht, anders telefoonstem. Keuze + voorbeeldknop: `shared/kadans_voice_chooser.dart`
+  (v) en Anna `8B6lPskx1bcErhNkFdqo` (v, bibliotheeknaam "Lotte") — Sem heeft Roos en Anna in "My Voices" gezet. Oude sleutels: berend → jamie,
+  sanne → anna (`ALIASES` in `tts` + `choice()` in de app). Terugval alleen binnen hetzelfde geslacht, anders telefoonstem. Keuze + voorbeeldknop: `shared/kadans_voice_chooser.dart`
   (introductie-stap "Kies je coachstem" + stemkeuze bij Opnemen). Cache per zin én stem op toestel. Na een fout 2 min pauze.
   **Nooit twee stemmen tegelijk:** `speak(..., fallback, stopFallback)` zet flutter_tts stil vóór het afspelen, een gestarte zin
   valt niet meer terug, en `_configureTts` gebruikt `awaitSpeakCompletion(true)`.
@@ -156,7 +156,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Na KvK: bedrijfsgegevens (naam, adres, KvK-nummer) invullen in `site/voorwaarden.html` (en versie ophogen).
 - Play Console → verwijder-URL invullen: https://semdenhartog.github.io/Kandans/verwijderen.html
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
-- ElevenLabs: Roos en Sanne in "My Voices" zetten (anders werken de vrouwenstemmen niet); vóór de lancering betaald plan.
+- ElevenLabs: vóór de lancering betaald plan (Roos en Anna staan in "My Voices").
 - **Migratie 0038 live zetten** (Supabase vroeg om bevestiging; daarna pas merge naar main).
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,

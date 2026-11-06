@@ -24,13 +24,16 @@ const VOICES: Record<string, { id: string; gender: "m" | "v" }> = {
   jamie: { id: "YxbOqEAPD1TsKmU3TFJz", gender: "m" },
   marvin: { id: "XWw6BayktH5jsnELw9Bc", gender: "m" },
   roos: { id: "7qdUFMklKPaaAVMsBTBt", gender: "v" },
-  sanne: { id: "mNOlrB5V39qx4wQwSjG3", gender: "v" },
+  anna: { id: "8B6lPskx1bcErhNkFdqo", gender: "v" },
 };
 
 /// Volgorde om te proberen: gekozen stem, dan de andere(n) van hetzelfde geslacht.
+// Oude sleutels uit eerdere versies van de app.
+const ALIASES: Record<string, string> = { berend: "jamie", sanne: "anna" };
+
 function voiceChain(key: string): string[] {
-  const chosen = VOICES[key];
-  if (!chosen) return [VOICES.jamie.id, VOICES.marvin.id]; // onbekend of oude keuze (Berend): Jamie
+  const chosen = VOICES[ALIASES[key] ?? key];
+  if (!chosen) return [VOICES.jamie.id, VOICES.marvin.id]; // onbekende sleutel: Jamie
   const same = Object.values(VOICES).filter((v) => v.gender === chosen.gender && v.id !== chosen.id).map((v) => v.id);
   return [chosen.id, ...same];
 }

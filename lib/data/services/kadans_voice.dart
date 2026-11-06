@@ -33,8 +33,8 @@ const kadansVoices = [
       'Hoi, ik ben Marvin. Nog vijfhonderd meter. Hou dit tempo vast, je bent er bijna!'),
   KadansVoiceOption('roos', 'Roos', true, 'fris en vrolijk',
       'Hoi, ik ben Roos. Kilometer drie. Je tempo is vijf minuut dertig. Goed zo!'),
-  KadansVoiceOption('sanne', 'Sanne', true, 'kalm en warm',
-      'Hoi, ik ben Sanne. Rustig aan bergop. Over tweehonderd meter rechtsaf.'),
+  KadansVoiceOption('anna', 'Anna', true, 'helder en warm',
+      'Hoi, ik ben Anna. Rustig aan bergop. Over tweehonderd meter rechtsaf.'),
 ];
 
 class KadansVoice {
@@ -70,12 +70,13 @@ class KadansVoice {
     } catch (_) {}
   }
 
-  /// Gekozen stem (sleutel uit [kadansVoices]); standaard Jamie. Een oude keuze (Berend) wordt Jamie.
+  /// Gekozen stem (sleutel uit [kadansVoices]); standaard Jamie.
   Future<String> choice() async {
     if (_choice != null) return _choice!;
     try {
       final p = await SharedPreferences.getInstance();
-      final saved = p.getString(_voiceKey);
+      // Oude keuzes uit eerdere versies: Berend → Jamie, Sanne → Anna (zelfde geslacht).
+      final saved = switch (p.getString(_voiceKey)) { 'berend' => 'jamie', 'sanne' => 'anna', final k => k };
       return _choice = kadansVoices.any((v) => v.key == saved) ? saved! : kadansVoices.first.key;
     } catch (_) {
       return _choice = kadansVoices.first.key;

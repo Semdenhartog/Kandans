@@ -976,7 +976,7 @@ const kTranslations = <String, List<String>>{
   'helder en vriendelijk': ['clear and friendly', 'klar und freundlich', 'claire et amicale', 'clara y amable'],
   'energiek en vlot': ['energetic and upbeat', 'energisch und flott', 'énergique et entraînant', 'enérgica y ágil'],
   'fris en vrolijk': ['fresh and cheerful', 'frisch und fröhlich', 'fraîche et joyeuse', 'fresca y alegre'],
-  'kalm en warm': ['calm and warm', 'ruhig und warm', 'calme et chaleureuse', 'serena y cálida'],
+  'helder en warm': ['bright and warm', 'hell und warm', 'lumineuse et chaleureuse', 'luminosa y cálida'],
   'Maakt niet uit': ['Doesn\'t matter', 'Egal', 'Peu importe', 'Da igual'],
   'Noord': ['North', 'Nord', 'Nord', 'Norte'],
   'Oost': ['East', 'Ost', 'Est', 'Este'],
