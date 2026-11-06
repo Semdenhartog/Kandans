@@ -45,7 +45,7 @@ class SharedRunCard extends StatelessWidget {
         Row(children: [
           if (showName) ...[
             InkWell(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               onTap: () => openRunnerProfile(context, r.nickname),
               child: RunnerAvatar(r.nickname),
             ),
@@ -92,12 +92,14 @@ class SharedRunCard extends StatelessWidget {
               label: tr('Route op de kaart bekijken'),
               child: GestureDetector(
                 onTap: () => _openMap(context, r),
+                // Dubbel tikken op de route = applaus (zoals een hartje op Instagram).
+                onDoubleTap: r.mine || r.kudoed ? null : onKudo,
                 child: Container(
                   height: 150,
                   padding: EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: RwColors.surfaceHigh,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(RwRadius.m),
                     border: Border.all(color: RwColors.hairline),
                   ),
                   child: ExcludeSemantics(child: RouteShape(polyline: r.polyline!, strokeWidth: 2.5)),
@@ -109,7 +111,15 @@ class SharedRunCard extends StatelessWidget {
         Row(children: [
           TextButton.icon(
             onPressed: r.mine ? (r.kudos > 0 ? onKudosList : null) : onKudo,
-            icon: Icon(r.kudoed ? Icons.celebration : Icons.celebration_outlined, size: 18, color: r.kudoed ? RwColors.accent : RwColors.muted),
+            // Kleine "pop" bij applaus geven (punt 41).
+            icon: TweenAnimationBuilder<double>(
+              key: ValueKey(r.kudoed),
+              tween: Tween(begin: r.kudoed ? 1.7 : 1.0, end: 1.0),
+              duration: const Duration(milliseconds: 450),
+              curve: Curves.elasticOut,
+              builder: (_, s, child) => Transform.scale(scale: s, child: child),
+              child: Icon(r.kudoed ? Icons.celebration : Icons.celebration_outlined, size: 18, color: r.kudoed ? RwColors.accent : RwColors.muted),
+            ),
             label: Text(r.kudos == 0 ? tr('Applaus') : '${r.kudos}', style: TextStyle(color: r.kudoed ? RwColors.accent : RwColors.muted)),
           ),
           TextButton.icon(

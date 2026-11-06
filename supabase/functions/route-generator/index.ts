@@ -155,9 +155,11 @@ Deno.serve(async (req) => {
       Math.abs(Number(p[0])) <= 90 && Math.abs(Number(p[1])) <= 180);
     if (!ok) return json(400, { error: "Tik minstens twee punten (hooguit 50)." });
     try {
-      const r = await path(key, pts.map((p: unknown[]) => [Number(p[0]), Number(p[1])]));
+      const ll = pts.map((p: unknown[]) => [Number(p[0]), Number(p[1])]);
+      // Ondergrond tegelijk ophalen (zoals de Route Builder van Strava): mag mislukken zonder dat de route faalt.
+      const [r, surf] = await Promise.all([path(key, ll), surface(key, ll).catch(() => null)]);
       if (!r) return json(502, { error: "Hier kon geen pad gevonden worden. Zet het punt dichter bij een weg of pad." });
-      return json(200, { route: r });
+      return json(200, { route: { ...r, surface: surf ?? [] } });
     } catch (e) {
       if (e instanceof Error && e.message === "rate_limit") {
         return json(429, { error: "Het is even druk. Probeer het over een minuut opnieuw." });
@@ -185,7 +187,7 @@ Deno.serve(async (req) => {
       const one = async (turn: number, spread: number) => {
         let target = distance;
         let r = await path(key, directedLoopWaypoints(lat, lon, target, dir + turn, spread));
-        if (r && r.distance_m > 0 && Math.abs(r.distance_m - distance) / distance > 0.15) {
+        if (r && r.distance_m > 0 && Math.abs(r.distance_m - distance) / distance > 0.05) {
           target = target * (distance / r.distance_m);
           r = (await path(key, directedLoopWaypoints(lat, lon, target, dir + turn, spread))) ?? r;
         }
@@ -207,9 +209,19 @@ Deno.serve(async (req) => {
   // Verschillende vormen proberen: andere 'seed' en aantal tussenpunten.
   const base = Math.floor(Math.random() * 1000);
   try {
-    const results = await Promise.all(
-      Array.from({ length: count }, (_, i) => roundTrip(key, lat, lon, distance, base + i * 7, 3 + (i % 3))),
-    );
+    // Wijkt een rondje meer dan 5% af van de gekozen afstand, dan één keer opnieuw met dezelfde vorm
+    // (zelfde seed) en een bijgestelde lengte. Het beste van de twee blijft over.
+    const one = async (seed: number, points: number) => {
+      const first = await roundTrip(key, lat, lon, distance, seed, points);
+      if (!first || first.distance_m <= 0) return first;
+      const off = (first.distance_m - distance) / distance;
+      if (Math.abs(off) <= 0.05) return first;
+      const second = await roundTrip(key, lat, lon, Math.round(distance * (distance / first.distance_m)), seed, points)
+        .catch(() => null);
+      if (!second || second.distance_m <= 0) return first;
+      return Math.abs(second.distance_m - distance) < Math.abs(first.distance_m - distance) ? second : first;
+    };
+    const results = await Promise.all(Array.from({ length: count }, (_, i) => one(base + i * 7, 3 + (i % 3))));
     const routes = results.filter((r) => r && r.coordinates.length > 3);
     if (routes.length === 0) return json(502, { error: "Er konden hier geen rondjes worden gemaakt. Kies een ander startpunt." });
     return json(200, { routes });

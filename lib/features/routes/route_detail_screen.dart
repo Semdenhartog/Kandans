@@ -490,8 +490,8 @@ class _RouteHistoryCard extends ConsumerWidget {
                                         ? const LinearGradient(colors: [Color(0xFF9C7A2A), Color(0xFFD9B45A), Color(0xFFF6E3A1)])
                                         : null,
                                     color: top ? null : RwColors.bar,
-                                    boxShadow: top ? [BoxShadow(color: const Color(0xFFD9B45A).withValues(alpha: 0.4), blurRadius: 8)] : null,
-                                    borderRadius: BorderRadius.circular(4),
+                                    boxShadow: top ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 8)] : null,
+                                    borderRadius: BorderRadius.circular(RwRadius.s),
                                   ),
                                 ),
                               ),
@@ -648,7 +648,7 @@ class _LightingCard extends ConsumerWidget {
                       : 'Grotendeels onverlicht. In het donker liever een andere route, of met een goede hoofdlamp.';
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(RwRadius.s),
               child: SizedBox(
                 height: 14,
                 child: Row(children: [
@@ -713,7 +713,7 @@ class _SurfaceCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(RwRadius.s),
                 child: SizedBox(
                   height: 14,
                   child: Row(children: [
@@ -761,7 +761,7 @@ class _NewRouteCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: RwColors.accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         border: Border.all(color: RwColors.accent.withValues(alpha: 0.4)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [

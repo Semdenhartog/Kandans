@@ -130,6 +130,29 @@ class NotificationService {
   }
 
   static const _turnId = 75416;
+  static const _stepsId = 75417;
+
+  /// Stappenwedstrijd: iemand heeft je ingehaald (punt 42).
+  Future<void> showSteps(String title, String body) async {
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        _stepsId,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'stappen',
+            'Stappenwedstrijd',
+            channelDescription: 'Als iemand je inhaalt in de stappen van de maand',
+            importance: Importance.defaultImportance,
+            autoCancel: true,
+            color: Color(0xFF7A5A34),
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
 
   /// Afslag-melding tijdens het volgen van een route. Gewone (niet vaste) meldingen komen
   /// ook op een gekoppeld horloge (Wear OS, Galaxy Watch, Garmin), zodat dat trilt bij een afslag.

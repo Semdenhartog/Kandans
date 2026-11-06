@@ -212,7 +212,7 @@ class RunSummaryScreen extends StatelessWidget {
                                       width: c.maxWidth * f,
                                       decoration: BoxDecoration(
                                         color: identical(sp, ex.fastest) ? RwColors.accent : RwColors.bar,
-                                        borderRadius: BorderRadius.circular(5),
+                                        borderRadius: BorderRadius.circular(RwRadius.s),
                                       ),
                                     ),
                                   );
@@ -295,7 +295,7 @@ class RunSummaryScreen extends StatelessWidget {
                 onTap: () => openShareRun(context, a, badges: [for (final r in records) 'Record ${r.label}', for (final b in badges) b.title]),
                 child: Row(children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(RwRadius.s),
                     child: SizedBox(
                       width: 72,
                       height: 90,
@@ -409,14 +409,14 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(RwRadius.m),
                       onTap: () => _save(v),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: _feel == v ? RwColors.accent : RwColors.surfaceHigh,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(RwRadius.m),
                         ),
                         child: Column(
                           children: [
@@ -496,14 +496,14 @@ class _RecordPlaque extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(1.4),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           gradient: _goldGradient,
           boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.25), blurRadius: 26, spreadRadius: -4)],
         ),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(21),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

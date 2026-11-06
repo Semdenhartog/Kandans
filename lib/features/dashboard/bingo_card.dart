@@ -103,7 +103,7 @@ class _Cell extends StatelessWidget {
       button: t != null,
       label: '$label${done ? ', ${tr('gedaan')}' : ''}',
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         onTap: t == null
             ? null
             : () => showMessage(
@@ -115,7 +115,7 @@ class _Cell extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: done ? color.withValues(alpha: 0.14) : RwColors.background,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             border: Border.all(color: done ? color.withValues(alpha: 0.6) : RwColors.subtle.withValues(alpha: 0.25)),
           ),
           child: Stack(children: [

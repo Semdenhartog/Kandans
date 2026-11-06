@@ -98,7 +98,7 @@ class _PhotosCardState extends ConsumerState<PhotosCard> {
                   child: Semantics(
                     label: 'Foto ${i + 1}. Lang drukken om te verwijderen.',
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(RwRadius.m),
                       child: SizedBox(
                         width: 110,
                         child: urls[p] == null
@@ -118,12 +118,12 @@ class _PhotosCardState extends ConsumerState<PhotosCard> {
                 button: true,
                 label: 'Foto toevoegen',
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(RwRadius.m),
                   onTap: _busy ? null : _add,
                   child: Container(
                     width: 110,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(RwRadius.m),
                       border: Border.all(color: RwColors.border, width: 1.5),
                     ),
                     alignment: Alignment.center,

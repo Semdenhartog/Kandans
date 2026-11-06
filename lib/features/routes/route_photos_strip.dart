@@ -136,7 +136,7 @@ class RoutePhotosCard extends ConsumerWidget {
                           ));
                         },
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(RwRadius.m),
                           child: SizedBox(
                             width: p.source == PhotoSource.landmark ? 170 : 210,
                             child: Stack(
@@ -309,7 +309,7 @@ class RouteThumb extends ConsumerWidget {
       child: cover == null
           ? RouteShape(polyline: polyline, strokeWidth: 2)
           : ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -321,7 +321,7 @@ class RouteThumb extends ConsumerWidget {
                     height: size * 0.42,
                     child: Container(
                       padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(RwRadius.s)),
                       child: RouteShape(polyline: polyline, strokeWidth: 1.5),
                     ),
                   ),

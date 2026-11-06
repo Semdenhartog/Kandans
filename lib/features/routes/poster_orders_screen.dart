@@ -99,7 +99,7 @@ class _Banner extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: const Color(0xFF1E180C),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: luxeGold.withValues(alpha: 0.6)),
         ),
         child: Row(children: [
@@ -135,7 +135,7 @@ class _OrderCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: RwColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         border: Border.all(color: highlight ? luxeGold : RwColors.border, width: highlight ? 1.5 : 1),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [

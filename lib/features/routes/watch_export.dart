@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
 import '../../domain/fit_course.dart';
@@ -171,9 +172,12 @@ Future<WatchBrand?> pickWatchBrand(BuildContext context, {WatchBrand? current}) 
 
 /// "Route naar je horloge": kiest het juiste bestand en legt de stappen voor jouw merk uit.
 /// [onRunWithPhone] start de run met deze route (voor horloges zonder route-import).
-Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? onRunWithPhone}) async {
+/// Route naar je horloge in één tik (punt 37): ken je horloge al en kan het bestanden openen, dan meteen delen;
+/// anders (of met [full]) eerst het scherm met uitleg en keuzes.
+Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? onRunWithPhone, bool full = false}) async {
   var brand = await loadWatchBrand();
   if (!context.mounted) return;
+  final firstTime = brand == null;
   if (brand == null) {
     brand = await pickWatchBrand(context);
     if (brand == null || !context.mounted) return;
@@ -181,6 +185,21 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
     if (!context.mounted) return;
   }
   final turns = detectTurns(RouteTrack(decodePolyline(r.polyline)));
+  if (!full && !firstTime && brand.canImport) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    await _share(context, r, brand, turns);
+    messenger?.showSnackBar(SnackBar(
+      content: Text(trf('Naar je {horloge} gestuurd', {'horloge': brand.label})),
+      action: SnackBarAction(
+        label: tr('Andere opties'),
+        onPressed: () {
+          if (context.mounted) sendRouteToWatch(context, r, onRunWithPhone: onRunWithPhone, full: true);
+        },
+      ),
+    ));
+    return;
+  }
+
   WatchBrand current = brand;
   final runWithPhone = onRunWithPhone;
   await showModalBottomSheet<void>(
@@ -218,7 +237,7 @@ Future<void> sendRouteToWatch(BuildContext context, RunRoute r, {VoidCallback? o
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: RwColors.accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(RwRadius.m),
                 ),
                 child: Row(
                   children: [

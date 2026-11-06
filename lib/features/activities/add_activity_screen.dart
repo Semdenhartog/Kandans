@@ -124,7 +124,7 @@ class _AddActivityScreenState extends ConsumerState<AddActivityScreen> {
           children: [
             InkWell(
               onTap: _pickDateTime,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               child: InputDecorator(
                 decoration: const InputDecoration(labelText: 'Gestart op'),
                 child: Text('${Fmt.dateLong(_start)} om ${Fmt.time(_start)}'),

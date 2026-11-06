@@ -50,6 +50,22 @@ class KadansVoice {
 
   bool? _on;
   String? _choice;
+  double? _volume;
+
+  static const _volumeKey = 'kadans_voice_volume';
+
+  /// Zinnen die bijna elke run voorkomen. Worden vóór de start alvast opgehaald, zodat er buiten zonder bereik
+  /// geen gat valt (punt 13).
+  static const commonPhrases = [
+    'Run gestart. Succes!',
+    'Gepauzeerd.',
+    'We gaan weer.',
+    'Automatisch gepauzeerd.',
+    'Verder.',
+    'Fijn. We gaan verder.',
+    'Opdracht overgeslagen.',
+    'Gaat het? Tik op je scherm als alles goed is.',
+  ];
   DateTime? _pauseUntil;
   AudioPlayer? _player;
   Future<void> _chain = Future<void>.value();
@@ -72,6 +88,43 @@ class KadansVoice {
       final p = await SharedPreferences.getInstance();
       await p.setBool(_key, on);
     } catch (_) {}
+  }
+
+  /// Volume van de Kadans-stem (0,2–1,0), los van het mediavolume (punt 14).
+  Future<double> volume() async {
+    if (_volume != null) return _volume!;
+    try {
+      return _volume = (await SharedPreferences.getInstance()).getDouble(_volumeKey) ?? 1.0;
+    } catch (_) {
+      return _volume = 1.0;
+    }
+  }
+
+  Future<void> setVolume(double v) async {
+    _volume = v.clamp(0.2, 1.0);
+    try {
+      await _player?.setVolume(_volume!);
+      await (await SharedPreferences.getInstance()).setDouble(_volumeKey, _volume!);
+    } catch (_) {}
+  }
+
+  /// Haalt zinnen alvast op (één tegelijk, hooguit 40) zodat ze tijdens de run uit de cache komen.
+  /// Stopt bij een serverfout (sleutel, limiet); faalt stil zonder internet.
+  Future<void> prefetch(Iterable<String> texts) async {
+    if (!await enabled()) return;
+    final voice = await choice();
+    var n = 0;
+    for (final t in texts.toSet()) {
+      if (n >= 40) break;
+      if (t.trim().isEmpty || t.length > 400) continue;
+      if (await _cached(t, voice) != null) continue;
+      try {
+        await _fetchOrThrow(t, voice);
+        n++;
+      } catch (_) {
+        return;
+      }
+    }
   }
 
   /// Gekozen stem (sleutel uit [kadansVoices]); standaard Jamie.
@@ -283,6 +336,7 @@ class KadansVoice {
           audioFocus: AndroidAudioFocus.gainTransientMayDuck,
         ),
       )).ignore();
+    await p.setVolume(await volume());
     final done = p.onPlayerComplete.first;
     await p.play(DeviceFileSource(f.path));
     await done.timeout(const Duration(seconds: 25), onTimeout: () {});

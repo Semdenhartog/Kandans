@@ -21,6 +21,7 @@ import '../data/services/recording_store.dart';
 import '../data/services/run_recorder_service.dart';
 import '../features/record/record_run_screen.dart';
 import '../core/i18n.dart';
+import '../data/services/steps_sync.dart';
 
 /// Onderste navigatiebalk: vier tabbladen en de Lopen-knop.
 /// Haalt bij het openen (en terugkomen in) de app automatisch nieuwe runs op
@@ -42,6 +43,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     WidgetsBinding.instance.addPostFrameCallback((_) {
       PendingRunStore.refreshCount().ignore();
       _autoSync();
+      StepsSync.run(ref).ignore();
       _onboarding();
       _setupShortcuts();
     });

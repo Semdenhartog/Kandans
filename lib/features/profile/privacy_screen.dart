@@ -72,7 +72,7 @@ class PrivacyScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                   decoration: BoxDecoration(
                     color: RwColors.surface,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(RwRadius.m),
                     border: Border.all(color: RwColors.border),
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

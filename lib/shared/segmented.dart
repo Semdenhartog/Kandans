@@ -45,7 +45,7 @@ class RwSegmented<T> extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
                 ),
-                boxShadow: [BoxShadow(color: RwColors.accent.withValues(alpha: 0.35), blurRadius: 12, spreadRadius: -2)],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12, spreadRadius: -2)],
               ),
             ),
           ),

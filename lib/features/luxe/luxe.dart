@@ -194,7 +194,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
                   final st = PosterStyle.values.where((s) => s.isLuxe).elementAt(i);
                   return Column(children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(RwRadius.s),
                       child: SizedBox(width: 96, height: 120, child: RoutePosterArt(data: sample, style: st)),
                     ),
                     const SizedBox(height: 6),

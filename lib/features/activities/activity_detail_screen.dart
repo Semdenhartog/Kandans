@@ -15,6 +15,7 @@ import '../../domain/gpx_parser.dart';
 import '../../domain/records.dart';
 import '../../domain/shoes.dart';
 import '../../domain/weather_correction.dart';
+import '../../domain/run_title.dart';
 import '../../shared/widgets.dart';
 import '../record/record_run_screen.dart';
 import '../routes/route_map.dart';
@@ -146,9 +147,20 @@ class ActivityDetailScreen extends ConsumerWidget {
         cacheExtent: 100000,
         padding: EdgeInsets.fromLTRB(16, a.hasTrack ? 0 : 4, 16, 32),
         children: [
-          Text(
-            runTitle(a, routeName: route?.name),
-            style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800),
+          // Titel: één tik om te wijzigen (punt 34), met slimme voorstellen.
+          InkWell(
+            borderRadius: BorderRadius.circular(RwRadius.s),
+            onTap: a.id == null ? null : () => _editTitle(context, ref, a, route?.name),
+            child: Row(children: [
+              Flexible(
+                child: Text(
+                  runTitle(a, routeName: route?.name),
+                  style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(Icons.edit_outlined, size: 18, color: RwColors.subtle),
+            ]),
           ),
           Text(
             '${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}',
@@ -767,5 +779,45 @@ class _MoreAnalysisState extends State<_MoreAnalysis> {
         if (_open) ...widget.children,
       ],
     );
+  }
+}
+
+
+/// Titel van een run wijzigen: eigen tekst of een van de voorstellen.
+Future<void> _editTitle(BuildContext context, WidgetRef ref, Activity a, String? routeName) async {
+  final auto = smartTitle(a, routeName: routeName, fill: (t, v) => trf(t, v));
+  final t = a.startedAt.toLocal();
+  final part = t.hour < 12 ? tr('Ochtendrun') : (t.hour < 18 ? tr('Middagrun') : tr('Avondrun'));
+  final km = (a.distanceMeters / 1000).toStringAsFixed(a.distanceMeters < 10000 ? 1 : 0).replaceAll('.', ',');
+  final suggestions = <String>{auto, '$part $km km', if (routeName != null && routeName.trim().isNotEmpty) routeName.trim()}.toList();
+  final c = TextEditingController(text: (a.title ?? '').trim().isEmpty ? auto : a.title!.trim());
+  final picked = await showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(ctx).bottom),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(tr('Titel van je run'), style: RwText.title),
+        const SizedBox(height: 12),
+        TextField(controller: c, autofocus: true, maxLength: 80, textCapitalization: TextCapitalization.sentences),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final s in suggestions) ActionChip(label: Text(s), onPressed: () => c.text = s),
+        ]),
+        const SizedBox(height: 16),
+        Row(children: [
+          TextButton(onPressed: () => Navigator.pop(ctx, ''), child: Text(tr('Automatisch'))),
+          const Spacer(),
+          FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(tr('Opslaan'))),
+        ]),
+      ]),
+    ),
+  );
+  if (picked == null || a.id == null) return;
+  try {
+    await ref.read(repositoryProvider).setActivityTitle(a.id!, picked == auto ? null : picked);
+    ref.invalidate(activitiesProvider);
+  } catch (e) {
+    if (context.mounted) showMessage(context, friendlyError(e), error: true);
   }
 }

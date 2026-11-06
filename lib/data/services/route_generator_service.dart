@@ -17,10 +17,13 @@ class Place {
 
 /// Een voorgesteld rondje van de server.
 class GeneratedLoop {
-  const GeneratedLoop({required this.points, required this.distanceMeters, required this.ascentMeters});
+  const GeneratedLoop({required this.points, required this.distanceMeters, required this.ascentMeters, this.surface = const {}});
   final List<LatLng> points;
   final double distanceMeters;
   final double ascentMeters;
+
+  /// Meters per ondergrond ('verhard', 'klinkers', 'halfverhard', 'onverhard', 'onbekend'); leeg als onbekend.
+  final Map<String, double> surface;
 }
 
 class RouteGeneratorService {
@@ -100,6 +103,10 @@ class RouteGeneratorService {
         ],
         distanceMeters: (r['distance_m'] as num).toDouble(),
         ascentMeters: (r['ascent_m'] as num).toDouble(),
+        surface: {
+          for (final e in ((r['surface'] as List?) ?? const []).cast<Map>())
+            e['type'].toString(): (e['meters'] as num).toDouble(),
+        },
       );
     } on FunctionException catch (e) {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};

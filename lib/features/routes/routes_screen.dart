@@ -328,7 +328,7 @@ class _RoutesScreenState extends ConsumerState<RoutesScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
                                 color: RwColors.accent.withValues(alpha: 0.13),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(RwRadius.m),
                                 border: Border.all(color: RwColors.accent.withValues(alpha: 0.3)),
                               ),
                               child: Text(
@@ -420,7 +420,7 @@ class _CreateTile extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: () {
             HapticFeedback.selectionClick();
             onTap();
@@ -428,7 +428,7 @@ class _CreateTile extends StatelessWidget {
           child: Ink(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               gradient: primary
                   ? LinearGradient(
                       begin: Alignment.topLeft,
@@ -438,7 +438,7 @@ class _CreateTile extends StatelessWidget {
                   : null,
               color: primary ? null : RwColors.surface,
               border: Border.all(color: primary ? Colors.transparent : RwColors.border),
-              boxShadow: primary ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.25), blurRadius: 18, offset: const Offset(0, 6))] : null,
+              boxShadow: primary ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 18, offset: const Offset(0, 6))] : null,
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Icon(icon, color: fg, size: 26),

@@ -224,7 +224,7 @@ class _Card extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               border: Border.all(color: _goldDeep.withValues(alpha: 0.8), width: 1),
             ),
           ),
@@ -261,7 +261,7 @@ class _Card extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: _surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             border: Border.all(color: _goldDeep.withValues(alpha: 0.6)),
           ),
           child: Row(children: [
@@ -332,7 +332,7 @@ class _Card extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           decoration: BoxDecoration(
             color: _surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             border: Border.all(color: _gold, width: 1.2),
           ),
           child: Column(children: [

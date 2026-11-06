@@ -216,7 +216,7 @@ class _ShareToFeedSheetState extends ConsumerState<ShareToFeedSheet> {
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: RwColors.surfaceHigh,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(RwRadius.m),
                 border: Border.all(color: RwColors.hairline),
               ),
               child: trimmed == null

@@ -80,7 +80,7 @@ class _MemberCardState extends State<MemberCard> {
               Positioned.fill(
                 child: IgnorePointer(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(RwRadius.m),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -100,7 +100,7 @@ class _MemberCardState extends State<MemberCard> {
             width: width,
             height: height,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               gradient: gold
                   ? const LinearGradient(
                       begin: Alignment.topLeft,
@@ -120,7 +120,7 @@ class _MemberCardState extends State<MemberCard> {
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               child: Stack(children: [
                 Positioned.fill(child: CustomPaint(painter: _CardArt(gold: gold))),
                 Padding(
@@ -141,7 +141,7 @@ class _MemberCardState extends State<MemberCard> {
                         width: width * 0.11,
                         height: width * 0.085,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(RwRadius.s),
                           gradient: const LinearGradient(colors: [Color(0xFFE8D08A), Color(0xFFB8963E), Color(0xFFE2C676)]),
                           border: Border.all(color: Colors.black.withValues(alpha: 0.25), width: 0.6),
                         ),

@@ -20,6 +20,7 @@ import '../../domain/route_drawing.dart';
 import '../../shared/discard_guard.dart';
 import '../../shared/widgets.dart';
 import 'route_map.dart';
+import 'surface_bar.dart';
 
 /// Zelf een route tekenen: tik punten op de kaart, de route volgt paden en wegen.
 class DrawRouteScreen extends ConsumerStatefulWidget {
@@ -204,7 +205,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: RwColors.background.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(RwRadius.m),
                           border: Border.all(color: RwColors.border),
                         ),
                         child: const Text(
@@ -260,6 +261,11 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
                       Expanded(child: StatTile(label: 'Looptijd', value: _taps.length < 2 ? '–' : Fmt.duration(secs))),
                     ],
                   ),
+                  // Ondergrond live mee (punt 22), zodra de route over echte paden ligt.
+                  if (loop != null && loop.surface.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    SurfaceBar(loop.surface),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: 8),
                     Text(_error!, style: TextStyle(color: RwColors.danger)),

@@ -20,7 +20,7 @@ class KadansEffectRow extends ConsumerWidget {
       if (rain >= 1) trf('{mm} mm regen ontlopen', {'mm': rain.round()}),
     ].join(' · ');
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(RwRadius.m),
       onTap: () => _details(context, e, year),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),

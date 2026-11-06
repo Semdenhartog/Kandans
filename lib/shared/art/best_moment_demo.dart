@@ -41,7 +41,7 @@ class _BestMomentDemoState extends State<BestMomentDemo> with SingleTickerProvid
           height: widget.height,
           width: double.infinity,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(RwRadius.l),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

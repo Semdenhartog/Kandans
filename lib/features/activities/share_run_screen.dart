@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/appearance.dart';
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -45,6 +46,9 @@ class ShareRunScreen extends ConsumerStatefulWidget {
 class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
   final _key = GlobalKey();
   // Met GPS-spoor standaard de echte kaart; anders de donkere kaart.
+  /// Verhaal (9:16, voor Instagram/WhatsApp-status) of bericht (4:5), punt 33.
+  bool _story = false;
+
   late _CardStyle _style = (widget.activity.hasTrack || widget.route != null) ? _CardStyle.kaart : _CardStyle.donker;
   bool _busy = false;
 
@@ -106,6 +110,28 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
     }
   }
 
+  /// Verhaal-formaat: de kaart in het midden, de achtergrond is dezelfde kaart vergroot en vervaagd,
+  /// zodat de kleuren altijd kloppen (wordt 1080 × 1920 px).
+  Widget _framed(Widget card) {
+    if (!_story || _style == _CardStyle.sticker) return card;
+    return SizedBox(
+      width: 360,
+      height: 640,
+      child: Stack(children: [
+        Positioned.fill(
+          child: ClipRect(
+            child: ImageFiltered(
+              imageFilter: ui.ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+              child: FittedBox(fit: BoxFit.cover, child: card),
+            ),
+          ),
+        ),
+        Positioned.fill(child: ColoredBox(color: Colors.black.withValues(alpha: 0.28))),
+        Center(child: card),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +148,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     child: Container(
                       decoration: _style == _CardStyle.sticker
                           ? BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(RwRadius.m),
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF2E3A46), Color(0xFF4A3A2E)],
                                 begin: Alignment.topLeft,
@@ -132,7 +158,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                           : null,
                       child: RepaintBoundary(
                       key: _key,
-                      child: RunShareCard(
+                      child: _framed(RunShareCard(
                         activity: widget.activity,
                         route: widget.route,
                         badges: widget.badges,
@@ -142,7 +168,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                         photo: _style == _CardStyle.foto ? _photo : null,
                         sticker: _style == _CardStyle.sticker,
                         map: _style == _CardStyle.kaart,
-                      ),
+                      )),
                     ),
                     ),
                   ),
@@ -171,6 +197,16 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     selected: {_style},
                     onSelectionChanged: (s) => setState(() => _style = s.first),
                   ),
+                  const SizedBox(height: 8),
+                  if (_style != _CardStyle.sticker)
+                    SegmentedButton<bool>(
+                      segments: [
+                        ButtonSegment(value: false, icon: const Icon(Icons.crop_portrait, size: 18), label: Text(tr('Bericht'))),
+                        ButtonSegment(value: true, icon: const Icon(Icons.smartphone, size: 18), label: Text(tr('Verhaal'))),
+                      ],
+                      selected: {_story},
+                      onSelectionChanged: (v) => setState(() => _story = v.first),
+                    ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: _hideHome,

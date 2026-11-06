@@ -24,7 +24,7 @@ class _ShineTextState extends State<ShineText> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    if (!WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+    if (widget._colors != null && !WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
       _c.value = 0.55; // eerste glans kort na openen
       _c.repeat();
     }
@@ -37,7 +37,14 @@ class _ShineTextState extends State<ShineText> with SingleTickerProviderStateMix
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
+  Widget build(BuildContext context) {
+    // Zonder eigen kleuren: gewoon effen tekst (geen verlooptekst meer in de gewone app, unslop-ronde).
+    // Met kleuren (Premium/Luxe) blijft de metalen glans.
+    if (widget._colors == null) return Text(widget.text, style: widget.style.copyWith(color: RwColors.text));
+    return _shine();
+  }
+
+  Widget _shine() => AnimatedBuilder(
         animation: _c,
         builder: (_, child) {
           // Glans alleen in het laatste kwart van de cyclus.

@@ -68,7 +68,7 @@ class _HindsightCardState extends ConsumerState<HindsightCard> {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(RwRadius.m),
                 border: Border.all(color: color.withValues(alpha: 0.35)),
               ),
               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

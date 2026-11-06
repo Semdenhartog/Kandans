@@ -92,6 +92,7 @@ class Activity {
     this.bestEfforts,
     this.photos = const [],
     this.aiSummary,
+    this.title,
     this.externalId,
   });
 
@@ -132,6 +133,9 @@ class Activity {
 
   /// Korte analyse van de coach (eenmalig gemaakt, daarna bewaard).
   final String? aiSummary;
+
+  /// Eigen titel van de run (0039); leeg = automatische titel.
+  final String? title;
 
   /// Id bij de bron (Strava, Health Connect). Begint met [viaStravaPrefix] als de run via
   /// Health Connect binnenkwam maar door de Strava-app was gemaakt.
@@ -176,6 +180,7 @@ class Activity {
             : null,
         photos: j['photos'] is List ? [for (final p in j['photos'] as List) p.toString()] : const [],
         aiSummary: j['ai_summary'] as String?,
+        title: j['title'] as String?,
         externalId: j['external_id'] as String?,
       );
 

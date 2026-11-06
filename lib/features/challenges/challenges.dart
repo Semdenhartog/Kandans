@@ -125,7 +125,7 @@ class ChallengesScreen extends ConsumerWidget {
               Container(
                 width: 46,
                 height: 46,
-                decoration: BoxDecoration(color: challengeGold.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(color: challengeGold.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(RwRadius.m)),
                 child: const Icon(Icons.groups_rounded, color: challengeGold),
               ),
               const SizedBox(width: 12),
@@ -291,7 +291,7 @@ class _OfferTile extends StatelessWidget {
           Container(
             width: 46,
             height: 46,
-            decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(RwRadius.m)),
             child: Icon(badgeIcon(challenge.icon), color: RwColors.accent),
           ),
           const SizedBox(width: 12),
@@ -433,7 +433,7 @@ class _ChallengeLiveChipState extends ConsumerState<ChallengeLiveChip> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: (p.completed ? challengeGold : RwColors.accent).withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(RwRadius.m),
           ),
           child: Row(children: [
             Icon(p.completed ? Icons.emoji_events : Icons.flag_outlined, size: 18, color: p.completed ? challengeGold : RwColors.accent),

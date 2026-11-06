@@ -376,7 +376,7 @@ class _InsightsCard extends StatelessWidget {
               backgroundColor: RwColors.surfaceHigh,
               color: RwColors.accent,
               minHeight: 8,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(RwRadius.s),
             ),
           ],
         ),
@@ -471,7 +471,7 @@ class _BucketChart extends StatelessWidget {
                             color: b[k].from >= insights.optimalMin && b[k].to <= insights.optimalMax
                                 ? RwColors.accent
                                 : RwColors.bar,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(RwRadius.s),
                           ),
                         ),
                       ),

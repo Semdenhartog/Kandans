@@ -123,7 +123,7 @@ class _RunReplayScreenState extends State<RunReplayScreen> with SingleTickerProv
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                   decoration: BoxDecoration(
                     color: RwColors.surface.withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(RwRadius.m),
                   ),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
                     Row(children: [

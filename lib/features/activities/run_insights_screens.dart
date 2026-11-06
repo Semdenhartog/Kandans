@@ -104,7 +104,7 @@ class _HeatmapScreenState extends ConsumerState<HeatmapScreen> {
                       right: 10,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(RwRadius.m)),
                         child: Text('${lines.length} runs${_year == null ? '' : ' in $_year'}', style: const TextStyle(fontWeight: FontWeight.w600)),
                       ),
                     ),
@@ -423,7 +423,7 @@ class _RecapCard extends StatelessWidget {
                             height: 4 + 56 * (r.perMonthKm[m] / maxM),
                             decoration: BoxDecoration(
                               color: m == r.bestMonth - 1 ? RwColors.accent : RwColors.bar,
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(RwRadius.s),
                             ),
                           ),
                           const SizedBox(height: 4),

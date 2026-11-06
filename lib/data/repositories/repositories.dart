@@ -25,7 +25,7 @@ class RunWiseRepository {
   static const _activityColumns =
       'id, started_at, distance_meters, moving_time_seconds, source, route_id, average_heart_rate, '
       'elevation_gain_meters, temperature_celsius, feels_like_celsius, wind_speed_kmh, wind_direction_degrees, '
-      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos, ai_summary, external_id';
+      'humidity_pct, track_polyline, route_link_locked, shoe_id, feel, note, best_efforts, photos, ai_summary, external_id, title';
 
   /// Verloop van een run (tijden per km, grafiek). Eigen opnames hebben het al; bij Strava-runs
   /// wordt het eenmalig bij Strava opgehaald. De snelste stukken worden er meteen bij berekend.
@@ -530,6 +530,12 @@ class RunWiseRepository {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
       throw Exception(details['error'] ?? 'Ondergrond ophalen is niet gelukt.');
     }
+  }
+
+  /// Eigen titel van een run (leeg = weer de automatische titel).
+  Future<void> setActivityTitle(String id, String? title) async {
+    final t = (title ?? '').trim();
+    await _db.from('activities').update({'title': t.isEmpty ? null : (t.length > 80 ? t.substring(0, 80) : t)}).eq('id', id);
   }
 
   Future<void> clearCoachChat() async {

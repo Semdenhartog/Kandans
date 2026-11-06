@@ -206,7 +206,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: challengeGold.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(RwRadius.m),
                 border: Border.all(color: challengeGold),
               ),
               child: Row(children: [
@@ -430,7 +430,7 @@ class _RankRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: row.me ? RwColors.accent.withValues(alpha: 0.14) : RwColors.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: row.me ? RwColors.accent.withValues(alpha: 0.6) : RwColors.border),
         ),
         child: Row(children: [

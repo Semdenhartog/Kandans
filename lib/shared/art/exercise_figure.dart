@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 
 /// Geanimeerd lijnfiguurtje dat een oefening voordoet (zijaanzicht, eigen ontwerp).
 /// Werkt met hoeken voor armen en benen; vloeroefeningen met vaste punten (handen/voeten op de grond).
@@ -542,12 +543,12 @@ class _ExerciseFigureState extends State<ExerciseFigure> with SingleTickerProvid
           aspectRatio: 1.2,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(RwRadius.l),
               border: Border.all(color: const Color(0xFFCFAA62).withValues(alpha: 0.35)),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 24, offset: const Offset(0, 10))],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(27),
+              borderRadius: BorderRadius.circular(RwRadius.l),
               child: Stack(fit: StackFit.expand, children: [
                 RepaintBoundary(
                   child: AnimatedBuilder(

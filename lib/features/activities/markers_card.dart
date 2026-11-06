@@ -101,7 +101,7 @@ class MarkersCard extends ConsumerWidget {
                       ),
                     )),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(RwRadius.s),
                       child: SizedBox(
                         width: 56,
                         height: 56,

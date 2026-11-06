@@ -128,7 +128,7 @@ class BadgeTile extends StatelessWidget {
     final b = badge;
     final color = b.weather ? const Color(0xFF5AA9FF) : RwColors.accent;
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(RwRadius.m),
       onTap: () => showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
@@ -147,7 +147,7 @@ class BadgeTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(RwRadius.m),
                     color: (b.earned ? color : RwColors.subtle).withValues(alpha: 0.12),
                     border: Border.all(color: (b.earned ? color : RwColors.subtle).withValues(alpha: 0.35)),
                   ),

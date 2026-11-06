@@ -194,6 +194,8 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadGhost(r.id!));
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _prepareBriefing());
+    // Vaste zinnen alvast ophalen nu er (meestal) nog bereik is: buiten geen gat in de Kadans-stem.
+    KadansVoice.instance.prefetch(KadansVoice.commonPhrases).ignore();
     SharedPreferences.getInstance().then((p) {
       if (mounted) {
         setState(() {
@@ -1664,7 +1666,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: (v.offRoute ? RwColors.warning : RwColors.accent).withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(RwRadius.m),
             ),
             child: Row(
               children: [
@@ -2132,7 +2134,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                             height: 8,
                                             decoration: BoxDecoration(
                                               color: _page == i ? RwColors.accent : RwColors.bar,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius: BorderRadius.circular(RwRadius.s),
                                             ),
                                           ),
                                       ],
@@ -2341,7 +2343,7 @@ class _IntervalPanel extends StatelessWidget {
     if (step == null) {
       return Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: RwColors.good.withValues(alpha: 0.13), borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: RwColors.good.withValues(alpha: 0.13), borderRadius: BorderRadius.circular(RwRadius.m)),
         child: Row(
           children: [
             Icon(Icons.check_circle, color: RwColors.good),
@@ -2370,7 +2372,7 @@ class _IntervalPanel extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Column(
@@ -2400,7 +2402,7 @@ class _IntervalPanel extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(RwRadius.s),
               child: LinearProgressIndicator(
                 value: v.stepProgress,
                 minHeight: 6,
@@ -2490,7 +2492,7 @@ class _HeartRow extends StatelessWidget {
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(14)),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(RwRadius.m)),
         child: Row(
           children: [
             _BeatingHeart(bpm: bpm),
@@ -2959,7 +2961,7 @@ class _BackToStart extends StatelessWidget {
         excludeSemantics: true,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(RwRadius.m)),
           child: Row(children: [
             if (b.relative != null)
               TweenAnimationBuilder<double>(
@@ -3005,7 +3007,7 @@ class _WayToRouteCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Row(children: [
@@ -3060,7 +3062,7 @@ class _NextTurnCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: soon ? RwColors.accent : RwColors.surfaceHigh,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: RwColors.accent.withValues(alpha: 0.5)),
         ),
         child: Row(
@@ -3169,6 +3171,7 @@ class _VoicePickerState extends State<_VoicePicker> {
       if (_kadans) ...[
         const SizedBox(height: 4),
         const KadansVoiceChooser(),
+        const _VoiceVolume(),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
@@ -3257,12 +3260,12 @@ class _PresetCard extends StatelessWidget {
   Widget build(BuildContext context) => Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: onTap,
           child: Ink(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               gradient: LinearGradient(colors: [RwColors.accent.withValues(alpha: 0.18), RwColors.accent.withValues(alpha: 0.06)]),
               border: Border.all(color: RwColors.accent.withValues(alpha: 0.35)),
             ),
@@ -3301,7 +3304,7 @@ class _QuestCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           decoration: BoxDecoration(
             color: RwColors.accent.withValues(alpha: 0.16),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             border: Border.all(color: RwColors.accent, width: 1.4),
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -3374,7 +3377,7 @@ class _LayoutChip extends StatelessWidget {
           label: trf('Indeling {naam}. Tik voor de volgende, houd vast om aan te passen.', {'naam': name}),
           excludeSemantics: true,
           child: InkWell(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             onTap: onTap,
             onLongPress: onLongPress,
             child: Padding(
@@ -3471,5 +3474,46 @@ class _LiveSplits extends StatelessWidget {
         ),
       ]),
     );
+  }
+}
+
+
+/// Eigen volume voor de stem, los van je muziek (punt 14).
+class _VoiceVolume extends StatefulWidget {
+  const _VoiceVolume();
+
+  @override
+  State<_VoiceVolume> createState() => _VoiceVolumeState();
+}
+
+class _VoiceVolumeState extends State<_VoiceVolume> {
+  double? _v;
+
+  @override
+  void initState() {
+    super.initState();
+    KadansVoice.instance.volume().then((v) {
+      if (mounted) setState(() => _v = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final v = _v;
+    if (v == null) return const SizedBox(height: 48);
+    return Row(children: [
+      Icon(Icons.volume_down, size: 20, color: RwColors.muted),
+      Expanded(
+        child: Slider(
+          value: v,
+          min: 0.2,
+          divisions: 8,
+          label: tr('Stemvolume'),
+          onChanged: (x) => setState(() => _v = x),
+          onChangeEnd: KadansVoice.instance.setVolume,
+        ),
+      ),
+      Icon(Icons.volume_up, size: 20, color: RwColors.muted),
+    ]);
   }
 }

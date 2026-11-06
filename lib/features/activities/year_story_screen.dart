@@ -227,7 +227,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
                         height: 6 + 120 * (r.perMonthKm[m] / maxM) * t,
                         decoration: BoxDecoration(
                           color: m == r.bestMonth - 1 ? RwColors.accent : Colors.white24,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(RwRadius.s),
                         ),
                       ),
                     ),

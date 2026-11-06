@@ -322,14 +322,14 @@ class _FormatTile extends StatelessWidget {
         button: true,
         selected: selected,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: selected ? (RwColors.isDark ? const Color(0xFF1E180C) : const Color(0xFFF0E3C8)) : RwColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               border: Border.all(color: selected ? luxeGold : RwColors.border, width: selected ? 1.5 : 1),
             ),
             child: Row(children: [

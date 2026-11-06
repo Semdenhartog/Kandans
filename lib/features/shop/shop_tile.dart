@@ -18,7 +18,7 @@ class ShopTile extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: () {
             HapticFeedback.selectionClick();
             markShopSeen();
@@ -27,7 +27,7 @@ class ShopTile extends StatelessWidget {
           child: Ink(
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

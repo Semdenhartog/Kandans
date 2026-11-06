@@ -56,7 +56,7 @@ class _RwCardState extends State<RwCard> {
       child: DecoratedBox(
         // Rand: licht aan de bovenkant, wegvallend naar onder.
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -69,7 +69,7 @@ class _RwCardState extends State<RwCard> {
           padding: const EdgeInsets.all(1),
           child: Material(
             color: RwColors.surface,
-            borderRadius: BorderRadius.circular(19),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             clipBehavior: Clip.antiAlias,
             child: Ink(
               decoration: BoxDecoration(
@@ -107,7 +107,7 @@ class StatTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: RwColors.surfaceHigh,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(RwRadius.m),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,7 +200,7 @@ class EmptyArt extends StatelessWidget {
         width: w,
         height: size,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(RwRadius.l),
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -313,7 +313,7 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: RwColors.surface,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(RwRadius.m),
                     border: Border.all(color: RwColors.border),
                   ),
                   child: Row(
@@ -526,20 +526,20 @@ class RwFab extends StatelessWidget {
         valueListenable: extended,
         builder: (context, ext, _) => DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
             ),
             boxShadow: [
-              BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 22, spreadRadius: -4, offset: const Offset(0, 8)),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 22, spreadRadius: -4, offset: const Offset(0, 8)),
             ],
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               onTap: () {
                 HapticFeedback.mediumImpact();
                 onPressed();
@@ -604,7 +604,7 @@ class TileIcon extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

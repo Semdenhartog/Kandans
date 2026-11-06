@@ -81,10 +81,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     NotificationService.instance.lastTrainingType().then((t) {
       if (mounted) setState(() => _type = t);
     });
+    _loadDuration();
     // Live: elke 5 minuten de buienradar en de berekening verversen.
     _live = Timer.periodic(const Duration(minutes: 5), (_) {
       if (mounted) ref.invalidate(rainNowcastProvider);
     });
+  }
+
+  static const _durationKey = 'plan_duration_minutes';
+
+  /// Rekenen met jouw echte looptijd (punt 18): je laatst gekozen duur, anders de mediaan van je laatste runs.
+  Future<void> _loadDuration() async {
+    try {
+      final saved = (await SharedPreferences.getInstance()).getInt(_durationKey);
+      if (saved != null) {
+        if (mounted) setState(() => _durationMinutes = saved);
+        return;
+      }
+      final runs = await ref.read(activitiesProvider.future);
+      final m = typicalRunMinutes([for (final a in runs) a.movingTimeSeconds]);
+      if (m != null && mounted) setState(() => _durationMinutes = m);
+    } catch (_) {}
   }
 
   @override
@@ -204,6 +221,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     onDuration: (m) {
                       setState(() => _durationMinutes = m);
                       setSheet(() {});
+                      SharedPreferences.getInstance().then((p) => p.setInt(_durationKey, m)).ignore();
                     },
                   ),
                   const SizedBox(height: 16),
@@ -811,7 +829,7 @@ class _HeroCard extends StatelessWidget {
       label: '${v.title}. ${v.detail}',
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(RwRadius.l),
           border: Border.all(color: color.withValues(alpha: 0.4)),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -1052,7 +1070,9 @@ class _HeroCard extends StatelessWidget {
                     Icon(Icons.directions_run, size: 16, color: RwColors.subtle),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text('Nu vertrekken kan ook: ${gain <= 3 ? 'bijna even goed' : (gain >= 25 ? 'een stuk minder' : 'iets minder')}.',
+                      child: Text(
+                          'Nu vertrekken kan ook: ${gain <= 3 ? 'bijna even goed' : (gain >= 25 ? 'een stuk minder' : 'iets minder')}.'
+                          '${whyNotNow(v) == null ? '' : '\n${whyNotNow(v)}.'}',
                           style: TextStyle(color: RwColors.subtle, fontSize: 13)),
                     ),
                     TextButton(
@@ -1219,8 +1239,8 @@ class _HourBars extends StatelessWidget {
                                                 ? [RwColors.border, RwColors.bar]
                                                 : [RwColors.bar.withValues(alpha: 0.55), RwColors.bar.withValues(alpha: 0.45)],
                               ),
-                              boxShadow: isBest ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.45), blurRadius: 12, spreadRadius: -2)] : null,
-                              borderRadius: BorderRadius.circular(6),
+                              boxShadow: isBest ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12, spreadRadius: -2)] : null,
+                              borderRadius: BorderRadius.circular(RwRadius.s),
                             ),
                           ),
                         ),

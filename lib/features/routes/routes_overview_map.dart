@@ -230,7 +230,7 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
                   ? Center(
                       child: Container(
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.92), borderRadius: BorderRadius.circular(14)),
+                        decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.92), borderRadius: BorderRadius.circular(RwRadius.m)),
                         child: const Text('Geen routes met deze filters.'),
                       ),
                     )
@@ -245,7 +245,7 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Material(
                             color: RwColors.surface,
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(RwRadius.m),
                             clipBehavior: Clip.antiAlias,
                             child: InkWell(
                               onTap: r.id == null ? null : () => context.go('/routes/${r.id}'),

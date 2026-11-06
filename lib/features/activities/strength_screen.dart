@@ -179,7 +179,7 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(RwRadius.s),
                 child: LinearProgressIndicator(
                   value: _p.count == 0 ? 0 : _p.index / _p.count,
                   minHeight: 6,
@@ -193,7 +193,7 @@ class _RoutinePlayerScreenState extends State<RoutinePlayerScreen> {
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(RwRadius.m)),
                   child: Row(children: [
                     Icon(Icons.info_outline, color: RwColors.accent, size: 20),
                     const SizedBox(width: 10),

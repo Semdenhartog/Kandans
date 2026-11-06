@@ -105,11 +105,11 @@ class _Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(RwRadius.m)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -210,7 +210,7 @@ class _AgeGradeCard extends ConsumerWidget {
               SizedBox(width: 120, child: Text(label)),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(RwRadius.s),
                   child: LinearProgressIndicator(value: (pct / 100).clamp(0.0, 1.0), minHeight: 6, backgroundColor: RwColors.surfaceHigh),
                 ),
               ),

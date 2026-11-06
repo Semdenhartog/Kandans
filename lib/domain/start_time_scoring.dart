@@ -385,3 +385,12 @@ class StartTimePlanner {
     return (score: 100 - total, penalties: p, wind: rw);
   }
 }
+
+
+/// Typische duur van je runs in minuten (mediaan van de laatste 10, afgerond op 5), of null bij te weinig runs.
+int? typicalRunMinutes(List<int> movingSeconds) {
+  final recent = movingSeconds.where((s) => s >= 600).take(10).toList()..sort();
+  if (recent.length < 3) return null;
+  final mid = recent[recent.length ~/ 2] / 60;
+  return ((mid / 5).round() * 5).clamp(15, 240);
+}

@@ -90,7 +90,7 @@ class FitnessScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(RwRadius.s),
                       child: SizedBox(
                         height: 14,
                         child: Row(

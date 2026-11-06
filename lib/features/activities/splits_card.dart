@@ -17,7 +17,7 @@ import '../../domain/training_load.dart';
 import '../../domain/zones.dart';
 import '../../shared/reveal.dart';
 import '../../shared/widgets.dart';
-import '../routes/route_map.dart' show windColor;
+import '../routes/route_map.dart' show RouteMap, windColor;
 
 /// Tijden per kilometer en een grafiek van tempo, hoogte en hartslag (runs uit Strava).
 class SplitsCard extends ConsumerStatefulWidget {
@@ -33,6 +33,66 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
 
   /// Tussentijden per zoveel meter (400 m, 1 km, 1 mijl of 5 km).
   double _every = 1000;
+
+  /// Kaart gekleurd op tempo (false) of hartslag (true), punt 31.
+  bool _mapHr = false;
+
+  static const _slow = Color(0xFF4A90D9), _fast = Color(0xFFE0533D);
+
+  /// Kaart van de run, gekleurd op tempo of hartslag (zoals Strava en Garmin).
+  List<Widget> _colorMap(RunStreams s) {
+    final poly = activity.trackPolyline;
+    if (poly == null || poly.isEmpty) return const [];
+    final hrOk = valueSegments(s, heartRate: true).isNotEmpty;
+    final useHr = _mapHr && hrOk;
+    final segs = valueSegments(s, heartRate: useHr);
+    if (segs.isEmpty) return const [];
+    final scale = relativeScale([for (final x in segs) x.value]);
+    Color colorOf(double v) {
+      final r = scale(v);
+      // Tempo: lager = sneller = rood. Hartslag: hoger = rood.
+      final t = useHr ? r : 1 - r;
+      return t < 0.5 ? Color.lerp(_slow, RwColors.accent, t * 2)! : Color.lerp(RwColors.accent, _fast, (t - 0.5) * 2)!;
+    }
+    return [
+      SizedBox(
+        height: 190,
+        child: RouteMap(
+          polyline: poly,
+          compact: true,
+          interactive: false,
+          showLayerToggle: false,
+          showLegend: false,
+          colorSegments: [for (final x in segs) (points: x.points, color: colorOf(x.value))],
+        ),
+      ),
+      const SizedBox(height: 8),
+      Row(children: [
+        Container(
+          width: 90,
+          height: 6,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(RwRadius.s), gradient: const LinearGradient(colors: [_slow, Color(0xFFD9B45A), _fast])),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(useHr ? tr('lage → hoge hartslag') : tr('rustig → snel'),
+              style: TextStyle(color: RwColors.muted, fontSize: 12)),
+        ),
+        if (hrOk)
+          SegmentedButton<bool>(
+            style: const ButtonStyle(visualDensity: VisualDensity.compact),
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(value: false, label: Text(tr('Tempo'))),
+              ButtonSegment(value: true, label: Text(tr('Hartslag'))),
+            ],
+            selected: {useHr},
+            onSelectionChanged: (v) => setState(() => _mapHr = v.first),
+          ),
+      ]),
+      const SizedBox(height: 14),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +129,7 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              ..._colorMap(s),
               SizedBox(height: 150, child: _RunChart(streams: s)),
               const SizedBox(height: 6),
               Row(
@@ -106,7 +167,7 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
                 ],
               ),
               const Divider(height: 12),
-              for (final sp in splits) _row(sp, ex, hasHr, hasEle, hasWind, hasCad),
+              for (final sp in splits) _row(sp, ex, hasHr, hasEle, hasWind, hasCad, _avgPace(splits)),
               const SizedBox(height: 6),
               Text('${switch (a.source) { 'strava' => 'Gegevens via Strava', 'manual' => 'Uit een geïmporteerd bestand', _ => 'Opgenomen met Kadans' }}.${hasWind ? ' Wind = het weer bij de start van je run.' : ''}${s.baroAltitude != null ? ' Hoogtemeters gemeten met de barometer van je telefoon.' : ''}${s.cadence != null ? ' Cadans van je loopsensor.' : ''}',
                   style: TextStyle(color: RwColors.subtle, fontSize: 11)),
@@ -199,7 +260,7 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
         label: [for (var i = 0; i < 5; i++) '${z.names[i]} ${Fmt.duration(z.seconds[i])}'].join(', '),
         excludeSemantics: true,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           child: SizedBox(
             height: 14,
             child: Row(children: [
@@ -240,7 +301,18 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
         ]),
       );
 
-  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle, bool hasWind, bool hasCad) {
+  /// Gemiddeld tempo over de hele stukken (voor de kleuren per regel).
+  static double? _avgPace(List<KmSplit> splits) {
+    final full = splits.where((x) => !x.partial).toList();
+    if (full.length < 2) return null;
+    final m = full.fold<double>(0, (a, x) => a + x.meters), t = full.fold<double>(0, (a, x) => a + x.seconds);
+    return m <= 0 ? null : t / (m / 1000);
+  }
+
+  Widget _row(KmSplit sp, ({KmSplit? fastest, KmSplit? slowest}) ex, bool hasHr, bool hasEle, bool hasWind, bool hasCad, double? avg) {
+    // Sneller dan gemiddeld = groen, trager = oranje, binnen 3 s = neutraal (zoals de tabel van Garmin).
+    final diff = avg == null || sp.partial ? null : (sp.paceSecPerKm - avg).round();
+    final tint = diff == null || diff.abs() <= 3 ? RwColors.accent : (diff < 0 ? RwColors.good : RwColors.warning);
     final a = activity;
     final cls = sp.bearing == null || a.windDirectionDegrees == null || a.windSpeedKmh == null
         ? null
@@ -271,11 +343,11 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
                 heightFactor: 1,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(RwRadius.s),
                     gradient: LinearGradient(
                       colors: isFast
                           ? [const Color(0x00D9B45A), const Color(0x40D9B45A)]
-                          : [RwColors.accent.withValues(alpha: 0), RwColors.accent.withValues(alpha: 0.13)],
+                          : [tint.withValues(alpha: 0), tint.withValues(alpha: 0.16)],
                     ),
                   ),
                 ),
@@ -303,7 +375,11 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
                     fontWeight: FontWeight.w700,
                     color: isFast ? (RwColors.isDark ? const Color(0xFFF2D892) : const Color(0xFF8A6A22)) : (isSlow ? RwColors.warning : RwColors.text),
                   )),
-              if (isFast) Text('  snelst', style: TextStyle(color: RwColors.isDark ? const Color(0xFFD9B45A) : const Color(0xFF8A6A22), fontSize: 12, fontWeight: FontWeight.w700)),
+              if (isFast)
+                Text('  snelst', style: TextStyle(color: RwColors.isDark ? const Color(0xFFD9B45A) : const Color(0xFF8A6A22), fontSize: 12, fontWeight: FontWeight.w700))
+              else if (diff != null && diff.abs() > 3)
+                Text('  ${diff < 0 ? '−' : '+'}${diff.abs() ~/ 60}:${(diff.abs() % 60).toString().padLeft(2, '0')}',
+                    style: TextStyle(color: diff < 0 ? RwColors.good : RwColors.warning, fontSize: 12, fontWeight: FontWeight.w600)),
             ]),
           ),
           if (hasCad)

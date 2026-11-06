@@ -80,7 +80,7 @@ class _FirstTipState extends State<FirstTip> {
               padding: widget.padding,
               child: Material(
                 color: RwColors.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(RwRadius.m),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

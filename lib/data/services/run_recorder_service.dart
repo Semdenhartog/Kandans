@@ -321,6 +321,8 @@ class RunRecorderService {
       await t.setLanguage('nl-NL');
       await t.setSpeechRate(speechRate);
       await t.setPitch(1.0);
+      // Zelfde stemvolume als de Kadans-stem (eigen schuif, los van muziek).
+      await t.setVolume(await KadansVoice.instance.volume());
       final choice = voiceChoice ?? await _autoVoice();
       if (choice != null) await t.setVoice({'name': choice.name, 'locale': choice.locale});
       // Achter elkaar uitspreken in plaats van elkaar af te kappen, en muziek even zachter zetten.

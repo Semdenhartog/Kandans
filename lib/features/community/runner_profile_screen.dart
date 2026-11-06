@@ -129,6 +129,44 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
         ),
       );
 
+  /// Hoe compleet je profiel is (punt 40), met wat er nog ontbreekt. Verdwijnt als alles er is.
+  List<Widget> _completeness(RunnerProfile p) {
+    final hasPhoto = AvatarCache.instance.peek(p.nickname)?.photoUrl != null;
+    final items = <(bool, String)>[
+      (hasPhoto, tr('foto')),
+      ((_extra.bio ?? '').isNotEmpty, tr('iets over jou')),
+      ((_extra.homeArea ?? '').isNotEmpty, tr('plaats')),
+      (_extra.favDistance != null, tr('favoriete afstand')),
+    ];
+    final done = items.where((e) => e.$1).length;
+    if (done == items.length) return const [];
+    final missing = [for (final e in items) if (!e.$1) e.$2];
+    return [
+      SizedBox(height: 12),
+      InkWell(
+        borderRadius: BorderRadius.circular(RwRadius.m),
+        onTap: () => _edit(p),
+        child: Container(
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(RwRadius.m)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              Expanded(child: Text(trf('Je profiel is voor {pct}% af', {'pct': done * 100 ~/ items.length}), style: TextStyle(fontWeight: FontWeight.w700))),
+              Icon(Icons.chevron_right, color: RwColors.accent),
+            ]),
+            SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(RwRadius.s),
+              child: LinearProgressIndicator(value: done / items.length, minHeight: 6, backgroundColor: RwColors.bar, color: RwColors.accent),
+            ),
+            SizedBox(height: 6),
+            Text(trf('Nog: {wat}', {'wat': missing.join(', ')}), style: TextStyle(color: RwColors.muted, fontSize: 13)),
+          ]),
+        ),
+      ),
+    ];
+  }
+
   Future<void> _edit(RunnerProfile p) async {
     final saved = await openProfileEditor(context, p.nickname, _extra);
     if (saved && mounted) _load();
@@ -221,7 +259,7 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
           // Omslag: het seizoenslandschap dat de loper koos.
           Padding(
             padding: EdgeInsets.only(top: 14, bottom: 12),
-            child: ClipRRect(borderRadius: BorderRadius.circular(14), child: ProfileCover(nickname: p.nickname, height: 92)),
+            child: ClipRRect(borderRadius: BorderRadius.circular(RwRadius.m), child: ProfileCover(nickname: p.nickname, height: 92)),
           ),
           if (p.isMe)
             Align(
@@ -268,16 +306,12 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
                 _Fact(Icons.event_outlined, trf('Sinds {datum}', {'datum': '${_monthNames[_extra.memberSince!.month - 1]} ${_extra.memberSince!.year}'})),
             ]),
           ],
-          if (p.isMe && _extra.bio == null && _extra.homeArea == null && _extra.favDistance == null) ...[
-            SizedBox(height: 10),
-            Text(tr('Vertel iets over jezelf: tik op "Profiel bewerken" voor een foto, bio en je favoriete afstand.'),
-                style: TextStyle(color: RwColors.muted, fontSize: 13)),
-          ],
+          if (p.isMe) ..._completeness(p),
           if (_extra.yearKm != null) ...[
             SizedBox(height: 14),
             Container(
               padding: EdgeInsets.symmetric(vertical: 10),
-              decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(RwRadius.m)),
               child: Row(children: [
                 _Stat(value: _extra.monthKm?.toStringAsFixed(1).replaceAll('.', ',') ?? '–', label: tr('km deze maand')),
                 _Stat(value: _extra.yearKm!.round().toString(), label: tr('km dit jaar')),
@@ -318,7 +352,7 @@ class _Count extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Expanded(
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           onTap: onTap,
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 6),

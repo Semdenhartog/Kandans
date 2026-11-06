@@ -164,7 +164,7 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
                   child: Stack(fit: StackFit.expand, children: [
                     RepaintBoundary(
                       key: _key,
-                      child: ClipRRect(borderRadius: BorderRadius.circular(4), child: RoutePosterArt(data: _data, style: _style)),
+                      child: ClipRRect(borderRadius: BorderRadius.circular(RwRadius.s), child: RoutePosterArt(data: _data, style: _style)),
                     ),
                     if (locked) const Positioned(right: 10, top: 10, child: LuxeBadge()),
                   ]),

@@ -246,3 +246,42 @@ List<({double meters, double pace})> paceSeries(RunStreams s, {double window = 2
   }
   return (min: lo, max: hi);
 }
+
+
+/// Een stuk van de route met een waarde, om de kaart te kleuren op tempo of hartslag (punt 31).
+typedef ValueSegment = ({List<LatLng> points, double value});
+
+/// Knipt de run in stukken van ongeveer [stepMeters] en geeft per stuk het tempo (s/km) of de gemiddelde hartslag.
+/// Leeg als er geen posities (of geen hartslag bij [heartRate]) zijn.
+List<ValueSegment> valueSegments(RunStreams s, {bool heartRate = false, double stepMeters = 100}) {
+  final pos = s.positions;
+  final hr = s.heartRate;
+  if (pos == null || pos.length < 3 || pos.length != s.length) return const [];
+  if (heartRate && (hr == null || hr.length != s.length)) return const [];
+  final out = <ValueSegment>[];
+  var start = 0;
+  for (var i = 1; i < s.length; i++) {
+    final d = s.distance[i] - s.distance[start];
+    if (d < stepMeters && i < s.length - 1) continue;
+    final t = s.time[i] - s.time[start];
+    double? v;
+    if (heartRate) {
+      final part = hr!.sublist(start, i + 1).where((x) => x > 0).toList();
+      if (part.isNotEmpty) v = part.reduce((a, b) => a + b) / part.length;
+    } else if (d > 5 && t > 0) {
+      v = t / (d / 1000);
+    }
+    if (v != null && v.isFinite) out.add((points: pos.sublist(start, i + 1), value: v));
+    start = i;
+  }
+  return out;
+}
+
+/// Plaats van [v] tussen het 10e en 90e percentiel van [values] (0..1), zodat één uitschieter de kleuren niet verpest.
+double Function(double) relativeScale(List<double> values) {
+  if (values.isEmpty) return (_) => 0.5;
+  final sorted = [...values]..sort();
+  final lo = sorted[(sorted.length * 0.1).floor()];
+  final hi = sorted[math.min(sorted.length - 1, (sorted.length * 0.9).floor())];
+  return (v) => hi - lo < 1e-9 ? 0.5 : ((v - lo) / (hi - lo)).clamp(0.0, 1.0);
+}

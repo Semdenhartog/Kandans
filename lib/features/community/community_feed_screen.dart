@@ -17,6 +17,7 @@ import '../../core/i18n.dart';
 import 'runner_avatar.dart';
 import 'together_screens.dart' show TogetherChips;
 import '../../shared/nav_buttons.dart';
+import '../profile/share_app_screen.dart' show openShareApp;
 export 'runner_avatar.dart' show RunnerAvatar;
 
 /// "Een uur geleden", "gisteren", of een datum.
@@ -430,6 +431,23 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
               _load();
             },
           ),
+          // Niet laten stranden op een leeg scherm (punt 43): uitnodigen of alvast de runs van iedereen bekijken.
+          SizedBox(height: 8),
+          Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [
+            OutlinedButton.icon(
+              onPressed: () => openShareApp(context, name: ''),
+              icon: Icon(Icons.person_add_alt_1_outlined, size: 18),
+              label: Text(tr('Vrienden uitnodigen')),
+            ),
+            if (!_everyone)
+              TextButton(
+                onPressed: () {
+                  setState(() => _everyone = true);
+                  _load();
+                },
+                child: Text(tr('Bekijk runs van iedereen')),
+              ),
+          ]),
         ]),
       );
     }
@@ -563,7 +581,7 @@ class _PostCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           InkWell(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             onTap: () => openRunnerProfile(context, p.nickname),
             child: RunnerAvatar(p.nickname),
           ),

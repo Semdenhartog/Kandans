@@ -120,7 +120,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
       label: 'Tijd voor nieuwe schoenen. ${s.name} heeft ${pick.km.round()} van ${s.limitKm} kilometer.',
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: _gold.withValues(alpha: 0.55)),
           gradient: LinearGradient(
             begin: Alignment.topLeft,

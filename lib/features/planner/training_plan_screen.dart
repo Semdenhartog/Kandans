@@ -209,7 +209,7 @@ class _PlanView extends ConsumerWidget {
               if (past.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(RwRadius.s),
                   child: LinearProgressIndicator(value: donePast / past.length, minHeight: 8, color: RwColors.accent, backgroundColor: RwColors.bar),
                 ),
                 const SizedBox(height: 4),
@@ -299,7 +299,7 @@ class _SessionTile extends StatelessWidget {
     final color = sessionColor(s.kind);
     return Card(
       shape: isToday
-          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: RwColors.accent, width: 1.5))
+          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.m), side: BorderSide(color: RwColors.accent, width: 1.5))
           : null,
       child: ExpansionTile(
         shape: const Border(),
@@ -449,7 +449,7 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(RwRadius.m),
                 side: BorderSide(color: _program == p ? RwColors.accent : RwColors.border, width: _program == p ? 1.5 : 1),
               ),
               child: ListTile(
@@ -636,7 +636,7 @@ class PlanCheckCard extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: color.withValues(alpha: 0.45)),
         ),
         child: Column(
@@ -815,7 +815,7 @@ class _PlanReplay extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(RwRadius.l),
           gradient: LinearGradient(colors: [RwColors.accent.withValues(alpha: 0.25), RwColors.surface], begin: Alignment.topLeft, end: Alignment.bottomRight),
           border: Border.all(color: RwColors.accent.withValues(alpha: 0.4)),
         ),

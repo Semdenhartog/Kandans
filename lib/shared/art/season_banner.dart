@@ -30,7 +30,7 @@ class SeasonBanner extends StatelessWidget {
     final now = DateTime.now();
     final month = DateFormat('MMMM', LanguageController.instance.lang.intlLocale).format(now);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(RwRadius.m),
       child: Container(
         constraints: BoxConstraints(minHeight: height),
         decoration: BoxDecoration(
@@ -40,7 +40,7 @@ class SeasonBanner extends StatelessWidget {
             colors: [RwColors.accent.withValues(alpha: 0.16), RwColors.surface],
           ),
           border: Border.all(color: RwColors.border),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(RwRadius.m),
         ),
         child: Stack(children: [
           Positioned.fill(child: KadansLandscape(date: now, opacity: 0.9)),

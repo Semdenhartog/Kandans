@@ -85,3 +85,17 @@ String? whyBetter(StartTimeScore now, StartTimeScore best, {double minDiff = 3})
   final parts = [for (final d in diffs.take(2)) words[d.$1]!];
   return parts.join(' en ');
 }
+
+
+/// Waarom nu níet het beste moment is, in één korte zin (punt 16). Null als nu prima is.
+/// Bijv. "Nu: kans op regen (60%), wind (28 km/u)".
+String? whyNotNow(RunVerdict v) {
+  final gain = v.best.score - v.now.score;
+  if (gain <= 3) return null;
+  final r = v.now.reasons.where((x) => !x.startsWith('Prima')).toList();
+  if (r.isEmpty) return null;
+  // Alleen redenen die bij het beste moment kleiner zijn of er niet zijn: dát is het verschil.
+  final diff = r.where((x) => !v.best.reasons.contains(x)).toList();
+  final shown = (diff.isEmpty ? r : diff).take(2).map((x) => x[0].toLowerCase() + x.substring(1));
+  return 'Nu: ${shown.join(', ')}';
+}

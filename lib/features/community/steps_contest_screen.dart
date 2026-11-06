@@ -12,6 +12,7 @@ import '../../data/services/together_service.dart';
 import '../../shared/widgets.dart';
 import 'runner_avatar.dart';
 import 'runner_profile_screen.dart';
+import '../profile/share_app_screen.dart' show openShareApp;
 
 void openStepsContest(BuildContext c) =>
     Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const StepsContestScreen()));
@@ -45,6 +46,7 @@ class _StepsContestScreenState extends ConsumerState<StepsContestScreen> {
   bool _connected = false;
   bool _connecting = false;
   int? _mySteps;
+  int? _today;
   String? _error;
   List<RunGroup> _groups = const [];
 
@@ -93,6 +95,7 @@ class _StepsContestScreenState extends ConsumerState<StepsContestScreen> {
       if (_connected) {
         final now = DateTime.now();
         final steps = await _sync.monthSteps(now);
+        _today = await _sync.todaySteps();
         if (steps != null) {
           _mySteps = steps;
           await _social.submitSteps(now, steps);
@@ -156,7 +159,7 @@ class _StepsContestScreenState extends ConsumerState<StepsContestScreen> {
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: RwColors.surface,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(RwRadius.l),
                 border: Border.all(color: RwColors.bar),
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -170,6 +173,12 @@ class _StepsContestScreenState extends ConsumerState<StepsContestScreen> {
                 Wrap(spacing: 16, runSpacing: 6, children: [
                   if (me != null) _Pill(Icons.emoji_events_outlined, trf('Plek {n} van {totaal}', {'n': me.rank, 'totaal': _board.length})),
                   if (!_lastMonth) _Pill(Icons.hourglass_bottom, daysLeft == 0 ? tr('Laatste dag!') : trf('Nog {n} dagen', {'n': daysLeft})),
+                  if (!_lastMonth && _today != null) _Pill(Icons.today_outlined, trf('Vandaag {n}', {'n': formatSteps(_today!)})),
+                  if (!_lastMonth && me != null && me.rank > 1)
+                    _Pill(Icons.trending_up, trf('Nog {n} om iemand in te halen', {
+                      // Wie het dichtst vóór je staat: het laagste aantal stappen boven jou.
+                      'n': formatSteps(_board.where((e) => e.rank < me.rank).map((e) => e.steps).reduce((a, b) => a < b ? a : b) - me.steps + 1),
+                    })),
                   if (!_lastMonth && shownSteps != null && now.day > 0)
                     _Pill(Icons.show_chart, trf('{n} per dag', {'n': formatSteps((shownSteps / now.day).round())})),
                 ]),
@@ -243,6 +252,8 @@ class _StepsContestScreenState extends ConsumerState<StepsContestScreen> {
                 message: _group == null
                     ? tr('Volg andere lopers in Samen, of nodig vrienden uit. Iedereen die zijn stappen koppelt, staat hier.')
                     : tr('Nog niemand anders in deze groep heeft stappen gekoppeld. Vraag het in de groep!'),
+                actionLabel: tr('Vrienden uitnodigen'),
+                onAction: () => openShareApp(context, name: ''),
               )
             else
               for (final e in _board) _Row(entry: e, leader: _board.first.steps),
@@ -287,9 +298,9 @@ class _Row extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: entry.isMe ? RwColors.accent.withValues(alpha: 0.12) : RwColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: entry.isMe ? null : () => openRunnerProfile(context, entry.nickname),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
@@ -309,7 +320,7 @@ class _Row extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(RwRadius.s),
                     child: LinearProgressIndicator(value: share, minHeight: 6, backgroundColor: RwColors.bar, color: RwColors.accent),
                   ),
                 ]),

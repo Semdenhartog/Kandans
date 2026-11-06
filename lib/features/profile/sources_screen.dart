@@ -19,7 +19,7 @@ class SourcesLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
         onTap: () => openSources(context),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(RwRadius.s),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(mainAxisSize: MainAxisSize.min, children: [

@@ -287,7 +287,7 @@ class _GoldButton extends StatelessWidget {
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
           gradient: _goldGradient,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(RwRadius.l),
           boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 8))],
         ),
         child: FilledButton(
@@ -355,7 +355,7 @@ class _DarkNote extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: rwZandAvond.surface,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: _gold.withValues(alpha: 0.45)),
         ),
         child: Text(text, style: TextStyle(color: rwZandAvond.muted, height: 1.5)),

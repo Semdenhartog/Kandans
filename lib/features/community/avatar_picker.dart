@@ -66,7 +66,7 @@ class _PickerState extends State<_Picker> {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               child: Stack(alignment: Alignment.bottomLeft, children: [
                 ProfileCover(nickname: widget.nickname, height: 110, style: _s),
                 Padding(
@@ -137,14 +137,14 @@ class _Choice extends StatelessWidget {
         button: true,
         selected: selected,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: onTap,
           child: Container(
             width: 48,
             height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               color: selected ? RwColors.accent.withValues(alpha: 0.18) : RwColors.surfaceHigh,
               border: Border.all(color: selected ? RwColors.accent : RwColors.border, width: selected ? 2 : 1),
             ),

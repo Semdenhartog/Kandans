@@ -179,7 +179,7 @@ class _PrivateHint extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: _stravaOrange.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: _stravaOrange.withValues(alpha: 0.5)),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -210,21 +210,21 @@ class _RouteTile extends StatelessWidget {
       selected: picked,
       label: '${route.name}, ${Fmt.km(route.distanceMeters, decimals: 1)}${imported ? ', al geïmporteerd' : ''}',
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: picked ? _stravaOrange.withValues(alpha: 0.10) : RwColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             border: Border.all(color: picked ? _stravaOrange : RwColors.border, width: picked ? 1.5 : 1),
           ),
           child: Row(children: [
             Container(
               width: 58,
               height: 58,
-              decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(RwRadius.m)),
               child: CustomPaint(painter: PosterRoutePainter(pts, color: imported ? RwColors.subtle : RwColors.accent, width: 2.5)),
             ),
             const SizedBox(width: 12),

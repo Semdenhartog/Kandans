@@ -386,7 +386,7 @@ class _CoachMark extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
           ),
-          boxShadow: [BoxShadow(color: RwColors.accent.withValues(alpha: 0.35), blurRadius: size * 0.5)],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: size * 0.5)],
         ),
         child: Icon(Icons.auto_awesome, size: size * 0.55, color: RwColors.accentDark),
       );
@@ -463,13 +463,13 @@ class _GoldPill extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           child: Ink(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(RwRadius.m),
               gradient: const LinearGradient(colors: [Color(0xFFF6E3A1), Color(0xFFD9B45A), Color(0xFF9C7A2A)]),
-              boxShadow: [BoxShadow(color: const Color(0xFFD9B45A).withValues(alpha: 0.3), blurRadius: 12)],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12)],
             ),
             child: const Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.workspace_premium, size: 16, color: Color(0xFF1C1405)),

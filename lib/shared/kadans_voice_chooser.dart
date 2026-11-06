@@ -86,11 +86,11 @@ class _VoiceRow extends StatelessWidget {
     return Material(
       color: selected ? RwColors.accent.withValues(alpha: 0.16) : RwColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         side: BorderSide(color: selected ? RwColors.accent : RwColors.bar, width: selected ? 1.6 : 1),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),

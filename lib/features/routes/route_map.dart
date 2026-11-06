@@ -122,9 +122,13 @@ class RouteMap extends StatefulWidget {
     this.pois = const [],
     this.animateIn = false,
     this.extraMarkers = const [],
+    this.colorSegments,
   });
 
   final String polyline;
+
+  /// Eigen kleuren per stuk (bijv. tempo of hartslag); vervangt de windkleuren als hij gezet is.
+  final List<({List<LatLng> points, Color color})>? colorSegments;
 
   /// De route tekent zich bij het openen vanzelf over de kaart (na je run).
   final bool animateIn;
@@ -322,8 +326,11 @@ class _RouteMapState extends State<RouteMap> with SingleTickerProviderStateMixin
                   ),
                   // Donkere rand, zodat de route op elke ondergrond leesbaar is.
                   Polyline(points: _pts, strokeWidth: line + 3.5, color: routeHalo),
-                  for (final s in _segments)
-                    Polyline(points: [for (final p in s.points) _ll(p)], strokeWidth: line, color: windColor(s.windClass)),
+                  if (widget.colorSegments case final cs? when cs.isNotEmpty)
+                    for (final c in cs) Polyline(points: [for (final p in c.points) _ll(p)], strokeWidth: line, color: c.color)
+                  else
+                    for (final s in _segments)
+                      Polyline(points: [for (final p in s.points) _ll(p)], strokeWidth: line, color: windColor(s.windClass)),
                 ],
               ),
               MarkerLayer(
@@ -940,7 +947,7 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
       builder: (context, layer, _) {
         final photo = layer == MapLayer.satelliet;
         return ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           child: Stack(
             children: [
               FlutterMap(

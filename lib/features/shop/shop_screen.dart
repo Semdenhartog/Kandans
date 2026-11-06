@@ -354,7 +354,7 @@ class _Panel extends StatelessWidget {
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: rwZandAvond.surface,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: ShopScreen._goldDeep.withValues(alpha: 0.45)),
         ),
         child: child,
@@ -409,7 +409,7 @@ class _FramedPoster extends StatelessWidget {
       aspectRatio: 4 / 5,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,

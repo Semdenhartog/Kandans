@@ -94,7 +94,7 @@ class TodayCard extends ConsumerWidget {
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: RwColors.warning.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: RwColors.warning.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(RwRadius.m)),
                 child: Text(
                   'Je klaar-score is ${ready.score}. Een stevige training kan vandaag beter een rustige worden.',
                   style: TextStyle(color: RwColors.warning),
@@ -192,7 +192,7 @@ class _ReadinessRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final color = _scoreColor(ready.score);
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(RwRadius.m),
       onTap: () => showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
@@ -544,7 +544,7 @@ class YearStoryCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Material(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => openYearStory(context, year: year),

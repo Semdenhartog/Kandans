@@ -12,7 +12,6 @@ import '../../shared/art/best_moment_demo.dart';
 import '../../shared/route_backdrop.dart';
 import '../planner/availability_provider.dart';
 import '../planner/roster_screen.dart' show openRosterScreen;
-import '../routes/watch_export.dart' show WatchBrand, WatchBrandInfo, saveWatchBrand;
 import '../../core/i18n.dart';
 import '../../shared/language_picker.dart';
 import '../../shared/kadans_voice_chooser.dart';
@@ -44,15 +43,6 @@ const _whenChoices = [
   ('altijd', 'Wisselend (bijv. diensten)', Icons.shuffle),
 ];
 
-/// Kort overzicht van wat er in de app zit, voor de uitlegpagina.
-const _features = [
-  (Icons.wb_sunny_outlined, 'Vandaag', 'Je beste moment, met weer, wind, buien en wat je aantrekt.'),
-  (Icons.route_outlined, 'Routes', 'Tekenen of laten maken, met ondergrond, verlichting en wind.'),
-  (Icons.play_circle_outline, 'Opnemen', 'Lopen met stem, tempo-doel, live opdrachten en afslagen op je horloge.'),
-  (Icons.flag_outlined, 'Uitdagingen en Samen', 'Doelen per maand, medailles en ranglijsten met vrienden.'),
-  (Icons.event_outlined, 'Wedstrijden', 'Je wedstrijd met schema, tempo per km en aftellen.'),
-  (Icons.auto_awesome_outlined, 'Coach', 'Vraag alles over je training; kent je eigen runs.'),
-];
 
 /// Toont de rondleiding als die nog niet is gezien. Geeft de gekozen vervolgstap terug.
 Future<OnboardingNext?> showOnboardingIfNeeded(BuildContext context) async {
@@ -85,7 +75,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _reminder = false;
   bool _asking = false;
   String? _locationResult;
-  WatchBrand? _brand;
   bool _voicePicked = false;
 
   @override
@@ -128,30 +117,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         text: tr('Strava laat zien wat je gelopen hebt. Kadans zegt wanneer je het best kunt gaan: '
             'op het weer, de wind op jouw route en de buien van het komende uur. En welke kant je op moet en wat je aantrekt.'),
         children: [
-          FilledButton(onPressed: _next, child: Text(tr('Verder'))),
-        ],
-      ),
-      _Page(
-        icon: Icons.apps_outlined,
-        title: tr('Alles op een rij'),
-        text: tr('Dit zit er in Kadans. Je vindt het later terug onder de knoppen onderaan, en uitleg onder Ik → Hulp.'),
-        children: [
-          for (final (icon, name, what) in _features)
+          // Locatie meteen hier (vroeger een eigen stap): de introductie is nu hooguit 5 stappen (punt 45).
+          if (_locationResult != null)
             Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Icon(icon, size: 22, color: RwColors.accent),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text.rich(TextSpan(children: [
-                    TextSpan(text: '${tr(name)}  ', style: TextStyle(fontWeight: FontWeight.w700)),
-                    TextSpan(text: tr(what), style: TextStyle(color: RwColors.muted)),
-                  ])),
-                ),
-              ]),
+              padding: EdgeInsets.only(bottom: 12),
+              child: Text(_locationResult!, textAlign: TextAlign.center, style: TextStyle(color: RwColors.good)),
             ),
-          SizedBox(height: 8),
-          FilledButton(onPressed: _next, child: Text(tr('Verder'))),
+          FilledButton.icon(
+            onPressed: _asking ? null : (_locationResult != null ? _next : _askLocation),
+            icon: _asking
+                ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : Icon(_locationResult != null ? Icons.arrow_forward : Icons.location_on_outlined),
+            label: Text(_locationResult != null ? tr('Verder') : tr('Weer op mijn plek: locatie toestaan')),
+          ),
+          if (_locationResult == null)
+            TextButton(
+              onPressed: () async {
+                await markLocationExplained();
+                _next();
+              },
+              child: Text(tr('Later')),
+            ),
+          Text(
+            tr('Alleen terwijl je de app gebruikt. We bewaren hooguit een grove thuisplaats (afgerond op ~1 km) en delen je locatie met niemand.'),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: RwColors.subtle, fontSize: 12),
+          ),
         ],
       ),
       _Page(
@@ -217,61 +208,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           SizedBox(height: 4),
           FilledButton(onPressed: _next, child: Text(_when == null && !_reminder ? tr('Sla over') : tr('Verder'))),
-        ],
-      ),
-      _Page(
-        icon: Icons.my_location,
-        title: tr('Het weer op jouw plek'),
-        text: tr('Daarvoor vraagt Kadans je locatie, alleen terwijl je de app gebruikt. We bewaren hooguit een '
-            'grove thuisplaats (op ongeveer 1 km afgerond) en delen je locatie met niemand, tenzij je zelf live delen aanzet.'),
-        children: [
-          if (_locationResult != null)
-            Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: Text(_locationResult!, textAlign: TextAlign.center, style: TextStyle(color: RwColors.good)),
-            ),
-          FilledButton.icon(
-            onPressed: _asking || _locationResult != null ? null : _askLocation,
-            icon: _asking
-                ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : Icon(Icons.location_on_outlined),
-            label: Text(tr('Locatie toestaan')),
-          ),
-          TextButton(
-            onPressed: () async {
-              await markLocationExplained();
-              _next();
-            },
-            child: Text(tr('Later')),
-          ),
-        ],
-      ),
-      _Page(
-        icon: Icons.watch_outlined,
-        title: tr('Welk horloge heb je?'),
-        text: tr('Dan zet Kadans je route met één knop op je horloge, met een trilling bij elke afslag. '
-            'Geen horloge? Dan zegt je telefoon de afslagen.'),
-        children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final b in WatchBrand.values)
-                ChoiceChip(
-                  label: Text(b == WatchBrand.wearos ? 'Wear OS (Galaxy, Pixel)' : b == WatchBrand.garminBasic ? 'Garmin zonder routes (Vivoactive 5)' : b.label),
-                  selected: _brand == b,
-                  onSelected: (_) async {
-                    setState(() => _brand = b);
-                    await saveWatchBrand(b);
-                    await Future<void>.delayed(Duration(milliseconds: 350));
-                    if (mounted) _next();
-                  },
-                ),
-            ],
-          ),
-          SizedBox(height: 8),
-          TextButton(onPressed: _next, child: Text(tr('Later kiezen'))),
         ],
       ),
       _Page(
@@ -398,7 +334,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       height: 8,
                       decoration: BoxDecoration(
                         color: i == _page ? RwColors.accent : RwColors.bar,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(RwRadius.s),
                       ),
                     ),
                     ),
@@ -480,11 +416,11 @@ class _Choice extends StatelessWidget {
   Widget build(BuildContext context) => Material(
         color: selected ? RwColors.accent.withValues(alpha: 0.16) : RwColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           side: BorderSide(color: selected ? RwColors.accent : RwColors.bar, width: selected ? 1.6 : 1),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: onTap,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),

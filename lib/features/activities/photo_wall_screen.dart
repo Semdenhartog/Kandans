@@ -86,9 +86,9 @@ class _Tile extends StatelessWidget {
         label: tr('Foto, tik om de run te openen'),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(RwRadius.s),
             child: url == null
                 ? Container(color: RwColors.surfaceHigh)
                 : Image(
@@ -110,12 +110,12 @@ class PhotoPin extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           border: Border.all(color: Colors.white, width: 2.5),
           boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 6)],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: BorderRadius.circular(RwRadius.s),
           child: Image(
             image: CachedNetImage(url, cacheKey: 'run-photo:$path'),
             fit: BoxFit.cover,

@@ -402,3 +402,12 @@ ThemeData buildTheme() {
     }),
   );
 }
+
+
+/// Vaste afrondingen (unslop-ronde): klein 8, middel 16, groot 24. Pil (999) alleen voor knoppen en chips.
+class RwRadius {
+  RwRadius._();
+  static const double s = 8;
+  static const double m = 16;
+  static const double l = 24;
+}

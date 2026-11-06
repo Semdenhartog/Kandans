@@ -274,6 +274,18 @@ class SyncService {
     } catch (_) {}
   }
 
+  /// Stappen van vandaag (voor de dagstand in de wedstrijd). Null als het niet kan.
+  Future<int?> todaySteps() async {
+    if (!Platform.isAndroid || !await stepsEnabled() || !await HealthConsent.granted()) return null;
+    try {
+      await _configureHealth();
+      final n = DateTime.now();
+      return await _health.getTotalStepsInInterval(DateTime(n.year, n.month, n.day), n);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Totaal aantal stappen van de maand waarin [month] valt (t/m nu). Null als het niet kan.
   /// Health Connect telt dubbele bronnen (telefoon + horloge) zelf maar één keer.
   Future<int?> monthSteps(DateTime month) async {

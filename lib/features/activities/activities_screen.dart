@@ -598,8 +598,8 @@ class _OverviewState extends ConsumerState<_Overview> {
                                   )
                                 : null,
                             boxShadow: d.runs > 0
-                                ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.35), blurRadius: 10, spreadRadius: -2)]
-                                : (d.isToday ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.25), blurRadius: 12)] : null),
+                                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 10, spreadRadius: -2)]
+                                : (d.isToday ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12)] : null),
                             border: Border.all(
                               color: d.isToday ? (d.runs > 0 ? RwColors.text : RwColors.accent) : (d.runs > 0 ? RwColors.text.withValues(alpha: 0.25) : RwColors.border),
                               width: d.isToday ? 2 : 1,
@@ -629,7 +629,7 @@ class _OverviewState extends ConsumerState<_Overview> {
           else
             InkWell(
               onTap: _setGoal,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(RwRadius.s),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
@@ -653,7 +653,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                     ),
                     const SizedBox(height: 6),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(RwRadius.s),
                       child: LinearProgressIndicator(
                         value: (weekKm / _goalKm!).clamp(0, 1).toDouble(),
                         minHeight: 8,
@@ -694,7 +694,7 @@ class _OverviewState extends ConsumerState<_Overview> {
           const SizedBox(height: 4),
           // Slanke doorklikregel i.p.v. een grote knop: rustiger in de weekkaart.
           InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(RwRadius.m),
             onTap: () => openFitness(context),
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
@@ -772,9 +772,9 @@ class _OverviewState extends ConsumerState<_Overview> {
                                         : [RwColors.border, RwColors.bar],
                                   ),
                                   boxShadow: i == totals.length - 1 && w.km > 0
-                                      ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.4), blurRadius: 10, spreadRadius: -2)]
+                                      ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 10, spreadRadius: -2)]
                                       : null,
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BorderRadius.circular(RwRadius.s),
                                 ),
                               ),
                             ),
@@ -905,7 +905,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
 }
 
 /// Titel van een run: automatisch op weer, moment en afstand (zie [smartTitle]).
-String runTitle(Activity a, {String? routeName}) => smartTitle(a, routeName: routeName, fill: (t, v) => trf(t, v));
+String runTitle(Activity a, {String? routeName}) =>
+    (a.title ?? '').trim().isNotEmpty ? a.title!.trim() : smartTitle(a, routeName: routeName, fill: (t, v) => trf(t, v));
 
 class _ActivityTile extends StatelessWidget {
   const _ActivityTile({required this.activity, required this.badges, required this.onTap, required this.onDelete, this.routeName, this.onRunAgain, this.onShare});
@@ -989,7 +990,7 @@ class _ActivityTile extends StatelessWidget {
                 width: 64,
                 height: 64,
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(RwRadius.m)),
                 child: a.hasTrack
                     ? RouteShape(polyline: a.trackPolyline!, strokeWidth: 2.2)
                     : Icon(sourceIcon, color: RwColors.accent, size: 28),
