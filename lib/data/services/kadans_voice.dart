@@ -46,8 +46,6 @@ class KadansVoice {
 
   bool? _on;
   String? _choice;
-
-  bool? _on;
   DateTime? _pauseUntil;
   AudioPlayer? _player;
   Future<void> _chain = Future<void>.value();
