@@ -27,14 +27,14 @@ class KadansVoiceOption {
 }
 
 const kadansVoices = [
-  KadansVoiceOption('jamie', 'Jamie', false, 'helder en vriendelijk',
-      'Hoi, ik ben Jamie. Kilometer drie. Je tempo is vijf minuut dertig. Lekker bezig!'),
-  KadansVoiceOption('marvin', 'Marvin', false, 'energiek en vlot',
-      'Hoi, ik ben Marvin. Nog vijfhonderd meter. Hou dit tempo vast, je bent er bijna!'),
-  KadansVoiceOption('roos', 'Roos', true, 'fris en vrolijk',
-      'Hoi, ik ben Roos. Kilometer drie. Je tempo is vijf minuut dertig. Goed zo!'),
-  KadansVoiceOption('anna', 'Anna', true, 'helder en warm',
-      'Hoi, ik ben Anna. Rustig aan bergop. Over tweehonderd meter rechtsaf.'),
+  KadansVoiceOption('daan', 'Daan', false, 'rustig en duidelijk',
+      'Hoi, ik ben Daan. Kilometer drie. Je tempo is vijf minuut dertig. Lekker bezig!'),
+  KadansVoiceOption('bram', 'Bram', false, 'energiek en vlot',
+      'Hoi, ik ben Bram. Nog vijfhonderd meter. Hou dit tempo vast, je bent er bijna!'),
+  KadansVoiceOption('emma', 'Emma', true, 'helder en zeker',
+      'Hoi, ik ben Emma. Kilometer drie. Je tempo is vijf minuut dertig. Goed zo!'),
+  KadansVoiceOption('fleur', 'Fleur', true, 'licht en vrolijk',
+      'Hoi, ik ben Fleur. Rustig aan bergop. Over tweehonderd meter rechtsaf.'),
 ];
 
 class KadansVoice {
@@ -75,8 +75,14 @@ class KadansVoice {
     if (_choice != null) return _choice!;
     try {
       final p = await SharedPreferences.getInstance();
-      // Oude keuzes uit eerdere versies: Berend → Jamie, Sanne → Anna (zelfde geslacht).
-      final saved = switch (p.getString(_voiceKey)) { 'berend' => 'jamie', 'sanne' => 'anna', final k => k };
+      // Oude keuzes uit eerdere versies (zelfde geslacht).
+      final saved = switch (p.getString(_voiceKey)) {
+        'berend' || 'jamie' => 'daan',
+        'marvin' => 'bram',
+        'sanne' || 'anna' => 'emma',
+        'roos' => 'fleur',
+        final k => k,
+      };
       return _choice = kadansVoices.any((v) => v.key == saved) ? saved! : kadansVoices.first.key;
     } catch (_) {
       return _choice = kadansVoices.first.key;
@@ -219,9 +225,12 @@ class KadansVoice {
     if (e.status == 404) return 'De stemfunctie staat nog niet op de server.';
     if (e.status == 401) return 'Log opnieuw in en probeer het nog eens.';
     return switch (reason) {
-      'key' => 'De ElevenLabs-sleutel klopt niet. Maak een nieuwe en zet hem opnieuw in Supabase.',
-      'permissions' => 'De sleutel mag geen spraak maken: zet "Text to Speech" aan bij de sleutel in ElevenLabs.',
-      'quota' => 'Je ElevenLabs-credits zijn op voor deze maand. Je hoort nu de telefoonstem.',
+      'key' => 'De stemsleutel klopt niet. Maak een nieuwe en zet hem opnieuw in Supabase (GOOGLE_TTS_KEY).',
+      'api_off' => 'Zet in Google Cloud de "Cloud Text-to-Speech API" aan. Tot die tijd hoor je de telefoonstem.',
+      'billing' => 'Zet in Google Cloud betalen aan voor dit project (het gratis deel blijft gratis).',
+      'permissions' => 'De sleutel mag geen spraak maken. Controleer de rechten van de sleutel.',
+      'plan' => 'Deze stem werkt pas met een betaald ElevenLabs-plan. Je hoort nu de telefoonstem.',
+      'quota' => 'Het gratis aantal stemzinnen is op voor deze maand. Je hoort nu de telefoonstem.',
       'voice' => 'Deze stem is nu niet beschikbaar. Kies een andere stem; tot die tijd hoor je de telefoonstem.',
       _ => 'ElevenLabs gaf een fout (${d is Map ? d['status'] : e.status}). Je hoort nu de telefoonstem.',
     };

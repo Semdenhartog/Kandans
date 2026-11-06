@@ -125,15 +125,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   (`SyncService.connectSteps/monthSteps`), alleen maandtotaal naar server. Ranglijst vrienden + per loopgroep.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
-- **Kadans-stem (TESTFASE, ElevenLabs gratis plan = niet commercieel):** edge function `tts` (geheim `ELEVENLABS_API_KEY`, optioneel
-  `ELEVENLABS_MODEL` standaard `eleven_flash_v2_5`). Vaste stemmenlijst `VOICES` in `tts` = `kadansVoices` in `data/services/kadans_voice.dart`:
-  Jamie `YxbOqEAPD1TsKmU3TFJz` (m, standaard; in Sems account), Marvin `XWw6BayktH5jsnELw9Bc` (m, in account), Roos `7qdUFMklKPaaAVMsBTBt`
-  (v) en Anna `8B6lPskx1bcErhNkFdqo` (v, bibliotheeknaam "Lotte") — Sem heeft Roos en Anna in "My Voices" gezet. Oude sleutels: berend → jamie,
-  sanne → anna (`ALIASES` in `tts` + `choice()` in de app). Terugval alleen binnen hetzelfde geslacht, anders telefoonstem. Keuze + voorbeeldknop: `shared/kadans_voice_chooser.dart`
-  (introductie-stap "Kies je coachstem" + stemkeuze bij Opnemen). Cache per zin én stem op toestel. Na een fout 2 min pauze.
-  **Nooit twee stemmen tegelijk:** `speak(..., fallback, stopFallback)` zet flutter_tts stil vóór het afspelen, een gestarte zin
-  valt niet meer terug, en `_configureTts` gebruikt `awaitSpeakCompletion(true)`.
-  **Vóór de lancering betaald plan nemen** (of eigen stemmen).
+- **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
+  betalen moet aan staan, budgetgrens instellen). Zonder Google-sleutel: reserve ElevenLabs (`ELEVENLABS_API_KEY`; gratis plan kan géén
+  bibliotheekstemmen via de API → reason `plan`). Stemmen `VOICES` in `tts` = `kadansVoices` in `data/services/kadans_voice.dart`:
+  Daan (Charon, m, standaard), Bram (Puck, m), Emma (Kore, v), Fleur (Aoede, v). Oude sleutels (berend/jamie/marvin/sanne/anna/roos)
+  worden omgezet naar hetzelfde geslacht (`ALIASES` + `choice()`). Terugval alleen binnen geslacht, anders telefoonstem.
+  Keuze + voorbeeldknop: `shared/kadans_voice_chooser.dart` (introductie "Kies je coachstem" + Opnemen). Cache per zin én stem.
+  Foutredenen → uitleg in `KadansVoice._explain` (key, api_off, billing, plan, quota, voice). Na een fout 2 min pauze.
+  **Nooit twee stemmen tegelijk:** `speak(..., fallback, stopFallback)` zet flutter_tts stil vóór het afspelen.
 - Marketing (buiten de repo): Instagram **@kadans.app**. Instagram-skills (`/ig-reel`, `/ig-caption`, `/ig-plan` enz.) en
   `frontend-design` en `unslop-ui` (controle op AI-look, scanner: `devibe_scan.py` uit JCarterJohnson/vibecoded-design-tells) zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
@@ -156,9 +155,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Na KvK: bedrijfsgegevens (naam, adres, KvK-nummer) invullen in `site/voorwaarden.html` (en versie ophogen).
 - Play Console → verwijder-URL invullen: https://semdenhartog.github.io/Kandans/verwijderen.html
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
-- ElevenLabs: vóór de lancering betaald plan (Roos en Anna staan in "My Voices").
+- Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
-- Testen op telefoon (nieuw 6-11): stemkeuze + voorbeeld (Jamie/Marvin/Roos/Anna), hoogtemeters, rondje met richting,
+- Testen op telefoon (nieuw 6-11): stemkeuze + voorbeeld (Daan/Bram/Emma/Fleur, na GOOGLE_TTS_KEY), hoogtemeters, rondje met richting,
   stappen van de maand, profielfoto/bio/melden, Kadans delen, laadtijd water/toilet/verlichting.
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
   loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
