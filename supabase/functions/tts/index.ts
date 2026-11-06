@@ -61,7 +61,10 @@ async function google(key: string, voice: Voice, text: string): Promise<Result> 
     signal: AbortSignal.timeout(9_000),
   });
   if (!res.ok) {
-    const detail = (await res.text().catch(() => "")).slice(0, 300);
+    const raw = await res.text().catch(() => "");
+    // Google zet de echte oorzaak (bijv. API_KEY_SERVICE_BLOCKED, API_KEY_ANDROID_APP_BLOCKED) in details[].reason.
+    const why = [...raw.matchAll(/"reason":\s*"([A-Z_]+)"/g)].map((m) => m[1]).join(",");
+    const detail = `${why} ${raw.replace(/\s+/g, " ")}`.slice(0, 600);
     // Sleutel fout, API uit of limiet op: een andere stem helpt niet.
     return { status: res.status, detail, stop: res.status === 401 || res.status === 403 || res.status === 429 };
   }
@@ -135,6 +138,7 @@ Deno.serve(async (req) => {
   if (last.status === 402 || /paid_plan/i.test(last.detail)) reason = "plan";
   else if (last.status === 403 && /SERVICE_DISABLED|has not been used|disabled/i.test(last.detail)) reason = "api_off";
   else if (last.status === 403 && /billing/i.test(last.detail)) reason = "billing";
+  else if (/API_KEY_\w*_BLOCKED/.test(last.detail)) reason = "key_restricted";
   else if (last.status === 401 && /missing_permissions|permission/i.test(last.detail)) reason = "permissions";
   else if (last.status === 401 || last.status === 403 || /API key not valid|API_KEY_INVALID/i.test(last.detail)) reason = "key";
   else if (last.status === 429 || /quota|credits|RESOURCE_EXHAUSTED/i.test(last.detail)) reason = "quota";
