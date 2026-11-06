@@ -9,7 +9,6 @@
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets), door Sem zelf in te stellen:
 //   ELEVENLABS_API_KEY    verplicht (zonder sleutel: 503 en de app gebruikt de telefoonstem)
-//   ELEVENLABS_VOICE_ID   optioneel, standaard "Berend" (pb6qe8wKy786fK6M05tq)
 //   ELEVENLABS_MODEL      optioneel, standaard eleven_flash_v2_5 (snel en zuinig)
 //
 // LET OP: het gratis ElevenLabs-plan is niet voor commercieel gebruik. Alleen voor testen;
@@ -22,7 +21,7 @@ const MAX_CHARS = 400;
 // Vaste Nederlandse stemmen (ElevenLabs). Sleutels moeten gelijk zijn aan `KadansVoiceOption.key` in de app.
 // Bibliotheekstemmen werken op het gratis plan alleen als ze in "My Voices" van het account staan.
 const VOICES: Record<string, { id: string; gender: "m" | "v" }> = {
-  berend: { id: "pb6qe8wKy786fK6M05tq", gender: "m" },
+  jamie: { id: "YxbOqEAPD1TsKmU3TFJz", gender: "m" },
   marvin: { id: "XWw6BayktH5jsnELw9Bc", gender: "m" },
   roos: { id: "7qdUFMklKPaaAVMsBTBt", gender: "v" },
   sanne: { id: "mNOlrB5V39qx4wQwSjG3", gender: "v" },
@@ -31,7 +30,7 @@ const VOICES: Record<string, { id: string; gender: "m" | "v" }> = {
 /// Volgorde om te proberen: gekozen stem, dan de andere(n) van hetzelfde geslacht.
 function voiceChain(key: string): string[] {
   const chosen = VOICES[key];
-  if (!chosen) return [env("ELEVENLABS_VOICE_ID") || VOICES.berend.id, VOICES.marvin.id];
+  if (!chosen) return [VOICES.jamie.id, VOICES.marvin.id]; // onbekend of oude keuze (Berend): Jamie
   const same = Object.values(VOICES).filter((v) => v.gender === chosen.gender && v.id !== chosen.id).map((v) => v.id);
   return [chosen.id, ...same];
 }

@@ -973,7 +973,7 @@ const kTranslations = <String, List<String>>{
   'VRIENDCODE': ['FRIEND CODE', 'FREUNDESCODE', 'CODE AMI', 'CÓDIGO DE AMIGO'],
   'Open de link, dan staan we meteen bij elkaars vrienden.': ['Open the link and we\'ll be friends right away.', 'Öffne den Link, dann sind wir sofort befreundet.', 'Ouvre le lien et nous serons tout de suite amis.', 'Abre el enlace y seremos amigos al instante.'],
   'Kies een mooie kaart: bericht of verhaal, met je eigen cijfers': ['Pick a nice card: post or story, with your own numbers', 'Wähle eine schöne Karte: Beitrag oder Story, mit deinen Zahlen', 'Choisis une belle carte : publication ou story, avec tes chiffres', 'Elige una tarjeta bonita: publicación o historia, con tus cifras'],
-  'rustig en duidelijk': ['calm and clear', 'ruhig und deutlich', 'calme et clair', 'tranquila y clara'],
+  'helder en vriendelijk': ['clear and friendly', 'klar und freundlich', 'claire et amicale', 'clara y amable'],
   'energiek en vlot': ['energetic and upbeat', 'energisch und flott', 'énergique et entraînant', 'enérgica y ágil'],
   'fris en vrolijk': ['fresh and cheerful', 'frisch und fröhlich', 'fraîche et joyeuse', 'fresca y alegre'],
   'kalm en warm': ['calm and warm', 'ruhig und warm', 'calme et chaleureuse', 'serena y cálida'],

@@ -40,20 +40,20 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   - `geheimen.yml`: geheimen-scan.
   - `site.yml`: zet `site/` op GitHub Pages (https://semdenhartog.github.io/Kandans/ — hoofdletter K), vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in. Links in `site/` zijn relatief.
-- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.5. Aanmelden vraagt 16+ en akkoord (versies in user metadata).
+- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.6 (foto's + stappen). Aanmelden vraagt 16+ en akkoord (versies in user metadata).
   Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
   Site gebruikt eigen lettertypes (`site/fonts.css`) en Leaflet uit `site.yml` (geen Google Fonts/unpkg → geen cookiebanner nodig).
   Site-stijl (unslop-controle 2-11-2026, score 0): geen tekst met kleurverloop (effen goud), kleurverloop alleen op het CTA-blok,
   afrondingen 8/16/24 px, pil alleen voor `.btn` (gemarkeerd `unslop-ignore`), `button{font-family:inherit}`. Functies toont `site/app-coach.jpg`
   (uitsnede van `schermen-main/playstore/6_coach.png`). Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live. Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0037** staan live; **0038** (profielen + stappen) nog níet (zie open punten). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
   starten met `-o '-p 5499 -k /tmp/pgt'`), met kleine stubs voor `auth.uid()`, `community_profiles` e.d.
 - Bewuste keuzes: geen sms-rechten (Google Play staat ze voor valmeldingen niet toe), geen "Hey Google"-vragen in het Nederlands
-  (niet mogelijk voor gewone apps; wel snelkoppeling), geen eigen profielfoto's in Samen (zou moderatie vragen).
+  (niet mogelijk voor gewone apps; wel snelkoppeling), eigen profielfoto's in Samen mág sinds 6-11-2026 (Sems keuze) mét melden/blokkeren (na 3 meldingen verborgen).
 - Gratis kaartdata: PDOK-tegels, Overpass (eerst één server, na 4 s reserve), openrouteservice, Open-Meteo, Buienradar.
 - Plugins: `/plugin` werkt niet in cloud-sessies (alleen in de terminal-CLI). Voor cloud: `enabledPlugins` (+ marketplace) in `.claude/settings.json`.
   ECC (affaan-m/ECC) is **niet** geïnstalleerd: Sem wilde het, advies was eerst doorlichten (groot, hooks, botst met zuinig werken).
@@ -94,7 +94,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   Hartslagdrift: `domain/decoupling.dart`. Afspreken-momenten: `community/best_moments_text.dart`.
 - Weerslim schema `domain/plan_swap.dart` (kaart in `planner/weather_smart_cards.dart`), vocht `domain/hydration.dart` + `activities/hydration_card.dart`, hond `dogModeProvider`
   (waarschuwingen 'dog'/'water' in `run_warnings.dart`), recordweer `domain/record_weather.dart` + `dashboard/record_weather_card.dart`.
-- GPS-kunst `domain/gps_art.dart` (vormknop in `routes/draw_route_screen.dart`), leeftijdsniveau `domain/age_grading.dart` +
+- GPS-kunst is uit de app gehaald (werkte niet; `domain/gps_art.dart` staat nog); i.p.v. daarvan 'Rondje op afstand' met richting
+  (N/O/Z/W → `route-generator` legt een driehoek, `_shared/directed_loop.ts`). Leeftijdsniveau `domain/age_grading.dart` +
   `data/services/age_grade_service.dart` (in `activities/records_screen.dart`), pijntjes `domain/pain_log.dart` + `profile/pain_screen.dart`
   (in notitie "Pijntje: <plek> <1-10>"), hartslagherstel `domain/hrr.dart` + `record/hrr_test_dialog.dart` + `data/services/hrr_store.dart`,
   Kadans-effect `data/services/kadans_effect_store.dart` + `activities/kadans_effect_row.dart` (badge 'wise').
@@ -114,15 +115,25 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Stukken `domain/segments.dart` + `data/services/segment_store.dart` + `activities/segments_screen.dart`. Runtitel `domain/run_title.dart`.
   Pijntjes-routine `domain/pain_routine.dart`. Samen-extra's (loopmaatjes, weddenschappen, loopgroepen): `community/together_screens.dart`,
   `data/services/together_service.dart`, SQL 0037. Snelkoppeling `runwise://app/moment` (`core/voice_shortcut.dart`, `android_extra/res/xml/shortcuts.xml`).
+- Hoogtemeters: `cleanElevationGain` in `domain/zones.dart` (mediaan+gemiddelde gladstrijken, klim vanaf 4–5 m) voor GPS live,
+  hoogtekaart en routeprofiel (`profileAscent`, alleen gladstrijken bij punten ≤ 150 m). Barometer ongewijzigd (stap 3 m).
+- Overpass (`data/services/poi_service.dart`): 2 servers tegelijk, 3e na 3 s, max 2 vragen per server, dubbele vragen samengevoegd;
+  verlichting vraagt alleen wegen mét `lit`-tag op.
+- Profielen (0038): foto in bucket `avatars` (`<uid>/<tijd>.jpg`), bio/plaats/favoriete afstand, `social_avatars2`, `social_profile_extra`,
+  melden `social_report_profile`, moderator `social_mod_photo`. App: `community/profile_edit_sheet.dart`, `runner_profile_screen.dart`.
+- Stappen van de maand (0038, `steps_submit`/`steps_board`): `community/steps_contest_screen.dart`, Health Connect `READ_STEPS`
+  (`SyncService.connectSteps/monthSteps`), alleen maandtotaal naar server. Ranglijst vrienden + per loopgroep.
+- Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
-- **Kadans-stem (TESTFASE, ElevenLabs gratis plan = niet commercieel):** edge function `tts` (geheimen `ELEVENLABS_API_KEY`, optioneel
-  `ELEVENLABS_VOICE_ID` standaard Berend `pb6qe8wKy786fK6M05tq`, `ELEVENLABS_MODEL` standaard `eleven_flash_v2_5`) → app
-  `data/services/kadans_voice.dart` (cache per zin op toestel, terugval op telefoonstem). Schakelaar + knop "Test de Kadans-stem"
-  (toont de oorzaak bij een fout) in de stemkeuze bij Opnemen. Reservestemmen in `tts`: Marvin, George. Na een fout 2 min pauze.
+- **Kadans-stem (TESTFASE, ElevenLabs gratis plan = niet commercieel):** edge function `tts` (geheim `ELEVENLABS_API_KEY`, optioneel
+  `ELEVENLABS_MODEL` standaard `eleven_flash_v2_5`). Vaste stemmenlijst `VOICES` in `tts` = `kadansVoices` in `data/services/kadans_voice.dart`:
+  Jamie `YxbOqEAPD1TsKmU3TFJz` (m, standaard; in Sems account), Marvin `XWw6BayktH5jsnELw9Bc` (m, in account), Roos `7qdUFMklKPaaAVMsBTBt`
+  (v) en Sanne `mNOlrB5V39qx4wQwSjG3` (v) — Roos/Sanne zijn bibliotheekstemmen: werken pas als Sem ze in "My Voices" zet. Berend is vervangen
+  (oude keuze → Jamie). Terugval alleen binnen hetzelfde geslacht, anders telefoonstem. Keuze + voorbeeldknop: `shared/kadans_voice_chooser.dart`
+  (introductie-stap "Kies je coachstem" + stemkeuze bij Opnemen). Cache per zin én stem op toestel. Na een fout 2 min pauze.
   **Nooit twee stemmen tegelijk:** `speak(..., fallback, stopFallback)` zet flutter_tts stil vóór het afspelen, een gestarte zin
-  valt niet meer terug, en `_configureTts` gebruikt `awaitSpeakCompletion(true)`. Sem meldde nog twee stemmen bij "beste looptijd
-  voorlezen"; de fix (commit 6da79f1) is nog niet door Sem bevestigd.
-  **Vóór de lancering vervangen of betaald plan nemen** (Sem wil dan een andere stem).
+  valt niet meer terug, en `_configureTts` gebruikt `awaitSpeakCompletion(true)`.
+  **Vóór de lancering betaald plan nemen** (of eigen stemmen).
 - Marketing (buiten de repo): Instagram **@kadans.app**. Instagram-skills (`/ig-reel`, `/ig-caption`, `/ig-plan` enz.) en
   `frontend-design` en `unslop-ui` (controle op AI-look, scanner: `devibe_scan.py` uit JCarterJohnson/vibecoded-design-tells) zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
@@ -145,7 +156,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Na KvK: bedrijfsgegevens (naam, adres, KvK-nummer) invullen in `site/voorwaarden.html` (en versie ophogen).
 - Play Console → verwijder-URL invullen: https://semdenhartog.github.io/Kandans/verwijderen.html
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
-- ElevenLabs-stem vóór de lancering vervangen of betaald plan nemen.
+- ElevenLabs: Roos en Sanne in "My Voices" zetten (anders werken de vrouwenstemmen niet); vóór de lancering betaald plan.
+- **Migratie 0038 live zetten** (Supabase vroeg om bevestiging; daarna pas merge naar main).
+- Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
 - Testen op telefoon: licht/donker, Vivoactive 5-meldingen, Strava oude runs/routes en upload, Samen (loopmaatjes, weddenschappen,
   loopgroepen, profielplaatje), valdetectie, oortjesknop, telefoonagenda, snelkoppeling "Wanneer lopen?", donker-route,
   stukken, live aanmoedigen, kantelen (landschap/medailles), widget, oefenfiguur (gouden tekenpop, schermtest `27b_oefenfiguren`).
