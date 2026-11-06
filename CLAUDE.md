@@ -47,7 +47,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   afrondingen 8/16/24 px, pil alleen voor `.btn` (gemarkeerd `unslop-ignore`), `button{font-family:inherit}`. Functies toont `site/app-coach.jpg`
   (uitsnede van `schermen-main/playstore/6_coach.png`). Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0039** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0040** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -130,6 +130,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   route naar bekend horloge in één tik (`sendRouteToWatch(full:)`); profiel-voortgang; applaus-pop + dubbel tikken; stappen: vandaag,
   afstand tot volgende, `StepsSync` (bij openen app, melding bij inhalen); lege Samen-schermen met uitnodigen; introductie 5 stappen;
   unslop deels: `RwRadius.s/m/l` overal, `ShineText` effen zonder eigen kleuren, gouden gloed neutraal (emoji nog niet nagelopen).
+- Ronde 6-11 nacht (11 punten + fotofix): vergrendelscherm tijdens run (kanaal `kadans/screen` in `KadansChannels.kt`,
+  `data/services/lock_screen_service.dart`, chip onder "Meer opties"); aftellen 3-2-1 met piep (`SoundService.beep`, `toneWav`) + tril;
+  tempo-alarm met bandbreedte (`PaceCoach.band`, pref `rec_pace_band`); route andersom (`domain/route_reverse.dart`); vlieg over de route
+  (`routes/route_flyover_screen.dart`, schuin via Transform); deel-link met `h=` (hoogtemeters) en `e=` (profiel) → `site/route.html`;
+  recordfeest + deelkaart (`record/record_celebration_screen.dart`, vanzelf na de samenvatting); reacties 👏🔥💪 (`social_react`,
+  `social_comments_of2`) en @vermeldingen (`social_mentions`, `MentionSync` bij openen app, melding kanaal 'samen'); groepsagenda
+  (`group_runs_*` in 0040, `TogetherService.groupRuns`, kaart AGENDA in `GroupScreen`); trekken om te vernieuwen in groepen, lopers, Doelen, Logboek.
+  Profielfoto-fout was: upsert zonder SELECT-regel op `storage.objects` → nu upsert uit + regel `avatars_own_select`, grens 2 MB.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -164,6 +172,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 6-11 nacht): profielfoto uploaden, vergrendelscherm tijdens run (aan/uit-knop), piep bij aftellen, tempo-alarm,
+  route andersom + vlieg over, gedeelde route-link (hoogte op de site), recordfeest + delen, reacties/@vermelding (melding bij openen app),
+  groepsagenda, trekken om te vernieuwen.
 - Testen op telefoon (nieuw 6-11): stemkeuze + voorbeeld (Daan/Bram/Emma/Fleur, na GOOGLE_TTS_KEY), hoogtemeters, rondje met richting,
   stappen van de maand, profielfoto/bio/melden, Kadans delen, laadtijd water/toilet/verlichting, en de 17 verbeteringen van 6-11 avond
   (stemvolume, tussentijden-kleuren, kaart op tempo, runtitel, verhaal-deelkaart, introductie, melding bij ingehaald).

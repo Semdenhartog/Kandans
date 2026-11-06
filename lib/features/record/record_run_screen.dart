@@ -1827,6 +1827,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                           if (x) SoundService.instance.play(RwSound.km).ignore();
                         },
                       ),
+                      if (_moreOpts)
                       FilterChip(
                         avatar: const Icon(Icons.lock_clock_outlined, size: 18),
                         label: Text(tr('Op vergrendelscherm')),
