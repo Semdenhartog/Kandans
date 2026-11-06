@@ -243,6 +243,52 @@ class SyncService {
     );
   }
 
+  // ---------- Stappen (voor de stappenwedstrijd van de maand) ----------
+
+  static const _stepsKey = 'health_steps_on';
+
+  Future<bool> stepsEnabled() async {
+    try {
+      return (await SharedPreferences.getInstance()).getBool(_stepsKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Vraagt toestemming om je stappen te lezen (van telefoon of horloge, via Health Connect).
+  Future<bool> connectSteps() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      await _configureHealth();
+      final ok = await _health.requestAuthorization(const [HealthDataType.STEPS], permissions: const [HealthDataAccess.READ]);
+      await (await SharedPreferences.getInstance()).setBool(_stepsKey, ok);
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> disconnectSteps() async {
+    try {
+      await (await SharedPreferences.getInstance()).setBool(_stepsKey, false);
+    } catch (_) {}
+  }
+
+  /// Totaal aantal stappen van de maand waarin [month] valt (t/m nu). Null als het niet kan.
+  /// Health Connect telt dubbele bronnen (telefoon + horloge) zelf maar één keer.
+  Future<int?> monthSteps(DateTime month) async {
+    if (!Platform.isAndroid || !await stepsEnabled() || !await HealthConsent.granted()) return null;
+    try {
+      await _configureHealth();
+      final start = DateTime(month.year, month.month);
+      final end = DateTime(month.year, month.month + 1);
+      final now = DateTime.now();
+      return await _health.getTotalStepsInInterval(start, now.isBefore(end) ? now : end);
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ---------- Slaap, rusthartslag en HRV (voor je klaar-score) ----------
 
   static const _bodyTypes = [

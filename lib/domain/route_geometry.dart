@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'geo.dart';
+import 'zones.dart' show cleanElevationGain;
 
 /// Een punt van het hoogteprofiel: afstand vanaf de start en hoogte.
 class ElevationSample {
@@ -254,20 +255,11 @@ List<ElevationSample> reverseProfile(List<ElevationSample> profile) {
   return [for (final s in profile.reversed) ElevationSample(total - s.meters, s.ele)];
 }
 
-/// Totaal aantal meters omhoog in een profiel (schommelingen < 1 m negeren).
+/// Totaal aantal meters omhoog in een profiel. De hoogtekaart telt bomen en gebouwen mee, dus eerst
+/// gladstrijken en pas een klim vanaf 3 m.
 double profileAscent(List<ElevationSample> profile) {
   if (profile.isEmpty) return 0;
-  var gain = 0.0;
-  var ref = profile.first.ele;
-  for (final s in profile.skip(1)) {
-    if (s.ele - ref >= 1) {
-      gain += s.ele - ref;
-      ref = s.ele;
-    } else if (ref - s.ele >= 1) {
-      ref = s.ele;
-    }
-  }
-  return gain;
+  return cleanElevationGain([for (final s in profile) s.ele], radius: 1, threshold: 3);
 }
 
 /// Privacyzone: haalt het begin en eind van een track weg (binnen [radius] meter

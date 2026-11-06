@@ -89,10 +89,36 @@ List<double> interpolateElevation(List<double> distance, List<int> idx, List<dou
   return out;
 }
 
-/// Hoogtemeters omhoog, kleine schommelingen (< 2 m) genegeerd.
-double elevationGain(List<double> ele) {
+/// Strijkt een hoogtereeks glad: eerst de mediaan (haalt losse uitschieters weg), dan het gemiddelde,
+/// over [radius] punten aan elke kant. Aan de randen krimpt het venster, zodat begin- en eindhoogte blijven kloppen.
+List<double> smoothElevation(List<double> ele, {int radius = 2}) {
+  if (ele.length < 3 || radius < 1) return List.of(ele);
+  final n = ele.length;
+  List<double> pass(List<double> src, bool median) => [
+        for (var i = 0; i < n; i++)
+          () {
+            final r = math.min(radius, math.min(i, n - 1 - i));
+            final win = src.sublist(i - r, i + r + 1);
+            if (median) {
+              win.sort();
+              return win[win.length ~/ 2];
+            }
+            return win.reduce((a, b) => a + b) / win.length;
+          }(),
+      ];
+  return pass(pass(ele, true), false);
+}
+
+/// Hoogtemeters omhoog uit een ruwe reeks (GPS of hoogtekaart): eerst gladstrijken, dan pas een klim vanaf
+/// [threshold] meter. GPS-hoogte schommelt 5–15 m en de hoogtekaart telt bomen en gebouwen mee; zonder dit
+/// kwam een vlak rondje op de Veluwe al snel op tientallen meters te veel.
+double cleanElevationGain(List<double> ele, {int radius = 2, double threshold = 4}) =>
+    elevationGain(smoothElevation(ele, radius: radius), threshold: threshold);
+
+/// Hoogtemeters omhoog, kleine schommelingen (< [threshold] m) genegeerd.
+double elevationGain(List<double> ele, {double threshold = 2}) {
   if (ele.isEmpty) return 0;
-  // Van dal naar top tellen; pas een klim als die minstens 2 m is (tegen ruis).
+  // Van dal naar top tellen; pas een klim als die minstens [threshold] m is (tegen ruis).
   var gain = 0.0;
   var low = ele.first, high = ele.first;
   var up = false;
@@ -100,14 +126,14 @@ double elevationGain(List<double> ele) {
     if (!up) {
       if (e < low) {
         low = e;
-      } else if (e - low >= 2) {
+      } else if (e - low >= threshold) {
         up = true;
         high = e;
       }
     } else {
       if (e > high) {
         high = e;
-      } else if (high - e >= 2) {
+      } else if (high - e >= threshold) {
         gain += high - low;
         up = false;
         low = e;

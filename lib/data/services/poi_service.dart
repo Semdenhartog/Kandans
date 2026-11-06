@@ -30,15 +30,47 @@ class PoiService {
     return 'poi_${h.toRadixString(16)}';
   }
 
-  Future<String> _ask(String url, String query) async {
-    final res = await _http
-        .post(Uri.parse(url), headers: {'User-Agent': 'Kadans/1.0 (nl.runwise.app)'}, body: {'data': query})
-        .timeout(const Duration(seconds: 25));
-    if (res.statusCode != 200) throw Exception('Overpass ${res.statusCode}');
-    // Controleer dat het echt JSON is (bij drukte stuurt Overpass soms een HTML-pagina).
-    parseOverpass(res.body);
-    return res.body;
+  /// Lopende vragen per server: Overpass staat maar 2 vragen tegelijk toe per telefoon *per server*.
+  /// Meer dan dat wacht in de rij op de server zelf (en duurt dan juist veel langer).
+  final _busy = <String, int>{};
+  final _waiting = <String, List<Completer<void>>>{};
+
+  Future<void> _slot(String url) async {
+    if ((_busy[url] ?? 0) < 2) {
+      _busy[url] = (_busy[url] ?? 0) + 1;
+      return;
+    }
+    final c = Completer<void>();
+    (_waiting[url] ??= []).add(c);
+    await c.future;
   }
+
+  void _release(String url) {
+    final q = _waiting[url];
+    if (q != null && q.isNotEmpty) {
+      q.removeAt(0).complete(); // de plek gaat direct door naar de volgende
+    } else {
+      _busy[url] = ((_busy[url] ?? 1) - 1).clamp(0, 2);
+    }
+  }
+
+  Future<String> _ask(String url, String query) async {
+    await _slot(url);
+    try {
+      final res = await _http
+          .post(Uri.parse(url), headers: {'User-Agent': 'Kadans/1.0 (nl.runwise.app)'}, body: {'data': query})
+          .timeout(const Duration(seconds: 18));
+      if (res.statusCode != 200) throw Exception('Overpass ${res.statusCode}');
+      // Controleer dat het echt JSON is (bij drukte stuurt Overpass soms een HTML-pagina).
+      parseOverpass(res.body);
+      return res.body;
+    } finally {
+      _release(url);
+    }
+  }
+
+  /// Dezelfde vraag die al onderweg is (bijv. scherm twee keer geopend) niet opnieuw stellen.
+  final _inFlight = <String, Future<String>>{};
 
   /// Straatverlichting langs een route (verlicht, onverlicht, onbekend in meters). Een maand bewaard.
   Future<({double lit, double unlit, double unknown})> lighting(String polyline) async {
@@ -52,14 +84,22 @@ class PoiService {
         return lightingAlong(track, parseLitWays(cached!.data! as String));
       } catch (_) {}
     }
-    final body = await _race(query);
-    OfflineCache.save(key, body).ignore();
-    return lightingAlong(track, parseLitWays(body));
+    try {
+      final body = await _race(query);
+      OfflineCache.save(key, body).ignore();
+      return lightingAlong(track, parseLitWays(body));
+    } catch (e) {
+      final old = await OfflineCache.load(key);
+      if (old?.data is String) return lightingAlong(track, parseLitWays(old!.data! as String));
+      rethrow;
+    }
   }
 
-  /// Eerst de snelste server; pas als die na een paar seconden niets zegt (of faalt) de volgende erbij.
-  /// Alles tegelijk vragen maakt het juist trager: Overpass laat maar 2 vragen tegelijk toe per telefoon.
-  Future<String> _race(String query) {
+  /// Twee verschillende servers tegelijk (elk heeft zijn eigen limiet, dus dat kost niets), de derde
+  /// erbij als die na 3 s nog niets hebben gezegd of als er een faalt. De snelste wint.
+  Future<String> _race(String query) => _inFlight[query] ??= _raceNow(query).whenComplete(() => _inFlight.remove(query));
+
+  Future<String> _raceNow(String query) {
     final done = Completer<String>();
     var started = 0, failed = 0;
     Object? lastError;
@@ -67,8 +107,6 @@ class PoiService {
     void start() {
       if (done.isCompleted || started >= _endpoints.length) return;
       final url = _endpoints[started++];
-      next?.cancel();
-      next = Timer(const Duration(seconds: 4), start);
       _ask(url, query).then((body) {
         if (!done.isCompleted) {
           next?.cancel();
@@ -78,6 +116,7 @@ class PoiService {
         lastError = e;
         failed++;
         if (failed == _endpoints.length && !done.isCompleted) {
+          next?.cancel();
           done.completeError(Exception('Gegevens langs de route konden niet worden geladen. ($lastError)'));
         } else {
           start(); // deze faalde: meteen de volgende proberen
@@ -86,9 +125,10 @@ class PoiService {
     }
 
     start();
+    start();
+    next = Timer(const Duration(seconds: 3), start);
     return done.future;
   }
-
 
   /// Straten, water en spoor rond een route, voor de kaart onder een poster. Twee maanden bewaard.
   Future<List<MapLine>> posterMap(String polyline) async {

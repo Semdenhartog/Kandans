@@ -14,7 +14,7 @@ class PrivacyBlock {
 }
 
 const privacyBlocks = <PrivacyBlock>[
-  PrivacyBlock.meta('Versie 1.5 · laatst bijgewerkt: 1 november 2026'),
+  PrivacyBlock.meta('Versie 1.6 · laatst bijgewerkt: 6 november 2026'),
   PrivacyBlock.paragraph('Kadans is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we verzamelen, waarom we dat doen en hoe je je rechten kunt uitoefenen.'),
   PrivacyBlock.heading('Wie zijn wij?'),
   PrivacyBlock.paragraph('Kadans is een app van Sem den Hartog, gevestigd in Barneveld. De verantwoordelijke voor de verwerking van je persoonsgegevens is Sem den Hartog.'),
@@ -51,6 +51,8 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.row('Weddenschappen en loopgroepen in Samen', 'Je tegenstander of groepsgenoten zien hoeveel kilometer je liep in die periode (alleen runs die je met Kadans opneemt of zelf toevoegt, nooit Strava-runs).'),
   PrivacyBlock.row('Posterbestelling (alleen als je een poster laat drukken): naam, bezorgadres, e-mailadres, het gekozen formaat en het drukbestand', 'Om je poster te laten drukken, te bezorgen en de bestelling te verwerken.'),
   PrivacyBlock.row('Wachtlijst of toezegging via de website: e-mailadres en (bij een toezegging) het gekozen pakket', 'Om je te laten weten wanneer je kunt meedoen, je een betaallink te sturen en na de lancering je code te mailen.'),
+  PrivacyBlock.row('Profiel in Samen (alleen wat je zelf invult): profielfoto, korte tekst over jezelf, plaats of regio en favoriete afstand', 'Zodat andere Samen-lopers zien wie je bent. Je foto staat op onze opslag en is zichtbaar voor andere lopers (geblokkeerde lopers niet). Lopers kunnen je profiel melden; na een paar meldingen verbergen we je foto. Een nieuwe foto of "Foto weghalen" wist de oude.'),
+  PrivacyBlock.row('Stappen uit Health Connect (alleen als je meedoet met de stappenwedstrijd)', 'Voor de ranglijst van de maand met je vrienden en loopgroepen. We bewaren alleen je totaal per maand, geen stappen per dag, tijden of plekken. Je volgers en groepsgenoten zien dit totaal.'),
   PrivacyBlock.row('Samen en community (alleen als je meedoet): bijnaam, vriendcode, wie je volgt en wie jou volgt, berichten en reacties, applaus, meldingen en blokkades', 'Voor ranglijsten, volgen, gesprekken en reacties met andere lopers. Anderen zien alleen je bijnaam, nooit je naam of e-mailadres. Stop je met Samen, dan verwijderen we dit.'),
   PrivacyBlock.row('Runs die je zelf deelt met volgers of iedereen: titel, datum (zonder tijdstip), afstand, tijd, tempo, hoogtemeters en de route zonder begin en eind (privacyzone)', 'Zodat je volgers (of alle leden, als je dat kiest) je run kunnen zien en er applaus en reacties op kunnen geven. Alleen als je per run kiest om te delen; hartslag en andere gezondheidsgegevens delen we nooit, runs uit Strava kunnen niet gedeeld worden. Je kunt het delen altijd stoppen.'),
   PrivacyBlock.row('Pauze (alleen als je die zelf aanzet): reden (blessure, ziek, vakantie of rust) en de periode', 'Om tijdens je pauze geen loopherinneringen te sturen en je reeks niet te laten breken. Dit staat alleen op je telefoon. Stel je tijdens een pauze een vraag aan de coach, dan gaan de reden en de periode mee, zodat de coach je geen trainingsdruk geeft.'),

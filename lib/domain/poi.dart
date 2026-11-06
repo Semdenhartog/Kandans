@@ -59,7 +59,7 @@ String overpassQuery(List<LatLng> track, {double padDegrees = 0.003}) {
     e = math.max(e, p.lon);
   }
   final bbox = [s - padDegrees, w - padDegrees, n + padDegrees, e + padDegrees].map((v) => v.toStringAsFixed(5)).join(',');
-  return '[out:json][timeout:20];('
+  return '[out:json][timeout:15];('
       'node["amenity"="drinking_water"]($bbox);'
       'node["amenity"="water_point"]($bbox);'
       'node["drinking_water"="yes"]["amenity"!="toilets"]($bbox);'

@@ -1,5 +1,6 @@
 import { checkQuota } from "../_shared/quota.ts";
 import { decodePolyline, inferSurface } from "../_shared/surface.ts";
+import { directedLoopWaypoints } from "../_shared/directed_loop.ts";
 // Edge Function: route-generator
 // Maakt rondjes van een gewenste lengte vanaf een startpunt, via openrouteservice
 // (gratis, op basis van OpenStreetMap). De app kiest daarna het rondje met de beste wind.
@@ -173,6 +174,34 @@ Deno.serve(async (req) => {
   }
   if (!Number.isFinite(distance) || distance < 1000 || distance > 50000) {
     return json(400, { error: "Kies een afstand tussen 1 en 50 km." });
+  }
+
+  // Gekozen richting (0 = noord, 90 = oost, ...): zelf een driehoek die kant op leggen en ORS de paden laten zoeken.
+  // Wijkt de lengte meer dan 15% af, dan één keer opnieuw met geschaalde zijden.
+  const dir = body.direction == null ? NaN : Number(body.direction);
+  if (Number.isFinite(dir)) {
+    const variants = [[0, 60], [-25, 50], [25, 70], [-12, 80], [12, 45]].slice(0, count);
+    try {
+      const one = async (turn: number, spread: number) => {
+        let target = distance;
+        let r = await path(key, directedLoopWaypoints(lat, lon, target, dir + turn, spread));
+        if (r && r.distance_m > 0 && Math.abs(r.distance_m - distance) / distance > 0.15) {
+          target = target * (distance / r.distance_m);
+          r = (await path(key, directedLoopWaypoints(lat, lon, target, dir + turn, spread))) ?? r;
+        }
+        return r;
+      };
+      const results = await Promise.all(variants.map(([t, sp]) => one(t, sp)));
+      const routes = results.filter((r) => r && r.coordinates.length > 3);
+      if (routes.length === 0) return json(502, { error: "Die kant op lukte geen rondje. Kies een andere richting of 'maakt niet uit'." });
+      return json(200, { routes });
+    } catch (e) {
+      if (e instanceof Error && e.message === "rate_limit") {
+        return json(429, { error: "Het is even druk. Probeer het over een minuut opnieuw." });
+      }
+      console.error("route-generator direction failed", e instanceof Error ? e.message : e);
+      return json(502, { error: "Routes maken is niet gelukt. Probeer het later opnieuw." });
+    }
   }
 
   // Verschillende vormen proberen: andere 'seed' en aantal tussenpunten.

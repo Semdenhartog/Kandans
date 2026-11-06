@@ -15,6 +15,7 @@ import '../planner/roster_screen.dart' show openRosterScreen;
 import '../routes/watch_export.dart' show WatchBrand, WatchBrandInfo, saveWatchBrand;
 import '../../core/i18n.dart';
 import '../../shared/language_picker.dart';
+import '../../shared/kadans_voice_chooser.dart';
 
 const _doneKey = 'onboarding_done_v1';
 
@@ -85,6 +86,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _asking = false;
   String? _locationResult;
   WatchBrand? _brand;
+  bool _voicePicked = false;
 
   @override
   void dispose() {
@@ -270,6 +272,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           SizedBox(height: 8),
           TextButton(onPressed: _next, child: Text(tr('Later kiezen'))),
+        ],
+      ),
+      _Page(
+        icon: Icons.record_voice_over_outlined,
+        title: tr('Kies je coachstem'),
+        text: tr('Deze stem praat tijdens het lopen: tempo, afstand en afslagen. Tik op ▶ om een kort voorbeeld te horen. '
+            'Je wisselt later altijd bij Opnemen → Stem.'),
+        children: [
+          KadansVoiceChooser(onPicked: (_) => setState(() => _voicePicked = true)),
+          SizedBox(height: 4),
+          FilledButton(onPressed: _next, child: Text(_voicePicked ? tr('Verder') : tr('Later kiezen'))),
         ],
       ),
       _Page(

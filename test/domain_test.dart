@@ -1455,6 +1455,13 @@ void main() {
       expect(alt[5], closeTo(12.5, 0.01));
       expect(elevationGain(alt), closeTo(25, 0.5));
       expect(elevationGain([10, 11, 10, 11, 10]), 0);
+      // Vlak rondje met GPS-ruis van ±6 m: na gladstrijken (bijna) geen hoogtemeters.
+      final noisy = [for (var i = 0; i < 600; i++) 20.0 + ((i * 7919) % 13 - 6)];
+      expect(elevationGain(noisy), greaterThan(300)); // zo telde het vroeger
+      expect(cleanElevationGain(noisy, radius: 10, threshold: 5), lessThan(10));
+      // Een echte heuvel van 30 m blijft wel staan.
+      final hill = [for (var i = 0; i <= 200; i++) 10.0 + 30 * (i <= 100 ? i / 100 : (200 - i) / 100)];
+      expect(cleanElevationGain(hill, radius: 10, threshold: 5), closeTo(30, 3));
     });
 
     test('tempoplan komt precies op de doeltijd uit', () {

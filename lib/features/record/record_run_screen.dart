@@ -56,6 +56,7 @@ import '../../shared/permission_primer.dart';
 import '../../shared/rolling_text.dart';
 import '../../shared/segmented.dart';
 import '../../shared/widgets.dart';
+import '../../shared/kadans_voice_chooser.dart';
 import '../routes/route_map.dart' show LiveTrackMap;
 import '../routes/turn_list_card.dart' show TurnArrow;
 import 'interval_picker.dart';
@@ -3165,7 +3166,9 @@ class _VoicePickerState extends State<_VoicePicker> {
           if (v) _test();
         },
       ),
-      if (_kadans)
+      if (_kadans) ...[
+        const SizedBox(height: 4),
+        const KadansVoiceChooser(),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
@@ -3174,6 +3177,7 @@ class _VoicePickerState extends State<_VoicePicker> {
             onPressed: _test,
           ),
         ),
+      ],
       const Divider(height: 1),
       ListTile(
         contentPadding: EdgeInsets.zero,

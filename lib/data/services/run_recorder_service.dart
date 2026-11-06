@@ -16,7 +16,7 @@ import '../../domain/guided_runs.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/run_markers.dart';
-import '../../domain/zones.dart' show elevationGain;
+import '../../domain/zones.dart' show cleanElevationGain;
 import '../../domain/run_recorder.dart';
 import '../../domain/route_turns.dart';
 import '../../domain/route_heads_up.dart';
@@ -1183,7 +1183,8 @@ class RunRecorderService {
     final baro = r.baroGain;
     if (baro != null) return _gpsGain = baro;
     final alt = [for (final x in r.samples) if (x.alt != null) x.alt!];
-    return _gpsGain = alt.length < 10 ? null : elevationGain(alt);
+    // GPS-hoogte is grof: ~20 s gladstrijken en pas vanaf 5 m een klim tellen.
+    return _gpsGain = alt.length < 30 ? null : cleanElevationGain(alt, radius: 10, threshold: 5);
   }
 
   /// Markering zetten op je huidige plek (met eventueel een foto die al op de telefoon staat).

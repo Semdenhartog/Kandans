@@ -13,11 +13,12 @@ List<LatLng> sampleTrack(RouteTrack t, {double every = 120, int max = 110}) {
   return [for (var m = 0.0; m <= t.length; m += step) t.at(m)];
 }
 
-/// Overpass-vraag: alle wegen en paden binnen 20 m van de route, met hun vorm.
-/// Lichter dan voorheen (minder punten, kleinere straal), zodat de server sneller antwoordt.
+/// Overpass-vraag: alleen wegen en paden binnen 20 m van de route die een `lit`-tag hebben, met hun vorm.
+/// Wegen zonder `lit` tellen toch als "onbekend"; door ze niet op te halen is het antwoord vaak 5–10× kleiner
+/// en is de server veel sneller klaar.
 String litQuery(List<LatLng> samples) {
   final coords = samples.map((p) => '${p.lat.toStringAsFixed(5)},${p.lon.toStringAsFixed(5)}').join(',');
-  return '[out:json][timeout:20];way["highway"](around:20,$coords);out tags geom 1500;';
+  return '[out:json][timeout:15];way["highway"]["lit"](around:20,$coords);out tags geom 800;';
 }
 
 class LitWay {

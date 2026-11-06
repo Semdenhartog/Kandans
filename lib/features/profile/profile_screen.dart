@@ -17,7 +17,6 @@ import '../../domain/performance_model.dart';
 import '../../data/services/offline_cache.dart';
 import '../../domain/badges.dart' show computeBadges;
 import '../../shared/widgets.dart';
-import '../challenges/invite_card.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../activities/badges_screen.dart';
 import 'appearance_tile.dart';
@@ -42,6 +41,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/config.dart';
 import 'health_consent_tile.dart';
 import '../../shared/nav_buttons.dart';
+import 'share_app_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -279,7 +279,7 @@ class ProfileScreen extends ConsumerWidget {
                 ListTile(
                   leading: TileIcon(Icons.favorite_border, color: RwColors.accent),
                   title: Text(tr('Vertel een vriend over Kadans')),
-                  subtitle: Text(tr('Stuur een gouden uitnodiging met een link naar de app')),
+                  subtitle: Text(tr('Kies een mooie kaart: bericht of verhaal, met je eigen cijfers')),
                   // Luxe kaart met link; zit je in Samen, dan voegt de link je ook meteen als vriend toe.
                   onTap: () async {
                     String? code;
@@ -287,7 +287,8 @@ class ProfileScreen extends ConsumerWidget {
                       code = (await ref.read(communityServiceProvider).status()).friendCode;
                     } catch (_) {}
                     final p = ref.read(profileProvider).value;
-                    await shareAppInvite(name: p == null || p.displayName == 'loper' ? '' : p.displayName, friendCode: code);
+                    if (!context.mounted) return;
+                    openShareApp(context, name: p == null || p.displayName == 'loper' ? '' : p.displayName, friendCode: code);
                   },
                 ),
                 Divider(height: 1, indent: 56),

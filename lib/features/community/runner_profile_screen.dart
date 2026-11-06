@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'avatar_picker.dart';
-import 'runner_avatar.dart' show ProfileCover;
+import '../../data/services/community_feed_service.dart' show communityFeedServiceProvider;
+import 'profile_edit_sheet.dart';
+import 'runner_avatar.dart' show ProfileCover, AvatarCache;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +27,7 @@ class RunnerProfileScreen extends ConsumerStatefulWidget {
 
 class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
   RunnerProfile? _profile;
+  ProfileExtra _extra = const ProfileExtra();
   List<SharedRun> _runs = const [];
   Object? _error;
   bool _loading = true;
@@ -43,9 +45,12 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
     try {
       final p = await _svc.profile(widget.nickname);
       final runs = p.canSeeRuns ? await _svc.feed(nickname: p.nickname) : const <SharedRun>[];
+      // Extra's (0038) zijn mooi meegenomen, maar mogen het profiel niet tegenhouden.
+      final extra = await _svc.profileExtra(p.nickname).catchError((Object _) => const ProfileExtra());
       if (!mounted) return;
       setState(() {
         _profile = p;
+        _extra = extra;
         _runs = runs;
         _error = null;
         _loading = false;
@@ -89,13 +94,65 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
     }
   }
 
+  Future<void> _menu(String action) async {
+    final p = _profile;
+    if (p == null) return;
+    try {
+      if (action == 'report') {
+        final reason = await _askReason();
+        if (reason == null) return;
+        await _svc.reportProfile(p.nickname, reason);
+        if (mounted) showMessage(context, tr('Bedankt, we kijken ernaar. Je kunt deze loper ook blokkeren.'));
+      } else if (action == 'block') {
+        final ok = await confirmDialog(context,
+            title: trf('{naam} blokkeren?', {'naam': p.nickname}),
+            message: tr('Jullie zien elkaars profiel, foto en runs niet meer, en volgen elkaar niet meer.'),
+            confirmLabel: tr('Blokkeren'));
+        if (!ok) return;
+        await ref.read(communityFeedServiceProvider).block(p.nickname);
+        AvatarCache.instance.forget(p.nickname);
+        if (mounted) Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) showMessage(context, e.toString().replaceFirst('Exception: ', ''), error: true);
+    }
+  }
+
+  Future<String?> _askReason() => showModalBottomSheet<String>(
+        context: context,
+        showDragHandle: true,
+        builder: (ctx) => SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            for (final r in const ['Ongepaste foto', 'Nep-profiel of iemand anders', 'Beledigende tekst', 'Spam of reclame'])
+              ListTile(title: Text(tr(r)), onTap: () => Navigator.pop(ctx, r)),
+          ]),
+        ),
+      );
+
+  Future<void> _edit(RunnerProfile p) async {
+    final saved = await openProfileEditor(context, p.nickname, _extra);
+    if (saved && mounted) _load();
+  }
+
   void _replace(SharedRun r) => setState(() => _runs = [for (final x in _runs) x.id == r.id ? r : x]);
 
   @override
   Widget build(BuildContext context) {
     final p = _profile;
     return Scaffold(
-      appBar: AppBar(title: Text(p?.nickname ?? widget.nickname)),
+      appBar: AppBar(
+        title: Text(p?.nickname ?? widget.nickname),
+        actions: [
+          if (p != null && !p.isMe)
+            PopupMenuButton<String>(
+              onSelected: _menu,
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'report', child: Text(tr('Profiel of foto melden'))),
+                PopupMenuItem(value: 'block', child: Text(trf('{naam} blokkeren', {'naam': p.nickname}))),
+              ],
+            ),
+        ],
+      ),
       body: _loading
           ? LoadingView(cards: 2)
           : _error != null || p == null
@@ -170,13 +227,13 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
-                onPressed: () => openAvatarPicker(context, p.nickname),
-                icon: Icon(Icons.brush_outlined, size: 18),
-                label: Text(tr('Plaatje en omslag')),
+                onPressed: () => _edit(p),
+                icon: Icon(Icons.edit_outlined, size: 18),
+                label: Text(tr('Profiel bewerken')),
               ),
             ),
           Row(children: [
-            RunnerAvatar(p.nickname, size: 64),
+            RunnerAvatar(p.nickname, size: 76),
             SizedBox(width: 16),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -198,6 +255,36 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
               ]),
             ),
           ]),
+          if ((_extra.bio ?? '').isNotEmpty) ...[
+            SizedBox(height: 12),
+            Text(_extra.bio!, style: TextStyle(height: 1.4)),
+          ],
+          if (_extra.homeArea != null || _extra.favDistance != null || _extra.memberSince != null) ...[
+            SizedBox(height: 10),
+            Wrap(spacing: 14, runSpacing: 6, children: [
+              if (_extra.homeArea != null) _Fact(Icons.place_outlined, _extra.homeArea!),
+              if (_extra.favDistance != null) _Fact(Icons.flag_outlined, tr(favDistanceLabels[_extra.favDistance] ?? '')),
+              if (_extra.memberSince != null)
+                _Fact(Icons.event_outlined, trf('Sinds {datum}', {'datum': '${_monthNames[_extra.memberSince!.month - 1]} ${_extra.memberSince!.year}'})),
+            ]),
+          ],
+          if (p.isMe && _extra.bio == null && _extra.homeArea == null && _extra.favDistance == null) ...[
+            SizedBox(height: 10),
+            Text(tr('Vertel iets over jezelf: tik op "Profiel bewerken" voor een foto, bio en je favoriete afstand.'),
+                style: TextStyle(color: RwColors.muted, fontSize: 13)),
+          ],
+          if (_extra.yearKm != null) ...[
+            SizedBox(height: 14),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(color: RwColors.accent.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(16)),
+              child: Row(children: [
+                _Stat(value: _extra.monthKm?.toStringAsFixed(1).replaceAll('.', ',') ?? '–', label: tr('km deze maand')),
+                _Stat(value: _extra.yearKm!.round().toString(), label: tr('km dit jaar')),
+                _Stat(value: _extra.monthSteps == null ? '–' : _thousands(_extra.monthSteps!), label: tr('stappen deze maand')),
+              ]),
+            ),
+          ],
           SizedBox(height: 16),
           Row(children: [
             _Count(value: p.runs, label: tr('Runs')),
@@ -242,5 +329,45 @@ class _Count extends StatelessWidget {
             ]),
           ),
         ),
+      );
+}
+
+const _monthNames = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+
+String _thousands(int n) {
+  final t = n.toString();
+  final b = StringBuffer();
+  for (var i = 0; i < t.length; i++) {
+    if (i > 0 && (t.length - i) % 3 == 0) b.write('.');
+    b.write(t[i]);
+  }
+  return b.toString();
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact(this.icon, this.text);
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 16, color: RwColors.accent),
+        SizedBox(width: 4),
+        Text(text, style: TextStyle(color: RwColors.muted, fontSize: 13)),
+      ]);
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat({required this.value, required this.label});
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Column(children: [
+          Text(value, style: RwText.number.copyWith(fontSize: 20)),
+          SizedBox(height: 2),
+          Text(label, textAlign: TextAlign.center, style: RwText.label),
+        ]),
       );
 }

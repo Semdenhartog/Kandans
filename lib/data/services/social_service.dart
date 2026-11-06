@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -146,6 +148,59 @@ class RunnerProfile {
       );
 }
 
+/// Extra's op een profiel (0038): bio, plaats, favoriete afstand en cijfers (alleen als je de runs mag zien).
+class ProfileExtra {
+  const ProfileExtra({this.bio, this.homeArea, this.favDistance, this.memberSince, this.yearKm, this.monthKm, this.monthSteps, this.photoHidden = false});
+  final String? bio;
+  final String? homeArea;
+
+  /// '5k', '10k', 'half', 'marathon', 'trail' of 'ultra'.
+  final String? favDistance;
+  final DateTime? memberSince;
+  final double? yearKm;
+  final double? monthKm;
+  final int? monthSteps;
+
+  /// Alleen voor jezelf: je foto is na meldingen verborgen.
+  final bool photoHidden;
+
+  factory ProfileExtra.fromJson(Map<String, dynamic> j) => ProfileExtra(
+        bio: j['bio'] as String?,
+        homeArea: j['home_area'] as String?,
+        favDistance: j['fav_distance'] as String?,
+        memberSince: j['member_since'] == null ? null : DateTime.tryParse(j['member_since'] as String),
+        yearKm: (j['year_km'] as num?)?.toDouble(),
+        monthKm: (j['month_km'] as num?)?.toDouble(),
+        monthSteps: (j['month_steps'] as num?)?.toInt(),
+        photoHidden: j['photo_hidden'] == true,
+      );
+}
+
+const favDistanceLabels = {
+  '5k': '5 km',
+  '10k': '10 km',
+  'half': 'Halve marathon',
+  'marathon': 'Marathon',
+  'trail': 'Trail',
+  'ultra': 'Ultra',
+};
+
+/// Plek op de stappenranglijst.
+class StepEntry {
+  const StepEntry({required this.nickname, required this.isMe, required this.steps, required this.rank});
+  final String nickname;
+  final bool isMe;
+  final int steps;
+  final int rank;
+
+  factory StepEntry.fromJson(Map<String, dynamic> j) => StepEntry(
+        nickname: j['nickname'] as String? ?? 'loper',
+        isMe: j['is_me'] == true,
+        steps: (j['steps'] as num?)?.toInt() ?? 0,
+        rank: (j['rank'] as num?)?.toInt() ?? 0,
+      );
+}
+
 /// Een loper in een lijst (volgers, volgend, verzoeken, zoeken).
 class RunnerItem {
   const RunnerItem({required this.nickname, this.state = FollowState.none, this.followsMe = false});
@@ -275,6 +330,60 @@ class SocialService {
   Future<void> report(String kind, int id, String reason) =>
       _rpc<dynamic>('social_report', {'p_kind': kind, 'p_id': id, 'p_reason': reason});
   Future<void> delete(String kind, int id) => _rpc<dynamic>('social_delete', {'p_kind': kind, 'p_id': id});
+
+  // ---- Profiel (0038) ----
+
+  Future<ProfileExtra> profileExtra(String nickname) async {
+    final rows = _rows(await _rpc<dynamic>('social_profile_extra', {'p_nickname': nickname}));
+    return rows.isEmpty ? const ProfileExtra() : ProfileExtra.fromJson(rows.first);
+  }
+
+  Future<void> setProfile({String? bio, String? homeArea, String? favDistance}) =>
+      _rpc<dynamic>('social_set_profile', {'p_bio': bio, 'p_area': homeArea, 'p_fav': favDistance});
+
+  /// Zet een (al verkleinde) foto in de eigen map en legt hem vast. Geeft het pad terug.
+  Future<String> uploadPhoto(Uint8List jpg) async {
+    final uid = _db.auth.currentUser?.id;
+    if (uid == null) throw Exception('Log eerst in.');
+    // Elke keer een nieuwe naam, zodat telefoons niet de oude foto uit hun cache blijven tonen.
+    final path = '$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    await _db.storage.from('avatars').uploadBinary(path, jpg,
+        fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true, cacheControl: '604800'));
+    final old = await _rpc<String?>('social_set_photo', {'p_path': path});
+    if (old != null && old != path) _db.storage.from('avatars').remove([old]).ignore();
+    return path;
+  }
+
+  Future<void> removePhoto() async {
+    final old = await _rpc<String?>('social_set_photo', {'p_path': null});
+    if (old != null) _db.storage.from('avatars').remove([old]).ignore();
+  }
+
+  /// Openbare link van een foto in de bucket `avatars`.
+  String photoUrl(String path) => _db.storage.from('avatars').getPublicUrl(path);
+
+  Future<void> reportProfile(String nickname, String reason) =>
+      _rpc<dynamic>('social_report_profile', {'p_nickname': nickname, 'p_reason': reason});
+
+  // ---- Stappenwedstrijd (0038) ----
+
+  Future<void> submitSteps(DateTime month, int steps) => _rpc<dynamic>('steps_submit', {
+        'p_month': '${month.year}-${month.month.toString().padLeft(2, '0')}-01',
+        'p_steps': steps,
+      });
+
+  /// [scope]: 'friends' of 'group' (met [groupId]).
+  Future<List<StepEntry>> stepsBoard(String scope, {int? groupId, DateTime? month}) async {
+    final m = month ?? DateTime.now();
+    return [
+      for (final r in _rows(await _rpc<dynamic>('steps_board', {
+        'p_scope': scope,
+        'p_group': groupId,
+        'p_month': '${m.year}-${m.month.toString().padLeft(2, '0')}-01',
+      })))
+        StepEntry.fromJson(r),
+    ];
+  }
 }
 
 final socialServiceProvider = Provider<SocialService>((ref) => SocialService(ref.watch(supabaseProvider)));

@@ -10,10 +10,13 @@ import '../../shared/art/landscape.dart';
 /// Profielplaatje in Samen: een icoon in een eigen kleur met een gouden rand.
 /// Zonder keuze: de eerste letter van de bijnaam.
 class AvatarStyle {
-  const AvatarStyle({this.icon, this.color, this.cover});
+  const AvatarStyle({this.icon, this.color, this.cover, this.photoUrl});
   final String? icon;
   final int? color;
   final String? cover;
+
+  /// Eigen profielfoto (0038). Gaat voor het icoon; verborgen na meldingen.
+  final String? photoUrl;
 }
 
 const avatarIcons = <String, IconData>{
@@ -68,8 +71,17 @@ class AvatarCache {
     return c.future;
   }
 
+  /// Opnieuw ophalen (bijv. na een nieuwe foto).
+  void forget(String nick) {
+    _known.remove(nick.toLowerCase());
+    changed.value++;
+  }
+
   void setMine(String nick, AvatarStyle s) {
-    _known[nick.toLowerCase()] = s;
+    final old = _known[nick.toLowerCase()];
+    // Icoon/kleur/omslag gewijzigd: een eigen foto blijft gewoon staan.
+    _known[nick.toLowerCase()] =
+        AvatarStyle(icon: s.icon, color: s.color, cover: s.cover, photoUrl: s.photoUrl ?? old?.photoUrl);
     changed.value++;
   }
 
@@ -78,13 +90,22 @@ class AvatarCache {
     final batch = Map.of(_waiting);
     _waiting.clear();
     final found = <String, AvatarStyle>{};
+    final db = Supabase.instance.client;
     try {
-      final rows = await Supabase.instance.client.rpc('social_avatars', params: {'p_nicknames': batch.keys.toList()}) as List;
+      List rows;
+      try {
+        rows = await db.rpc('social_avatars2', params: {'p_nicknames': batch.keys.toList()}) as List;
+      } on PostgrestException {
+        // Server nog zonder 0038: de oude functie (zonder foto).
+        rows = await db.rpc('social_avatars', params: {'p_nicknames': batch.keys.toList()}) as List;
+      }
       for (final r in rows.cast<Map<String, dynamic>>()) {
+        final photo = r['photo_path'] as String?;
         found[(r['nickname'] as String).toLowerCase()] = AvatarStyle(
           icon: r['avatar_icon'] as String?,
           color: (r['avatar_color'] as num?)?.toInt(),
           cover: r['cover'] as String?,
+          photoUrl: photo == null ? null : db.storage.from('avatars').getPublicUrl(photo),
         );
       }
     } catch (_) {
@@ -135,7 +156,16 @@ class _RunnerAvatarState extends State<RunnerAvatar> {
   }
 
   void _refresh() {
-    if (mounted) setState(() => _s = AvatarCache.instance.peek(widget.name) ?? _s);
+    if (!mounted || widget.style != null) return;
+    final known = AvatarCache.instance.peek(widget.name);
+    if (known != null) {
+      setState(() => _s = known);
+    } else if (widget.name.isNotEmpty) {
+      // Vergeten (nieuwe foto): opnieuw ophalen.
+      AvatarCache.instance.get(widget.name).then((s) {
+        if (mounted) setState(() => _s = s);
+      }).catchError((Object _) {});
+    }
   }
 
   void _fetch() {
@@ -169,7 +199,21 @@ class _RunnerAvatarState extends State<RunnerAvatar> {
               ? LinearGradient(colors: [RwColors.accentLight, RwColors.accentDeep])
               : RadialGradient(center: const Alignment(-0.3, -0.4), colors: [Color.lerp(base, Colors.white, 0.25)!, base, Color.lerp(base, Colors.black, 0.3)!]),
         ),
-        child: icon != null
+        clipBehavior: s?.photoUrl != null ? Clip.antiAlias : Clip.none,
+        child: s?.photoUrl != null
+            ? Image.network(
+                s!.photoUrl!,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
+                // Foto (nog) niet te laden: dan gewoon het icoon of de letter.
+                errorBuilder: (_, _, _) => icon != null
+                    ? Icon(icon, size: size * 0.5, color: Colors.white)
+                    : Text(widget.name.isEmpty ? '?' : widget.name.characters.first.toUpperCase(),
+                        style: TextStyle(color: base == null ? RwColors.accentDark : Colors.white, fontWeight: FontWeight.w800, fontSize: size * 0.4)),
+              )
+            : icon != null
             ? Icon(icon, size: size * 0.5, color: Colors.white)
             : Text(widget.name.isEmpty ? '?' : widget.name.characters.first.toUpperCase(),
                 style: TextStyle(color: base == null ? RwColors.accentDark : Colors.white, fontWeight: FontWeight.w800, fontSize: size * 0.4)),

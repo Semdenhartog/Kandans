@@ -17,6 +17,7 @@ import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
 import 'runner_avatar.dart';
 import 'runner_profile_screen.dart';
+import 'steps_contest_screen.dart' show openStepsContest;
 
 void openBuddies(BuildContext c) => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const BuddiesScreen()));
 void openBets(BuildContext c) => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const BetsScreen()));
@@ -33,6 +34,7 @@ class TogetherChips extends StatelessWidget {
         ActionChip(avatar: const Icon(Icons.people_alt_outlined, size: 18), label: Text(tr('Loopmaatjes')), onPressed: () => openBuddies(context)),
         ActionChip(avatar: const Icon(Icons.handshake_outlined, size: 18), label: Text(tr('Weddenschappen')), onPressed: () => openBets(context)),
         ActionChip(avatar: const Icon(Icons.groups_outlined, size: 18), label: Text(tr('Loopgroepen')), onPressed: () => openGroups(context)),
+        ActionChip(avatar: const Icon(Icons.directions_walk, size: 18), label: Text(tr('Stappen van de maand')), onPressed: () => openStepsContest(context)),
       ]);
 }
 

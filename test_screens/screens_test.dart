@@ -62,6 +62,8 @@ import 'package:runwise/data/services/community_feed_service.dart';
 import 'package:runwise/data/services/social_service.dart';
 import 'package:runwise/features/community/people_screen.dart';
 import 'package:runwise/features/community/runner_profile_screen.dart';
+import 'package:runwise/features/community/steps_contest_screen.dart';
+import 'package:runwise/features/profile/share_app_screen.dart';
 import 'package:runwise/features/community/share_to_feed.dart';
 import 'package:runwise/domain/privacy_zone.dart';
 import 'package:runwise/domain/run_pause.dart';
@@ -536,9 +538,12 @@ void main() {
         activityStreamsProvider('spike1').overrideWith((ref) async => _spikeStreams),
       ]));
   testWidgets('18i lopers groot', (t) => _shot(t, '18i_lopers_groot', const PeopleScreen(), height: 1800, textScale: 1.6));
+  testWidgets('18s stappen van de maand', (t) => _shot(t, '18s_stappen_maand', const StepsContestScreen(preview: _stepsSample), height: 1500));
+  testWidgets('18t kadans delen', (t) => _shot(t, '18t_kadans_delen', const ShareAppScreen(name: 'Sem'), height: 1500));
   testWidgets('18j profiel groot', (t) => _shot(t, '18j_profiel_groot', const RunnerProfileScreen(nickname: 'Anne'), height: 2400, textScale: 1.6));
   testWidgets('19 strava-archief', (t) => _shot(t, '19_strava_archief', const StravaArchiveScreen(), height: 1900));
   testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 3), height: 915));
+  testWidgets('14e rondleiding stem', (t) => _shot(t, '14e_rondleiding_stem', const OnboardingScreen(initialPage: 6), height: 915));
   testWidgets('15 na je run', (t) {
     final st = RunStreams.fromJson(_streams)!;
     return _shot(
@@ -744,6 +749,20 @@ class _FakeSocial implements SocialService {
   Future<List<RunnerItem>> search(String query) async => const [];
 
   @override
+  Future<ProfileExtra> profileExtra(String nickname) async => ProfileExtra(
+        bio: 'Loop elke zondag over de hei. Op weg naar mijn eerste halve marathon.',
+        homeArea: 'Ede',
+        favDistance: 'half',
+        memberSince: DateTime(2026, 3, 1),
+        yearKm: 812,
+        monthKm: 64.3,
+        monthSteps: 184230,
+      );
+
+  @override
+  Future<List<StepEntry>> stepsBoard(String scope, {int? groupId, DateTime? month}) async => _stepsSample;
+
+  @override
   Future<RunnerProfile> profile(String nickname) async =>
       RunnerProfile(nickname: nickname, followers: 38, following: 41, runs: 1, state: FollowState.accepted, followsMe: true, approveFollowers: true);
 
@@ -830,3 +849,10 @@ class _ExerciseGallery extends StatelessWidget {
         ),
       );
 }
+
+const _stepsSample = [
+  StepEntry(nickname: 'Anne', isMe: false, steps: 241870, rank: 1),
+  StepEntry(nickname: 'Sem uit Utrecht', isMe: true, steps: 198400, rank: 2),
+  StepEntry(nickname: 'Dijkloper', isMe: false, steps: 150220, rank: 3),
+  StepEntry(nickname: 'Loper Lisa', isMe: false, steps: 96010, rank: 4),
+];

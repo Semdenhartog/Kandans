@@ -41,7 +41,7 @@ class ElevationService {
     // Gemeten met de barometer? Dan zijn die hoogtemeters nauwkeuriger dan de hoogtekaart
     // (die mist bruggen, dijken en viaducten). De kaart gebruiken we dan alleen voor de grafiek.
     final baro = baroSeries(streams);
-    final gain = baro != null ? barometricGain(baro) : elevationGain(alt);
+    final gain = baro != null ? barometricGain(baro) : cleanElevationGain(ele, radius: 1, threshold: 4);
     return (streams: {...streams, 'alt': alt, 'alt_src': 'dem'}, gain: gain);
   }
 }

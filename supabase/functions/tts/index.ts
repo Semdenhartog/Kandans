@@ -2,7 +2,10 @@
 // TESTFASE: zet een gesproken coachzin om in een ElevenLabs-stem (mp3). De app valt terug op de
 // telefoonstem als dit niet lukt (geen sleutel, credits op, geen internet).
 //
-//   POST { text: "Kilometer drie. Tempo vijf minuut twaalf." }  -> audio (application/octet-stream, mp3)
+//   POST { text: "Kilometer drie. Tempo vijf minuut twaalf.", voice: "roos" }  -> audio (application/octet-stream, mp3)
+//
+// `voice` is een sleutel uit VOICES (geen vrije stem-id, zodat niemand andere stemmen op ons account gebruikt).
+// Lukt de gekozen stem niet, dan een andere stem van hetzelfde geslacht; nooit ineens een man i.p.v. een vrouw.
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets), door Sem zelf in te stellen:
 //   ELEVENLABS_API_KEY    verplicht (zonder sleutel: 503 en de app gebruikt de telefoonstem)
@@ -15,6 +18,23 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const MAX_CHARS = 400;
+
+// Vaste Nederlandse stemmen (ElevenLabs). Sleutels moeten gelijk zijn aan `KadansVoiceOption.key` in de app.
+// Bibliotheekstemmen werken op het gratis plan alleen als ze in "My Voices" van het account staan.
+const VOICES: Record<string, { id: string; gender: "m" | "v" }> = {
+  berend: { id: "pb6qe8wKy786fK6M05tq", gender: "m" },
+  marvin: { id: "XWw6BayktH5jsnELw9Bc", gender: "m" },
+  roos: { id: "7qdUFMklKPaaAVMsBTBt", gender: "v" },
+  sanne: { id: "mNOlrB5V39qx4wQwSjG3", gender: "v" },
+};
+
+/// Volgorde om te proberen: gekozen stem, dan de andere(n) van hetzelfde geslacht.
+function voiceChain(key: string): string[] {
+  const chosen = VOICES[key];
+  if (!chosen) return [env("ELEVENLABS_VOICE_ID") || VOICES.berend.id, VOICES.marvin.id];
+  const same = Object.values(VOICES).filter((v) => v.gender === chosen.gender && v.id !== chosen.id).map((v) => v.id);
+  return [chosen.id, ...same];
+}
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -48,9 +68,9 @@ Deno.serve(async (req) => {
   if (!text) return json(400, { error: "Geen tekst." });
   if (text.length > MAX_CHARS) return json(400, { error: "Tekst te lang." });
 
-  // Eerst de gekozen stem; lukt die niet (bijv. bibliotheekstem niet toegestaan op het gratis plan),
-  // dan "Marvin" (Nederlands, in het account) en als laatste de standaardstem "George".
-  const voices = [env("ELEVENLABS_VOICE_ID") || "pb6qe8wKy786fK6M05tq", "XWw6BayktH5jsnELw9Bc", "JBFqnCBsd6RMkjVDRZzb"];
+  // Eerst de gekozen stem; lukt die niet (bijv. bibliotheekstem niet in het account op het gratis plan),
+  // dan een andere Nederlandse stem van hetzelfde geslacht. Geen Engelse noodstem meer.
+  const voices = voiceChain(String(body.voice ?? "").toLowerCase());
   const model = env("ELEVENLABS_MODEL") || "eleven_flash_v2_5";
   let res: Response | null = null;
   let lastStatus = 0;

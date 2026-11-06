@@ -56,6 +56,9 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
   bool _busy = false;
   List<_Candidate> _results = const [];
 
+  /// Welke kant op (graden, 0 = noord); null = maakt niet uit.
+  int? _direction;
+
   /// Na zonsondergang: alleen langs verlichte straten. Staat vanzelf aan als het donker is.
   late bool _dark = _isDarkNow();
 
@@ -148,7 +151,7 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
         startLabel = p.label.split(',').first;
       }
 
-      final loops = await ref.read(routeGeneratorProvider).generate(lat, lon, _targetMeters, count: _dark ? 5 : 4);
+      final loops = await ref.read(routeGeneratorProvider).generate(lat, lon, _targetMeters, count: _dark ? 5 : 4, direction: _direction);
       // Donker-route: per rondje kijken hoeveel er verlicht is (OpenStreetMap), tegelijk opgevraagd.
       final lit = <int, double>{};
       if (_dark) {
@@ -340,6 +343,18 @@ class _GenerateRouteScreenState extends ConsumerState<GenerateRouteScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          // Welke kant op: handig als je bijv. naar het bos of juist de stad in wilt.
+          Text(tr('Welke kant op?'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final (deg, label) in const [(null, 'Maakt niet uit'), (0, 'Noord'), (90, 'Oost'), (180, 'Zuid'), (270, 'West')])
+              ChoiceChip(
+                label: Text(tr(label)),
+                selected: _direction == deg,
+                onSelected: (_) => setState(() => _direction = deg),
+              ),
+          ]),
           const SizedBox(height: 8),
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
