@@ -182,7 +182,8 @@ details a{color:var(--gold-deep)}
 .up:hover{background:rgba(255,255,255,.1)}
 .mega{display:flex;align-items:flex-end;gap:2.2vw;margin-top:clamp(56px,10vw,140px);max-width:1180px}
 .mega img{width:15vw;max-width:200px;height:auto}
-.mega .adans{flex:1;aspect-ratio:737/102;background:#F7EEDD;-webkit-mask:url(kadans-adans-groot.png) left bottom/contain no-repeat;mask:url(kadans-adans-groot.png) left bottom/contain no-repeat}
+.mega .adans-v{flex:1;min-width:0;height:auto;color:#F7EEDD;display:block}
+.mega .adans-old{flex:1;aspect-ratio:737/102;background:#F7EEDD;-webkit-mask:url(kadans-adans-groot.png) left bottom/contain no-repeat;mask:url(kadans-adans-groot.png) left bottom/contain no-repeat}
 .legal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:20px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6)}
 .legal a{color:rgba(255,255,255,.75);text-decoration:none}
 @media (max-width:860px){.foot-top{grid-template-columns:1fr 1fr}.foot-top>div:first-child{grid-column:1/-1}.up{position:absolute;top:24px;right:24px}.foot h2{padding-right:52px}}
@@ -448,7 +449,9 @@ details a{color:var(--gold-deep)}
     <div><h4>Volg</h4><ul><li><a href="https://www.instagram.com/kadans.app/" rel="noopener">Instagram</a></li><li><a href="steun.html">Steun Kadans</a></li><li><a href="privacy.html">Privacy</a></li><li><a href="voorwaarden.html">Voorwaarden</a></li><li><a href="verwijderen.html">Account verwijderen</a></li></ul></div>
     <a class="up" href="#top" aria-label="Naar boven"><svg width="14" height="14" style="transform:rotate(-90deg)"><use href="#pijl"/></svg></a>
   </div>
-  <div class="mega" aria-hidden="true"><img src="kadans-k-groot.png" alt="" width="200" height="181"><span class="adans"></span></div>
+  <div class="mega" aria-hidden="true"><img src="kadans-k-groot.png" alt="" width="200" height="181"><svg class="adans-v" xmlns="http://www.w3.org/2000/svg" viewBox="-4 0 542 100" aria-hidden="true" focusable="false">
+<defs><clipPath id="c"><rect x="-10" y="0" width="554" height="100"/></clipPath></defs>
+<g clip-path="url(#c)" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"><g transform="translate(0 0)"><path d="M-2 108 L35 -2 L72 108" /></g><g transform="translate(116 0)"><path d="M4.5 4.5 H30 C64 4.5 74 28 74 50 C74 72 64 95.5 30 95.5 H4.5 Z" /></g><g transform="translate(240 0)"><path d="M-2 108 L35 -2 L72 108" /></g><g transform="translate(356 0)"><path d="M4.5 108 V4 L65.5 96 V-8" stroke-linejoin="miter"/></g><g transform="translate(472 0)"><path d="M58 17 C51 8 42 4.5 32 4.5 C17 4.5 7.5 12 7.5 26 C7.5 42 21 46 33 49 C47 53 59 57 59 73 C59 88 48 95.5 31 95.5 C19 95.5 9 91 3 82" /></g></g></svg></div>
   <div class="legal"><span>© 2026 Kadans. Alle rechten voorbehouden.</span><span>Kaarten © Kadaster · Weer Open-Meteo &amp; Buienradar · Foto's Unsplash</span></div>
 </footer>
 
