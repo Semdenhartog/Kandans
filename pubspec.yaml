@@ -59,6 +59,8 @@ flutter:
   assets:
     - assets/logo/
     - assets/sounds/
+    # Sfeerfoto's bovenaan Vandaag (Unsplash-licentie, vrij te gebruiken).
+    - assets/foto/
     - assets/fonts/OFL-Saira.txt
     - assets/fonts/OFL-DMSans.txt
   fonts:

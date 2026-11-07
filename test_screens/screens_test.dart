@@ -2,11 +2,13 @@
 // Draait in de cloud (workflow "Schermen"): flutter test test_screens --update-goldens
 // De plaatjes komen in test_screens/goldens en worden als artefact bewaard, zodat de
 // layout bekeken kan worden zonder telefoon. Geen echte gebruikersgegevens.
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart' show TileProvider, TileCoordinates, TileLayer;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +21,7 @@ import 'package:runwise/shared/art/exercise_figure.dart';
 import 'package:runwise/core/supabase.dart';
 import 'package:runwise/features/profile/shoes_screen.dart';
 import 'package:runwise/core/theme.dart';
+import 'package:runwise/features/routes/route_map.dart' show debugMapTiles;
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/repositories/repositories.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
@@ -128,21 +131,30 @@ Future<void> _loadFonts() async {
   }
 }
 
+/// Kaarttegels uit test_screens/tegels (opgehaald door screens.yml), zodat kaarten echte straten tonen.
+class _DiskTiles extends TileProvider {
+  static final _empty = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+
+  @override
+  ImageProvider getImage(TileCoordinates c, TileLayer options) {
+    final photo = options.urlTemplate?.contains('luchtfoto') ?? false;
+    final f = File('test_screens/tegels/${photo ? 'foto' : 'grijs'}/${c.z}/${c.x}/${c.y}.${photo ? 'jpg' : 'png'}');
+    final alt = File('test_screens/tegels/grijs/${c.z}/${c.x}/${c.y}.png');
+    final file = f.existsSync() ? f : (alt.existsSync() ? alt : null);
+    return MemoryImage(file == null ? _empty : file.readAsBytesSync());
+  }
+}
+
 // ---------------------------------------------------------------- voorbeeldgegevens
 
 final _now = DateTime.now();
-const _home = LatLng(52.14, 5.585);
-
-List<LatLng> _loop(double km, double phase) {
-  final r = km / (2 * math.pi) / 111.0;
-  return [
-    for (var i = 0; i <= 80; i++)
-      LatLng(
-        _home.lat + r * math.sin(i / 80 * 2 * math.pi + phase) * (1 + 0.15 * math.sin(i / 7)),
-        _home.lon + r * 1.6 * math.cos(i / 80 * 2 * math.pi + phase) * (1 + 0.1 * math.cos(i / 5)),
-      ),
-  ];
-}
+// Echte rondjes in Amsterdam (over echte paden, via BRouter/OpenStreetMap), zodat kaarten en
+// voorbeelden iets herkenbaars laten zien: Amsterdamse Bos, Vondelpark en langs de Amstel.
+const _bosPoly = 'oak~Ho`w\\c@?JvPmELFxlAGhGEX?fAFHG|Oh@PXkE~L~IbAfBjA~DxApJp@dJnDfAj@BbCOlAH\\HZZ{@dBQl@K~@@nAV|A~AxCf@d@n@Lp@M^[fAsB^f@ZpA@rMHrAXfAb@dAn@l@hAPAfFLxAtBbINP`@TdAFn@\\v@rALf@@ZhAj@l@h@lCbAn@Fb@?p@m@Rs@BgCNc@`@@t@j@p@o@t@YXH?O~LFB{Ol@cf@R?\\aYu@QiBeAg@sAq@YyF{J}C}D{AgA_Cw@FsEPc@BYGu@iFe@IOQy@NkTs@GyAu@{BKOIqTq@YRcADWyg@UqCs@Ba@K}DHAoBmEDQo@A[Og]cLJ';
+const _vondelPoly = 'ixq~Hccx\\\\lB`@hFd@x@R|D`AvFyArCY~@EdADx@_An@Ug@UKwEjBlHxb@jBhNh@Yb@~CdEcCf@OJrA`B`KJu@rAcFRmBFFBgAWmC}@mCE{@Ti@HoAQiAg@_B@i@Lq@fBa@V_@@uDc@iC{@_Cq@eHu@iDwAqB_Ak@aAOc@oAaBwBaAwFS}De@y@a@iF]mB';
+const _amstelPoly = 'scp~Het|\\JhAdBa@XFzH{B`IcBpMoDN?BJdAWZg@~[{I`B]fAGr@{@H[|@uAlJ_LzAkA~As@VZCl@cAbB_Az@a@HA|@JXt@RpDu@pAMlBBxB\\v@b@~AjB|@bBnAnDvAdGb@dDTdE@tBC|B]fG?t@X|Bj@~B^z@r@\\rA?nCgArAKtDj@vBpAjFtFrB|@|BtAtCfApG`DtAZhBEfCeAp@_AjCyHRy@Fk@AqLVmEPiBr@iDzDyLjBoK`B}Gb@wAf@eAlAeBf@GhBx@TVnBjD`BrGd@fCXx@zA`B\\Pl@?tFuB~AMxBn@nEvBfDf@zCUdAU|@[nDyBrB{BYoAGw@nAyYH}DEcA]_CkFcNQIi@l@QEoA}D{J}VaBuEsVlXsFxFgFlEkFlDcCpAeHtC}EbBSl@Ab@LdFw@lD[[]cAk@sRaAsGBu@dBuF}BiC_@m@[yAMiBMc@POB_@YeAiA|@g@fAy]d[aAt@s@gAAvBkAlAcBhAk@N{NrA}EtBo@A}Ae@e@fE_DjD{@rAyKnMi@P_ClCu^`K]BWO_AXKZyPrE]ZiKnC]\\gEdAg@{E';
+const _home = LatLng(52.3268, 4.87448);
 
 /// Nep-stratenkaart rond een route (geen netwerk in de test): een licht scheef stratenraster,
 /// een paar doorgaande wegen, een rivier, een meertje en een spoorlijn.
@@ -182,46 +194,48 @@ final _routes = [
       id: 'r1',
       name: 'Rondje bos',
       source: 'generated',
-      distanceMeters: 8200,
-      startLatitude: _home.lat,
-      startLongitude: _home.lon,
-      polyline: encodePolyline(_loop(8.2, 0)),
-      elevationGainMeters: 34,
-      estimatedDurationSeconds: 2700,
-      elevationProfile: [for (var i = 0; i <= 82; i++) ElevationSample(i * 100.0, 8 + 10 * math.sin(i / 9) + 4 * math.sin(i / 3.3))],
+      distanceMeters: 8390,
+      startLatitude: 52.3268,
+      startLongitude: 4.87448,
+      polyline: _bosPoly,
+      elevationGainMeters: 7,
+      estimatedDurationSeconds: 2760,
+      elevationProfile: [for (var i = 0; i <= 83; i++) ElevationSample(i * 100.0, -3 + 1.6 * math.sin(i / 9) + 0.6 * math.sin(i / 3.3))],
       isFavorite: true),
   RunRoute(
       id: 'r2',
-      name: 'Langs de beek',
+      name: 'Rondje Vondelpark',
       source: 'drawn',
-      distanceMeters: 5100,
-      startLatitude: _home.lat,
-      startLongitude: _home.lon,
-      polyline: encodePolyline(_loop(5.1, 1.2)),
-      elevationGainMeters: 12,
-      estimatedDurationSeconds: 1700),
+      distanceMeters: 3060,
+      startLatitude: 52.36117,
+      startLongitude: 4.88002,
+      polyline: _vondelPoly,
+      elevationGainMeters: 3,
+      estimatedDurationSeconds: 1000),
   RunRoute(
       id: 'r3',
-      name: 'Lange duurloop heide',
+      name: 'Langs de Amstel',
       source: 'gpx_upload',
-      distanceMeters: 16400,
-      startLatitude: _home.lat,
-      startLongitude: _home.lon,
-      polyline: encodePolyline(_loop(16.4, 2.5)),
-      elevationGainMeters: 88,
-      estimatedDurationSeconds: 5800),
+      distanceMeters: 13620,
+      startLatitude: 52.35274,
+      startLongitude: 4.90323,
+      polyline: _amstelPoly,
+      elevationGainMeters: 9,
+      estimatedDurationSeconds: 4700),
 ];
 
 final _runs = () {
   final rnd = math.Random(7);
   final out = <Activity>[];
-  for (var d = 1; d < 120; d++) {
+  // Ruim een jaar aan runs: zo ziet een logboek eruit als je Kadans al een tijd gebruikt.
+  for (var d = 1; d < 430; d++) {
     if (d % 7 == 2 || d % 7 == 5 || rnd.nextDouble() < 0.12) continue;
     final day = _now.subtract(Duration(days: d));
     final long = day.weekday == DateTime.sunday;
-    final km = long ? 12 + rnd.nextDouble() * 6 : 5 + rnd.nextDouble() * 4;
-    final pace = (long ? 345 : 320) + rnd.nextDouble() * 30 - (120 - d) * 0.15;
-    final route = _routes[rnd.nextInt(3)];
+    // Lange duurloop langs de Amstel op zondag, verder het Amsterdamse Bos of twee rondjes Vondelpark.
+    final route = long ? _routes[2] : (rnd.nextDouble() < 0.65 ? _routes[0] : _routes[1]);
+    final km = route.distanceMeters / 1000 * (route.id == 'r2' ? 2 : 1) + rnd.nextDouble() * 0.15;
+    final pace = (long ? 345 : 320) + rnd.nextDouble() * 30 - (430 - d) * 0.05;
     out.add(Activity(
       id: 'a$d',
       startedAt: DateTime(day.year, day.month, day.day, d.isEven ? 7 : 18, 30),
@@ -230,7 +244,7 @@ final _runs = () {
       source: 'runwise',
       routeId: route.id,
       averageHeartRate: 138 + rnd.nextInt(25),
-      elevationGainMeters: 10 + rnd.nextDouble() * 60,
+      elevationGainMeters: 2 + rnd.nextDouble() * 9,
       temperatureCelsius: 8 + rnd.nextDouble() * 14,
       feelsLikeCelsius: 6 + rnd.nextDouble() * 14,
       windSpeedKmh: 8 + rnd.nextDouble() * 25,
@@ -300,12 +314,33 @@ final _plan = buildPlan(
 );
 
 final _coach = [
-  CoachMessage(role: 'user', content: 'Hoe ver moet mijn lange duurloop zijn deze week?', createdAt: _now.subtract(const Duration(minutes: 9))),
+  CoachMessage(
+      role: 'user',
+      content: 'Over drie weken loop ik de Halve van Amsterdam. Wat moet ik de laatste 3 weken doen? Mijn doel is onder de 1:55.',
+      createdAt: _now.subtract(const Duration(minutes: 9))),
   CoachMessage(
       role: 'assistant',
-      content: 'Je liep de laatste 4 weken gemiddeld 28 km per week, met als langste 15,8 km.\n\n'
-          '- Deze week: **16–17 km** rustig (rond 5:50/km)\n- Zondag wordt 12 °C met weinig wind: prima\n- Volgende week een rustweek: 12 km\n\n'
-          'Voel je je moe, dan liever 14 km.',
+      content: 'Goed nieuws: je bent er klaar voor. De laatste 6 weken liep je gemiddeld 34 km per week, je langste duurloop was 18,2 km '
+          'en je 10 km in oktober (52:10) voorspelt een halve rond **1:54**. Nu gaat het om fris aan de start staan.\n\n'
+          '## Week 1 – laatste zware week (± 36 km)\n'
+          '- Di: 8 km met 5 × 1 km op **5:15/km**, 2 min dribbel ertussen\n'
+          '- Do: 7 km rustig (6:00/km), Vondelpark\n'
+          '- Za: 5 km heel rustig + 4 versnellingen\n'
+          '- Zo: **16 km** langs de Amstel, laatste 4 km op wedstrijdtempo (5:25/km)\n\n'
+          '## Week 2 – afbouwen (± 26 km)\n'
+          '- Di: 7 km met 3 × 2 km op **5:25/km**\n'
+          '- Do: 6 km rustig\n'
+          '- Zo: **12 km** rustig, de laatste 2 km op wedstrijdtempo\n\n'
+          '## Week 3 – wedstrijdweek (± 14 km + de halve)\n'
+          '- Di: 5 km met 3 × 1 km op 5:25/km\n'
+          '- Do: 4 km rustig + 3 korte versnellingen\n'
+          '- Za: 15 min dribbelen, of rust\n'
+          '- Zo: **de Halve**, start op 5:30/km en versnel na km 15\n\n'
+          '## Tips\n'
+          '- Eet de laatste 2 dagen wat meer koolhydraten en drink goed.\n'
+          '- Test je wedstrijdschoenen en ontbijt op de lange duurloop.\n'
+          '- Kadans kijkt die ochtend naar wind op het parcours: bij tegenwind langs de Amstel start je 5 s/km rustiger.\n\n'
+          'Voel je je moe of zwaar in week 1? Laat dan de intervallen vallen en loop alleen rustig. Fris aan de start wint het altijd van een extra training.',
       createdAt: _now.subtract(const Duration(minutes: 8))),
 ];
 
@@ -363,7 +398,7 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
       myShareProvider.overrideWith((ref, id) async => null),
       communityStatusProvider.overrideWith((ref) async => notInCommunity
           ? const CommunityStatus(joined: false)
-          : const CommunityStatus(joined: true, nickname: 'Sem uit Utrecht', friendCode: 'K7QX2M', boards: [
+          : const CommunityStatus(joined: true, nickname: 'Sem uit Amsterdam', friendCode: 'K7QX2M', boards: [
               BoardInfo(key: 'km-2026-11', title: 'Kilometers in november', unit: 'km'),
               BoardInfo(key: 'climb-2026-11', title: 'Hoogtemeters in november', unit: 'm'),
               BoardInfo(key: 'advent-2026', title: 'Adventsloop (dagen op rij)', unit: 'dagen'),
@@ -373,11 +408,11 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
             BoardRow(rank: 2, nickname: 'MarathonMark', value: 167.9),
             BoardRow(rank: 3, nickname: 'Anouk_rent', value: 151.2),
             BoardRow(rank: 4, nickname: 'Pieter V.', value: 139.0, friend: true),
-            BoardRow(rank: 5, nickname: 'Sem uit Utrecht', value: 126.7, me: true),
+            BoardRow(rank: 5, nickname: 'Sem uit Amsterdam', value: 126.7, me: true),
             BoardRow(rank: 6, nickname: 'Dijkloper', value: 118.3),
             BoardRow(rank: 6, nickname: 'Fenna', value: 118.3),
             BoardRow(rank: 8, nickname: 'een_heel_lange_bijnaam_x', value: 97.5),
-          ], mine: BoardRow(rank: 5, nickname: 'Sem uit Utrecht', value: 126.7, me: true))),
+          ], mine: BoardRow(rank: 5, nickname: 'Sem uit Amsterdam', value: 126.7, me: true))),
       posterProductsProvider.overrideWith((ref) => const [
             PosterProduct(id: '30x40', label: '30 × 40 cm', widthMm: 300, heightMm: 400, priceCents: 2495, description: 'Mat posterpapier, 200 g/m²'),
             PosterProduct(id: '50x70', label: '50 × 70 cm', widthMm: 500, heightMm: 700, priceCents: 3495, description: 'Mat posterpapier, 200 g/m²'),
@@ -394,7 +429,7 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const []}) async {
+    {double height = 2400, bool nav = false, void Function()? after, Future<void> Function(WidgetTester)? act, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const []}) async {
   RwColors.use(dark ? rwZandAvond : rwZand);
   addTearDown(() => RwColors.use(rwZand));
   tester.view.physicalSize = Size(_w * 2, height * 2);
@@ -419,18 +454,39 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
   for (var i = 0; i < 14; i++) {
     await tester.pump(const Duration(milliseconds: 120));
   }
+  await _letImagesLoad(tester);
   if (after != null) {
     after();
     for (var i = 0; i < 4; i++) {
       await tester.pump(const Duration(milliseconds: 120));
     }
   }
+  if (act != null) {
+    await act(tester);
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+  }
+  await _letImagesLoad(tester);
   await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
   // Timers en animaties opruimen.
   await tester.pumpWidget(const SizedBox());
   for (var i = 0; i < 4; i++) {
     await tester.pump(const Duration(minutes: 2));
   }
+}
+
+/// Foto's en kaarttegels laden echt (buiten de nep-klok van de test), daarna één frame tekenen.
+Future<void> _letImagesLoad(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    for (final e in find.byType(Image).evaluate()) {
+      final img = e.widget as Image;
+      await precacheImage(img.image, e).timeout(const Duration(seconds: 3), onTimeout: () {});
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+  });
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump(const Duration(milliseconds: 50));
 }
 
 /// Zelfde onderbalk als de echte app (zonder router).
@@ -461,6 +517,7 @@ void main() {
     await initializeDateFormatting('nl');
     Intl.defaultLocale = 'nl_NL';
     await _loadFonts();
+    debugMapTiles = _DiskTiles();
   });
 
   // Donkere weergave (Zand avond) van de belangrijkste schermen.
@@ -498,10 +555,32 @@ void main() {
           followRoute: decodePolyline(_routes.first.polyline),
           routeRemaining: 2970,
           ghostDelta: -12,
-          nextTurn: const RouteTurn(meters: 2400, point: LatLng(52.15, 5.6), kind: TurnKind.left, angle: -90),
+          nextTurn: const RouteTurn(meters: 2400, point: LatLng(52.32793, 4.86468), kind: TurnKind.left, angle: -90),
           nextTurnIn: 120,
         );
       }));
+  testWidgets('11c opnemen kaart', (t) {
+    final route = decodePolyline(_routes.first.polyline);
+    return _shot(t, '11c_opnemen_kaart', const RecordRunScreen(), height: 915, after: () {
+      RunRecorderService.instance.view.value = RecorderView(
+        status: RecorderStatus.running,
+        distance: 5230,
+        movingSeconds: 1652,
+        currentPace: 309,
+        averagePace: 316,
+        km: 5,
+        gpsAccuracy: 4,
+        heartRate: 152,
+        hrStatus: HrStatus.connected,
+        track: route.sublist(0, (route.length * 0.62).round()),
+        position: route[(route.length * 0.62).round() - 1],
+        followRoute: route,
+        routeRemaining: 3160,
+      );
+    }, act: (t) async {
+      await t.drag(find.byType(PageView).first, const Offset(-380, 0));
+    });
+  });
   testWidgets('11b afslag nu, groot', (t) => _shot(t, '11b_afslag_groot', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
         RunRecorderService.instance.view.value = RecorderView(
           status: RecorderStatus.running,
@@ -513,7 +592,7 @@ void main() {
           gpsAccuracy: 4,
           followRoute: decodePolyline(_routes.first.polyline),
           routeRemaining: 2970,
-          nextTurn: const RouteTurn(meters: 2400, point: LatLng(52.15, 5.6), kind: TurnKind.sharpRight, angle: 130),
+          nextTurn: const RouteTurn(meters: 2400, point: LatLng(52.32793, 4.86468), kind: TurnKind.sharpRight, angle: 130),
           nextTurnIn: 15,
         );
       }));
@@ -618,7 +697,7 @@ void main() {
     final r = _routes.first;
     final data = PosterData(
       title: r.name,
-      subtitle: 'Barneveld · oktober 2026',
+      subtitle: 'Amsterdam · oktober 2026',
       polyline: r.polyline,
       distanceMeters: r.distanceMeters,
       elevationGainMeters: r.elevationGainMeters,
@@ -738,8 +817,8 @@ class _FakeSocial implements SocialService {
   static String? _map(int i) => privacyTrimmedPolyline(_routes[i % _routes.length].polyline, meters: 200);
 
   static List<SharedRun> _sample() => [
-        SharedRun(id: 5, nickname: 'Anne', title: 'Zondagse duurloop over de hei', runDate: _now, distanceMeters: 15230, movingTimeSeconds: 5520, paceSecondsPerKm: 362, elevationGainMeters: 64, polyline: _map(0), createdAt: _now.subtract(const Duration(minutes: 40)), kudos: 7, comments: 2, kudoed: true),
-        SharedRun(id: 4, nickname: 'Sem uit Utrecht', title: 'Ochtendloopje 8,2 km', runDate: _now.subtract(const Duration(days: 1)), distanceMeters: 8210, movingTimeSeconds: 2470, paceSecondsPerKm: 301, elevationGainMeters: 21, polyline: _map(1), visibility: ShareVisibility.everyone, createdAt: _now.subtract(const Duration(hours: 20)), kudos: 3, comments: 1, mine: true, canDelete: true),
+        SharedRun(id: 5, nickname: 'Anne', title: 'Zondagse duurloop langs de Amstel', runDate: _now, distanceMeters: 13620, movingTimeSeconds: 5520, paceSecondsPerKm: 362, elevationGainMeters: 64, polyline: _map(0), createdAt: _now.subtract(const Duration(minutes: 40)), kudos: 7, comments: 2, kudoed: true),
+        SharedRun(id: 4, nickname: 'Sem uit Amsterdam', title: 'Ochtendloopje 8,2 km', runDate: _now.subtract(const Duration(days: 1)), distanceMeters: 8210, movingTimeSeconds: 2470, paceSecondsPerKm: 301, elevationGainMeters: 21, polyline: _map(1), visibility: ShareVisibility.everyone, createdAt: _now.subtract(const Duration(hours: 20)), kudos: 3, comments: 1, mine: true, canDelete: true),
         SharedRun(id: 3, nickname: 'Loper Lisa', title: 'Eerste 5 km zonder wandelen!', runDate: _now.subtract(const Duration(days: 2)), distanceMeters: 5020, movingTimeSeconds: 2010, paceSecondsPerKm: 400, createdAt: _now.subtract(const Duration(days: 2)), kudos: 21, comments: 9),
       ];
 
@@ -751,7 +830,7 @@ class _FakeSocial implements SocialService {
   }
 
   @override
-  Future<SocialSettings> settings() async => const SocialSettings(nickname: 'Sem uit Utrecht', approveFollowers: true, requests: 2);
+  Future<SocialSettings> settings() async => const SocialSettings(nickname: 'Sem uit Amsterdam', approveFollowers: true, requests: 2);
 
   @override
   Future<List<RunnerItem>> people(String kind) async => switch (kind) {
@@ -765,8 +844,8 @@ class _FakeSocial implements SocialService {
 
   @override
   Future<ProfileExtra> profileExtra(String nickname) async => ProfileExtra(
-        bio: 'Loop elke zondag over de hei. Op weg naar mijn eerste halve marathon.',
-        homeArea: 'Ede',
+        bio: 'Loop elke zondag langs de Amstel. Op weg naar mijn eerste halve marathon.',
+        homeArea: 'Amsterdam-Zuid',
         favDistance: 'half',
         memberSince: DateTime(2026, 3, 1),
         yearKm: 812,
@@ -867,7 +946,7 @@ class _ExerciseGallery extends StatelessWidget {
 
 const _stepsSample = [
   StepEntry(nickname: 'Anne', isMe: false, steps: 241870, rank: 1),
-  StepEntry(nickname: 'Sem uit Utrecht', isMe: true, steps: 198400, rank: 2),
+  StepEntry(nickname: 'Sem uit Amsterdam', isMe: true, steps: 198400, rank: 2),
   StepEntry(nickname: 'Dijkloper', isMe: false, steps: 150220, rank: 3),
   StepEntry(nickname: 'Loper Lisa', isMe: false, steps: 96010, rank: 4),
 ];

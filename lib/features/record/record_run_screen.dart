@@ -1662,7 +1662,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                   ),
                 ),
                 Text(tr(_layout.main.unit), textAlign: TextAlign.center, style: TextStyle(color: RwColors.muted, fontSize: 16)),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   _targetKm != null
                       ? (v.distance >= _targetKm! * 1000
@@ -1671,11 +1671,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                       : 'nog ${(1000 - v.distance % 1000).round()} m tot km ${(v.distance / 1000).floor() + 1}',
                   style: TextStyle(
                       color: _targetKm != null && v.distance >= _targetKm! * 1000 ? RwColors.good : RwColors.subtle,
-                      fontSize: 12,
+                      fontSize: 13,
                       fontFeatures: rwTnum),
                 ),
-                const SizedBox(height: 2),
-                Text('tik om te horen', style: TextStyle(color: RwColors.subtle, fontSize: 10, letterSpacing: 0.4)),
               ]),
             ),
             ),
@@ -1715,19 +1713,21 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                 Expanded(
                   child: Text(
                     v.offRoute ? 'Je bent van je route af. Veeg naar de kaart.' : 'Nog ${Fmt.km(v.routeRemaining!, decimals: 1)} van je route',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
                 if (v.ghostDelta != null && !v.offRoute)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('vs record', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+                      Text('vs record', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
                       Text(
                         '${v.ghostDelta! <= 0 ? '−' : '+'}${Fmt.duration(v.ghostDelta!.abs().round())}',
                         style: TextStyle(
+                          fontFamily: RwFonts.display,
+                          fontFeatures: rwTnum,
                           fontWeight: FontWeight.w800,
-                          fontSize: 18,
+                          fontSize: 28,
                           color: v.ghostDelta! <= 0 ? RwColors.good : RwColors.danger,
                         ),
                       ),
@@ -2521,7 +2521,7 @@ class _Big extends StatelessWidget {
           // Altijd op één regel (ook bij runs boven het uur of met grote letters).
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: RollingText(value, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: small ? 22 : 30, fontWeight: FontWeight.w800)),
+            child: RollingText(value, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: small ? 22 : 28, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(height: 2),
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: RwColors.subtle, fontSize: 13)),
@@ -2555,7 +2555,7 @@ class _HeartRow extends StatelessWidget {
             const SizedBox(width: 10),
             Text(bpm == null ? (view.hrStatus == HrStatus.lost ? 'Band kwijt…' : 'Band verbinden…') : '$bpm',
                 style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: bpm == null ? 16 : 28, fontWeight: FontWeight.w800)),
-            if (bpm != null) Text('  bpm', style: TextStyle(color: RwColors.muted)),
+            if (bpm != null) Text('  bpm', style: TextStyle(color: RwColors.muted, fontSize: 13)),
             // De zone krimpt mee als er weinig ruimte is (grote letters), in plaats van uit beeld te vallen.
             Expanded(
               child: zone <= 0
@@ -2578,7 +2578,7 @@ class _HeartRow extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(width: 8),
-                  Text('Zone $zone', style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+                  Text('Zone $zone', style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13)),
                           ],
                         ),
                       ),
@@ -3092,7 +3092,7 @@ class _WayToRouteCard extends StatelessWidget {
           const SizedBox(width: 10),
           Text(dist,
               style: const TextStyle(
-                  fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800)),
+                  fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800)),
         ]),
       ),
     );
@@ -3123,15 +3123,14 @@ class _NextTurnCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            TurnArrow(turn.kind, size: 44, color: soon ? RwColors.accentDark : RwColors.accent),
+            TurnArrow(turn.kind, size: 36, color: soon ? RwColors.accentDark : RwColors.accent),
             const SizedBox(width: 14),
             Expanded(
               child: Text(turn.kind.label,
                   maxLines: 2,
                   style: TextStyle(
-                      fontFamily: RwFonts.display,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                       color: soon ? RwColors.accentDark : RwColors.text)),
             ),
             const SizedBox(width: 10),
@@ -3139,7 +3138,7 @@ class _NextTurnCard extends StatelessWidget {
                 style: TextStyle(
                     fontFamily: RwFonts.display,
                     fontFeatures: rwTnum,
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: FontWeight.w800,
                     color: soon ? RwColors.accentDark : RwColors.text)),
           ],

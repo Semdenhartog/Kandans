@@ -28,7 +28,6 @@ import '../../shared/alarm.dart';
 import '../../data/services/run_recorder_service.dart';
 import '../../domain/run_helpers.dart';
 import '../../shared/calendar.dart';
-import '../../shared/art/landscape.dart';
 import '../../shared/art/sun_arc.dart';
 import '../../shared/art/tilt.dart';
 import '../../shared/art/weather_icon.dart';
@@ -1471,8 +1470,15 @@ bool _golden(DateTime t, double lat, double lon) {
 }
 
 
-/// Het beeld bovenaan Vandaag: het eigen seizoenslandschap met lucht, een lopertje dat meeleeft
-/// met het weer, en daarin je groet en het advies van vandaag. De advieskaart ligt er half overheen.
+/// Mist, buien of grijs: dan past de mistfoto beter dan de zonnige heide.
+bool _foggy(HourWeather? w) {
+  if (w == null) return false;
+  final c = w.weatherCode ?? 0;
+  return c == 3 || c == 45 || c == 48 || (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || (w.precipitationProbability ?? 0) >= 50;
+}
+
+/// Het beeld bovenaan Vandaag: een sfeerfoto met daarin je groet en het advies van vandaag.
+/// De advieskaart ligt er half overheen.
 class _TodayScene extends StatelessWidget {
   const _TodayScene({required this.greeting, required this.subLine, this.line, this.weather, this.onSpeak, this.overlap = 64});
   final String greeting;
@@ -1501,18 +1507,18 @@ class _TodayScene extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(children: [
+          // Sfeerfoto (zoals op kadans.fit): heide bij droog weer, mist bij mist, buien of grijs weer.
           Positioned.fill(
-            child: KadansLandscape(
-              date: DateTime.now(),
-              wind: w?.windSpeed ?? 10,
-              rain: ((w?.precipitationProbability ?? 0) / 100).clamp(0.0, 1.0),
-              feels: w?.feelsLike ?? w?.temperature,
-              runner: true,
-              night: night,
-              opacity: 3.2,
+            child: Image.asset(
+              _foggy(w) ? 'assets/foto/mist.jpg' : 'assets/foto/heide.jpg',
+              fit: BoxFit.cover,
+              alignment: const Alignment(0, -0.1),
+              color: night ? Colors.black.withValues(alpha: 0.45) : null,
+              colorBlendMode: night ? BlendMode.darken : null,
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
             ),
           ),
-          // Donker verloop bovenin, zodat de witte tekst altijd leesbaar is (ook in de zon).
+          // Donker verloop boven- en onderin, zodat de witte tekst altijd leesbaar is (ook in de zon).
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(

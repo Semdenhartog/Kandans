@@ -90,7 +90,13 @@ class CachedTileProvider extends TileProvider {
       CachedNetImage(getTileUrl(coordinates, options), headers: headers);
 }
 
-final _tiles = CachedTileProvider();
+final _cachedTiles = CachedTileProvider();
+
+/// Alleen voor de schermtests: tegels van schijf in plaats van internet.
+@visibleForTesting
+TileProvider? debugMapTiles;
+
+TileProvider get _tiles => debugMapTiles ?? _cachedTiles;
 
 Color windColor(WindClass c) => switch (c) {
       WindClass.head => RwColors.danger,

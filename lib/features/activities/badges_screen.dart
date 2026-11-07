@@ -73,6 +73,8 @@ class BadgesScreen extends ConsumerWidget {
               style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           Text('Tik op een badge voor meer uitleg.', style: TextStyle(color: RwColors.subtle)),
+          const SizedBox(height: 10),
+          const BadgeTierLegend(),
           // Medailles van gehaalde uitdagingen.
           if (ref.watch(challengeMedalsProvider) case final medals when medals.isNotEmpty) ...[
             const SizedBox(height: 20),
@@ -126,7 +128,7 @@ class BadgeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final b = badge;
-    final color = b.weather ? const Color(0xFF5AA9FF) : RwColors.accent;
+    final color = tierColor(b.tier);
     return InkWell(
       borderRadius: BorderRadius.circular(RwRadius.m),
       onTap: () => showModalBottomSheet<void>(
@@ -152,7 +154,7 @@ class BadgeTile extends StatelessWidget {
                     border: Border.all(color: (b.earned ? color : RwColors.subtle).withValues(alpha: 0.35)),
                   ),
                   child: Text(
-                    b.earned ? 'Verdiend op ${Fmt.dateLong(b.earnedAt!)}' : (b.progress > 0 ? '${(b.progress * 100).round()}% op weg' : 'Nog niet verdiend'),
+                    '${b.tier.label} · ${b.earned ? 'verdiend op ${Fmt.dateLong(b.earnedAt!)}' : (b.progress > 0 ? '${(b.progress * 100).round()}% op weg' : 'nog niet verdiend')}',
                     style: TextStyle(color: b.earned ? color : RwColors.subtle, fontWeight: FontWeight.w700, fontSize: 13),
                   ),
                 ),
@@ -498,4 +500,34 @@ class _RibbonPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RibbonPainter old) => old.color != color;
+}
+
+/// Metaalkleur per niveau: brons, zilver, goud, platina.
+Color tierColor(bd.BadgeTier t) => switch (t) {
+      bd.BadgeTier.bronze => const Color(0xFFB0703C),
+      bd.BadgeTier.silver => const Color(0xFFA9B0B7),
+      bd.BadgeTier.gold => const Color(0xFFD6AE4E),
+      bd.BadgeTier.platinum => const Color(0xFF8DB9CB),
+    };
+
+/// Uitleg bovenaan: vier niveaus, elk met een eigen kleur.
+class BadgeTierLegend extends StatelessWidget {
+  const BadgeTierLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) => Wrap(spacing: 14, runSpacing: 6, children: [
+        for (final t in bd.BadgeTier.values)
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(center: const Alignment(-0.3, -0.4), colors: [Color.lerp(tierColor(t), Colors.white, 0.35)!, tierColor(t)]),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(t.label, style: TextStyle(color: RwColors.muted, fontSize: 12, fontWeight: FontWeight.w600)),
+          ]),
+      ]);
 }

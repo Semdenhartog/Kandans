@@ -18,6 +18,29 @@ enum BadgeCategory {
   final String? subtitle;
 }
 
+/// Niveau van een badge: hoe moeilijker, hoe edeler het metaal.
+enum BadgeTier {
+  bronze('Brons'),
+  silver('Zilver'),
+  gold('Goud'),
+  platinum('Platina');
+
+  const BadgeTier(this.label);
+  final String label;
+}
+
+const _tiers = <String, BadgeTier>{
+  'first': BadgeTier.bronze, '5k': BadgeTier.bronze, 'runs10': BadgeTier.bronze, 'early': BadgeTier.bronze, 'night': BadgeTier.bronze,
+  '10k': BadgeTier.silver, '15k': BadgeTier.silver, 'runs50': BadgeTier.silver, 'km100': BadgeTier.silver, 'climb': BadgeTier.silver,
+  'half': BadgeTier.gold, '30k': BadgeTier.gold, 'runs100': BadgeTier.gold, 'km500': BadgeTier.gold,
+  'full': BadgeTier.platinum, 'runs250': BadgeTier.platinum, 'km1000': BadgeTier.platinum, 'km2500': BadgeTier.platinum,
+  '5k_30': BadgeTier.bronze, '10k_60': BadgeTier.bronze, '5k_25': BadgeTier.silver, '10k_50': BadgeTier.silver,
+  '1k_4': BadgeTier.gold, 'half_2h': BadgeTier.gold, '5k_20': BadgeTier.platinum,
+  'streak4': BadgeTier.bronze, 'streak12': BadgeTier.silver, 'streak26': BadgeTier.gold, 'year1': BadgeTier.platinum,
+  'storm': BadgeTier.gold, 'arctic': BadgeTier.gold, 'tropical': BadgeTier.gold, 'seasons': BadgeTier.platinum,
+  'routes10': BadgeTier.silver, 'routes25': BadgeTier.gold, 'places5': BadgeTier.silver, 'far': BadgeTier.gold, 'mountain': BadgeTier.platinum,
+};
+
 /// Een badge (mijlpaal). [progress] 0..1 voor badges die je nog niet hebt.
 class Badge {
   const Badge({
@@ -44,6 +67,9 @@ class Badge {
   bool get weather => category == BadgeCategory.weather;
 
   bool get earned => earnedAt != null;
+
+  /// Brons, zilver, goud of platina (onbekend = brons).
+  BadgeTier get tier => _tiers[id] ?? BadgeTier.bronze;
 }
 
 Badge _single(String id, String title, String desc, String icon, List<Activity> sorted, bool Function(Activity) test,

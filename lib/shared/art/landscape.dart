@@ -55,8 +55,6 @@ class KadansLandscape extends StatefulWidget {
     this.parallax = true,
     this.showPath = true,
     this.rain = 0,
-    this.feels,
-    this.runner = false,
     this.night = false,
   });
 
@@ -64,12 +62,6 @@ class KadansLandscape extends StatefulWidget {
 
   /// Regenkans 0–1: vanaf 0,35 vallen er streepjes regen, schuin met de wind.
   final double rain;
-
-  /// Gevoelstemperatuur: muts bij kou, zweetdruppels bij hitte (alleen met [runner]).
-  final double? feels;
-
-  /// Een lopertje op het pad dat meeleeft met het weer.
-  final bool runner;
 
   /// Nacht: sterren en een maantje.
   final bool night;
@@ -118,8 +110,6 @@ class _KadansLandscapeState extends State<KadansLandscape> with SingleTickerProv
                 opacity: widget.opacity,
                 showPath: widget.showPath,
                 rain: widget.rain,
-                feels: widget.feels,
-                runner: widget.runner,
                 night: widget.night,
                 ink: RwColors.text,
                 accent: RwColors.accent,
@@ -142,8 +132,6 @@ class LandscapePainter extends CustomPainter {
     required this.opacity,
     required this.showPath,
     this.rain = 0,
-    this.feels,
-    this.runner = false,
     this.night = false,
     required this.ink,
     required this.accent,
@@ -157,8 +145,6 @@ class LandscapePainter extends CustomPainter {
   final double opacity;
   final bool showPath;
   final double rain;
-  final double? feels;
-  final bool runner;
   final bool night;
   final Color ink, accent;
   final bool dark;
@@ -352,7 +338,6 @@ class LandscapePainter extends CustomPainter {
       }
       canvas.drawCircle(Offset(w * 0.82 + far.dx, h * 0.16), h * 0.05, Paint()..color = _c(const Color(0xFFF3E7C9), 0.55));
     }
-    if (runner) _paintRunner(canvas, size, near, mid, sway);
     if (rain >= 0.35) {
       final slant = (wind / 25).clamp(0.1, 0.9);
       final drops = (18 + rain * 40).round();
@@ -368,65 +353,8 @@ class LandscapePainter extends CustomPainter {
     }
   }
 
-  /// Lopertje vooraan op het pad: buigt tegen de wind in, capuchon bij regen, muts bij kou, druppels bij hitte.
-  void _paintRunner(Canvas canvas, Size size, Offset near, Offset mid, double sway) {
-    final w = size.width, h = size.height;
-    // Halverwege het pad: onderin ligt op Vandaag de advieskaart eroverheen.
-    const f = 0.78;
-    final baseY = h + 4 - f * (h * 0.36);
-    final baseX = w * 0.5 + math.sin(f * math.pi * 2.4) * w * 0.16 * (1 - f) + near.dx * (1 - f) + mid.dx * f;
-    final s = (h * 0.16).clamp(16.0, 40.0) * (1 - f * 0.35); // lichaamslengte, verder weg = kleiner
-    final phase = t * 12 * math.pi * 2;
-    final lean = 0.12 + (wind / 40).clamp(0.0, 0.35);
-    final bob = math.sin(phase * 2).abs() * s * 0.04;
-    final ink = dark ? const Color(0xFFF1E9DC) : const Color(0xFF2A2119);
-    final body = Paint()
-      ..color = _c(ink, 0.85)
-      ..strokeWidth = s * 0.09
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    final hip = Offset(baseX, baseY - s * 0.48 - bob);
-    final neck = hip + Offset(math.sin(lean) * s * 0.36, -math.cos(lean) * s * 0.36);
-    final head = neck + Offset(math.sin(lean) * s * 0.13, -s * 0.13);
-    Offset limb(Offset from, double angle, double len) => from + Offset(math.sin(angle) * len, math.cos(angle) * len);
-    final swing = math.sin(phase) * 0.75;
-    // Benen (knie + voet) en armen, om en om.
-    for (final dir in [1.0, -1.0]) {
-      final knee = limb(hip, swing * dir, s * 0.26);
-      final foot = limb(knee, swing * dir - 0.5 - (dir * swing).clamp(0.0, 1.0) * 0.6, s * 0.26);
-      canvas.drawPath(Path()..moveTo(hip.dx, hip.dy)..lineTo(knee.dx, knee.dy)..lineTo(foot.dx, foot.dy), body);
-      final elbow = limb(neck + Offset(0, s * 0.05), -swing * dir * 0.9, s * 0.17);
-      final hand = limb(elbow, -swing * dir * 0.9 - 1.4, s * 0.15);
-      canvas.drawPath(Path()..moveTo(neck.dx, neck.dy + s * 0.05)..lineTo(elbow.dx, elbow.dy)..lineTo(hand.dx, hand.dy), body);
-    }
-    canvas.drawLine(hip, neck, body..strokeWidth = s * 0.12);
-    canvas.drawCircle(head, s * 0.085, Paint()..color = _c(ink, 0.85));
-    final gold = Paint()..color = _c(const Color(0xFFD9BF92), 0.95);
-    if (rain >= 0.35) {
-      // Capuchon.
-      canvas.drawArc(Rect.fromCircle(center: head, radius: s * 0.12), math.pi * 0.85, math.pi * 1.45, false,
-          Paint()
-            ..color = _c(const Color(0xFFD9BF92), 0.95)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = s * 0.05);
-    } else if ((feels ?? 10) <= 4) {
-      // Muts met bolletje.
-      canvas.drawArc(Rect.fromCircle(center: head, radius: s * 0.095), math.pi, math.pi, true, gold);
-      canvas.drawCircle(head + Offset(0, -s * 0.12), s * 0.03, gold);
-    } else if ((feels ?? 10) >= 24) {
-      // Zweetdruppels.
-      for (var i = 0; i < 2; i++) {
-        final d = head + Offset(-s * (0.14 + i * 0.07), -s * 0.02 + ((t * 8 + i * 0.5) % 1.0) * s * 0.12);
-        canvas.drawCircle(d, s * 0.022, Paint()..color = _c(const Color(0xFF7FB2D6), 0.8));
-      }
-    }
-    // Schaduw onder de voeten.
-    canvas.drawOval(Rect.fromCenter(center: Offset(baseX, baseY), width: s * 0.5, height: s * 0.07),
-        Paint()..color = _c(Colors.black, 0.12));
-  }
-
   @override
   bool shouldRepaint(covariant LandscapePainter old) =>
       old.t != t || old.tilt != tilt || old.season.month != season.month || old.opacity != opacity || old.ink != ink ||
-      old.rain != rain || old.night != night || old.runner != runner || old.feels != feels;
+      old.rain != rain || old.night != night;
 }
