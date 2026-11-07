@@ -97,7 +97,7 @@ a:hover .arrow-btn{transform:translateX(3px)}
 .app h2{font-size:clamp(32px,3.8vw,56px);margin-bottom:8px}
 .app p{margin:0 0 16px;color:var(--muted);font-size:15.5px}
 .app p em{font-style:normal;color:var(--ink);font-weight:600}
-.shotframe{grid-row:1/3;border-radius:var(--r-m);overflow:hidden;background:var(--dark);aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;padding:28px}
+.shotframe{grid-row:1/3;border-radius:var(--r-m);overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(217,191,146,.25),transparent 60%),var(--dark);display:flex;align-items:center;justify-content:center;padding:44px 28px}
 .shotframe img{border-radius:var(--r-m);width:100%;height:100%;object-fit:cover;object-position:top}
 .facts{display:flex;gap:28px;margin:8px 0 28px}
 .facts b{display:block;font-family:Saira,sans-serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-0.01em}
@@ -188,6 +188,44 @@ details a{color:var(--gold-deep)}
 @media (max-width:860px){.foot-top{grid-template-columns:1fr 1fr}.foot-top>div:first-child{grid-column:1/-1}.up{position:absolute;top:24px;right:24px}.foot h2{padding-right:52px}}
 @media (max-width:640px){.foot{padding:32px 20px 20px}}
 
+
+/* Telefoon met echte schermen */
+.phone{position:relative;width:min(300px,72vw);aspect-ratio:540/1169;border-radius:46px;padding:9px;background:linear-gradient(150deg,#4a3c2d 0%,#120e0a 38%,#0b0907 70%,#3a2e22 100%);box-shadow:0 50px 90px -30px rgba(0,0,0,.6),0 18px 40px -20px rgba(0,0,0,.5),0 0 0 1px rgba(217,191,146,.4),inset 0 0 0 1px rgba(255,255,255,.07)}
+.phone img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:38px;background:var(--paper)}
+.phone::before{content:"";position:absolute;inset:9px;border-radius:38px;pointer-events:none;z-index:1;background:linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 28%)}
+.hero-phone{position:absolute;right:clamp(32px,7vw,140px);top:50%;transform:translateY(-48%) rotate(-5deg);width:min(300px,24vw)}
+.hero-foot{justify-content:flex-start!important}
+@media (max-width:1000px){.hero{min-height:0}.hero-phone{position:relative;right:auto;top:auto;transform:rotate(-4deg);width:min(240px,60vw);margin:36px auto 40px}}
+
+/* Galerij: schermen naast elkaar, vegen of pijltjes */
+.gallery{margin:8px;border-radius:var(--r-l);background:radial-gradient(ellipse at 20% 0%,rgba(217,191,146,.16),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(184,149,95,.18),transparent 50%),#14100C;color:var(--on-dark);padding:clamp(56px,7vw,104px) 0 clamp(40px,5vw,72px);overflow:hidden}
+.gallery .sec-head h2{color:#fff}
+.gallery .sec-head p{color:var(--on-dark-muted)}
+.rail{display:flex;gap:clamp(20px,3vw,40px);overflow-x:auto;scroll-snap-type:x mandatory;padding:20px max(32px,calc((100vw - 1360px)/2 + 32px)) 36px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.shot{flex:none;scroll-snap-align:center;margin:0;display:flex;flex-direction:column;gap:20px;width:min(280px,70vw)}
+.shot .phone{width:100%;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.shot:hover .phone{transform:translateY(-8px)}
+.shot figcaption{display:flex;flex-direction:column;gap:6px}
+.shot figcaption .label{color:var(--gold)}
+.shot figcaption span:last-child{color:var(--on-dark-muted);font-size:15px}
+.rail-nav{display:flex;gap:8px}
+.rail-nav button{border:1px solid rgba(255,255,255,.25);background:none;color:#fff;width:44px;height:44px;border-radius:var(--r-s);cursor:pointer;display:grid;place-items:center}
+.rail-nav button:hover{background:rgba(255,255,255,.08)}
+.rail-nav svg{width:14px;height:14px}
+
+/* Ledenkaart */
+.member{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(32px,5vw,80px);align-items:center;background:var(--dark);color:var(--on-dark);border-radius:var(--r-l);padding:clamp(32px,5vw,72px);overflow:hidden;position:relative}
+.member::before{content:"";position:absolute;inset:auto -20% -60% 20%;height:120%;background:radial-gradient(closest-side,rgba(217,191,146,.22),transparent);pointer-events:none}
+.member h2{font-size:clamp(32px,4vw,56px);color:#fff;margin:18px 0 18px}
+.member p{color:var(--on-dark-muted);margin:0 0 14px;max-width:32rem}
+.card3d{perspective:1200px}
+.card3d img{width:100%;height:auto;border-radius:28px;transform:rotateX(8deg) rotateY(-14deg) rotateZ(1deg);transition:transform .25s ease-out;box-shadow:0 60px 80px -40px rgba(0,0,0,.8),0 0 0 1px rgba(217,191,146,.25)}
+.member ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:10px}
+.member li{display:flex;gap:12px;align-items:baseline}
+.member li::before{content:"";flex:none;width:7px;height:7px;background:var(--gold);border-radius:1px;transform:translateY(-2px)}
+@media (max-width:860px){.member{grid-template-columns:1fr}}
+
 /* Rustig in beeld; uit bij "minder beweging" */
 .js .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
 .js .reveal.in{opacity:1;transform:none}
@@ -209,6 +247,7 @@ details a{color:var(--gold-deep)}
 <main id="top">
 <section class="hero">
   <h1>Loop op het beste moment.</h1>
+  <div class="phone hero-phone" aria-hidden="true"><img src="app/vandaag.jpg" alt="" width="540" height="1169" fetchpriority="high"></div>
   <div class="hero-foot">
     <p>Weer, wind op je route, de buienradar en je eigen runs, per 5 minuten doorgerekend.</p>
     <a class="go" href="#wachtlijst"><span class="t">Zet me op de wachtlijst</span><span class="a"><svg><use href="#pijl"/></svg></span></a>
@@ -250,10 +289,28 @@ details a{color:var(--gold-deep)}
   </article>
 </section>
 
+<section class="gallery" id="schermen" aria-label="Schermen uit de app">
+  <div class="wrap">
+    <div class="sec-head reveal"><div><span class="tag on-dark">In de app</span><h2 style="margin-top:20px">Gemaakt om naar te kijken.</h2></div>
+      <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start"><p>Echte schermen uit Kadans. Veeg erdoorheen of gebruik de pijltjes.</p>
+      <div class="rail-nav"><button type="button" data-dir="-1" aria-label="Vorige"><svg style="transform:rotate(180deg)"><use href="#pijl"/></svg></button><button type="button" data-dir="1" aria-label="Volgende"><svg><use href="#pijl"/></svg></button></div></div>
+    </div>
+  </div>
+  <div class="rail" id="rail" tabindex="0">
+    <figure class="shot"><div class="phone"><img src="app/vandaag.jpg" alt="Vandaag: beste vertrektijd 13:25 met score 97, gevoelstemperatuur, wind en regenkans" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Vandaag</span><span>Je beste vertrektijd, met het waarom erbij.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="app/opnemen.jpg" alt="Een run opnemen: 5,23 kilometer, tijd, tempo en de volgende afslag" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Opnemen</span><span>Grote cijfers en afslagen, ook op je vergrendelscherm.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="app/route.jpg" alt="Route Rondje bos met hoogteprofiel en kilometerpunten op de kaart" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Routes</span><span>Hoogte, wind, ondergrond en verlichting per route.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="app/run.jpg" alt="Een gelopen run: 6,97 km in 36:49 met de wind langs de route" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Je run</span><span>Hoeveel het weer je kostte, eerlijk vergeleken.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="app/coach.jpg" alt="De coach adviseert hoe ver de lange duurloop deze week moet zijn" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Coach · Premium</span><span>Advies op basis van je eigen runs en het weer.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="app/logboek.jpg" alt="Logboek met de week, kilometers per week en eerdere runs" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Logboek</span><span>Elke week in één oogopslag, met je reeks.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="app/badges.jpg" alt="Badges: 14 van 50 verdiend, als medailles" width="540" height="1169" loading="lazy"></div><figcaption><span class="label">Badges</span><span>Medailles voor mijlpalen, records en bijzonder weer.</span></figcaption></figure>
+  </div>
+</section>
+
 <div class="wrap">
   <section class="app" id="app">
-    <figure class="shotframe reveal" style="margin:0"><img src="app-coach.jpg" width="560" height="602" loading="lazy" alt="De AI-coach in Kadans beantwoordt de vraag hoe ver de lange duurloop deze week moet zijn"></figure>
-    <div class="head reveal"><h2>Een coach die het weer kent.</h2></div>
+    <figure class="shotframe reveal" style="margin:0"><div class="phone" style="width:min(270px,100%)"><img src="app/kaart.jpg" width="540" height="1169" loading="lazy" alt="Tijdens de run: je spoor op de kaart met afstand, tijd en tempo"></div></figure>
+    <div class="head reveal"><h2>Onderweg met een coach in je oor.</h2></div>
     <div class="reveal">
       <p>Op <em>Vandaag</em> zie je in één oogopslag je beste vertrektijd, met een score, het weer en wanneer het droog wordt. Kies je rondje en Kadans zegt welke kant je op moet, zodat je op het eind rugwind hebt.</p>
       <p>Tijdens je run praat een Nederlandse coachstem mee: <em>Daan, Bram, Emma of Fleur</em>. Met tussentijden, een tempo-alarm en een feestje als je een record loopt.</p>
@@ -287,6 +344,20 @@ details a{color:var(--gold-deep)}
       <a class="row" href="#app"><span class="t">Wind op je route, per kilometer</span><span class="date">Gratis</span><span class="arrow-btn"><svg><use href="#pijl"/></svg></span></a>
       <a class="row" href="#app"><span class="t">Jouw loopprofiel: bij welk weer je het snelst bent</span><span class="date">Gratis</span><span class="arrow-btn"><svg><use href="#pijl"/></svg></span></a>
       <a class="row" href="#app"><span class="t">Wedstrijddoelen met het weer van de wedstrijddag</span><span class="date">Gratis</span><span class="arrow-btn"><svg><use href="#pijl"/></svg></span></a>
+    </div>
+  </section>
+</div>
+
+<div class="space"></div>
+
+<div class="wrap">
+  <section class="member reveal" aria-label="Ledenkaart">
+    <div class="card3d" id="kaart3d"><img src="app/ledenkaart.png" width="757" height="477" alt="De Kadans-ledenkaart met 643 km, 75 runs en 14 badges"></div>
+    <div>
+      <span class="tag on-dark">Ledenkaart</span>
+      <h2>Elke kilometer op je eigen kaart.</h2>
+      <p>In je profiel staat je ledenkaart, in zwart en goud. De lijn is het profiel van je lopen; kilometers, runs en badges tellen vanzelf mee.</p>
+      <ul><li>Deel je run als kaart of als verhaal 9:16</li><li>Recordfeest met eigen deelkaart</li><li>Je rondje als poster aan de muur</li></ul>
     </div>
   </section>
 </div>
@@ -349,6 +420,27 @@ details a{color:var(--gold-deep)}
 </footer>
 
 <script>
+// Galerij: pijltjes schuiven één scherm op.
+(function () {
+  var rail = document.getElementById('rail');
+  document.querySelectorAll('.rail-nav button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var step = rail.querySelector('.shot').getBoundingClientRect().width + 32;
+      rail.scrollBy({ left: step * +b.dataset.dir, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
+  });
+})();
+// Ledenkaart kantelt mee met de muis (niet bij "minder beweging" of aanraakschermen).
+(function () {
+  var box = document.getElementById('kaart3d');
+  if (!box || matchMedia('(prefers-reduced-motion: reduce)').matches || !matchMedia('(hover: hover)').matches) return;
+  var img = box.querySelector('img');
+  box.addEventListener('pointermove', function (e) {
+    var r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    img.style.transform = 'rotateX(' + (-y * 16) + 'deg) rotateY(' + (x * 22) + 'deg)';
+  });
+  box.addEventListener('pointerleave', function () { img.style.transform = ''; });
+})();
 // Rustig in beeld schuiven (zonder IntersectionObserver gewoon meteen zichtbaar).
 (function () {
   var els = document.querySelectorAll('.reveal');

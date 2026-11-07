@@ -45,8 +45,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
   Site gebruikt eigen lettertypes (`site/fonts.css`) en Leaflet uit `site.yml` (geen Google Fonts/unpkg → geen cookiebanner nodig).
   Site-stijl (unslop-controle 2-11-2026, score 0): geen tekst met kleurverloop (effen goud), kleurverloop alleen op het CTA-blok,
-  afrondingen 8/16/24 px, pil alleen voor `.btn` (gemarkeerd `unslop-ignore`), `button{font-family:inherit}`. Functies toont `site/app-coach.jpg`
-  (uitsnede van `schermen-main/playstore/6_coach.png`). Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
+  afrondingen 8/16/24 px, `button{font-family:inherit}`. **Voorpagina sinds 7-11-2026 in de stijl van integratedbio.com** (licht papier,
+  groot beeld met ronde hoeken `site/beeld-hero.jpg`/`beeld-voet.jpg` uit `tools/maak_site_beeld.py`, typemachine-labels, knop = donker blok + goud vierkant,
+  vlakken 01–03, galerij met echte app-schermen in telefoonlijsten `site/app/*.jpg` (uitsneden van Sems schermafbeeldingen), ledenkaart `site/app/ledenkaart.png`,
+  donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0040** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
