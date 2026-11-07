@@ -10,7 +10,7 @@
 <meta property="og:description" content="Weet wanneer je moet lopen, welke kant je op moet en wat je aantrekt.">
 <meta property="og:image" content="https://kadans.fit/og.png">
 <meta property="og:url" content="https://kadans.fit/">
-<meta name="theme-color" content="#F3EEE6">
+<meta name="theme-color" content="#EDE6DA">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="beeld-hero.jpg">
@@ -18,8 +18,8 @@
 <script>document.documentElement.classList.add('js')</script>
 <style>
 :root{
-  --paper:#F3EEE6; --card:#FBF8F3; --stone:#E6DFD3; --line:#DCD3C4;
-  --ink:#1E1914; --dark:#211A14; --dark-2:#2C241C;
+  --paper:#EDE6DA; --card:#F7F2EA; --stone:#E7DFD2; --line:#DCD1BF;
+  --ink:#211A13; --dark:#211A14; --dark-2:#2C241C;
   --gold:#D9BF92; --gold-soft:#E9D7B2; --gold-deep:#7A5A34;
   --muted:#5A5044; --faint:#A89C8B; --on-dark:#F1E9DC; --on-dark-muted:#BDB1A0;
   --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
@@ -54,11 +54,11 @@ a:hover .arrow-btn{transform:translateX(3px)}
 /* Zwevende kop: logo links, menu-groep rechts */
 .top{position:fixed;inset:16px 16px auto 16px;z-index:30;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
 .top>*{pointer-events:auto}
-.logo{display:flex;align-items:flex-end;gap:7px;padding:10px 14px;border-radius:var(--r-s);background:rgba(251,248,243,.92);text-decoration:none}
-@supports (backdrop-filter:blur(8px)){.logo,.menu{backdrop-filter:blur(14px)}.logo{background:rgba(251,248,243,.78)}}
+.logo{display:flex;align-items:flex-end;gap:7px;padding:10px 14px;border-radius:var(--r-s);background:rgba(247,242,234,.92);text-decoration:none}
+@supports (backdrop-filter:blur(8px)){.logo,.menu{backdrop-filter:blur(14px)}.logo{background:rgba(247,242,234,.78)}}
 .logo img{height:22px;width:auto}
 .logo .adans{display:block;aspect-ratio:737/102;height:9px;background:var(--gold-deep);-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat}
-.menu{display:flex;gap:2px;padding:4px;border-radius:var(--r-s);background:rgba(251,248,243,.78)}
+.menu{display:flex;gap:2px;padding:4px;border-radius:var(--r-s);background:rgba(247,242,234,.78)}
 .menu a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:9px 12px;border-radius:6px;color:var(--ink)}
 .menu a:hover{background:var(--stone)}
 .menu a.cta{background:var(--dark);color:var(--on-dark)}
