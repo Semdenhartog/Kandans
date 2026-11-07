@@ -345,7 +345,7 @@ final _coach = [
 ];
 
 List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false}) => [
-      supabaseProvider.overrideWithValue(SupabaseClient('https://voorbeeld.supabase.co', 'anon')),
+      supabaseProvider.overrideWithValue(SupabaseClient('https://voorbeeld.supabase.co', 'anon', authOptions: const AuthClientOptions(autoRefreshToken: false))),
       currentUserProvider.overrideWithValue(null),
       profileProvider.overrideWith((ref) => Profile(id: 'u', firstName: 'Sem', homeLatitude: _home.lat, homeLongitude: _home.lon)),
       activitiesProvider.overrideWith((ref) => newUser ? const <Activity>[] : _runs),

@@ -23,7 +23,8 @@ class HeartRateService {
   static const _nameKey = 'hr_device_name';
   static const _maxKey = 'hr_max';
 
-  final _ble = FlutterReactiveBle();
+  // Pas aanmaken als Bluetooth echt nodig is (niet al bij het tonen van Vandaag).
+  late final _ble = FlutterReactiveBle();
   final bpm = ValueNotifier<int?>(null);
   final status = ValueNotifier<HrStatus>(HrStatus.off);
   final maxHr = ValueNotifier<int>(190);

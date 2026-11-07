@@ -19,7 +19,8 @@ class StrideSensorService {
   static const _idKey = 'stride_device_id';
   static const _nameKey = 'stride_device_name';
 
-  final _ble = FlutterReactiveBle();
+  // Pas aanmaken als Bluetooth echt nodig is (niet al bij het tonen van Vandaag).
+  late final _ble = FlutterReactiveBle();
 
   /// Stappen per minuut (null = geen sensor of geen signaal).
   final cadence = ValueNotifier<int?>(null);
