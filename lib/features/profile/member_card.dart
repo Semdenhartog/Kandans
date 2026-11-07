@@ -170,16 +170,25 @@ class _MemberCardState extends State<MemberCard> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _Fig(label: 'KM', value: '${w.km.round()}', ink: ink, soft: soft),
-                          SizedBox(width: width * 0.06),
-                          _Fig(label: 'RUNS', value: '${w.runs}', ink: ink, soft: soft),
-                          SizedBox(width: width * 0.06),
-                          GestureDetector(
-                            onTap: w.onBadges,
-                            child: _Fig(label: 'BADGES', value: '${w.badges}', ink: ink, soft: soft),
+                          // Krimpt mee bij grote getallen (2465 km) of grote letters, in plaats van uit de kaart te lopen.
+                          Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: _Fig(label: 'KM', value: '${w.km.round()}', ink: ink, soft: soft))),
+                          SizedBox(width: width * 0.05),
+                          Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: _Fig(label: 'RUNS', value: '${w.runs}', ink: ink, soft: soft))),
+                          SizedBox(width: width * 0.05),
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: w.onBadges,
+                              child: FittedBox(fit: BoxFit.scaleDown, child: _Fig(label: 'BADGES', value: '${w.badges}', ink: ink, soft: soft)),
+                            ),
                           ),
                           const Spacer(),
-                          _Fig(label: 'LOPER SINDS', value: since, ink: ink, soft: soft, end: true),
+                          Flexible(
+                            flex: 2,
+                            child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: _Fig(label: 'LOPER SINDS', value: since, ink: ink, soft: soft, end: true)),
+                          ),
                         ],
                       ),
                     ],
