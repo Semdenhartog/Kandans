@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#EDE6DA">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preload" as="image" href="beeld-hero.jpg">
+<link rel="preload" as="image" href="foto/heide.jpg">
 <link rel="stylesheet" href="fonts.css">
 <script>document.documentElement.classList.add('js')</script>
 <style>
@@ -66,7 +66,7 @@ a:hover .arrow-btn{transform:translateX(3px)}
 @media (max-width:640px){.menu a:not(.cta){display:none}}
 
 /* Hero: groot beeld met afgeronde hoeken */
-.hero{margin:8px;border-radius:var(--r-l);min-height:calc(100svh - 16px);position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:120px 32px 32px;background:#1A1510 url(beeld-hero.jpg) center/cover no-repeat}
+.hero{margin:8px;border-radius:var(--r-l);min-height:calc(100svh - 16px);position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:120px 32px 32px;background:linear-gradient(100deg,rgba(18,14,10,.82) 0%,rgba(18,14,10,.45) 45%,rgba(18,14,10,.15) 75%),linear-gradient(0deg,rgba(18,14,10,.55),transparent 40%),#1A1510 url(foto/heide.jpg) center/cover no-repeat}
 .hero h1{font-size:clamp(48px,8.4vw,128px);max-width:11ch;font-weight:500}
 .hero-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px}
 .hero-foot p{margin:0;font-size:clamp(17px,1.5vw,20px);max-width:30rem;color:rgba(255,255,255,.88)}
@@ -97,7 +97,7 @@ a:hover .arrow-btn{transform:translateX(3px)}
 .app h2{font-size:clamp(32px,3.8vw,56px);margin-bottom:8px}
 .app p{margin:0 0 16px;color:var(--muted);font-size:15.5px}
 .app p em{font-style:normal;color:var(--ink);font-weight:600}
-.shotframe{grid-row:1/3;border-radius:var(--r-m);overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(217,191,146,.25),transparent 60%),var(--dark);display:flex;align-items:center;justify-content:center;padding:44px 28px}
+.shotframe{grid-row:1/3;border-radius:var(--r-m);overflow:hidden;background:linear-gradient(0deg,rgba(18,14,10,.35),rgba(18,14,10,.1)),#1d1a14 url(foto/bos.jpg) center/cover;display:flex;align-items:center;justify-content:center;padding:44px 28px}
 .shotframe img{border-radius:var(--r-m);width:100%;height:100%;object-fit:cover;object-position:top}
 .facts{display:flex;gap:28px;margin:8px 0 28px}
 .facts b{display:block;font-family:Saira,sans-serif;font-weight:700;font-size:34px;line-height:1;letter-spacing:-0.01em}
@@ -110,7 +110,7 @@ a:hover .arrow-btn{transform:translateX(3px)}
 .sec-head h2{font-size:clamp(44px,6.5vw,96px)}
 .sec-head p{margin:0;color:var(--muted);max-width:26rem;font-size:17px}
 .feature{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);background:var(--paper);border-radius:var(--r-m);padding:16px;text-decoration:none;color:inherit}
-.feature .pic{border-radius:var(--r-s);min-height:300px;background:var(--dark) url(beeld-voet.jpg) center/cover;position:relative;overflow:hidden}
+.feature .pic{border-radius:var(--r-s);min-height:300px;background:var(--dark) url(foto/loper.jpg) center 60%/cover;position:relative;overflow:hidden}
 .feature .pic .big{position:absolute;left:24px;bottom:18px;font-family:Saira,sans-serif;font-weight:800;font-size:clamp(64px,8vw,110px);line-height:1;color:var(--gold-soft)}
 .feature .body{display:flex;flex-direction:column;gap:16px;padding:12px 8px 8px}
 .feature .meta{display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -195,6 +195,7 @@ details a{color:var(--gold-deep)}
 .phone::before{content:"";position:absolute;inset:9px;border-radius:38px;pointer-events:none;z-index:1;background:linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 28%)}
 .hero-phone{position:absolute;right:clamp(32px,7vw,140px);top:50%;transform:translateY(-48%) rotate(-5deg);width:min(300px,24vw)}
 .hero-foot{justify-content:flex-start!important}
+.hero .go .t{background:#F3EEE6;color:var(--ink)}.hero .go:hover .t{background:#fff}
 @media (max-width:1000px){.hero{min-height:0}.hero-phone{position:relative;right:auto;top:auto;transform:rotate(-4deg);width:min(240px,60vw);margin:36px auto 40px}}
 
 /* Galerij: schermen naast elkaar, vegen of pijltjes */
@@ -225,6 +226,22 @@ details a{color:var(--gold-deep)}
 .member li{display:flex;gap:12px;align-items:baseline}
 .member li::before{content:"";flex:none;width:7px;height:7px;background:var(--gold);border-radius:1px;transform:translateY(-2px)}
 @media (max-width:860px){.member{grid-template-columns:1fr}}
+
+
+/* Fotobanden: rust tussen de blokken */
+.band-photo{margin:8px;border-radius:var(--r-l);min-height:clamp(420px,62vw,720px);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:clamp(28px,4vw,56px);color:#fff;background:#2a241c center/cover no-repeat}
+.band-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(18,14,10,.55),transparent 55%)}
+.band-photo>*{position:relative;z-index:1}
+.band-photo blockquote{margin:0;text-align:right;margin-left:auto;max-width:22ch;font-size:clamp(30px,4vw,56px);font-weight:500;letter-spacing:-0.03em;line-height:1.06}
+.band-photo cite{text-align:right;display:block;margin-top:18px;font-style:normal;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.duo{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+.duo figure{margin:0;border-radius:var(--r-m);overflow:hidden;position:relative;min-height:clamp(320px,40vw,560px);background:#2a241c center/cover no-repeat}
+.duo figure:nth-child(2){margin-top:clamp(40px,8vw,120px)}
+.duo figcaption{position:absolute;left:16px;bottom:16px;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:rgba(18,14,10,.45);backdrop-filter:blur(8px);padding:7px 11px;border-radius:var(--r-s)}
+.duo-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:32px;margin-bottom:40px}
+.duo-head h2{font-size:clamp(34px,4.6vw,68px)}
+.duo-head p{color:var(--muted);max-width:34rem;margin:18px 0 0}
+@media (max-width:760px){.duo{grid-template-columns:1fr}.duo figure:nth-child(2){margin-top:0}.duo-head{grid-template-columns:1fr}}
 
 /* Rustig in beeld; uit bij "minder beweging" */
 .js .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
@@ -264,6 +281,10 @@ details a{color:var(--gold-deep)}
     </div>
   </section>
 </div>
+
+<section class="band-photo reveal" style="background-image:url(foto/mist.jpg);background-position:center 58%;justify-content:flex-end" aria-label="Sfeerbeeld">
+  <div><blockquote>Om 7:10 droog, windstil en negen graden. Precies dan.</blockquote><cite>Zo klinkt Kadans op een gewone dinsdag</cite></div>
+</section>
 
 <section class="tiles" aria-label="Drie stappen">
   <article class="tile">
@@ -351,6 +372,18 @@ details a{color:var(--gold-deep)}
 <div class="space"></div>
 
 <div class="wrap">
+  <section aria-label="Jouw rondje">
+    <div class="duo-head reveal"><div><span class="tag">Jouw rondje</span></div><div><h2>Duinen in de ochtend. Heide in de avond. <span style="color:var(--faint)">Altijd op het goede moment.</span></h2><p>Kadans kent je eigen rondjes en zoekt per route het rustigste moment: minder wind, droog, en de wind op het eind in je rug.</p></div></div>
+    <div class="duo">
+      <figure class="reveal" style="background-image:url(foto/duin.jpg)"><figcaption><span style="width:7px;height:7px;background:var(--gold);border-radius:1px"></span>Duinpad · 07:10 · wind 6 km/u</figcaption></figure>
+      <figure class="reveal" style="background-image:url(foto/boom.jpg)"><figcaption><span style="width:7px;height:7px;background:var(--gold);border-radius:1px"></span>Heide · 18:35 · droog</figcaption></figure>
+    </div>
+  </section>
+</div>
+
+<div class="space"></div>
+
+<div class="wrap">
   <section class="member reveal" aria-label="Ledenkaart">
     <div class="card3d" id="kaart3d"><img src="app/ledenkaart.png" width="757" height="477" alt="De Kadans-ledenkaart met 412 km, 48 runs en 11 badges"></div>
     <div>
@@ -416,7 +449,7 @@ details a{color:var(--gold-deep)}
     <a class="up" href="#top" aria-label="Naar boven"><svg width="14" height="14" style="transform:rotate(-90deg)"><use href="#pijl"/></svg></a>
   </div>
   <div class="mega" aria-hidden="true"><img src="kadans-k-groot.png" alt="" width="200" height="181"><span class="adans"></span></div>
-  <div class="legal"><span>© 2026 Kadans. Alle rechten voorbehouden.</span><span>Kaarten © Kadaster · Weer Open-Meteo &amp; Buienradar</span></div>
+  <div class="legal"><span>© 2026 Kadans. Alle rechten voorbehouden.</span><span>Kaarten © Kadaster · Weer Open-Meteo &amp; Buienradar · Foto's Unsplash</span></div>
 </footer>
 
 <script>
