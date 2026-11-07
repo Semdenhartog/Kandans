@@ -3,55 +3,77 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kadans – de beste loopmomenten</title>
+<title>Kadans – loop op het beste moment</title>
 <meta name="description" content="Kadans rekent per 5 minuten uit wanneer je het best kunt gaan hardlopen: op basis van weer, wind op je route, buien en je eigen prestaties.">
-<meta property="og:title" content="Kadans – de beste loopmomenten">
+<link rel="canonical" href="https://kadans.fit/">
+<meta property="og:title" content="Kadans – loop op het beste moment">
 <meta property="og:description" content="Weet wanneer je moet lopen, welke kant je op moet en wat je aantrekt.">
-<meta property="og:image" content="og.png">
+<meta property="og:image" content="https://kadans.fit/og.png">
+<meta property="og:url" content="https://kadans.fit/">
 <meta name="theme-color" content="#13110E">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="fonts.css">
+<script>document.documentElement.classList.add('js')</script>
 <style>
 :root{
-  --bg:#13110E; --surface:#1C1814; --surface-high:#25201B; --border:#352E26; --bar:#3A332B;
+  --bg:#13110E; --band:#17140F; --surface:#1C1814; --surface-high:#25201B; --border:#2E2821; --line:#3A332B;
   --accent:#D9BF92; --accent-deep:#B8955F; --accent-light:#F0DDB6;
   --text:#F1E9DC; --muted:#BDB1A0; --subtle:#94897A; --good:#8CC99A; --rain:#9DB8C9;
   --grad:linear-gradient(135deg,var(--accent-light) 0%,var(--accent) 50%,var(--accent-deep) 100%);
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
 body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:var(--accent)}a:hover{color:var(--accent-light)}
 img{display:block;max-width:100%}
+button{font-family:inherit}
 .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
 .display{font-family:Saira,sans-serif;font-weight:800;letter-spacing:-0.01em;line-height:1.02;margin:0}
-.eyebrow{font-family:Saira,sans-serif;font-weight:700;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
-.lead{font-size:19px;color:var(--muted);margin:0;max-width:34rem}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border-radius:999px;font-weight:600;font-size:17px;text-decoration:none;border:0;cursor:pointer;transition:transform .12s ease,opacity .12s ease}/* unslop-ignore: pil alleen voor knoppen, bewuste keuze */
+.eyebrow{font-family:Saira,sans-serif;font-weight:700;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border-radius:999px;font-weight:600;font-size:17px;text-decoration:none;border:0;cursor:pointer;transition:transform .12s ease,filter .12s ease}/* unslop-ignore: pil alleen voor knoppen, bewuste keuze */
 .btn:hover{transform:translateY(-1px)}
 .btn-primary{background:var(--accent);color:var(--bg)}.btn-primary:hover{color:var(--bg);filter:brightness(1.07)}
-.btn-ghost{border:1.5px solid var(--border);color:var(--text)}.btn-ghost:hover{color:var(--text);border-color:var(--subtle)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px}
-.grad-text{color:var(--accent)}
+.btn-ghost{border:1.5px solid var(--line);color:var(--text)}.btn-ghost:hover{color:var(--text);border-color:var(--subtle)}
+.arrow{display:inline-block;transition:transform .15s ease}
+a:hover .arrow{transform:translateX(3px)}
+.link{font-weight:600;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-.notice{border-bottom:1px solid #241F18;background:rgba(217,191,146,.05)}
-.notice .inner{max-width:1200px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;font-size:14px;color:var(--muted)}
-.notice a{color:var(--accent);font-weight:600}
+/* Kop: logo links, drie links + knop rechts; op mobiel een menu dat uitklapt */
+.top{position:sticky;top:0;z-index:20;background:rgba(19,17,14,.92);border-bottom:1px solid transparent;transition:border-color .2s ease}
+.top.scrolled{border-bottom-color:var(--border)}
+@supports (backdrop-filter:blur(8px)){.top{background:rgba(19,17,14,.78);backdrop-filter:blur(12px)}}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.brand{display:flex;align-items:flex-end;gap:8px;text-decoration:none}
+.brand img.mark{height:32px;width:auto}
+.brand .adans{display:block;flex:none;aspect-ratio:737/102;height:13px;background:var(--accent);-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat}
+.menu{display:flex;align-items:center;gap:28px;font-size:15px}
+.menu a:not(.btn){color:var(--muted);text-decoration:none}.menu a:not(.btn):hover{color:var(--text)}
+.menu .btn{min-height:42px;padding:0 20px;font-size:15px}
+.burger{display:none;background:none;border:1.5px solid var(--line);color:var(--text);border-radius:8px;width:44px;height:44px;cursor:pointer}
+.burger svg{width:20px;height:20px}
+.drawer{display:none;border-top:1px solid var(--border);padding:12px 24px 24px}
+.drawer a{display:block;padding:14px 0;font-size:20px;font-family:Saira,sans-serif;font-weight:700;color:var(--text);text-decoration:none;border-bottom:1px solid var(--border)}
+.drawer .mail{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:var(--muted);border:0}
+@media (max-width:820px){.menu{display:none}.burger{display:inline-grid;place-items:center}.top.open .drawer{display:block}}
 
-header.wrap,header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-top:22px;padding-bottom:22px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.brand{align-items:flex-end;gap:8px}.brand img.mark{height:34px;width:auto;display:block}.brand .adans{display:block;flex:none;aspect-ratio:737/102;background:currentColor;-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat;height:14px;color:var(--accent)}.brand .word{font-family:Saira,sans-serif;font-weight:800;letter-spacing:.38em;color:var(--accent);font-size:17px}
-nav{display:flex;flex-wrap:wrap;gap:24px;font-size:15px}
-nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
+/* 1. Hero */
+.hero{padding-top:clamp(56px,9vw,120px);padding-bottom:clamp(64px,9vw,120px);display:flex;flex-direction:column;gap:28px}
+.hero h1{font-size:clamp(46px,8vw,112px);text-transform:uppercase;max-width:14ch}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .sub{font-size:clamp(18px,2vw,22px);color:var(--muted);margin:0;max-width:40rem}
+.hero .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
 
-.hero{display:flex;flex-wrap:wrap;align-items:center;gap:56px;padding-top:56px;padding-bottom:96px}
-.hero-copy{flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:24px}
-.hero h1{font-size:clamp(44px,6.4vw,82px);text-transform:uppercase}
-.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
-.hero-visual{flex:1 1 360px;min-width:0;display:flex;justify-content:center}
+/* 2. Het idee: kop + verhaal + voorbeeldscherm */
+.band{background:var(--band);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.section{padding-top:clamp(72px,9vw,120px);padding-bottom:clamp(72px,9vw,120px)}
+.idea{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(40px,6vw,96px);align-items:center}
+.idea h2{font-size:clamp(32px,4.4vw,56px);text-transform:uppercase;margin-top:16px}
+.idea .story{font-size:clamp(18px,1.7vw,21px);color:var(--muted);margin:24px 0 32px;max-width:36rem}
+@media (max-width:900px){.idea{grid-template-columns:1fr}}
 
-.phone{width:100%;max-width:370px;padding:26px;display:flex;flex-direction:column;gap:18px;border-radius:24px;box-shadow:0 30px 80px rgba(217,191,146,.10)}
+.phone{width:100%;max-width:370px;justify-self:center;padding:26px;display:flex;flex-direction:column;gap:18px;border-radius:24px;background:var(--surface);border:1px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,.35)}
 .phone-top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--subtle)}
 .pill{padding:4px 10px;border-radius:8px;background:var(--surface-high);color:var(--muted);font-size:13px}
 .best{background:var(--accent);color:var(--bg);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
@@ -66,119 +88,160 @@ nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 .panel-head{display:flex;justify-content:space-between;font-size:13px}
 .panel-head span:last-child{color:var(--subtle)}
 .bars{display:flex;align-items:flex-end;gap:3px;height:44px}
-.bars i{flex:1;border-radius:3px;background:var(--bar)}
+.bars i{flex:1;border-radius:3px;background:var(--line)}
 .bars i.r{background:var(--rain)}
 .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--subtle)}
 
-section.band{background:#17140F;border-top:1px solid #241F18;border-bottom:1px solid #241F18}
-.section{padding-top:96px;padding-bottom:96px;display:flex;flex-direction:column;gap:48px}
-.section h2{font-size:clamp(32px,4vw,52px);text-transform:uppercase;max-width:44rem}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;list-style:none;margin:0;padding:0;counter-reset:s}
-.step{position:relative;display:flex;flex-direction:column;gap:10px;padding-top:28px;border-top:2px solid var(--border)}
-.step::before{content:"";position:absolute;top:-7px;left:0;width:12px;height:12px;border-radius:50%;background:var(--accent)}
-@media (max-width:760px){.steps{grid-template-columns:1fr;gap:0}.step{border-top:0;border-left:2px solid var(--border);padding:0 0 32px 28px}.step::before{top:4px;left:-7px}}
-.step .n{font-family:Saira,sans-serif;font-weight:800;font-size:44px;line-height:1}
-.step h3,.feat h3{margin:0;font-size:21px;font-weight:600}
-.step p,.feat p{margin:0;color:var(--muted);font-size:16px}
-.feat-wrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:64px;align-items:start}
-.feats{display:flex;flex-direction:column;gap:0}
-.feat{display:grid;grid-template-columns:30px 1fr;column-gap:18px;row-gap:6px;padding:22px 0;border-bottom:1px solid var(--border)}
-.feat:first-child{padding-top:0}
-.feat svg{width:26px;height:26px;grid-row:span 3;margin-top:2px}
-.feat-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.shot{position:sticky;top:24px;margin:0}
-.shot img{width:100%;border-radius:24px;-webkit-mask:linear-gradient(#000 78%,transparent);mask:linear-gradient(#000 78%,transparent)}
-.shot figcaption{font-size:14px;color:var(--subtle);margin-top:4px}
-@media (max-width:860px){.feat-wrap{grid-template-columns:1fr;gap:40px}.shot{position:static;max-width:420px}}
-.tag{align-self:flex-start;font-size:12px;font-weight:600;padding:3px 9px;border-radius:8px;border:1px solid var(--border);color:var(--subtle)}
-.tag.prem{border-color:transparent;background:var(--accent);color:var(--bg)}
+/* 3. Drie stappen 01–03 */
+.head-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px 40px;margin-bottom:48px}
+.head-row h2{font-size:clamp(32px,4.4vw,56px);text-transform:uppercase;max-width:18ch}
+.head-row p{color:var(--muted);margin:0;max-width:26rem}
+.pillars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;list-style:none;margin:0;padding:0}
+.pillar{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:14px;min-height:280px;transition:border-color .2s ease,transform .2s ease}
+.pillar:hover{border-color:var(--line);transform:translateY(-2px)}
+.pillar .no{font-family:Saira,sans-serif;font-weight:800;font-size:15px;letter-spacing:.12em;color:var(--subtle)}
+.pillar svg{width:34px;height:34px;margin-top:auto}
+.pillar h3{margin:0;font-family:Saira,sans-serif;font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.01em}
+.pillar p{margin:0;color:var(--muted)}
+@media (max-width:900px){.pillars{grid-template-columns:1fr}.pillar{min-height:0}.pillar svg{margin-top:0}}
 
-.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-.plan{padding:32px;display:flex;flex-direction:column;gap:14px}
+/* Functies: compacte lijst onder de stappen */
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;margin-top:56px;list-style:none;padding:0}
+.feats li{padding:18px 0;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+.feats b{font-weight:600}
+.feats span{color:var(--muted);font-size:15px}
+.tag{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:8px;background:var(--accent);color:var(--bg);vertical-align:2px}
+@media (max-width:900px){.feats{grid-template-columns:1fr}}
+
+/* 4. Over Kadans: beeld + tekst */
+.about{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(40px,6vw,96px);align-items:center}
+.about figure{margin:0}
+.about img{width:100%;border-radius:24px;-webkit-mask:linear-gradient(#000 80%,transparent);mask:linear-gradient(#000 80%,transparent)}
+.about figcaption{font-size:14px;color:var(--subtle);margin-top:6px}
+.about h2{font-size:clamp(32px,4.4vw,56px);text-transform:uppercase;margin:16px 0 24px}
+.about p{color:var(--muted);margin:0 0 18px;max-width:36rem;font-size:17px}
+.facts{display:flex;flex-wrap:wrap;gap:32px;margin:28px 0}
+.fact b{display:block;font-family:Saira,sans-serif;font-weight:800;font-size:40px;line-height:1;color:var(--text)}
+.fact span{font-size:14px;color:var(--subtle)}
+@media (max-width:900px){.about{grid-template-columns:1fr}.about figure{max-width:440px}}
+
+/* Prijs */
+.plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.plan{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:14px}
 .plan.featured{border:1.5px solid var(--accent)}
 .price{font-family:Saira,sans-serif;font-weight:800;font-size:44px;line-height:1}
 .price small{font-family:'DM Sans',sans-serif;font-weight:500;font-size:16px;color:var(--muted)}
 .plan ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--muted)}
 .plan li{display:flex;gap:10px}.plan li::before{content:"";flex:0 0 8px;height:8px;margin-top:9px;border-radius:50%;background:var(--accent)}
 .fine{font-size:13px;color:var(--subtle);margin:0}
+@media (max-width:760px){.plans{grid-template-columns:1fr}}
 
-.faq{display:grid;gap:12px;max-width:52rem}
-details{padding:20px 24px}
-summary{cursor:pointer;font-weight:600;font-size:18px;list-style-position:outside}
-details p{margin:10px 0 0;color:var(--muted)}
+/* 5. Nieuws: datum, titel, link */
+.news{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--border)}
+.news li a{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:8px 32px;align-items:baseline;padding:26px 0;border-top:1px solid var(--border);text-decoration:none;color:var(--text)}
+.news time{font-size:14px;color:var(--subtle);font-variant-numeric:tabular-nums}
+.news .t{font-family:Saira,sans-serif;font-weight:700;font-size:clamp(20px,2.2vw,26px);line-height:1.2}
+.news .go{color:var(--accent);font-weight:600;font-size:15px;white-space:nowrap}
+.news li a:hover .t{color:var(--accent-light)}
+@media (max-width:700px){.news li a{grid-template-columns:1fr}.news .go{margin-top:4px}}
 
-.cta{padding:0 24px 112px}
-.cta-box{max-width:1200px;margin:0 auto;background:var(--grad);color:var(--bg);border-radius:24px;padding:clamp(32px,6vw,72px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:30px}
-.cta-box h2{font-size:clamp(30px,4vw,48px);text-transform:uppercase}
-.cta-box p{margin:0;font-size:18px;color:#2A2016}
+/* Vragen */
+.faq{display:grid;gap:0;max-width:52rem;border-bottom:1px solid var(--border)}
+details{border-top:1px solid var(--border);padding:22px 0}
+summary{cursor:pointer;font-weight:600;font-size:19px;list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--accent);font-size:24px;line-height:1;transition:transform .2s ease}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin:12px 0 0;color:var(--muted);max-width:44rem}
+
+/* 6. Slotbanner met wachtlijst */
+.cta{padding:0 24px clamp(72px,9vw,120px)}
+.cta-box{max-width:1200px;margin:0 auto;background:var(--grad);color:var(--bg);border-radius:24px;padding:clamp(32px,6vw,80px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:end}
+.cta-box h2{font-size:clamp(34px,5vw,64px);text-transform:uppercase}
+.cta-box p{margin:16px 0 0;font-size:18px;color:#2A2016}
 .cta-box a{color:#2A2016;font-weight:600}
-form{flex:1 1 360px;min-width:0;display:flex;flex-wrap:wrap;gap:12px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:860px){.cta-box{grid-template-columns:1fr}}
+form{display:flex;flex-wrap:wrap;gap:12px}
 input[type=email]{flex:1 1 220px;min-width:0;min-height:52px;padding:0 20px;border-radius:8px;border:1.5px solid var(--bg);background:#FBF4E8;color:var(--bg);font-size:17px;font-family:inherit}
-button{font-family:inherit}
 form .btn{background:var(--bg);color:var(--text);border-radius:8px}
+form .btn:hover{color:var(--text)}
 
-footer{border-top:1px solid #241F18;padding:32px 0}
-.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;font-size:14px;color:var(--subtle)}
-.foot a{color:var(--subtle)}
-@media (max-width:560px){nav{gap:16px;font-size:14px}.hero{padding-top:24px}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* Voet: drie groepen */
+footer{border-top:1px solid var(--border);padding:64px 0 32px}
+.foot{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:40px}
+.foot h4{margin:0 0 14px;font-family:Saira,sans-serif;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--subtle);font-weight:700}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.foot a{color:var(--muted);text-decoration:none}.foot a:hover{color:var(--text)}
+.foot .claim{color:var(--muted);max-width:22rem;margin:14px 0 0}
+.legal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--border);font-size:14px;color:var(--subtle)}
+.legal a{color:var(--subtle)}
+@media (max-width:860px){.foot{grid-template-columns:1fr 1fr}.foot>div:first-child{grid-column:1/-1}}
+
+/* Rustig in beeld schuiven; uit bij "minder beweging" */
+.js .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.js .reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<div class="notice">
-  <div class="inner">
-    <span>Privacy &amp; contact: we verwerken jouw data alleen om de app te laten werken.</span>
-    <span><a href="privacy.html">Privacyverklaring</a> · <a href="voorwaarden.html">Voorwaarden</a> · <a href="contact.html">Contact</a></span>
+<header class="top" id="kop">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Kadans, naar boven">
+      <img class="mark" src="kadans-mark.png" alt="Kadans" width="36" height="32">
+      <span class="adans" aria-hidden="true"></span>
+    </a>
+    <nav class="menu" aria-label="Hoofdmenu">
+      <a href="#hoe">Hoe het werkt</a>
+      <a href="#over">Over Kadans</a>
+      <a href="#nieuws">Nieuws</a>
+      <a class="btn btn-primary" href="#wachtlijst">Op de wachtlijst</a>
+    </nav>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="lade" aria-label="Menu openen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
   </div>
-</div>
-
-<header class="wrap">
-  <a class="brand" href="#top" aria-label="Kadans, naar boven">
-    <img class="mark" src="kadans-mark.png" alt="Kadans" width="38" height="34">
-    <span class="adans" aria-hidden="true"></span>
-  </a>
-  <nav aria-label="Hoofdmenu">
+  <nav class="drawer" id="lade" aria-label="Menu">
     <a href="#hoe">Hoe het werkt</a>
-    <a href="#functies">Functies</a>
-    <a href="#prijs">Prijs</a>
-    <a href="#wachtlijst">Wachtlijst</a>
-    <a href="steun.html">Steun Kadans</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="contact.html">Contact</a>
+    <a href="#over">Over Kadans</a>
+    <a href="#nieuws">Nieuws</a>
+    <a href="#wachtlijst">Op de wachtlijst</a>
+    <a class="mail" href="contact.html">Contact</a>
   </nav>
 </header>
 
 <main id="top">
+<!-- 1. Hero -->
 <section class="wrap hero">
-  <div class="hero-copy">
-    <span class="eyebrow">De beste loopmomenten</span>
-    <h1 class="display">Loop niet zomaar.<br><span class="grad-text">Loop op het beste moment.</span></h1>
-    <p class="lead">Kadans kijkt naar het weer, de wind op je route, de buienradar en je eigen runs, en rekent per 5 minuten uit wanneer je het best kunt vertrekken. En welke kant je op moet, zodat je het rustigste en snelste loopmoment pakt.</p>
-    <div class="actions">
-      <a class="btn btn-primary" href="#wachtlijst">Zet me op de wachtlijst</a>
-      <a class="btn btn-ghost" href="#hoe">Hoe het werkt</a>
-    </div>
+  <p class="eyebrow">Hardloop-app · Android · 1 december 2026</p>
+  <h1 class="display">Loop op het <em>beste moment.</em></h1>
+  <p class="sub">Kadans combineert het weer, de wind op je route, de buienradar en je eigen runs, en vertelt je per 5 minuten wanneer je het best kunt vertrekken.</p>
+  <div class="actions">
+    <a class="btn btn-primary" href="#wachtlijst">Zet me op de wachtlijst <span class="arrow" aria-hidden="true">→</span></a>
+    <a class="btn btn-ghost" href="#hoe">Ontdek hoe het werkt</a>
   </div>
+</section>
 
-  <div class="hero-visual">
-    <div class="card phone" role="img" aria-label="Voorbeeld van het scherm Vandaag in Kadans: beste vertrektijd 18:35, met de buien voor de komende 2 uur">
+<!-- 2. Het idee -->
+<section class="band">
+  <div class="wrap section idea">
+    <div class="reveal">
+      <p class="eyebrow">Eén app, drie bronnen</p>
+      <h2 class="display">Minder gokken met het weer.</h2>
+      <p class="story">De meeste loop-apps vertellen je achteraf hoe het ging. Kadans helpt je vooraf: het weer, je route en je eigen prestaties versterken elkaar. Hoe meer je loopt, hoe beter Kadans weet wat voor jou werkt.</p>
+      <a class="link" href="#hoe">Bekijk hoe het werkt <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+    <div class="phone reveal" role="img" aria-label="Voorbeeld van het scherm Vandaag in Kadans: beste vertrektijd 18:35, met de buien voor de komende 2 uur">
       <div class="phone-top"><span>Vandaag · Barneveld</span><span class="pill">Voorbeeld</span></div>
       <div class="best">
         <div class="best-row">
-          <div>
-            <div class="best-label">Beste vertrektijd</div>
-            <div class="best-time">18:35</div>
-          </div>
+          <div><div class="best-label">Beste vertrektijd</div><div class="best-time">18:35</div></div>
           <div class="score">92<small>Top</small></div>
         </div>
         <div class="chips"><span class="chip">12°C</span><span class="chip">Wind 9 km/u ZW</span><span class="chip">Droog</span></div>
       </div>
       <div class="panel">
         <div class="panel-head"><span>Buien komende 2 uur · live</span><span>Buienradar</span></div>
-        <div class="bars" aria-hidden="true">
-          <i class="r" style="height:70%"></i><i class="r" style="height:85%"></i><i class="r" style="height:60%"></i><i class="r" style="height:40%"></i><i class="r" style="height:22%"></i><i style="height:15%"></i><i style="height:25%"></i>
-        </div>
+        <div class="bars" aria-hidden="true"><i class="r" style="height:70%"></i><i class="r" style="height:85%"></i><i class="r" style="height:60%"></i><i class="r" style="height:40%"></i><i class="r" style="height:22%"></i><i style="height:15%"></i><i style="height:25%"></i></div>
         <div class="axis"><span>18:10</span><span>Droog vanaf 18:35</span><span>20:10</span></div>
       </div>
       <div class="panel">
@@ -189,86 +252,120 @@ footer{border-top:1px solid #241F18;padding:32px 0}
   </div>
 </section>
 
-<section class="band" id="hoe">
-  <div class="wrap section">
-    <h2 class="display">Zo werkt het</h2>
-    <ol class="steps">
-      <li class="step"><span class="n grad-text">1</span><h3>Koppel je runs</h3><p>Via je horloge (Fitbit, Samsung, Garmin en meer via Health Connect), Strava, een GPX-bestand of gewoon met de hand.</p></li>
-      <li class="step"><span class="n grad-text">2</span><h3>Kies je route en training</h3><p>Rustig, tempo, lang of herstel, op je eigen rondje. Na 8 runs weet Kadans bij welk weer jij het best presteert.</p></li>
-      <li class="step"><span class="n grad-text">3</span><h3>Vertrek op het beste moment</h3><p>Per 5 minuten berekend, met de buien van de komende 2 uur erbij. Minder gokken met het weer.</p></li>
-    </ol>
+<!-- 3. Drie stappen -->
+<section class="wrap section" id="hoe">
+  <div class="head-row reveal">
+    <h2 class="display">Zo werkt Kadans</h2>
+    <p>Drie stappen. De eerste duurt een minuut, de rest gaat vanzelf.</p>
   </div>
+  <ol class="pillars">
+    <li class="pillar reveal">
+      <span class="no">01</span>
+      <h3>Koppel je runs</h3>
+      <p>Via je horloge (Garmin, Samsung, Fitbit en meer via Health Connect), Strava, een GPX-bestand of met de hand.</p>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="3"/><path d="M10 17h4"/></svg>
+    </li>
+    <li class="pillar reveal">
+      <span class="no">02</span>
+      <h3>Kies route en training</h3>
+      <p>Rustig, tempo, lang of herstel, op je eigen rondje. Na 8 runs weet Kadans bij welk weer jij het best presteert.</p>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 20h11a3 3 0 1 1-3-3"/><path d="M16 4l5 6-5 6"/></svg>
+    </li>
+    <li class="pillar reveal">
+      <span class="no">03</span>
+      <h3>Vertrek op tijd</h3>
+      <p>Per 5 minuten berekend, met de buien van de komende 2 uur en de wind op je route erbij.</p>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 5V13L16 15"/></svg>
+    </li>
+  </ol>
+  <ul class="feats reveal" aria-label="Functies">
+    <li><b>Wind op jouw route</b><span>Tegen- of rugwind per kilometer, zodat je de wind op het eind in je rug hebt.</span></li>
+    <li><b>Jouw loopprofiel</b><span>Bij welke temperatuur en wind jij het snelst bent.</span></li>
+    <li><b>Wedstrijddoelen</b><span>Verwachte eindtijd met het weer van de wedstrijddag.</span></li>
+    <li><b>Coachstem tijdens je run</b><span>Kies Daan, Bram, Emma of Fleur voor je tussentijden.</span></li>
+    <li><b>Samen lopen</b><span>Loopgroepen met een eigen agenda, reacties en stappenwedstrijd.</span></li>
+    <li><b>AI-coach<span class="tag">Premium</span></b><span>Kent je runs, je wedstrijd en het weer van de komende dagen.</span></li>
+  </ul>
 </section>
 
-<section class="wrap section" id="functies">
-  <h2 class="display">Alles om slimmer te trainen</h2>
-  <div class="feat-wrap">
-  <div class="feats">
-    <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 5V13L16 15"></path></svg>
-      <div class="feat-head"><h3>Per 5 minuten berekend</h3><span class="tag">Gratis</span></div><p>Weer per kwartier en live buien, zodat je ziet of 18:30 of 18:35 de betere keus lijkt.</p>
-    </div>
-    <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a3 3 0 1 0-3-3"></path><path d="M3 20h11a3 3 0 1 1-3-3"></path><path d="M16 4l5 6-5 6"></path></svg>
-      <div class="feat-head"><h3>Wind op jouw route</h3><span class="tag">Gratis</span></div><p>Tegen- of rugwind per kilometer. Loop zo dat je de wind op het eind in je rug hebt.</p>
-    </div>
-    <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"></path><path d="M15 8h6v6"></path></svg>
-      <div class="feat-head"><h3>Jouw loopprofiel</h3><span class="tag">Gratis</span></div><p>Bij welke temperatuur en wind jij het snelst bent, en of je een ochtend- of avondloper bent.</p>
-    </div>
-    <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 4h11l-2 4 2 4H5"></path></svg>
-      <div class="feat-head"><h3>Wedstrijddoelen</h3><span class="tag">Gratis</span></div><p>Verwachte eindtijd met het weer van de wedstrijddag, plus advies over tempo, kleding en drinken.</p>
-    </div>
-    <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 10h8M8 14h5"></path></svg>
-      <div class="feat-head"><h3>Je eigen AI-coach</h3><span class="tag prem">Premium</span></div><p>Een coach die je runs, je wedstrijd en het weer van de komende dagen kent. Vraag wat je deze week moet lopen.</p>
-    </div>
-    <div class="feat">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#D9BF92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="3"></rect><path d="M10 17h4"></path></svg>
-      <div class="feat-head"><h3>Werkt met je horloge</h3><span class="tag">Gratis</span></div><p>Runs komen vanzelf binnen via Health Connect of Strava, met het weer van dat moment erbij.</p>
-    </div>
-  </div>
-  <figure class="shot"><img src="app-coach.jpg" width="560" height="602" loading="lazy" alt="De AI-coach in Kadans beantwoordt de vraag hoe ver de lange duurloop deze week moet zijn"><figcaption>De coach in de app (Premium).</figcaption></figure>
-  </div>
-</section>
-
-<section class="band" id="prijs">
-  <div class="wrap section">
-    <h2 class="display">Gratis beginnen. <span class="grad-text">Premium als je meer wilt.</span></h2>
-    <div class="pricing">
-      <div class="card plan">
-        <span class="eyebrow" style="color:var(--muted)">Gratis</span>
-        <div class="price">€0</div>
-        <ul><li>Beste vertrektijd, per 5 minuten berekend</li><li>Live buien en wind op je route</li><li>Persoonlijk loopprofiel</li><li>Wedstrijddoelen en horloge-koppeling</li><li>3 proefvragen aan de coach</li></ul>
-        <p class="fine"><strong>Onze belofte:</strong> wat gratis is, blijft gratis. Prijs omhoog? Dan hoor je het ruim van tevoren. En je runs exporteren kan altijd.</p>
+<!-- 4. Over Kadans -->
+<section class="band" id="over">
+  <div class="wrap section about">
+    <figure class="reveal">
+      <img src="app-coach.jpg" width="560" height="602" loading="lazy" alt="De AI-coach in Kadans beantwoordt de vraag hoe ver de lange duurloop deze week moet zijn">
+      <figcaption>De coach in de app (Premium).</figcaption>
+    </figure>
+    <div class="reveal">
+      <p class="eyebrow">Over Kadans</p>
+      <h2 class="display">Gemaakt door een hardloper uit Barneveld.</h2>
+      <p>Kadans begon met een simpele ergernis: net de deur uit, en dan de bui. Of een uur later droog en windstil. Daarom rekent Kadans het voor je uit, met open weerdata, de buienradar en kaarten van het Kadaster.</p>
+      <p>Geen advertenties, geen verkoop van je gegevens. Alleen jij ziet je runs.</p>
+      <div class="facts">
+        <div class="fact"><b>5 min</b><span>nauwkeurig per vertrektijd</span></div>
+        <div class="fact"><b>2 uur</b><span>live buien vooruit</span></div>
+        <div class="fact"><b>€0</b><span>om te beginnen</span></div>
       </div>
-      <div class="card plan featured">
-        <span class="eyebrow">Premium</span>
-        <div class="price">€5 <small>per maand</small></div>
-        <ul><li>Alles van Gratis</li><li>AI-coach die je runs en wedstrijd kent</li><li>Weekschema's richting je doel</li><li>Of €40 per jaar: 4 maanden voordeliger</li></ul>
-        <p class="fine">Eerste maand gratis, daarna automatisch verlengd. Opzeggen kan altijd in Google Play.</p>
-      </div>
+      <a class="link" href="contact.html">Neem contact op <span class="arrow" aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
 
-<section class="wrap section">
-  <h2 class="display">Veelgestelde vragen</h2>
-  <div class="faq">
-    <details class="card"><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en je ranglijsten. Strava laat zien wat je liep; Kadans helpt je vóór je run. Ze werken mooi samen, maar Kadans is gemaakt om je te helpen kiezen op het juiste moment.</p></details>
-    <details class="card"><summary>Heb ik een horloge nodig?</summary><p>Nee. Je kunt runs ook met de hand invoeren of een GPX-bestand uploaden. Met een horloge gaat het vanzelf.</p></details>
-    <details class="card"><summary>Op welke telefoons werkt het?</summary><p>Kadans komt eerst voor Android. iPhone volgt later.</p></details>
-    <details class="card"><summary>Wat doen jullie met mijn gegevens?</summary><p>Alleen jij ziet je runs. We verkopen niets en tonen geen advertenties. Je kunt alles inzien en je account verwijderen via je profiel.</p></details>
+<!-- Prijs -->
+<section class="wrap section" id="prijs">
+  <div class="head-row reveal">
+    <h2 class="display">Gratis beginnen</h2>
+    <p>Premium als je meer wilt. Wat gratis is, blijft gratis.</p>
+  </div>
+  <div class="plans">
+    <div class="plan reveal">
+      <p class="eyebrow" style="color:var(--muted)">Gratis</p>
+      <div class="price">€0</div>
+      <ul><li>Beste vertrektijd, per 5 minuten berekend</li><li>Live buien en wind op je route</li><li>Persoonlijk loopprofiel</li><li>Wedstrijddoelen en horloge-koppeling</li><li>3 proefvragen aan de coach</li></ul>
+      <p class="fine">Prijs omhoog? Dan hoor je het ruim van tevoren. Je runs exporteren kan altijd.</p>
+    </div>
+    <div class="plan featured reveal">
+      <p class="eyebrow">Premium</p>
+      <div class="price">€5 <small>per maand</small></div>
+      <ul><li>Alles van Gratis</li><li>AI-coach die je runs en wedstrijd kent</li><li>Weekschema's richting je doel</li><li>Of €40 per jaar: 4 maanden voordeliger</li></ul>
+      <p class="fine">Eerste maand gratis, daarna automatisch verlengd. Opzeggen kan altijd in Google Play.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Nieuws -->
+<section class="band" id="nieuws">
+  <div class="wrap section">
+    <div class="head-row reveal">
+      <h2 class="display">Nieuws</h2>
+      <a class="link" href="https://www.instagram.com/kadans.app/" rel="noopener">Volg @kadans.app <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+    <ul class="news reveal">
+      <li><a href="#wachtlijst"><time datetime="2026-12-01">1 december 2026</time><span class="t">Kadans komt naar Google Play</span><span class="go">Schrijf je in →</span></a></li>
+      <li><a href="#hoe"><time datetime="2026-11-07">7 november 2026</time><span class="t">Nieuw thuis: kadans.fit</span><span class="go">Bekijk →</span></a></li>
+      <li><a href="#hoe"><time datetime="2026-11-06">6 november 2026</time><span class="t">Kies je eigen coachstem, plus tempo-alarm en recordfeest</span><span class="go">Bekijk →</span></a></li>
+      <li><a href="#hoe"><time datetime="2026-11-06">6 november 2026</time><span class="t">Loopgroepen krijgen een agenda: zie wie er meeloopt</span><span class="go">Bekijk →</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Vragen -->
+<section class="wrap section" id="vragen">
+  <div class="head-row reveal"><h2 class="display">Veelgestelde vragen</h2></div>
+  <div class="faq reveal">
+    <details><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en ranglijsten. Strava laat zien wat je liep; Kadans helpt je vóór je run. Ze werken mooi samen.</p></details>
+    <details><summary>Heb ik een horloge nodig?</summary><p>Nee. Je kunt runs ook met je telefoon opnemen, met de hand invoeren of een GPX-bestand uploaden. Met een horloge gaat het vanzelf.</p></details>
+    <details><summary>Op welke telefoons werkt het?</summary><p>Kadans komt eerst voor Android. iPhone volgt later.</p></details>
+    <details><summary>Wat doen jullie met mijn gegevens?</summary><p>Alleen jij ziet je runs. We verkopen niets en tonen geen advertenties. Je kunt alles inzien en je account verwijderen via je profiel. Zie de <a href="privacy.html">privacyverklaring</a>.</p></details>
   </div>
 </section>
 </main>
 
+<!-- 6. Slotbanner -->
 <section class="cta" id="wachtlijst">
   <div class="cta-box">
-    <div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:12px">
-      <h2 class="display">Wees er als eerste bij</h2>
-      <p>Kadans is bijna klaar. Laat je e-mailadres achter en je hoort het zodra je kunt meetesten.</p>
+    <div>
+      <h2 class="display">Loop mee vanaf dag één.</h2>
+      <p>Laat je e-mailadres achter. Je hoort het zodra je kunt meetesten.</p>
     </div>
     <form id="wachtlijst-form" name="wachtlijst" novalidate>
       <p class="sr"><label>Niet invullen <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
@@ -276,18 +373,43 @@ footer{border-top:1px solid #241F18;padding:32px 0}
       <input id="email" name="email" type="email" required autocomplete="email" placeholder="jouw@email.nl">
       <button type="submit" class="btn">Aanmelden</button>
       <p id="wachtlijst-msg" role="status" style="flex:1 1 100%;margin:0;font-weight:600"></p>
-      <p style="flex:1 1 100%;margin:0;font-size:13px;color:#4A3B28">We mailen je alleen over de lancering. Afmelden kan altijd met de link in de mail of door ons te mailen. <a href="privacy.html">Privacy</a></p>
+      <p style="flex:1 1 100%;margin:0;font-size:13px;color:#4A3B28">We mailen je alleen over de lancering. Afmelden kan altijd. <a href="privacy.html">Privacy</a></p>
     </form>
   </div>
 </section>
 
 <footer>
-  <div class="wrap foot">
-    <span>© 2026 Kadans</span>
-    <span><a href="mailto:sb.denhartog@hotmail.com">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="voorwaarden.html">Voorwaarden</a> · <a href="verwijderen.html">Account verwijderen</a></span>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top" aria-label="Kadans, naar boven"><img class="mark" src="kadans-mark.png" alt="Kadans" width="36" height="32"><span class="adans" aria-hidden="true"></span></a>
+        <p class="claim">Loop op het beste moment.</p>
+      </div>
+      <div><h4>Navigeer</h4><ul><li><a href="#hoe">Hoe het werkt</a></li><li><a href="#over">Over Kadans</a></li><li><a href="#nieuws">Nieuws</a></li><li><a href="#wachtlijst">Wachtlijst</a></li></ul></div>
+      <div><h4>Volg ons</h4><ul><li><a href="https://www.instagram.com/kadans.app/" rel="noopener">Instagram</a></li><li><a href="contact.html">Contact</a></li><li><a href="steun.html">Steun Kadans</a></li></ul></div>
+      <div><h4>Juridisch</h4><ul><li><a href="privacy.html">Privacy</a></li><li><a href="voorwaarden.html">Voorwaarden</a></li><li><a href="verwijderen.html">Account verwijderen</a></li></ul></div>
+    </div>
+    <div class="legal"><span>© 2026 Kadans</span><a href="#top">Naar boven ↑</a></div>
   </div>
 </footer>
 <script>
+// Kop: lijntje bij scrollen, menu op mobiel.
+(function () {
+  var top = document.getElementById('kop'), burger = top.querySelector('.burger');
+  addEventListener('scroll', function () { top.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
+  burger.addEventListener('click', function () {
+    var open = top.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open); burger.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
+  });
+  top.querySelectorAll('.drawer a').forEach(function (a) { a.addEventListener('click', function () { top.classList.remove('open'); burger.setAttribute('aria-expanded', false); }); });
+})();
+// Rustig in beeld schuiven (zonder IntersectionObserver gewoon meteen zichtbaar).
+(function () {
+  var els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
+  els.forEach(function (e) { io.observe(e); });
+})();
 // Wachtlijst: e-mailadres naar Supabase (tabel waitlist, alleen toevoegen). URL en openbare sleutel worden bij het
 // online zetten ingevuld (zie .github/workflows/site.yml).
 (function () {
