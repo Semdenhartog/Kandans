@@ -518,13 +518,6 @@ void main() {
     Intl.defaultLocale = 'nl_NL';
     await _loadFonts();
     debugMapTiles = _DiskTiles();
-    // Locatie: altijd aan en toegestaan (anders toont het kaartscherm een foutmelding).
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        const MethodChannel('flutter.baseflow.com/geolocator'), (call) async => switch (call.method) {
-              'isLocationServiceEnabled' => true,
-              'checkPermission' || 'requestPermission' => 3,
-              _ => null,
-            });
   });
 
   // Donkere weergave (Zand avond) van de belangrijkste schermen.
@@ -568,8 +561,7 @@ void main() {
       }));
   testWidgets('11c opnemen kaart', (t) {
     final route = decodePolyline(_routes.first.polyline);
-    return _shot(t, '11c_opnemen_kaart', images: true, const RecordRunScreen(), height: 915, after: () {
-      RunRecorderService.instance.view.value = RecorderView(
+    RecorderView view() => RecorderView(
         status: RecorderStatus.running,
         distance: 5230,
         movingSeconds: 1652,
@@ -584,8 +576,13 @@ void main() {
         followRoute: route,
         routeRemaining: 3160,
       );
+    return _shot(t, '11c_opnemen_kaart', images: true, const RecordRunScreen(), height: 915, after: () {
+      RunRecorderService.instance.view.value = view();
     }, act: (t) async {
       await t.drag(find.byType(PageView).first, const Offset(-380, 0));
+      await t.pump(const Duration(milliseconds: 300));
+      // Zonder GPS in de test zet het kaartscherm een melding; toon de run zoals onderweg.
+      RunRecorderService.instance.view.value = view();
     });
   });
   testWidgets('11b afslag nu, groot', (t) => _shot(t, '11b_afslag_groot', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
