@@ -1716,23 +1716,20 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
-                if (v.ghostDelta != null && !v.offRoute)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('vs record', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
-                      Text(
-                        '${v.ghostDelta! <= 0 ? '−' : '+'}${Fmt.duration(v.ghostDelta!.abs().round())}',
-                        style: TextStyle(
-                          fontFamily: RwFonts.display,
-                          fontFeatures: rwTnum,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 28,
-                          color: v.ghostDelta! <= 0 ? RwColors.good : RwColors.danger,
-                        ),
-                      ),
-                    ],
+                if (v.ghostDelta != null && !v.offRoute) ...[
+                  Text('vs record ', style: TextStyle(color: RwColors.subtle, fontSize: 13)),
+                  Text(
+                    '${v.ghostDelta! <= 0 ? '−' : '+'}${Fmt.duration(v.ghostDelta!.abs().round())}',
+                    style: TextStyle(
+                      fontFamily: RwFonts.display,
+                      fontFeatures: rwTnum,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 28,
+                      height: 1.1,
+                      color: v.ghostDelta! <= 0 ? RwColors.good : RwColors.danger,
+                    ),
                   ),
+                ],
               ],
             ),
           ),

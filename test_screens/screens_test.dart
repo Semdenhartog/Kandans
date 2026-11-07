@@ -429,7 +429,7 @@ class _FakeJoined extends JoinedChallenges {
 }
 
 Future<void> _shot(WidgetTester tester, String name, Widget screen,
-    {double height = 2400, bool nav = false, void Function()? after, Future<void> Function(WidgetTester)? act, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const []}) async {
+    {double height = 2400, bool nav = false, void Function()? after, Future<void> Function(WidgetTester)? act, bool images = false, double textScale = 1, bool emptyPlan = false, bool newUser = false, bool wornShoe = false, bool notInCommunity = false, bool dark = false, int navIndex = 0, List<Override> extra = const []}) async {
   RwColors.use(dark ? rwZandAvond : rwZand);
   addTearDown(() => RwColors.use(rwZand));
   tester.view.physicalSize = Size(_w * 2, height * 2);
@@ -454,7 +454,7 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
   for (var i = 0; i < 14; i++) {
     await tester.pump(const Duration(milliseconds: 120));
   }
-  await _letImagesLoad(tester);
+  if (images) await _letImagesLoad(tester);
   if (after != null) {
     after();
     for (var i = 0; i < 4; i++) {
@@ -467,7 +467,7 @@ Future<void> _shot(WidgetTester tester, String name, Widget screen,
       await tester.pump(const Duration(milliseconds: 120));
     }
   }
-  await _letImagesLoad(tester);
+  if (images) await _letImagesLoad(tester);
   await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
   // Timers en animaties opruimen.
   await tester.pumpWidget(const SizedBox());
@@ -521,23 +521,23 @@ void main() {
   });
 
   // Donkere weergave (Zand avond) van de belangrijkste schermen.
-  testWidgets('60 donker vandaag', (t) => _shot(t, '60_donker_vandaag', const DashboardScreen(), height: 2600, nav: true, dark: true));
+  testWidgets('60 donker vandaag', (t) => _shot(t, '60_donker_vandaag', images: true, const DashboardScreen(), height: 2600, nav: true, dark: true));
   testWidgets('61 donker runs', (t) => _shot(t, '61_donker_runs', const ActivitiesScreen(), height: 1800, dark: true));
-  testWidgets('62 donker run detail', (t) => _shot(t, '62_donker_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3200, dark: true));
+  testWidgets('62 donker run detail', (t) => _shot(t, '62_donker_run_detail', images: true, ActivityDetailScreen(activityId: _runs.first.id!), height: 3200, dark: true));
   testWidgets('63 donker routes', (t) => _shot(t, '63_donker_routes', const RoutesScreen(), height: 1600, dark: true));
   testWidgets('64 donker ik', (t) => _shot(t, '64_donker_ik', const ProfileScreen(), height: 2600, dark: true));
   testWidgets('65 donker opnemen', (t) => _shot(t, '65_donker_opnemen', const RecordRunScreen(), height: 915, dark: true));
   testWidgets('66 donker coach', (t) => _shot(t, '66_donker_coach', const CoachScreen(), height: 915, dark: true));
-  testWidgets('01 vandaag', (t) => _shot(t, '01_vandaag', const DashboardScreen(), height: 2600, nav: true));
-  testWidgets('01b vandaag boven', (t) => _shot(t, '01b_vandaag_boven', const DashboardScreen(), height: 915, nav: true));
+  testWidgets('01 vandaag', (t) => _shot(t, '01_vandaag', images: true, const DashboardScreen(), height: 2600, nav: true));
+  testWidgets('01b vandaag boven', (t) => _shot(t, '01b_vandaag_boven', images: true, const DashboardScreen(), height: 915, nav: true));
   testWidgets('02 runs', (t) => _shot(t, '02_runs', const ActivitiesScreen(), height: 1800));
-  testWidgets('03 run detail', (t) => _shot(t, '03_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3200));
+  testWidgets('03 run detail', (t) => _shot(t, '03_run_detail', images: true, ActivityDetailScreen(activityId: _runs.first.id!), height: 3200));
   testWidgets('04 routes', (t) => _shot(t, '04_routes', const RoutesScreen(), height: 1600));
   testWidgets('05 coach', (t) => _shot(t, '05_coach', const CoachScreen(), height: 915));
   testWidgets('06 ik', (t) => _shot(t, '06_ik', const ProfileScreen(), height: 2600));
   testWidgets('70 deze week', (t) => _shot(t, '70_deze_week', const ThisWeekScreen(), height: 2000));
   testWidgets('71 doelen', (t) => _shot(t, '71_doelen', const GoalsScreen(), height: 2600));
-  testWidgets('72 vandaag groot', (t) => _shot(t, '72_vandaag_groot_balk', const DashboardScreen(), height: 915, nav: true, textScale: 1.3));
+  testWidgets('72 vandaag groot', (t) => _shot(t, '72_vandaag_groot_balk', images: true, const DashboardScreen(), height: 915, nav: true, textScale: 1.3));
   testWidgets('07 fitheid', (t) => _shot(t, '07_fitheid', const FitnessScreen(), height: 1800));
   testWidgets('08 badges', (t) => _shot(t, '08_badges', const BadgesScreen(), height: 1900));
   testWidgets('10 opnemen start', (t) => _shot(t, '10_opnemen_start', const RecordRunScreen(), height: 915));
@@ -561,7 +561,7 @@ void main() {
       }));
   testWidgets('11c opnemen kaart', (t) {
     final route = decodePolyline(_routes.first.polyline);
-    return _shot(t, '11c_opnemen_kaart', const RecordRunScreen(), height: 915, after: () {
+    return _shot(t, '11c_opnemen_kaart', images: true, const RecordRunScreen(), height: 915, after: () {
       RunRecorderService.instance.view.value = RecorderView(
         status: RecorderStatus.running,
         distance: 5230,
@@ -596,7 +596,7 @@ void main() {
           nextTurnIn: 15,
         );
       }));
-  testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', const RouteDetailScreen(routeId: 'r1'), height: 3000));
+  testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', images: true, const RouteDetailScreen(routeId: 'r1'), height: 3000));
   testWidgets('12f vlieg over route', (t) => _shot(t, '12f_vlieg_over', RouteFlyoverScreen(route: _routes.first), height: 915));
   testWidgets('13 inloggen', (t) => _shot(t, '13_inloggen', const LoginScreen(), height: 915));
   testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
@@ -613,7 +613,7 @@ void main() {
   testWidgets('18g profiel', (t) => _shot(t, '18g_profiel', const RunnerProfileScreen(nickname: 'Anne'), height: 1900));
   testWidgets('18h run delen', (t) => _shot(t, '18h_run_delen', Scaffold(body: SafeArea(child: ShareToFeedSheet(activity: _runs.first))), height: 1700));
   testWidgets('18k pauze starten', (t) => _shot(t, '18k_pauze', const Scaffold(body: SafeArea(child: PauseSheet())), height: 1300));
-  testWidgets('18l vandaag met pauze', (t) => _shot(t, '18l_vandaag_pauze', const DashboardScreen(), height: 1400, extra: [
+  testWidgets('18l vandaag met pauze', (t) => _shot(t, '18l_vandaag_pauze', images: true, const DashboardScreen(), height: 1400, extra: [
         currentPauseProvider.overrideWithValue(PausePeriod(reason: PauseReason.injury, start: DateTime.now(), end: DateTime.now().add(const Duration(days: 6)))),
       ]));
   testWidgets('18m gps-sprong', (t) => _shot(t, '18m_gps_sprong', GpsSpikeScreen(activity: _spikeRun), height: 1700, extra: [
@@ -653,7 +653,7 @@ void main() {
         ],
       ),
       height: 1900));
-  testWidgets('20 groot vandaag', (t) => _shot(t, '20_groot_vandaag', const DashboardScreen(), height: 3200, nav: true, textScale: 1.6));
+  testWidgets('20 groot vandaag', (t) => _shot(t, '20_groot_vandaag', images: true, const DashboardScreen(), height: 3200, nav: true, textScale: 1.6));
   testWidgets('21 groot opnemen', (t) => _shot(t, '21_groot_opnemen', const RecordRunScreen(), height: 915, textScale: 1.6, after: () {
         RunRecorderService.instance.view.value = RecorderView(
           status: RecorderStatus.running,
@@ -688,7 +688,7 @@ void main() {
   testWidgets('28 jaarverhaal', (t) => _shot(t, '28_jaarverhaal', YearStoryScreen(year: _now.year), height: 915));
   testWidgets('29 premium', (t) => _shot(t, '29_premium', const PaywallScreen(), height: 1300));
   // Nieuwe gebruiker: nog geen runs, routes, schema of coachgesprek. Zo ziet de eerste indruk eruit.
-  testWidgets('40 nieuw vandaag', (t) => _shot(t, '40_nieuw_vandaag', const DashboardScreen(), height: 2400, nav: true, newUser: true));
+  testWidgets('40 nieuw vandaag', (t) => _shot(t, '40_nieuw_vandaag', images: true, const DashboardScreen(), height: 2400, nav: true, newUser: true));
   testWidgets('41 nieuw runs', (t) => _shot(t, '41_nieuw_runs', const ActivitiesScreen(), height: 1400, newUser: true));
   testWidgets('42 nieuw routes', (t) => _shot(t, '42_nieuw_routes', const RoutesScreen(), height: 1400, newUser: true));
   testWidgets('43 nieuw coach', (t) => _shot(t, '43_nieuw_coach', const CoachScreen(), height: 915, newUser: true));
@@ -750,7 +750,7 @@ void main() {
     RunRecorderService.instance.view.value = const RecorderView();
     return _shot(t, '30_groot_opnemen_start', const RecordRunScreen(), height: 915, textScale: 1.6);
   });
-  testWidgets('31 groot run detail', (t) => _shot(t, '31_groot_run_detail', ActivityDetailScreen(activityId: _runs.first.id!), height: 3800, textScale: 1.6));
+  testWidgets('31 groot run detail', (t) => _shot(t, '31_groot_run_detail', images: true, ActivityDetailScreen(activityId: _runs.first.id!), height: 3800, textScale: 1.6));
   testWidgets('32 groot routes', (t) => _shot(t, '32_groot_routes', const RoutesScreen(), height: 1900, textScale: 1.6));
   testWidgets('33 groot coach', (t) => _shot(t, '33_groot_coach', const CoachScreen(), height: 915, textScale: 1.6));
   testWidgets('34 groot ik', (t) => _shot(t, '34_groot_ik', const ProfileScreen(), height: 3200, textScale: 1.6));
