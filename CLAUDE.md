@@ -142,6 +142,13 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `social_comments_of2`) en @vermeldingen (`social_mentions`, `MentionSync` bij openen app, melding kanaal 'samen'); groepsagenda
   (`group_runs_*` in 0040, `TogetherService.groupRuns`, kaart AGENDA in `GroupScreen`); trekken om te vernieuwen in groepen, lopers, Doelen, Logboek.
   Profielfoto-fout was: upsert zonder SELECT-regel op `storage.objects` → nu upsert uit + regel `avatars_own_select`, grens 2 MB.
+- **App in site-stijl (7-11):** Vandaag = `_TodayScene` (eigen landschap + lucht, groet/advies in wit, lopertje dat meeleeft met weer:
+  capuchon/muts/zweet, sterren 's nachts, regenstreepjes; params `rain/feels/runner/night` in `KadansLandscape`) met de advieskaart
+  64 px eroverheen (`Transform.translate`), kaart kantelt licht mee (`_TiltCard`, `Tilt`), tijd telt op (`_CountClock`/`CountUpText`),
+  feitenrij `_FactRow`, zonneboog ingeklapt (`_MoreDetails` "Zon en licht"), "§ 02 Deze week" als veegrij (`_WeekRow`).
+  Gedeeld: `SectionLabel` (§-labels, lettertype `KadansMono` = DejaVu Sans Mono), `KadansButton` (donker blok + goud vierkant),
+  papierkorrel in `RwAura` (`PaperGrainPainter`). Route in 3D bovenaan Route-details: `routes/route_relief.dart` (tik = vlieg over).
+  Ledenkaart kantelt ook met de telefoon mee.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -177,6 +184,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 7-11): nieuwe Vandaag (beeld, lopertje, kantelen, optellende tijd, veegrij), Kadans-knop, route in 3D, ledenkaart kantelen.
 - Testen op telefoon (nieuw 6-11 nacht): profielfoto uploaden, vergrendelscherm tijdens run (aan/uit-knop), piep bij aftellen, tempo-alarm,
   route andersom + vlieg over, gedeelde route-link (hoogte op de site), recordfeest + delen, reacties/@vermelding (melding bij openen app),
   groepsagenda, trekken om te vernieuwen.
