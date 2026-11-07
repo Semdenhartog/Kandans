@@ -1,0 +1,58 @@
+/* Gedeelde stijl voor de losse pagina's (privacy, voorwaarden, contact, …), gelijk aan de voorpagina:
+   licht papier, rustige koppen, typemachine-labels, zwevende kop en donkere voet. Staat ná de eigen <style>
+   van een pagina, zodat deze regels winnen. */
+:root{
+  --paper:#F3EEE6; --card:#FBF8F3; --stone:#E6DFD3; --line:#DCD3C4;
+  --ink:#1E1914; --dark:#211A14; --gold-soft:#E9D7B2; --gold-deep:#7A5A34; --faint:#A89C8B;
+  --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  /* Oude namen van de pagina's omzetten naar het lichte palet */
+  --bg:var(--paper); --surface:var(--card); --surface-high:var(--stone); --border:var(--line); --bar:var(--line);
+  --text:var(--ink); --muted:#5A5044; --subtle:#6C6153;
+  --accent:var(--gold-deep); --accent-deep:#5E4325; --accent-light:#A27C4A;
+  --gold:#D9BF92; --gold-light:#A27C4A;
+}
+html{scroll-padding-top:96px}
+body{background:var(--paper)!important;color:var(--ink)!important;-webkit-font-smoothing:antialiased}
+a{color:var(--gold-deep)}
+a:hover{color:var(--ink)}
+
+/* Kop: logo-blokje links, menu-groep rechts */
+.pg-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:16px;pointer-events:none}
+.pg-top>*{pointer-events:auto}
+.pg-logo{display:flex;align-items:flex-end;gap:7px;padding:10px 14px;border-radius:8px;background:rgba(251,248,243,.86);text-decoration:none;box-shadow:0 1px 0 var(--line)}
+.pg-logo img{height:22px;width:auto}
+.pg-logo span{display:block;aspect-ratio:737/102;height:9px;background:var(--gold-deep);-webkit-mask:url(kadans-adans.png) center/contain no-repeat;mask:url(kadans-adans.png) center/contain no-repeat}
+.pg-menu{margin:0!important;flex-wrap:nowrap!important;display:flex;gap:2px;padding:4px;border-radius:8px;background:rgba(251,248,243,.86);box-shadow:0 1px 0 var(--line)}
+@supports (backdrop-filter:blur(8px)){.pg-logo,.pg-menu{backdrop-filter:blur(14px);background:rgba(251,248,243,.74)}}
+.pg-menu a{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:9px 12px;border-radius:6px;color:var(--ink)}
+.pg-menu a:hover{background:var(--stone);color:var(--ink)}
+.pg-menu a.cta{background:var(--dark);color:#F1E9DC}
+@media (max-width:640px){.pg-menu a:not(.cta){display:none}}
+
+/* Koppen en tekst rustig, zoals op de voorpagina */
+h1{font-family:'DM Sans',system-ui,sans-serif!important;font-weight:500!important;text-transform:none!important;letter-spacing:-0.035em!important;line-height:1.02!important;color:var(--ink)!important;font-size:clamp(40px,7vw,80px)!important;margin:24px 0 14px!important}
+h2{font-family:'DM Sans',system-ui,sans-serif!important;font-weight:500!important;letter-spacing:-0.02em;color:var(--ink)!important}
+p,li,td{color:var(--muted)}
+strong,th{color:var(--ink)}
+.meta{font-family:var(--mono);font-size:11.5px!important;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)!important}
+.eyebrow{font-family:var(--mono)!important;font-weight:400!important;font-size:11.5px!important;letter-spacing:.08em!important;color:var(--gold-deep)!important}
+.card,.contact-item{box-shadow:none}
+table td,table th{border-color:var(--line)!important}
+th{background:var(--stone)!important}
+/* Oude merk-link bovenin de tekst is vervangen door de kop */
+main>.top{display:none!important}
+.btn,button.btn{border-radius:8px!important}
+
+/* Voet: donker beeld met kolommen en klein merk */
+.pg-foot{border:0!important;margin:64px 8px 8px;border-radius:24px;overflow:hidden;color:#fff;background:#1A1510 url(beeld-voet.jpg) center/cover no-repeat;padding:40px 32px 24px}
+.pg-foot .cols{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr));gap:32px}
+.pg-foot h2{color:#fff!important;font-size:clamp(26px,3vw,40px)!important;line-height:1.08!important;margin:0 0 20px!important;max-width:16ch}
+.pg-foot .go{display:inline-flex;gap:4px;text-decoration:none}
+.pg-foot .go b{display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border-radius:8px;background:var(--gold);color:var(--dark);font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.pg-foot .go i{display:inline-grid;place-items:center;width:42px;border-radius:8px;background:#fff;color:var(--dark);font-style:normal}
+.pg-foot h4{margin:0 0 14px;font-family:var(--mono);font-weight:400;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.pg-foot ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pg-foot ul a{color:#fff;text-decoration:none}.pg-foot ul a:hover{color:var(--gold-soft)}
+.pg-foot li{color:#fff}
+.pg-foot .legal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:48px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+@media (max-width:760px){.pg-foot .cols{grid-template-columns:1fr 1fr}.pg-foot .cols>div:first-child{grid-column:1/-1}.pg-foot{padding:32px 20px 20px}}
