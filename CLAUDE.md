@@ -38,7 +38,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
     faalt op "overflowed by". Play Store-plaatjes in `playstore/`.
   - `supabase-functies.yml`: zet edge functions live (met de hand én bij push naar main die `supabase/functions/**` raakt).
   - `geheimen.yml`: geheimen-scan.
-  - `site.yml`: zet `site/` op GitHub Pages (https://semdenhartog.github.io/Kandans/ — hoofdletter K), vult
+  - `site.yml`: zet `site/` op GitHub Pages, eigen domein **https://kadans.fit** (sinds 7-11-2026, Namecheap, privacy aan; oud adres
+    semdenhartog.github.io/Kandans stuurt door). Domein-stap in site.yml controleert DNS. Vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in. Links in `site/` zijn relatief.
 - Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.6 (foto's + stappen). Aanmelden vraagt 16+ en akkoord (versies in user metadata).
   Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
@@ -168,7 +169,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Merkcheck "Kadans" (TMview/BOIP) en domein; Kadans Science Partner (vastgoed) gebruikt dezelfde naam.
 - Stripe, Gelato, RevenueCat, KvK/btw voor posters en Premium.
 - Na KvK: bedrijfsgegevens (naam, adres, KvK-nummer) invullen in `site/voorwaarden.html` (en versie ophogen).
-- Play Console → verwijder-URL invullen: https://semdenhartog.github.io/Kandans/verwijderen.html
+- Play Console → privacy-URL https://kadans.fit/privacy.html en verwijder-URL https://kadans.fit/verwijderen.html invullen.
+- kadans.fit: auto-verlengen uit bij Namecheap ($45,98/jr); rond sept 2027 verhuizen naar Porkbun (± $26/jr).
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
