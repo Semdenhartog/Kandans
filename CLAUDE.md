@@ -49,7 +49,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   groot beeld met ronde hoeken `site/beeld-hero.jpg`/`beeld-voet.jpg` uit `tools/maak_site_beeld.py`, typemachine-labels, knop = donker blok + goud vierkant,
   vlakken 01–03, galerij met echte app-schermen in telefoonlijsten `site/app/*.jpg` (uitsneden van Sems schermafbeeldingen), ledenkaart `site/app/ledenkaart.png`,
   donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Foto's (7-11): zes gratis Unsplash-foto's in `site/foto/` (warm bijgekleurd;
-  heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Desktop en mobiel apart ingedeeld (7-11): desktop = hangende hero-telefoon, vlakken 01–03 over de mistfoto, § -labels; mobiel (≤900px) = compacter, vlakken/nieuws/tweeluik veegbaar, vaste wachtlijstknop `#ctabar`, tellende cijfers `[data-count]`. Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
+  heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Bovenbalk scrolt op mobiel mee weg (8-11). Desktop en mobiel apart ingedeeld (7-11): desktop = hangende hero-telefoon, vlakken 01–03 over de mistfoto, § -labels; mobiel (≤900px) = compacter, vlakken/nieuws/tweeluik veegbaar, vaste wachtlijstknop `#ctabar`, tellende cijfers `[data-count]`. Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0040** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
@@ -148,7 +148,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   feitenrij `_FactRow`, zonneboog ingeklapt (`_MoreDetails` "Zon en licht"), "§ 02 Deze week" als veegrij (`_WeekRow`).
   Gedeeld: `SectionLabel` (§-labels, lettertype `KadansMono` = DejaVu Sans Mono), `KadansButton` (donker blok + goud vierkant),
   papierkorrel in `RwAura` (`PaperGrainPainter`). Route in 3D bovenaan Route-details: `routes/route_relief.dart` (tik = vlieg over).
-  Ledenkaart kantelt ook met de telefoon mee.
+  Ledenkaart kantelt ook met de telefoon mee. **Ronde 8-11:** lopertje weg (Sem vond het knullig: geen getekende lopertjes meer);
+  Vandaag-beeld = sfeerfoto `assets/foto/heide.jpg` of `mist.jpg` (mist/buien/grijs, `_foggy`), 's nachts donkerder.
+  Opnemen: vaste lettergroottes (hoofdcijfer, getallen 28, tekst 16, labels 13). Badges hebben niveaus `BadgeTier`
+  (brons/zilver/goud/platina, `tierColor`, legenda `BadgeTierLegend`). Bluetooth (`FlutterReactiveBle`) is `late` in de services.
+  Schermtests: echte Amsterdamse routes (Amsterdamse Bos = "Rondje bos", Vondelpark, Amstel; via BRouter) en echte PDOK-tegels
+  (`.github/scripts/haal_tegels.py` in screens.yml → `test_screens/tegels`, `debugMapTiles` in `route_map.dart`), foto's/tegels
+  laden alleen bij `images: true`; kaarttest `11c_opnemen_kaart` (`RecordRunScreen.debugSkipWarmUp`). Logboek-voorbeeld = ruim een jaar runs,
+  coach-voorbeeld = schema laatste 3 weken halve marathon. `site/app/*.jpg` komen nu uit de schermtests (540×1199).
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -184,6 +191,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 8-11): sfeerfoto op Vandaag (licht/donker, mist), opnamescherm rustiger, badgekleuren, ledenkaart met grote getallen.
 - Testen op telefoon (nieuw 7-11): nieuwe Vandaag (beeld, lopertje, kantelen, optellende tijd, veegrij), Kadans-knop, route in 3D, ledenkaart kantelen.
 - Testen op telefoon (nieuw 6-11 nacht): profielfoto uploaden, vergrendelscherm tijdens run (aan/uit-knop), piep bij aftellen, tempo-alarm,
   route andersom + vlieg over, gedeelde route-link (hoogte op de site), recordfeest + delen, reacties/@vermelding (melding bij openen app),
