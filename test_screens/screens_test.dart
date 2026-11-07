@@ -518,6 +518,13 @@ void main() {
     Intl.defaultLocale = 'nl_NL';
     await _loadFonts();
     debugMapTiles = _DiskTiles();
+    // Locatie: altijd aan en toegestaan (anders toont het kaartscherm een foutmelding).
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('flutter.baseflow.com/geolocator'), (call) async => switch (call.method) {
+              'isLocationServiceEnabled' => true,
+              'checkPermission' || 'requestPermission' => 3,
+              _ => null,
+            });
   });
 
   // Donkere weergave (Zand avond) van de belangrijkste schermen.
