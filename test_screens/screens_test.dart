@@ -560,6 +560,8 @@ void main() {
         );
       }));
   testWidgets('11c opnemen kaart', (t) {
+    RecordRunScreen.debugSkipWarmUp = true;
+    addTearDown(() => RecordRunScreen.debugSkipWarmUp = false);
     final route = decodePolyline(_routes.first.polyline);
     RecorderView view() => RecorderView(
         status: RecorderStatus.running,

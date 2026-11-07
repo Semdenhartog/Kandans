@@ -88,6 +88,10 @@ void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace,
 
 /// Een run opnemen met GPS, met stemcoach per kilometer.
 class RecordRunScreen extends ConsumerStatefulWidget {
+  /// Alleen voor schermtests: GPS niet alvast opwarmen (geeft zonder toestel een foutmelding).
+  @visibleForTesting
+  static bool debugSkipWarmUp = false;
+
   const RecordRunScreen({super.key, this.initialPlan, this.initialTargetPace, this.sessionTitle, this.initialRoute, this.initialIndoor});
 
   /// Vanuit de snelkoppeling "Loopband": meteen binnen-modus.
@@ -261,7 +265,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         setState(() => _plan = IntervalPlan.fromJson(jsonDecode(raw)));
       } catch (_) {}
     }).ignore();
-    if (!_svc.isRecording) {
+    if (!_svc.isRecording && !RecordRunScreen.debugSkipWarmUp) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!_indoor) {
           await explainLocationFirst(context,
