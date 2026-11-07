@@ -48,7 +48,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   afrondingen 8/16/24 px, `button{font-family:inherit}`. **Voorpagina sinds 7-11-2026 in de stijl van integratedbio.com** (licht papier,
   groot beeld met ronde hoeken `site/beeld-hero.jpg`/`beeld-voet.jpg` uit `tools/maak_site_beeld.py`, typemachine-labels, knop = donker blok + goud vierkant,
   vlakken 01–03, galerij met echte app-schermen in telefoonlijsten `site/app/*.jpg` (uitsneden van Sems schermafbeeldingen), ledenkaart `site/app/ledenkaart.png`,
-  donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
+  donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Foto's (7-11): zes gratis Unsplash-foto's in `site/foto/` (warm bijgekleurd;
+  heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
 - Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0040** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
