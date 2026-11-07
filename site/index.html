@@ -244,6 +244,74 @@ details a{color:var(--gold-deep)}
 .duo-head p{color:var(--muted);max-width:34rem;margin:18px 0 0}
 @media (max-width:760px){.duo{grid-template-columns:1fr}.duo figure:nth-child(2){margin-top:0}.duo-head{grid-template-columns:1fr}}
 
+
+/* ===== Indeling per scherm (7-11-2026): laptop = ademruimte + zwevende vlakken, telefoon = vegen en compact ===== */
+body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .2 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.sec-no{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep)}
+.sec-no b{font-weight:400;color:var(--faint);margin-right:10px}
+.tile{box-shadow:0 50px 90px -40px rgba(30,25,20,.45),inset 0 1px 0 rgba(255,255,255,.35)}
+.tile:nth-child(1){background:linear-gradient(160deg,#EEDDB8,#E2CB9C)}
+.tile:nth-child(2){background:linear-gradient(160deg,#2C241C,#17120D)}
+.tile:nth-child(3){background:linear-gradient(160deg,#EFE9DF,#E1D9CB)}
+.cta-bar{display:none}
+
+@media (min-width:901px){
+  .hero{overflow:visible}
+  .hero-phone{top:auto!important;bottom:-110px;transform:rotate(-5deg)!important;width:min(330px,24vw)!important;z-index:5}
+  .statement{border-top:1px solid var(--gold);border-bottom:0;margin-top:clamp(140px,14vw,200px);padding-top:clamp(120px,12vw,200px);padding-bottom:clamp(100px,10vw,160px)}
+  .statement h2{font-size:clamp(44px,6vw,100px);max-width:15ch}
+  .statement>div:last-child>p,.statement>div:last-child>.go{margin-left:36%}
+  .statement>div:last-child>p{margin-top:56px;max-width:30rem}
+  #vragen{border-top:1px solid var(--line)}
+  .band-photo{margin:0 clamp(24px,6vw,120px);min-height:clamp(560px,52vw,760px);align-items:flex-start;justify-content:flex-end;padding-top:clamp(48px,6vw,96px)}
+  .band-photo::after{background:linear-gradient(180deg,rgba(18,14,10,.5),transparent 55%)}
+  .tiles{position:relative;z-index:3;margin:-220px clamp(48px,9vw,180px) 0;gap:16px}
+  .tile{border-radius:var(--r-l);min-height:clamp(340px,30vw,420px)}
+  .tile h3{font-size:clamp(26px,2.4vw,34px)}
+  .app,.space{margin-top:clamp(40px,6vw,80px)}
+  .duo-head,.sec-head{margin-bottom:56px}
+}
+
+@media (max-width:900px){
+  .hero{padding:96px 20px 24px}
+  .hero h1{font-size:clamp(44px,13vw,64px)}
+  .statement{padding-top:72px;padding-bottom:48px;gap:20px;border-bottom:0}
+  .statement h2{font-size:clamp(32px,9vw,44px)}
+  .statement p{margin:24px 0 20px}
+  .band-photo{margin:0 8px;min-height:460px;border-radius:var(--r-m);padding:28px 24px;align-items:flex-start!important}
+  .band-photo::after{background:linear-gradient(180deg,rgba(18,14,10,.55),transparent 50%)}
+  .band-photo blockquote{font-size:clamp(26px,7.5vw,34px)}
+  /* Vlakken: naast elkaar vegen, half over de foto */
+  .tiles{display:flex;grid-template-columns:none;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px 20px;margin-top:-70px;position:relative;z-index:3;scrollbar-width:none}
+  .tiles::-webkit-scrollbar{display:none}
+  .tile{flex:0 0 82%;scroll-snap-align:center;border-radius:var(--r-m);min-height:300px}
+  .app{padding-top:56px;padding-bottom:56px;gap:20px}
+  .shotframe{padding:28px 20px;max-height:460px}
+  .shotframe .phone{width:min(200px,60%)!important}
+  .gallery{padding-top:48px}
+  .rail-nav{display:none}
+  .sheet{padding:24px 18px;border-radius:var(--r-m)}
+  .sec-head{margin-bottom:24px}
+  .sec-head h2{font-size:clamp(40px,12vw,56px)}
+  .feature .pic{min-height:200px}
+  .grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;scrollbar-width:none;margin-right:-18px;padding-right:18px}
+  .grid::-webkit-scrollbar{display:none}
+  .cell{flex:0 0 78%;scroll-snap-align:start;min-height:180px}
+  .duo{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -20px;padding:0 20px;scrollbar-width:none}
+  .duo::-webkit-scrollbar{display:none}
+  .duo figure{flex:0 0 84%;scroll-snap-align:center;min-height:380px;margin-top:0!important}
+  .duo-head{margin-bottom:24px;gap:16px}
+  .duo-head h2{font-size:clamp(30px,8.5vw,40px)}
+  .member{padding:28px 22px;border-radius:var(--r-m)}
+  .space{height:48px}
+  .foot{margin:8px 8px 96px}
+  /* Vaste knop onderin zodra je voorbij het grote beeld bent */
+  .cta-bar{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:40;gap:4px;transform:translateY(140%);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .cta-bar.on{transform:none}
+  .cta-bar .t{flex:1;justify-content:center;min-height:52px;background:var(--dark);color:var(--on-dark);box-shadow:0 18px 40px -12px rgba(0,0,0,.45)}
+  .cta-bar .a{min-height:52px;width:52px}
+}
+
 /* Rustig in beeld; uit bij "minder beweging" */
 .js .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
 .js .reveal.in{opacity:1;transform:none}
@@ -274,7 +342,7 @@ details a{color:var(--gold-deep)}
 
 <div class="wrap">
   <section class="statement" id="hoe">
-    <div><span class="tag">Zo werkt Kadans</span></div>
+    <div><span class="sec-no"><b>§ 01</b>Zo werkt Kadans</span></div>
     <div class="reveal">
       <h2>Weer, wind en je eigen runs samen in één antwoord: <span>wanneer je het best kunt vertrekken.</span></h2>
       <p>De meeste loop-apps vertellen je achteraf hoe het ging. Kadans helpt je vooraf. Je koppelt je runs, kiest je rondje en Kadans rekent het weer van de komende uren door, met de wind per kilometer en de buien van de komende twee uur. Hoe meer je loopt, hoe beter Kadans weet bij welk weer jij het snelst bent.</p>
@@ -339,7 +407,7 @@ details a{color:var(--gold-deep)}
     </div>
     <div class="reveal">
       <p>Premium voegt een <em>AI-coach</em> toe die je runs, je wedstrijd en het weer van de komende dagen kent. Vraag gewoon wat je deze week moet lopen.</p>
-      <div class="facts"><div><b>5 min</b><span>per vertrektijd</span></div><div><b>2 uur</b><span>buien vooruit</span></div><div><b>€0</b><span>om te beginnen</span></div></div>
+      <div class="facts"><div><b data-count="5" data-suffix=" min">5 min</b><span>per vertrektijd</span></div><div><b data-count="2" data-suffix=" uur">2 uur</b><span>buien vooruit</span></div><div><b>€0</b><span>om te beginnen</span></div></div>
       <a class="go" href="#prijs"><span class="t">Gratis en Premium</span><span class="a"><svg><use href="#pijl"/></svg></span></a>
     </div>
   </section>
@@ -374,7 +442,7 @@ details a{color:var(--gold-deep)}
 
 <div class="wrap">
   <section aria-label="Jouw rondje">
-    <div class="duo-head reveal"><div><span class="tag">Jouw rondje</span></div><div><h2>Duinen in de ochtend. Heide in de avond. <span style="color:var(--faint)">Altijd op het goede moment.</span></h2><p>Kadans kent je eigen rondjes en zoekt per route het rustigste moment: minder wind, droog, en de wind op het eind in je rug.</p></div></div>
+    <div class="duo-head reveal"><div><span class="sec-no"><b>§ 04</b>Jouw rondje</span></div><div><h2>Duinen in de ochtend. Heide in de avond. <span style="color:var(--faint)">Altijd op het goede moment.</span></h2><p>Kadans kent je eigen rondjes en zoekt per route het rustigste moment: minder wind, droog, en de wind op het eind in je rug.</p></div></div>
     <div class="duo">
       <figure class="reveal" style="background-image:url(foto/duin.jpg)"><figcaption><span style="width:7px;height:7px;background:var(--gold);border-radius:1px"></span>Duinpad · 07:10 · wind 6 km/u</figcaption></figure>
       <figure class="reveal" style="background-image:url(foto/boom.jpg)"><figcaption><span style="width:7px;height:7px;background:var(--gold);border-radius:1px"></span>Heide · 18:35 · droog</figcaption></figure>
@@ -420,7 +488,7 @@ details a{color:var(--gold-deep)}
 
 <div class="wrap">
   <section class="statement" id="vragen" style="border-bottom:0">
-    <div><span class="tag">Vragen</span></div>
+    <div><span class="sec-no"><b>§ 05</b>Vragen</span></div>
     <div class="faq reveal">
       <details><summary>Waarom niet gewoon Strava?</summary><p>Gebruik Strava gerust voor je vrienden en ranglijsten. Strava laat zien wat je liep; Kadans helpt je vóór je run. Ze werken mooi samen.</p></details>
       <details><summary>Heb ik een horloge nodig?</summary><p>Nee. Je kunt runs ook met je telefoon opnemen, met de hand invoeren of een GPX-bestand uploaden. Met een horloge gaat het vanzelf.</p></details>
@@ -430,6 +498,8 @@ details a{color:var(--gold-deep)}
   </section>
 </div>
 </main>
+
+<a class="go cta-bar" id="ctabar" href="#wachtlijst" aria-label="Zet me op de wachtlijst"><span class="t">Zet me op de wachtlijst</span><span class="a"><svg><use href="#pijl"/></svg></span></a>
 
 <footer class="foot" id="wachtlijst">
   <div class="foot-top">
@@ -456,6 +526,29 @@ details a{color:var(--gold-deep)}
 </footer>
 
 <script>
+// Telefoon: vaste wachtlijstknop na het grote beeld, weg zodra de voet (met het formulier) in beeld is.
+(function () {
+  var bar = document.getElementById('ctabar'), hero = document.querySelector('.hero'), foot = document.getElementById('wachtlijst');
+  if (!bar || !('IntersectionObserver' in window)) return;
+  var pastHero = false, footIn = false;
+  function upd() { bar.classList.toggle('on', pastHero && !footIn); }
+  new IntersectionObserver(function (e) { pastHero = !e[0].isIntersecting; upd(); }).observe(hero);
+  new IntersectionObserver(function (e) { footIn = e[0].isIntersecting; upd(); }).observe(foot);
+})();
+// Getallen tellen op als ze in beeld komen (niet bij "minder beweging").
+(function () {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+  document.querySelectorAll('[data-count]').forEach(function (el) {
+    var end = +el.dataset.count, suf = el.dataset.suffix || '';
+    el.textContent = '0' + suf;
+    var io = new IntersectionObserver(function (e) {
+      if (!e[0].isIntersecting) return; io.disconnect();
+      var t0 = performance.now();
+      (function step(t) { var k = Math.min(1, (t - t0) / 900); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))) + suf; if (k < 1) requestAnimationFrame(step); })(t0);
+    });
+    io.observe(el);
+  });
+})();
 // Galerij: pijltjes schuiven één scherm op.
 (function () {
   var rail = document.getElementById('rail');
