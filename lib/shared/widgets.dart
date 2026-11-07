@@ -704,7 +704,7 @@ class SectionLabel extends StatelessWidget {
   final Color? color;
 
   static TextStyle style({Color? color}) => TextStyle(
-        fontFamily: 'monospace',
+        fontFamily: 'KadansMono',
         fontSize: 11.5,
         letterSpacing: 1.6,
         fontWeight: FontWeight.w500,

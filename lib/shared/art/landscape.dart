@@ -371,10 +371,11 @@ class LandscapePainter extends CustomPainter {
   /// Lopertje vooraan op het pad: buigt tegen de wind in, capuchon bij regen, muts bij kou, druppels bij hitte.
   void _paintRunner(Canvas canvas, Size size, Offset near, Offset mid, double sway) {
     final w = size.width, h = size.height;
-    const f = 0.16;
+    // Halverwege het pad: onderin ligt op Vandaag de advieskaart eroverheen.
+    const f = 0.78;
     final baseY = h + 4 - f * (h * 0.36);
     final baseX = w * 0.5 + math.sin(f * math.pi * 2.4) * w * 0.16 * (1 - f) + near.dx * (1 - f) + mid.dx * f;
-    final s = (h * 0.2).clamp(18.0, 46.0); // lichaamslengte
+    final s = (h * 0.16).clamp(16.0, 40.0) * (1 - f * 0.35); // lichaamslengte, verder weg = kleiner
     final phase = t * 12 * math.pi * 2;
     final lean = 0.12 + (wind / 40).clamp(0.0, 0.35);
     final bob = math.sin(phase * 2).abs() * s * 0.04;

@@ -78,6 +78,10 @@ flutter:
           weight: 600
         - asset: assets/fonts/DMSans-Bold.ttf
           weight: 700
+    # Typemachine-labels (§ 01 ...), zoals op kadans.fit. DejaVu Sans Mono, vrije licentie (OFL-DejaVu.txt).
+    - family: KadansMono
+      fonts:
+        - asset: assets/fonts/DejaVuSansMono.ttf
 
 # App-icoon (wordt in de cloudbuild gemaakt met: dart run flutter_launcher_icons)
 flutter_launcher_icons:

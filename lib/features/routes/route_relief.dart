@@ -76,7 +76,7 @@ class _RouteReliefState extends State<RouteRelief> {
               left: 16,
               top: 14,
               child: Text('ROUTE IN 3D',
-                  style: TextStyle(fontFamily: 'monospace', fontSize: 11, letterSpacing: 1.6, color: Colors.white.withValues(alpha: 0.7))),
+                  style: TextStyle(fontFamily: 'KadansMono', fontSize: 11, letterSpacing: 1.6, color: Colors.white.withValues(alpha: 0.7))),
             ),
             if (widget.onTap != null)
               Positioned(

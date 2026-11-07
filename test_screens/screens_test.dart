@@ -115,6 +115,7 @@ Future<void> _loadFonts() async {
     'assets/fonts/DMSans-SemiBold.ttf',
     'assets/fonts/DMSans-Bold.ttf',
   ]);
+  await family('KadansMono', ['assets/fonts/DejaVuSansMono.ttf']);
   // Ook de standaardletter (Roboto) laten wijzen naar DM Sans, zodat er geen blokjes staan.
   await family('Roboto', ['assets/fonts/DMSans-Regular.ttf', 'assets/fonts/DMSans-Bold.ttf']);
   final root = Platform.environment['FLUTTER_ROOT'];
