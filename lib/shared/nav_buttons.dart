@@ -10,26 +10,30 @@ int lastMainBranch = 0;
 
 /// Ik: rechtsboven op elk hoofdtabblad. Eén vaste plek voor profiel, instellingen en account.
 class MeButton extends StatelessWidget {
-  const MeButton({super.key});
+  const MeButton({super.key, this.color});
+
+  /// Andere kleur, bijvoorbeeld wit op het beeld bovenaan Vandaag.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => IconButton(
         tooltip: tr('Ik'),
-        icon: Icon(Icons.account_circle_outlined, color: RwColors.muted),
+        icon: Icon(Icons.account_circle_outlined, color: color ?? RwColors.muted),
         onPressed: () => context.go('/me'),
       );
 }
 
 /// Vraag de coach: staat waar de vraag ontstaat (Vandaag, Logboek, een run), in plaats van als los tabblad.
 class CoachButton extends StatelessWidget {
-  const CoachButton({super.key, this.compact = true});
+  const CoachButton({super.key, this.compact = true, this.color});
   final bool compact;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => compact
       ? IconButton(
           tooltip: tr('Vraag de coach'),
-          icon: Icon(Icons.auto_awesome_outlined, color: RwColors.accent),
+          icon: Icon(Icons.auto_awesome_outlined, color: color ?? RwColors.accent),
           onPressed: () => context.go('/coach'),
         )
       : OutlinedButton.icon(

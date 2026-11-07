@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
+import '../../shared/art/tilt.dart';
 
 /// Lidmaatschapskaart in de vorm van een creditcard: geborsteld zwart (of goud voor Premium),
 /// een getekende hoogtelijn, je naam in reliëf, je totalen en "loper sinds".
-/// Kantelt licht mee als je hem aanraakt.
+/// Kantelt licht mee als je hem aanraakt, en een fractie als je de telefoon kantelt.
 class MemberCard extends StatefulWidget {
   const MemberCard({
     super.key,
@@ -64,8 +65,10 @@ class _MemberCardState extends State<MemberCard> {
         onPointerMove: (d) => _move(d.localPosition, size),
         onPointerUp: (_) => setState(() => _tilt = Offset.zero),
         onPointerCancel: (_) => setState(() => _tilt = Offset.zero),
-        child: TweenAnimationBuilder<Offset>(
-          tween: Tween(end: _tilt),
+        child: AnimatedBuilder(
+          animation: Tilt.instance,
+          builder: (context, _) => TweenAnimationBuilder<Offset>(
+          tween: Tween(end: _tilt != Offset.zero ? _tilt : Tilt.instance.value * 0.35),
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
           builder: (context, t, child) => Transform(
@@ -185,6 +188,7 @@ class _MemberCardState extends State<MemberCard> {
               ]),
             ),
           ),
+        ),
         ),
       );
     });

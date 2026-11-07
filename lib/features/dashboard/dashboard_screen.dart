@@ -30,8 +30,8 @@ import '../../domain/run_helpers.dart';
 import '../../shared/calendar.dart';
 import '../../shared/art/landscape.dart';
 import '../../shared/art/sun_arc.dart';
+import '../../shared/art/tilt.dart';
 import '../../shared/art/weather_icon.dart';
-import '../../shared/shine_text.dart';
 import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
 import '../live/live_share_screen.dart';
@@ -175,6 +175,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
     final selectedRoute = routes.where((r) => r.id == _routeId).firstOrNull;
     final layout = ref.watch(dashLayoutProvider);
+    final greeting = '${_greeting()}${name.isEmpty ? '' : ', $name'}.';
+    final nowW = forecast.value?.at(DateTime.now());
+    final subLine = () {
+      final place = location.when(data: (l) => l.label, loading: () => '', error: (_, _) => '');
+      final weather = nowW == null ? '' : ' · ${Fmt.temp(nowW.temperature)}, ${weatherLabel(nowW.weatherCode).toLowerCase()}';
+      final where = place.isEmpty || place == 'je locatie' ? '' : ' · $place';
+      final upd = _updatedAt ?? (forecast.hasValue ? DateTime.now() : null);
+      _updatedAt ??= upd;
+      return '${Fmt.date(DateTime.now())}$weather$where${upd == null ? '' : ' · bijgewerkt ${Fmt.time(upd)}'}';
+    }();
+    // Met weerdata: groet en advies op het beeld bovenaan (zoals kadans.fit); anders de gewone kop.
+    final scene = (forecast.value?.hours.isNotEmpty ?? false);
 
     final settings = _PlanRow(
       type: _type,
@@ -261,7 +273,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: RefreshIndicator(
           onRefresh: _refresh,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+            padding: EdgeInsets.fromLTRB(scene ? 10 : 20, scene ? 8 : 20, scene ? 10 : 20, scene ? 40 : 96),
             children: [
               const FirstTip(
                 id: 'today',
@@ -270,39 +282,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 text: 'Vandaag zie je het beste moment om te lopen. Tik op een uur in de grafiek voor het weer en kledingadvies op dat moment. Kaarten kiezen en ordenen doe je onder \"Meer vandaag\".',
               ),
               const PauseBanner(),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: StaggerIn(
-                      index: 0,
-                      child: Text(
-                        '${_greeting()}${name.isEmpty ? '' : ', $name'}.',
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+              if (!scene) ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: StaggerIn(
+                        index: 0,
+                        child: Text(
+                          greeting,
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+                        ),
                       ),
                     ),
-                  ),
-                  const CoachButton(),
-                  const MeButton(),
-                ],
-              ),
-              const SizedBox(height: 2),
-              StaggerIn(
-                index: 2,
-                child: Text(
-                () {
-                  final nowW = forecast.value?.at(DateTime.now());
-                  final place = location.when(data: (l) => l.label, loading: () => '', error: (_, _) => '');
-                  final weather = nowW == null ? '' : ' · ${Fmt.temp(nowW.temperature)}, ${weatherLabel(nowW.weatherCode).toLowerCase()}';
-                  final where = place.isEmpty || place == 'je locatie' ? '' : ' · $place';
-                  final upd = _updatedAt ?? (forecast.hasValue ? DateTime.now() : null);
-                  _updatedAt ??= upd;
-                  return '${Fmt.date(DateTime.now())}$weather$where${upd == null ? '' : ' · bijgewerkt ${Fmt.time(upd)}'}';
-                }(),
-                style: TextStyle(color: RwColors.subtle),
-              ),
-              ),
-              const SizedBox(height: 18),
+                    const CoachButton(),
+                    const MeButton(),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                StaggerIn(index: 2, child: Text(subLine, style: TextStyle(color: RwColors.subtle))),
+                const SizedBox(height: 18),
+              ],
               ...forecast.when<List<Widget>>(
                 loading: () => [
                   settings,
@@ -346,6 +346,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       pollen: ref.watch(pollenSensitivityProvider),
                       recentMaxTemp: ref.watch(recentMaxRunTempProvider),
                       dog: ref.watch(dogModeProvider),
+                      greeting: greeting,
+                      subLine: subLine,
+                      nowWeather: nowW,
                     ),
                   ];
                 },
@@ -471,7 +474,13 @@ class _Results extends StatefulWidget {
     this.pollen = PollenSensitivity.normal,
     this.recentMaxTemp,
     this.dog = false,
+    this.greeting = '',
+    this.subLine = '',
+    this.nowWeather,
   });
+  final String greeting;
+  final String subLine;
+  final HourWeather? nowWeather;
   final ClothingFeel clothingFeel;
   final PollenSensitivity pollen;
   final bool dog;
@@ -525,6 +534,8 @@ class _ResultsState extends State<_Results> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          _TodayScene(greeting: widget.greeting, subLine: widget.subLine, weather: widget.nowWeather, overlap: 0),
+          const SizedBox(height: 12),
           widget.settings,
           const SizedBox(height: 20),
           EmptyState(
@@ -639,6 +650,7 @@ class _ResultsState extends State<_Results> {
           _ => widget.extras[c],
         };
 
+    const overlap = 64.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -648,40 +660,53 @@ class _ResultsState extends State<_Results> {
           final today = DateTime(now.year, now.month, now.day);
           final session = plan.where((x) => x.date == today).firstOrNull;
           final line = personalLine(verdict, session, restDay: plan.isNotEmpty && session == null);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                child: Text(line, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, height: 1.35)),
-              ),
-              // Voorlezen: handig terwijl je je omkleedt of je schoenen strikt.
-              IconButton(
-                tooltip: 'Voorlezen',
-                visualDensity: VisualDensity.compact,
-                icon: Icon(Icons.volume_up_outlined, color: RwColors.subtle),
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  final w = verdict.best.weather;
-                  RunRecorderService.instance.say(
-                    '$line Het beste moment is om ${Fmt.time(verdict.best.start)}, '
-                    'met ${(w.feelsLike ?? w.temperature).round()} graden gevoel en wind ${w.windSpeed.round()} kilometer per uur.',
-                  );
-                },
-              ),
-            ]),
+          return _TodayScene(
+            greeting: widget.greeting,
+            subLine: widget.subLine,
+            line: line,
+            weather: widget.nowWeather,
+            overlap: overlap,
+            onSpeak: () {
+              HapticFeedback.selectionClick();
+              final w = verdict.best.weather;
+              RunRecorderService.instance.say(
+                '$line Het beste moment is om ${Fmt.time(verdict.best.start)}, '
+                'met ${(w.feelsLike ?? w.temperature).round()} graden gevoel en wind ${w.windSpeed.round()} kilometer per uur.',
+              );
+            },
           );
         }),
-        widget.settings,
-        const SizedBox(height: 12),
-        _HeroCard(
-          verdict: verdict,
-          shown: shown,
-          isBest: isBest,
-          onShowBest: () => setState(() => _selected = null),
-          durationMinutes: widget.planner.durationMinutes,
-          lat: widget.planner.forecast.latitude,
-          lon: widget.planner.forecast.longitude,
+        // Alles hieronder schuift omhoog, zodat de advieskaart half over het beeld ligt.
+        Transform.translate(
+          offset: const Offset(0, -overlap),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: _TiltCard(
+            child: _HeroCard(
+              verdict: verdict,
+              shown: shown,
+              isBest: isBest,
+              onShowBest: () => setState(() => _selected = null),
+              durationMinutes: widget.planner.durationMinutes,
+              lat: widget.planner.forecast.latitude,
+              lon: widget.planner.forecast.longitude,
+            ),
+          ),
         ),
+        const SizedBox(height: 12),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: widget.settings),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 22, 10, 0),
+          child: _WeekRow(scores: all, type: widget.type),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
         const SizedBox(height: 12),
         const TodayCard(),
         const RaceCountdownCard(),
@@ -704,11 +729,6 @@ class _ResultsState extends State<_Results> {
             for (final w in smart) ...[const SizedBox(height: 12), w],
             const SizedBox(height: 12),
             Wrap(spacing: 8, runSpacing: 8, children: [
-              OutlinedButton.icon(
-                onPressed: () => openThisWeek(context),
-                icon: const Icon(Icons.date_range_outlined, size: 18),
-                label: const Text('Deze week'),
-              ),
               OutlinedButton.icon(
                 onPressed: () => setState(() => _more = !_more),
                 icon: Icon(_more ? Icons.expand_less : Icons.expand_more, size: 18),
@@ -736,6 +756,12 @@ class _ResultsState extends State<_Results> {
               : 'Log minimaal 8 runs om het advies op jouw eigen prestaties af te stemmen.',
           style: TextStyle(color: RwColors.subtle, fontSize: 13),
           textAlign: TextAlign.center,
+        ),
+            ],
+          ),
+        ),
+            ],
+          ),
         ),
       ],
     );
@@ -830,25 +856,15 @@ class _HeroCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(RwRadius.l),
-          border: Border.all(color: color.withValues(alpha: 0.4)),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [color.withValues(alpha: 0.18), RwColors.surface],
-            stops: const [0, 0.7],
-          ),
+          color: RwColors.surface,
+          border: Border.all(color: RwColors.hairline),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: RwColors.isDark ? 0.35 : 0.14), blurRadius: 36, offset: const Offset(0, 18)),
+          ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(children: [
           Positioned.fill(child: WeatherAmbience(weather: w, golden: _golden(s.start, lat, lon))),
-          // Seizoenslandschap onderin, heel zacht, beweegt mee als je de telefoon kantelt.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 150,
-            child: KadansLandscape(date: s.start, wind: w.windSpeed, opacity: 0.55, showPath: false),
-          ),
           Padding(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
         child: Column(
@@ -857,13 +873,7 @@ class _HeroCard extends StatelessWidget {
             ExcludeSemantics(
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(999)),
-                    child: Text(isBest ? label : 'GEKOZEN MOMENT',
-                        style: TextStyle(color: RwColors.background, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.6)),
-                  ),
-                  const Spacer(),
+                  Expanded(child: SectionLabel(isBest ? label : 'Gekozen moment', number: 1, color: color)),
                   IconButton(
                     tooltip: 'Nodig iemand uit om mee te lopen',
                     visualDensity: VisualDensity.compact,
@@ -897,11 +907,11 @@ class _HeroCard extends StatelessWidget {
                 spacing: 12,
                 runSpacing: 4,
                 children: [
-                  ShineText(
-                    goNowShown ? 'Nu' : Fmt.time(s.start),
+                  _CountClock(
+                    time: goNowShown ? null : s.start,
                     style: TextStyle(
                       fontFamily: RwFonts.display, fontFeatures: rwTnum,
-                      fontSize: 64,
+                      fontSize: 68,
                       fontWeight: FontWeight.w800,
                       color: RwColors.text,
                       height: 1,
@@ -927,22 +937,13 @@ class _HeroCard extends StatelessWidget {
             Text(isBest ? v.detail : 'Je bekijkt ${Fmt.time(s.start)}. Het beste moment is ${Fmt.time(v.best.start)} (score ${v.best.score}).',
                 style: TextStyle(color: RwColors.muted, height: 1.4)),
             const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(child: _HeroStat(icon: Icons.thermostat, label: 'Gevoel', value: Fmt.temp(w.feelsLike ?? w.temperature))),
-                Expanded(
-                  child: _HeroStat(
-                    icon: Icons.air,
-                    lead: w.windDirection == null ? null : _WindNeedle(fromDegrees: w.windDirection!),
-                    label: 'Wind',
-                    value: w.windDirection == null ? Fmt.wind(w.windSpeed) : '${Fmt.wind(w.windSpeed)} ${Fmt.compass(w.windDirection!)}',
-                  ),
-                ),
-                Expanded(child: _HeroStat(icon: Icons.water_drop_outlined, label: 'Regen', value: Fmt.pct(w.precipitationProbability))),
-              ],
-            ),
+            _FactRow(facts: [
+              ('Gevoel', Fmt.temp(w.feelsLike ?? w.temperature)),
+              ('Wind', w.windDirection == null ? Fmt.wind(w.windSpeed) : '${w.windSpeed.round()} ${Fmt.compass(w.windDirection!)}'),
+              ('Regen', Fmt.pct(w.precipitationProbability)),
+            ]),
             if (extraReasons.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 4),
               for (final r in extraReasons.take(2))
                 Padding(
                   padding: const EdgeInsets.only(top: 3),
@@ -984,51 +985,32 @@ class _HeroCard extends StatelessWidget {
                   ),
               ]);
             }),
-            const SizedBox(height: 8),
-            SunArc(start: s.start, minutes: durationMinutes, lat: lat, lon: lon),
-            const SizedBox(height: 10),
+            _MoreDetails(child: SunArc(start: s.start, minutes: durationMinutes, lat: lat, lon: lon)),
+            const SizedBox(height: 12),
             Row(
               children: [
                 if (goNowShown)
                   Expanded(
                     // Glas-stijl: de oranje hoofdknop "Start run" zweeft al onderin.
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: RwColors.surface.withValues(alpha: 0.6),
-                        foregroundColor: RwColors.text,
-                        side: BorderSide(color: RwColors.good.withValues(alpha: 0.6)),
-                      ),
-                      onPressed: () => openRecorder(context),
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text('Start run'),
-                    ),
+                    child: KadansButton(label: 'Start run', icon: Icons.play_arrow, onPressed: () => openRecorder(context)),
                   )
                 else if (remindAt.isAfter(DateTime.now()))
                   Expanded(
                     // Secundair (glas met oranje rand): de oranje hoofdknop is "Start run".
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: RwColors.surface.withValues(alpha: 0.6),
-                        foregroundColor: RwColors.text,
-                        side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
-                      ),
+                    child: KadansButton(
+                      label: 'Wekker ${Fmt.time(remindAt)}',
+                      icon: Icons.alarm_add_outlined,
                       onPressed: () async {
                         final ok = await setAlarm(remindAt, 'Kadans: om ${Fmt.time(s.start)} lopen');
                         if (!ok && context.mounted) {
                           showMessage(context, 'Kon geen wekker zetten. Zet hem zelf op ${Fmt.time(remindAt)}.', error: true);
                         }
                       },
-                      icon: Icon(Icons.alarm_add_outlined, color: RwColors.accentLight),
-                      label: Text('Wekker ${Fmt.time(remindAt)}'),
                     ),
                   )
                 else
                   Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => openRecorder(context),
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text('Start run'),
-                    ),
+                    child: KadansButton(label: 'Start run', icon: Icons.play_arrow, onPressed: () => openRecorder(context)),
                   ),
                 if (!goNowShown) ...[
                   const SizedBox(width: 8),
@@ -1036,8 +1018,8 @@ class _HeroCard extends StatelessWidget {
                     tooltip: 'In je agenda zetten',
                     style: IconButton.styleFrom(
                       minimumSize: const Size(52, 52),
-                      side: BorderSide(color: RwColors.accent.withValues(alpha: 0.55)),
-                      backgroundColor: RwColors.surface.withValues(alpha: 0.6),
+                      side: BorderSide(color: RwColors.hairline),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
                     ),
                     onPressed: () => addToCalendar(
                       context,
@@ -1090,31 +1072,6 @@ class _HeroCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _HeroStat extends StatelessWidget {
-  const _HeroStat({required this.icon, required this.label, required this.value, this.lead});
-  final IconData icon;
-  final Widget? lead;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          lead ?? Icon(icon, size: 18, color: RwColors.subtle),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
-                Text(value, maxLines: 2, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.2)),
-              ],
-            ),
-          ),
-        ],
-      );
 }
 
 /// Compacte regel "wat ga je lopen" (type, duur, route); tik om aan te passen.
@@ -1495,27 +1452,6 @@ class _WarningsCard extends StatelessWidget {
 }
 
 
-/// Kompasnaaldje dat de kant op wijst waar de wind naartoe waait; draait bij openen in.
-class _WindNeedle extends StatelessWidget {
-  const _WindNeedle({required this.fromDegrees});
-  final double fromDegrees;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        width: 22,
-        height: 22,
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: RwColors.text.withValues(alpha: 0.18))),
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: fromDegrees - 140, end: fromDegrees + 180),
-          duration: const Duration(milliseconds: 1400),
-          curve: Curves.elasticOut,
-          builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
-          child: Icon(Icons.navigation, size: 13, color: RwColors.accentLight),
-        ),
-      );
-}
-
-
 /// Passend icoontje bij een kledingstuk.
 IconData _clothingIcon(String item) {
   final i = item.toLowerCase();
@@ -1532,4 +1468,312 @@ bool _golden(DateTime t, double lat, double lon) {
   final st = sunTimes(t, lat, lon);
   bool near(DateTime? x) => x != null && t.difference(x).inMinutes.abs() <= 60;
   return near(st.sunrise) || near(st.sunset);
+}
+
+
+/// Het beeld bovenaan Vandaag: het eigen seizoenslandschap met lucht, een lopertje dat meeleeft
+/// met het weer, en daarin je groet en het advies van vandaag. De advieskaart ligt er half overheen.
+class _TodayScene extends StatelessWidget {
+  const _TodayScene({required this.greeting, required this.subLine, this.line, this.weather, this.onSpeak, this.overlap = 64});
+  final String greeting;
+  final String subLine;
+  final String? line;
+  final HourWeather? weather;
+  final VoidCallback? onSpeak;
+  final double overlap;
+
+  @override
+  Widget build(BuildContext context) {
+    final w = weather;
+    final night = w != null && !w.isDay;
+    final sky = night
+        ? const [Color(0xFF12151C), Color(0xFF2A2721), Color(0xFF3A3226)]
+        : const [Color(0xFF4F5A55), Color(0xFF8C8670), Color(0xFFCDB68E)];
+    const white = Color(0xFFFFFBF3);
+    return Semantics(
+      container: true,
+      label: '$greeting ${line ?? ''}',
+      child: Container(
+        constraints: BoxConstraints(minHeight: 250 + overlap),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(RwRadius.l),
+          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: sky),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(children: [
+          Positioned.fill(
+            child: KadansLandscape(
+              date: DateTime.now(),
+              wind: w?.windSpeed ?? 10,
+              rain: ((w?.precipitationProbability ?? 0) / 100).clamp(0.0, 1.0),
+              feels: w?.feelsLike ?? w?.temperature,
+              runner: true,
+              night: night,
+              opacity: 3.2,
+            ),
+          ),
+          // Donker verloop bovenin, zodat de witte tekst altijd leesbaar is (ook in de zon).
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withValues(alpha: 0.5), Colors.black.withValues(alpha: 0.05), Colors.transparent],
+                  stops: const [0, 0.6, 1],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(18, 10, 6, 18 + overlap),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                Expanded(child: Text(subLine.toUpperCase(), maxLines: 2, style: SectionLabel.style(color: white.withValues(alpha: 0.8)).copyWith(fontSize: 10.5))),
+                CoachButton(color: white),
+                MeButton(color: white),
+              ]),
+              const SizedBox(height: 14),
+              StaggerIn(
+                index: 0,
+                child: Text(greeting,
+                    style: const TextStyle(
+                        fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 34, fontWeight: FontWeight.w700, height: 1.02, letterSpacing: -0.4, color: white)),
+              ),
+              if (line != null) ...[
+                const SizedBox(height: 10),
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(
+                    child: Text(line!, style: TextStyle(fontSize: 15.5, height: 1.4, fontWeight: FontWeight.w500, color: white.withValues(alpha: 0.92))),
+                  ),
+                  if (onSpeak != null)
+                    IconButton(
+                      tooltip: 'Voorlezen',
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(Icons.volume_up_outlined, color: white.withValues(alpha: 0.85)),
+                      onPressed: onSpeak,
+                    ),
+                ]),
+              ],
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// De advieskaart kantelt een fractie mee met de telefoon (3D-gevoel). Uit bij "minder beweging":
+/// dan staat de bewegingssensor niet aan.
+class _TiltCard extends StatelessWidget {
+  const _TiltCard({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
+    final inner = RepaintBoundary(child: child);
+    return AnimatedBuilder(
+      animation: Tilt.instance,
+      child: inner,
+      builder: (_, c) {
+        final t = Tilt.instance.value;
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.0009)
+            ..rotateX(-t.dy * 0.045)
+            ..rotateY(t.dx * 0.06),
+          child: c,
+        );
+      },
+    );
+  }
+}
+
+/// Grote tijd die bij verschijnen naar het beste moment toe telt (null = "Nu").
+class _CountClock extends StatelessWidget {
+  const _CountClock({required this.time, required this.style});
+  final DateTime? time;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = time;
+    if (t == null) return Text('Nu', style: style);
+    final target = (t.hour * 60 + t.minute).toDouble();
+    return CountUpText(
+      key: ValueKey(t),
+      value: target,
+      from: math.max(0, target - 75),
+      style: style,
+      format: (v) {
+        final m = v.round();
+        return '${(m ~/ 60).toString().padLeft(2, '0')}:${(m % 60).toString().padLeft(2, '0')}';
+      },
+    );
+  }
+}
+
+/// Drie feiten op een rij tussen dunne lijntjes: label in typemachine-letters, waarde groot.
+class _FactRow extends StatelessWidget {
+  const _FactRow({required this.facts});
+  final List<(String, String)> facts;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          border: Border.symmetric(horizontal: BorderSide(color: RwColors.hairline)),
+        ),
+        child: Row(children: [
+          for (final (label, value) in facts)
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(label.toUpperCase(), style: SectionLabel.style(color: RwColors.subtle).copyWith(fontSize: 10)),
+                const SizedBox(height: 3),
+                Text(value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 19, fontWeight: FontWeight.w700, color: RwColors.text)),
+              ]),
+            ),
+        ]),
+      );
+}
+
+/// "Meer over dit moment": de zonneboog staat ingeklapt, zodat de kaart rustig blijft.
+class _MoreDetails extends StatefulWidget {
+  const _MoreDetails({required this.child});
+  final Widget child;
+
+  @override
+  State<_MoreDetails> createState() => _MoreDetailsState();
+}
+
+class _MoreDetailsState extends State<_MoreDetails> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.muted, padding: EdgeInsets.zero),
+            onPressed: () => setState(() => _open = !_open),
+            icon: Icon(_open ? Icons.expand_less : Icons.wb_twilight_outlined, size: 18),
+            label: Text(_open ? 'Minder' : 'Zon en licht'),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          child: _open ? widget.child : const SizedBox(width: double.infinity),
+        ),
+      ]);
+}
+
+/// "§ 02 Deze week": je trainingen van de komende dagen als veegrij, met een randje van de volgende kaart.
+/// Binnen de weersverwachting (36 uur) staat het beste moment erbij. Zonder schema: één knop naar Deze week.
+class _WeekRow extends ConsumerWidget {
+  const _WeekRow({required this.scores, required this.type});
+  final List<StartTimeScore> scores;
+  final TrainingType type;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plan = ref.watch(planProvider).value ?? const <PlanSession>[];
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final next = [
+      for (final p in plan)
+        if (!p.date.isBefore(today) && p.date.difference(today).inDays < 7) p,
+    ]..sort((a, b) => a.date.compareTo(b.date));
+    const days = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'];
+    String dayLabel(DateTime d) {
+      final diff = d.difference(today).inDays;
+      final base = '${days[d.weekday - 1]} ${d.day}';
+      return diff == 0 ? '$base · vandaag' : diff == 1 ? '$base · morgen' : base;
+    }
+
+    DateTime? bestOn(DateTime d) {
+      StartTimeScore? best;
+      for (final s in scores) {
+        if (s.start.year == d.year && s.start.month == d.month && s.start.day == d.day && s.start.isAfter(now)) {
+          if (best == null || s.score > best.score) best = s;
+        }
+      }
+      return best?.start;
+    }
+
+    final head = Row(children: [
+      const Expanded(child: SectionLabel('Deze week', number: 2)),
+      TextButton(
+        style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accentDeep),
+        onPressed: () => openThisWeek(context),
+        child: const Text('Alles →'),
+      ),
+    ]);
+    if (next.isEmpty) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        head,
+        const SizedBox(height: 6),
+        RwCard(
+          onTap: () => openThisWeek(context),
+          child: Row(children: [
+            Icon(Icons.date_range_outlined, color: RwColors.accentDeep),
+            const SizedBox(width: 12),
+            Expanded(child: Text('Bekijk je week: de beste momenten per dag.', style: TextStyle(color: RwColors.muted))),
+            Icon(Icons.chevron_right, color: RwColors.subtle),
+          ]),
+        ),
+      ]);
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      head,
+      const SizedBox(height: 6),
+      LayoutBuilder(builder: (context, c) {
+        final cardW = math.min(170.0, c.maxWidth * 0.42);
+        final big = MediaQuery.textScalerOf(context).scale(1) > 1.25;
+        return SizedBox(
+          height: big ? 196 : 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            itemCount: next.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            itemBuilder: (context, i) {
+              final p = next[i];
+              final first = i == 0;
+              final t = bestOn(p.date);
+              final fg = first ? const Color(0xFFF1E9DC) : RwColors.text;
+              final soft = first ? const Color(0xFFBDB1A0) : RwColors.muted;
+              return GestureDetector(
+                onTap: () => openThisWeek(context),
+                child: Container(
+                  width: cardW,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: first ? const Color(0xFF211A14) : RwColors.surface,
+                    borderRadius: BorderRadius.circular(RwRadius.m),
+                    border: Border.all(color: first ? const Color(0xFF211A14) : RwColors.hairline),
+                  ),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(dayLabel(p.date).toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: SectionLabel.style(color: soft).copyWith(fontSize: 10)),
+                    const Spacer(),
+                    Text(t == null ? (p.distanceMeters == null ? '–' : Fmt.km(p.distanceMeters!)) : Fmt.time(t),
+                        maxLines: 1,
+                        style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w700, color: fg)),
+                    const Spacer(),
+                    Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, height: 1.3, color: soft)),
+                  ]),
+                ),
+              );
+            },
+          ),
+        );
+      }),
+    ]);
+  }
 }

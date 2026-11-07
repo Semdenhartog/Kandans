@@ -695,3 +695,127 @@ class _BackToTopState extends State<BackToTop> {
         ),
       ]);
 }
+
+/// Sectielabel in typemachine-stijl, zoals op kadans.fit: "§ 01 · LATER LOPEN".
+class SectionLabel extends StatelessWidget {
+  const SectionLabel(this.text, {super.key, this.number, this.color});
+  final String text;
+  final int? number;
+  final Color? color;
+
+  static TextStyle style({Color? color}) => TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 11.5,
+        letterSpacing: 1.6,
+        fontWeight: FontWeight.w500,
+        color: color ?? RwColors.muted,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? RwColors.muted;
+    return Text.rich(
+      TextSpan(children: [
+        if (number != null)
+          TextSpan(text: '§ ${number.toString().padLeft(2, '0')}  ', style: TextStyle(color: RwColors.accentDeep)),
+        TextSpan(text: text.toUpperCase()),
+      ]),
+      style: style(color: c),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+/// Hoofdknop in huisstijl: donker blok met tekst in typemachine-letters + goud vierkant met pijl
+/// (dezelfde knop als op kadans.fit). In donkere weergave een licht blok.
+class KadansButton extends StatefulWidget {
+  const KadansButton({super.key, required this.label, required this.onPressed, this.icon = Icons.arrow_forward});
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData icon;
+
+  @override
+  State<KadansButton> createState() => _KadansButtonState();
+}
+
+class _KadansButtonState extends State<KadansButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = RwColors.isDark;
+    final block = dark ? const Color(0xFFF1E9DC) : const Color(0xFF211A14);
+    final onBlock = dark ? const Color(0xFF211A14) : const Color(0xFFF1E9DC);
+    const gold = Color(0xFFD9BF92);
+    final enabled = widget.onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: widget.label,
+      child: GestureDetector(
+        onTapDown: enabled ? (_) => setState(() => _down = true) : null,
+        onTapCancel: () => setState(() => _down = false),
+        onTapUp: (_) => setState(() => _down = false),
+        onTap: enabled
+            ? () {
+                HapticFeedback.lightImpact();
+                widget.onPressed!();
+              }
+            : null,
+        child: AnimatedScale(
+          scale: _down ? 0.97 : 1,
+          duration: const Duration(milliseconds: 120),
+          child: Opacity(
+            opacity: enabled ? 1 : 0.5,
+            child: ExcludeSemantics(
+              child: Row(children: [
+                Expanded(
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 52),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(RwRadius.s)),
+                    child: Text(
+                      widget.label.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: SectionLabel.style(color: onBlock).copyWith(fontSize: 13, letterSpacing: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(RwRadius.s)),
+                  child: Icon(widget.icon, color: const Color(0xFF211A14), size: 22),
+                ),
+              ]),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Een getal dat bij verschijnen optelt (zoals de cijfers op kadans.fit). Bij "minder beweging" meteen goed.
+class CountUpText extends StatelessWidget {
+  const CountUpText({super.key, required this.value, required this.format, this.style, this.from});
+  final double value;
+  final double? from;
+  final String Function(double) format;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still) return Text(format(value), style: style);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: from ?? 0, end: value),
+      duration: const Duration(milliseconds: 1100),
+      curve: Curves.easeOutCubic,
+      builder: (_, v, _) => Text(format(v), style: style),
+    );
+  }
+}
