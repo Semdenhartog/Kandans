@@ -605,25 +605,20 @@ class _ResultsState extends State<_Results> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Wrap: bij grote letters schuift het filter onder het kopje in plaats van uit beeld.
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    alignment: WrapAlignment.spaceBetween,
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      const SectionLabel('Weercijfer per uur', number: 2),
-                      FilterChip(
-                        label: const Text('Goede uren', maxLines: 1, overflow: TextOverflow.ellipsis),
-                        selected: _goodOnly,
-                        onSelected: (v) {
+                  Row(children: [
+                    const Expanded(child: SectionLabel('Weercijfer per uur', number: 2)),
+                    Text('Goede uren', style: TextStyle(color: RwColors.muted, fontSize: 13)),
+                    Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: _goodOnly,
+                        onChanged: (v) {
                           setState(() => _goodOnly = v);
                           SharedPreferences.getInstance().then((p) => p.setBool('hours_good_only', v)).ignore();
                         },
-                        visualDensity: VisualDensity.compact,
                       ),
-                    ],
-                  ),
+                    ),
+                  ]),
                   const SizedBox(height: 10),
                   if (bars.isEmpty)
                     Padding(
