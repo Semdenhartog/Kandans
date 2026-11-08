@@ -146,7 +146,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   capuchon/muts/zweet, sterren 's nachts, regenstreepjes; params `rain/feels/runner/night` in `KadansLandscape`) met de advieskaart
   64 px eroverheen (`Transform.translate`), kaart kantelt licht mee (`_TiltCard`, `Tilt`), tijd telt op (`_CountClock`/`CountUpText`),
   feitenrij `_FactRow`, zonneboog ingeklapt (`_MoreDetails` "Zon en licht"), "§ 02 Deze week" als veegrij (`_WeekRow`).
-  Gedeeld: `SectionLabel` (§-labels, lettertype `KadansMono` = DejaVu Sans Mono), `KadansButton` (donker blok + goud vierkant),
+  Gedeeld: `SectionLabel` (labels "01  TEKST", § weg sinds 8-11, lettertype `KadansMono` = DejaVu Sans Mono), `KadansButton` (donker blok + goud vierkant),
   papierkorrel in `RwAura` (`PaperGrainPainter`). Route in 3D is weer weggehaald (8-11, Sem).
   Ledenkaart kantelt ook met de telefoon mee. **Ronde 8-11:** weercijfer per uur (`DashCard.hours`, staafjes) staat weer vast
   onder de advieskaart (§ 02, schakelaar "Goede uren"), Deze week = § 03; lopertje weg (Sem vond het knullig: geen getekende lopertjes meer);
@@ -157,6 +157,11 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   (`.github/scripts/haal_tegels.py` in screens.yml → `test_screens/tegels`, `debugMapTiles` in `route_map.dart`), foto's/tegels
   laden alleen bij `images: true`; kaarttest `11c_opnemen_kaart` (`RecordRunScreen.debugSkipWarmUp`). Logboek-voorbeeld = ruim een jaar runs,
   coach-voorbeeld = schema laatste 3 weken halve marathon. `site/app/*.jpg` komen nu uit de schermtests (540×1199).
+- **Rondleiding (8-11, site-stijl):** `onboarding/onboarding_screen.dart`, 6 stappen: welkom donker-goud (gouden K `k_goud.webp`
+  met gloed) → 3 vragen op papier (doel, wanneer + melding, coachstem) → eerste advies live over `assets/foto/heide.jpg`
+  (locatie pas hier vragen, echte `StartTimePlanner`, tijd telt op, coach-zin) → ledenkaart (`MemberCard`, vaste maat i.v.m. IntrinsicHeight).
+  Ontwerp-schets: Design-artifact "Kadans – luxe rondleiding bij eerste gebruik". Schermtests `14`–`14g`.
+  "Nu lopen" toont weer/dag van nú (`s = v.now`). Schermtest-weer is relatief aan nu (altijd "Later lopen" over ±2 uur).
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -176,10 +181,6 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Alles wat gebouwd is: `VERBETERPUNTEN.md`. Play Store: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
-- **Klaar voor de volgende ronde (8-11, nog niet gebouwd/getest, niet live):** §-teken weg uit labels (app `SectionLabel` → "01  LATER LOPEN",
-  site `.sec-no`); "Nu lopen" toont dag/weer/cijfers van nú (`s = v.now`, was: weer van het latere beste moment + "Morgen");
-  schermtest-weer ten opzichte van nu (altijd "Later lopen" over ±2 uur). Bij de volgende ronde: build + schermen, dan site/app/vandaag.jpg
-  overdag opnieuw maken, main + `site.yml`.
 - KvK (november, KOR-keuze) → Kickstarter-betaalgegevens + Submit for review, betaallinks steunpagina.
 - Wachtlijst → Google Sheets: wacht op Sems keuzes (zie archief).
 - Gouden K van het marmerlogo in de app vervangen door de nieuwe K, als Sem dat wil.
@@ -196,6 +197,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 8-11 middag): nieuwe rondleiding (wis app-gegevens of Ik → Hulp), locatie op stap 5, ledenkaart-animatie.
 - Testen op telefoon (nieuw 8-11): sfeerfoto op Vandaag (licht/donker, mist), opnamescherm rustiger, badgekleuren, ledenkaart met grote getallen.
 - Testen op telefoon (nieuw 7-11): nieuwe Vandaag (beeld, lopertje, kantelen, optellende tijd, veegrij), Kadans-knop, ledenkaart kantelen, weercijfer per uur onder het advies.
 - Testen op telefoon (nieuw 6-11 nacht): profielfoto uploaden, vergrendelscherm tijdens run (aan/uit-knop), piep bij aftellen, tempo-alarm,
