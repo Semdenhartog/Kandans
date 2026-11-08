@@ -609,7 +609,7 @@ void main() {
   testWidgets('12 route detail', (t) => _shot(t, '12_route_detail', images: true, const RouteDetailScreen(routeId: 'r1'), height: 3000));
   testWidgets('12f vlieg over route', (t) => _shot(t, '12f_vlieg_over', RouteFlyoverScreen(route: _routes.first), height: 915));
   testWidgets('13 inloggen', (t) => _shot(t, '13_inloggen', const LoginScreen(), height: 915));
-  testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', const OnboardingScreen(), height: 915));
+  testWidgets('14 rondleiding', (t) => _shot(t, '14_rondleiding', images: true, const OnboardingScreen(), height: 915));
   testWidgets('14c rondleiding doel', (t) => _shot(t, '14c_rondleiding_doel', const OnboardingScreen(initialPage: 1), height: 915));
   testWidgets('16 privacy', (t) => _shot(t, '16_privacy', const PrivacyScreen(), height: 1600));
   testWidgets('17 shop', (t) => _shot(t, '17_shop', const ShopScreen(), height: 2000));
@@ -636,6 +636,8 @@ void main() {
   testWidgets('19 strava-archief', (t) => _shot(t, '19_strava_archief', const StravaArchiveScreen(), height: 1900));
   testWidgets('14d rondleiding wanneer', (t) => _shot(t, '14d_rondleiding_wanneer', const OnboardingScreen(initialPage: 2), height: 915));
   testWidgets('14e rondleiding stem', (t) => _shot(t, '14e_rondleiding_stem', const OnboardingScreen(initialPage: 3), height: 915));
+  testWidgets('14f rondleiding advies', (t) => _shot(t, '14f_rondleiding_advies', images: true, const OnboardingScreen(initialPage: 4), height: 915));
+  testWidgets('14g rondleiding ledenkaart', (t) => _shot(t, '14g_rondleiding_ledenkaart', images: true, const OnboardingScreen(initialPage: 5), height: 915));
   testWidgets('15 na je run', (t) {
     final st = RunStreams.fromJson(_streams)!;
     return _shot(

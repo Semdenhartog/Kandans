@@ -1153,3 +1153,28 @@ T.update({
     'Vliegen': ('Fly', 'Fliegen', 'Survoler', 'Volar'),
     'Opnieuw': ('Again', 'Nochmal', 'Recommencer', 'Otra vez'),
 })
+
+# Rondleiding in site-stijl (8-11)
+T.update({
+    'Begin': ('Start', 'Los geht\'s', 'Commencer', 'Empezar'),
+    'Wij kijken naar het weer.': ('We watch the weather.', 'Wir achten aufs Wetter.', 'Nous surveillons la météo.', 'Nosotros vigilamos el tiempo.'),
+    'Jij loopt.': ('You run.', 'Du läufst.', 'Toi, tu cours.', 'Tú corres.'),
+    'Drie korte vragen, dan zie je meteen jouw beste moment om te lopen.': ('Three quick questions, then you\'ll see your best moment to run.', 'Drei kurze Fragen, dann siehst du sofort deinen besten Moment zum Laufen.', 'Trois petites questions, puis tu verras ton meilleur moment pour courir.', 'Tres preguntas rápidas y verás tu mejor momento para correr.'),
+    'Vraag {n} van 3': ('Question {n} of 3', 'Frage {n} von 3', 'Question {n} sur 3', 'Pregunta {n} de 3'),
+    'Je eerste advies': ('Your first advice', 'Dein erster Rat', 'Ton premier conseil', 'Tu primer consejo'),
+    'Dit is jouw moment.': ('This is your moment.', 'Das ist dein Moment.', 'Voici ton moment.', 'Este es tu momento.'),
+    'Weer op jouw plek.': ('Weather where you are.', 'Wetter genau bei dir.', 'La météo là où tu es.', 'El tiempo donde estás.'),
+    'Berekend op het weer van de komende uren, de wind en jouw tijden.': ('Based on the weather for the coming hours, the wind and your times.', 'Berechnet aus dem Wetter der nächsten Stunden, dem Wind und deinen Zeiten.', 'Calculé selon la météo des prochaines heures, le vent et tes horaires.', 'Calculado con el tiempo de las próximas horas, el viento y tus horarios.'),
+    'Sta je locatie toe, dan rekent Kadans meteen jouw beste moment uit.': ('Allow your location and Kadans works out your best moment right away.', 'Erlaube deinen Standort, dann berechnet Kadans sofort deinen besten Moment.', 'Autorise ta position et Kadans calcule tout de suite ton meilleur moment.', 'Permite tu ubicación y Kadans calcula al instante tu mejor momento.'),
+    'Toon mijn moment': ('Show my moment', 'Meinen Moment zeigen', 'Voir mon moment', 'Ver mi momento'),
+    'Even rekenen…': ('Calculating…', 'Wird berechnet…', 'Calcul en cours…', 'Calculando…'),
+    'Zonder locatie verder': ('Continue without location', 'Ohne Standort weiter', 'Continuer sans position', 'Seguir sin ubicación'),
+    'Mooi, verder': ('Nice, continue', 'Schön, weiter', 'Parfait, continuer', 'Genial, seguir'),
+    'Het weer laden lukt nu niet. Op Vandaag zie je zo je beste moment.': ('Can\'t load the weather right now. You\'ll see your best moment on Today shortly.', 'Das Wetter lässt sich gerade nicht laden. Unter Heute siehst du gleich deinen besten Moment.', 'Impossible de charger la météo pour l\'instant. Tu verras bientôt ton meilleur moment sur Aujourd\'hui.', 'Ahora no se puede cargar el tiempo. En Hoy verás pronto tu mejor momento.'),
+    'Jouw beste moment': ('Your best moment', 'Dein bester Moment', 'Ton meilleur moment', 'Tu mejor momento'),
+    '“{dag} om {tijd} is jouw moment.”': ('“{dag} at {tijd} is your moment.”', '„{dag} um {tijd} ist dein Moment.“', '« {dag} à {tijd}, c\'est ton moment. »', '“{dag} a las {tijd} es tu momento.”'),
+    'Je ledenkaart': ('Your membership card', 'Deine Mitgliedskarte', 'Ta carte de membre', 'Tu tarjeta de socio'),
+    'Welkom bij de club': ('Welcome to the club', 'Willkommen im Club', 'Bienvenue au club', 'Bienvenido al club'),
+    'Je eerste run maakt hem compleet.': ('Your first run completes it.', 'Dein erster Lauf macht sie komplett.', 'Ta première course la complète.', 'Tu primera carrera la completa.'),
+    'Naar Vandaag': ('Go to Today', 'Zu Heute', 'Vers Aujourd\'hui', 'Ir a Hoy'),
+})
