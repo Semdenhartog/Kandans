@@ -147,8 +147,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   64 px eroverheen (`Transform.translate`), kaart kantelt licht mee (`_TiltCard`, `Tilt`), tijd telt op (`_CountClock`/`CountUpText`),
   feitenrij `_FactRow`, zonneboog ingeklapt (`_MoreDetails` "Zon en licht"), "§ 02 Deze week" als veegrij (`_WeekRow`).
   Gedeeld: `SectionLabel` (§-labels, lettertype `KadansMono` = DejaVu Sans Mono), `KadansButton` (donker blok + goud vierkant),
-  papierkorrel in `RwAura` (`PaperGrainPainter`). Route in 3D bovenaan Route-details: `routes/route_relief.dart` (tik = vlieg over).
-  Ledenkaart kantelt ook met de telefoon mee. **Ronde 8-11:** lopertje weg (Sem vond het knullig: geen getekende lopertjes meer);
+  papierkorrel in `RwAura` (`PaperGrainPainter`). Route in 3D is weer weggehaald (8-11, Sem).
+  Ledenkaart kantelt ook met de telefoon mee. **Ronde 8-11:** weercijfer per uur (`DashCard.hours`, staafjes) staat weer vast
+  onder de advieskaart (§ 02, schakelaar "Goede uren"), Deze week = § 03; lopertje weg (Sem vond het knullig: geen getekende lopertjes meer);
   Vandaag-beeld = sfeerfoto `assets/foto/heide.jpg` of `mist.jpg` (mist/buien/grijs, `_foggy`), 's nachts donkerder.
   Opnemen: vaste lettergroottes (hoofdcijfer, getallen 28, tekst 16, labels 13). Badges hebben niveaus `BadgeTier`
   (brons/zilver/goud/platina, `tierColor`, legenda `BadgeTierLegend`). Bluetooth (`FlutterReactiveBle`) is `late` in de services.
@@ -192,7 +193,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
 - Testen op telefoon (nieuw 8-11): sfeerfoto op Vandaag (licht/donker, mist), opnamescherm rustiger, badgekleuren, ledenkaart met grote getallen.
-- Testen op telefoon (nieuw 7-11): nieuwe Vandaag (beeld, lopertje, kantelen, optellende tijd, veegrij), Kadans-knop, route in 3D, ledenkaart kantelen.
+- Testen op telefoon (nieuw 7-11): nieuwe Vandaag (beeld, lopertje, kantelen, optellende tijd, veegrij), Kadans-knop, ledenkaart kantelen, weercijfer per uur onder het advies.
 - Testen op telefoon (nieuw 6-11 nacht): profielfoto uploaden, vergrendelscherm tijdens run (aan/uit-knop), piep bij aftellen, tempo-alarm,
   route andersom + vlieg over, gedeelde route-link (hoogte op de site), recordfeest + delen, reacties/@vermelding (melding bij openen app),
   groepsagenda, trekken om te vernieuwen.
