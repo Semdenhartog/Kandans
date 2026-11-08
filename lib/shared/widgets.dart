@@ -717,7 +717,7 @@ class SectionLabel extends StatelessWidget {
     return Text.rich(
       TextSpan(children: [
         if (number != null)
-          TextSpan(text: '${number.toString().padLeft(2, '0')}  ', style: TextStyle(color: RwColors.accentDeep)),
+          TextSpan(text: '${number.toString().padLeft(2, '0')}  ', style: TextStyle(color: color ?? RwColors.accentDeep)),
         TextSpan(text: text.toUpperCase()),
       ]),
       style: style(color: c),
