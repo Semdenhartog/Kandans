@@ -26,7 +26,6 @@ import 'elevation_profile.dart';
 import 'route_flyover_screen.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
-import 'route_relief.dart';
 import 'route_map_screen.dart';
 import 'turn_list_card.dart';
 import 'route_poster_screen.dart';
@@ -148,12 +147,6 @@ class RouteDetailScreen extends ConsumerWidget {
                 _NewRouteCard(route: r),
                 const SizedBox(height: 14),
               ],
-              RouteRelief(
-                polyline: r.polyline,
-                profile: r.profileOrKmPoints,
-                onTap: () => openRouteFlyover(context, r),
-              ),
-              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(r.distanceMeters))),

@@ -605,9 +605,14 @@ class _ResultsState extends State<_Results> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
+                  // Wrap: bij grote letters schuift het filter onder het kopje in plaats van uit beeld.
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
-                      const Expanded(child: SectionLabel('Weercijfer per uur', number: 2)),
+                      const SectionLabel('Weercijfer per uur', number: 2),
                       FilterChip(
                         label: const Text('Alleen goede uren'),
                         selected: _goodOnly,
