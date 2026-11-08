@@ -614,7 +614,7 @@ class _ResultsState extends State<_Results> {
                     children: [
                       const SectionLabel('Weercijfer per uur', number: 2),
                       FilterChip(
-                        label: const Text('Alleen goede uren'),
+                        label: const Text('Goede uren', maxLines: 1, overflow: TextOverflow.ellipsis),
                         selected: _goodOnly,
                         onSelected: (v) {
                           setState(() => _goodOnly = v);
