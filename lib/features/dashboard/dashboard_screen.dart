@@ -841,9 +841,10 @@ class _HeroCard extends StatelessWidget {
       VerdictKind.later => (RwColors.accent, 'LATER LOPEN'),
       VerdictKind.tough => (RwColors.warning, 'LASTIGE DAG'),
     };
-    final s = shown;
-    final w = s.weather;
     final goNowShown = isBest && v.kind == VerdictKind.goNow;
+    // Bij "Nu lopen" gaan dag, weer en cijfers over nú, niet over het (latere) beste moment.
+    final s = goNowShown ? v.now : shown;
+    final w = s.weather;
     final remindAt = s.start.subtract(const Duration(minutes: 15));
     final gain = v.best.score - v.now.score;
     // Redenen die nog niet in de tekst hierboven staan.

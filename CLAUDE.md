@@ -176,6 +176,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Alles wat gebouwd is: `VERBETERPUNTEN.md`. Play Store: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
+- **Klaar voor de volgende ronde (8-11, nog niet gebouwd/getest, niet live):** §-teken weg uit labels (app `SectionLabel` → "01  LATER LOPEN",
+  site `.sec-no`); "Nu lopen" toont dag/weer/cijfers van nú (`s = v.now`, was: weer van het latere beste moment + "Morgen");
+  schermtest-weer ten opzichte van nu (altijd "Later lopen" over ±2 uur). Bij de volgende ronde: build + schermen, dan site/app/vandaag.jpg
+  overdag opnieuw maken, main + `site.yml`.
 - KvK (november, KOR-keuze) → Kickstarter-betaalgegevens + Submit for review, betaallinks steunpagina.
 - Wachtlijst → Google Sheets: wacht op Sems keuzes (zie archief).
 - Gouden K van het marmerlogo in de app vervangen door de nieuwe K, als Sem dat wil.

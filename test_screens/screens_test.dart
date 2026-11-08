@@ -281,19 +281,23 @@ final _forecast = Forecast(
     for (var h = 0; h < 48; h++)
       () {
         final t = DateTime(_now.year, _now.month, _now.day, _now.hour).add(Duration(hours: h));
-        final temp = 11 + 6 * math.sin((t.hour - 9) / 24 * 2 * math.pi);
+        // Weer ten opzichte van nu (niet van de klok), zodat Vandaag er altijd hetzelfde uitziet:
+        // nu droog maar winderig, over ±2 uur windstil en zacht (= "Later lopen"), over 6–8 uur buien.
+        final k = h;
+        final temp = 12 + 3 * math.sin((k - 1) / 24 * 2 * math.pi);
+        final rain = k >= 6 && k <= 8;
         return HourWeather(
           time: t,
           temperature: temp,
-          feelsLike: temp - 2,
-          humidity: 70 + 15 * math.cos(t.hour / 24 * 2 * math.pi),
-          precipitationProbability: (t.hour >= 15 && t.hour <= 18) ? 65 : 10,
-          precipitation: (t.hour >= 15 && t.hour <= 18) ? 0.8 : 0,
-          windSpeed: 12 + 10 * math.sin(t.hour / 24 * 2 * math.pi),
+          feelsLike: temp - (k < 2 ? 4 : 1),
+          humidity: 72 + 8 * math.cos(k / 24 * 2 * math.pi),
+          precipitationProbability: rain ? 65 : 10,
+          precipitation: rain ? 0.8 : 0,
+          windSpeed: k < 2 ? 27 : (k <= 4 ? 8 : 14),
           windDirection: 225,
-          windGusts: 30,
+          windGusts: k < 2 ? 45 : 20,
           uvIndex: 2,
-          weatherCode: (t.hour >= 15 && t.hour <= 18) ? 61 : 2,
+          weatherCode: rain ? 61 : 2,
           isDay: t.hour > 7 && t.hour < 19,
         );
       }(),

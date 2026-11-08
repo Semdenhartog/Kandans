@@ -696,7 +696,7 @@ class _BackToTopState extends State<BackToTop> {
       ]);
 }
 
-/// Sectielabel in typemachine-stijl, zoals op kadans.fit: "§ 01 · LATER LOPEN".
+/// Sectielabel in typemachine-stijl, zoals op kadans.fit: "01  LATER LOPEN".
 class SectionLabel extends StatelessWidget {
   const SectionLabel(this.text, {super.key, this.number, this.color});
   final String text;
@@ -717,7 +717,7 @@ class SectionLabel extends StatelessWidget {
     return Text.rich(
       TextSpan(children: [
         if (number != null)
-          TextSpan(text: '§ ${number.toString().padLeft(2, '0')}  ', style: TextStyle(color: RwColors.accentDeep)),
+          TextSpan(text: '${number.toString().padLeft(2, '0')}  ', style: TextStyle(color: RwColors.accentDeep)),
         TextSpan(text: text.toUpperCase()),
       ]),
       style: style(color: c),
