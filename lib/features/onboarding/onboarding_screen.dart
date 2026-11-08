@@ -883,7 +883,12 @@ class _MemberPage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  child: MemberCard(name: name, email: '', runs: 0, km: 0, badges: 0, since: DateTime.now(), premium: p?.isPremium ?? false),
+                  // Vaste maat: de kaart meet zichzelf met een LayoutBuilder, en dat mag niet binnen IntrinsicHeight.
+                  child: SizedBox(
+                    width: box.maxWidth - 48,
+                    height: (box.maxWidth - 48) / 1.586,
+                    child: MemberCard(name: name, email: '', runs: 0, km: 0, badges: 0, since: DateTime.now(), premium: p?.isPremium ?? false),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Text(tr('Je eerste run maakt hem compleet.'),
