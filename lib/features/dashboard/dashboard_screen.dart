@@ -1307,7 +1307,7 @@ class _ClothingCard extends StatelessWidget {
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     Icon(_clothingIcon(item), size: 16, color: RwColors.accentLight),
                     const SizedBox(width: 6),
-                    Text(item, style: const TextStyle(fontSize: 13)),
+                    Flexible(child: Text(item, style: const TextStyle(fontSize: 13))),
                   ]),
                 ),
             ],
