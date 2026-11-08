@@ -607,10 +607,7 @@ class _ResultsState extends State<_Results> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: Text('PER UUR',
-                            style: RwText.overline),
-                      ),
+                      const Expanded(child: SectionLabel('Weercijfer per uur', number: 2)),
                       FilterChip(
                         label: const Text('Alleen goede uren'),
                         selected: _goodOnly,
@@ -695,6 +692,11 @@ class _ResultsState extends State<_Results> {
             ),
           ),
         ),
+        // Het weercijfer per uur staat altijd op Vandaag, direct onder het advies (Sems keuze, 8-11).
+        if (card(DashCard.hours) case final hours?) ...[
+          const SizedBox(height: 12),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: hours),
+        ],
         const SizedBox(height: 12),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: widget.settings),
         Padding(
@@ -715,6 +717,7 @@ class _ResultsState extends State<_Results> {
           final smart = <Widget>[];
           final more = <Widget>[];
           for (final c in widget.layout.visible) {
+            if (c == DashCard.hours) continue; // staat al bovenaan
             final w = card(c);
             if (w == null) continue;
             if (_smartCards.contains(c) && smart.length < 3) {
@@ -1713,7 +1716,7 @@ class _WeekRow extends ConsumerWidget {
     }
 
     final head = Row(children: [
-      const Expanded(child: SectionLabel('Deze week', number: 2)),
+      const Expanded(child: SectionLabel('Deze week', number: 3)),
       TextButton(
         style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accentDeep),
         onPressed: () => openThisWeek(context),
