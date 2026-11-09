@@ -1481,20 +1481,28 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   Widget _preStats(RecorderView v) {
     // Buiten: grote kaart met je positie en de gouden looppaden, GPS-status eroverheen (9-11, zoals Strava).
     if (!_indoor) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Expanded(
-            child: Stack(children: [
-              Positioned.fill(child: LiveTrackMap(track: const [], position: v.position)),
-              Positioned(left: 10, bottom: 26, right: 64, child: _GpsPill(accuracy: v.gpsAccuracy, ready: v.gpsReady)),
-            ]),
-          ),
-          const SizedBox(height: 10),
-          _presets(),
-        ]),
-      );
+      // Te weinig ruimte (grote letters, klein scherm): de compacte GPS-weergave hieronder.
+      return LayoutBuilder(builder: (context, box) {
+        if (box.maxHeight < 300) return _compactPre(v);
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Expanded(
+              child: Stack(children: [
+                Positioned.fill(child: LiveTrackMap(track: const [], position: v.position)),
+                Positioned(left: 10, bottom: 26, right: 64, child: _GpsPill(accuracy: v.gpsAccuracy, ready: v.gpsReady)),
+              ]),
+            ),
+            const SizedBox(height: 10),
+            _presets(),
+          ]),
+        );
+      });
     }
+    return _compactPre(v);
+  }
+
+  Widget _compactPre(RecorderView v) {
     return Center(
       child: SingleChildScrollView(
         child: Column(
