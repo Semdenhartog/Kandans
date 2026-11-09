@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/i18n.dart';
 import '../models/models.dart';
 
 /// Samen-extra's: loopmaatjes, weddenschappen en loopgroepen (SQL in 0037).
@@ -165,7 +166,12 @@ class TogetherService {
       });
 
   Future<String> groupCreate(String name) => _call(() async => await _db.rpc('group_create', params: {'p_name': name}) as String);
-  Future<String> groupJoin(String code) => _call(() async => await _db.rpc('group_join', params: {'p_code': code}) as String);
+  Future<String> groupJoin(String code) => _call(() async {
+        // De server geeft null bij een onbekende code (zo telt de poging mee voor de daglimiet).
+        final name = await _db.rpc('group_join', params: {'p_code': code}) as String?;
+        if (name == null) throw Exception(tr('Geen groep gevonden met deze code.'));
+        return name;
+      });
   Future<void> groupLeave(int id) => _call(() => _db.rpc('group_leave', params: {'p_id': id}));
   Future<void> groupSetRoute(int id, String? name, String? polyline) =>
       _call(() => _db.rpc('group_set_route', params: {'p_id': id, 'p_name': name, 'p_polyline': polyline}));
