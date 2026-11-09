@@ -168,6 +168,9 @@ Deno.serve(async (req) => {
       case "follow": {
         const code = String(body.code ?? "").trim().toUpperCase();
         if (!/^[A-Z0-9]{6}$/.test(code)) return json(400, { error: "Een vriendcode heeft 6 tekens." });
+        // Daglimiet: zonder limiet zijn vriendcodes te raden (een goede code geeft meteen goedgekeurd volgen).
+        const fq = await checkQuota(req, "community-follow", 20);
+        if (!fq.ok) return json(fq.status, { error: fq.status === 429 ? "Te veel pogingen vandaag. Probeer het morgen opnieuw." : fq.error });
         if (!(await profileOf(userId))) return json(409, { error: "Doe eerst zelf mee." });
         const { data: other } = await db.from("community_profiles").select("user_id, nickname").eq("friend_code", code).maybeSingle();
         if (!other) return json(404, { error: "Geen loper gevonden met deze code." });

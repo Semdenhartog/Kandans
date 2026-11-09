@@ -6,6 +6,7 @@ Sleutel = de Nederlandse tekst precies zoals in de code (met \\n als regeloverga
 
 T = {
     "Kadans": ("Kadans", "Kadans", "Kadans", "Kadans"),
+    "Geen groep gevonden met deze code.": ("No group found with this code.", "Keine Gruppe mit diesem Code gefunden.", "Aucun groupe trouvé avec ce code.", "No se encontró ningún grupo con este código."),
     # Inloggen en account
     "Vul eerst je e-mailadres in.": ("Enter your email address first.", "Gib zuerst deine E-Mail-Adresse ein.", "Saisis d'abord ton adresse e-mail.", "Introduce primero tu correo electrónico."),
     "Als dit adres bij ons bekend is, ontvang je een e-mail om je wachtwoord te herstellen.": ("If we know this address, you'll receive an email to reset your password.", "Wenn wir diese Adresse kennen, bekommst du eine E-Mail zum Zurücksetzen deines Passworts.", "Si nous connaissons cette adresse, tu recevras un e-mail pour réinitialiser ton mot de passe.", "Si conocemos esta dirección, recibirás un correo para restablecer tu contraseña."),
