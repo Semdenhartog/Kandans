@@ -162,6 +162,12 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   (locatie pas hier vragen, echte `StartTimePlanner`, tijd telt op, coach-zin) → ledenkaart (`MemberCard`, vaste maat i.v.m. IntrinsicHeight).
   Ontwerp-schets: Design-artifact "Kadans – luxe rondleiding bij eerste gebruik". Schermtests `14`–`14g`.
   "Nu lopen" toont weer/dag van nú (`s = v.now`). Schermtest-weer is relatief aan nu (altijd "Later lopen" over ±2 uur).
+- **Ronde 9-11 nacht:** clubevenementen in Samen → Runs (`community/club_events_strip.dart`, `ClubEventsStrip`/`ClubEventsScreen`, datumtegel `DateTile`):
+  groepsruns uit al je loopgroepen + clubagenda's via iCal-link (`domain/club_calendar.dart`, `data/services/club_events_service.dart`, max 5 links,
+  op toestel, elke 6 u ververst). Kaarten: donkerder blauwgrijs (`_darkMap`), gouden looppaden uit OSM (`domain/run_paths.dart`,
+  `routes/run_paths_layer.dart`, `PoiService.runPaths`, vak 0,03°, 30 dagen bewaard, knop `RunPathsButton`, standaard aan) in LiveTrackMap en DrawRouteMap.
+  Opnemen vóór start = kaart + `_GpsPill` (bij < 300 px ruimte de oude compacte weergave). Runoverzicht: grote kaart gekleurd op tempo
+  (`coloredRunSegments` + `PaceLegend` in `splits_card.dart`). Wedstrijdkalender: nog geen bron; mail om toestemming (running.life/Atletiekunie) ligt bij Sem.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -209,6 +215,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 9-11 nacht): clubagenda koppelen (iCal-link van je club), evenementenrij in Samen, startkaart bij Opnemen (GPS-status, looppaden aan/uit), donkere kaart, tempokleuren in runoverzicht.
 - Testen op telefoon (nieuw 8-11 middag): nieuwe rondleiding (wis app-gegevens of Ik → Hulp), locatie op stap 5, ledenkaart-animatie.
 - Testen op telefoon (nieuw 8-11): sfeerfoto op Vandaag (licht/donker, mist), opnamescherm rustiger, badgekleuren, ledenkaart met grote getallen.
 - Testen op telefoon (nieuw 7-11): nieuwe Vandaag (beeld, lopertje, kantelen, optellende tijd, veegrij), Kadans-knop, ledenkaart kantelen, weercijfer per uur onder het advies.
