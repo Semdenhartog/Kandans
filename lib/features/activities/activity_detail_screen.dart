@@ -477,7 +477,9 @@ class ActivityDetailScreen extends ConsumerWidget {
                         compact: true,
                         interactive: false,
                         showLayerToggle: false,
-                        animateIn: colored.isEmpty,
+                        animateIn: true,
+                        // Windlegenda alleen zonder tempokleuren (anders klopt de legenda niet bij de lijn).
+                        showLegend: colored.isEmpty,
                         colorSegments: colored.isEmpty ? null : colored,
                       ),
                       if (colored.isNotEmpty) const Positioned(left: 12, bottom: 34, child: IgnorePointer(child: PaceLegend())),
