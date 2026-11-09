@@ -22,6 +22,10 @@ import 'package:runwise/core/supabase.dart';
 import 'package:runwise/features/profile/shoes_screen.dart';
 import 'package:runwise/core/theme.dart';
 import 'package:runwise/features/routes/route_map.dart' show debugMapTiles;
+import 'package:runwise/features/routes/run_paths_layer.dart' show debugRunPaths;
+import 'package:runwise/domain/run_paths.dart';
+import 'package:runwise/domain/club_calendar.dart';
+import 'package:runwise/data/services/club_events_service.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/repositories/repositories.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
@@ -398,6 +402,15 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
       joinedChallengesProvider.overrideWith(_FakeJoined.new),
       communityFeedServiceProvider.overrideWithValue(_FakeFeed()),
       socialServiceProvider.overrideWithValue(_FakeSocial()),
+      clubEventsProvider.overrideWith((ref) {
+        final d = DateTime.now();
+        DateTime at(int days, int h, [int m = 0]) => DateTime(d.year, d.month, d.day + days, h, m);
+        return ClubEventsState([
+          ClubEvent(title: 'Rondje SSS – Koewei', start: at(1, 19, 30), source: ClubEventSource.calendar, from: 'SSS Barneveld', location: 'Sportpark Norschoten'),
+          ClubEvent(title: 'Zondagse duurloop', start: at(4, 9), source: ClubEventSource.group, from: 'Lopers Barneveld', location: 'Kerkplein', going: 7, distanceKm: 14, groupId: 1),
+          ClubEvent(title: 'Veluweloop', start: at(12, 0), allDay: true, source: ClubEventSource.calendar, from: 'SSS Barneveld', location: 'Garderen'),
+        ], const {}, const []);
+      }),
       followRequestCountProvider.overrideWith((ref) async => notInCommunity ? 0 : 2),
       myShareProvider.overrideWith((ref, id) async => null),
       communityStatusProvider.overrideWith((ref) async => notInCommunity
@@ -522,7 +535,14 @@ void main() {
     Intl.defaultLocale = 'nl_NL';
     await _loadFonts();
     debugMapTiles = _DiskTiles();
+    // Looppaden-laag: de testroutes als paden (zonder Overpass).
+    debugRunPaths = [
+      for (final (i, r) in _routes.indexed) RunPath(i.isEven ? RunPathKind.foot : RunPathKind.trail, decodePolyline(r.polyline)),
+    ];
   });
+
+  // Vóór de start: kaart met je positie en de GPS-status.
+  RecorderView startView() => RecorderView(gpsAccuracy: 4, position: decodePolyline(_routes.first.polyline).first);
 
   // Donkere weergave (Zand avond) van de belangrijkste schermen.
   testWidgets('60 donker vandaag', (t) => _shot(t, '60_donker_vandaag', images: true, const DashboardScreen(), height: 2600, nav: true, dark: true));
@@ -530,7 +550,7 @@ void main() {
   testWidgets('62 donker run detail', (t) => _shot(t, '62_donker_run_detail', images: true, ActivityDetailScreen(activityId: _runs.first.id!), height: 3200, dark: true));
   testWidgets('63 donker routes', (t) => _shot(t, '63_donker_routes', const RoutesScreen(), height: 1600, dark: true));
   testWidgets('64 donker ik', (t) => _shot(t, '64_donker_ik', const ProfileScreen(), height: 2600, dark: true));
-  testWidgets('65 donker opnemen', (t) => _shot(t, '65_donker_opnemen', const RecordRunScreen(), height: 915, dark: true));
+  testWidgets('65 donker opnemen', (t) => _shot(t, '65_donker_opnemen', images: true, const RecordRunScreen(), height: 915, dark: true, after: () => RunRecorderService.instance.view.value = startView()));
   testWidgets('66 donker coach', (t) => _shot(t, '66_donker_coach', const CoachScreen(), height: 915, dark: true));
   testWidgets('01 vandaag', (t) => _shot(t, '01_vandaag', images: true, const DashboardScreen(), height: 2600, nav: true));
   testWidgets('01b vandaag boven', (t) => _shot(t, '01b_vandaag_boven', images: true, const DashboardScreen(), height: 915, nav: true));
@@ -544,7 +564,7 @@ void main() {
   testWidgets('72 vandaag groot', (t) => _shot(t, '72_vandaag_groot_balk', images: true, const DashboardScreen(), height: 915, nav: true, textScale: 1.3));
   testWidgets('07 fitheid', (t) => _shot(t, '07_fitheid', const FitnessScreen(), height: 1800));
   testWidgets('08 badges', (t) => _shot(t, '08_badges', const BadgesScreen(), height: 1900));
-  testWidgets('10 opnemen start', (t) => _shot(t, '10_opnemen_start', const RecordRunScreen(), height: 915));
+  testWidgets('10 opnemen start', (t) => _shot(t, '10_opnemen_start', images: true, const RecordRunScreen(), height: 915, after: () => RunRecorderService.instance.view.value = startView()));
   testWidgets('11 opnemen bezig', (t) => _shot(t, '11_opnemen_bezig', const RecordRunScreen(), height: 915, after: () {
         RunRecorderService.instance.view.value = RecorderView(
           status: RecorderStatus.running,

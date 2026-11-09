@@ -10,6 +10,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/heart_rate_service.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/decoupling.dart';
+import '../../domain/geo.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_recorder.dart' show GpsQuality;
 import '../../domain/run_streams.dart';
@@ -37,7 +38,7 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
   /// Kaart gekleurd op tempo (false) of hartslag (true), punt 31.
   bool _mapHr = false;
 
-  static const _slow = Color(0xFF4A90D9), _fast = Color(0xFFE0533D);
+  static const _slow = runSlowColor, _fast = runFastColor;
 
   /// Kaart van de run, gekleurd op tempo of hartslag (zoals Strava en Garmin).
   List<Widget> _colorMap(RunStreams s) {
@@ -45,15 +46,8 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
     if (poly == null || poly.isEmpty) return const [];
     final hrOk = valueSegments(s, heartRate: true).isNotEmpty;
     final useHr = _mapHr && hrOk;
-    final segs = valueSegments(s, heartRate: useHr);
-    if (segs.isEmpty) return const [];
-    final scale = relativeScale([for (final x in segs) x.value]);
-    Color colorOf(double v) {
-      final r = scale(v);
-      // Tempo: lager = sneller = rood. Hartslag: hoger = rood.
-      final t = useHr ? r : 1 - r;
-      return t < 0.5 ? Color.lerp(_slow, RwColors.accent, t * 2)! : Color.lerp(RwColors.accent, _fast, (t - 0.5) * 2)!;
-    }
+    final colored = coloredRunSegments(s, heartRate: useHr);
+    if (colored.isEmpty) return const [];
     return [
       SizedBox(
         height: 190,
@@ -63,7 +57,7 @@ class _SplitsCardState extends ConsumerState<SplitsCard> {
           interactive: false,
           showLayerToggle: false,
           showLegend: false,
-          colorSegments: [for (final x in segs) (points: x.points, color: colorOf(x.value))],
+          colorSegments: colored,
         ),
       ),
       const SizedBox(height: 8),
@@ -526,4 +520,46 @@ class _ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ChartPainter old) => old.s != s;
+}
+
+
+/// Kleuren van de tempokaart: blauw (rustig) → goud → rood (snel).
+const runSlowColor = Color(0xFF4A90D9), runFastColor = Color(0xFFE0533D);
+
+/// Routelijn in stukjes van 100 m, gekleurd op tempo (of hartslag), zoals Strava en Garmin.
+List<({List<LatLng> points, Color color})> coloredRunSegments(RunStreams s, {bool heartRate = false}) {
+  final segs = valueSegments(s, heartRate: heartRate);
+  if (segs.isEmpty) return const [];
+  final scale = relativeScale([for (final x in segs) x.value]);
+  Color colorOf(double v) {
+    final r = scale(v);
+    // Tempo: lager = sneller = rood. Hartslag: hoger = rood.
+    final t = heartRate ? r : 1 - r;
+    return t < 0.5 ? Color.lerp(runSlowColor, RwColors.accent, t * 2)! : Color.lerp(RwColors.accent, runFastColor, (t - 0.5) * 2)!;
+  }
+
+  return [for (final x in segs) (points: x.points, color: colorOf(x.value))];
+}
+
+/// Kleine legenda "rustig → snel" voor over een kaart.
+class PaceLegend extends StatelessWidget {
+  const PaceLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(color: RwColors.background.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(RwRadius.s)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            width: 56,
+            height: 5,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(RwRadius.s),
+              gradient: const LinearGradient(colors: [runSlowColor, Color(0xFFD9B45A), runFastColor]),
+            ),
+          ),
+          const SizedBox(width: 7),
+          Text(tr('rustig → snel'), style: TextStyle(color: RwColors.muted, fontSize: 11.5)),
+        ]),
+      );
 }

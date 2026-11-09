@@ -8,6 +8,7 @@ import '../../domain/lighting.dart';
 import '../../domain/poi.dart';
 import '../../domain/poster_map.dart';
 import '../../domain/route_geometry.dart';
+import '../../domain/run_paths.dart';
 import 'offline_cache.dart';
 
 /// Zoekt watertappunten en toiletten langs een route in OpenStreetMap (Overpass, gratis).
@@ -147,6 +148,26 @@ class PoiService {
     return lines;
   }
 
+  /// Looppaden (voet-, fiets- en onverharde paden) rond een punt, per vak van ±3 km. Een maand bewaard.
+  Future<List<RunPath>> runPaths(LatLng p) async {
+    final key = runPathCellKey(p);
+    final cached = await OfflineCache.load(key, maxAge: const Duration(days: 30));
+    if (cached?.data is String) {
+      try {
+        return decodeRunPaths(cached!.data! as String);
+      } catch (_) {}
+    }
+    try {
+      final paths = parseRunPaths(await _race(runPathsQuery(p)));
+      OfflineCache.save(key, encodeRunPaths(paths)).ignore();
+      return paths;
+    } catch (e) {
+      final old = await OfflineCache.load(key);
+      if (old?.data is String) return decodeRunPaths(old!.data! as String);
+      rethrow;
+    }
+  }
+
   Future<List<RoutePoi>> alongRoute(String polyline) async {
     final track = RouteTrack(decodePolyline(polyline));
     if (!track.isValid) return const [];
@@ -187,4 +208,12 @@ final posterMapProvider = FutureProvider.family<List<MapLine>, String>((ref, pol
 /// Verlichting per route (op polyline).
 final routeLightingProvider = FutureProvider.family<({double lit, double unlit, double unknown}), String>((ref, polyline) {
   return ref.watch(poiServiceProvider).lighting(polyline);
+});
+
+/// Looppaden per vak (sleutel = vak), onthouden zolang de app open is.
+final runPathsProvider = FutureProvider.family<List<RunPath>, String>((ref, cellKey) {
+  final parts = cellKey.split('_');
+  // Midden van het vak, zodat de vraag precies dit vak dekt.
+  final p = LatLng(double.parse(parts[1]) + runPathCell / 2, double.parse(parts[2]) + runPathCell / 2);
+  return ref.watch(poiServiceProvider).runPaths(p);
 });

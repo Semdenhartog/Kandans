@@ -15,6 +15,7 @@ import '../../core/theme.dart';
 import '../../domain/geo.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
+import 'run_paths_layer.dart';
 
 /// Ondergrond van de kaart.
 enum MapLayer { kaart, satelliet }
@@ -48,11 +49,11 @@ const _greyTiles = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs
 const _photoTiles = 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg';
 
 /// Maakt van de lichtgrijze kaart een donkere kaart in Kadans-stijl:
-/// omkeren, dimmen en een tikje koel, zodat de oranje route eruit springt.
+/// omkeren, dimmen en diep blauwgrijs (9-11), zodat de gouden looppaden en de route oplichten.
 const _darkMap = ColorFilter.matrix(<double>[
-  -0.60, 0, 0, 0, 165, //
-  0, -0.60, 0, 0, 166, //
-  0, 0, -0.60, 0, 172, //
+  -0.56, 0, 0, 0, 150, //
+  0, -0.56, 0, 0, 158, //
+  0, 0, -0.56, 0, 174, //
   0, 0, 0, 1, 0,
 ]);
 
@@ -68,7 +69,7 @@ const _sandMap = ColorFilter.matrix(<double>[
 ColorFilter mapFilter({bool photo = false}) => photo ? _dimPhoto : (RwColors.isDark ? _darkMap : _sandMap);
 
 /// Ondergrond terwijl de kaart laadt.
-Color get mapBackground => RwColors.isDark ? const Color(0xFF17171A) : const Color(0xFFE4DCCD);
+Color get mapBackground => RwColors.isDark ? const Color(0xFF161D2A) : const Color(0xFFE4DCCD);
 
 /// Rand om de routelijn, zodat hij loskomt van de kaart.
 Color get routeHalo => RwColors.isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9);
@@ -935,6 +936,11 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
     final p = widget.position;
     final h = _currentHeading();
     if (h != null) _heading = h;
+    // Eerste GPS-positie: meteen inzoomen op je straat (de kaart begon op heel Nederland).
+    if (_ready && p != null && old.position == null && widget.track.isEmpty) {
+      _map.move(_ll(p), math.max(_map.camera.zoom, 16));
+      return;
+    }
     if (_ready && _follow && p != null && (old.position == null || distanceMeters(old.position!, p) > 1)) {
       if (_headingUp) {
         _map.moveAndRotate(_ll(p), _map.camera.zoom, -_heading);
@@ -972,6 +978,7 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                 ),
                 children: [
                   _baseTiles(photo),
+                  RunPathsLayer(center: pos ?? (widget.planned.isEmpty ? null : widget.planned.first)),
                   if (widget.planned.length >= 2)
                     PolylineLayer(polylines: [
                       Polyline(points: [for (final p in widget.planned) _ll(p)], strokeWidth: 8, color: Colors.white.withValues(alpha: 0.35)),
@@ -999,14 +1006,19 @@ class _LiveTrackMapState extends State<LiveTrackMap> {
                 ],
               ),
               Positioned(top: 10, left: 10, child: _LayerToggle(layer: layer, onChanged: mapLayerNotifier.choose)),
+              // Knoppen in één kolom rechts (zoals in andere loop-apps): richting, looppaden.
               Positioned(
                 top: 10,
                 right: 10,
-                child: _RoundButton(
-                  icon: _headingUp ? Icons.explore : Icons.explore_outlined,
-                  tooltip: _headingUp ? 'Noorden boven' : 'Looprichting boven (kaart draait mee)',
-                  onTap: _toggleHeadingUp,
-                ),
+                child: Column(children: [
+                  _RoundButton(
+                    icon: _headingUp ? Icons.explore : Icons.explore_outlined,
+                    tooltip: _headingUp ? 'Noorden boven' : 'Looprichting boven (kaart draait mee)',
+                    onTap: _toggleHeadingUp,
+                  ),
+                  const SizedBox(height: 8),
+                  const RunPathsButton(),
+                ]),
               ),
               if (!_follow && pos != null)
                 Positioned(
@@ -1076,6 +1088,7 @@ class DrawRouteMap extends StatelessWidget {
               ),
               children: [
                 _baseTiles(photo),
+                RunPathsLayer(center: center),
                 PolylineLayer(polylines: [
                   if (line.length < 2 && straight.length >= 2)
                     Polyline(
@@ -1115,6 +1128,7 @@ class DrawRouteMap extends StatelessWidget {
               ],
             ),
             Positioned(top: 10, right: 10, child: _LayerToggle(layer: layer, onChanged: mapLayerNotifier.choose)),
+            const Positioned(top: 54, right: 10, child: RunPathsButton()),
             _attribution(photo),
           ],
         );
