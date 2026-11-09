@@ -51,7 +51,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Foto's (7-11): zes gratis Unsplash-foto's in `site/foto/` (warm bijgekleurd;
   heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Bovenbalk scrolt op mobiel mee weg (8-11). Desktop en mobiel apart ingedeeld (7-11): desktop = hangende hero-telefoon, vlakken 01–03 over de mistfoto, § -labels; mobiel (≤900px) = compacter, vlakken/nieuws/tweeluik veegbaar, vaste wachtlijstknop `#ctabar`, tellende cijfers `[data-count]`. Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0040** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0041b** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -196,6 +196,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Wachtlijst → Google Sheets: wacht op Sems keuzes (zie archief).
 - Gouden K van het marmerlogo in de app vervangen door de nieuwe K, als Sem dat wil.
 - Play Store live → `PLAY_LIVE = true` in `site/vriend.html`.
+- Beveiliging (pentest 9-11): gelekte-wachtwoordbescherming aanzetten (Auth → Settings, mogelijk alleen Pro); functie `waitlist-to-sheets` (niet in repo, ongebruikt) verwijderen in dashboard; `FEEDBACK_EMAIL` in `app_config.json` (openbaar) vervangen door adres op kadans.fit; `free_tier_max_routes` wordt nergens gebruikt (productkeuze).
 - Strava API-app hernoemen naar Kadans; Strava één keer opnieuw koppelen voor privéroutes en uploaden (`activity:write`).
 - Play Console → gegevensveiligheid: agenda (alleen op toestel, niet gedeeld) en afgeronde locatie voor loopmaatjes
   (alleen als de gebruiker het aanzet) toevoegen.
