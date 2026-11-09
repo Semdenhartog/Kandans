@@ -174,6 +174,17 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   **Nooit twee stemmen tegelijk:** `speak(..., fallback, stopFallback)` zet flutter_tts stil vóór het afspelen.
 - Marketing (buiten de repo): Instagram **@kadans.app**. Instagram-skills (`/ig-reel`, `/ig-caption`, `/ig-plan` enz.) en
   `frontend-design` en `unslop-ui` (controle op AI-look, scanner: `devibe_scan.py` uit JCarterJohnson/vibecoded-design-tells) zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
+  **Instagram-stijl (9-11, Sems keuze na proefronde):** vaste reeks **"Zelfde rondje."**: dia 1 = zelfde foto gesplitst (links regen,
+  koel, rechts droog, warm goud), gouden middenlijn, label "45 MIN LATER", grote tijden 15:50 / 16:35 (klopt met `site/app/vandaag.jpg`).
+  Dia 2 = weerbalk per kwartier op papier, dia 3 = echt Vandaag-scherm in strak getekend toestel + gouden kader "Beste moment",
+  dia 4 = heide + "Jouw rondje. Beter moment." + knop "STUUR WEER" + "Nu voor Android". Maken met `tools/insta/dia1_split.py` en
+  `dia2_4.py` (PIL, vanuit de repo-root, echte foto's `site/foto/`). Analyse (500 vragen): `docs/insta-500-vragen.md`.
+  **Niet doen** (Sem vond het amateuristisch): AI-handen, AI-telefoons met geplakt scherm, schoenen, stockfoto's met tip-tekst,
+  zware kop over het onderwerp. AI-beelden alleen voor weer/landschap/straat. Beeldgenerator: HF-koppeling "Hugging face beelden"
+  (`gr1_flux_1_krea_dev_infer`, gratis ZeroGPU, daglimiet snel op). ElevenLabs-beelden kosten Sems tegoed (alleen na "ja, ElevenLabs").
+  Captions: nuchter/droge humor, herkenbare looperszinnen ("Het is maar regen, je smelt niet", "Ik heb geen zin", "Ga gewoon"),
+  eerste zin < 125 tekens, één vraag, max 5 hashtags, CTA "Stuur WEER". Doel: 100 testers. Eerste 5 captions staan in de chat van 9-11
+  (rondje, wind, donker, kou, gewoonte). Nog te doen: posten + alt-tekst, contentmaakster echte split-foto's laten maken (zelfde plek, 2 momenten).
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).
