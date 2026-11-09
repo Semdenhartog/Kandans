@@ -90,8 +90,9 @@ class AvatarCache {
     final batch = Map.of(_waiting);
     _waiting.clear();
     final found = <String, AvatarStyle>{};
-    final db = Supabase.instance.client;
     try {
+      // Binnen de try: zonder Supabase (schermtests, opstarten) gewoon de letter tonen.
+      final db = Supabase.instance.client;
       List rows;
       try {
         rows = await db.rpc('social_avatars2', params: {'p_nicknames': batch.keys.toList()}) as List;

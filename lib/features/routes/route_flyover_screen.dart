@@ -230,10 +230,11 @@ class _RouteFlyoverScreenState extends State<RouteFlyoverScreen> with SingleTick
                 ),
               ),
             ),
-            Positioned(right: 8, bottom: 6, child: ValueListenableBuilder<MapLayer>(
+            // mapAttribution is zelf al een Positioned (dubbel gaf een fout).
+            ValueListenableBuilder<MapLayer>(
               valueListenable: mapLayerNotifier,
-              builder: (_, layer, _) => mapAttribution(layer == MapLayer.satelliet),
-            )),
+              builder: (_, layer, _) => Stack(fit: StackFit.expand, children: [mapAttribution(layer == MapLayer.satelliet)]),
+            ),
           ]),
         ),
         Material(
@@ -263,6 +264,8 @@ class _RouteFlyoverScreenState extends State<RouteFlyoverScreen> with SingleTick
                   ),
                   const SizedBox(width: 12),
                   FilledButton.icon(
+                    // Het thema geeft knoppen de volle breedte; in een rij moet dat begrensd zijn.
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
                     onPressed: _toggle,
                     icon: Icon(_anim.isAnimating ? Icons.pause : Icons.play_arrow),
                     label: Text(_anim.isAnimating ? tr('Pauze') : tr('Vliegen')),

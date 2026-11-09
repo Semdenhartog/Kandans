@@ -33,7 +33,7 @@ class ClubEventsStrip extends ConsumerWidget {
         ),
       ]),
       SizedBox(
-        height: 112,
+        height: 116,
         child: events.isEmpty
             ? _ConnectCard(onTap: () => openClubEvents(context))
             : ListView.separated(
@@ -96,7 +96,10 @@ class DateTile extends StatelessWidget {
         border: Border.all(color: RwColors.hairline),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
+      // Schaalt mee omlaag bij grote letters, zodat de tegel altijd past.
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: SizedBox(width: 64, child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(
           width: double.infinity,
           color: RwColors.accent,
@@ -112,7 +115,7 @@ class DateTile extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 5),
           child: Text(day, style: SectionLabel.style()),
         ),
-      ]),
+      ]))),
     );
   }
 }
@@ -330,7 +333,7 @@ class _ClubEventsScreenState extends ConsumerState<ClubEventsScreen> {
                   for (final e in state.events)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 10),
-                      child: SizedBox(height: 96, child: ClubEventCard(event: e, onTap: () => openClubEvent(context, ref, e))),
+                      child: SizedBox(height: 104, child: ClubEventCard(event: e, onTap: () => openClubEvent(context, ref, e))),
                     ),
                   if (state.links.isNotEmpty) ...[
                     const SizedBox(height: 12),
