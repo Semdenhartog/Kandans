@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/services/community_feed_service.dart';
+import '../../data/services/club_events_service.dart';
 import '../../data/services/community_service.dart';
 import '../../data/services/social_service.dart';
 import '../../shared/widgets.dart';
@@ -16,6 +17,7 @@ import 'best_moments_text.dart';
 import '../../core/i18n.dart';
 import 'runner_avatar.dart';
 import 'together_screens.dart' show TogetherChips;
+import 'club_events_strip.dart';
 import '../../shared/nav_buttons.dart';
 import '../profile/share_app_screen.dart' show openShareApp;
 export 'runner_avatar.dart' show RunnerAvatar;
@@ -134,6 +136,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         return;
       }
       if (!_talk) {
+        ref.invalidate(clubEventsProvider);
         final runs = await ref.read(socialServiceProvider).feed(everyone: _everyone);
         if (!mounted) return;
         setState(() {
@@ -417,8 +420,10 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
     if (_runs.isEmpty) {
       return RefreshIndicator(
         onRefresh: _load,
-        child: ListView(physics: AlwaysScrollableScrollPhysics(), children: [
-          SizedBox(height: 40),
+        child: ListView(physics: AlwaysScrollableScrollPhysics(), padding: EdgeInsets.symmetric(horizontal: 16), children: [
+          SizedBox(height: 4),
+          const ClubEventsStrip(),
+          SizedBox(height: 24),
           EmptyState(
             icon: Icons.person_search_outlined,
             title: _everyone ? tr('Nog geen openbare runs') : tr('Nog geen runs van wie je volgt'),
@@ -462,13 +467,17 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         itemBuilder: (context, i) {
           if (i == 0) {
             // Bewuste keuze (zie docs/concurrentie-strava.md): geen algoritme, geen reclame.
-            return Row(children: [
+            return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              const ClubEventsStrip(),
+              SizedBox(height: 12),
+              Row(children: [
               Icon(Icons.schedule, size: 14, color: RwColors.subtle),
               SizedBox(width: 6),
               Expanded(
                 child: Text(tr('Op volgorde van tijd, zonder reclame'),
                     style: TextStyle(color: RwColors.subtle, fontSize: 12.5)),
               ),
+              ]),
             ]);
           }
           final r = _runs[i - 1];

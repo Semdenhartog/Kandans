@@ -1453,7 +1453,56 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
   }
 
   /// Voor de start: compact, zodat alle opties passen (ook op een klein scherm).
+  Widget _presets() => _QuickPresets(
+        show: widget.sessionTitle == null,
+        routeChosen: _route != null,
+        planChosen: _plan != null,
+        onSession: (sess) {
+          HapticFeedback.selectionClick();
+          setState(() {
+            _plan = sess.intervals;
+            _targetPace = sess.intervals == null ? sess.targetPace : null;
+            _indoor = false;
+          });
+          showMessage(context, '${sess.title} staat klaar.');
+        },
+        onRoute: (r) {
+          HapticFeedback.selectionClick();
+          setState(() {
+            _route = r;
+            _ghost = null;
+            _ghostTime = null;
+            _indoor = false;
+          });
+          if (r.id != null) _loadGhost(r.id!);
+        },
+      );
+
   Widget _preStats(RecorderView v) {
+    // Buiten: grote kaart met je positie en de gouden looppaden, GPS-status eroverheen (9-11, zoals Strava).
+    if (!_indoor) {
+      // Te weinig ruimte (grote letters, klein scherm): de compacte GPS-weergave hieronder.
+      return LayoutBuilder(builder: (context, box) {
+        if (box.maxHeight < 300) return _compactPre(v);
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Expanded(
+              child: Stack(children: [
+                Positioned.fill(child: LiveTrackMap(track: const [], position: v.position)),
+                Positioned(left: 10, bottom: 26, right: 64, child: _GpsPill(accuracy: v.gpsAccuracy, ready: v.gpsReady)),
+              ]),
+            ),
+            const SizedBox(height: 10),
+            _presets(),
+          ]),
+        );
+      });
+    }
+    return _compactPre(v);
+  }
+
+  Widget _compactPre(RecorderView v) {
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -1477,30 +1526,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
               style: TextStyle(color: RwColors.muted),
             ),
             const SizedBox(height: 14),
-            _QuickPresets(
-              show: widget.sessionTitle == null,
-              routeChosen: _route != null,
-              planChosen: _plan != null,
-              onSession: (sess) {
-                HapticFeedback.selectionClick();
-                setState(() {
-                  _plan = sess.intervals;
-                  _targetPace = sess.intervals == null ? sess.targetPace : null;
-                  _indoor = false;
-                });
-                showMessage(context, '${sess.title} staat klaar.');
-              },
-              onRoute: (r) {
-                HapticFeedback.selectionClick();
-                setState(() {
-                  _route = r;
-                  _ghost = null;
-                  _ghostTime = null;
-                  _indoor = false;
-                });
-                if (r.id != null) _loadGhost(r.id!);
-              },
-            ),
+            _presets(),
 
             if (_indoor) ...[
               const SizedBox(height: 16),
@@ -2639,6 +2665,42 @@ class _TreadmillSpeed extends StatelessWidget {
   }
 }
 
+
+/// GPS-status over de kaart vóór de start: groen als het signaal goed genoeg is, anders zoeken met nauwkeurigheid.
+class _GpsPill extends StatelessWidget {
+  const _GpsPill({required this.accuracy, required this.ready});
+  final double? accuracy;
+  final bool ready;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = ready ? RwColors.good : RwColors.warning;
+    final text = ready
+        ? tr('GPS-signaal opgevangen')
+        : accuracy == null
+            ? tr('GPS zoeken…')
+            : trf('GPS zoeken… (±{m} m)', {'m': '${accuracy!.round()}'});
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Semantics(
+        liveRegion: true,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: RwColors.background.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(RwRadius.s),
+            border: Border.all(color: color.withValues(alpha: 0.6)),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(ready ? Icons.signal_cellular_alt : Icons.signal_cellular_alt_1_bar, size: 18, color: color),
+            const SizedBox(width: 8),
+            Flexible(child: Text(text, style: TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 14))),
+          ]),
+        ),
+      ),
+    );
+  }
+}
 
 /// Radar die pulseert zolang de GPS zoekt; wordt een rustige groene ring met vinkje als hij klaar is.
 /// Onderaan signaalbalkjes en de nauwkeurigheid in meters.

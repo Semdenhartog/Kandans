@@ -11,6 +11,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
 import '../../domain/geo.dart';
+import '../../domain/run_streams.dart';
 import '../../domain/gpx_parser.dart';
 import '../../domain/records.dart';
 import '../../domain/shoes.dart';
@@ -463,15 +464,27 @@ class ActivityDetailScreen extends ConsumerWidget {
                 Padding(
                   // Ruimte voor titel en knoppen, zodat ze niet over de kaartknoppen vallen.
                   padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + kToolbarHeight - 6),
-                  child: RouteMap(
-                  polyline: a.trackPolyline!,
-                  windSpeedKmh: a.windSpeedKmh,
-                  windFromDegrees: a.windDirectionDegrees,
-                  compact: true,
-                  interactive: false,
-                  showLayerToggle: false,
-                  animateIn: true,
-                  ),
+                  // Routelijn gekleurd op tempo zodra de tijden binnen zijn (zoals Strava), anders effen goud.
+                  child: Consumer(builder: (context, ref, _) {
+                    final json = a.id == null ? null : ref.watch(activityStreamsProvider(a.id!)).value;
+                    final s = json == null ? null : RunStreams.fromJson(json);
+                    final colored = s == null ? const <({List<LatLng> points, Color color})>[] : coloredRunSegments(s);
+                    return Stack(fit: StackFit.expand, children: [
+                      RouteMap(
+                        polyline: a.trackPolyline!,
+                        windSpeedKmh: a.windSpeedKmh,
+                        windFromDegrees: a.windDirectionDegrees,
+                        compact: true,
+                        interactive: false,
+                        showLayerToggle: false,
+                        animateIn: true,
+                        // Windlegenda alleen zonder tempokleuren (anders klopt de legenda niet bij de lijn).
+                        showLegend: colored.isEmpty,
+                        colorSegments: colored.isEmpty ? null : colored,
+                      ),
+                      if (colored.isNotEmpty) const Positioned(left: 12, bottom: 34, child: IgnorePointer(child: PaceLegend())),
+                    ]);
+                  }),
                 ),
                 IgnorePointer(
                   child: DecoratedBox(
