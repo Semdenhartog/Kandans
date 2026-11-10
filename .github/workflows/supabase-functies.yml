@@ -64,3 +64,5 @@ jobs:
           supabase functions deploy live-share --project-ref "$PROJECT_REF" --no-verify-jwt --yes
           # Stripe belt zelf; de functie controleert de handtekening van Stripe.
           supabase functions deploy stripe-webhook --project-ref "$PROJECT_REF" --no-verify-jwt --yes
+          # De database start deze 's nachts zelf (pg_cron); de functie controleert een eenmalige code.
+          supabase functions deploy race-import --project-ref "$PROJECT_REF" --no-verify-jwt --yes
