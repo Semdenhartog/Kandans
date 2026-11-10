@@ -51,7 +51,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Foto's (7-11): zes gratis Unsplash-foto's in `site/foto/` (warm bijgekleurd;
   heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Bovenbalk scrolt op mobiel mee weg (8-11). Desktop en mobiel apart ingedeeld (7-11): desktop = hangende hero-telefoon, vlakken 01–03 over de mistfoto, § -labels; mobiel (≤900px) = compacter, vlakken/nieuws/tweeluik veegbaar, vaste wachtlijstknop `#ctabar`, tellende cijfers `[data-count]`. Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0042b** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg; 0042 = `race_calendar` (wedstrijdkalender, alleen lezen voor ingelogden); 0042b = pg_cron + pg_net, nachtelijke import 04:17 via `private.start_race_import()` met eenmalige code, log in `private.race_import_runs`). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0043** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg; 0042 = `race_calendar` (wedstrijdkalender, alleen lezen voor ingelogden); 0042b = pg_cron + pg_net, nachtelijke import 04:17 via `private.start_race_import()` met eenmalige code, log in `private.race_import_runs`). 0043 = coach-kennisbank (zie Coach hieronder). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -87,6 +87,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Routes: `lib/features/routes/` · Horloges: `watch_export.dart` (`WatchBrand.garminBasic` = Vivoactive 5, alleen ← → op de pols)
 - Strava: `supabase/functions/strava`, app `profile/strava_history_screen.dart`, `routes/strava_routes_screen.dart`, archief-import `profile/strava_archive_screen.dart`
 - Uitdagingen + Samen: `lib/features/challenges/`, functie `community` · Coach: functie `coach`, app `lib/features/coach/`
+- **Coach zonder AI (10-11, 0043):** functie `coach` zoekt eerst in `coach_kennis` (RPC `coach_kennis_top`, NL-stammen + synoniemen
+  `_coach_syn` + zachte overlap, drempel **0,45** = `DREMPEL` in `_shared/coach_kennis.ts`). Onderwerpen met `actie`
+  (week/laatste/maand/vandaag/tempo/wedstrijd/kleding) rekent de server uit eigen runs/Open-Meteo. Geen match → `coach_onbeantwoord`
+  (anoniem, 90 dagen) → Claude (alleen met sleutel, premium of gratis proefvragen) met JSON-opdracht; `algemeen`-versie gaat via
+  `coach_kennis_van_claude` de kennis in (bron claude, `nakijken`). `coach_messages.via` = kennis|data|claude|onbekend; daglimiet telt alleen claude.
+  Startkennis: `supabase/coach_kennis/*.txt` (219 onderwerpen, 1024 vragen: `?` veelgesteld, `!` verwacht, `# +sleutel` = extra vragen) →
+  `tools/coach_kennis_naar_sql.py` (`--tel`) → workflow `coach-kennis.yml` (bij push naar main, upsert op sleutel, bron 'sem' blijft).
+  Beheer: **kadans.fit/coach-beheer.html** (inlog = app-account, `coach_admins`; Sem staat erin). Zoektest lokaal: 58/59 goed.
 - Community: `lib/features/community/` (Runs | Gesprekken), SQL `community_*` (0033), volgen/delen `social_*` (0034),
   `data/services/social_service.dart`, privacyzone `domain/privacy_zone.dart`. Strava-runs worden geweigerd (ook in SQL).
 - Sensoren: barometer `data/services/barometer_service.dart` (hoogtemeters, `domain/barometer.dart`), loopsensor BLE 0x1814
@@ -206,6 +214,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Alles wat gebouwd is: `VERBETERPUNTEN.md`. Play Store: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
+- Coach-kennis: af en toe kadans.fit/coach-beheer.html → Nakijken (Claude-antwoorden) en Onbeantwoord (koppelen of nieuw onderwerp).
 - KvK (november, KOR-keuze) → Kickstarter-betaalgegevens + Submit for review, betaallinks steunpagina.
 - Wachtlijst → Google Sheets: wacht op Sems keuzes (zie archief).
 - Gouden K van het marmerlogo in de app vervangen door de nieuwe K, als Sem dat wil.
