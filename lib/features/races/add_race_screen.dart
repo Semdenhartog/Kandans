@@ -11,7 +11,13 @@ import '../../shared/discard_guard.dart';
 import '../../shared/widgets.dart';
 
 class AddRaceScreen extends ConsumerStatefulWidget {
-  const AddRaceScreen({super.key});
+  const AddRaceScreen({super.key, this.initialName, this.initialDate, this.initialKm, this.startLatitude, this.startLongitude});
+
+  /// Vooraf ingevuld, bv. vanuit de wedstrijdkalender.
+  final String? initialName;
+  final DateTime? initialDate;
+  final double? initialKm;
+  final double? startLatitude, startLongitude;
 
   @override
   ConsumerState<AddRaceScreen> createState() => _AddRaceScreenState();
@@ -33,6 +39,17 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
   TimeOfDay? _time;
   String? _routeId;
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialName != null) _name.text = widget.initialName!;
+    if (widget.initialDate != null) _date = widget.initialDate!;
+    if (widget.initialKm != null) {
+      final km = widget.initialKm!;
+      _distance.text = (km % 1 == 0 ? km.toStringAsFixed(0) : km.toStringAsFixed(1)).replaceAll('.', ',');
+    }
+  }
 
   @override
   void dispose() {
@@ -76,8 +93,8 @@ class _AddRaceScreenState extends ConsumerState<AddRaceScreen> {
                 ? null
                 : '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}',
             routeId: _routeId,
-            startLatitude: route?.startLatitude,
-            startLongitude: route?.startLongitude,
+            startLatitude: route?.startLatitude ?? widget.startLatitude,
+            startLongitude: route?.startLongitude ?? widget.startLongitude,
           ));
       ref.invalidate(racesProvider);
       if (mounted) context.go('/me/races');
