@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/supabase.dart';
+import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../domain/run_goal.dart';
 import '../../data/models/models.dart';
@@ -12,10 +13,10 @@ import '../../shared/widgets.dart';
 import '../../shared/nav_buttons.dart';
 
 const _suggestions = [
-  'Wat zal ik deze week lopen?',
-  'Hoe pak ik mijn volgende wedstrijd aan?',
+  'Wat loop ik vandaag?',
+  'Hoe ging mijn week?',
   'Hoe word ik sneller op de 5 km?',
-  'Wat trek ik aan bij het weer van morgen?',
+  'Wat trek ik aan?',
 ];
 
 const _followUps = [
@@ -73,7 +74,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     try {
       final r = await ref.read(repositoryProvider).askCoach(text);
       setState(() {
-        _pending.add(CoachMessage(role: 'assistant', content: r.reply, createdAt: DateTime.now()));
+        _pending.add(CoachMessage(role: 'assistant', content: r.reply, createdAt: DateTime.now(), via: r.via));
         _freeLeft = r.freeLeft;
       });
       _scrollDown();
@@ -174,7 +175,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
           const FirstTip(
             id: 'coach',
             icon: Icons.auto_awesome,
-            text: 'Stel je coach een vraag in gewone taal, zoals "Hoe train ik voor 10 km in 50 minuten?". De coach kent je runs en het weer.',
+            text: 'Stel je coach een vraag in gewone taal, zoals "Hoe ging mijn week?" of "Wat trek ik aan?". Antwoorden uit de Kadans-kennis en je logboek zijn gratis.',
           ),
           Expanded(
             child: history.when(
@@ -360,11 +361,27 @@ class _Bubble extends StatelessWidget {
               : SelectionArea(child: _RichReply(message.content)),
     );
     if (user) return Align(alignment: Alignment.centerRight, child: bubble);
+    final bron = switch (message.via) {
+      'kennis' => tr('Uit de Kadans-kennis'),
+      'data' => tr('Uit je logboek'),
+      'claude' => tr('Opgezocht door de AI-coach'),
+      _ => null,
+    };
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const Padding(padding: EdgeInsets.only(bottom: 6, right: 8), child: _CoachMark(size: 28)),
-        Flexible(child: bubble),
+        Padding(padding: EdgeInsets.only(bottom: bron == null ? 6 : 24, right: 8), child: const _CoachMark(size: 28)),
+        Flexible(
+          child: bron == null
+              ? bubble
+              : Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                  bubble,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6, bottom: 4),
+                    child: Text(bron, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+                  ),
+                ]),
+        ),
       ],
     );
   }

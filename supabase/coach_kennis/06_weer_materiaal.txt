@@ -1,0 +1,200 @@
+# kleding-weer | Wat trek ik aan (jouw weer) | kleding | wat trek ik aan, kleding, aankleden, kleren, wat aan, outfit | actie=kleding
+? Wat trek ik aan?
+? Wat moet ik aantrekken om te gaan hardlopen?
+? Wat trek ik aan bij dit weer?
+! Wat trek ik aan bij het weer van vandaag?
+! Korte of lange broek vandaag?
+! Moet ik een jas aan om te lopen?
+= Trek kleding aan alsof het ongeveer 10 graden warmer is dan het buiten is. Na 10 minuten lopen heb je het warm.
+
+# kleding-temperatuur | Kleding per temperatuur | kleding | temperatuur, graden, koud, warm, laagjes, lagen
+? Wat trek ik aan bij 10 graden?
+? Wat trek ik aan als het vriest?
+? Wat draag ik als het 20 graden is?
+! Hoeveel laagjes moet ik aan in de winter?
+! Wat trek ik aan bij 5 graden?
+= Vuistregel: kleed je alsof het 10 graden warmer is. Na een paar minuten heb je het warm.
+- Boven 15°C: korte broek, shirt.
+- 10–15°C: shirt met korte of lange mouw, korte broek of driekwart.
+- 5–10°C: shirt met lange mouw, lange tight, eventueel dunne handschoenen.
+- 0–5°C: twee laagjes boven, tight, muts en handschoenen.
+- Onder 0°C: drie laagjes, windstopper, muts, handschoenen en buff.
+Wind en regen maken het kouder. Kies dan een winddicht jasje.
+
+# regen | Lopen in de regen | weer | regen, regenachtig, nat, buien, regenjas, plensbui
+? Kan ik gewoon hardlopen in de regen?
+? Wat trek ik aan als het regent?
+! Is lopen in de regen slecht?
+! Moet ik mijn run verplaatsen als het gaat regenen?
+= Lopen in de regen is prima, je smelt niet.
+- Draag een licht regen- of windjack, een pet tegen druppels in je ogen en geen katoen.
+- Smeer schuurplekken in met vaseline.
+- Wees voorzichtig op gladde tegels, bladeren en putdeksels.
+- Haal je natte schoenen na afloop leeg en vul ze met krantenpapier. Niet op de verwarming.
+Bij onweer: niet lopen. Kadans laat op Vandaag zien wanneer het droog is en of het 45 minuten later beter weer is.
+
+# onweer | Onweer | weer | onweer, bliksem, donder, onweersbui
+? Mag ik hardlopen als het onweert?
+! Wat doe ik als ik overvallen word door onweer?
+= Nee. Bij onweer kun je beter niet lopen, vooral niet in open terrein, op een dijk, op het strand of bij losse bomen.
+Overvallen door onweer? Zoek een gebouw of auto op. Lukt dat niet, ga dan gehurkt laag zitten met je voeten tegen elkaar, weg van bomen en metalen hekken. Kadans waarschuwt op Vandaag bij onweerskans.
+
+# kou | Lopen in de kou | weer | kou, koud, vriezen, winter, ijs, ademen kou
+? Is hardlopen in de kou slecht voor je longen?
+? Hoe koud is te koud om te hardlopen?
+! Hoe loop ik veilig als het vriest?
+! Waarom heb ik keelpijn na lopen in de kou?
+= Lopen in de kou is veilig voor gezonde mensen. Je longen bevriezen echt niet.
+- Een buff voor je mond maakt de lucht warmer en vochtiger. Dat helpt tegen een rauwe keel.
+- Begin binnen met een paar oefeningen en loop met de wind mee terug.
+- Bescherm je handen, oren en hoofd.
+- Pas op voor gladheid. Neem bij ijzel liever de loopband.
+Onder ongeveer -15°C, of met harde wind en gevoelstemperatuur onder -20°C: loop korter, of binnen.
+
+# gladheid | Gladheid en sneeuw | weer | glad, gladheid, ijzel, sneeuw, bevroren
+? Kan ik hardlopen als het glad is?
+! Hoe loop ik veilig in de sneeuw?
+= Bij ijzel en ijs is het risico om te vallen groot. Neem dan een rustdag of de loopband.
+Bij sneeuw:
+- Korte passen, met je voeten onder je lichaam.
+- Trailschoenen met grip, of spikes die je onder je schoenen trekt.
+- Kies wegen die gestrooid zijn of verse sneeuw (minder glad dan aangestampte).
+- Vergeet tempo: het gaat om het lopen zelf.
+
+# hitte | Lopen in de warmte | weer | warm, hitte, zomer, heet, hittegolf, zon, 30 graden
+? Is het te warm om te hardlopen?
+? Hoe loop ik veilig als het warm is?
+! Hoe laat moet ik lopen als het heel warm is?
+! Wat zijn de signalen van oververhitting?
+= Bij warmte is je hart meer bezig met koelen. Daardoor loop je trager bij dezelfde inspanning.
+- Loop vroeg in de ochtend of laat in de avond. Kadans rekent het koelste moment uit.
+- Loop langzamer, op gevoel of hartslag, en kies schaduw (bos, park).
+- Neem drinken mee, draag lichte kleding, een pet en zonnebrand.
+- Boven 25–28°C met hoge luchtvochtigheid: kort en rustig, of verplaatsen.
+Stop direct bij duizeligheid, hoofdpijn, misselijkheid, kippenvel in de hitte of verwardheid. Koel af in de schaduw en drink. Bij verwardheid of bewustzijnsverlies: 112.
+
+# wind | Lopen met wind | weer | wind, tegenwind, storm, windkracht, rugwind
+? Hoe loop ik het slimst met veel wind?
+! Kan ik lopen bij storm?
+! Waarom ben ik zoveel trager met tegenwind?
+= - Start met tegenwind en loop met de wind in de rug terug. Dan heb je het niet koud als je moe en bezweet bent.
+- Loop op inspanning, niet op tempo: met tegenwind gaat het nu eenmaal langzamer.
+- Kies een beschutte route (bos, tussen de huizen). Kadans houdt bij routes rekening met de wind.
+- Bij storm (windkracht 8 en meer) liever niet: vallende takken en losse voorwerpen.
+
+# donker | Lopen in het donker | veiligheid | donker, avond, nacht, verlichting, lampje, reflectie
+? Hoe loop ik veilig in het donker?
+? Welke verlichting heb ik nodig tijdens het hardlopen?
+! Kan Kadans een verlichte route voor mij kiezen?
+! Is het veilig om 's avonds alleen te lopen?
+= - Zorg dat je gezien wordt: reflecterende kleding, een knipperlicht achter en een hoofd- of borstlamp.
+- Kies verlichte, bekende routes. Kadans heeft een donker-route: die zoekt wegen met straatverlichting.
+- Laat iemand weten waar je loopt. Deel eventueel live je locatie, en zet de valdetectie aan.
+- Gebruik oortjes zachtjes of met open oor.
+
+# luchtkwaliteit | Smog en slechte lucht | weer | smog, luchtvervuiling, fijnstof, luchtkwaliteit, pollen, hooikoorts
+? Kan ik lopen bij smog?
+! Wat doe ik met hooikoorts als ik wil hardlopen?
+= Bij smog of veel fijnstof: kies een rustig moment, weg van drukke wegen (park, bos), en loop korter of rustiger. Vooral als je astma hebt.
+Bij hooikoorts:
+- Loop na een regenbui of vroeg in de ochtend, als er minder pollen zijn.
+- Draag een zonnebril.
+- Douche en verkleed je na het lopen.
+- Bespreek medicatie met je huisarts of apotheek.
+
+# weeradvies-app | Hoe Kadans het weer gebruikt | app | weer, weerbericht, buienradar, beste moment, verdict, advies
+? Hoe bepaalt Kadans het beste moment om te lopen?
+? Waar komt het weer in Kadans vandaan?
+! Waarom zegt Kadans dat ik later moet lopen?
+! Hoe betrouwbaar is het weeradvies?
+= Kadans combineert weerdata (Open-Meteo en Buienradar) met jouw voorkeuren: temperatuur, wind, regen, licht, je agenda en hoe lang je wilt lopen.
+- Op Vandaag zie je het beste moment, en waarom nu wel of niet.
+- Is het later duidelijk beter, bijvoorbeeld 45 minuten later droog? Dan zegt Kadans dat ook.
+- De chip met weerzekerheid laat zien hoe zeker de voorspelling is.
+Na je run kun je aangeven of het klopte.
+
+# schoenen-kiezen | Hardloopschoenen kiezen | materiaal | schoenen, hardloopschoenen, loopschoenen, kopen, merk, demping
+? Welke hardloopschoenen moet ik kopen?
+? Hoe kies ik goede loopschoenen?
+? Wat zijn de beste hardloopschoenen voor beginners?
+! Heb ik een loopanalyse nodig voor schoenen?
+! Welk merk hardloopschoenen is het best?
+! Hoeveel moet ik uitgeven aan loopschoenen?
+= De beste schoen is de schoen die prettig zit. Een beste merk bestaat niet.
+- Pas schoenen aan het eind van de dag, met je eigen loopsokken. Houd een duimbreed ruimte voor je tenen.
+- Probeer er een paar en loop er even mee. Kies wat comfortabel voelt.
+- Voor beginners: een neutrale schoen met redelijk wat demping is meestal goed.
+- Een loopanalyse kan helpen, maar comfort is het belangrijkst.
+Rond €100–150 vind je goede schoenen. Duurder is niet altijd beter. De vorige versie van een model is vaak goedkoper.
+
+# schoenen-vervangen | Schoenen vervangen | materiaal | schoenen vervangen, oude schoenen, versleten, kilometers schoen, hoe lang meegaan
+? Hoe lang gaan hardloopschoenen mee?
+? Wanneer moet ik nieuwe loopschoenen kopen?
+! Hoe zie ik of mijn schoenen versleten zijn?
+! Is het goed om twee paar schoenen af te wisselen?
+= De meeste schoenen gaan 600–900 km mee, afhankelijk van het model, je gewicht en de ondergrond.
+Tekenen van slijtage: de zool is glad, de demping voelt plat, de schoen zakt scheef, of je krijgt nieuwe pijntjes.
+Twee paar afwisselen is prima. Ze drogen beter op, en je benen krijgen net wat afwisseling.
+Houd in Kadans onder Ik → Mijn schoenen bij hoeveel kilometer er op elk paar zit. Kadans waarschuwt je als ze aan vervanging toe zijn.
+
+# carbon | Carbon schoenen | materiaal | carbon, carbonplaat, superschoenen, wedstrijdschoen, vaporfly
+? Heb ik carbon schoenen nodig?
+! Word ik sneller met een carbonschoen?
+= Schoenen met carbonplaat en veel schuim maken snelle lopers een paar procent zuiniger. Op een rustig tempo is het voordeel kleiner.
+- Gebruik ze vooral voor wedstrijden en een paar snelle trainingen.
+- Ze zijn duur en slijten sneller.
+- Bouw rustig op: ze belasten je kuiten en voeten anders.
+Voor beginners is het geen must.
+
+# sokken | Loopsokken | materiaal | sokken, loopsokken, compressie, compressiesokken
+? Welke sokken zijn goed voor hardlopen?
+! Helpen compressiesokken?
+= Kies naadloze loopsokken van synthetisch materiaal of merinowol, geen katoen. Ze voeren vocht af en voorkomen blaren.
+Compressiesokken voelen voor sommige lopers prettig en kunnen spierpijn iets verminderen. Sneller word je er nauwelijks van.
+
+# horloge | Hardloophorloge | materiaal | horloge, sporthorloge, garmin, gps horloge, smartwatch
+? Heb ik een hardloophorloge nodig?
+? Welk horloge werkt met Kadans?
+! Kan ik mijn Garmin koppelen aan Kadans?
+! Kan ik routes van Kadans naar mijn horloge sturen?
+= Een horloge is handig, maar niet nodig: Kadans neemt runs op met je telefoon.
+- Runs van je horloge komen via Health Connect in Kadans. Garmin, Samsung, Polar en andere merken zetten hun runs daar meestal in.
+- Routes kun je naar je horloge sturen als GPX. Bij veel Garmin-modellen kan dat in één tik. Bij eenvoudige modellen zoals de Vivoactive krijg je pijlen naar links en rechts op je pols.
+
+# strava | Strava en Kadans | app | strava, koppelen, synchroniseren, uploaden, importeren
+? Kan ik Strava koppelen aan Kadans?
+? Hoe zet ik mijn runs van Strava in Kadans?
+! Kan Kadans mijn runs naar Strava uploaden?
+! Waarom ziet de coach mijn Strava-runs niet?
+= Ja. Koppel Strava onder Ik → Strava.
+- Je oude runs en routes komen dan in Kadans, alleen voor jou zichtbaar.
+- Runs die je in Kadans opneemt, kun je naar Strava uploaden.
+- Om de voorwaarden van Strava te respecteren, gaan runs uit Strava niet naar de AI-coach en worden ze niet in Samen aan anderen getoond.
+Je kunt ook je volledige Strava-archief importeren.
+
+# health-connect | Health Connect | app | health connect, samsung health, google fit, synchroniseren, stappen
+? Hoe koppel ik Health Connect aan Kadans?
+! Waarom komen mijn runs niet binnen via Health Connect?
+! Kan Kadans mijn stappen zien?
+= Kadans leest runs (en als je dat wilt stappen) uit Health Connect. Dat gebeurt alleen nadat jij toestemming geeft.
+- Geef in Health Connect toestemming voor oefeningen, hartslag en eventueel stappen.
+- Zet in de app van je horloge (Garmin Connect, Samsung Health) de synchronisatie naar Health Connect aan.
+- Je kunt de toestemming altijd intrekken onder Ik → Gezondheidsgegevens.
+
+# kleding-algemeen | Hardloopkleding | materiaal | kleding, shirt, tight, katoen, functioneel, loopkleding
+? Welke kleding heb ik nodig om te gaan hardlopen?
+! Kan ik hardlopen in een katoenen shirt?
+! Is dure loopkleding nodig?
+= Om te beginnen heb je weinig nodig: goede schoenen, sokken en kleding die niet schuurt.
+- Functionele stof (polyester, merino) voert zweet af. Katoen wordt nat en zwaar, en schuurt.
+- Vrouwen: een goede sportbeha is belangrijk.
+- Voor de winter: een tight, een shirt met lange mouw, een windjack, een muts en handschoenen.
+Duur hoeft niet. Goedkope functionele kleding werkt ook prima.
+
+# sportbeha | Sportbeha | materiaal | sportbeha, beha, borsten, bh
+? Welke sportbeha is goed voor hardlopen?
+! Waarom is een goede sportbeha belangrijk?
+= Bij hardlopen bewegen je borsten veel. Een goede sportbeha voorkomt pijn en schuren.
+- Kies een beha met hoge ondersteuning (high impact).
+- Hij moet stevig zitten, maar niet knellen. Doe de springtest in de winkel.
+- Vervang hem als het elastiek slap wordt, ongeveer elk jaar bij veel lopen.

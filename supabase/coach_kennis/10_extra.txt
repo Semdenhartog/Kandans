@@ -1,0 +1,465 @@
+## Extra onderwerpen en extra vraagvormen bij bestaande onderwerpen ("# +sleutel").
+
+# tijden-normaal | Normale tijden per afstand | snelheid | normale tijd, gemiddelde tijd, hoe lang over 5 km, goede tijd, gemiddeld
+? Wat is een normale tijd voor 5 km?
+? Hoe lang doet een gemiddelde loper over 10 km?
+? Wat is een goede tijd voor een halve marathon?
+? Wat is een gemiddelde marathontijd?
+! Is 30 minuten op de 5 km goed?
+! Is 2 uur 15 voor een halve marathon langzaam?
+= Gemiddelden bij recreatieve wedstrijden (heel grof):
+- 5 km: 25–35 minuten.
+- 10 km: 50–70 minuten.
+- Halve marathon: 1:50–2:30.
+- Marathon: 3:45–5:00.
+Alles daarbinnen of daarbuiten is prima. Een "goede tijd" is een tijd waar jij trots op bent. Het leeftijdsniveau in Logboek → Records laat zien hoe je tijd scoort voor je leeftijd.
+
+# dienstwerk | Hardlopen met wisseldiensten | planning | diensten, nachtdienst, ploegendienst, rooster, wisseldienst, onregelmatig
+? Hoe train ik als ik nachtdiensten draai?
+? Kan ik hardlopen na een nachtdienst?
+! Hoe combineer ik een trainingsschema met een wisselend rooster?
+! Kan Kadans rekening houden met mijn rooster?
+= - Na een nachtdienst gaat slaap voor. Loop pas na je slaap, en kies dan een rustige run.
+- Plan zware trainingen op je vrije dagen of na een dagdienst.
+- Plan per week: hoeveel runs passen er, en welke dag is de lange run?
+- Koppel je rooster (ICS-link) onder Ik → Werkrooster. Vandaag zoekt dan een moment dat bij je diensten past, en je schema schuift mee.
+
+# kinderwagen | Hardlopen met kinderwagen | planning | kinderwagen, buggy, joggingwagen, baby mee
+? Kan ik hardlopen met een kinderwagen?
+! Vanaf welke leeftijd mag mijn baby mee in de joggingwagen?
+= Dat kan, met een echte joggingbuggy: luchtbanden, een vast voorwiel en een polsband.
+- Veel fabrikanten adviseren om te wachten tot je kind ongeveer 6 maanden is en goed zijn hoofd kan houden. Vraag het eventueel aan het consultatiebureau.
+- Loop iets langzamer en houd de buggy dicht bij je lichaam.
+- Kies vlakke, rustige paden.
+
+# blote-voeten | Op blote voeten of minimalistisch lopen | materiaal | blote voeten, barefoot, minimalistisch, barefoot schoenen, zero drop
+? Is hardlopen op blote voeten beter?
+! Moet ik overstappen op barefootschoenen?
+= Het kan je voeten sterker maken, maar het is geen wondermiddel. Overstappen gaat heel langzaam, anders riskeer je achilles-, kuit- en voetblessures.
+- Begin met een paar minuten op gras of in minimalistische schoenen.
+- Bouw dit over maanden op.
+- Doe voet- en kuitkracht.
+Lopen je benen goed op je huidige schoenen? Dan hoef je niet over te stappen.
+
+# zolen | Steunzolen | materiaal | steunzolen, inlegzolen, platvoeten, holvoeten, overpronatie, pronatie
+? Heb ik steunzolen nodig om te hardlopen?
+! Wat is overpronatie?
+! Ik heb platvoeten, kan ik wel hardlopen?
+= De meeste lopers hebben geen steunzolen nodig. Pronatie (je voet die naar binnen kantelt) is een normale beweging.
+- Met platvoeten of holvoeten kun je prima lopen, als je geen klachten hebt.
+- Kies vooral een schoen die comfortabel zit.
+Heb je terugkerende klachten aan voet, scheen of knie? Een podotherapeut of sportfysiotherapeut kan kijken of zolen zinvol zijn.
+
+# zand | Lopen op strand en zand | trail | strand, zand, duinen, mul zand, kust
+? Is hardlopen op het strand goed?
+! Hoe loop ik in mul zand?
+= Lopen op het strand is mooi, maar zwaarder.
+- Hard zand bij de vloedlijn is het prettigst. Mul zand belast je kuiten en achillespees veel meer. Doe dat kort.
+- Let op de schuine kant naar de zee. Loop heen en terug, zodat je beide kanten even belast.
+- Duinen zijn ideaal voor heuveltraining.
+Op blote voeten op het strand: rustig opbouwen.
+
+# vakantie | Hardlopen op vakantie | planning | vakantie, buitenland, reizen, hotel, onbekende stad
+? Hoe blijf ik hardlopen op vakantie?
+! Hoe vind ik een goede route in een onbekende stad?
+! Is het erg als ik twee weken niet loop op vakantie?
+= - Neem je schoenen mee. Een paar korte runs houdt je conditie op peil.
+- Maak in Kadans een rondje vanaf je hotel. De routes werken ook in het buitenland.
+- Vroeg op de dag is het vaak rustig en koel.
+- Twee weken niets doen kost wat conditie, maar die heb je in een paar weken terug. Genieten mag.
+
+# hoogte | Hardlopen in de bergen | trail | bergen, hoogte, hoogtetraining, ijle lucht, alpen
+? Waarom is hardlopen in de bergen zo zwaar?
+! Hoe loop ik op grote hoogte?
+= Boven ongeveer 1500 m zit er minder zuurstof in de lucht. Je hartslag is hoger en alles voelt zwaarder.
+- Loop de eerste dagen rustig, en op gevoel in plaats van op tempo.
+- Drink meer, want de lucht is droger.
+- Bij hoofdpijn, misselijkheid of duizeligheid: rustiger aan of lager gaan. Bij ernstige klachten: medische hulp.
+
+# vasten | Hardlopen tijdens het vasten | voeding | vasten, ramadan, intermittent fasting, niet eten
+? Kan ik hardlopen tijdens de ramadan?
+! Is hardlopen met intermittent fasting een goed idee?
+= Dat kan, met aanpassingen.
+- Loop rustig en kort, liefst vlak voor het eten (iftar) of 1–2 uur erna.
+- Laat zware trainingen even liggen.
+- Drink en eet goed in de uren dat het kan.
+Bij intermittent fasting: plan zware trainingen in je eetvenster. Bij duizeligheid stop je. Bij diabetes of medicijnen: overleg met je arts.
+| soort=arts
+
+# na-corona | Weer lopen na corona of langdurige vermoeidheid | gezondheid | corona, covid, long covid, na ziekte, vermoeid na virus
+? Wanneer kan ik weer lopen na corona?
+! Ik ben na een virus nog steeds snel moe, mag ik lopen?
+= Begin pas weer als je een paar dagen klachtenvrij bent, en bouw heel rustig op met wandelen en korte stukjes lopen.
+- Ging het goed? Dan pas iets meer.
+- Word je na een inspanning de volgende dag veel zieker of vermoeider? Dan doe je te veel. Bespreek dat met je huisarts.
+Bij pijn op de borst, hartkloppingen of benauwdheid: niet lopen en contact opnemen met je huisarts.
+| soort=arts
+
+# schoenen-wassen | Schoenen schoonmaken | materiaal | schoenen wassen, wasmachine, modder, stinken, drogen
+? Mogen hardloopschoenen in de wasmachine?
+! Hoe krijg ik mijn natte schoenen droog?
+= Liever niet in de wasmachine: lijm en demping gaan daar sneller kapot.
+- Borstel modder eraf, en was ze met lauw water en wat zeep.
+- Haal de zolen eruit en vul de schoenen met krantenpapier.
+- Laat ze drogen op kamertemperatuur, niet op de verwarming en niet in de felle zon.
+
+# loopscholing | Loopscholing | techniek | loopscholing, abc, knieheffen, hakken billen, huppelen, oefeningen
+? Wat is loopscholing?
+! Welke loopscholingsoefeningen moet ik doen?
+= Loopscholing zijn korte oefeningen die je looptechniek en coördinatie verbeteren.
+- Knieheffen, hakken-billen, huppelsprong, skippings, zijwaarts lopen, kruispassen.
+- Doe 2× 20–30 meter per oefening, na het inlopen en voor een snelle training.
+- 1–2 keer per week, dan gaat je techniek vanzelf vooruit.
+
+# +beginnen-start
+? Hoe begin ik met rennen?
+? Ik wil beginnen met joggen, hoe?
+? Wat is een goed beginnersschema?
+! Hoe begin ik met hardlopen na jaren niets doen?
+! Ik ben 40 en wil gaan hardlopen, waar begin ik?
+! Kan Kadans mij helpen om te beginnen met lopen?
+
+# +beginnen-vaak
+? Hoe vaak moet je hardlopen om fitter te worden?
+? Is drie keer per week hardlopen genoeg?
+! Is twee keer per week lopen genoeg?
+! Mag ik vijf keer per week hardlopen?
+
+# +beginnen-tempo
+? Hoe snel moet je lopen als beginner?
+? Ik loop te snel, hoe loop ik langzamer?
+! Wat is een goed tempo voor een beginner?
+
+# +beginnen-5k
+? Hoe kan ik 5 km lopen zonder te stoppen?
+? Ik kan nog geen 5 km lopen, hoe bouw ik dat op?
+! Hoe lang moet ik trainen voor een 5 km?
+
+# +beginnen-spierpijn
+? Waarom heb ik zo'n spierpijn in mijn kuiten?
+! Mijn bovenbenen zijn stijf na het lopen
+
+# +beginnen-steken
+? Hoe kom ik van een steek in mijn zij af?
+! Waarom krijg ik altijd een zijsteek?
+
+# +beginnen-eten-voor
+? Wat kan ik het beste eten voor een run?
+? Mag ik hardlopen met een volle maag?
+! Moet ik iets eten voor een ochtendrun?
+
+# +beginnen-water
+? Moet ik drinken tijdens het hardlopen?
+! Hoeveel water moet ik drinken na het lopen?
+
+# +beginnen-pijn-algemeen
+? Ik heb overal pijn na het lopen
+? Is het normaal dat hardlopen pijn doet?
+! Mijn been doet pijn, mag ik nog lopen?
+
+# +beginnen-warmlopen
+? Wat is een goede warming up voor hardlopen?
+! Hoe warm ik op voor een intervaltraining?
+
+# +beginnen-ademhaling
+? Hoe krijg ik meer lucht tijdens het hardlopen?
+! Waarom heb ik het zo benauwd tijdens rennen?
+
+# +beginnen-techniek
+? Hoe moet je goed hardlopen?
+! Loop ik wel goed?
+
+# +beginnen-loopband
+? Is de loopband goed voor beginners?
+! Is een kilometer op de loopband hetzelfde als buiten?
+
+# +opbouw-10procent
+? Hoeveel kilometer per week moet ik lopen?
+? Hoeveel mag ik per week meer lopen?
+! Loop ik te veel kilometers?
+! Hoeveel kilometer per week is gezond?
+
+# +rustig-lopen
+? Waarom moet je langzaam lopen om sneller te worden?
+? Is langzaam lopen wel zinvol?
+! Hoe langzaam is een rustige run?
+
+# +lange-duurloop
+? Hoe ver moet mijn langste run zijn?
+! Mag ik mijn lange duurloop in twee delen lopen?
+
+# +intervallen
+? Welke intervaltraining maakt mij sneller?
+? Wat is een goede intervaltraining?
+! Kun je een intervaltraining voor mij bedenken?
+
+# +tempoloop
+? Wat is een duurloop in tempo?
+! Hoe doe ik een drempeltraining?
+
+# +hartslagzones
+? Wat is een goede hartslag tijdens hardlopen?
+? Hoe hoog mag mijn hartslag zijn bij het lopen?
+! Wat is mijn zone 2?
+
+# +hartslag-hoog
+? Mijn hartslag is te hoog bij een rustige run
+! Waarom heb ik een hoge hartslag bij lage snelheid?
+
+# +training-gemist
+? Ik heb twee weken niet gelopen, wat nu?
+! Hoe begin ik weer na een pauze?
+
+# +lopen-ziek
+? Mag ik sporten als ik verkouden ben?
+! Mag ik lopen als ik hoest?
+
+# +training-moe
+? Waarom ben ik zo moe na het hardlopen?
+! Ik ben al weken moe, moet ik stoppen?
+
+# +sneller-5k
+? Hoe kan ik mijn 5 km tijd verbeteren?
+! Hoe loop ik de 5 km onder de 20 minuten?
+
+# +sneller-algemeen
+? Hoe kan ik sneller gaan hardlopen?
+? Waarom ben ik zo langzaam?
+! Hoe verbeter ik mijn snelheid?
+
+# +tempo-berekenen
+? Hoe reken ik km per uur om naar minuten per kilometer?
+! Welk tempo is 12 km per uur?
+
+# +kracht
+? Welke oefeningen zijn goed voor hardlopers?
+? Moet ik naar de sportschool als hardloper?
+! Welke krachtoefeningen kan ik thuis doen?
+
+# +mobiliteit
+? Welke stretchoefeningen moet ik doen na het hardlopen?
+! Is rekken voor het lopen slecht?
+
+# +scheen
+? Waarom doen mijn schenen pijn na het rennen?
+? Wat te doen bij shin splints?
+! Pijn aan de binnenkant van mijn scheenbeen
+
+# +knie
+? Waarom doen mijn knieën pijn na het hardlopen?
+! Mijn knie doet zeer bij het traplopen na het rennen
+! Pijn aan de binnenkant van mijn knie
+
+# +achilles
+? Mijn hiel doet pijn na het hardlopen
+! Wat is een achillespeesontsteking?
+
+# +voetzool
+? Mijn voet doet pijn na het hardlopen
+! Pijn onder mijn voet na het lopen
+
+# +kuit
+? Wat helpt tegen kramp in de kuiten?
+! Mijn kuiten zijn altijd stijf
+
+# +heup
+? Pijn in mijn heup na het rennen
+! Mijn bil doet pijn tijdens het lopen
+
+# +preventie
+? Wat is de meest voorkomende hardloopblessure?
+! Hoe voorkom ik overbelasting?
+
+# +regen
+? Is lopen in de regen gezond?
+! Wat doe ik met natte schoenen?
+
+# +kou
+? Wat trek ik aan als het koud is?
+! Kun je ziek worden van lopen in de kou?
+
+# +hitte
+? Hoe warm is te warm om te hardlopen?
+? Mag ik hardlopen bij 30 graden?
+! Wat trek ik aan als het warm is?
+
+# +wind
+? Hoe loop ik tegen de wind in?
+! Moet ik bij harde wind binnen blijven?
+
+# +donker
+? Wat moet ik aan als ik in het donker loop?
+! Hoe zorg ik dat auto's me zien?
+
+# +schoenen-kiezen
+? Welke loopschoenen zijn goed?
+? Hoe weet ik welke maat hardloopschoen ik nodig heb?
+? Welke schoenen zijn goed voor brede voeten?
+! Wat zijn goede schoenen voor een marathon?
+! Zijn dure hardloopschoenen beter?
+
+# +schoenen-vervangen
+? Hoeveel kilometer gaan loopschoenen mee?
+! Hoe weet ik of mijn schoenen op zijn?
+
+# +horloge
+? Welk sporthorloge is goed voor hardlopen?
+! Werkt Kadans met mijn Samsung Watch?
+! Hoe komen de runs van mijn horloge in Kadans?
+
+# +strava
+? Werkt Kadans samen met Strava?
+! Waarom staan mijn Strava-runs niet in Samen?
+
+# +eten-na
+? Wat is goed eten na het sporten?
+! Hoeveel moet ik eten na een lange run?
+
+# +afvallen
+? Hoeveel calorieën verbrand ik bij 5 km?
+? Hoe val ik af met hardlopen?
+! Waarom kom ik aan terwijl ik hardloop?
+
+# +slaap
+? Waarom slaap ik slecht na het hardlopen?
+! Hoeveel uur slaap heb ik nodig als ik veel train?
+
+# +herstel-algemeen
+? Hoe kan ik mijn herstel verbeteren?
+! Helpt een koude douche na het lopen?
+
+# +wedstrijd-dag
+? Wat eet ik op de ochtend van een wedstrijd?
+? Hoe bereid ik me voor op wedstrijddag?
+! Moet ik inlopen voor een 5 km wedstrijd?
+
+# +wedstrijd-pacing
+? Hoe snel moet ik starten bij een 10 km?
+! Hoe verdeel ik mijn krachten bij een halve marathon?
+
+# +taperen
+? Hoeveel moet ik lopen in de week voor een halve marathon?
+! Wat doe ik de dag voor een wedstrijd?
+
+# +na-wedstrijd
+? Wat moet ik doen na een marathon?
+! Hoe lang herstel ik van een 10 km?
+
+# +halve
+? Hoeveel weken trainen voor een halve marathon?
+? Wat is een goed schema voor de halve marathon?
+! Hoe loop ik een halve marathon onder de 2 uur?
+
+# +marathon
+? Hoe lang van tevoren moet je trainen voor een marathon?
+? Wat is de langste duurloop voor een marathon?
+! Hoe loop ik een marathon onder de 4 uur?
+
+# +10k
+? Wat is een goed schema voor 10 km?
+? Hoe lang moet je trainen voor 10 km?
+! Hoe ga ik van 5 naar 10 kilometer?
+
+# +gels
+? Hoe vaak moet ik een gel nemen tijdens een halve marathon?
+! Wat kan ik eten tijdens een lange duurloop?
+
+# +geen-zin
+? Hoe blijf ik gemotiveerd om te hardlopen?
+? Ik heb geen motivatie meer
+! Waarom heb ik geen zin om te rennen?
+
+# +gewoonte
+? Hoe vind ik tijd om te hardlopen?
+! Hoe kan ik hardlopen combineren met een drukke baan?
+
+# +app-wat
+? Hoe werkt Kadans?
+? Wat kan Kadans wat Strava niet kan?
+! Waarvoor gebruik ik Kadans?
+
+# +app-vandaag
+? Wat betekent het cijfer op Vandaag?
+? Waarom is nu niet het beste moment om te lopen?
+! Hoe bepaalt Kadans of ik nu moet lopen?
+
+# +app-opnemen
+? Hoe begin ik een run in de app?
+! Hoe neem ik een loopbandrun op?
+
+# +app-gps
+? Waarom is mijn route niet goed opgenomen?
+? Mijn run is niet opgeslagen
+! Waarom mist er een stuk van mijn route?
+
+# +app-coachstem
+? Ik hoor de coachstem niet tijdens het lopen
+! Kan de coach mijn tempo voorlezen?
+
+# +app-routes
+? Kan Kadans een route voor mij bedenken?
+? Hoe vind ik een mooie route om te lopen?
+! Kan ik een route maken die eindigt waar ik begin?
+
+# +app-samen
+? Hoe deel ik mijn runs met vrienden?
+! Kan ik mijn runs privé houden?
+
+# +app-premium
+? Wat kost Kadans?
+? Is Premium het waard?
+! Hoe annuleer ik mijn abonnement?
+
+# +app-privacy
+? Is mijn locatie veilig bij Kadans?
+! Wie kan mijn routes zien?
+
+# +app-coach
+? Kan ik de coach alles vragen?
+? Hoe slim is de coach?
+! Onthoudt de coach wat ik eerder vroeg?
+
+# +app-fout
+? De app laadt niet
+! Waarom blijft het scherm wit?
+
+# +mijn-week
+? Hoe veel heb ik gelopen deze week?
+? Wat heb ik deze week gedaan?
+
+# +mijn-laatste
+? Hoe deed ik het vandaag?
+? Wat vond je van mijn run vandaag?
+
+# +mijn-maand
+? Hoeveel kilometer heb ik afgelopen maand gelopen?
+? Hoe gaat het met mijn conditie?
+
+# +mijn-vandaag
+? Moet ik vandaag hardlopen?
+? Mag ik vandaag weer lopen?
+
+# +mijn-tempo
+? Loop ik te snel?
+? Hoe snel loop ik gemiddeld?
+
+# +buiten-algemeen
+? Hoe laat is het?
+? Wat is het weer in Spanje?
+! Kun je me helpen met mijn werk?
+! Wat moet ik koken vanavond?
+
+# +buiten-groet
+? Hoe gaat het?
+! Goedenavond
+
+# +kleding-weer
+? Wat moet ik aan bij het hardlopen vandaag?
+? Lange of korte mouwen vandaag?
+! Heb ik vandaag handschoenen nodig?
+! Moet ik een muts op vandaag?
+
+# +kleding-temperatuur
+? Wat trek ik aan bij 0 graden?
+? Wat trek ik aan bij 15 graden?
+! Wat draag ik bij min 5?

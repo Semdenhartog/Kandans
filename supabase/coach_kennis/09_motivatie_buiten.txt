@@ -1,0 +1,129 @@
+# geen-zin | Geen zin om te lopen | motivatie | geen zin, lui, motivatie kwijt, niet gemotiveerd, uitstellen
+? Ik heb geen zin om te lopen, wat nu?
+? Hoe motiveer ik mezelf om te gaan hardlopen?
+? Ik heb nergens zin in vandaag
+! Hoe kom ik van de bank af?
+! Ik stel mijn run steeds uit
+! Hoe vind ik mijn motivatie terug?
+= Geen zin is normaal. Het begin is het zwaarst, niet de run zelf.
+- Spreek met jezelf af: 10 minuten. Daarna mag je stoppen. Meestal ga je door.
+- Trek je loopkleren alvast aan.
+- Loop een nieuwe route, met een maatje of naar een mooi doel.
+- Plan een wedstrijd of doel. Dat geeft richting.
+- Merk je weken achter elkaar geen zin, en ook voor andere dingen niet? Dan is rust of een gesprek met iemand misschien beter dan forceren.
+Het is maar regen, je smelt niet. Ga gewoon.
+
+# dip | Een dip of stilstand | motivatie | dip, stilstand, geen vooruitgang, plateau, vast
+? Waarom ga ik niet meer vooruit?
+? Ik zit in een dip, hoe kom ik eruit?
+! Mijn tijden worden niet beter, wat doe ik verkeerd?
+! Hoe doorbreek ik een plateau?
+= Stilstand heeft vaak een van deze oorzaken:
+- Altijd hetzelfde tempo en dezelfde afstand. Voeg afwisseling toe (intervallen, heuvels, een langere run).
+- Te weinig rust, of juist te weinig prikkels.
+- Slaap, voeding en stress spelen mee.
+Probeer 4–6 weken een gericht schema. Kadans kan er een voor je maken. Soms helpt het ook om een paar weken alleen voor je plezier te lopen.
+
+# vergelijken | Vergelijken met anderen | motivatie | vergelijken, anderen sneller, te langzaam, schamen, langzaam
+? Ik ben veel langzamer dan anderen, is dat erg?
+! Ik schaam me omdat ik zo langzaam loop
+! Wat is een normaal tempo voor een recreant?
+= Nee. Elk tempo telt. Iedereen die loopt, loopt hard.
+Recreanten lopen vaak tussen 5:30 en 7:30 per km, maar alles daarbuiten is net zo goed. Vergelijk jezelf alleen met jezelf van een paar maanden geleden. Kadans laat je eigen vooruitgang zien.
+
+# gewoonte | Hardlopen tot gewoonte maken | motivatie | gewoonte, routine, regelmatig, ritme, volhouden
+? Hoe maak ik hardlopen een vaste gewoonte?
+? Hoe hou ik een loopschema vol naast werk en gezin?
+! Ik heb weinig tijd, hoe pas ik hardlopen in?
+! Hoe loop ik regelmatig met onregelmatige diensten?
+= - Koppel het aan iets vasts: na het brengen van de kinderen, of direct na het werk.
+- Korte runs tellen ook. 20–30 minuten 3 keer per week is al veel waard.
+- Werk je in diensten? Plan per week in plaats van per dag. Je kunt in Kadans je rooster (ICS) koppelen, dan zoekt Vandaag een moment dat past.
+- Leg alles klaar, en loop vanaf je voordeur of je werk.
+
+# eenzaam-lopen | Saai of eenzaam | motivatie | saai, eenzaam, alleen, verveling, afwisseling
+? Hardlopen vind ik saai, hoe maak ik het leuker?
+! Hoe maak ik mijn runs afwisselender?
+= - Wissel van route. Kadans maakt een rondje in een richting die je nog niet kent.
+- Speel met tempo (fartlek), of loop naar een doel, zoals koffie of een bakker.
+- Doe mee aan loop-bingo of een uitdaging.
+- Loop met anderen. Zoek een loopmaatje of loopgroep in Samen.
+- Luister een podcast of luisterboek.
+
+# mentaal-zwaar | Mentaal doorzetten | motivatie | mentaal, doorzetten, opgeven, hoofd, mindset, afzien
+? Hoe zet ik door als het zwaar wordt?
+! Hoe word ik mentaal sterker tijdens het lopen?
+= - Knip het op: alleen nog tot de volgende lantaarnpaal, bocht of kilometer.
+- Concentreer je op je ritme: adem, passen, armen.
+- Zeg iets kort en vriendelijk tegen jezelf ("Rustig en sterk").
+- Weet dat zwaar niet hetzelfde is als niet kunnen.
+Pijn die scherp is of erger wordt, is geen mentale kwestie. Dan stop je.
+
+# beloning | Belonen en vieren | motivatie | beloning, vieren, trots, mijlpaal
+? Hoe beloon ik mezelf voor mijn trainingen?
+! Is het goed om een doel te vieren?
+= Ja, vier je mijlpalen. Je eerste 5 km, een maand lang volgehouden, een record. Een nieuw shirt, een ontbijt of gewoon even trots zijn werkt. Kadans geeft badges en een feestje bij records, en je kunt die moment delen.
+
+# weer-excuus | Lopen bij slecht weer | motivatie | slecht weer, excuus, koud en nat, buiten lopen, regen geen zin
+? Het is slecht weer, moet ik toch gaan lopen?
+! Wanneer is het weer echt te slecht om te lopen?
+= Bijna nooit. Regen, kou en wind zijn met de juiste kleding prima te doen. Achteraf ben je er het meest trots op.
+Alleen bij onweer, ijzel, storm of extreme hitte kun je het beter verschuiven of naar binnen gaan. Kadans laat zien of het straks beter is. Vaak scheelt 45 minuten al veel.
+
+## ---- Buiten het terrein van de coach (eerlijk zeggen) ----
+
+# buiten-algemeen | Niet over hardlopen | buiten | weer in, hoofdstad, recept, nieuws, politiek, wiskunde, huiswerk
+? Wat is de hoofdstad van Frankrijk?
+? Kun je mijn huiswerk maken?
+? Wie wint de verkiezingen?
+? Wat is het nieuws van vandaag?
+! Schrijf een gedicht voor mij
+! Kun je een e-mail voor me schrijven?
+! Wat is een lekker recept voor vanavond?
+! Wat is de wortel van 144?
+! Vertel een mop
+= Daar is de Kadans-coach niet voor gemaakt. Ik help je met hardlopen: trainen, tempo, herstel, voeding rond het lopen, materiaal, weer en de app. Wat wil je weten over je lopen?
+| soort=buiten
+
+# buiten-andere-sport | Andere sporten | buiten | voetbal, tennis, wielrennen, fitness schema, bodybuilding, zwemtraining, schaken
+? Kun je een fitnessschema voor me maken?
+? Hoe word ik beter in voetbal?
+! Hoe train ik voor een fietstocht van 100 km?
+! Wat is een goede zwemtraining?
+! Hoe word ik beter in tennis?
+= Kadans is gemaakt voor hardlopen. Voor andere sporten kan ik je niet goed helpen. Wel kan ik vertellen hoe je fietsen, zwemmen of kracht slim combineert met hardlopen. Vraag het gerust.
+| soort=buiten
+
+# buiten-medisch | Medische diagnose | buiten | diagnose, wat heb ik, ziekte, medicijn voorschrijven, arts vervangen, uitslag
+? Wat heb ik precies aan mijn knie?
+? Kun je zeggen welke blessure ik heb?
+! Welke medicijnen moet ik nemen voor mijn pijn?
+! Kun je mijn bloeduitslag uitleggen?
+! Moet ik geopereerd worden?
+= Ik kan geen diagnose stellen of medicijnen adviseren. Ik ben geen arts of fysiotherapeut. Ga met klachten naar je huisarts of een (sport)fysiotherapeut. Bij acute klachten, zoals pijn op de borst of flauwvallen: bel 112.
+Wel kan ik je algemene informatie geven over veelvoorkomende hardloopklachten en hoe je weer rustig opbouwt.
+| soort=arts
+
+# buiten-financieel | Geld en zaken | buiten | beleggen, geld, belasting, verzekering, juridisch, contract
+? Moet ik mijn sportverzekering afsluiten?
+! Kun je me helpen met mijn belastingaangifte?
+! Waar moet ik in beleggen?
+= Daar kan de Kadans-coach je niet mee helpen. Ik ben er voor vragen over hardlopen en de app.
+| soort=buiten
+
+# buiten-persoonlijk | Over de coach zelf | buiten | wie ben jij, ben je een mens, ben je echt, robot, ai, chatgpt
+? Wie ben jij?
+? Ben je een echt mens?
+! Ben je ChatGPT?
+! Hoe slim ben jij?
+! Hoe werk je eigenlijk?
+= Ik ben de Kadans-coach. Ik geef antwoorden uit een kennisbank over hardlopen die door Kadans is samengesteld, en ik reken met je eigen runs. Een mens ben ik niet. Als een vraag nog niet in de kennisbank staat, kan het antwoord via AI (Claude van Anthropic) worden opgezocht. Bij gezondheidsklachten verwijs ik je altijd naar een arts of fysio.
+
+# buiten-groet | Begroeting | buiten | hallo, hoi, goedemorgen, hey, dag, bedankt, dankjewel, thanks
+? Hallo
+? Hoi coach
+? Dankjewel
+! Goedemorgen
+! Bedankt voor je hulp
+! Hey, hoe gaat het?
+= Hoi! Waarmee kan ik je helpen? Je kunt bijvoorbeeld vragen "Hoe ging mijn week?", "Wat trek ik aan?" of "Hoe word ik sneller op de 5 km?".

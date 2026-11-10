@@ -58,7 +58,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           // Bewijs van akkoord: welke versie en wanneer.
           'age_16_plus': true,
           'terms_version': '1.0',
-          'privacy_version': '1.6',
+          'privacy_version': '1.7',
           'accepted_at': DateTime.now().toUtc().toIso8601String(),
         },
       );

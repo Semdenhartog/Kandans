@@ -1,0 +1,238 @@
+## Blessures: altijd algemeen, geen diagnose, verwijzen naar huisarts/fysio.
+
+# scheen | Pijn aan de schenen | blessures | schenen, scheen, scheenbeen, shin splints, scheenbeenvliesontsteking, onderbeen
+? Ik heb pijn aan mijn schenen, wat nu?
+? Wat zijn shin splints?
+! Mijn scheenbeen doet zeer na het hardlopen
+! Hoe voorkom ik scheenbeenklachten?
+= Pijn aan de binnenkant van je scheen komt veel voor bij beginners en bij te snel opbouwen.
+Wat je zelf kunt doen:
+- Minder lopen of tijdelijk alternatief trainen (fietsen, zwemmen) zolang het pijn doet.
+- Bouw daarna rustiger op, op zachtere ondergrond en met goede schoenen.
+- Doe kuit- en voetoefeningen (kuitheffen, tenen krullen).
+Is de pijn op één plek scherp, voel je het ook bij wandelen of in rust, of in de nacht? Dan kan het een stressfractuur zijn. Ga dan naar je huisarts of een fysiotherapeut. Ik kan geen diagnose stellen.
+| soort=arts
+
+# knie | Pijn in de knie | blessures | knie, knieën, knieklachten, lopersknie, runners knee, knieschijf
+? Ik heb pijn in mijn knie na het lopen
+? Is hardlopen slecht voor je knieën?
+! Wat is een lopersknie?
+! Pijn aan de buitenkant van mijn knie, wat kan het zijn?
+= Hardlopen is níét slecht voor gezonde knieën. Het maakt kraakbeen en spieren juist sterker. Knieklachten komen vaak door overbelasting: te snel meer, veel bergaf, versleten schoenen of zwakke bil- en heupspieren.
+- Pijn rond de knieschijf of aan de buitenkant van de knie (ITB-syndroom) komt veel voor.
+- Doe minder en vermijd bergaf en trappen zolang het pijn doet.
+- Kracht voor heupen, billen en bovenbenen helpt bij het herstel en voorkomt terugkeer.
+Is de knie dik, zit hij op slot, geeft hij mee of gaat de pijn niet weg? Ga dan naar je huisarts of een fysiotherapeut. Ik stel geen diagnose.
+| soort=arts
+
+# achilles | Achillespees | blessures | achilles, achillespees, hiel, pees, hak, peesklachten
+? Ik heb pijn aan mijn achillespees
+? Wat doe ik bij achillespeesklachten?
+! Mijn hiel doet 's ochtends pijn achter
+! Mag ik lopen met een pijnlijke achillespees?
+= Achillespeesklachten komen vaak door te snel meer of sneller lopen, veel heuvels of een nieuwe schoen met minder hakverschil.
+- Verminder de belasting en loop alleen zonder dat de pijn toeneemt.
+- Kuitkracht (langzaam kuitheffen, ook op één been) is de belangrijkste oefening voor peesherstel.
+- Rekken helpt bij peesklachten weinig.
+Bij een plotselinge knal of een trap tegen je hiel, of als je niet meer op je tenen kunt staan: ga direct naar de huisarts. Bij aanhoudende klachten: een fysiotherapeut.
+| soort=arts
+
+# voetzool | Pijn onder de voet | blessures | voetzool, hielspoor, fasciitis plantaris, onder de voet, hiel pijn, eerste stappen
+? Ik heb pijn onder mijn voet bij de hiel
+? Wat is fasciitis plantaris?
+! Mijn eerste stappen 's ochtends doen zeer onder mijn voet
+! Wat is hielspoor?
+= Pijn onder de hiel, vooral bij de eerste stappen in de ochtend, past bij een overbelaste peesplaat onder je voet (fasciitis plantaris, vaak hielspoor genoemd).
+- Verminder het lopen en loop niet op blote voeten op harde vloeren.
+- Voet- en kuitoefeningen (tenen krullen, kuitheffen) en rollen met een bal kunnen verlichten.
+- Kijk of je schoenen versleten zijn.
+Het herstel duurt vaak weken tot maanden. Bij aanhoudende klachten kan een fysiotherapeut of podotherapeut helpen.
+| soort=arts
+
+# kuit | Kuitkramp of kuitpijn | blessures | kuit, kuiten, kramp, kuitkramp, verrekt, kuitspier
+? Ik krijg kramp in mijn kuit tijdens het lopen
+? Ik heb pijn in mijn kuit, wat moet ik doen?
+! Hoe voorkom ik kramp tijdens het hardlopen?
+! Heb ik mijn kuit verrekt?
+= Kramp komt vaak door vermoeidheid: te snel, langer dan je gewend bent, of warm weer.
+- Ga langzamer of wandel even, en strek je kuit rustig.
+- Loop de opbouw rustiger en doe kuitkracht.
+- Bij warmte en lange runs: drink genoeg en neem wat zout.
+Voelde je een scheut of "zweepslag" midden in je kuit en kun je nauwelijks nog lopen? Dan is het waarschijnlijk een spierscheurtje. Stop, koel en zoek hulp. Een warme, dikke, pijnlijke kuit zonder duidelijke oorzaak: ga direct naar de huisarts.
+| soort=arts
+
+# heup | Pijn in de heup of lies | blessures | heup, lies, heupklachten, bil, piriformis
+? Ik heb pijn in mijn heup tijdens het lopen
+! Wat doe ik bij liespijn?
+! Waarom doet mijn bil pijn na het hardlopen?
+= Klachten in heup, lies of bil komen vaak door overbelasting en zwakke heup- en bilspieren.
+- Verminder het lopen, en vooral het snelle lopen en de heuvels.
+- Kracht voor billen en romp (bruggetje, zijwaarts liggend been heffen, plank) helpt.
+Diepe liespijn die bij elke stap erger wordt, of pijn 's nachts, kan een stressfractuur zijn. Ga dan meteen naar je huisarts. Bij aanhoudende klachten: een fysiotherapeut.
+| soort=arts
+
+# rug | Rugpijn bij lopen | blessures | rug, rugpijn, onderrug, lage rug
+? Ik krijg rugpijn van het hardlopen
+! Is hardlopen goed of slecht voor mijn rug?
+= Voor de meeste mensen is rustig hardlopen goed voor de rug. Krijg je rugpijn tijdens het lopen?
+- Loop rechtop en ontspannen. Kijk vooruit, niet naar beneden.
+- Train je romp en billen (plank, bruggetje, bird-dog).
+- Kijk of je schoenen versleten zijn.
+Bij uitstralende pijn in je been, tintelingen, gevoelloosheid of zwakte: ga naar je huisarts.
+| soort=arts
+
+# enkel | Enkel verzwikt | blessures | enkel, verzwikt, verstuikt, omgeslagen, enkelband
+? Ik heb mijn enkel verzwikt, wanneer kan ik weer lopen?
+! Wat doe ik direct na het verzwikken van mijn enkel?
+= Direct na het verzwikken:
+- Stop met lopen.
+- Koel 10–20 minuten.
+- Leg je been hoog en ondersteun de enkel.
+Kun je na een paar dagen weer normaal wandelen, dan kun je meestal na 1–3 weken rustig opbouwen. Balansoefeningen (op één been staan) helpen tegen opnieuw verzwikken.
+Ga naar de huisarts of de huisartsenpost als je niet kunt staan, de enkel sterk is gezwollen of scheef staat, of de pijn op het bot zit.
+| soort=arts
+
+# blaren | Blaren op je voeten | blessures | blaren, blaar, voeten, sokken, wrijven
+? Hoe voorkom ik blaren tijdens het lopen?
+! Wat doe ik met een blaar?
+= Voorkomen:
+- Draag naadloze, synthetische of merino loopsokken, geen katoen.
+- Kies schoenen die goed passen, met een duimbreed ruimte voor je tenen.
+- Gebruik vaseline of blarenpleisters op plekken die snel wrijven.
+Een blaar: laat hem dicht als dat kan en bescherm hem met een blarenpleister. Een grote, pijnlijke blaar kun je schoon aan de zijkant doorprikken. Laat het vel zitten.
+
+# zwarte-teennagel | Zwarte teennagel | blessures | zwarte nagel, teennagel, blauwe nagel, nagel
+? Waarom krijg ik zwarte teennagels van het hardlopen?
+! Moet ik iets doen met een zwarte teennagel?
+= Een zwarte nagel is een bloeduitstorting onder de nagel. Dat komt door stoten tegen de voorkant van je schoen, vooral bergaf.
+- Kies schoenen met genoeg ruimte voor je tenen, ongeveer een duimbreed.
+- Knip je nagels kort en recht.
+- Strik je veters zo dat je voet niet naar voren schuift.
+Meestal groeit het vanzelf weg. Bij veel pijn, roodheid of pus: ga naar je huisarts.
+
+# schuren | Schuurplekken | blessures | schuren, schaven, schuurplekken, tepels, liezen, oksels
+? Hoe voorkom ik schuurplekken tijdens lange runs?
+! Mijn tepels schuren tijdens het lopen, wat doe ik?
+= - Smeer vaseline of anti-schuurbalsem op de liezen, de binnenkant van je dijen, onder je oksels en op plekken van naden.
+- Plak tepelpleisters of sporttape op je tepels.
+- Draag strakke, synthetische kleding zonder ruwe naden, en geen katoen.
+- Bij warm weer en lange afstanden extra smeren.
+
+# blessure-terug | Terugkomen na een blessure | blessures | na blessure, weer beginnen, opbouwen na blessure, herstel blessure
+? Hoe begin ik weer met lopen na een blessure?
+? Hoe snel mag ik opbouwen na een blessure?
+! Wanneer ben ik hersteld genoeg om weer te lopen?
+= Begin pas weer als je pijnvrij kunt wandelen, hinkelen en een paar keer kunt springen. Volg het advies van je fysiotherapeut als je die hebt.
+- Start met loop-wandel-blokken, bijvoorbeeld 1–2 minuten lopen en 1 minuut wandelen.
+- Neem een dag rust tussen je runs.
+- Ging het goed (geen extra pijn tijdens het lopen en de volgende ochtend)? Dan mag het iets meer.
+- Eerst afstand terugwinnen, pas daarna tempo.
+Kadans heeft een pijntjes-logboek, zodat je ziet of het echt beter gaat.
+| soort=arts
+
+# pijntjes-app | Pijntjes bijhouden in Kadans | app | pijntjes, pijn bijhouden, pijn logboek, notitie pijn
+? Hoe houd ik pijntjes bij in Kadans?
+! Kan ik noteren waar ik pijn had na een run?
+= Ga naar Ik → Pijntjes. Kies de plek en geef aan hoe erg het is (1–10). Zo zie je of iets terugkomt of beter wordt. Kadans stelt ook een korte routine voor bij veelvoorkomende plekken.
+Kadans stelt geen diagnose. Blijft de pijn, of wordt hij erger? Ga dan naar een fysiotherapeut of je huisarts.
+
+# preventie | Blessures voorkomen | blessures | blessure voorkomen, preventie, geblesseerd, overbelasting
+? Hoe voorkom ik blessures bij het hardlopen?
+? Waarom raak ik steeds geblesseerd?
+! Wat zijn de meest voorkomende hardloopblessures?
+= De meeste hardloopblessures zijn overbelasting: te veel, te snel en te vaak. Denk aan scheenbeenklachten, de lopersknie, de achillespees en hielspoor.
+Voorkomen:
+- Bouw rustig op (ongeveer 10% per week) en neem rustweken.
+- Loop het meeste rustig.
+- Doe 2 keer per week kracht (kuiten, billen, romp).
+- Vervang versleten schoenen.
+- Slaap en eet genoeg.
+- Neem pijn die blijft serieus en doe tijdig een stapje terug.
+
+# borst | Pijn op de borst | gezondheid | pijn op de borst, borstpijn, hartkloppingen, duizelig, flauwvallen, benauwd
+? Ik voel pijn op mijn borst tijdens het lopen
+? Ik werd duizelig tijdens het hardlopen
+! Mijn hart slaat soms over tijdens het lopen
+! Ik werd ineens heel benauwd tijdens het rennen
+= Stop meteen met lopen.
+Bij pijn op de borst (drukkend, uitstralend naar arm, kaak of rug), flauwvallen, ernstige benauwdheid of hartkloppingen die niet stoppen: bel 112.
+Hadden de klachten zich al voorgedaan en zijn ze weer weg? Neem dan voor je weer gaat sporten contact op met je huisarts. Ik kan en mag hier geen advies over geven.
+| soort=arts
+
+# astma | Hardlopen met astma | gezondheid | astma, inspanningsastma, piepen, benauwd bij kou, puffer
+? Kan ik hardlopen met astma?
+! Waarom ben ik benauwd als ik in de kou loop?
+= Veel mensen met astma lopen prima, ook op hoog niveau. Bespreek het wel met je huisarts of longarts. Die kan je adviseren over medicatie vooraf.
+- Een lange, rustige warming-up helpt.
+- Bij kou: een buff over je mond en neus maakt de lucht warmer.
+- Neem je puffer mee als je die hebt.
+Word je erg benauwd? Stop dan meteen. Bij ernstige benauwdheid die niet overgaat: 112.
+| soort=arts
+
+# diabetes | Hardlopen met diabetes | gezondheid | diabetes, suikerziekte, insuline, bloedsuiker, hypo
+? Kan ik hardlopen met diabetes?
+! Hoe voorkom ik een hypo tijdens het lopen?
+= Hardlopen kan goed zijn bij diabetes, maar het beïnvloedt je bloedsuiker. Overleg met je huisarts, internist of diabetesverpleegkundige over medicatie, insuline en meten voor en na het lopen.
+Neem altijd snelle suikers mee (druivensuiker), loop bij voorkeur met iemand samen en draag iets waaraan anderen kunnen zien dat je diabetes hebt.
+| soort=arts
+
+# zwanger | Hardlopen tijdens de zwangerschap | gezondheid | zwanger, zwangerschap, baby, na de bevalling, bevallen
+? Mag ik hardlopen als ik zwanger ben?
+! Wanneer mag ik weer lopen na de bevalling?
+= Liep je al voor je zwangerschap? Dan mag je bij een gezonde zwangerschap vaak blijven lopen. Doe het rustiger, op gevoel en zonder te veel hitte. Overleg altijd met je verloskundige of arts.
+Stop bij bloedverlies, buikpijn, duizeligheid, vocht of andere klachten, en neem direct contact op.
+Na de bevalling wordt vaak geadviseerd om minstens 12 weken te wachten met hardlopen, en eerst je bekkenbodem en romp te trainen. Een bekkenfysiotherapeut kan je helpen met opbouwen.
+| soort=arts
+
+# menstruatie | Hardlopen en menstruatie | gezondheid | menstruatie, ongesteld, cyclus, menstruatiecyclus, overgang
+? Kan ik hardlopen als ik ongesteld ben?
+! Heeft mijn cyclus invloed op mijn hardlopen?
+= Ja, dat kan prima. Veel vrouwen merken zelfs dat bewegen buikkrampen verlicht.
+- Je energie kan per fase van je cyclus verschillen. Pas je training daar gerust op aan.
+- Blijft je menstruatie weg door veel trainen en weinig eten? Dat is een signaal om met je huisarts te bespreken (energietekort, RED-S).
+| soort=arts
+
+# kinderen | Kinderen en hardlopen | gezondheid | kinderen, kind, tiener, jeugd, zoon, dochter
+? Hoeveel mag mijn kind hardlopen?
+! Vanaf welke leeftijd mag een kind een 5 km lopen?
+= Voor kinderen moet hardlopen vooral spelen zijn: afwisselend, kort en met plezier.
+- Kinderloopjes van 1–2 km kunnen vanaf ongeveer 6 jaar, op hun eigen tempo.
+- Een 5 km kan vaak vanaf 10–12 jaar, als ze het fijn vinden en er rustig naartoe werken.
+- Geen strakke schema's of zware trainingen. Een atletiekclub met jeugdtrainers is ideaal.
+Kadans is gemaakt voor gebruikers van 16 jaar en ouder.
+
+# medicijnen | Medicijnen en hardlopen | gezondheid | medicijnen, pijnstillers, ibuprofen, paracetamol, bloeddrukpillen
+? Mag ik een pijnstiller nemen voor het hardlopen?
+! Beïnvloeden medicijnen mijn hartslag?
+= Neem geen pijnstillers om door pijn heen te lopen. Pijn is juist een waarschuwing. Ontstekingsremmers zoals ibuprofen vlak voor of tijdens lange inspanning kunnen bovendien je nieren en maag belasten.
+Sommige medicijnen (zoals bètablokkers) verlagen je hartslag. Je hartslagzones kloppen dan niet. Overleg over medicijnen en sport altijd met je huisarts of apotheker.
+| soort=arts
+
+# ijzer | IJzertekort bij lopers | gezondheid | ijzer, ijzertekort, bloedarmoede, ferritine, moe
+? Kan ik door hardlopen een ijzertekort krijgen?
+! Moet ik ijzer slikken als hardloper?
+= Lopers, vooral vrouwen en vegetariërs, hebben meer kans op een laag ijzer. Signalen zijn vermoeidheid, kortademig zijn en slechtere prestaties.
+Slik niet zomaar ijzer: te veel is ook schadelijk. Laat je bloed prikken via je huisarts als je klachten hebt. Eet wel ijzerrijk: vlees, peulvruchten, volkoren, groene groenten, met vitamine C erbij.
+| soort=arts
+
+# hoofdpijn | Hoofdpijn na het lopen | gezondheid | hoofdpijn, migraine, hoofd
+? Waarom krijg ik hoofdpijn na het hardlopen?
+! Wat kan ik doen tegen hoofdpijn na het sporten?
+= Hoofdpijn na het lopen komt vaak door te weinig drinken, warmte, te weinig eten of een gespannen nek en schouders.
+- Drink voor en na het lopen goed, en eet op tijd.
+- Loop in de schaduw of op een koeler moment.
+- Ontspan je schouders tijdens het lopen.
+Een plotselinge, hevige hoofdpijn, of hoofdpijn met misselijkheid, verwarring of uitval: bel 112. Bij steeds terugkerende hoofdpijn: ga naar je huisarts.
+| soort=arts
+
+# misselijk | Misselijk of buikklachten | gezondheid | misselijk, buikpijn, darmen, toilet, diarree, runners trots
+? Ik word misselijk tijdens het hardlopen
+? Ik moet altijd naar de wc tijdens het lopen
+! Hoe voorkom ik maag- en darmklachten tijdens het lopen?
+= - Eet 2–3 uur voor een run geen vette of vezelrijke maaltijd.
+- Probeer minder koffie, zuivel of zoetstoffen voor het lopen, als je daar gevoelig voor bent.
+- Neem gels altijd met water, en oefen ermee op trainingen.
+- Plan een route langs een toilet. Kadans kan toiletten tonen langs je route.
+- Wie te hard start, wordt eerder misselijk.
+Houden de klachten aan, of zit er bloed bij? Ga dan naar je huisarts.
+| soort=arts

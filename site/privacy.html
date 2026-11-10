@@ -32,7 +32,7 @@ th{color:var(--text);background:var(--surface)}
 <main>
 <a class="top" href="./" aria-label="Terug naar Kadans"><img src="kadans-mark.png" alt="" width="34" height="30"><span class="adans"></span></a>
 <h1>Privacyverklaring</h1>
-<p class="meta">Versie 1.6 · laatst bijgewerkt: 6 november 2026</p>
+<p class="meta">Versie 1.7 · laatst bijgewerkt: 10 november 2026</p>
 
 <p>Kadans is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we verzamelen, waarom we dat doen en hoe je je rechten kunt uitoefenen.</p>
 
@@ -53,6 +53,7 @@ th{color:var(--text);background:var(--surface)}
 <tr><td>Afspraken uit je telefoonagenda (alleen als je dat aanzet): begin- en eindtijd</td><td>Om geen loopmoment voor te stellen tijdens een afspraak. Dit blijft op je telefoon en gaat niet naar onze servers. De titels lezen we niet.</td></tr>
 <tr><td>Runs uit Strava (alleen als je Strava koppelt)</td><td>Om je runs automatisch toe te voegen. Ontkoppel je Strava, dan verwijderen we deze runs.</td></tr>
 <tr><td>Vragen aan de coach en de antwoorden</td><td>Om je persoonlijk trainingsadvies te geven en het gesprek te onthouden. Je kunt het gesprek altijd wissen.</td></tr>
+<tr><td>Vragen waar de coach nog geen antwoord op had (los van je account, zonder naam)</td><td>Om de kennis van de coach aan te vullen. We bewaren ze maximaal 90 dagen. Komt het antwoord van de AI, dan bewaren we een algemene versie zonder persoonsgegevens in de kennis van de coach, zodat andere lopers met dezelfde vraag hetzelfde antwoord krijgen.</td></tr>
 <tr><td>Abonnementsstatus</td><td>Om te weten of je Premium hebt. Betalingen lopen via Google Play; wij zien geen betaalgegevens.</td></tr>
 <tr><td>Foutmeldingen (technische gegevens: wat er misging, appversie, Android of iOS)</td><td>Om fouten in de app op te sporen en op te lossen. We bewaren ze maximaal 60 dagen.</td></tr>
 <tr><td>Runs die je in Kadans opneemt (GPS-spoor, afstand, tijd, hoogte en eventueel hartslag per meetpunt)</td><td>Om je run op te slaan, aan je routes te koppelen en je tijden per kilometer, grafieken en trainingen te berekenen.</td></tr>
@@ -91,7 +92,7 @@ th{color:var(--text);background:var(--surface)}
 <ul>
 <li><strong>Supabase</strong> – slaat je account en gegevens op, op servers in de EU.</li>
 <li><strong>Open-Meteo</strong> en <strong>Buienradar</strong> – leveren het weer en de buien. Daarvoor sturen we alleen afgeronde coördinaten (zonder naam of e-mailadres).</li>
-<li><strong>Anthropic</strong> – levert de AI achter de coach. Als je een vraag stelt of om een analyse van een run vraagt, sturen we je vraag, je voornaam en een samenvatting van je runs (inclusief relevante data) om een persoonlijk antwoord te geven.</li>
+<li><strong>Anthropic</strong> – levert de AI achter de coach. De meeste vragen beantwoordt de coach zelf uit de eigen kennis, zonder AI. Alleen als een vraag daar nog niet in staat, of als je om een analyse van een run vraagt, sturen we je vraag, je voornaam en een samenvatting van je runs (inclusief relevante data) om een persoonlijk antwoord te geven.</li>
 <li><strong>Strava</strong> – alleen als je Strava koppelt, om je runs op te halen. Zet je "Eigen runs naar Strava" aan (of tik je bij een run op "Naar Strava sturen"), dan sturen we die run (tijd, afstand, route, hoogte, hartslag en cadans) naar je eigen Strava-account.</li>
 <li><strong>Mapillary</strong> (Meta) – straatfoto's langs je route. Onze server stuurt een paar punten van de route (zonder je naam of account) om foto's in de buurt te zoeken.</li>
 <li><strong>Open-Meteo</strong> – hoogtekaart: om de hoogtemeters van je opgenomen runs te verbeteren sturen we punten van je spoor (zonder naam of account).</li>
