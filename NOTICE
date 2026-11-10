@@ -4,3 +4,5 @@ uitgegeven onder de Apache License 2.0 (https://www.apache.org/licenses/LICENSE-
 - hoogtemeters uit de barometer (lib/domain/barometer.dart)
 - uitlezen van Bluetooth-loopsensoren (lib/domain/stride_sensor.dart)
 De code is opnieuw geschreven in Dart en aangepast.
+
+Caveat (assets/fonts/Caveat.ttf): Copyright 2014 The Caveat Project Authors, SIL Open Font License 1.1 (assets/fonts/Caveat-OFL.txt).

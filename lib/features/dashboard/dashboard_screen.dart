@@ -4,10 +4,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/voice_shortcut.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
@@ -693,11 +695,11 @@ class _ResultsState extends State<_Results> {
                 lon: widget.planner.forecast.longitude,
               ),
             ),
-            // Wolkje gluurt over de kaart, in de bui van het weer van nu.
+            // Wolkje gluurt over de kaart (bui = weer van nu), met een handgeschreven pijl; tik = naar de coach.
             Positioned(
               right: 18,
-              top: -40,
-              child: IgnorePointer(child: Wolkje(size: 52, mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather))),
+              top: -96,
+              child: _AskWolkje(mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather)),
             ),
           ]),
         ),
@@ -1549,7 +1551,6 @@ class _TodayScene extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
                 Expanded(child: Text(subLine.toUpperCase(), maxLines: 2, style: SectionLabel.style(color: white.withValues(alpha: 0.8)).copyWith(fontSize: 10.5))),
-                CoachButton(color: white),
                 MeButton(color: white),
               ]),
               const SizedBox(height: 14),
@@ -1795,4 +1796,89 @@ class _WeekRow extends ConsumerWidget {
       }),
     ]);
   }
+}
+
+/// "vraag het Wolkje → tik hier" in handschrift, met een getekende pijl naar Wolkje. Het hele vlak gaat naar de coach.
+class _AskWolkje extends StatelessWidget {
+  const _AskWolkje({required this.mood});
+  final WolkjeMood mood;
+
+  static const _goud = Color(0xFFD9BF92);
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        label: tr('Vraag het Wolkje, je coach'),
+        excludeSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            context.go('/coach');
+          },
+          child: SizedBox(
+            width: 250,
+            height: 100,
+            child: Stack(children: [
+              Positioned(
+                left: 0,
+                top: 4,
+                child: Transform.rotate(
+                  angle: -0.07,
+                  child: Text(
+                    '${tr('vraag het Wolkje')}\n→ ${tr('tik hier')}',
+                    style: const TextStyle(
+                      fontFamily: 'Caveat',
+                      fontVariations: [FontVariation('wght', 700)],
+                      fontSize: 25,
+                      height: 1.0,
+                      color: _goud,
+                      shadows: [Shadow(color: Color(0x66000000), blurRadius: 6)],
+                    ),
+                  ),
+                ),
+              ),
+              const Positioned.fill(child: CustomPaint(painter: _HandArrowPainter(_goud))),
+              Positioned(right: 0, bottom: 0, child: Wolkje(size: 52, mood: mood)),
+            ]),
+          ),
+        ),
+      );
+}
+
+/// Getekende pijl (variant B van het ontwerp): golvend en dan omlaag naar Wolkje.
+class _HandArrowPainter extends CustomPainter {
+  const _HandArrowPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final schaduw = Paint()
+      ..color = const Color(0x55000000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    final lijn = Path()
+      ..moveTo(112, 50)
+      ..cubicTo(132, 62, 150, 40, 170, 48)
+      ..cubicTo(182, 53, 188, 59, 194, 66);
+    final punt = Path()
+      ..moveTo(184, 63)
+      ..lineTo(195, 67)
+      ..lineTo(196, 55);
+    for (final path in [lijn, punt]) {
+      canvas.drawPath(path, schaduw);
+      canvas.drawPath(path, p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_HandArrowPainter old) => old.color != color;
 }
