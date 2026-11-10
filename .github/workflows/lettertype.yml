@@ -1,0 +1,23 @@
+# Eenmalig: haalt het handschrift-lettertype Caveat (OFL) op uit google/fonts en zet het in assets/fonts.
+name: Lettertype ophalen
+on:
+  push:
+    branches: [ai-coach]
+    paths: [".github/workflows/lettertype.yml"]
+permissions:
+  contents: write
+jobs:
+  halen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p assets/fonts
+          curl -fsSL -o assets/fonts/Caveat.ttf "https://github.com/google/fonts/raw/main/ofl/caveat/Caveat%5Bwght%5D.ttf"
+          curl -fsSL -o assets/fonts/Caveat-OFL.txt "https://github.com/google/fonts/raw/main/ofl/caveat/OFL.txt"
+          file assets/fonts/Caveat.ttf
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add assets/fonts/Caveat.ttf assets/fonts/Caveat-OFL.txt
+          git commit -m "Lettertype Caveat (OFL) toegevoegd [skip ci]" || echo "niets te doen"
+          git push
