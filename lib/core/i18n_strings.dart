@@ -2,6 +2,7 @@
 
 /// Nederlandse tekst → [Engels, Duits, Frans, Spaans].
 const kTranslations = <String, List<String>>{
+  'Wolkje, je coach': ['Cloudy, your coach', 'Wölkchen, dein Coach', 'Nuage, ton coach', 'Nubecita, tu coach'],
   'Uit de Kadans-kennis': ['From the Kadans knowledge base', 'Aus dem Kadans-Wissen', 'Issu des connaissances Kadans', 'Del conocimiento de Kadans'],
   'Uit je logboek': ['From your log', 'Aus deinem Logbuch', 'Issu de ton journal', 'De tu registro'],
   'Opgezocht door de AI-coach': ['Looked up by the AI coach', 'Vom KI-Coach nachgeschlagen', 'Recherché par le coach IA', 'Consultado por el coach de IA'],

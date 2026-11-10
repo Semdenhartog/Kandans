@@ -11,6 +11,7 @@ import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../shared/confetti.dart';
 import '../../shared/widgets.dart';
+import '../../shared/art/wolkje.dart';
 
 /// Eén nieuw record: afstand, tijd en (als bekend) de vorige beste tijd.
 typedef RecordWin = ({String label, double meters, double seconds, double? previous});
@@ -174,7 +175,7 @@ class _RecordCard extends StatelessWidget {
           Text(Fmt.dateLong(date), style: TextStyle(color: light.withValues(alpha: 0.7), fontSize: 12)),
         ]),
         const Spacer(),
-        const Icon(Icons.emoji_events, color: gold, size: 44),
+        const Wolkje(size: 72, mood: WolkjeMood.blij),
         const SizedBox(height: 8),
         Text(tr('Persoonlijk record'), style: TextStyle(color: light.withValues(alpha: 0.85), fontSize: 16, fontWeight: FontWeight.w600)),
         Text(main.label,
