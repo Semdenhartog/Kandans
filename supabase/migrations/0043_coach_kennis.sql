@@ -137,7 +137,7 @@ begin
   return new;
 end $$;
 drop trigger if exists coach_kennis_lex on public.coach_kennis;
-create trigger coach_kennis_lex before insert or update on public.coach_kennis
+create trigger coach_kennis_lex before insert or update of onderwerp, categorie, antwoord, actie, soort, trefwoorden, actief on public.coach_kennis
   for each row execute function public._coach_kennis_lex();
 
 create or replace function public._coach_is_admin()
