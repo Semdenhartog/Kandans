@@ -5,6 +5,9 @@ Sleutel = de Nederlandse tekst precies zoals in de code (met \\n als regeloverga
 """
 
 T = {
+    'Vraag het Wolkje, je coach': ('Ask Cloudy, your coach', 'Frag Wölkchen, deinen Coach', 'Demande à Nuage, ton coach', 'Pregunta a Nubecita, tu coach'),
+    'vraag het Wolkje': ('ask Cloudy', 'frag Wölkchen', 'demande à Nuage', 'pregunta a Nubecita'),
+    'tik hier': ('tap here', 'hier tippen', 'touche ici', 'toca aquí'),
     'Wolkje, je coach': ('Cloudy, your coach', 'Wölkchen, dein Coach', 'Nuage, ton coach', 'Nubecita, tu coach'),
     'Uit de Kadans-kennis': ('From the Kadans knowledge base', 'Aus dem Kadans-Wissen', 'Issu des connaissances Kadans', 'Del conocimiento de Kadans'),
     'Uit je logboek': ('From your log', 'Aus deinem Logbuch', 'Issu de ton journal', 'De tu registro'),

@@ -187,7 +187,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - **Wolkje (10-11, mascotte/coach, Sems keuze uit ±27 opties op Design-canvas "Kadans – mascotte Haas (voorbeeld)"):**
   `shared/art/wolkje.dart` (pixel 18×16, gouden rand, vaste kleuren in licht én donker; buien `WolkjeMood` gewoon/regen/zon/wind/nacht/koud/blij/denkt,
   `wolkjeVoorWeer(HourWeather)`, wipt via Timer, stil bij disableAnimations). Staat in: Vandaag (gluurt over advieskaart, weer van nu),
-  coach-avatar `_CoachMark`, `CoachButton`, lege schermen (`EmptyArt`), recordkaart (blij). Test `test/wolkje_test.dart`.
+  coach-avatar `_CoachMark`, `CoachButton` (niet meer in de Vandaag-scène), handgeschreven "vraag het Wolkje → tik hier" + getekende pijl (`_AskWolkje`, lettertype Caveat OFL) → /coach, lege schermen (`EmptyArt`), recordkaart (blij). Test `test/wolkje_test.dart`.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;

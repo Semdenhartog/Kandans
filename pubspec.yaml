@@ -84,6 +84,10 @@ flutter:
     - family: KadansMono
       fonts:
         - asset: assets/fonts/DejaVuSansMono.ttf
+    # Handschrift voor de pijl naar Wolkje op Vandaag. Caveat, OFL (Caveat-OFL.txt), variabel lettertype (wght 400–700).
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat.ttf
 
 # App-icoon (wordt in de cloudbuild gemaakt met: dart run flutter_launcher_icons)
 flutter_launcher_icons:
