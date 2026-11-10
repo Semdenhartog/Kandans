@@ -51,7 +51,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Foto's (7-11): zes gratis Unsplash-foto's in `site/foto/` (warm bijgekleurd;
   heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Bovenbalk scrolt op mobiel mee weg (8-11). Desktop en mobiel apart ingedeeld (7-11): desktop = hangende hero-telefoon, vlakken 01–03 over de mistfoto, § -labels; mobiel (≤900px) = compacter, vlakken/nieuws/tweeluik veegbaar, vaste wachtlijstknop `#ctabar`, tellende cijfers `[data-count]`. Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0041b** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0042b** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg; 0042 = `race_calendar` (wedstrijdkalender, alleen lezen voor ingelogden); 0042b = pg_cron + pg_net, nachtelijke import 04:17 via `private.start_race_import()` met eenmalige code, log in `private.race_import_runs`). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -168,6 +168,14 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `routes/run_paths_layer.dart`, `PoiService.runPaths`, vak 0,03°, 30 dagen bewaard, knop `RunPathsButton`, standaard aan) in LiveTrackMap en DrawRouteMap.
   Opnemen vóór start = kaart + `_GpsPill` (bij < 300 px ruimte de oude compacte weergave). Runoverzicht: grote kaart gekleurd op tempo
   (`coloredRunSegments` + `PaceLegend` in `splits_card.dart`). Wedstrijdkalender: nog geen bron; mail om toestemming (running.life/Atletiekunie) ligt bij Sem.
+- **Wedstrijdkalender (10-11):** bron = officiële bekendmakingen van gemeenten (KOOP SRU, CC-0). Functie `race-import`
+  (`_shared/race_import.ts` + test, `--no-verify-jwt`, controleert eenmalige code) filtert titels, leest naam/datum uit
+  (met `ANTHROPIC_API_KEY` via Haiku; zonder sleutel `heuristicRaces`, en dan níét als gezien markeren), RD→GPS, gemeente via PDOK,
+  dubbelingen samen (`mergeRows`/`sameRace`), status nooit omlaag. Met de hand: `select private.start_race_import();`.
+  App: `domain/race_calendar.dart`, `data/services/race_calendar_service.dart` (12 u cache, afstand via `weatherLocationProvider`),
+  `community/race_calendar_ui.dart` (`RacesStrip` in Samen onder clubevenementen, `RaceCalendarScreen` met straal/soort,
+  `RaceDetailScreen` → `AddRaceScreen(initialName/Date/Km)`); header = PDOK-luchtfoto van de start (`AerialHeader`), terugval eigen foto.
+  Verbergen van een foute wedstrijd: `update race_calendar set hidden = true where key = …`.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -213,8 +221,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Play Console → privacy-URL https://kadans.fit/privacy.html en verwijder-URL https://kadans.fit/verwijderen.html invullen.
 - kadans.fit: auto-verlengen uit bij Namecheap ($45,98/jr); rond sept 2027 verhuizen naar Porkbun (± $26/jr).
 - Instagram: link in bio zetten (via telefoon) en de oude €600-giveaway-posts archiveren.
+- Supabase-geheim `ANTHROPIC_API_KEY` zetten (coach én betere wedstrijdherkenning).
 - Google Cloud: project + betalen (budgetgrens €1) + "Cloud Text-to-Speech API" aan + API-sleutel (alleen die API) → Supabase-geheim `GOOGLE_TTS_KEY`.
 - Play Console → gegevensveiligheid: stappen en profielfoto's toevoegen.
+- Testen op telefoon (nieuw 10-11): Samen → Wedstrijden in de buurt (luchtfoto's, afstand), Wedstrijdkalender filters, Zet in Mijn wedstrijden.
 - Testen op telefoon (nieuw 9-11 nacht): clubagenda koppelen (iCal-link van je club), evenementenrij in Samen, startkaart bij Opnemen (GPS-status, looppaden aan/uit), donkere kaart, tempokleuren in runoverzicht.
 - Testen op telefoon (nieuw 8-11 middag): nieuwe rondleiding (wis app-gegevens of Ik → Hulp), locatie op stap 5, ledenkaart-animatie.
 - Testen op telefoon (nieuw 8-11): sfeerfoto op Vandaag (licht/donker, mist), opnamescherm rustiger, badgekleuren, ledenkaart met grote getallen.
