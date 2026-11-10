@@ -1,4 +1,5 @@
 # Eenmalig: haalt het handschrift-lettertype Caveat (OFL) op uit google/fonts en zet het in assets/fonts.
+# (Draait één keer bij een push van dit bestand naar ai-coach.)
 name: Lettertype ophalen
 on:
   push:
