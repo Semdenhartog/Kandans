@@ -111,8 +111,14 @@ export function statusOf(r: SruRecord): Status {
 
 export const STATUS_RANK: Record<Status, number> = { aangevraagd: 0, melding: 1, verleend: 2 };
 
-export function kindOf(name: string, title: string): Kind {
-  const s = `${name} ${title}`.toLowerCase();
+/** Soort uit de naam; alleen als de naam niets zegt én de titel over één wedstrijd gaat, uit de titel. */
+export function kindOf(name: string, title: string, single = true): Kind {
+  const own = kindFrom(name);
+  return own !== "loop" || !single ? own : kindFrom(`${name} ${title}`);
+}
+
+function kindFrom(text: string): Kind {
+  const s = text.toLowerCase();
   if (/halve marathon|halve van|\bhalve\b/.test(s)) return "halve";
   if (/marathon/.test(s)) return "marathon";
   if (/trail|ultra/.test(s)) return "trail";
@@ -273,7 +279,7 @@ const STOP = new Set(["voor", "het", "aanvraag", "vergunning", "evenementenvergu
 
 /** Te algemene naam ("Halve Marathon", "Trailrun"): plaats erachter. */
 export function withPlace(name: string, place: string | null): string {
-  const generic = /^(de |het )?(halve marathon|marathon|trail ?run|trail|cross|loop|run|stratenloop|hardloopwedstrijd|veldloop|bosloop)$/i;
+  const generic = /^(de |het )?(halve marathon|marathon|trail ?run|trail|ultra trail|urban trail|cross|cross country|loop|run|stratenloop|hardloopwedstrijd|veldloop|bosloop|santa run|rotary santa run|night run|color run|kerstloop|kerstcross|kerst run|nieuwjaarsloop|oliebollenloop)$/i;
   return generic.test(name.trim()) && place ? `${name.trim()} ${place}` : name;
 }
 
@@ -283,6 +289,8 @@ function cleanName(n: string): string {
     n = n.toLowerCase().replace(/(^|\s)(\p{L})/gu, (_m, a, b) => a + b.toUpperCase());
   }
   return n
+    .replace(/\.\s+[A-Z].*$/, "") // afgebroken zin ("Hang-On Run. Voor …")
+    .replace(/^\d{1,2}-\d{1,2}-(20\d\d)?\s*/, "") // datum vooraan ("22-11-2026 Maisplak cross")
     .replace(/\s+/g, " ")
     .replace(/\b20\d\d\b/g, "")
     .replace(/^(de|het)\s+/i, (m) => m) // lidwoord mag blijven ("de Halve van Ell")
@@ -339,4 +347,43 @@ function nameAround(text: string): string | null {
 function capitalsBeforeDate(part: string): string | null {
   const m = part.match(/((?:[A-Z][\w'’-]+\s){1,3})\d{1,2}[\s-]/);
   return m ? m[1].trim() : null;
+}
+
+/** Lijkt het op dezelfde wedstrijd (tikfout of extra woord in een andere publicatie)? */
+export function sameRace(a: string, b: string): boolean {
+  const n = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "");
+  const x = n(a), y = n(b);
+  if (!x || !y) return false;
+  if (x.includes(y) || y.includes(x)) return true;
+  return levenshtein(x, y) <= Math.max(1, Math.floor(Math.min(x.length, y.length) / 8));
+}
+
+function levenshtein(a: string, b: string): number {
+  const d = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = d[0];
+    d[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = d[j];
+      d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return d[b.length];
+}
+
+/** Voegt dubbelingen samen: zelfde datum en gemeente, vergelijkbare naam. Houdt de hoogste status en de
+ *  langste naam (meestal de volledigste). */
+export function mergeRows(rows: RaceRow[]): RaceRow[] {
+  const out: RaceRow[] = [];
+  for (const r of [...rows].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status] || b.name.length - a.name.length)) {
+    const twin = out.find((o) => o.race_date === r.race_date && o.municipality === r.municipality && sameRace(o.name, r.name));
+    if (!twin) {
+      out.push(r);
+      continue;
+    }
+    if (twin.lat == null && r.lat != null) (twin.lat = r.lat), (twin.lon = r.lon);
+    if (r.name.length > twin.name.length) twin.name = r.name; // tikfout in de bron: de volledigste naam
+  }
+  return out;
 }

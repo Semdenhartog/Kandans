@@ -11,7 +11,7 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import {
-  extractionPrompt, heuristicRaces, isCandidate, kindOf, parseExtraction, parseSru, pointFromWkt, raceKey, withPlace,
+  extractionPrompt, heuristicRaces, isCandidate, kindOf, parseExtraction, mergeRows, parseSru, sameRace, pointFromWkt, raceKey, withPlace,
   type RaceRow, sruUrl, STATUS_RANK, statusOf, type SruRecord,
 } from "../_shared/race_import.ts";
 
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
           place: race.place ?? null,
           lat: point?.lat ?? null,
           lon: point?.lon ?? null,
-          kind: kindOf(race.name, r.title),
+          kind: kindOf(race.name, r.title, races.length === 1),
           status: statusOf(r),
           source_id: r.id,
           source_url: r.url,
@@ -133,6 +133,21 @@ Deno.serve(async (req) => {
         if (!prev || STATUS_RANK[row.status] > STATUS_RANK[prev.status]) rows.set(key, row);
       }
     }
+
+    // Dubbelingen samenvoegen (zelfde dag en gemeente, vergelijkbare naam), ook met wat er al staat.
+    const { data: same } = await db.from("race_calendar").select("key,name,race_date,municipality,status")
+      .in("race_date", [...new Set([...rows.values()].map((r) => r.race_date))]);
+    for (const e of same ?? []) {
+      for (const [k, r] of rows) {
+        if (k !== e.key && r.race_date === e.race_date && r.municipality === e.municipality && sameRace(r.name, e.name)) {
+          rows.delete(k);
+          rows.set(e.key, { ...r, key: e.key, name: e.name.length >= r.name.length ? e.name : r.name });
+        }
+      }
+    }
+    const merged = mergeRows([...rows.values()]);
+    rows.clear();
+    for (const r of merged) rows.set(r.key, r);
 
     // Bestaande rijen: status nooit omlaag (een verlening blijft een verlening), plek alleen aanvullen.
     const keys = [...rows.keys()];

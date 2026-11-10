@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import {
   dateInTitle, heuristicExtract, heuristicRaces, isCandidate, withPlace, kindOf, parseExtraction, parseSru, pointFromWkt, raceKey, rdToWgs84,
-  statusOf, type SruRecord,
+  statusOf, type SruRecord, sameRace, mergeRows, type RaceRow,
 } from "./race_import.ts";
 
 const rec = (title: string, type = "evenementenvergunning", geometry: string | null = null): SruRecord => ({
@@ -104,5 +104,17 @@ assert.deepEqual(
 assert.deepEqual(names("Ontvangen aanvraag vergunning, het organiseren van hardloopevenement op 8 november 2026, Voorhof 2"), []);
 assert.equal(withPlace("Halve Marathon", "Nieuwkoop"), "Halve Marathon Nieuwkoop");
 assert.equal(withPlace("Oosterbos Trailrun", "Emmen"), "Oosterbos Trailrun");
+
+assert.equal(kindOf("Mosselloop", "… Halve marathon …", false), "loop");
+assert.equal(kindOf("Run Scherpenzeel", "hardloopevenement halve marathon", true), "halve");
+assert.ok(sameRace("Amersfoort Night Run", "Amersoort Night Run"));
+assert.ok(sameRace("Olympisch Stadionloop", "de Olympisch Stadionloop"));
+assert.ok(!sameRace("Santa Run Gouda", "Night Run Gouda"));
+assert.deepEqual(names("Aanvraag evenementenvergunning Hang-On Run. Voor meer info op 21 november 2026"), ["Hang-On Run|2026-11-21"]);
+const row = (name: string, status: "aangevraagd" | "verleend"): RaceRow => ({ key: name, name, race_date: "2026-11-13", municipality: "Amersfoort", place: null, lat: 1, lon: 1, kind: "loop", status, source_id: "x", source_url: "u", source_title: "t", published: "2026-11-01" });
+const m = mergeRows([row("Amersfoort Night Run", "aangevraagd"), row("Amersoort Night Run", "verleend")]);
+assert.equal(m.length, 1);
+assert.equal(m[0].status, "verleend");
+assert.equal(m[0].name, "Amersfoort Night Run");
 
 console.log("race_import: alle tests geslaagd");
