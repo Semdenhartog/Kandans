@@ -11,7 +11,7 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import {
-  extractionPrompt, heuristicExtract, isCandidate, kindOf, parseExtraction, parseSru, pointFromWkt, raceKey,
+  extractionPrompt, heuristicRaces, isCandidate, kindOf, parseExtraction, parseSru, pointFromWkt, raceKey, withPlace,
   type RaceRow, sruUrl, STATUS_RANK, statusOf, type SruRecord,
 } from "../_shared/race_import.ts";
 
@@ -55,10 +55,7 @@ async function extract(items: SruRecord[]): Promise<Map<number, { name: string; 
   const out = new Map<number, { name: string; date: string | null; place?: string | null }[]>();
   const key = env("ANTHROPIC_API_KEY");
   if (!key) {
-    items.forEach((r, i) => {
-      const h = heuristicExtract(r.title);
-      out.set(i, h ? [h] : []);
-    });
+    items.forEach((r, i) => out.set(i, heuristicRaces(r.title)));
     return out;
   }
   for (let from = 0; from < items.length; from += 40) {
@@ -75,10 +72,7 @@ async function extract(items: SruRecord[]): Promise<Map<number, { name: string; 
     }).catch(() => null);
     if (!res?.ok) {
       // AI even niet bereikbaar: deze reeks met de strenge reserve.
-      batch.forEach((b) => {
-        const h = heuristicExtract(b.title);
-        out.set(b.i, h ? [h] : []);
-      });
+      batch.forEach((b) => out.set(b.i, heuristicRaces(b.title)));
       continue;
     }
     const result = await res.json();
@@ -117,6 +111,7 @@ Deno.serve(async (req) => {
       const r = fresh[i];
       for (const race of races) {
         if (!race.date || race.date < today()) continue; // zonder datum of al geweest: niet tonen
+        race.name = withPlace(race.name, race.place ?? r.municipality);
         const key = raceKey(race.name, race.date);
         const point = pointFromWkt(r.geometry) ?? (await municipalityPoint(r.municipality));
         const row: RaceRow = {
@@ -152,7 +147,9 @@ Deno.serve(async (req) => {
       const { error } = await db.from("race_calendar").upsert([...rows.values()].map((r) => ({ ...r, updated_at: new Date().toISOString() })));
       if (error) throw new Error(error.message);
     }
-    if (fresh.length) await db.rpc("race_import_mark_seen", { p_ids: fresh.map((r) => r.id) });
+    // Alleen als de AI meelas als 'gezien' markeren: zonder AI elke nacht opnieuw (kost niets), zodat alles
+    // alsnog netjes wordt uitgelezen zodra ANTHROPIC_API_KEY er staat.
+    if (fresh.length && env("ANTHROPIC_API_KEY")) await db.rpc("race_import_mark_seen", { p_ids: fresh.map((r) => r.id) });
     const summary = { since, found: records.length, new_publications: fresh.length, races: rows.size, ai: !!env("ANTHROPIC_API_KEY") };
     console.log(JSON.stringify({ race_import: summary }));
     await db.rpc("race_import_log", { p_summary: summary });

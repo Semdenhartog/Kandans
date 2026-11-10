@@ -224,9 +224,119 @@ export function dateInTitle(title: string): string | null {
   return null;
 }
 
-/** Zonder AI: alleen titels met een naam tussen aanhalingstekens én een datum. Liever niets dan onzin. */
+/** Zonder AI: naam tussen aanhalingstekens, of de eigen naam rond een hardloopwoord (Oosterbos Trailrun,
+ *  Halve Marathon Zoetermeer, Heide en Heuvel trailrun). Per stukje titel met een datum; een titel met een
+ *  lijst ("Samancross 23 januari 2027, Mosselloop 6 november 2027") geeft meerdere wedstrijden.
+ *  Liever niets dan onzin: zonder datum of zonder herkenbare naam geen wedstrijd. */
+export function heuristicRaces(title: string): { name: string; date: string }[] {
+  const out: { name: string; date: string }[] = [];
+  const seen = new Set<string>();
+  const add = (name: string | null, date: string | null) => {
+    if (!name || !date) return;
+    const n = cleanName(name);
+    if (n.length < 3 || seen.has(n.toLowerCase() + date)) return;
+    seen.add(n.toLowerCase() + date);
+    out.push({ name: n, date });
+  };
+  // Datums van ontvangst of indiening zijn geen wedstrijddatum.
+  title = title
+    .replace(/\b(ontvangen|ingediend|ontvangst|bekendgemaakt)( op)? \d{1,2}[- ][\wé]+[- ]20\d\d/gi, "$1")
+    .replace(/\bop \d{1,2}-\d{1,2}-20\d\d \d\d:\d\d hebben wij/gi, "")
+    .replace(/\b\d{1,2}-\d{1,2}-20\d\d 00:00\b/g, ""); // tijdstip van ontvangst
+  const quoted = title.match(/(?:^|[\s(:,])[‘'"“]{1,2}([^’'"”]{3,60})[’'"”]{1,2}/)?.[1] ?? null;
+  const dates = [...title.matchAll(DATE_ANY)].length;
+  if (dates > 1) {
+    // Meerdere datums: per stukje (lijst met wedstrijden).
+    for (const part of title.split(/[,;]|\s+en\s+/)) {
+      const d = dateInTitle(part);
+      if (!d) continue;
+      add(nameAround(part) ?? capitalsBeforeDate(part), d);
+    }
+    if (out.length) return out;
+  }
+  add(quoted ?? nameAround(title), dateInTitle(title));
+  return out;
+}
+
+/** @deprecated gebruik heuristicRaces */
 export function heuristicExtract(title: string): { name: string; date: string } | null {
-  const date = dateInTitle(title);
-  const name = title.match(/[‘'"“]([^’'"”]{3,60})[’'"”]/)?.[1]?.trim();
-  return date && name ? { name: name.replace(/\s+20\d\d$/, ""), date } : null;
+  return heuristicRaces(title)[0] ?? null;
+}
+
+const DATE_ANY = /\b\d{1,2}(?:\s+(?:januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sept?|okt|nov|dec)\.?\s+|-\d{1,2}-)20\d\d\b/gi;
+
+const GENERIC = /^(hardloopwedstrijd(en)?|hardloopevenement(en)?|loopwedstrijd(en)?|hardlopen|evenement|wedstrijd)$/i;
+const RUN_WORD = /(loop|run|trail|trailrun|cross|marathon|ultra)$/i;
+const CONNECT = new Set(["en", "van", "de", "der", "den", "het", "&", "'s"]);
+const CONNECT_FWD = new Set(["for", "the", "of", "van", "de", "der", "en", "&", "aan", "zee"]);
+const STOP = new Set(["voor", "het", "aanvraag", "vergunning", "evenementenvergunning", "toestemming", "melding", "organiseren", "houden"]);
+
+/** Te algemene naam ("Halve Marathon", "Trailrun"): plaats erachter. */
+export function withPlace(name: string, place: string | null): string {
+  const generic = /^(de |het )?(halve marathon|marathon|trail ?run|trail|cross|loop|run|stratenloop|hardloopwedstrijd|veldloop|bosloop)$/i;
+  return generic.test(name.trim()) && place ? `${name.trim()} ${place}` : name;
+}
+
+function cleanName(n: string): string {
+  // ALLEMAAL HOOFDLETTERS → Gewone Hoofdletters.
+  if (n === n.toUpperCase() && /[A-Z]{3}/.test(n)) {
+    n = n.toLowerCase().replace(/(^|\s)(\p{L})/gu, (_m, a, b) => a + b.toUpperCase());
+  }
+  return n
+    .replace(/\s+/g, " ")
+    .replace(/\b20\d\d\b/g, "")
+    .replace(/^(de|het)\s+/i, (m) => m) // lidwoord mag blijven ("de Halve van Ell")
+    .replace(/[\s,.:;–-]+$/g, "")
+    .trim();
+}
+
+const isCap = (w: string) => /^[A-Z0-9ÀÉÈËÏÖÜ]/.test(w);
+
+/** Eigen naam rond het eerste niet-generieke hardloopwoord. */
+function nameAround(text: string): string | null {
+  // Aanhalingstekens alleen aan woordranden weg ("Voorne’s" blijft heel).
+  const words = text.replace(/[()]/g, " ").replace(/(^|\s)[‘’'"“”]+|[‘’'"“”]+(?=[\s,.:;]|$)/g, "$1 ").split(/\s+/).filter(Boolean);
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i].replace(/[,.:;!?]+$/, "");
+    if (!RUN_WORD.test(w) || GENERIC.test(w) || /hardloop/i.test(w)) continue;
+    // Ervoor: hoofdletterwoorden (met verbindingswoordjes ertussen), hooguit 5.
+    let a = i;
+    while (a > 0 && i - a < 5) {
+      const prev = words[a - 1].replace(/[,.:;]+$/, "");
+      if (STOP.has(prev.toLowerCase()) || /[,:;]$/.test(words[a - 1])) break;
+      if (isCap(prev)) a--;
+      else if (CONNECT.has(prev.toLowerCase()) && a - 2 >= 0 && isCap(words[a - 2])) a -= 2;
+      else break;
+    }
+    // Erna: hooguit 3 hoofdletterwoorden (Halve Marathon Zoetermeer), geen jaartal of straat met nummer.
+    let b = i;
+    while (b + 1 < words.length && b - i < 4 && !/[,:;]$/.test(words[b])) {
+      const next = words[b + 1].replace(/[,.:;]+$/, "");
+      if (CONNECT_FWD.has(next.toLowerCase())) {
+        // Eén of meer verbindingswoordjes, dan een hoofdletterwoord ("Cross for the Crocus").
+        let k = b + 1;
+        while (k < words.length && CONNECT_FWD.has(words[k].toLowerCase()) && k - b <= 2) k++;
+        if (k < words.length && isCap(words[k]) && !/^\d/.test(words[k])) {
+          b = k;
+          continue;
+        }
+        break;
+      }
+      if (!isCap(next) || /^\d/.test(next) || /^(Op|Aan|Te|In)$/.test(next)) break;
+      b++;
+    }
+    // Kleingeschreven los hardloopwoord ("loop Achtje van Atledo"): het woord zelf is geen deel van de naam.
+    if (a === i && !isCap(w) && !/\w{4,}(loop|run|cross|trail)$/i.test(w)) {
+      if (b === i) continue;
+      return words.slice(i + 1, b + 1).join(" ").replace(/[,.:;]+$/, "");
+    }
+    return words.slice(a, b + 1).join(" ").replace(/[,.:;]+$/, "");
+  }
+  return null;
+}
+
+/** Hoofdletterwoord(en) direct vóór de datum ("… Bombokaal 21 juli 2027"). */
+function capitalsBeforeDate(part: string): string | null {
+  const m = part.match(/((?:[A-Z][\w'’-]+\s){1,3})\d{1,2}[\s-]/);
+  return m ? m[1].trim() : null;
 }

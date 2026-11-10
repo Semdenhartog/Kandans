@@ -1,7 +1,7 @@
 // node --experimental-strip-types supabase/functions/_shared/race_import.test.ts
 import assert from "node:assert/strict";
 import {
-  dateInTitle, heuristicExtract, isCandidate, kindOf, parseExtraction, parseSru, pointFromWkt, raceKey, rdToWgs84,
+  dateInTitle, heuristicExtract, heuristicRaces, isCandidate, withPlace, kindOf, parseExtraction, parseSru, pointFromWkt, raceKey, rdToWgs84,
   statusOf, type SruRecord,
 } from "./race_import.ts";
 
@@ -87,5 +87,22 @@ assert.equal(parsed.records[0].municipality, "Emmen");
 assert.equal(parsed.records[0].type, "evenementenvergunning");
 assert.ok(parsed.records[0].geometry!.startsWith("POINT"));
 assert.equal(parsed.records[1].title, "Light & Kids Run");
+
+// Herkenning zonder AI op echte titels
+const names = (t: string) => heuristicRaces(t).map((r) => `${r.name}|${r.date}`);
+assert.deepEqual(names("Toestemming voor de Oosterbos Trailrun op 7 maart 2027 aan Herenstreek 130 te Nieuw-Dordrecht"), ["Oosterbos Trailrun|2027-03-07"]);
+assert.deepEqual(names("Kennisgeving aanvraag Evenementenvergunning voor Halve Marathon Zoetermeer op 24 januari 2027, Scheglaan 12"), ["Halve Marathon Zoetermeer|2027-01-24"]);
+assert.deepEqual(names("Besluit Evenementenvergunning Cross for the Crocus 2027 op 21-02-2027"), ["Cross for the Crocus|2027-02-21"]);
+assert.deepEqual(names("Ontvangst melding voor recreatieve loop Achtje van Atledo 25-10-2026 op locatie Kanovijver"), ["Achtje van Atledo|2026-10-25"]);
+assert.deepEqual(names("Kennisgeving ontvangst aanvraag NIGHT TRAIL ENSCHEDE op 10 december 2026, Willem Wilminkplein"), ["Night Trail Enschede|2026-12-10"]);
+assert.deepEqual(names("Gemeente Haarlem, ingekomen aanvraag, 0392-2026-0155397, het evenement Urban Trail Leiden, op 08-11-2026 08:00 t/m 14:00"), ["Urban Trail Leiden|2026-11-08"]);
+assert.deepEqual(names("Op 06-07-2026 00:00 hebben wij een aanvraag ontvangen voor het houden van een evenement (Cross Country op 19 en 20 september 2026 )"), ["Cross Country|2026-09-20"]);
+assert.deepEqual(
+  names("Verleende evenementenvergunning: Diverse hardloopwedstrijden van AV Delta Sport op Samancross 23 januari 2027, Pannenkoekenmolenloop 13 maart 2027 en Mosselloop 6 november 2027"),
+  ["Samancross|2027-01-23", "Pannenkoekenmolenloop|2027-03-13", "Mosselloop|2027-11-06"],
+);
+assert.deepEqual(names("Ontvangen aanvraag vergunning, het organiseren van hardloopevenement op 8 november 2026, Voorhof 2"), []);
+assert.equal(withPlace("Halve Marathon", "Nieuwkoop"), "Halve Marathon Nieuwkoop");
+assert.equal(withPlace("Oosterbos Trailrun", "Emmen"), "Oosterbos Trailrun");
 
 console.log("race_import: alle tests geslaagd");
