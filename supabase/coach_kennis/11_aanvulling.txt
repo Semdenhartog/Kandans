@@ -1,0 +1,253 @@
+# knieen-gezond | Is hardlopen gezond | gezondheid | gezond, gezondheid, voordelen, waarom hardlopen, levensduur, hart
+? Is hardlopen gezond?
+? Wat zijn de voordelen van hardlopen?
+! Leef je langer als je hardloopt?
+! Is hardlopen goed voor je hart?
+! Is hardlopen goed voor je mentale gezondheid?
+= Ja. Regelmatig hardlopen verlaagt het risico op hart- en vaatziekten, diabetes type 2 en depressieve klachten. Je slaapt vaak beter en je botten worden sterker.
+Je hoeft er niet veel voor te doen. Al 1–2 uur rustig lopen per week maakt een groot verschil.
+Wie lang niet heeft gesport of klachten heeft, laat zich eerst even checken.
+
+# loopgroep-vs-schema | Schema volgen of op gevoel | training | op gevoel, zonder schema, vrij lopen, schema nodig
+? Heb ik een schema nodig of kan ik op gevoel lopen?
+! Is lopen zonder doel ook goed?
+= Beide is goed. Op gevoel lopen is prima voor je plezier en gezondheid.
+Een schema helpt als je een doel hebt (een afstand of tijd), of als je merkt dat je altijd hetzelfde doet en niet vooruitgaat. Wissel gerust af: een paar maanden met schema naar een wedstrijd toe, en daarna weer vrij.
+
+# +app-wat
+! Waarom heet de app Kadans?
+! Wie heeft Kadans gemaakt?
+
+# +app-coach
+? Waarom gaf de coach een raar antwoord?
+! Hoe meld ik een fout antwoord van de coach?
+
+# +intervallen
+? Hoeveel intervallen moet ik doen?
+! Wat is 4x4 training?
+
+# +heuveltraining
+? Hoe vaak moet ik heuveltraining doen?
+! Zijn bruggen goed voor heuveltraining?
+
+# +strides
+? Hoe lang moeten versnellingen zijn?
+
+# +rustdag
+? Moet ik elke week een rustdag nemen?
+! Is wandelen op een rustdag goed?
+
+# +rustweek
+? Wanneer moet ik een rustweek nemen?
+
+# +trainingsweek
+? Hoe ziet een goede trainingsweek eruit?
+! Op welke dag moet ik mijn lange duurloop doen?
+
+# +trainingsschema-kadans
+? Hoe stel ik een doel in voor mijn schema?
+! Kan ik mijn trainingsschema aanpassen?
+
+# +eiwit
+? Hoeveel eiwit moet ik eten als ik hardloop?
+
+# +koolhydraten
+? Wat zijn goede koolhydraten voor hardlopers?
+
+# +cafeine
+? Is koffie goed voor hardlopers?
+
+# +alcohol
+? Mag ik een biertje na het hardlopen?
+
+# +zout
+? Waarom zweet ik zoveel tijdens het lopen?
+
+# +supplementen
+? Welke vitamines heb ik nodig als hardloper?
+
+# +stress
+? Kan hardlopen helpen bij een burn-out?
+
+# +blaren
+? Waarom krijg ik blaren van mijn hardloopschoenen?
+
+# +schuren
+? Waarom schuren mijn benen tijdens het lopen?
+
+# +enkel
+? Mag ik lopen met een verzwikte enkel?
+
+# +rug
+? Waarom doet mijn onderrug pijn bij het hardlopen?
+
+# +blessure-terug
+? Hoe bouw ik weer op na een knieblessure?
+! Hoe lang duurt het voordat ik weer kan hardlopen na een blessure?
+
+# +borst
+? Ik heb hartkloppingen tijdens het hardlopen
+! Mijn hart gaat heel snel, moet ik stoppen?
+
+# +menstruatie
+? Mag je sporten als je ongesteld bent?
+
+# +hoofdpijn
+? Waarom heb ik hoofdpijn na het rennen?
+
+# +misselijk
+? Waarom moet ik poepen tijdens het hardlopen?
+
+# +onweer
+? Is lopen bij onweer gevaarlijk?
+
+# +gladheid
+? Hoe loop ik op een gladde weg?
+
+# +luchtkwaliteit
+? Kan ik hardlopen met hooikoorts?
+
+# +carbon
+? Zijn carbon schoenen goed voor beginners?
+
+# +sokken
+? Welke sokken voorkomen blaren?
+
+# +kleding-algemeen
+? Wat heb ik nodig om te beginnen met hardlopen?
+! Welke kleding moet ik kopen om te beginnen?
+
+# +wedstrijd-eerste
+? Welke wedstrijd is leuk voor een beginner?
+! Kan ik meedoen aan een wedstrijd als ik langzaam ben?
+
+# +wedstrijd-zoeken
+? Welke hardloopwedstrijden zijn er bij mij in de buurt?
+! Welke loopjes zijn er dit weekend?
+
+# +voorspelling
+? Wat wordt mijn tijd op de halve marathon?
+
+# +trail
+? Wat zijn goede trailschoenen?
+
+# +app-live
+? Hoe kan mijn partner zien waar ik loop?
+
+# +app-routes
+! Kan ik een route lopen die ik eerder liep?
+
+# +app-badges
+? Waar vind ik mijn badges?
+
+# +app-records
+? Wat is mijn snelste 5 km?
+
+# +app-loopgroep
+? Hoe nodig ik iemand uit voor mijn loopgroep?
+
+# +app-stappen
+? Hoeveel stappen heb ik deze maand gezet?
+
+# +app-account-verwijderen
+? Hoe kan ik mijn gegevens laten verwijderen?
+
+# +app-taal
+? Hoe zet ik Kadans op donker?
+
+# +mijn-wedstrijd
+? Hoe lang is het nog tot mijn wedstrijd?
+
+# +geen-zin
+! Ik ben te moe om te gaan lopen
+
+# +dip
+! Ik word langzamer, hoe kan dat?
+
+# +vergelijken
+? Ben ik te langzaam om hard te lopen?
+
+# +beginnen-leeftijd
+! Ben ik met 70 te oud om te gaan lopen?
+
+# +beginnen-gewicht
+! Hoeveel moet ik wegen om te hardlopen?
+
+# +beginnen-hond
+? Hoe ver kan mijn hond meelopen?
+
+# +beginnen-muziek
+! Welke muziek is goed om op te rennen?
+
+# +beginnen-veilig
+! Wat doe ik als ik me onveilig voel tijdens het lopen?
+
+# +beginnen-ochtend-avond
+! Is 's avonds hardlopen slecht voor je slaap?
+
+# +beginnen-coolingdown
+! Is uitlopen echt nodig?
+
+# +beginnen-pasfrequentie
+! Hoeveel stappen per minuut is goed?
+
+# +maxhartslag
+! Wat is mijn maximale hartslag?
+
+# +rusthartslag
+! Hoe meet ik mijn rusthartslag?
+
+# +vo2max
+! Wat is een goede VO2max?
+
+# +tempo-gelijk
+! Hoe loop ik een negatieve split?
+
+# +crosstraining
+! Is fietsen goed als ik geblesseerd ben?
+
+# +muur
+! Wat doe ik als ik de man met de hamer tegenkom?
+
+# +carbo-loading
+! Hoeveel pasta moet ik eten voor een marathon?
+
+# +zenuwen
+! Hoe blijf ik rustig voor de start?
+
+# +pacer
+! Hoe vind ik de pacer bij de start?
+
+# +ultra
+! Hoe ver is een ultramarathon?
+
+# +cross
+! Wanneer zijn de crossen?
+
+# +obstakel
+! Hoe bereid ik me voor op een Strongman Run?
+
+# +afstand-kiezen
+! Moet ik eerst een 10 km lopen voor een halve marathon?
+
+# +kleding-weer
+? Wat moet ik aan vandaag?
+
+# +marathon
+? Wat is een goed marathonschema?
+? Schema voor de marathon
+
+# +rustdag
+? Hoe vaak moet ik een rustdag nemen?
+
+# +app-iphone
+? Werkt Kadans op een iPhone?
+
+# +muur
+? Wat is de muur bij een marathon?
+
+# +beginnen-ochtend-avond
+? Wat is de beste tijd van de dag om te sporten?
+
+# +app-route-volgen
+! Hoe zorg ik dat ik niet verdwaal?

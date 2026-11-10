@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Coach-kennis beheren – Kadans</title>
+<meta name="theme-color" content="#13110E">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="fonts.css">
+<style>
+:root{--bg:#13110E;--surface:#1C1814;--surface2:#241F1A;--border:#352E26;--gold:#D9BF92;--gold-deep:#B8955F;--text:#F1E9DC;--muted:#BDB1A0;--subtle:#94897A;--bad:#E07A5F;--good:#8FBF8F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.5;font-size:15px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 96px}
+h1{font-family:Saira,sans-serif;font-weight:800;font-size:28px;margin:0;text-transform:uppercase;color:var(--gold);letter-spacing:.02em}
+h2{font-family:Saira,sans-serif;font-weight:700;font-size:18px;margin:0 0 8px}
+.kop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.meta{color:var(--subtle);font-size:13px}
+button{font-family:inherit;font-size:14px;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:8px 14px}
+button.hoofd{background:var(--gold);color:#13110E;border-color:var(--gold);font-weight:700}
+button.gevaar{color:var(--bad);border-color:#5a3328}
+button:disabled{opacity:.5;cursor:default}
+input,textarea,select{font-family:inherit;font-size:15px;width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 11px}
+textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:12px;color:var(--subtle);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.08em}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button[aria-selected=true]{border-color:var(--gold);color:var(--gold)}
+.kaart{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.rij{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rij>input{flex:1;min-width:180px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;border:1px solid var(--border);color:var(--muted);margin-right:4px}
+.tag.claude{color:var(--gold);border-color:var(--gold-deep)}
+.tag.uit{color:var(--bad)}
+.lijst .kaart{cursor:pointer}
+.lijst .kaart:hover{border-color:var(--gold-deep)}
+.antw{white-space:pre-wrap;color:var(--muted);font-size:14px;margin-top:6px;max-height:4.5em;overflow:hidden}
+.vr{color:var(--subtle);font-size:13px;margin-top:6px}
+#melding{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#13110E;padding:10px 16px;border-radius:8px;font-weight:600;display:none}
+.verborgen{display:none!important}
+.score{font-variant-numeric:tabular-nums;color:var(--gold)}
+dialog{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:16px;width:min(760px,96vw);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+</style>
+</head>
+<body>
+<main>
+  <div class="kop">
+    <div><h1>Coach-kennis</h1><div class="meta" id="stand">Beheer van de antwoorden van de Kadans-coach</div></div>
+    <button id="uitloggen" class="verborgen">Uitloggen</button>
+  </div>
+
+  <section id="login" class="kaart" style="max-width:420px">
+    <h2>Inloggen</h2>
+    <p class="meta">Met je Kadans-account. Alleen beheerders zien de kennis.</p>
+    <label for="email">E-mail</label><input id="email" type="email" autocomplete="username">
+    <label for="ww">Wachtwoord</label><input id="ww" type="password" autocomplete="current-password">
+    <p><button class="hoofd" id="inloggen">Inloggen</button></p>
+    <p class="meta" id="loginfout"></p>
+  </section>
+
+  <section id="app" class="verborgen">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="nakijken" aria-selected="true">Nakijken <span id="n-nak"></span></button>
+      <button role="tab" data-tab="onbeantwoord" aria-selected="false">Onbeantwoord <span id="n-onb"></span></button>
+      <button role="tab" data-tab="alles" aria-selected="false">Alle onderwerpen <span id="n-all"></span></button>
+      <button role="tab" data-tab="proberen" aria-selected="false">Proberen</button>
+      <button id="nieuw" class="hoofd" style="margin-left:auto">+ Nieuw onderwerp</button>
+    </div>
+
+    <div data-paneel="nakijken">
+      <p class="meta">Door Claude toegevoegde antwoorden (al zichtbaar voor gebruikers). Controleer ze en sla op, of verwijder ze.</p>
+      <div class="lijst" id="lijst-nak"></div>
+    </div>
+    <div data-paneel="onbeantwoord" class="verborgen">
+      <p class="meta">Vragen waar de coach geen goed antwoord op had (zonder naam, na 90 dagen weg). Koppel ze aan een onderwerp, maak een nieuw onderwerp of negeer ze.</p>
+      <div id="lijst-onb"></div>
+    </div>
+    <div data-paneel="alles" class="verborgen">
+      <div class="rij" style="margin-bottom:12px"><input id="filter" placeholder="Zoek in onderwerpen, vragen en antwoorden"><select id="cat" style="max-width:200px"></select></div>
+      <div class="lijst" id="lijst-all"></div>
+    </div>
+    <div data-paneel="proberen" class="verborgen">
+      <div class="rij"><input id="probeer" placeholder="Typ een vraag zoals een loper hem stelt"><button class="hoofd" id="probeerknop">Zoek</button></div>
+      <p class="meta">Vanaf score 0,45 geeft de coach het antwoord uit de kennis. Daaronder gaat de vraag naar Claude (als de sleutel is ingesteld).</p>
+      <div id="probeeruit"></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="bewerk">
+  <h2 id="bw-titel">Onderwerp</h2>
+  <label for="bw-onderwerp">Onderwerp</label><input id="bw-onderwerp">
+  <div class="rij">
+    <div style="flex:1"><label for="bw-categorie">Categorie</label><input id="bw-categorie" list="cats"></div>
+    <div style="flex:1"><label for="bw-soort">Soort</label><select id="bw-soort"><option value="antwoord">Antwoord</option><option value="arts">Gezondheid (doorverwijzen)</option><option value="buiten">Buiten de app (eerlijk nee)</option></select></div>
+    <div style="flex:1"><label for="bw-actie">Antwoord uit eigen data</label><select id="bw-actie"><option value="">Nee, vaste tekst</option><option value="week">Week</option><option value="laatste">Laatste run</option><option value="maand">Laatste 4 weken</option><option value="vandaag">Vandaag</option><option value="tempo">Rustig tempo</option><option value="wedstrijd">Volgende wedstrijd</option><option value="kleding">Kleding (weer nu)</option></select></div>
+  </div>
+  <label for="bw-vragen">Voorbeeldvragen (één per regel)</label><textarea id="bw-vragen" style="min-height:120px"></textarea>
+  <label for="bw-tref">Trefwoorden (komma's)</label><input id="bw-tref">
+  <label for="bw-antwoord">Antwoord (lijstje met "- " mag)</label><textarea id="bw-antwoord" style="min-height:200px"></textarea>
+  <label><input type="checkbox" id="bw-actief" style="width:auto"> Actief</label>
+  <p class="meta" id="bw-info"></p>
+  <div class="rij" style="justify-content:space-between;margin-top:12px">
+    <button class="gevaar" id="bw-weg">Verwijderen</button>
+    <div class="rij"><button id="bw-annuleer">Annuleren</button><button class="hoofd" id="bw-opslaan">Opslaan</button></div>
+  </div>
+</dialog>
+<datalist id="cats"></datalist>
+<div id="melding" role="status"></div>
+
+<script>
+(function () {
+  var URL_ = '__SUPABASE_URL__', KEY = '__SUPABASE_ANON_KEY__';
+  var sessie = null, kennis = [], onb = [], huidig = null, koppelVraag = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function melding(t) { var m = $('melding'); m.textContent = t; m.style.display = 'block'; clearTimeout(m._t); m._t = setTimeout(function () { m.style.display = 'none'; }, 2500); }
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    for (var k in (attrs || {})) { if (k === 'text') e.textContent = attrs[k]; else if (k === 'class') e.className = attrs[k]; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+
+  function bewaarSessie(s) { sessie = s; try { sessionStorage.setItem('kadans_beheer', JSON.stringify(s)); } catch (e) {} }
+  async function auth(grant, body) {
+    var r = await fetch(URL_ + '/auth/v1/token?grant_type=' + grant, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    var j = await r.json();
+    if (!r.ok) throw new Error(j.error_description || j.msg || 'Inloggen mislukt');
+    return j;
+  }
+  async function api(pad, opties, opnieuw) {
+    opties = opties || {};
+    var h = Object.assign({ apikey: KEY, Authorization: 'Bearer ' + sessie.access_token, 'Content-Type': 'application/json' }, opties.headers || {});
+    var r = await fetch(URL_ + pad, Object.assign({}, opties, { headers: h }));
+    if (r.status === 401 && !opnieuw && sessie.refresh_token) {
+      bewaarSessie(await auth('refresh_token', { refresh_token: sessie.refresh_token }));
+      return api(pad, opties, true);
+    }
+    var tekst = await r.text();
+    var data = tekst ? JSON.parse(tekst) : null;
+    if (!r.ok) throw new Error((data && (data.message || data.msg)) || ('Fout ' + r.status));
+    return data;
+  }
+  var rpc = function (naam, args) { return api('/rest/v1/rpc/' + naam, { method: 'POST', body: JSON.stringify(args || {}) }); };
+
+  async function start() {
+    var ok = await rpc('coach_is_admin');
+    if (!ok) { $('loginfout').textContent = 'Dit account is geen beheerder.'; return; }
+    $('login').classList.add('verborgen'); $('app').classList.remove('verborgen'); $('uitloggen').classList.remove('verborgen');
+    await laad();
+  }
+  async function laad() {
+    kennis = await api('/rest/v1/coach_kennis?select=id,sleutel,onderwerp,categorie,antwoord,actie,soort,trefwoorden,bron,nakijken,actief,keer_gebruikt,bijgewerkt,coach_vragen(id,vraag,herkomst)&order=keer_gebruikt.desc,onderwerp.asc');
+    onb = await api('/rest/v1/coach_onbeantwoord?select=id,vraag,aantal,beste_kennis_id,beste_score,laatst&opgelost_kennis_id=is.null&genegeerd=is.false&order=aantal.desc,laatst.desc&limit=300');
+    var cats = Array.from(new Set(kennis.map(function (k) { return k.categorie; }))).sort();
+    $('cat').innerHTML = ''; $('cat').appendChild(el('option', { value: '', text: 'Alle categorieën' }));
+    $('cats').innerHTML = '';
+    cats.forEach(function (c) { $('cat').appendChild(el('option', { value: c, text: c })); $('cats').appendChild(el('option', { value: c })); });
+    var nVragen = kennis.reduce(function (a, k) { return a + (k.coach_vragen || []).length; }, 0);
+    $('stand').textContent = kennis.length + ' onderwerpen · ' + nVragen + ' voorbeeldvragen · ' + kennis.filter(function (k) { return k.bron === 'claude'; }).length + ' door Claude';
+    toon();
+  }
+
+  function kaartVoor(k) {
+    var tags = [el('span', { class: 'tag', text: k.categorie })];
+    if (k.bron === 'claude') tags.push(el('span', { class: 'tag claude', text: 'Claude' }));
+    if (k.bron === 'sem') tags.push(el('span', { class: 'tag', text: 'aangepast' }));
+    if (k.actie) tags.push(el('span', { class: 'tag', text: 'data: ' + k.actie }));
+    if (k.soort !== 'antwoord') tags.push(el('span', { class: 'tag', text: k.soort }));
+    if (!k.actief) tags.push(el('span', { class: 'tag uit', text: 'uit' }));
+    var vr = (k.coach_vragen || []).slice(0, 3).map(function (v) { return v.vraag; }).join(' · ');
+    return el('div', { class: 'kaart', tabindex: '0', onclick: function () { open(k); }, onkeydown: function (e) { if (e.key === 'Enter') open(k); } }, [
+      el('div', { class: 'rij', style: 'justify-content:space-between' }, [el('strong', { text: k.onderwerp }), el('span', { class: 'meta', text: k.keer_gebruikt + '× gebruikt' })]),
+      el('div', {}, tags),
+      el('div', { class: 'vr', text: vr + ((k.coach_vragen || []).length > 3 ? ' · +' + ((k.coach_vragen || []).length - 3) : '') }),
+      el('div', { class: 'antw', text: k.antwoord || '(antwoord uit eigen data)' }),
+    ]);
+  }
+
+  function toon() {
+    var nak = kennis.filter(function (k) { return k.nakijken; });
+    $('n-nak').textContent = nak.length ? '(' + nak.length + ')' : '';
+    $('n-onb').textContent = onb.length ? '(' + onb.length + ')' : '';
+    $('n-all').textContent = '(' + kennis.length + ')';
+    var ln = $('lijst-nak'); ln.innerHTML = '';
+    if (!nak.length) ln.appendChild(el('p', { class: 'meta', text: 'Niets na te kijken.' }));
+    nak.forEach(function (k) { ln.appendChild(kaartVoor(k)); });
+
+    var lo = $('lijst-onb'); lo.innerHTML = '';
+    if (!onb.length) lo.appendChild(el('p', { class: 'meta', text: 'Geen open vragen.' }));
+    onb.forEach(function (o) {
+      var beste = kennis.find(function (k) { return k.id === o.beste_kennis_id; });
+      var keuze = el('select', {}, [el('option', { value: '', text: 'Koppel aan onderwerp…' })].concat(
+        kennis.slice().sort(function (a, b) { return a.onderwerp.localeCompare(b.onderwerp); }).map(function (k) { return el('option', { value: k.id, text: k.onderwerp }); })));
+      if (beste) keuze.value = beste.id;
+      lo.appendChild(el('div', { class: 'kaart' }, [
+        el('div', { class: 'rij', style: 'justify-content:space-between' }, [el('strong', { text: o.vraag }), el('span', { class: 'meta', text: o.aantal + '× · ' + new Date(o.laatst).toLocaleDateString('nl-NL') })]),
+        beste ? el('div', { class: 'meta' }, ['Dichtstbij: ' + beste.onderwerp + ' ', el('span', { class: 'score', text: '(' + Number(o.beste_score).toFixed(2).replace('.', ',') + ')' })]) : null,
+        el('div', { class: 'rij', style: 'margin-top:10px' }, [
+          keuze,
+          el('button', { text: 'Koppelen', onclick: async function () {
+            if (!keuze.value) return melding('Kies eerst een onderwerp');
+            await rpc('coach_vraag_koppelen', { onbeantwoord_id: o.id, kid: Number(keuze.value) }); melding('Gekoppeld'); laad();
+          } }),
+          el('button', { text: 'Nieuw onderwerp', onclick: function () { koppelVraag = o; open(null, o.vraag); } }),
+          el('button', { class: 'gevaar', text: 'Negeren', onclick: async function () {
+            await api('/rest/v1/coach_onbeantwoord?id=eq.' + o.id, { method: 'PATCH', body: JSON.stringify({ genegeerd: true }) }); laad();
+          } }),
+        ]),
+      ]));
+    });
+
+    var f = $('filter').value.toLowerCase().trim(), c = $('cat').value;
+    var la = $('lijst-all'); la.innerHTML = '';
+    var alle = kennis.filter(function (k) {
+      if (c && k.categorie !== c) return false;
+      if (!f) return true;
+      var t = (k.onderwerp + ' ' + k.antwoord + ' ' + (k.trefwoorden || []).join(' ') + ' ' + (k.coach_vragen || []).map(function (v) { return v.vraag; }).join(' ')).toLowerCase();
+      return t.indexOf(f) >= 0;
+    });
+    alle.slice(0, 250).forEach(function (k) { la.appendChild(kaartVoor(k)); });
+    if (alle.length > 250) la.appendChild(el('p', { class: 'meta', text: 'En nog ' + (alle.length - 250) + ' meer. Zoek specifieker.' }));
+  }
+
+  function open(k, eersteVraag) {
+    huidig = k;
+    $('bw-titel').textContent = k ? 'Onderwerp bewerken' : 'Nieuw onderwerp';
+    $('bw-onderwerp').value = k ? k.onderwerp : '';
+    $('bw-categorie').value = k ? k.categorie : 'algemeen';
+    $('bw-soort').value = k ? k.soort : 'antwoord';
+    $('bw-actie').value = k && k.actie ? k.actie : '';
+    $('bw-vragen').value = k ? (k.coach_vragen || []).map(function (v) { return v.vraag; }).join('\n') : (eersteVraag || '');
+    $('bw-tref').value = k ? (k.trefwoorden || []).join(', ') : '';
+    $('bw-antwoord').value = k ? k.antwoord : '';
+    $('bw-actief').checked = k ? k.actief : true;
+    $('bw-info').textContent = k ? ('Bron: ' + k.bron + (k.sleutel ? ' · sleutel ' + k.sleutel : '') + ' · bijgewerkt ' + new Date(k.bijgewerkt).toLocaleString('nl-NL')) : '';
+    $('bw-weg').classList.toggle('verborgen', !k);
+    $('bewerk').showModal();
+  }
+
+  $('bw-annuleer').onclick = function () { koppelVraag = null; $('bewerk').close(); };
+  $('bw-opslaan').onclick = async function () {
+    var vragen = $('bw-vragen').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!$('bw-onderwerp').value.trim() || !vragen.length) return melding('Onderwerp en minstens één vraag zijn nodig');
+    if (!$('bw-actie').value && !$('bw-antwoord').value.trim()) return melding('Vul een antwoord in');
+    this.disabled = true;
+    try {
+      var id = await rpc('coach_kennis_opslaan', { j: {
+        id: huidig ? huidig.id : null, onderwerp: $('bw-onderwerp').value.trim(), categorie: $('bw-categorie').value.trim().toLowerCase(),
+        soort: $('bw-soort').value, actie: $('bw-actie').value, antwoord: $('bw-antwoord').value.trim(),
+        trefwoorden: $('bw-tref').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+        vragen: vragen, actief: $('bw-actief').checked } });
+      if (koppelVraag) { await api('/rest/v1/coach_onbeantwoord?id=eq.' + koppelVraag.id, { method: 'PATCH', body: JSON.stringify({ opgelost_kennis_id: id }) }); koppelVraag = null; }
+      $('bewerk').close(); melding('Opgeslagen'); laad();
+    } catch (e) { melding(e.message); } finally { this.disabled = false; }
+  };
+  $('bw-weg').onclick = async function () {
+    if (!huidig || !confirm('Dit onderwerp en de voorbeeldvragen verwijderen?')) return;
+    await api('/rest/v1/coach_kennis?id=eq.' + huidig.id, { method: 'DELETE' });
+    $('bewerk').close(); melding('Verwijderd'); laad();
+  };
+
+  $('probeerknop').onclick = async function () {
+    var q = $('probeer').value.trim(); if (!q) return;
+    var r = await rpc('coach_kennis_top', { q: q, n: 5 });
+    var uit = $('probeeruit'); uit.innerHTML = '';
+    if (!r.length) uit.appendChild(el('p', { class: 'meta', text: 'Niets gevonden.' }));
+    r.forEach(function (x, i) {
+      var k = kennis.find(function (k) { return k.id === x.kennis_id; });
+      uit.appendChild(el('div', { class: 'kaart', style: i === 0 && x.score >= 0.45 ? 'border-color:var(--gold)' : '' }, [
+        el('div', { class: 'rij', style: 'justify-content:space-between' }, [el('strong', { text: x.onderwerp }), el('span', { class: 'score', text: Number(x.score).toFixed(2).replace('.', ',') })]),
+        el('div', { class: 'vr', text: 'Beste vraag: ' + x.vraag }),
+        k ? el('button', { text: 'Bewerken', style: 'margin-top:8px', onclick: function () { open(k); } }) : null,
+      ]));
+    });
+  };
+  $('probeer').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('probeerknop').click(); });
+
+  document.querySelectorAll('[data-tab]').forEach(function (b) {
+    b.onclick = function () {
+      document.querySelectorAll('[data-tab]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('[data-paneel]').forEach(function (p) { p.classList.toggle('verborgen', p.getAttribute('data-paneel') !== b.getAttribute('data-tab')); });
+    };
+  });
+  $('nieuw').onclick = function () { open(null); };
+  $('filter').oninput = toon; $('cat').onchange = toon;
+
+  $('inloggen').onclick = async function () {
+    $('loginfout').textContent = '';
+    try { bewaarSessie(await auth('password', { email: $('email').value.trim(), password: $('ww').value })); await start(); }
+    catch (e) { $('loginfout').textContent = e.message; }
+  };
+  $('ww').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('inloggen').click(); });
+  $('uitloggen').onclick = function () { try { sessionStorage.removeItem('kadans_beheer'); } catch (e) {} location.reload(); };
+
+  try { var s = JSON.parse(sessionStorage.getItem('kadans_beheer') || 'null'); if (s) { sessie = s; start().catch(function () { sessionStorage.removeItem('kadans_beheer'); }); } } catch (e) {}
+})();
+</script>
+</body>
+</html>

@@ -14,7 +14,7 @@ class PrivacyBlock {
 }
 
 const privacyBlocks = <PrivacyBlock>[
-  PrivacyBlock.meta('Versie 1.6 · laatst bijgewerkt: 6 november 2026'),
+  PrivacyBlock.meta('Versie 1.7 · laatst bijgewerkt: 10 november 2026'),
   PrivacyBlock.paragraph('Kadans is een app die berekent wanneer je het beste kunt gaan hardlopen, op basis van het weer, je route en je eigen prestaties. In deze verklaring lees je welke gegevens we verzamelen, waarom we dat doen en hoe je je rechten kunt uitoefenen.'),
   PrivacyBlock.heading('Wie zijn wij?'),
   PrivacyBlock.paragraph('Kadans is een app van Sem den Hartog, gevestigd in Barneveld. De verantwoordelijke voor de verwerking van je persoonsgegevens is Sem den Hartog.'),
@@ -30,6 +30,7 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.row('Afspraken uit je telefoonagenda (alleen als je dat aanzet): begin- en eindtijd', 'Om geen loopmoment voor te stellen tijdens een afspraak. Dit blijft op je telefoon en gaat niet naar onze servers. De titels lezen we niet.'),
   PrivacyBlock.row('Runs uit Strava (alleen als je Strava koppelt)', 'Om je runs automatisch toe te voegen. Ontkoppel je Strava, dan verwijderen we deze runs.'),
   PrivacyBlock.row('Vragen aan de coach en de antwoorden', 'Om je persoonlijk trainingsadvies te geven en het gesprek te onthouden. Je kunt het gesprek altijd wissen.'),
+  PrivacyBlock.row('Vragen waar de coach nog geen antwoord op had (los van je account, zonder naam)', 'Om de kennis van de coach aan te vullen. We bewaren ze maximaal 90 dagen. Komt het antwoord van de AI, dan bewaren we een algemene versie zonder persoonsgegevens in de kennis van de coach, zodat andere lopers met dezelfde vraag hetzelfde antwoord krijgen.'),
   PrivacyBlock.row('Abonnementsstatus', 'Om te weten of je Premium hebt. Betalingen lopen via Google Play; wij zien geen betaalgegevens.'),
   PrivacyBlock.row('Foutmeldingen (technische gegevens: wat er misging, appversie, Android of iOS)', 'Om fouten in de app op te sporen en op te lossen. We bewaren ze maximaal 60 dagen.'),
   PrivacyBlock.row('Runs die je in Kadans opneemt (GPS-spoor, afstand, tijd, hoogte en eventueel hartslag per meetpunt)', 'Om je run op te slaan, aan je routes te koppelen en je tijden per kilometer, grafieken en trainingen te berekenen.'),
@@ -64,7 +65,7 @@ const privacyBlocks = <PrivacyBlock>[
   PrivacyBlock.heading('Met wie delen we gegevens?'),
   PrivacyBlock.bullet('**Supabase** – slaat je account en gegevens op, op servers in de EU.'),
   PrivacyBlock.bullet('**Open-Meteo** en **Buienradar** – leveren het weer en de buien. Daarvoor sturen we alleen afgeronde coördinaten (zonder naam of e-mailadres).'),
-  PrivacyBlock.bullet('**Anthropic** – levert de AI achter de coach. Als je een vraag stelt of om een analyse van een run vraagt, sturen we je vraag, je voornaam en een samenvatting van je runs (inclusief relevante data) om een persoonlijk antwoord te geven.'),
+  PrivacyBlock.bullet('**Anthropic** – levert de AI achter de coach. De meeste vragen beantwoordt de coach zelf uit de eigen kennis, zonder AI. Alleen als een vraag daar nog niet in staat, of als je om een analyse van een run vraagt, sturen we je vraag, je voornaam en een samenvatting van je runs (inclusief relevante data) om een persoonlijk antwoord te geven.'),
   PrivacyBlock.bullet('**Strava** – alleen als je Strava koppelt, om je runs op te halen. Zet je "Eigen runs naar Strava" aan (of tik je bij een run op "Naar Strava sturen"), dan sturen we die run (tijd, afstand, route, hoogte, hartslag en cadans) naar je eigen Strava-account.'),
   PrivacyBlock.bullet('**Mapillary** (Meta) – straatfoto\'s langs je route. Onze server stuurt een paar punten van de route (zonder je naam of account) om foto\'s in de buurt te zoeken.'),
   PrivacyBlock.bullet('**Open-Meteo** – hoogtekaart: om de hoogtemeters van je opgenomen runs te verbeteren sturen we punten van je spoor (zonder naam of account).'),

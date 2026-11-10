@@ -1,0 +1,70 @@
+## Vragen over je eigen runs: het antwoord rekent de server uit je logboek uit (actie=…).
+## De antwoordtekst hier is de terugval als er nog geen runs zijn.
+
+# mijn-week | Jouw week | mijn data | week, deze week, weekoverzicht, hoeveel gelopen | actie=week
+? Hoe ging mijn week?
+? Hoeveel heb ik deze week gelopen?
+? Hoeveel kilometer heb ik deze week?
+? Hoe was mijn trainingsweek?
+? Geef me een overzicht van mijn week
+! Heb ik deze week genoeg gelopen?
+! Loop ik deze week meer dan vorige week?
+! Hoeveel runs heb ik deze week gedaan?
+! Hoe sta ik ervoor deze week?
+= Er staan nog geen runs van deze week in je logboek. Neem een run op of koppel je horloge via Health Connect, dan zie je hier je week.
+
+# mijn-laatste | Jouw laatste run | mijn data | laatste run, vorige run, gisteren, mijn run | actie=laatste
+? Hoe ging mijn laatste run?
+? Wat vind je van mijn laatste run?
+? Hoe was mijn run van gisteren?
+? Hoe snel liep ik de vorige keer?
+! Was mijn laatste run goed?
+! Analyseer mijn laatste training
+! Wat was mijn tempo bij mijn laatste run?
+= Er staat nog geen run in je logboek. Neem er een op met de Lopen-knop.
+
+# mijn-maand | Jouw laatste weken | mijn data | maand, trend, laatste weken, ontwikkeling, vooruitgang, progressie | actie=maand
+? Hoeveel heb ik deze maand gelopen?
+? Hoe gaat het met mijn training de laatste weken?
+? Word ik beter?
+? Ga ik vooruit?
+! Hoe ontwikkelt mijn conditie zich?
+! Bouw ik niet te snel op?
+! Wat is mijn trend van de afgelopen maand?
+! Laat mijn vooruitgang zien
+= Er staan nog te weinig runs in je logboek om een trend te zien. Na een paar weken lopen zie je hier je ontwikkeling.
+
+# mijn-vandaag | Wat loop ik vandaag | mijn data | welke training, rustdag of niet | actie=vandaag
+? Wat loop ik vandaag?
+? Wat moet ik vandaag lopen?
+? Moet ik vandaag lopen of rusten?
+? Wat is mijn training van vandaag?
+! Kan ik vandaag een zware training doen?
+! Is vandaag een rustdag?
+! Wat raad je me aan voor vandaag?
+= Kijk op Vandaag voor het beste moment. Heb je een trainingsschema, dan staat daar ook je training.
+
+# mijn-tempo | Jouw rustige tempo | mijn data | mijn tempo, rustig tempo, welk tempo, duurlooptempo, mijn snelheid | actie=tempo
+? Welk tempo is rustig voor mij?
+? Hoe snel moet ik mijn duurlopen doen?
+? Wat is mijn gemiddelde tempo?
+! Welk tempo moet ik lopen bij een rustige run?
+! Loop ik mijn rustige runs te snel?
+! Wat is mijn normale looptempo?
+= Er staan nog te weinig runs in je logboek om je tempo te bepalen. Loop voorlopig op praattempo: zo rustig dat je nog in zinnen kunt praten.
+
+# mijn-wedstrijd | Jouw volgende wedstrijd | mijn data | mijn wedstrijd, volgende wedstrijd, klaar voor wedstrijd, race | actie=wedstrijd
+? Ben ik klaar voor mijn wedstrijd?
+? Wanneer is mijn volgende wedstrijd?
+? Hoe snel ga ik mijn wedstrijd lopen?
+! Haal ik mijn doeltijd?
+! Hoeveel weken heb ik nog tot mijn wedstrijd?
+! Hoe moet ik mijn volgende wedstrijd aanpakken?
+= Je hebt nog geen wedstrijd gepland. Zet er een in via Samen → Wedstrijden in de buurt → Zet in Mijn wedstrijden, of voeg er zelf een toe.
+
+# mijn-gegevens-waar | Waar zie ik mijn statistieken | app | statistieken, totaal, jaaroverzicht, heatmap, kilometers totaal
+? Hoeveel kilometer heb ik in totaal gelopen?
+? Waar zie ik mijn jaaroverzicht?
+! Waar vind ik de heatmap van mijn runs?
+! Hoeveel heb ik dit jaar gelopen?
+= In Logboek vind je je totalen. Na 20 runs krijg je ook een heatmap en een jaaroverzicht, onder het menu rechtsboven in Logboek. Je doelen en voortgang staan onder Vandaag → Meer vandaag → Doelen.

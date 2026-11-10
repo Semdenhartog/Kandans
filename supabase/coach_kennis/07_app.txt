@@ -1,0 +1,304 @@
+## Uitleg over de Kadans-app zelf. Houd dit in lijn met de echte app (CLAUDE.md).
+
+# app-wat | Wat is Kadans | app | kadans, wat is, wat doet de app, functies, uitleg app
+? Wat is Kadans?
+? Wat kan ik allemaal met Kadans?
+? Waarin verschilt Kadans van Strava?
+! Waarom zou ik Kadans gebruiken?
+! Wat doet deze app precies?
+! Is Kadans gratis?
+= Kadans is een Nederlandse hardloop-app die uitrekent wanneer je het beste kunt lopen. De app kijkt naar weer, wind, licht, je agenda en je eigen runs.
+- Vandaag: het beste moment en advies.
+- Routes: rondjes maken, tekenen, met verlichting, water en toiletten.
+- Lopen: opnemen met coachstem, live delen en valdetectie.
+- Logboek: je runs, records en vorm.
+- Samen: lopers, loopgroepen, clubevenementen en wedstrijden.
+De basis is gratis. Met Premium krijg je extra's, zoals meer van de AI-coach.
+
+# app-vandaag | Het scherm Vandaag | app | vandaag, startscherm, advieskaart, beste moment, nu lopen, later lopen
+? Wat betekent het advies op Vandaag?
+? Waarom zegt Kadans "later lopen"?
+! Wat betekenen de staafjes per uur?
+! Hoe verander ik hoe lang ik wil lopen?
+! Wat is "Deze week" op Vandaag?
+= Op Vandaag zie je in één oogopslag:
+- Het advies: nu lopen, of later, met het beste tijdstip en waarom.
+- De staafjes per uur: hoe goed elk uur is om te lopen, op basis van weer en licht.
+- Deze week: je geplande trainingen en wat je al deed.
+- Slimme kaarten, bijvoorbeeld bij een weerwissel in je schema of een record.
+Kadans onthoudt hoe lang je meestal loopt. Pas het aan bij het advies.
+
+# app-opnemen | Een run opnemen | app | opnemen, starten, run starten, gps, lopen knop, record
+? Hoe neem ik een run op?
+? Hoe start ik een training in Kadans?
+! Wat doet lang drukken op de Lopen-knop?
+! Hoe pauzeer of stop ik mijn run?
+! Waarom wacht de app op GPS voor ik start?
+= Tik op de ronde Lopen-knop midden in de balk. Wacht tot de GPS-pil groen is en tik op Start. Je hoort dan 3-2-1.
+- Lang drukken op de knop opent een snelmenu, bijvoorbeeld voor de loopband of een route volgen.
+- Tijdens de run: pauzeer met de knop. Stoppen gaat met lang drukken, zodat je niet per ongeluk stopt.
+- Na afloop kies je Afronden en opslaan.
+Een goed GPS-signaal voor de start voorkomt een rare eerste kilometer.
+
+# app-gps | GPS-problemen | app | gps, signaal, afwijking, verkeerde afstand, kaart springt, locatie
+? Waarom klopt mijn afstand niet?
+? Mijn GPS-route springt alle kanten op
+! Waarom is mijn run korter dan op mijn horloge?
+! Waarom stopt de opname als mijn scherm uit gaat?
+= - Wacht voor je start tot de GPS-pil groen is.
+- Geef Kadans altijd toegang tot je locatie, ook op de achtergrond.
+- Zet batterijbesparing voor Kadans uit. Op Samsung: Instellingen → Apps → Kadans → Batterij → Onbeperkt.
+- Tussen hoge gebouwen, onder bomen of in tunnels is GPS minder nauwkeurig.
+Verschillen van een paar procent met een horloge zijn normaal.
+
+# app-coachstem | Coachstem tijdens het lopen | app | stem, coachstem, gesproken, meldingen, km melding, daan, emma
+? Hoe stel ik de coachstem in?
+? Kan ik de stem van de coach veranderen?
+! Hoe vaak hoor ik een melding tijdens het lopen?
+! Waarom hoor ik twee stemmen door elkaar?
+! Hoe zet ik de gesproken meldingen uit?
+= Kies je coachstem onder Opnemen → instellingen, of tijdens de introductie. Je kunt kiezen uit Daan, Bram, Emma of Fleur, en met de voorbeeldknop hoor je hoe ze klinken.
+- Je bepaalt zelf hoe vaak je een melding krijgt (per kilometer of per tijd) en wat je hoort (tempo, afstand, hartslag).
+- Werkt de natuurlijke stem even niet? Dan valt Kadans terug op de stem van je telefoon, nooit twee tegelijk.
+- Het volume regel je in dezelfde instellingen.
+
+# app-routes | Routes maken | app | routes, route maken, rondje, route tekenen, rondje op afstand
+? Hoe maak ik een route in Kadans?
+? Kan Kadans een rondje van 10 km voor mij maken?
+! Hoe teken ik zelf een route?
+! Kan ik een route in een bepaalde richting laten maken?
+! Wat betekenen de kleuren onder de route?
+= Ga naar Routes.
+- Rondje op afstand: kies een afstand, en eventueel een richting (N/O/Z/W). Kadans legt een rondje vanaf je locatie.
+- Zelf tekenen: tik punten op de kaart. Kadans volgt de paden.
+- De balk onder de route laat de ondergrond zien: verhard, onverhard, enzovoort.
+- Gouden lijnen op de kaart zijn populaire looppaden. Die kun je aan- en uitzetten.
+- Een route kun je andersom lopen, delen, naar je horloge sturen of als vlucht bekijken.
+
+# app-route-volgen | Route volgen tijdens het lopen | app | route volgen, navigatie, afslag, verdwalen
+? Hoe volg ik een route tijdens het lopen?
+! Waarschuwt Kadans als ik van de route afwijk?
+= Kies een route en tik op "Lopen". Je ziet de route op de kaart, en de coachstem meldt afslagen. Wijk je af, dan waarschuwt Kadans en zie je hoe je terugkomt.
+Je kunt de route ook naar je horloge sturen.
+
+# app-poi | Water, toiletten en verlichting | app | water, waterpunt, toilet, wc, verlichting, kraantje
+? Hoe vind ik waterpunten langs mijn route?
+? Waar is een toilet onderweg?
+! Laat Kadans zien welke wegen verlicht zijn?
+= Kadans haalt water- en toiletpunten en straatverlichting uit OpenStreetMap.
+- Bij Routes zet je de lagen voor water, toilet en verlichting aan.
+- De donker-route kiest wegen met straatverlichting.
+Het is afhankelijk van wat er in OpenStreetMap staat, dus controleer het onderweg zelf.
+
+# app-route-delen | Route delen | app | route delen, link, sturen, vriend, gpx
+? Hoe deel ik een route met een vriend?
+! Kan iemand zonder Kadans mijn route bekijken?
+! Hoe exporteer ik een route als GPX?
+= Open de route en tik op Delen. Je krijgt een link, waarmee iedereen de route op kadans.fit kan bekijken, inclusief de hoogte. Heeft je vriend Kadans? Dan opent de link direct de app.
+Exporteren als GPX kan ook, bijvoorbeeld voor je horloge.
+
+# app-live | Live locatie delen | app | live, live delen, locatie delen, volgen, aanmoedigen
+? Hoe deel ik mijn live locatie tijdens het lopen?
+! Kunnen mijn vrienden mij aanmoedigen tijdens het lopen?
+! Wie kan mijn live locatie zien?
+= Zet bij Opnemen "Live delen" aan en stuur de link naar wie je wilt. Zij zien op een webpagina waar je bent, hoe ver je bent en of de valdetectie alarm slaat.
+Ze kunnen je via die pagina aanmoedigen. Dat hoor je dan tijdens het lopen.
+Alleen wie de link heeft, ziet je locatie. Na je run stopt het delen.
+
+# app-valdetectie | Valdetectie | app | vallen, valdetectie, gevallen, alarm, noodgeval
+? Hoe werkt de valdetectie?
+! Wat gebeurt er als ik val tijdens het lopen?
+! Kan ik de valdetectie uitzetten?
+= De valdetectie merkt een harde val op, gevolgd door stilliggen.
+- Je krijgt eerst een aftelling ("Gaat het?"), zodat je het alarm kunt annuleren.
+- Reageer je niet, dan ziet wie je live volgt een melding. Je krijgt knoppen om je noodcontact of 112 te bellen, of je locatie te sturen.
+Kadans stuurt zelf geen sms. Zet daarom live delen aan als je wilt dat iemand meekijkt. Je noodcontact stel je in onder Ik; het blijft alleen op je telefoon. Valdetectie zet je aan of uit in de instellingen van Opnemen.
+
+# app-vergrendel | Vergrendelscherm tijdens de run | app | vergrendelscherm, scherm uit, lockscreen, scherm aan
+? Kan ik mijn run op het vergrendelscherm zien?
+! Moet het scherm aan blijven tijdens het opnemen?
+= Nee, je scherm hoeft niet aan te blijven. Zet onder "Meer opties" bij Opnemen het vergrendelscherm aan. Dan zie je je cijfers zonder te ontgrendelen. De opname loopt gewoon door met het scherm uit.
+
+# app-markeren | Moment markeren | app | markeren, markering, marker, oortjesknop, moment
+? Wat doet de knop Markeren?
+! Kan ik met mijn oortjes een moment markeren?
+= Met Markeren zet je een punt in je run, bijvoorbeeld de start van een interval of iets moois onderweg. Dat kan ook met de knop op je oortjes. Na de run zie je de markeringen op de kaart en in de tussentijden.
+
+# app-indeling | Opnamescherm indelen | app | indeling, cijfers, scherm aanpassen, velden, data velden
+? Kan ik zelf kiezen welke cijfers ik zie tijdens het lopen?
+! Hoe verander ik de indeling van het opnamescherm?
+= Ja. Ga bij Opnemen naar de instellingen en kies "Indeling". Daar zet je de cijfers die je wilt zien in de volgorde die jij wilt: tijd, afstand, tempo, hartslag, cadans en meer.
+
+# app-tempoalarm | Tempo-alarm | app | tempo alarm, pace alarm, te snel, te langzaam, bandbreedte
+? Hoe werkt het tempo-alarm?
+! Kan Kadans waarschuwen als ik te snel loop?
+= Stel bij Opnemen een doeltempo in, met een bandbreedte, bijvoorbeeld 6:00 ± 10 seconden. Loop je erbuiten, dan zegt de coachstem "iets rustiger" of "iets sneller".
+
+# app-records | Records | app | records, pr, persoonlijk record, snelste, beste tijd
+? Waar zie ik mijn persoonlijke records?
+! Hoe berekent Kadans mijn records?
+! Wat is het leeftijdsniveau bij mijn records?
+= Je records staan in Logboek → Records (na 5 runs). Kadans zoekt in al je runs naar je snelste stuk op 1 km, 5 km, 10 km, de halve en de hele marathon, ook als het onderdeel was van een langere run.
+Het leeftijdsniveau vergelijkt je tijd met het wereldrecord voor jouw leeftijd en geslacht. Zo zie je hoe goed je bent, los van je leeftijd.
+
+# app-badges | Badges en niveaus | app | badges, medailles, brons, zilver, goud, platina, prestaties
+? Hoe verdien ik badges in Kadans?
+! Wat betekenen brons, zilver, goud en platina?
+= Badges krijg je voor mijlpalen, zoals afstanden, reeksen, vroege runs of runs in de regen. Ze hebben niveaus van brons naar zilver, goud en platina. De legenda staat bij je badges.
+
+# app-bingo | Loop-bingo | app | bingo, loop bingo, uitdaging, kaart
+? Wat is loop-bingo?
+! Hoe werkt de bingokaart op Vandaag?
+= Loop-bingo is een kaart met kleine uitdagingen: een run voor 8 uur, in de regen, een nieuwe route, een heuvel, enzovoort. Elke uitdaging die je doet, streept Kadans vanzelf af. Een rij vol is bingo.
+
+# app-segmenten | Stukken | app | stukken, segmenten, segment, stuk, rondetijd
+? Wat zijn stukken in Kadans?
+! Hoe maak ik een stuk aan?
+= Een stuk is een vast stukje route dat je vaak loopt, bijvoorbeeld een heuvel of een rondje. Je maakt het aan vanuit een run. Daarna vergelijkt Kadans elke keer dat je het stuk loopt je tijd met je eerdere tijden.
+
+# app-doelen | Doelen en uitdagingen | app | doelen, uitdaging, doel, maanddoel, jaardoel
+? Hoe stel ik een doel in?
+! Waar vind ik de uitdagingen?
+= Ga naar Vandaag → Meer vandaag → Doelen. Daar stel je een week-, maand- of jaardoel in, in kilometers of runs, en zie je je voortgang. Uitdagingen met anderen vind je in Samen.
+
+# app-samen | Samen (sociaal) | sociaal | samen, community, vrienden, volgen, gesprekken
+? Wat kan ik doen in Samen?
+? Hoe volg ik een vriend in Kadans?
+! Wie kan mijn runs zien?
+! Hoe voeg ik vrienden toe?
+! Kan ik reageren op runs van anderen?
+= In Samen zie je runs van mensen die je volgt, gesprekken, loopgroepen, clubevenementen en wedstrijden.
+- Volg iemand met zijn of haar vriendcode.
+- Reageer met 👏🔥💪 of een bericht. Met @naam vermeld je iemand.
+- Alleen runs die jij deelt zijn zichtbaar. Begin en eind van de route worden standaard weggelaten (privacyzone).
+Runs uit Strava worden nooit in Samen getoond.
+
+# app-privacyzone | Privacyzone | privacy | privacyzone, thuis verbergen, adres, privé
+? Hoe verberg ik waar ik woon?
+! Wat is een privacyzone?
+= Als je een run deelt, laat Kadans standaard het begin en eind van de route weg. Zo ziet niemand waar je woont. Die privacyzone kun je bij het delen aan- of uitzetten.
+
+# app-loopgroep | Loopgroepen | sociaal | loopgroep, groep maken, groepscode, groepsrun, agenda
+? Hoe maak ik een loopgroep aan?
+? Hoe word ik lid van een loopgroep?
+! Hoe plan ik een groepsrun?
+= Ga naar Samen → Loopgroepen.
+- Maak een groep. Je krijgt een code die je deelt met je loopmaatjes.
+- Lid worden doe je met die code.
+- In de groep plan je groepsruns in de agenda (wanneer, waar, tempo), en zie je wie er komt.
+
+# app-loopmaatjes | Loopmaatjes vinden | sociaal | loopmaatje, maatje zoeken, samen lopen, buurt
+? Hoe vind ik een loopmaatje in de buurt?
+! Is mijn locatie zichtbaar bij loopmaatjes?
+= Zet in Samen → Loopmaatjes je profiel aan. Je ziet dan lopers in de buurt met een vergelijkbaar tempo en vergelijkbare tijden. Je locatie wordt afgerond, dus niemand ziet je precieze adres. Je kunt het altijd weer uitzetten.
+
+# app-clubagenda | Clubagenda koppelen | sociaal | club, clubagenda, ical, evenementen, vereniging
+? Hoe zet ik de trainingen van mijn club in Kadans?
+! Wat is een iCal-link?
+= Vraag je club om de agendalink (iCal of .ics), of kopieer hem van de clubwebsite. Plak hem in Samen → Clubevenementen → Agenda koppelen. Je kunt maximaal 5 agenda's koppelen. Ze worden elke 6 uur ververst.
+De link blijft op je telefoon en wordt niet gedeeld.
+
+# app-profiel | Profiel en profielfoto | sociaal | profiel, profielfoto, foto, bio, naam wijzigen
+? Hoe verander ik mijn profielfoto?
+! Hoe pas ik mijn naam of bio aan?
+! Wat doe ik als iemand een ongepaste foto heeft?
+= Tik in Samen op je eigen profiel om het te bewerken. Daar kies je een foto (maximaal 2 MB), een bio, je plaats en je favoriete afstand.
+Ongepaste foto of gedrag? Tik op het profiel en kies "Melden" of "Blokkeren". Na 3 meldingen wordt een foto automatisch verborgen.
+
+# app-stappen | Stappen van de maand | sociaal | stappen, stappenwedstrijd, stappen teller, ranglijst
+? Hoe werkt de stappenwedstrijd?
+! Waarom staan mijn stappen er niet in?
+= Kadans leest met jouw toestemming je stappen uit Health Connect, en stuurt alleen het maandtotaal naar de ranglijst met je vrienden en loopgroepen.
+Staan je stappen er niet in? Controleer of Health Connect je stappen heeft, en of je Kadans toegang tot stappen hebt gegeven.
+
+# app-premium | Premium | app | premium, abonnement, betalen, pro, opzeggen, prijs
+? Wat krijg ik met Kadans Premium?
+? Hoe zeg ik mijn Premium-abonnement op?
+! Hoeveel kost Kadans Premium?
+! Kan ik Premium eerst uitproberen?
+= Met Premium krijg je extra's, zoals de AI-coach die je runs kent, uitgebreidere analyses en de luxe donker-gouden stijl. De eerste maand is gratis, daarna kost Premium € 5 per maand. De actuele prijs zie je altijd onder Ik → Premium.
+Opzeggen doe je via Google Play → Abonnementen, of in Kadans onder Ik → Premium → Abonnement beheren.
+
+# app-account-verwijderen | Account verwijderen | privacy | account verwijderen, gegevens wissen, uitschrijven, stoppen
+? Hoe verwijder ik mijn account?
+! Worden al mijn gegevens gewist als ik mijn account verwijder?
+= Ga naar Ik en tik onderaan op Account verwijderen. Je runs, routes, berichten en profiel worden dan gewist. Zonder de app kan het ook via kadans.fit/verwijderen.html.
+Heb je Premium? Zeg je abonnement ook op in Google Play. Dat stopt niet vanzelf.
+
+# app-privacy | Privacy en gegevens | privacy | privacy, gegevens, data, avg, gdpr, wie ziet mijn data
+? Wat doet Kadans met mijn gegevens?
+! Verkoopt Kadans mijn data?
+! Waar staat de privacyverklaring?
+= Kadans gebruikt je gegevens alleen om de app te laten werken. Je data wordt niet verkocht.
+- Gezondheidsgegevens (hartslag, stappen) alleen na jouw toestemming. Intrekken kan onder Ik → Gezondheidsgegevens.
+- Je agenda en clubagenda's blijven op je telefoon.
+- Vragen aan de coach worden zonder naam bewaard om de coach te verbeteren.
+De volledige privacyverklaring vind je onder Ik → Privacyverklaring en op kadans.fit/privacy.html.
+
+# app-coach | De Kadans-coach | app | coach, ai coach, vraag stellen, coach werkt niet, antwoord
+? Hoe werkt de coach?
+? Wat kan ik de coach vragen?
+! Is de coach een echte trainer?
+! Waarom zegt de coach dat hij iets niet weet?
+! Waarom krijg ik soms een kort standaardantwoord?
+= De coach beantwoordt vragen over hardlopen, trainen, voeding, herstel, materiaal en de app. Dat doet hij uit een kennisbank met antwoorden die door Kadans zijn opgesteld. Vragen over je eigen runs ("Hoe ging mijn week?") rekent hij direct uit je logboek uit.
+Staat een vraag nog niet in de kennisbank, dan wordt het antwoord opgezocht en toegevoegd. De coach is geen arts of fysiotherapeut. Bij pijn of klachten verwijst hij je door.
+
+# app-deelkaart | Run delen | app | delen, deelkaart, instagram, story, verhaal, foto van run
+? Hoe deel ik mijn run op Instagram?
+! Kan ik een deelkaart maken van mijn run?
+= Open je run en tik op Delen. Kies een bericht (4:5) of een verhaal (9:16), met je kaart, je tijd en je tempo in de donker-gouden stijl. Na een record maakt Kadans vanzelf een feestelijke deelkaart.
+
+# app-titel | Runtitel wijzigen | app | titel, naam van run, run hernoemen
+? Hoe verander ik de naam van mijn run?
+! Kan ik een notitie toevoegen aan een run?
+= Open de run in Logboek en tik op de titel om hem te wijzigen. Daar kun je ook een notitie toevoegen en aangeven hoe de run voelde. Dat helpt de coach en jezelf later.
+
+# app-run-verwijderen | Run verwijderen of bewerken | app | run verwijderen, dubbele run, verkeerde run, wissen
+? Hoe verwijder ik een run?
+! Ik heb een dubbele run, hoe haal ik die weg?
+= Open de run in Logboek, tik op het menu (de drie puntjes) en kies Verwijderen. Een dubbele run komt vaak doordat een run zowel via je horloge (Health Connect) als via Strava binnenkwam. Verwijder er één.
+
+# app-widget | Widget op het startscherm | app | widget, startscherm, homescreen
+? Heeft Kadans een widget?
+! Hoe zet ik de Kadans-widget op mijn startscherm?
+= Ja. Druk lang op een lege plek op je startscherm, kies Widgets, zoek Kadans en sleep de widget naar je scherm. Je ziet dan het beste moment om te lopen zonder de app te openen.
+
+# app-snelkoppeling | Snelkoppeling "Wanneer lopen?" | app | snelkoppeling, google assistent, hey google, spraak
+? Kan ik Google vragen wanneer ik moet lopen?
+! Werkt Kadans met Hey Google?
+= Nederlandse "Hey Google"-vragen aan apps zijn helaas niet mogelijk. Wel kun je lang drukken op het Kadans-icoon en de snelkoppeling "Wanneer lopen?" op je startscherm zetten. Eén tik geeft je het beste moment.
+
+# app-taal | Taal en weergave | app | taal, engels, donker, licht, thema, lettergrootte
+? Kan ik Kadans in het Engels gebruiken?
+! Hoe zet ik de donkere modus aan?
+! Kan ik de letters groter maken?
+= Taal en weergave (licht, donker of automatisch) stel je in onder Ik → Weergave. Kadans volgt ook de lettergrootte van je telefoon.
+De coach antwoordt nu nog alleen in het Nederlands.
+
+# app-fout | De app doet raar of crasht | app | crash, bug, fout, werkt niet, probleem, storing
+? De app werkt niet goed, wat moet ik doen?
+? Kadans crasht steeds
+! Hoe meld ik een fout in de app?
+! Waarom laadt de app niet?
+= Probeer eerst dit:
+- Sluit de app helemaal af en open hem opnieuw.
+- Controleer je internetverbinding.
+- Kijk of er een update is.
+Blijft het probleem? Meld het onder Ik → Feedback sturen, met wat je deed en wat er gebeurde. Een screenshot helpt.
+
+# app-iphone | Kadans op iPhone | app | iphone, ios, apple, apple watch
+? Is Kadans er ook voor iPhone?
+! Werkt Kadans met de Apple Watch?
+= Kadans is er nu voor Android. Een iPhone-versie staat op de wensenlijst, maar heeft nog geen datum. Meld je op kadans.fit voor de wachtlijst, dan hoor je het als eerste.
+
+# app-poster | Posters en shop | app | poster, shop, route poster, kopen, cadeau
+? Kan ik een poster van mijn route bestellen?
+! Wat zit er in de Kadans-shop?
+= De shop met posters van je eigen routes (en andere spullen) is in voorbereiding. Zodra hij live is, vind je hem onder Ik → Shop.
+
+# app-luchtfoto | Wedstrijddetails | app | luchtfoto, startlocatie, wedstrijd details, vergunning, status
+? Wat betekent de status bij een wedstrijd?
+! Waarom zie ik een luchtfoto bij een wedstrijd?
+= De status komt uit de bekendmaking van de gemeente: aangevraagd, gemeld of verleend. "Verleend" betekent dat de vergunning er is. De luchtfoto (PDOK) laat de omgeving van de start zien.
+Controleer de datum en details altijd bij de organisatie. Gebruik daarvoor de knop "Zoek inschrijving en afstanden" of de link naar de officiële bekendmaking.

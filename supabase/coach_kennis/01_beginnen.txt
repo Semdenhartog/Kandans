@@ -1,0 +1,328 @@
+## Coach-kennis van Kadans. Formaat:
+##   # sleutel | Onderwerp | categorie | trefwoorden, gescheiden door komma's [| actie=… | soort=arts|buiten]
+##   ? veelgestelde vraag
+##   ! verwachte vraag
+##   = antwoord (meerdere regels mag, tot de volgende lege regel)
+## Regels die met '##' beginnen zijn opmerkingen.
+
+# beginnen-start | Beginnen met hardlopen | beginnen | beginner, starten, beginnen, nooit gelopen
+? Hoe begin ik met hardlopen?
+? Ik wil gaan hardlopen, waar begin ik?
+! Ik heb nog nooit gelopen, hoe pak ik dat aan?
+! Wat is de beste manier om te starten met rennen?
+= Begin rustig en wissel lopen af met wandelen.
+- Loop 3 keer per week, met steeds een dag rust ertussen.
+- Start met bijvoorbeeld 8 keer 1 minuut lopen en 2 minuten wandelen.
+- Maak de looptukjes elke week iets langer. Na 6 tot 9 weken loop je 20 à 30 minuten aan één stuk.
+- Loop zo rustig dat je nog kunt praten.
+Kadans heeft een beginnersschema met loop-wandel-blokken onder Ik → Trainingsschema.
+
+# beginnen-vaak | Hoe vaak per week lopen | beginnen | vaak, keer per week, frequentie, hoeveel keer
+? Hoe vaak per week moet ik hardlopen?
+? Hoeveel keer per week kan ik het beste trainen?
+! Is elke dag hardlopen goed?
+! Mag ik twee dagen achter elkaar lopen?
+= Voor de meeste lopers is 3 keer per week een goede basis.
+- Beginner: 2–3 keer, met een rustdag ertussen.
+- Een paar maanden ervaring: 3–4 keer.
+- Ervaren en gezond: 4–6 keer kan, als het grootste deel rustig is.
+Twee dagen achter elkaar mag zodra je lichaam eraan gewend is. Maak de tweede dag dan kort en rustig. Elke dag lopen raden we alleen aan als je al lang loopt en minstens één dag per week heel licht houdt.
+
+# beginnen-tempo | Te snel beginnen | beginnen | te snel, kapot, buiten adem, praattempo
+? Waarom ben ik na een paar minuten al kapot?
+? Ik ben steeds buiten adem, wat doe ik fout?
+! Hoe hard moet ik lopen als beginner?
+! Hoe weet ik of ik niet te snel loop?
+= Bijna iedereen begint te snel. Zo herken je een goed tempo:
+- Je kunt nog in hele zinnen praten (praattempo).
+- Je ademt wel dieper, maar hijgt niet.
+- Na afloop had je nog een stukje verder gekund.
+Voelt zelfs langzaam lopen zwaar? Las dan wandelpauzes in. Dat is geen falen, maar slim trainen. Je conditie groeit vooral door rustige kilometers.
+
+# beginnen-afstand | Hoe ver als beginner | beginnen | hoe ver, afstand, eerste keer, kilometers
+? Hoeveel kilometer moet ik lopen als beginner?
+? Hoe ver moet ik de eerste keer lopen?
+! Is 2 kilometer genoeg om mee te beginnen?
+! Hoe lang moet een eerste run duren?
+= Kijk in het begin naar tijd, niet naar afstand.
+- Eerste weken: 20–30 minuten in totaal, inclusief wandelen.
+- Doel na ongeveer 2 maanden: 25–30 minuten aan één stuk.
+- Bij een rustig tempo is dat vaak 3 tot 5 km.
+2 km is een prima begin. Elke run telt.
+
+# beginnen-5k | Eerste 5 kilometer | beginnen | 5 km, vijf kilometer, eerste 5k, start to run
+? Hoe lang duurt het voor ik 5 km kan lopen?
+? Hoe train ik naar mijn eerste 5 kilometer?
+! Kan ik binnen een maand 5 km lopen?
+! Wat is een goed schema voor 0 naar 5 km?
+= Van niets naar 5 km aan één stuk duurt meestal 8 tot 10 weken, met 3 keer per week trainen.
+- Week 1–3: loop-wandel-blokken, bijvoorbeeld 1–3 minuten lopen en 1–2 minuten wandelen.
+- Week 4–6: blokken van 5–10 minuten.
+- Week 7–10: 20–35 minuten aan één stuk.
+Een maand kan als je al sportief bent, maar het risico op blessures is dan groter. Kies in Kadans onder Ik → Trainingsschema het doel "5 km" voor een schema dat zich aanpast.
+
+# beginnen-wandelen | Wandelen tijdens het lopen | beginnen | wandelen, wandelpauze, stukjes lopen, loop wandel
+? Mag ik tussendoor wandelen?
+? Is het erg als ik stukjes wandel?
+! Telt een run nog als ik wandel?
+! Is lopen en wandelen afwisselen goed?
+= Ja, dat mag en het werkt goed. Loop-wandelen is een bewezen manier om op te bouwen. Ook ervaren lopers gebruiken het bij ultra's en in de heuvels.
+- Je belast je lichaam korter achter elkaar en herstelt sneller.
+- Je kunt in totaal langer bewegen.
+Kadans telt de hele activiteit mee. Tijdens het opnemen hoeft wandelen niet op pauze.
+
+# beginnen-motivatie-start | Volhouden als beginner | motivatie | volhouden, opgeven, zin, gewoonte
+? Hoe hou ik het hardlopen vol?
+? Ik stop steeds na een paar weken, hoe voorkom ik dat?
+! Hoe maak ik van hardlopen een gewoonte?
+! Hoe blijf ik gemotiveerd als beginner?
+= Volhouden gaat makkelijker met een vaste structuur:
+- Zet je runs vast in je agenda, op dezelfde dagen.
+- Maak het makkelijk: leg je kleren klaar en loop vanaf je voordeur.
+- Kies een klein doel, bijvoorbeeld 4 weken 3 keer per week, en daarna een groter.
+- Loop samen: een maatje of loopgroep maakt afzeggen lastiger. Kijk in Samen.
+- Houd het tempo rustig. Lopers die te hard beginnen, stoppen vaker.
+Kadans laat op Vandaag het beste moment zien en houdt in Logboek je reeks bij.
+
+# beginnen-leeftijd | Hardlopen op latere leeftijd | beginnen | leeftijd, oud, 50, 60, 70, ouder, senior
+? Ben ik te oud om te beginnen met hardlopen?
+? Kan ik op mijn 60e nog leren hardlopen?
+! Moet ik als 50-plusser anders trainen?
+! Is hardlopen gezond voor ouderen?
+= Je bent bijna nooit te oud om te beginnen. Bouw wel rustiger op:
+- Laat bij hart- of vaatklachten, hoge bloeddruk of medicijnen eerst je huisarts meekijken.
+- Neem meer rust: 2–3 keer per week is genoeg.
+- Doe ook kracht- en balansoefeningen, want die beschermen je spieren en gewrichten.
+- Verwacht dat herstel wat langer duurt, en dat is normaal.
+In Logboek → Records laat Kadans je leeftijdsniveau zien, zodat je jezelf eerlijk vergelijkt.
+
+# beginnen-gewicht | Hardlopen met overgewicht | beginnen | overgewicht, zwaar, gewicht, dik
+? Kan ik hardlopen met overgewicht?
+? Is hardlopen slecht voor mijn knieën als ik zwaar ben?
+! Moet ik eerst afvallen voordat ik ga lopen?
+! Hoe begin ik met lopen als ik veel weeg?
+= Dat kan, maar bouw extra rustig op. Je gewrichten en pezen hebben meer tijd nodig dan je conditie.
+- Begin met stevig wandelen en daarna loop-wandel-blokken.
+- Kies zachte ondergrond (bospad, gravel) en goede schoenen.
+- Fietsen of zwemmen ernaast helpt je conditie zonder extra belasting.
+- Krijg je aanhoudend pijn in knieën, heupen of schenen? Neem rust en vraag een fysiotherapeut om advies.
+Bij hartklachten, diabetes of medicijnen: overleg eerst met je huisarts.
+
+# beginnen-keuring | Sportkeuring nodig? | gezondheid | sportkeuring, keuring, dokter, check, hart
+? Moet ik een sportkeuring doen voordat ik begin?
+! Heb ik een medische check nodig om te gaan hardlopen?
+! Wanneer is een sportmedisch onderzoek verstandig?
+= Voor de meeste gezonde mensen is een keuring niet verplicht. Het is wel verstandig in deze gevallen:
+- Hart- of vaatziekte in de familie op jonge leeftijd.
+- Klachten bij inspanning: pijn op de borst, flauwvallen, hartkloppingen, erg kortademig.
+- Hoge bloeddruk, diabetes of medicijnen voor hart of longen.
+- Je bent 35+ en begint na jaren stilzitten aan zware training of wedstrijden.
+Je huisarts of een sportmedisch centrum kan je verder helpen.
+| soort=arts
+
+# beginnen-loopgroep | Loopgroep of alleen | beginnen | loopgroep, club, atletiekvereniging, samen, alleen
+? Is een loopgroep handig voor beginners?
+! Moet ik lid worden van een atletiekvereniging?
+! Loop ik beter alleen of samen?
+= Beide werken, het hangt van je doel af.
+- Loopgroep of club: vaste tijden, uitleg van een trainer, motivatie en gezelligheid. Veel clubs hebben beginnersgroepen.
+- Alleen: flexibel, je kiest zelf tijd, route en tempo.
+In Kadans kun je onder Samen een loopgroep maken of zoeken, met een groepsagenda, en loopmaatjes vinden. De agenda van je club kun je via een iCal-link toevoegen.
+
+# beginnen-ochtend-avond | Ochtend of avond lopen | planning | ochtend, avond, tijdstip, nuchter, wanneer op de dag
+? Is het beter om 's ochtends of 's avonds te lopen?
+? Wat is het beste tijdstip om te hardlopen?
+! Kan ik vlak voor het slapengaan nog lopen?
+! Mag ik direct na het opstaan gaan lopen?
+= Het beste tijdstip is het moment dat je het volhoudt.
+- Ochtend: lekker rustig, de dag begint goed. Je spieren zijn wel stijver, dus begin heel rustig.
+- Middag of vroege avond: je lichaam is warm en je loopt vaak het snelst.
+- Laat in de avond: kan, maar een zware training vlak voor bed kan je slaap verstoren. Houd het dan rustig en eindig minstens een uur voor bedtijd.
+Kadans rekent op Vandaag het beste moment van de dag uit, met weer, licht en jouw agenda.
+
+# beginnen-warmlopen | Warming-up | techniek | warming up, opwarmen, inlopen, voorbereiding
+? Moet ik een warming-up doen?
+? Hoe doe ik een goede warming-up?
+! Hoe lang moet ik inlopen?
+! Moet ik rekken voor het lopen?
+= Voor een rustige run is 5 minuten heel rustig beginnen genoeg.
+Voor snelle trainingen of een wedstrijd:
+- 10–15 minuten rustig inlopen.
+- Een paar dynamische oefeningen: knieheffen, hakken-billen, beenzwaaien.
+- 3–4 korte versnellingen van 15–20 seconden.
+Statisch rekken (lang vasthouden) voor het lopen is niet nodig. Doe dat liever na de run of op een rustdag.
+
+# beginnen-coolingdown | Cooling-down en uitlopen | techniek | cooling down, uitlopen, na de run, afkoelen
+? Is een cooling-down nodig?
+! Wat moet ik doen na het hardlopen?
+! Moet ik uitlopen na een training?
+= Na een rustige run kun je gewoon stoppen en een paar minuten wandelen.
+Na intervallen, een tempoloop of een wedstrijd:
+- 5–10 minuten heel rustig uitlopen of wandelen.
+- Daarna drinken en binnen een uur iets eten, met koolhydraten en wat eiwit.
+- Licht rekken of mobiliseren mag als het prettig voelt, maar het hoeft niet.
+
+# beginnen-spierpijn | Spierpijn na lopen | herstel | spierpijn, stijf, pijnlijke benen, dag erna
+? Ik heb spierpijn na het lopen, is dat normaal?
+? Mag ik lopen met spierpijn?
+! Hoe kom ik sneller van mijn spierpijn af?
+! Waarom heb ik twee dagen later pas spierpijn?
+= Spierpijn na een nieuwe of zware inspanning is normaal. Het komt vaak pas 1–2 dagen later (DOMS) en verdwijnt binnen 2–4 dagen.
+- Licht bewegen helpt: wandelen, fietsen of een heel rustig rondje.
+- Slaap goed, drink voldoende en eet genoeg eiwit.
+- Wacht met een zware training tot de spierpijn grotendeels weg is.
+Is het scherpe pijn op één plek, wordt het erger bij lopen of zie je zwelling? Dan is het geen spierpijn. Stop dan en laat het nakijken.
+
+# beginnen-steken | Steken in de zij | gezondheid | steek, zij, zijsteek, buik
+? Wat doe ik tegen steken in mijn zij?
+? Waarom krijg ik steken in mijn zij tijdens het lopen?
+! Hoe voorkom ik een zijsteek?
+= Een zijsteek is vervelend, maar meestal onschuldig.
+Tijdens het lopen:
+- Ga langzamer lopen of wandel even.
+- Adem diep en rustig uit, en druk met je hand op de plek.
+- Buig licht voorover of strek je arm aan de andere kant omhoog.
+Voorkomen:
+- Eet niet zwaar in de 2 uur voor je run.
+- Drink niet veel tegelijk vlak voor het lopen.
+- Begin rustig.
+Komt de pijn vaak terug of is het pijn op de borst? Laat het dan nakijken.
+
+# beginnen-ademhaling | Ademhaling tijdens het lopen | techniek | ademen, ademhaling, neus, mond, adem
+? Hoe moet ik ademhalen tijdens het hardlopen?
+? Moet ik door mijn neus of mond ademen?
+! Hoe adem ik goed bij een hoog tempo?
+! Waarom kom ik adem tekort?
+= Adem zoals het vanzelf gaat, door neus en mond tegelijk. Bij hardlopen heb je meer lucht nodig dan alleen je neus geeft.
+- Rustig lopen: kun je nog praten, dan zit je goed.
+- Sneller lopen: een vast ritme helpt, bijvoorbeeld 2 passen in en 2 passen uit.
+- Adem met je buik. Laat je schouders laag en ontspannen.
+Kom je bij rustig lopen adem tekort? Dan loop je meestal te snel. Bij benauwdheid, piepen of pijn op de borst: laat het nakijken.
+
+# beginnen-pasfrequentie | Pasfrequentie (cadans) | techniek | cadans, pasfrequentie, passen per minuut, spm, stappen
+? Wat is een goede pasfrequentie?
+? Moet ik 180 passen per minuut lopen?
+! Hoe verhoog ik mijn cadans?
+! Wat betekent cadans bij hardlopen?
+= Cadans is het aantal passen per minuut. 180 is geen wet, maar een gemiddelde van snelle lopers.
+- Veel recreanten lopen 155–170. Dat is prima.
+- Iets kortere, snellere passen (5–10% meer) kunnen je belasting verminderen als je ver voor je lichaam landt.
+- Verhoog het rustig, bijvoorbeeld met een metronoom of muziek met het juiste ritme.
+Kadans laat je cadans zien bij de run als je telefoon of loopsensor die meet.
+
+# beginnen-techniek | Looptechniek verbeteren | techniek | looptechniek, houding, landen, voorvoet, hiel
+? Hoe verbeter ik mijn looptechniek?
+? Moet ik op mijn voorvoet of hiel landen?
+! Wat is een goede houding tijdens het lopen?
+! Hoe loop ik efficiënter?
+= Je lichaam vindt vaak vanzelf een goede manier. Een paar aandachtspunten:
+- Rechtop, licht voorover vanuit je enkels, niet vanuit je heupen.
+- Land onder je lichaam, niet ver voor je uit. Waar je voet landt (hiel, middenvoet, voorvoet) maakt minder uit.
+- Ontspannen schouders, armen in een hoek van ongeveer 90°, zwaaien naar voren en achteren.
+- Kijk vooruit, niet naar je voeten.
+Loopscholing (knieheffen, huppelen) en heuvelsprintjes maken je techniek vanzelf beter. Verander niet alles tegelijk.
+
+# beginnen-armen | Armbeweging | techniek | armen, armzwaai, handen, schouders
+? Wat moet ik met mijn armen doen tijdens het lopen?
+! Waarom krijg ik pijn in mijn schouders bij hardlopen?
+! Moet ik mijn handen ontspannen?
+= - Buig je ellebogen ongeveer 90 graden.
+- Zwaai je armen naar voren en achteren, niet voor je borst langs.
+- Houd je handen losjes, alsof je een chipje vasthoudt dat niet mag breken.
+- Laat je schouders laag. Schud ze af en toe los.
+Pijn in schouders of nek komt vaak door spanning. Let er een run lang bewust op.
+
+# beginnen-loopband | Loopband of buiten | techniek | loopband, treadmill, sportschool, binnen
+? Is lopen op de loopband net zo goed als buiten?
+? Hoe gebruik ik de loopband in Kadans?
+! Op welke helling moet ik de loopband zetten?
+! Is een loopband slechter voor je knieën?
+= De loopband is een prima vervanger, bijvoorbeeld bij gladheid of in het donker.
+- Zet de helling op 1% om de luchtweerstand van buiten ongeveer na te bootsen.
+- Het tempo voelt vaak anders. Loop op gevoel en hartslag, niet alleen op het getal.
+- De band is iets zachter en voorspelbaarder. Voor je knieën is dat niet slechter.
+In Kadans kies je bij Opnemen voor de loopband. De app rekent dan met de snelheid die je instelt.
+
+# beginnen-dagboek | Waarom een logboek bijhouden | app | logboek, bijhouden, overzicht, geschiedenis, runs zien
+? Waar zie ik mijn eerdere runs?
+! Waarom zou ik mijn runs bijhouden?
+! Hoe zie ik mijn voortgang?
+= Al je runs staan in Logboek, onderaan in de balk.
+- Tik op een run voor de kaart, tussentijden, hartslag en hoogte. Onder "Meer analyse" vind je de verdieping.
+- Na 5 runs krijg je je vorm en records, na 20 runs een heatmap en jaaroverzicht.
+Met een logboek zie je wat werkt, voorkom je te snelle opbouw en blijf je gemotiveerd.
+
+# beginnen-hond | Hardlopen met je hond | planning | hond, hondje, met de hond, canicross
+? Kan ik hardlopen met mijn hond?
+! Vanaf welke leeftijd mag mijn hond meelopen?
+! Waar moet ik op letten als ik met de hond loop?
+= Dat kan, met een paar regels:
+- Wacht tot de hond volgroeid is, vaak 12–18 maanden bij grotere rassen. Vraag het je dierenarts.
+- Bouw voor de hond net zo rustig op als voor jezelf.
+- Loop niet in de hitte en let op hete stoepen.
+- Neem water mee voor de hond.
+- Een heupgordel met elastische lijn is prettiger dan een gewone riem.
+Zet in Kadans de hondmodus aan. Dan waarschuwt de app bij warmte en wijst hij waterpunten aan.
+
+# beginnen-muziek | Muziek tijdens het lopen | motivatie | muziek, oortjes, podcast, koptelefoon
+? Is muziek luisteren tijdens het lopen goed?
+! Welke muziek is goed om op te hardlopen?
+! Kan ik Kadans gebruiken met mijn oortjes?
+= Muziek kan helpen: inspanning voelt lichter en je ritme wordt regelmatiger.
+- Kies voor rustige runs nummers rond je pasfrequentie (160–175 bpm), of een podcast.
+- Zet het volume zo dat je verkeer en fietsers nog hoort. Oortjes met open oor zijn veiliger.
+Met de knop op je oortjes kun je in Kadans tijdens de run een moment markeren. De coachstem praat gewoon door je muziek heen.
+
+# beginnen-veilig | Veilig hardlopen | veiligheid | veilig, alleen lopen, donker, noodgeval, ICE
+? Hoe loop ik veilig in mijn eentje?
+! Wat neem ik mee als ik alleen ga lopen?
+! Wat als er iets gebeurt tijdens mijn run?
+= - Laat iemand weten waar je loopt, of deel je live-locatie. Kadans heeft live delen bij Opnemen.
+- Zet de valdetectie aan en stel een noodcontact in. Als je valt en niet reageert, slaat Kadans alarm, ziet wie je live volgt een melding, en kun je met één tik bellen.
+- Neem je telefoon mee en zet je noodgegevens (ICE) in je telefoon.
+- Gebruik in het donker verlichte routes. Kadans kan een donker-route kiezen, en draag reflectie.
+- Wissel van route en tijd als je je ergens niet prettig voelt.
+- Bij een noodgeval: 112.
+
+# beginnen-telefoon | Telefoon meenemen | app | telefoon, gsm, mee nemen, houder, armband
+? Moet ik mijn telefoon meenemen tijdens het lopen?
+! Waar laat ik mijn telefoon tijdens het hardlopen?
+! Werkt Kadans zonder telefoon?
+= Kadans neemt je run op met de GPS van je telefoon, dus die moet mee. Ook voor je veiligheid is dat handig.
+- Een heupband of loopriem zit het stilst. Een armband kan ook.
+- Liever zonder telefoon? Neem op met je horloge. Via Health Connect komen de runs in Kadans.
+
+# beginnen-eten-voor | Eten voor het lopen | voeding | eten voor, ontbijt, maaltijd, hoe lang van tevoren
+? Wat moet ik eten voor het hardlopen?
+? Hoe lang moet ik wachten na het eten met lopen?
+! Mag ik met een lege maag lopen?
+! Wat is een goed ontbijt voor een run?
+= - Na een grote maaltijd: wacht 2–3 uur.
+- Een kleine snack (banaan, beschuit met jam, krentenbol) kan 30–60 minuten van tevoren.
+- Een rustige run tot een uur kan prima nuchter, als je je goed voelt.
+- Voor een lange of snelle training: eet vooraf iets met koolhydraten.
+Vermijd vlak voor het lopen veel vet, vezels of zuivel als je daar last van krijgt. Iedere maag is anders, dus probeer het uit op trainingen, niet op wedstrijddag.
+
+# beginnen-water | Drinken bij het lopen | voeding | drinken, water, dorst, bidon, vocht
+? Moet ik water meenemen tijdens het lopen?
+? Hoeveel moet ik drinken als ik ga hardlopen?
+! Moet ik drinken bij een run van een uur?
+! Hoe weet ik of ik genoeg gedronken heb?
+= - Tot ongeveer een uur, bij normaal weer: drinken is niet nodig als je goed gedronken begint.
+- Langer dan een uur of bij warmte: neem drinken mee, ongeveer 400–800 ml per uur, op dorst.
+- Drink niet geforceerd veel. Te veel water kan ook gevaarlijk zijn.
+- Lichtgele urine betekent meestal dat je genoeg drinkt.
+Kadans maakt na je run een schatting van je vochtverlies, en de route kan waterpunten laten zien.
+
+# beginnen-pijn-algemeen | Pijn tijdens het lopen | blessures | pijn, zeer, doet zeer, pijntje, blessure
+? Ik heb pijn tijdens het lopen, moet ik stoppen?
+? Mag ik doorlopen met pijn?
+! Wanneer is pijn een reden om te stoppen?
+! Hoe weet ik of het een blessure is?
+= Gebruik deze vuistregel:
+- Licht ongemak dat tijdens het lopen minder wordt en de volgende dag weg is: meestal geen probleem.
+- Pijn die erger wordt, scherp is, je anders laat lopen of de volgende ochtend nog voelbaar is: stop met lopen.
+- Neem een paar dagen rust of doe alternatief bewegen zonder pijn.
+- Is het na 1–2 weken niet over, of had je meteen zwelling? Ga naar een fysiotherapeut of huisarts.
+Ik kan geen diagnose stellen. Noteer pijntjes in Kadans onder Ik → Pijntjes, dan zie je of het terugkomt.
+| soort=arts

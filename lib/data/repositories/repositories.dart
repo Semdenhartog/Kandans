@@ -472,6 +472,7 @@ class RunWiseRepository {
       return CoachReply(
         reply: data['reply'] as String,
         freeLeft: (data['free_left'] as num?)?.toInt(),
+        via: data['via'] as String?,
       );
     } on FunctionException catch (e) {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
@@ -580,8 +581,11 @@ class RunWiseRepository {
 
 /// Antwoord van de coach.
 class CoachReply {
-  CoachReply({required this.reply, this.freeLeft});
+  CoachReply({required this.reply, this.freeLeft, this.via});
   final String reply;
+
+  /// 'kennis', 'data', 'claude' of 'onbekend'.
+  final String? via;
 
   /// Aantal gratis vragen dat nog over is (null bij premium).
   final int? freeLeft;

@@ -52,12 +52,15 @@ class Profile {
 
 /// Eén bericht in het gesprek met de AI-coach.
 class CoachMessage {
-  CoachMessage({required this.role, required this.content, required this.createdAt, this.id});
+  CoachMessage({required this.role, required this.content, required this.createdAt, this.id, this.via});
 
   final String? id;
   final String role; // 'user' of 'assistant'
   final String content;
   final DateTime createdAt;
+
+  /// Herkomst van een antwoord: 'kennis', 'data', 'claude' of 'onbekend' (null bij oude berichten).
+  final String? via;
 
   bool get isUser => role == 'user';
 
@@ -66,6 +69,7 @@ class CoachMessage {
         role: j['role'] as String,
         content: j['content'] as String,
         createdAt: DateTime.parse(j['created_at'] as String),
+        via: j['via'] as String?,
       );
 }
 

@@ -1,16 +1,22 @@
 // Edge Function: coach
-// AI-hardloopcoach. Alleen voor premium (met een paar gratis proefvragen).
+// Eerst de kennisbank (coach_kennis, gratis, geen AI). Vragen over je eigen runs/weer rekent de
+// server zelf uit. Alleen als niets goed past gaat de vraag naar Claude (premium of gratis proefvragen);
+// dat antwoord komt algemeen gemaakt in de kennisbank, zodat dezelfde vraag niet twee keer geld kost.
 //
-//   POST { message: "..." }  -> { reply, premium, free_left }
-//   POST { mode: "summary", activity_id }  -> { summary, premium, free_left }
+//   POST { message: "..." }  -> { reply, premium, free_left, via: kennis|data|claude|onbekend }
+//   POST { mode: "summary", activity_id }  -> { summary, premium, free_left }   (altijd Claude)
 //
 // Geheimen (Supabase -> Edge Functions -> Secrets):
-//   ANTHROPIC_API_KEY   verplicht
+//   ANTHROPIC_API_KEY   optioneel: zonder werkt alleen de kennisbank
 //   COACH_MODEL         optioneel, standaard claude-haiku-5-5
 //
 // Strava-runs gaan bewust NIET mee naar de AI (Strava-voorwaarden over AI).
 
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import {
+  CLAUDE_OPDRACHT, DREMPEL, kledingAntwoord, laatsteAntwoord, leesClaude, maandAntwoord, ONBEKEND_ANTWOORD,
+  tempoAntwoord, vandaagAntwoord, wedstrijdAntwoord, weekAntwoord, type Run,
+} from "../_shared/coach_kennis.ts";
 
 const MAX_MESSAGE_CHARS = 1500;
 const HISTORY_MESSAGES = 16;
@@ -309,12 +315,73 @@ function logUsage(kind: "chat" | "run_summary", userId: string, model: string, r
   }));
 }
 
+/** Antwoord uit je eigen gegevens voor een kennis-onderwerp met een actie. null = terugvaltekst gebruiken. */
+async function dataAntwoord(actie: string, db: SupabaseClient, userId: string, profile: Record<string, unknown>): Promise<string | null> {
+  const nu = new Date();
+  const runsVan = async (dagen: number) => {
+    const { data } = await db.from("activities")
+      .select("started_at, distance_meters, moving_time_seconds, average_heart_rate, elevation_gain_meters, feel")
+      .eq("user_id", userId).neq("source", "strava")
+      .or("external_id.is.null,external_id.not.like.viastrava-*")
+      .gte("started_at", new Date(nu.getTime() - dagen * 86_400_000).toISOString())
+      .gt("distance_meters", 0).gt("moving_time_seconds", 0)
+      .order("started_at", { ascending: false }).limit(80);
+    return (data ?? []) as Run[];
+  };
+  switch (actie) {
+    case "week": return weekAntwoord(await runsVan(16), nu);
+    case "laatste": return laatsteAntwoord(await runsVan(120));
+    case "maand": return maandAntwoord(await runsVan(35), nu);
+    case "tempo": return tempoAntwoord(await runsVan(60));
+    case "vandaag": {
+      const vandaag = nu.toISOString().slice(0, 10);
+      const [runs, { data: plan }] = await Promise.all([
+        runsVan(10),
+        db.from("plan_sessions").select("session_date, title, description").eq("user_id", userId)
+          .gte("session_date", vandaag).lte("session_date", new Date(nu.getTime() + 2 * 86_400_000).toISOString().slice(0, 10)),
+      ]);
+      return vandaagAntwoord(runs, plan ?? [], nu);
+    }
+    case "wedstrijd": {
+      const [runs, { data: races }] = await Promise.all([
+        runsVan(50),
+        db.from("race_events").select("name, race_date, distance_meters, goal_time_seconds, predicted_finish_seconds")
+          .eq("user_id", userId).gte("race_date", nu.toISOString().slice(0, 10)).order("race_date").limit(3),
+      ]);
+      return wedstrijdAntwoord(races ?? [], runs, nu);
+    }
+    case "kleding": {
+      const lat = profile.home_latitude as number | null, lon = profile.home_longitude as number | null;
+      if (lat == null || lon == null) return null;
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}` +
+          `&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&timezone=Europe%2FAmsterdam`,
+          { signal: AbortSignal.timeout(5000) });
+        if (!res.ok) return null;
+        const c = (await res.json()).current;
+        return kledingAntwoord({ temp: c.temperature_2m, gevoel: c.apparent_temperature, wind: c.wind_speed_10m, regen: c.precipitation, code: c.weather_code });
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+async function bewaar(db: SupabaseClient, userId: string, vraag: string, antwoord: string, via: string) {
+  const now = Date.now();
+  const { error } = await db.from("coach_messages").insert([
+    { user_id: userId, role: "user", content: vraag, via, created_at: new Date(now).toISOString() },
+    { user_id: userId, role: "assistant", content: antwoord.slice(0, 8000), via, created_at: new Date(now + 1).toISOString() },
+  ]);
+  if (error) console.error("coach_messages insert failed", error.message);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json(405, { error: "Alleen POST is toegestaan." });
 
   const apiKey = env("ANTHROPIC_API_KEY");
-  if (!apiKey) return json(503, { error: "De coach is nog niet ingesteld op de server." });
 
   const jwt = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   if (!jwt) return json(401, { error: "Niet ingelogd." });
@@ -341,29 +408,67 @@ Deno.serve(async (req) => {
   const limits = await config(db);
   const freeUsed = Number(profile.coach_free_questions_used ?? 0);
 
-  if (!premium) {
-    if (freeUsed >= limits.free) {
-      return json(402, { error: "Je gratis vragen zijn op. Start je gratis proefmaand voor onbeperkt coachen.", paywall: true, free_left: 0 });
-    }
-  } else {
+  /** Mag deze gebruiker nu een (betaalde) Claude-vraag stellen? */
+  const claudeLimiet = async (): Promise<"ok" | "gratis_op" | "dag_op"> => {
+    if (!premium) return freeUsed >= limits.free ? "gratis_op" : "ok";
     const startOfDay = new Date();
     startOfDay.setUTCHours(0, 0, 0, 0);
     const { count } = await db.from("coach_messages").select("id", { count: "exact", head: true })
-      .eq("user_id", userId).eq("role", "user").gte("created_at", startOfDay.toISOString());
-    if ((count ?? 0) >= limits.daily) {
-      return json(429, { error: `Je hebt vandaag al ${limits.daily} vragen gesteld. Morgen kun je weer verder.` });
-    }
-  }
+      .eq("user_id", userId).eq("role", "user").eq("via", "claude").gte("created_at", startOfDay.toISOString());
+    return (count ?? 0) >= limits.daily ? "dag_op" : "ok";
+  };
 
   if (summaryOf) {
+    if (!apiKey) return json(503, { error: "De run-analyse door de coach is nog niet ingesteld op de server." });
+    const l = await claudeLimiet();
+    if (l === "gratis_op") return json(402, { error: "Je gratis vragen zijn op. Start je gratis proefmaand voor onbeperkt coachen.", paywall: true, free_left: 0 });
+    if (l === "dag_op") return json(429, { error: `Je hebt vandaag al ${limits.daily} vragen gesteld. Morgen kun je weer verder.` });
     return await summarize(db, userId, profile, summaryOf, apiKey, premium, freeUsed, limits.free, body.pause);
   }
 
-  // Eerdere berichten zodat de coach het gesprek kent.
+  // 1. Kennisbank (gratis, voor iedereen).
+  const { data: top, error: zoekErr } = await db.rpc("coach_kennis_top", { q: message, n: 1 });
+  if (zoekErr) console.error("coach_kennis_top", zoekErr.message);
+  const best = (top ?? [])[0] as { kennis_id: number; score: number } | undefined;
+  if (best && best.score >= DREMPEL) {
+    const { data: k } = await db.from("coach_kennis").select("id, antwoord, actie").eq("id", best.kennis_id).single();
+    if (k) {
+      let reply = String(k.antwoord ?? "");
+      let via = "kennis";
+      if (k.actie) {
+        const d = await dataAntwoord(k.actie, db, userId, profile).catch((e) => {
+          console.error("dataAntwoord", k.actie, e?.message ?? e);
+          return null;
+        });
+        if (d) { reply = d; via = "data"; }
+      }
+      if (reply) {
+        await db.rpc("coach_kennis_gebruikt", { kid: k.id });
+        await bewaar(db, userId, message, reply, via);
+        console.log(JSON.stringify({ event: "coach_kennis", via, kennis: k.id, score: Number(best.score.toFixed(2)) }));
+        return json(200, { reply, premium, free_left: null, via });
+      }
+    }
+  }
+
+  // 2. Niet gevonden: (anoniem) loggen, zodat het in de beheerpagina verschijnt.
+  const { data: onbId } = await db.rpc("coach_onbeantwoord_log", {
+    q: message, beste: best?.kennis_id ?? null, score: best ? Number(best.score) : null,
+  });
+
+  const limiet = apiKey ? await claudeLimiet() : "geen_sleutel";
+  if (limiet !== "ok") {
+    let reply = ONBEKEND_ANTWOORD;
+    if (limiet === "gratis_op") reply += "\n\nMet Kadans Premium zoekt de coach zo'n vraag meteen voor je uit.";
+    if (limiet === "dag_op") reply += `\n\nJe hebt vandaag al ${limits.daily} uitgebreide vragen gesteld. Morgen kan het weer.`;
+    await bewaar(db, userId, message, reply, "onbekend");
+    return json(200, { reply, premium, free_left: premium ? null : Math.max(0, limits.free - freeUsed), via: "onbekend" });
+  }
+
+  // 3. Claude als reserve.
   const { data: history } = await db.from("coach_messages").select("role, content")
     .eq("user_id", userId).order("created_at", { ascending: false }).limit(HISTORY_MESSAGES);
   const past = (history ?? []).reverse();
-  // De API wil afwisselend user/assistant, beginnend met user.
   while (past.length && past[0].role !== "user") past.shift();
   const messages: { role: string; content: string }[] = [];
   for (const m of past) {
@@ -384,11 +489,12 @@ Deno.serve(async (req) => {
   };
   const goal = goals[String(body.goal ?? "")];
   const lengths: Record<string, string> = {
-    short: "Houd je antwoord deze keer heel kort: hooguit 4 regels of 3 punten, alleen de kern.",
-    long: "De loper wil meer uitleg: geef de kern en daarna gerust achtergrond en het waarom (maximaal ongeveer 250 woorden).",
+    short: "Houd \"antwoord\" deze keer heel kort: hooguit 4 regels of 3 punten.",
+    long: "De loper wil meer uitleg in \"antwoord\": de kern en daarna het waarom (maximaal ongeveer 250 woorden).",
   };
   const lengthNote = lengths[String(body.length ?? "")] ?? "";
   const context = (await buildContext(db, userId, profile)) + (goal ? `\nDoel van de loper: ${goal}.` : "") + pauseNote(body.pause);
+  const model = env("COACH_MODEL") || "claude-haiku-5-5";
 
   const ai = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -398,9 +504,9 @@ Deno.serve(async (req) => {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: env("COACH_MODEL") || "claude-haiku-5-5",
-      max_tokens: 900,
-      system: `${SYSTEM_PROMPT}${lengthNote ? `\n\n${lengthNote}` : ""}\n\nGegevens van de loper (uit Kadans):\n${context}`,
+      model,
+      max_tokens: 1600,
+      system: `${SYSTEM_PROMPT}\n\n${CLAUDE_OPDRACHT}${lengthNote ? `\n\n${lengthNote}` : ""}\n\nGegevens van de loper (uit Kadans):\n${context}`,
       messages,
     }),
     signal: AbortSignal.timeout(60_000),
@@ -414,17 +520,23 @@ Deno.serve(async (req) => {
     return json(502, { error: "De coach is even niet bereikbaar. Probeer het zo opnieuw." });
   }
   const result = await ai.json();
-  logUsage("chat", userId, env("COACH_MODEL") || "claude-haiku-5-5", result);
-  const reply = ((result.content ?? []) as { type: string; text?: string }[])
+  logUsage("chat", userId, model, result);
+  const tekst = ((result.content ?? []) as { type: string; text?: string }[])
     .filter((c) => c.type === "text").map((c) => c.text).join("\n").trim();
+  const u = leesClaude(tekst);
+  const reply = u.antwoord;
   if (!reply) return json(502, { error: "De coach gaf geen antwoord. Probeer het opnieuw." });
 
-  const now = Date.now();
-  const { error: insErr } = await db.from("coach_messages").insert([
-    { user_id: userId, role: "user", content: message, created_at: new Date(now).toISOString() },
-    { user_id: userId, role: "assistant", content: reply.slice(0, 8000), created_at: new Date(now + 1).toISOString() },
-  ]);
-  if (insErr) console.error("coach_messages insert failed", insErr.message);
+  // Algemene versie in de kennisbank: de volgende keer gratis.
+  if (u.algemeen && u.soort !== "persoonlijk") {
+    const { error: kErr } = await db.rpc("coach_kennis_van_claude", {
+      onderwerp: u.onderwerp, categorie: u.categorie, antwoord: u.algemeen, soort: u.soort,
+      trefwoorden: u.trefwoorden, vragen: u.vragen, onbeantwoord_id: onbId ?? null,
+    });
+    if (kErr) console.error("coach_kennis_van_claude", kErr.message);
+  }
+
+  await bewaar(db, userId, message, reply, "claude");
 
   let freeLeft: number | null = null;
   if (!premium) {
@@ -432,5 +544,5 @@ Deno.serve(async (req) => {
     freeLeft = Math.max(0, limits.free - freeUsed - 1);
   }
 
-  return json(200, { reply, premium, free_left: freeLeft });
+  return json(200, { reply, premium, free_left: freeLeft, via: "claude" });
 });
