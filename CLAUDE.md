@@ -184,6 +184,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `community/race_calendar_ui.dart` (`RacesStrip` in Samen onder clubevenementen, `RaceCalendarScreen` met straal/soort,
   `RaceDetailScreen` → `AddRaceScreen(initialName/Date/Km)`); header = PDOK-luchtfoto van de start (`AerialHeader`), terugval eigen foto.
   Verbergen van een foute wedstrijd: `update race_calendar set hidden = true where key = …`.
+- **Wolkje (10-11, mascotte/coach, Sems keuze uit ±27 opties op Design-canvas "Kadans – mascotte Haas (voorbeeld)"):**
+  `shared/art/wolkje.dart` (pixel 18×16, gouden rand, vaste kleuren in licht én donker; buien `WolkjeMood` gewoon/regen/zon/wind/nacht/koud/blij/denkt,
+  `wolkjeVoorWeer(HourWeather)`, wipt via Timer, stil bij disableAnimations). Staat in: Vandaag (gluurt over advieskaart, weer van nu),
+  coach-avatar `_CoachMark`, `CoachButton`, lege schermen (`EmptyArt`), recordkaart (blij). Test `test/wolkje_test.dart`.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;

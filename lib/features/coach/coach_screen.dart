@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/supabase.dart';
 import '../../core/i18n.dart';
+import '../../shared/art/wolkje.dart';
 import '../../core/theme.dart';
 import '../../domain/run_goal.dart';
 import '../../data/models/models.dart';
@@ -393,19 +394,10 @@ class _CoachMark extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => SizedBox(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
-          ),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: size * 0.5)],
-        ),
-        child: Icon(Icons.auto_awesome, size: size * 0.55, color: RwColors.accentDark),
+        child: Center(child: Wolkje(size: size, mood: size >= 48 ? WolkjeMood.gewoon : WolkjeMood.denkt, animate: size >= 48)),
       );
 }
 

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/i18n.dart';
 import '../core/theme.dart';
+import 'art/wolkje.dart';
 
 /// Laatst gekozen hoofdtabblad (Vandaag, Routes, Logboek, Samen), zodat "terug" vanuit Ik of Coach
 /// weer op dat tabblad uitkomt.
@@ -33,12 +34,12 @@ class CoachButton extends StatelessWidget {
   Widget build(BuildContext context) => compact
       ? IconButton(
           tooltip: tr('Vraag de coach'),
-          icon: Icon(Icons.auto_awesome_outlined, color: color ?? RwColors.accent),
+          icon: const Wolkje(size: 30, mood: WolkjeMood.denkt, animate: false),
           onPressed: () => context.go('/coach'),
         )
       : OutlinedButton.icon(
           onPressed: () => context.go('/coach'),
-          icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+          icon: const Wolkje(size: 24, animate: false),
           label: Text(tr('Vraag de coach')),
         );
 }

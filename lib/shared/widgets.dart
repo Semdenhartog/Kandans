@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 import 'art/landscape.dart';
+import 'art/wolkje.dart';
 import 'rolling_text.dart';
 
 /// Kaart met optionele titel, in Kadans-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
@@ -216,16 +217,23 @@ class EmptyArt extends StatelessWidget {
                 right: 0,
                 top: size * 0.16,
                 child: Center(
-                  child: Container(
-                  width: size * 0.34,
-                  height: size * 0.34,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: RwColors.surfaceHigh,
-                    border: Border.all(color: RwColors.accent.withValues(alpha: 0.6), width: 1.5),
-                  ),
-                  child: Icon(icon, size: size * 0.16, color: RwColors.accent),
-                ),
+                  child: Stack(clipBehavior: Clip.none, children: [
+                    Wolkje(size: size * 0.5),
+                    Positioned(
+                      right: -size * 0.06,
+                      bottom: -size * 0.02,
+                      child: Container(
+                        width: size * 0.2,
+                        height: size * 0.2,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: RwColors.surfaceHigh,
+                          border: Border.all(color: RwColors.accent.withValues(alpha: 0.6), width: 1.2),
+                        ),
+                        child: Icon(icon, size: size * 0.1, color: RwColors.accent),
+                      ),
+                    ),
+                  ]),
                 ),
               ),
             ]),

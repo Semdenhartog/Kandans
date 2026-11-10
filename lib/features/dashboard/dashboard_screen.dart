@@ -56,6 +56,7 @@ import 'weather_ambience.dart';
 import '../profile/sources_screen.dart';
 import '../profile/run_pause_tile.dart' show PauseBanner;
 import '../../shared/nav_buttons.dart';
+import '../../shared/art/wolkje.dart';
 import '../planner/this_week_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -680,17 +681,25 @@ class _ResultsState extends State<_Results> {
             children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: _TiltCard(
-            child: _HeroCard(
-              verdict: verdict,
-              shown: shown,
-              isBest: isBest,
-              onShowBest: () => setState(() => _selected = null),
-              durationMinutes: widget.planner.durationMinutes,
-              lat: widget.planner.forecast.latitude,
-              lon: widget.planner.forecast.longitude,
+          child: Stack(clipBehavior: Clip.none, fit: StackFit.passthrough, children: [
+            _TiltCard(
+              child: _HeroCard(
+                verdict: verdict,
+                shown: shown,
+                isBest: isBest,
+                onShowBest: () => setState(() => _selected = null),
+                durationMinutes: widget.planner.durationMinutes,
+                lat: widget.planner.forecast.latitude,
+                lon: widget.planner.forecast.longitude,
+              ),
             ),
-          ),
+            // Wolkje gluurt over de kaart, in de bui van het weer van nu.
+            Positioned(
+              right: 18,
+              top: -40,
+              child: IgnorePointer(child: Wolkje(size: 52, mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather))),
+            ),
+          ]),
         ),
         // Het weercijfer per uur staat altijd op Vandaag, direct onder het advies (Sems keuze, 8-11).
         if (card(DashCard.hours) case final hours?) ...[
