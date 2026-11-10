@@ -26,6 +26,9 @@ import 'package:runwise/features/routes/run_paths_layer.dart' show debugRunPaths
 import 'package:runwise/domain/run_paths.dart';
 import 'package:runwise/domain/club_calendar.dart';
 import 'package:runwise/data/services/club_events_service.dart';
+import 'package:runwise/data/services/race_calendar_service.dart';
+import 'package:runwise/domain/race_calendar.dart';
+import 'package:runwise/features/community/race_calendar_ui.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/data/repositories/repositories.dart';
 import 'package:runwise/data/services/air_quality_service.dart';
@@ -402,6 +405,7 @@ List<Override> _overrides({bool emptyPlan = false, bool newUser = false, bool wo
       joinedChallengesProvider.overrideWith(_FakeJoined.new),
       communityFeedServiceProvider.overrideWithValue(_FakeFeed()),
       socialServiceProvider.overrideWithValue(_FakeSocial()),
+      raceCalendarProvider.overrideWith((ref) => RaceCalendarState(_sampleRaces(), 52.14, 5.59, 'Barneveld')),
       clubEventsProvider.overrideWith((ref) {
         final d = DateTime.now();
         DateTime at(int days, int h, [int m = 0]) => DateTime(d.year, d.month, d.day + days, h, m);
@@ -638,6 +642,9 @@ void main() {
   testWidgets('18c community balk grote letters',
       (t) => _shot(t, '18c_community_balk_groot', const CommunityFeedScreen(), height: 915, nav: true, navIndex: 4, textScale: 1.3));
   testWidgets('18d community runs', (t) => _shot(t, '18d_community_runs', const CommunityFeedScreen(), height: 2000));
+  testWidgets('18w wedstrijdkalender', (t) => _shot(t, '18w_wedstrijdkalender', const RaceCalendarScreen(), height: 1400));
+  testWidgets('18x wedstrijd detail', (t) => _shot(t, '18x_wedstrijd_detail', RaceDetailScreen(race: _sampleRaces()[1], km: 18.4), height: 915));
+  testWidgets('18y wedstrijdkalender donker', (t) => _shot(t, '18y_wedstrijdkalender_donker', const RaceCalendarScreen(), height: 1400, dark: true));
   testWidgets('18e community runs donker', (t) => _shot(t, '18e_donker_community_runs', const CommunityFeedScreen(), height: 2000, dark: true));
   testWidgets('18f lopers', (t) => _shot(t, '18f_lopers', const PeopleScreen(), height: 1400));
   testWidgets('18g profiel', (t) => _shot(t, '18g_profiel', const RunnerProfileScreen(nickname: 'Anne'), height: 1900));
@@ -982,3 +989,25 @@ const _stepsSample = [
   StepEntry(nickname: 'Dijkloper', isMe: false, steps: 150220, rank: 3),
   StepEntry(nickname: 'Loper Lisa', isMe: false, steps: 96010, rank: 4),
 ];
+
+
+List<RaceListing> _sampleRaces() {
+  final d = DateTime.now();
+  RaceListing r(String name, int days, String kind, String status, String place, double lat, double lon) => RaceListing.fromRow({
+        'key': name,
+        'name': name,
+        'race_date': DateTime(d.year, d.month, d.day + days).toIso8601String().substring(0, 10),
+        'kind': kind,
+        'status': status,
+        'source_url': 'https://zoek.officielebekendmakingen.nl/gmb-2026-1.html',
+        'municipality': place,
+        'lat': lat,
+        'lon': lon,
+      })!;
+  return [
+    r('Amersfoort Night Run', 3, 'loop', 'verleend', 'Amersfoort', 52.155, 5.387),
+    r('Veluwse Ultra Trail', 12, 'trail', 'aangevraagd', 'Ermelo', 52.30, 5.62),
+    r('Santa Run Leienplein', 40, 'loop', 'verleend', 'Apeldoorn', 52.211, 5.969),
+    r('Halve Marathon Ede', 75, 'halve', 'melding', 'Ede', 52.04, 5.67),
+  ];
+}

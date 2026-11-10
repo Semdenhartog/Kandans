@@ -6,6 +6,7 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/services/community_feed_service.dart';
 import '../../data/services/club_events_service.dart';
+import '../../data/services/race_calendar_service.dart';
 import '../../data/services/community_service.dart';
 import '../../data/services/social_service.dart';
 import '../../shared/widgets.dart';
@@ -18,6 +19,7 @@ import '../../core/i18n.dart';
 import 'runner_avatar.dart';
 import 'together_screens.dart' show TogetherChips;
 import 'club_events_strip.dart';
+import 'race_calendar_ui.dart';
 import '../../shared/nav_buttons.dart';
 import '../profile/share_app_screen.dart' show openShareApp;
 export 'runner_avatar.dart' show RunnerAvatar;
@@ -137,6 +139,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
       }
       if (!_talk) {
         ref.invalidate(clubEventsProvider);
+        ref.invalidate(raceCalendarProvider);
         final runs = await ref.read(socialServiceProvider).feed(everyone: _everyone);
         if (!mounted) return;
         setState(() {
@@ -423,6 +426,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         child: ListView(physics: AlwaysScrollableScrollPhysics(), padding: EdgeInsets.symmetric(horizontal: 16), children: [
           SizedBox(height: 4),
           const ClubEventsStrip(),
+          const RacesStrip(),
           SizedBox(height: 24),
           EmptyState(
             icon: Icons.person_search_outlined,
@@ -469,6 +473,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
             // Bewuste keuze (zie docs/concurrentie-strava.md): geen algoritme, geen reclame.
             return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               const ClubEventsStrip(),
+              const RacesStrip(),
               SizedBox(height: 12),
               Row(children: [
               Icon(Icons.schedule, size: 14, color: RwColors.subtle),
