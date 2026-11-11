@@ -2,6 +2,8 @@
 
 /// Nederlandse tekst → [Engels, Duits, Frans, Spaans].
 const kTranslations = <String, List<String>>{
+  'KRACHT EN MOBILITEIT': ['STRENGTH AND MOBILITY', 'KRAFT UND MOBILITÄT', 'RENFORCEMENT ET MOBILITÉ', 'FUERZA Y MOVILIDAD'],
+  'zie voorblad': ['see cover page', 'siehe Deckblatt', 'voir page de garde', 'ver portada'],
   '/km · zwaarte {r}': ['/km · effort {r}', '/km · Belastung {r}', '/km · effort {r}', '/km · esfuerzo {r}'],
   'Aantal weken': ['Number of weeks', 'Anzahl Wochen', 'Nombre de semaines', 'Número de semanas'],
   'Advies: {n} weken.': ['Advice: {n} weeks.', 'Empfehlung: {n} Wochen.', 'Conseil : {n} semaines.', 'Consejo: {n} semanas.'],
