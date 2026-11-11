@@ -61,7 +61,10 @@ Color phaseColor(PlanPhase p) => switch (p) {
     };
 
 class CustomPlanScreen extends ConsumerStatefulWidget {
-  const CustomPlanScreen({super.key});
+  const CustomPlanScreen({super.key, this.debugWishes});
+
+  /// Voor schermtests: meteen het schema voor deze wensen tonen.
+  final PlanWishes? debugWishes;
 
   @override
   ConsumerState<CustomPlanScreen> createState() => _CustomPlanScreenState();
@@ -94,6 +97,16 @@ class _CustomPlanScreenState extends ConsumerState<CustomPlanScreen> {
   }
 
   Future<void> _load() async {
+    final debug = widget.debugWishes;
+    if (debug != null) {
+      setState(() {
+        _w = debug;
+        _threshold = 300;
+        _plan = buildCustomPlan(debug, start: DateTime.now().add(const Duration(days: 1)), thresholdPace: 300);
+        _loaded = true;
+      });
+      return;
+    }
     final p = await SharedPreferences.getInstance();
     final saved = PlanWishes.fromJson(jsonDecode(p.getString(_wishesKey) ?? 'null'));
     final runs = ref.read(activitiesProvider).value ?? await ref.read(activitiesProvider.future).catchError((_) => <Activity>[]);

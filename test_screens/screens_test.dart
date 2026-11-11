@@ -2,6 +2,8 @@
 // Draait in de cloud (workflow "Schermen"): flutter test test_screens --update-goldens
 // De plaatjes komen in test_screens/goldens en worden als artefact bewaard, zodat de
 // layout bekeken kan worden zonder telefoon. Geen echte gebruikersgegevens.
+import 'package:runwise/domain/custom_plan.dart';
+import 'package:runwise/features/planner/custom_plan_screen.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -549,6 +551,11 @@ void main() {
   RecorderView startView() => RecorderView(gpsAccuracy: 4, position: decodePolyline(_routes.first.polyline).first);
 
   // Donkere weergave (Zand avond) van de belangrijkste schermen.
+  testWidgets('28a schema op maat vragen', (t) => _shot(t, '28a_schema_op_maat_vragen', const CustomPlanScreen(), height: 1400));
+  testWidgets('28b schema op maat', (t) => _shot(t, '28b_schema_op_maat', CustomPlanScreen(
+        debugWishes: PlanWishes(goal: PlanGoal.halve, raceDate: DateTime.now().add(const Duration(days: 98)), raceName: 'Halve van Egmond',
+            weeklyKm: 24, longestKm: 12, runDays: const [2, 4, 7], strengthPerWeek: 2, goalTimeSeconds: 6900, testRace: true),
+      ), height: 3600));
   testWidgets('60 donker vandaag', (t) => _shot(t, '60_donker_vandaag', images: true, const DashboardScreen(), height: 2600, nav: true, dark: true));
   testWidgets('61 donker runs', (t) => _shot(t, '61_donker_runs', const ActivitiesScreen(), height: 1800, dark: true));
   testWidgets('62 donker run detail', (t) => _shot(t, '62_donker_run_detail', images: true, ActivityDetailScreen(activityId: _runs.first.id!), height: 3200, dark: true));
