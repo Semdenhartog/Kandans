@@ -48,8 +48,6 @@ class AppLockService {
     try {
       return await _auth.authenticate(
         localizedReason: reason,
-        stickyAuth: true,
-        biometricOnly: false,
       );
     } catch (_) {
       return false;
