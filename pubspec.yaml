@@ -30,6 +30,7 @@ dependencies:
   flutter_map: ^8.1.0
   latlong2: ^0.9.1
   share_plus: ^13.0.0
+  pdf: ^3.11.3
   android_intent_plus: ^6.1.0
   flutter_tts: ^4.2.0
   wakelock_plus: ">=1.2.0 <2.0.0"
@@ -53,6 +54,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.3
+
+# pdf trekt anders image 4.11 binnen, dat niet werkt met de archive-versie die de rest vastzet.
+dependency_overrides:
+  image: 4.5.4
 
 flutter:
   uses-material-design: true
