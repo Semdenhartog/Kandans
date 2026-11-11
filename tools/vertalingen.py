@@ -5,6 +5,7 @@ Sleutel = de Nederlandse tekst precies zoals in de code (met \\n als regeloverga
 """
 
 T = {
+    'Rust': ('Rest', 'Ruhe', 'Repos', 'Descanso'),
     'KRACHT EN MOBILITEIT': ('STRENGTH AND MOBILITY', 'KRAFT UND MOBILITÄT', 'RENFORCEMENT ET MOBILITÉ', 'FUERZA Y MOVILIDAD'),
     'zie voorblad': ('see cover page', 'siehe Deckblatt', 'voir page de garde', 'ver portada'),
     '/km · zwaarte {r}': ('/km · effort {r}', '/km · Belastung {r}', '/km · effort {r}', '/km · esfuerzo {r}'),

@@ -265,7 +265,7 @@ List<pw.Widget> _week(PlanWeek wk, {required pw.Font display, required pw.Font b
           ],
         ),
       ),
-    for (final e in wk.extras)
+    for (final e in wk.extras.where((e) => e.kind != ExtraKind.rust))
       (
         e.date,
         pw.TableRow(children: [
@@ -283,6 +283,7 @@ List<pw.Widget> _week(PlanWeek wk, {required pw.Font display, required pw.Font b
         ]),
       ),
   ]..sort((a, b) => a.$1.compareTo(b.$1));
+  final rest = [for (final e in wk.extras) if (e.kind == ExtraKind.rust && e.title == 'Rustdag') _days[e.date.weekday - 1]];
 
   return [
     pw.Container(height: 1.2, margin: const pw.EdgeInsets.only(top: 10, bottom: 8), color: _gold),
@@ -310,6 +311,11 @@ List<pw.Widget> _week(PlanWeek wk, {required pw.Font display, required pw.Font b
       border: const pw.TableBorder(horizontalInside: pw.BorderSide(color: _line, width: 0.4)),
       children: [for (final r in rows) r.$2],
     ),
+    if (rest.isNotEmpty)
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 4),
+        child: pw.Text('${tr('Rust')}: ${rest.join('  ·  ')}', style: pw.TextStyle(font: mono, fontSize: 7.5, color: _subtle)),
+      ),
     pw.SizedBox(height: 10),
   ];
 }
