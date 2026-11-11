@@ -293,7 +293,7 @@ class PaceZone {
 
 class CustomPlan {
   CustomPlan({required this.wishes, required this.start, required this.weeks, required this.paces, this.predictedSeconds, this.goalCheck,
-      this.warnings = const [], this.raceDay = const [], this.raceDate, this.paceIsEstimate = true});
+      this.warnings = const [], this.raceDate, this.paceIsEstimate = true});
   final PlanWishes wishes;
   final DateTime start;
   final List<PlanWeek> weeks;
@@ -303,7 +303,7 @@ class CustomPlan {
   /// "haalbaar", "ambitieus" of "erg ambitieus" (alleen met doeltijd).
   final String? goalCheck;
   final List<String> warnings;
-  final List<String> raceDay;
+  final List<String> raceDay = [];
   final DateTime? raceDate;
   final bool paceIsEstimate;
 
