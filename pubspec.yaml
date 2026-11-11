@@ -55,6 +55,10 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.3
 
+# pdf trekt anders image 4.11 binnen, dat niet werkt met de archive-versie die de rest vastzet.
+dependency_overrides:
+  image: 4.5.4
+
 flutter:
   uses-material-design: true
   assets:
