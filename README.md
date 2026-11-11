@@ -6,15 +6,15 @@ Flutter-app die de beste vertrektijd voor je loopje berekent op basis van het we
 
 | Tabblad | Functie |
 |---|---|
-| **Vandaag** | Beste vertrektijd voor de komende 36 uur, per type training (rustig, tempo, lang, herstel). Rekent met tegenwind op je route, temperatuur, regen, donker, UV en benauwdheid. Score per uur in een grafiek. |
+| **Vandaag** | Beste vertrektijd voor de komende 36 uur, per type training (rustig, tempo, lang, herstel). Rekent met tegenwind op je route, temperatuur, regen, donker, UV en benauwdheid. Score pe[...] |
 | **Runs** | Runs toevoegen. Het weer van dat moment wordt automatisch opgehaald (Open-Meteo). Weekoverzicht. |
 | **Routes** | GPX importeren (Strava, Garmin, Komoot…). Routevorm, hoogtemeters, looprichting per km en tegen-/rugwind nu. |
 | **Wedstrijden** | Wedstrijddoelen met verwachte eindtijd (Riegel-formule op je beste recente run), weercorrectie vanaf ~15 dagen vooraf, en advies voor tempo, kleding en drinken. |
 | **Ik** | Persoonlijk loopprofiel (na 8 runs): ideale temperatuur, windgevoeligheid, ochtend of avond. Privacyverklaring, gegevens kopiëren, account verwijderen. |
 
-**Premium (in aanbouw):** AI-hardloopcoach achter een abonnement: eerste maand gratis, daarna €5 per maand of €40 per jaar (via Google Play + RevenueCat). Gratis gebruikers krijgen 3 proefvragen.
+**Premium (in aanbouw):** AI-hardloopcoach achter een abonnement: eerste maand gratis, daarna €5 per maand of €40 per jaar (via Google Play + RevenueCat). Gratis gebruikers krijgen 3 proefvragen per dag.
 
-**Koppelingen:** runs komen automatisch binnen van je horloge via **Health Connect** (Fitbit, Samsung, Garmin, Polar …; de laatste 30 dagen en daarna alles nieuw) en via **Strava**. Ophalen gebeurt bij het openen van de app en bij vernieuwen in Runs. Strava-runs gaan niet naar de AI-coach (Strava-voorwaarden).
+**Koppelingen:** runs komen automatisch binnen van je horloge via **Health Connect** (Fitbit, Samsung, Garmin, Polar …; de laatste 30 dagen en daarna alles nieuw) en via **Strava**. Ophalen gebeurt op aanvraag en automatisch bij app-open.
 
 Bewust **nog niet**: pushmeldingen en ophalen terwijl de app dicht is.
 
@@ -38,7 +38,8 @@ supabase/functions/delete-account/   server-functie voor account verwijderen
 ```
 
 De database-migraties staan in `supabase/migrations` (0001 t/m 0011) en zijn al toegepast op het Supabase-project.
-De publieke Supabase-instellingen (URL en publishable key) staan in `app_config.json`; die zijn bedoeld om openbaar te zijn.
+De publieke Supabase-instellingen (URL en publishable key) staan in `app_config.json`; die zijn bedoeld om lokaal in te stellen en door de app te lezen.
+Gebruik `config.example.json` als template en maak lokaal een `app_config.json` aan. Niet `config.json`.
 
 ---
 
@@ -76,7 +77,7 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 5. **Edge Functions → Deploy a new function → Via editor**: naam `delete-account`,
    plak de inhoud van `supabase/functions/delete-account/index.ts` en klik op *Deploy*.
 6. **Project Settings → API**: kopieer de **Project URL** en de **anon / publishable key**
-   naar `config.json`. Gebruik **nooit** de service-role key in de app.
+   naar `app_config.json`. Gebruik **nooit** de service-role key in de app.
 
 ### 3a. Strava-koppeling instellen
 1. Ga naar https://www.strava.com/settings/api en maak een API-app aan (naam Kadans).
@@ -128,8 +129,8 @@ Het script maakt de Android-bestanden aan, voegt de rechten toe, downloadt de pa
 4. Vanaf de volgende push bouwt GitHub naast de APK ook **runwise-playstore-aab**: dat bestand upload je in de Play Console.
 
 ### 4c. Health Connect en de Play Store
-Google Play vraagt bij de eerste versie een **verklaring voor Health Connect**: Kadans leest alleen *trainingen*, *afstand* en *hartslag* om je runs automatisch te loggen en je loopprofiel te berekenen. Zet dit ook in de privacyverklaring:
-> Kadans leest met jouw toestemming hardlooptrainingen, afstand en hartslag uit Health Connect om je runs automatisch toe te voegen. Deze gegevens worden alleen gebruikt voor jouw eigen overzicht, loopprofiel en coach, worden niet verkocht of gedeeld met adverteerders, en worden verwijderd als je je account verwijdert.
+Google Play vraagt bij de eerste versie een **verklaring voor Health Connect**: Kadans leest alleen *trainingen*, *afstand* en *hartslag* om je runs automatisch te loggen en je loopprofiel te berekenen. De privacyverklaring staat in `privacy.html`.
+> Kadans leest met jouw toestemming hardlooptrainingen, afstand en hartslag uit Health Connect om je runs automatisch toe te voegen. Deze gegevens worden alleen gebruikt voor jouw eigen overzicht en niet voor advertenties of het delen met derden.
 
 ### 5. Later: publiceren in de Play Store
 - Google Play-ontwikkelaarsaccount (eenmalig ca. $25).

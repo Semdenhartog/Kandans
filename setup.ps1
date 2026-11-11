@@ -1,7 +1,7 @@
 # RunWise - eenmalige installatie van het Android-project.
 # Uitvoeren in PowerShell vanuit deze map:
 #   powershell -ExecutionPolicy Bypass -File .\setup.ps1
-
+#
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
@@ -44,9 +44,9 @@ flutter analyze | Tee-Object -FilePath analyze.txt
 Write-Host "5/5  Tests draaien..." -ForegroundColor Green
 flutter test | Tee-Object -FilePath tests.txt
 
-if (-not (Test-Path "config.json")) {
-    Copy-Item "config.example.json" "config.json"
-    Write-Host "config.json aangemaakt: vul hierin je Supabase-URL en anon key in." -ForegroundColor Yellow
+if (-not (Test-Path "app_config.json")) {
+    Copy-Item "config.example.json" "app_config.json"
+    Write-Host "app_config.json aangemaakt: vul hierin je Supabase-URL en anon key in." -ForegroundColor Yellow
 }
 
 Write-Host ""

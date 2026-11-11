@@ -1,5 +1,6 @@
 # Geheimen en lokale instellingen
 config.json
+app_config.json
 *.jks
 *.keystore
 android/key.properties
