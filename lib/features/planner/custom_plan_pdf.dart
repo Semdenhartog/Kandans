@@ -180,6 +180,20 @@ Future<Uint8List> buildCustomPlanPdf(CustomPlan plan) async {
           padding: const pw.EdgeInsets.only(top: 6),
           child: pw.Text(tr('Tempo\'s zijn een schatting: je hebt nog weinig runs. Loop op gevoel (zwaarte).'), style: const pw.TextStyle(fontSize: 8, color: _subtle)),
         ),
+      label('04  ${tr('KRACHT EN MOBILITEIT')}'),
+      for (final (naam, oefeningen) in [
+        if (w.strengthPerWeek > 0) ('Kracht A', 'Squat 3×10 · lunges 3×8/been · kuitheffen 3×15 · bruggetje 3×12 · plank 3×30 s'),
+        if (w.strengthPerWeek > 0)
+          ('Kracht B', 'Bulgaarse split squat 3×8/been · step-ups 3×10/been · enkelbeens kuitheffen 3×12 · hip thrust 3×10 · zijplank 3×30 s/kant'),
+        ('Mobiliteit', 'Na de lange duurloop, 10 min: kuiten, hamstrings, heupbuigers en billen, 30 s per oefening.'),
+      ])
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 5),
+          child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+            pw.SizedBox(width: 70, child: pw.Text(tr(naam), style: pw.TextStyle(font: bodyBold, fontSize: 9, color: _ink))),
+            pw.Expanded(child: pw.Text(tr(oefeningen), style: const pw.TextStyle(fontSize: 8.5, color: _muted))),
+          ]),
+        ),
       pw.Spacer(),
       pw.Text(tr('Zwaarte 1–10: 3–4 = je kunt praten, 7 = losse woorden, 9–10 = alles geven. Mis je een training? Niet inhalen, gewoon verder.'),
           style: const pw.TextStyle(fontSize: 8, color: _subtle)),
@@ -195,7 +209,7 @@ Future<Uint8List> buildCustomPlanPdf(CustomPlan plan) async {
       pw.Text('${ctx.pageNumber} / ${ctx.pagesCount}', style: pw.TextStyle(font: mono, fontSize: 7, color: _subtle)),
     ]),
     build: (ctx) => [
-      for (final wk in plan.weeks) _week(wk, display: display, bodyBold: bodyBold, mono: mono),
+      for (final wk in plan.weeks) ..._week(wk, display: display, bodyBold: bodyBold, mono: mono),
       if (plan.raceDay.isNotEmpty) ...[
         pw.SizedBox(height: 10),
         pw.Text(tr('Wedstrijdplan'), style: pw.TextStyle(font: display, fontSize: 18, color: _ink)),
@@ -217,7 +231,7 @@ Future<Uint8List> buildCustomPlanPdf(CustomPlan plan) async {
   return doc.save();
 }
 
-pw.Widget _week(PlanWeek wk, {required pw.Font display, required pw.Font bodyBold, required pw.Font mono}) {
+List<pw.Widget> _week(PlanWeek wk, {required pw.Font display, required pw.Font bodyBold, required pw.Font mono}) {
   final rows = <(DateTime, pw.TableRow)>[
     for (final it in wk.items)
       (
@@ -258,7 +272,8 @@ pw.Widget _week(PlanWeek wk, {required pw.Font display, required pw.Font bodyBol
           pw.Padding(padding: const pw.EdgeInsets.symmetric(vertical: 4), child: pw.Text(_d(e.date), style: pw.TextStyle(font: mono, fontSize: 7.5, color: _subtle))),
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(vertical: 4),
-            child: pw.Text(e.kind == ExtraKind.rust ? e.title : '${e.title}: ${e.description}', style: const pw.TextStyle(fontSize: 7.5, color: _subtle)),
+            child: pw.Text(e.kind == ExtraKind.kracht ? '${e.title}  (${tr('zie voorblad')})' : (e.kind == ExtraKind.rust ? e.title : '${e.title}: ${e.description}'),
+                style: const pw.TextStyle(fontSize: 7.5, color: _subtle)),
           ),
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(vertical: 4),
@@ -269,38 +284,32 @@ pw.Widget _week(PlanWeek wk, {required pw.Font display, required pw.Font bodyBol
       ),
   ]..sort((a, b) => a.$1.compareTo(b.$1));
 
-  return pw.Container(
-    margin: const pw.EdgeInsets.only(bottom: 12),
-    padding: const pw.EdgeInsets.fromLTRB(14, 12, 14, 8),
-    decoration: pw.BoxDecoration(
-      border: pw.Border.all(color: _line, width: 0.7),
-      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10)),
-    ),
-    child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-      pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-        pw.Text('${tr('WEEK')} ${wk.number.toString().padLeft(2, '0')}', style: pw.TextStyle(font: display, fontSize: 15, color: _ink)),
-        pw.SizedBox(width: 10),
-        pw.Container(width: 6, height: 6, margin: const pw.EdgeInsets.only(bottom: 4), color: _phase(wk.phase)),
-        pw.SizedBox(width: 4),
-        pw.Padding(
-          padding: const pw.EdgeInsets.only(bottom: 2),
-          child: pw.Text(tr(wk.phase.label).toUpperCase() + (wk.recovery && wk.phase != PlanPhase.herstel ? '  ·  ${tr('RUSTWEEK')}' : ''),
-              style: pw.TextStyle(font: mono, fontSize: 7.5, letterSpacing: 1.2, color: _muted)),
-        ),
-        pw.Spacer(),
-        pw.Padding(
-          padding: const pw.EdgeInsets.only(bottom: 2),
-          child: pw.Text('${_d(wk.start)}  ·  ${wk.km.toStringAsFixed(0)} km  ·  ${wk.minutes} min', style: pw.TextStyle(font: mono, fontSize: 7.5, color: _subtle)),
-        ),
-      ]),
-      pw.SizedBox(height: 4),
-      pw.Text(tr(wk.focus), style: const pw.TextStyle(fontSize: 8, color: _muted)),
-      pw.SizedBox(height: 4),
-      pw.Table(
-        columnWidths: const {0: pw.FixedColumnWidth(58), 1: pw.FlexColumnWidth(), 2: pw.FixedColumnWidth(40), 3: pw.FixedColumnWidth(30)},
-        border: const pw.TableBorder(horizontalInside: pw.BorderSide(color: _line, width: 0.4)),
-        children: [for (final r in rows) r.$2],
+  return [
+    pw.Container(height: 1.2, margin: const pw.EdgeInsets.only(top: 10, bottom: 8), color: _gold),
+    pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+      pw.Text('${tr('WEEK')} ${wk.number.toString().padLeft(2, '0')}', style: pw.TextStyle(font: display, fontSize: 15, color: _ink)),
+      pw.SizedBox(width: 10),
+      pw.Container(width: 6, height: 6, margin: const pw.EdgeInsets.only(bottom: 4), color: _phase(wk.phase)),
+      pw.SizedBox(width: 4),
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 2),
+        child: pw.Text(tr(wk.phase.label).toUpperCase() + (wk.recovery && wk.phase != PlanPhase.herstel ? '  ·  ${tr('RUSTWEEK')}' : ''),
+            style: pw.TextStyle(font: mono, fontSize: 7.5, letterSpacing: 1.2, color: _muted)),
+      ),
+      pw.Spacer(),
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 2),
+        child: pw.Text('${_d(wk.start)}  ·  ${wk.km.toStringAsFixed(0)} km  ·  ${wk.minutes} min', style: pw.TextStyle(font: mono, fontSize: 7.5, color: _subtle)),
       ),
     ]),
-  );
+    pw.SizedBox(height: 4),
+    pw.Text(tr(wk.focus), style: const pw.TextStyle(fontSize: 8, color: _muted)),
+    pw.SizedBox(height: 4),
+    pw.Table(
+      columnWidths: const {0: pw.FixedColumnWidth(58), 1: pw.FlexColumnWidth(), 2: pw.FixedColumnWidth(40), 3: pw.FixedColumnWidth(30)},
+      border: const pw.TableBorder(horizontalInside: pw.BorderSide(color: _line, width: 0.4)),
+      children: [for (final r in rows) r.$2],
+    ),
+    pw.SizedBox(height: 10),
+  ];
 }

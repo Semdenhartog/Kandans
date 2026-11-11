@@ -276,7 +276,7 @@ class PlanWeek {
   final List<PlanItem> items = [];
   final List<PlanExtra> extras = [];
 
-  double get km => items.fold(0.0, (s, i) => s + (i.session.distanceMeters ?? i.minutes * 60 / 390 * 1000)) / 1000;
+  double get km => items.where((i) => i.session.kind != SessionKind.race).fold(0.0, (s, i) => s + (i.session.distanceMeters ?? i.minutes * 60 / 390 * 1000)) / 1000;
   int get minutes => items.fold(0, (s, i) => s + i.minutes) + extras.fold(0, (s, e) => s + e.minutes);
 }
 
@@ -342,6 +342,7 @@ double thresholdFrom5k(int seconds) => seconds / 5 * 1.053;
 /// Maakt het schema. [thresholdPace] uit je runs (s/km), of null als er te weinig runs zijn.
 CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thresholdPace}) {
   final day0 = _day(start);
+  final monday0 = day0.subtract(Duration(days: day0.weekday - 1));
   final race = w.goal.isRace && w.raceDate != null ? _day(w.raceDate!) : null;
   final warnings = <String>[];
   final days = ([...w.runDays.toSet()]..sort());
@@ -355,13 +356,13 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
   final goalPace = w.goalTimeSeconds != null && w.goal.meters != null ? w.goalTimeSeconds! / (w.goal.meters! / 1000) : null;
   final easyFrom = t * 1.22, easyTo = t * 1.36;
   final easy = (easyFrom + easyTo) / 2;
-  final long = t * 1.25;
+  final long = t * 1.3;
   final tempo = t;
   final interval = t * 0.94;
   final racePace = goalPace ?? (w.goal.meters == null ? t * 0.97 : predictSeconds(t, w.goal.meters!) / (w.goal.meters! / 1000));
   final paces = <PaceZone>[
     PaceZone('Rustig', easyFrom, easyTo, '3–4', 'Praattempo. Het grootste deel van je kilometers.'),
-    PaceZone('Lang', long - 8, long + 12, '4–5', 'Lange duurloop: ontspannen, de laatste km mag iets sneller.'),
+    PaceZone('Lang', long - 10, long + 15, '4–5', 'Lange duurloop: ontspannen, de laatste km mag iets sneller.'),
     PaceZone('Tempo', tempo - 5, tempo + 5, '7', 'Comfortabel zwaar: je kunt nog losse woorden zeggen.'),
     PaceZone('Interval', interval - 6, interval + 4, '8', 'Snel maar gecontroleerd, ongeveer je 5 km-tempo.'),
     PaceZone(w.goal.isRace ? 'Wedstrijd' : 'Doel', racePace - 3, racePace + 3, '9', w.goal.isRace ? 'Je doeltempo op de dag zelf.' : 'Snel tempo voor een testloop.'),
@@ -382,7 +383,7 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
   }
 
   // Aantal weken.
-  var nWeeks = race != null ? (race.difference(day0).inDays / 7).ceil() : w.weeks.clamp(4, 24);
+  var nWeeks = race != null ? (race.difference(monday0).inDays ~/ 7) + 1 : w.weeks.clamp(4, 24);
   if (race != null && race.difference(day0).inDays < 7) {
     nWeeks = 1;
     warnings.add('Je wedstrijd is binnen een week. Er staat alleen nog een korte afbouw in.');
@@ -447,7 +448,7 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
 
   for (var i = 0; i < nWeeks; i++) {
     final nr = i + 1;
-    final weekStart = DateTime(day0.year, day0.month, day0.day + i * 7);
+    final weekStart = DateTime(monday0.year, monday0.month, monday0.day + i * 7);
     final left = nWeeks - i;
     final skip = w.skipWeeks.contains(nr) && left > 1;
     final taper = taperWeeks > 0 && left <= taperWeeks;
@@ -474,7 +475,7 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
       weekKm = volume * 0.75;
       afterSkip = false;
     } else {
-      if (i > 0) volume = math.min(peak, volume * growth);
+      if (i > 0) volume = math.min(peak, math.max(volume * growth, volume + (volume < 25 ? (w.injuryProne || w.over50 ? 1.5 : 2.5) : 0)));
       weekKm = volume;
     }
 
@@ -505,6 +506,7 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
     for (final d in days) {
       final date = DateTime(weekStart.year, weekStart.month, weekStart.day + ((d - weekStart.weekday) % 7));
       if (race != null && !date.isBefore(race)) continue;
+      if (date.isBefore(day0)) continue;
       weekDays[date] = d;
     }
     final sortedDates = weekDays.keys.toList()..sort();
@@ -523,7 +525,7 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
     final easyDates = sortedDates.where((x) => x != longDate && !qDates.contains(x)).toList();
     final qKm = qDates.length * math.min(10.0, weekKm * 0.2);
     final rest = weekKm - (longDate == null || left == 1 && race != null ? 0 : longRun) - qKm;
-    final easyKm = easyDates.isEmpty ? 0.0 : math.max(3.0, rest / easyDates.length);
+    final easyKm = easyDates.isEmpty ? 0.0 : math.max((g.meters ?? 0) >= 10000 ? 4.0 : 3.0, rest / easyDates.length);
     var stridesGiven = false;
 
     for (final date in sortedDates) {
@@ -547,7 +549,7 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
       week.items.add(_race(w, race, nr, racePace, predicted));
     }
     week.items.sort((a, b) => a.session.date.compareTo(b.session.date));
-    _extras(week, w, weekStart, sortedDates, longDate, phase, race);
+    _extras(week, w, weekStart, sortedDates, longDate, phase, race, notBefore: day0);
   }
 
   // Herstelweek na de wedstrijd.
@@ -563,6 +565,12 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
     week.items.sort((a, b) => a.session.date.compareTo(b.session.date));
     plan.weeks.add(week);
     plan.raceDay.addAll(_raceDayPlan(w, racePace, predicted));
+    final longest = plan.runSessions.where((s) => s.kind == SessionKind.long).fold<double>(0, (m, s) => math.max(m, (s.distanceMeters ?? 0) / 1000));
+    final wanted = math.min(g.meters! / 1000 * 0.9, longCap);
+    if (g.meters! >= 10000 && longest < wanted - 1) {
+      warnings.add('Je langste duurloop komt in dit schema tot ${_km(longest)} km; voor een ${g.label} is ±${_km(wanted.roundToDouble())} km beter. '
+          'Meer weken of een extra loopdag helpt.');
+    }
   }
   return plan;
 }
@@ -623,7 +631,7 @@ PlanItem _longRun(PlanWishes w, DateTime date, int nr, double km, double pace, P
       if (finish) 'Laatste 2–3 km op wedstrijdtempo, alleen als het goed voelt.',
       if (mins >= 75) 'Langer dan 75 min: neem drinken mee en 30–60 g koolhydraten per uur (gel, sportdrank).',
       if (w.terrain != Terrain.vlak) 'Kies een route met hoogteverschil, zoals je wedstrijd.',
-      'Na afloop: 10 minuten mobiliteit (zie kracht en mobiliteit).',
+      'Na afloop 10 min mobiliteit: kuiten, hamstrings, heupbuigers en billen, 30 s per oefening.',
     ],
     minutes: mins,
   );
@@ -668,17 +676,17 @@ PlanItem _quality(PlanWishes w, DateTime date, int nr, PlanPhase phase, int idx,
   // Intervallen per doel en fase.
   final (String name, IntervalPlan plan, double pace, String core) = switch (g) {
     PlanGoal.k5 || PlanGoal.sneller => phase == PlanPhase.piek
-        ? ('6 × 800 m', IntervalPlan.build(name: '6 × 800 m', reps: afbouw ? 4 : 6, workMeters: 800, restSeconds: 120), racePace, '${afbouw ? 4 : 6} × 800 m op wedstrijdtempo, 2 min dribbelen.')
-        : ('8 × 400 m', IntervalPlan.build(name: '8 × 400 m', reps: afbouw ? 5 : 8, workMeters: 400, restSeconds: 90), interval * 0.98, '${afbouw ? 5 : 8} × 400 m vlot, 90 s dribbelen.'),
+        ? ('${afbouw ? 4 : 6} × 800 m', IntervalPlan.build(name: '${afbouw ? 4 : 6} × 800 m', reps: afbouw ? 4 : 6, workMeters: 800, restSeconds: 120), racePace, '${afbouw ? 4 : 6} × 800 m op wedstrijdtempo, 2 min dribbelen.')
+        : ('${afbouw ? 5 : 8} × 400 m', IntervalPlan.build(name: '${afbouw ? 5 : 8} × 400 m', reps: afbouw ? 5 : 8, workMeters: 400, restSeconds: 90), interval * 0.98, '${afbouw ? 5 : 8} × 400 m vlot, 90 s dribbelen.'),
     PlanGoal.k10 => phase == PlanPhase.piek
-        ? ('3 × 2 km', IntervalPlan.build(name: '3 × 2 km', reps: afbouw ? 2 : 3, workMeters: 2000, restSeconds: 150), racePace, '${afbouw ? 2 : 3} × 2 km op wedstrijdtempo, 2,5 min rustig.')
-        : ('5 × 1 km', IntervalPlan.build(name: '5 × 1 km', reps: afbouw ? 3 : 5, workMeters: 1000, restSeconds: 120), interval, '${afbouw ? 3 : 5} × 1 km rond ${fmtPace(interval)} /km, 2 min rustig.'),
+        ? ('${afbouw ? 2 : 3} × 2 km', IntervalPlan.build(name: '${afbouw ? 2 : 3} × 2 km', reps: afbouw ? 2 : 3, workMeters: 2000, restSeconds: 150), racePace, '${afbouw ? 2 : 3} × 2 km op wedstrijdtempo, 2,5 min rustig.')
+        : ('${afbouw ? 3 : 5} × 1 km', IntervalPlan.build(name: '${afbouw ? 3 : 5} × 1 km', reps: afbouw ? 3 : 5, workMeters: 1000, restSeconds: 120), interval, '${afbouw ? 3 : 5} × 1 km rond ${fmtPace(interval)} /km, 2 min rustig.'),
     PlanGoal.k15 || PlanGoal.halve => phase == PlanPhase.piek
-        ? ('3 × 3 km', IntervalPlan.build(name: '3 × 3 km', reps: afbouw ? 2 : 3, workMeters: 3000, restSeconds: 180), racePace, '${afbouw ? 2 : 3} × 3 km op wedstrijdtempo, 3 min rustig.')
-        : ('5 × 6 min', IntervalPlan.build(name: '5 × 6 min', reps: afbouw ? 3 : 5, workSeconds: 360, restSeconds: 120), interval * 1.03, '${afbouw ? 3 : 5} × 6 min net onder je drempel, 2 min rustig.'),
+        ? ('${afbouw ? 2 : 3} × 3 km', IntervalPlan.build(name: '${afbouw ? 2 : 3} × 3 km', reps: afbouw ? 2 : 3, workMeters: 3000, restSeconds: 180), racePace, '${afbouw ? 2 : 3} × 3 km op wedstrijdtempo, 3 min rustig.')
+        : ('${afbouw ? 3 : 5} × 6 min', IntervalPlan.build(name: '${afbouw ? 3 : 5} × 6 min', reps: afbouw ? 3 : 5, workSeconds: 360, restSeconds: 120), interval * 1.03, '${afbouw ? 3 : 5} × 6 min net onder je drempel, 2 min rustig.'),
     _ => phase == PlanPhase.piek
-        ? ('3 × 4 km marathontempo', IntervalPlan.build(name: '3 × 4 km', reps: afbouw ? 2 : 3, workMeters: 4000, restSeconds: 120), racePace, '${afbouw ? 2 : 3} × 4 km op marathontempo, 2 min rustig.')
-        : ('4 × 8 min', IntervalPlan.build(name: '4 × 8 min', reps: afbouw ? 3 : 4, workSeconds: 480, restSeconds: 120), tempo, '${afbouw ? 3 : 4} × 8 min op drempeltempo, 2 min rustig.'),
+        ? ('${afbouw ? 2 : 3} × 4 km marathontempo', IntervalPlan.build(name: '${afbouw ? 2 : 3} × 4 km', reps: afbouw ? 2 : 3, workMeters: 4000, restSeconds: 120), racePace, '${afbouw ? 2 : 3} × 4 km op marathontempo, 2 min rustig.')
+        : ('${afbouw ? 3 : 4} × 8 min', IntervalPlan.build(name: '${afbouw ? 3 : 4} × 8 min', reps: afbouw ? 3 : 4, workSeconds: 480, restSeconds: 120), tempo, '${afbouw ? 3 : 4} × 8 min op drempeltempo, 2 min rustig.'),
   };
   return _item(w, date, nr, SessionKind.interval, 'Intervallen $name', core, plan, pace, 8,
       phase == PlanPhase.piek ? 'Wedstrijdspecifiek: je lichaam went aan je doeltempo.' : 'Je zuurstofopname omhoog: hier word je sneller van.',
@@ -770,12 +778,13 @@ void _buildStarter(CustomPlan plan, PlanWishes w, DateTime day0, List<int> days,
   }
 }
 
-void _extras(PlanWeek week, PlanWishes w, DateTime ws, List<DateTime> runDates, DateTime? longDate, PlanPhase phase, DateTime? race) {
+void _extras(PlanWeek week, PlanWishes w, DateTime ws, List<DateTime> runDates, DateTime? longDate, PlanPhase phase, DateTime? race, {DateTime? notBefore}) {
   final free = [
     for (var d = 0; d < 7; d++) DateTime(ws.year, ws.month, ws.day + d),
-  ].where((d) => !runDates.contains(d) && (race == null || d.isBefore(race))).toList();
+  ].where((d) => !runDates.contains(d) && (race == null || d.isBefore(race)) && (notBefore == null || !d.isBefore(notBefore))).toList();
   var strength = w.strengthPerWeek.clamp(0, 2);
   if (phase == PlanPhase.afbouw) strength = math.min(strength, 1);
+  if (race != null && !race.isAfter(ws.add(const Duration(days: 6)))) strength = 0;
   final krachtDays = <DateTime>[];
   // Kracht liefst niet de dag vóór een sleuteltraining.
   final keyDates = [for (final i in week.items) if (i.key) i.session.date];
@@ -804,9 +813,6 @@ void _extras(PlanWeek week, PlanWishes w, DateTime ws, List<DateTime> runDates, 
   if (w.cross && rest.isNotEmpty && phase != PlanPhase.afbouw) {
     final d = rest.removeAt(rest.length ~/ 2);
     week.extras.add(PlanExtra(date: d, kind: ExtraKind.cross, title: 'Fietsen of zwemmen · 40 min', description: 'Rustig, zwaarte 3–4. Extra conditie zonder klappen op je benen.', minutes: 40));
-  }
-  if (longDate != null) {
-    week.extras.add(PlanExtra(date: longDate, kind: ExtraKind.mobiliteit, title: 'Mobiliteit · 10 min', description: 'Na de lange duurloop: kuiten, hamstrings, heupbuigers, billen. 30 s per oefening.', minutes: 10));
   }
   for (final d in rest) {
     week.extras.add(PlanExtra(date: d, kind: ExtraKind.rust, title: 'Rustdag', description: 'Herstel. Wandelen mag.'));
