@@ -185,10 +185,18 @@ Je wedstrijdtijden zeggen eigenlijk meer dan de VO2max op je horloge.
 # trainingsschema-kadans | Trainingsschema in Kadans | app | trainingsschema, schema, plan, trainingsplan, schema maken
 ? Hoe maak ik een trainingsschema in Kadans?
 ? Kan Kadans een schema voor mij maken?
+? Maak een schema voor mij
+? Kun je een hardloopschema voor me maken?
+! Ik wil een trainingsplan op maat
+! Kan ik mijn schema als PDF downloaden?
 ! Past het schema zich aan als ik een training mis?
 ! Waar vind ik mijn trainingsschema?
-= Ga naar Ik → Trainingsschema en kies je doel: beginnen, 5 km, 10 km, halve of hele marathon. Geef aan hoeveel dagen je wilt lopen en wanneer je wedstrijd is.
-- Je trainingen staan op Vandaag en onder "Deze week".
+= Tik hieronder op "Maak je schema op maat", of ga naar Ik → Trainingsschema → Schema op maat. In zes korte stappen kies je:
+- je doel (beginnen, fit, sneller, 5 km tot marathon) en je wedstrijddatum of het aantal weken;
+- je niveau, loopdagen, lange-duurloopdag en hoeveel tijd je doordeweeks hebt;
+- je ambitie, krachttraining, crosstraining, terrein en vakantieweken.
+Je krijgt een schema per week met fases, tempo's, zwaarte, uitleg, kracht en een wedstrijdplan. Download het als PDF of zet het in je plan.
+- Je trainingen staan dan op Vandaag en onder "Deze week".
 - Mis je een training, dan schuift het schema mee. Je hoeft niets in te halen.
 - Bij slecht weer kan Kadans voorstellen om trainingen te wisselen (weerslim schema).
 

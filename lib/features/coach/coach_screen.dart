@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/supabase.dart';
 import '../../core/i18n.dart';
 import '../../shared/art/wolkje.dart';
+import '../planner/custom_plan_screen.dart';
 import '../../core/theme.dart';
 import '../../domain/run_goal.dart';
 import '../../data/models/models.dart';
@@ -16,7 +17,7 @@ import '../../shared/nav_buttons.dart';
 const _suggestions = [
   'Wat loop ik vandaag?',
   'Hoe ging mijn week?',
-  'Hoe word ik sneller op de 5 km?',
+  'Maak een schema voor mij',
   'Wat trek ik aan?',
 ];
 
@@ -40,6 +41,10 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
 
   /// Berichten van deze sessie die nog niet opnieuw zijn ingeladen.
   final _pending = <CoachMessage>[];
+
+  /// Vraag over een (trainings)schema: toon de knop naar Schema op maat.
+  static final _schemaVraag = RegExp(r'schema|trainingsplan|plan (voor|maken)|programma', caseSensitive: false);
+  bool _schemaHint = false;
   bool _sending = false;
   int? _freeLeft;
 
@@ -76,6 +81,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       final r = await ref.read(repositoryProvider).askCoach(text);
       setState(() {
         _pending.add(CoachMessage(role: 'assistant', content: r.reply, createdAt: DateTime.now(), via: r.via));
+        if (_schemaVraag.hasMatch(text)) _schemaHint = true;
         _freeLeft = r.freeLeft;
       });
       _scrollDown();
@@ -208,6 +214,20 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               },
             ),
           ),
+          if (_schemaHint && !_sending)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF13110E),
+                  foregroundColor: const Color(0xFFD9BF92),
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                onPressed: () => openCustomPlan(context),
+                icon: const Icon(Icons.auto_awesome, size: 18),
+                label: Text(tr('Maak je schema op maat')),
+              ),
+            ),
           if (!_sending && (history.value ?? const []).length + _pending.length > 0)
             SizedBox(
               height: 44,

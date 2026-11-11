@@ -188,6 +188,12 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `shared/art/wolkje.dart` (pixel 18×16, gouden rand, vaste kleuren in licht én donker; buien `WolkjeMood` gewoon/regen/zon/wind/nacht/koud/blij/denkt,
   `wolkjeVoorWeer(HourWeather)`, wipt via Timer, stil bij disableAnimations). Staat in: Vandaag (gluurt over advieskaart, weer van nu),
   coach-avatar `_CoachMark`, `CoachButton` (niet meer in de Vandaag-scène), handgeschreven "vraag het Wolkje → tik hier" + getekende pijl (`_AskWolkje`, lettertype Caveat OFL) → /coach, lege schermen (`EmptyArt`), recordkaart (blij). Test `test/wolkje_test.dart`.
+- **Schema op maat (11-11):** `domain/custom_plan.dart` (`PlanWishes` → `buildCustomPlan`: 9 doelen, fases basis/opbouw/piek/afbouw/herstel,
+  rustweek elke 4 (3 bij 50+/blessuregevoelig), taper per afstand, kracht A/B, cross, mobiliteit, vakantieweken, testloop, tempo-zones, voorspelling Riegel,
+  doelcheck, wedstrijdplan, herstelweek; beginnen/terugkomen via `beginner_plan.dart`). UI `planner/custom_plan_screen.dart` (6 vragen, altijd donker-goud,
+  fasebalk, km-staafjes, tempo-tabel, weken inklapbaar, details-sheet), PDF `planner/custom_plan_pdf.dart` (pakket `pdf`, A4 papierwit, delen via share_plus).
+  Ingang: Trainingsschema-setup (kaart bovenaan) + coach (knop bij vraag over schema, suggestie "Maak een schema voor mij"). Wensen in prefs `custom_plan_wishes`.
+  Alleen looptrainingen gaan naar `plan_sessions`. 100 vragen: `docs/schema-op-maat-100-vragen.md`. Test `test/custom_plan_test.dart`.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/models/models.dart';
@@ -20,6 +21,7 @@ import '../../domain/training_plan.dart';
 import '../../domain/weekly_load.dart';
 import '../../shared/widgets.dart';
 import '../record/record_run_screen.dart';
+import 'custom_plan_screen.dart';
 
 void openTrainingPlan(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TrainingPlanScreen()));
@@ -439,6 +441,35 @@ class _PlanSetupViewState extends ConsumerState<_PlanSetupView> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
       children: [
+        // Uitgebreid schema naar jouw wensen, met PDF.
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Material(
+            color: const Color(0xFF13110E),
+            borderRadius: BorderRadius.circular(RwRadius.m),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(RwRadius.m),
+              onTap: () => openCustomPlan(context),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Row(children: [
+                  Container(width: 10, height: 10, color: const Color(0xFFD9BF92)),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(tr('Schema op maat'),
+                          style: const TextStyle(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontSize: 20, color: Color(0xFFD9BF92))),
+                      const SizedBox(height: 2),
+                      Text(tr('Jouw doel, dagen en wensen. Met kracht, tempo\'s, wedstrijdplan en als PDF.'),
+                          style: const TextStyle(color: Color(0xFFBDB1A0), fontSize: 13)),
+                    ]),
+                  ),
+                  const Icon(Icons.arrow_forward, color: Color(0xFFD9BF92)),
+                ]),
+              ),
+            ),
+          ),
+        ),
         _label('WAT WIL JE?'),
         for (final (p, title, text, icon) in [
           (null, 'Naar een afstand', '5 km, 10 km, halve of hele marathon, met tempo\'s en intervallen.', Icons.flag_outlined),
