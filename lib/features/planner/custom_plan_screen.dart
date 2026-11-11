@@ -829,9 +829,12 @@ class _WeekCard extends StatelessWidget {
       for (final it in week.items) (it.session.date, _RunRow(item: it)),
       for (final e in week.extras) (e.date, _ExtraRow(extra: e)),
     ]..sort((a, b) => a.$1.compareTo(b.$1));
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(color: _surface, borderRadius: BorderRadius.circular(RwRadius.m), border: Border.all(color: _line)),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+      color: _surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.m), side: const BorderSide(color: _line)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -872,6 +875,7 @@ class _WeekCard extends StatelessWidget {
             for (final e in entries) e.$2,
           ],
         ),
+      ),
       ),
     );
   }
