@@ -639,7 +639,7 @@ class _ResultsState extends State<_Results> {
                   if (bars.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text('Hoger en warmer = beter moment · het beste uur gloeit · tik voor details',
+                      child: Text('Hoger en warmer = beter moment · tik op een uur, of houd vast en sleep door de dag',
                           style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                     ),
                 ],
@@ -1125,7 +1125,7 @@ class _PlanRow extends StatelessWidget {
       );
 }
 
-class _HourBars extends StatelessWidget {
+class _HourBars extends StatefulWidget {
   const _HourBars({
     required this.scores,
     required this.best,
@@ -1139,10 +1139,48 @@ class _HourBars extends StatelessWidget {
   final ValueChanged<StartTimeScore> onTap;
 
   @override
+  State<_HourBars> createState() => _HourBarsState();
+}
+
+class _HourBarsState extends State<_HourBars> {
+  /// Breedte van één uur: staafje (30) + tussenruimte (6).
+  static const double _step = 36;
+  final _scroll = ScrollController();
+  int _last = -1;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// Vasthouden en slepen (zoals op kadans.fit): het uur onder je vinger wordt gekozen, met een tikje per uur.
+  void _scrub(double dx) {
+    final scores = widget.scores;
+    if (scores.isEmpty || !_scroll.hasClients) return;
+    final i = ((dx + _scroll.offset) / _step).floor().clamp(0, scores.length - 1);
+    if (i == _last) return;
+    _last = i;
+    HapticFeedback.selectionClick();
+    widget.onTap(scores[i]);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scores = widget.scores;
+    final best = widget.best;
+    final selected = widget.selected;
+    final onTap = widget.onTap;
     return SizedBox(
       height: 146,
-      child: ListView.separated(
+      child: GestureDetector(
+        onLongPressStart: (d) {
+          _last = -1;
+          _scrub(d.localPosition.dx);
+        },
+        onLongPressMoveUpdate: (d) => _scrub(d.localPosition.dx),
+        child: ListView.separated(
+        controller: _scroll,
         scrollDirection: Axis.horizontal,
         itemCount: scores.length,
         separatorBuilder: (_, _) => const SizedBox(width: 6),
@@ -1158,7 +1196,10 @@ class _HourBars extends StatelessWidget {
             excludeSemantics: true,
             label: '${_dayLabel(s.start)} ${Fmt.time(s.start)}, score ${s.score}, ${s.verdict.toLowerCase()}${isBest ? ', beste moment' : ''}',
             child: GestureDetector(
-            onTap: () => onTap(s),
+            onTap: () {
+              if (!isSel) HapticFeedback.selectionClick();
+              onTap(s);
+            },
             child: SizedBox(
               width: 30,
               child: Column(
@@ -1194,7 +1235,9 @@ class _HourBars extends StatelessWidget {
                         curve: Curves.easeOutCubic,
                         builder: (_, h, _) => FractionallySizedBox(
                           heightFactor: h,
-                          child: Container(
+                          // Kleur loopt vloeiend over als je een ander uur kiest.
+                          child: AnimatedContainer(
+                            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 180),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -1233,6 +1276,7 @@ class _HourBars extends StatelessWidget {
           ),
           );
         },
+      ),
       ),
     );
   }
