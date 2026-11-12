@@ -556,9 +556,16 @@ CustomPlan buildCustomPlan(PlanWishes w, {required DateTime start, double? thres
   if (race != null) {
     final ws = DateTime(race.year, race.month, race.day + 1);
     final week = PlanWeek(number: plan.weeks.length + 1, start: ws, phase: PlanPhase.herstel, focus: 'Herstel: korte, rustige runs. Voel je je nog moe, wandel dan. Daarna kies je een nieuw doel.', recovery: true);
-    final firstDays = days.where((d) => d != longDay).take(2).toList();
-    for (final (n, d) in firstDays.indexed) {
-      final date = DateTime(ws.year, ws.month, ws.day + 2 + ((d - ws.weekday) % 7));
+    final herstelDagen = [
+      for (var k = 2; k < 7; k++) DateTime(ws.year, ws.month, ws.day + k),
+    ].where((x) => days.contains(x.weekday)).toList();
+    final firstDays = <DateTime>[];
+    for (final x in herstelDagen) {
+      if (firstDays.length >= 2) break;
+      if (firstDays.isNotEmpty && x.difference(firstDays.last).inDays < 2) continue;
+      firstDays.add(x);
+    }
+    for (final (n, date) in firstDays.indexed) {
       final km = g.meters! >= 21000 ? 4.0 : 5.0;
       week.items.add(_easy(w, date, week.number, n == 0 ? km : km + 1, easy, false, true, why: 'Bloed laten stromen, niets meer. Hersteld = soepel en zonder pijn.'));
     }
@@ -583,7 +590,7 @@ String _dist(PlanWishes w, double km, double pace) => w.inMinutes ? '${_min(km, 
 
 PlanItem _easy(PlanWishes w, DateTime date, int nr, double km, double pace, bool strides, bool weekday, {String? why}) {
   var k = _half(km);
-  if (weekday) k = _half(math.min(k, w.maxWeekdayMinutes * 60 / pace / 1000));
+  if (weekday) k = _half(math.min(k, w.maxWeekdayMinutes * 60 / pace));
   final mins = _min(k, pace) + (strides ? 3 : 0);
   return PlanItem(
     session: PlanSession(
@@ -738,7 +745,7 @@ PlanItem _race(PlanWishes w, DateTime date, int nr, double racePace, int? predic
     rpe: 10,
     key: true,
     why: 'Hier heb je voor getraind. Zie het wedstrijdplan.',
-    parts: ['Kort inlopen (marathon: 5 min wandelen en dribbelen).', 'Eerste km iets rustiger dan ${fmtPace(racePace)} /km.', 'Laatste kwart: versnellen als het kan.'],
+    parts: [m >= 21000 ? 'Kort inlopen: 5 min wandelen en dribbelen is genoeg.' : 'Inlopen: 10–15 min rustig en 3 versnellingen.', 'Eerste km iets rustiger dan ${fmtPace(racePace)} /km.', 'Laatste kwart: versnellen als het kan.'],
     minutes: (predicted ?? (m / 1000 * racePace)).round() ~/ 60,
   );
 }

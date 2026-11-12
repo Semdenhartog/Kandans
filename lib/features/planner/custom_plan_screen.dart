@@ -827,7 +827,7 @@ class _WeekCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final entries = <(DateTime, Widget)>[
       for (final it in week.items) (it.session.date, _RunRow(item: it)),
-      for (final e in week.extras) (e.date, _ExtraRow(extra: e)),
+      for (final e in week.extras.where((e) => e.kind != ExtraKind.rust || e.title != 'Rustdag')) (e.date, _ExtraRow(extra: e)),
     ]..sort((a, b) => a.$1.compareTo(b.$1));
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -873,6 +873,21 @@ class _WeekCard extends StatelessWidget {
               ),
             ),
             for (final e in entries) e.$2,
+            if (week.extras.any((e) => e.kind == ExtraKind.rust && e.title == 'Rustdag'))
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Row(children: [
+                  const SizedBox(width: 52),
+                  const Icon(Icons.bedtime_outlined, size: 16, color: _subtle),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '${tr('Rust')}: ${[for (final e in week.extras) if (e.kind == ExtraKind.rust && e.title == 'Rustdag') _dayShort[e.date.weekday - 1]].join(' · ')}',
+                      style: const TextStyle(color: _subtle, fontSize: 13),
+                    ),
+                  ),
+                ]),
+              ),
           ],
         ),
       ),

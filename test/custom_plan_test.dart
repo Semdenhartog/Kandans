@@ -89,4 +89,18 @@ void main() {
     expect(p.goalCheck, 'erg ambitieus');
     expect(p.warnings, isNotEmpty);
   });
+
+  test('rustige runs voor een 10 km zijn minstens 4 km en herstelweek valt binnen de week', () {
+    final w = PlanWishes(goal: PlanGoal.k10, raceDate: DateTime(2027, 1, 20), weeklyKm: 8, longestKm: 4, runDays: const [2, 4, 7]);
+    final p = buildCustomPlan(w, start: DateTime(2026, 11, 12), thresholdPace: 330);
+    final easy = p.weeks.where((x) => x.phase != PlanPhase.herstel).expand((x) => x.items).where((i) => i.session.kind == SessionKind.easy);
+    expect(easy, isNotEmpty);
+    for (final e in easy) {
+      expect(e.session.distanceMeters, greaterThanOrEqualTo(4000));
+    }
+    final herstel = p.weeks.last;
+    for (final i in herstel.items) {
+      expect(i.session.date.difference(herstel.start).inDays, inInclusiveRange(0, 6));
+    }
+  });
 }
