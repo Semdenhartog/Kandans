@@ -2163,7 +2163,10 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                       controller: _pages,
                                       onPageChanged: (i) => setState(() => _page = i),
                                       children: [
-                                        _stats(v),
+                                        _PausedBlink(
+                                          active: v.status == RecorderStatus.paused || v.status == RecorderStatus.autoPaused,
+                                          child: _stats(v),
+                                        ),
                                         Padding(
                                           padding: const EdgeInsets.only(top: 12, bottom: 8),
                                           child: Column(
@@ -2500,6 +2503,58 @@ class _IntervalPanel extends StatelessWidget {
   }
 }
 
+/// Gepauzeerd: de cijfers ademen (zoals een sporthorloge knippert), zodat je in één oogopslag ziet dat de tijd stilstaat.
+/// Bij "minder beweging" alleen gedimd.
+class _PausedBlink extends StatefulWidget {
+  const _PausedBlink({required this.active, required this.child});
+  final bool active;
+  final Widget child;
+
+  @override
+  State<_PausedBlink> createState() => _PausedBlinkState();
+}
+
+class _PausedBlinkState extends State<_PausedBlink> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100), value: 1);
+  late final Animation<double> _fade = Tween(begin: 0.45, end: 1.0).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut));
+
+  bool get _still => WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+
+  void _sync() {
+    if (widget.active) {
+      if (_still) {
+        _c.value = 0.3;
+      } else if (!_c.isAnimating) {
+        _c.repeat(reverse: true);
+      }
+    } else {
+      _c.stop();
+      _c.value = 1;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(_PausedBlink old) {
+    super.didUpdateWidget(old);
+    if (old.active != widget.active) _sync();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(opacity: _fade, child: widget.child);
+}
+
 class _StatusBar extends StatelessWidget {
   const _StatusBar({required this.view, required this.error});
   final RecorderView view;
@@ -2519,7 +2574,7 @@ class _StatusBar extends StatelessWidget {
           };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(RwRadius.s)),
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
@@ -2883,7 +2938,8 @@ class _GlowPulseState extends State<_GlowPulse> with SingleTickerProviderStateMi
         child: widget.child,
         builder: (_, child) => DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(40),
+            // Zelfde hoek als de knop eronder (blok sinds 12-11), anders steekt de gloed bij de hoeken uit.
+            borderRadius: BorderRadius.circular(RwRadius.s),
             boxShadow: widget.active
                 ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.18 + 0.22 * _c.value), blurRadius: 14 + 16 * _c.value, spreadRadius: -2)]
                 : const [],
