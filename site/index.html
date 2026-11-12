@@ -35,6 +35,7 @@ button{font-family:inherit}
 @media (max-width:640px){.wrap{padding:0 20px}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 h1,h2,h3{font-weight:400;letter-spacing:-0.035em;line-height:1.02;margin:0}
+h1,h2,.tile h3,.plan .price{font-family:Saira,'DM Sans',sans-serif;font-weight:700;letter-spacing:-0.02em;line-height:.98}
 .label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:var(--r-s);background:var(--card)}
 .tag::before{content:"";width:7px;height:7px;background:var(--gold);border-radius:1px}
@@ -66,11 +67,66 @@ a:hover .arrow-btn{transform:translateX(3px)}
 @media (max-width:640px){.menu a:not(.cta){display:none}}
 
 /* Hero: groot beeld met afgeronde hoeken */
-.hero{margin:8px;border-radius:var(--r-l);min-height:calc(100svh - 16px);position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:120px 32px 32px;background:linear-gradient(100deg,rgba(18,14,10,.82) 0%,rgba(18,14,10,.45) 45%,rgba(18,14,10,.15) 75%),linear-gradient(0deg,rgba(18,14,10,.55),transparent 40%),#1A1510 url(foto/heide.jpg) center/cover no-repeat}
-.hero h1{font-size:clamp(48px,8.4vw,128px);max-width:11ch;font-weight:500}
+.hero{margin:8px;border-radius:var(--r-l);min-height:calc(100svh - 16px);position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:120px 32px 40px;background:linear-gradient(100deg,rgba(18,14,10,.82) 0%,rgba(18,14,10,.45) 45%,rgba(18,14,10,.15) 75%),linear-gradient(0deg,rgba(18,14,10,.55),transparent 40%),#1A1510 url(foto/heide.jpg) center/cover no-repeat}
+.hero h1{font-size:clamp(46px,7.4vw,116px);max-width:10ch;font-weight:800;margin:20px 0 20px}
 .hero-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px}
 .hero-foot p{margin:0;font-size:clamp(17px,1.5vw,20px);max-width:30rem;color:rgba(255,255,255,.88)}
 @media (max-width:640px){.hero{padding:104px 20px 20px}}
+
+/* Hero-inhoud: lanceerlabel, kop, wachtlijst */
+.hero-main{position:relative;z-index:2;max-width:40rem}
+.launch{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:#fff;padding:8px 12px;border-radius:var(--r-s);background:rgba(18,14,10,.5)}
+@supports (backdrop-filter:blur(8px)){.launch{backdrop-filter:blur(10px)}}
+.launch i{width:8px;height:8px;border-radius:1px;background:var(--gold);animation:tik 1.6s ease-in-out infinite}
+.launch b{font-weight:400;color:var(--gold-soft)}
+@keyframes tik{50%{opacity:.25}}
+.lede{margin:0 0 24px;font-size:clamp(17px,1.5vw,20px);max-width:32rem;color:rgba(255,255,255,.9)}
+.wl{display:flex;flex-wrap:wrap;gap:4px;max-width:30rem;margin:0}
+.wl input[type=email]{flex:1 1 200px;min-width:0;min-height:48px;padding:0 14px;border-radius:var(--r-s);border:1px solid rgba(255,255,255,.3);background:rgba(18,14,10,.45);color:#fff;font-size:16px;font-family:inherit}
+@supports (backdrop-filter:blur(8px)){.wl input[type=email]{backdrop-filter:blur(10px)}}
+.wl input::placeholder{color:rgba(255,255,255,.65)}
+.wl input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.wl .go .t{min-height:48px;background:var(--gold);color:var(--dark)}
+.wl .go:hover .t{background:var(--gold-soft)}
+.wl .go .a{min-height:48px;width:48px;background:#fff}
+.wl-msg{flex:1 1 100%;margin:6px 0 0;font-weight:600;color:var(--gold-soft)}
+.wl-msg:empty{display:none}
+.trust{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin:16px 0 0;padding:0;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.trust li{display:flex;align-items:center;gap:8px}
+.trust li::before{content:"";width:6px;height:6px;background:var(--gold);border-radius:1px}
+
+/* Probeer het: voorbeelddag per 5 minuten */
+.demo{background:var(--dark);color:var(--on-dark);border-radius:var(--r-l);padding:clamp(24px,4vw,56px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:clamp(28px,4vw,64px);align-items:end;margin-bottom:clamp(64px,8vw,120px)}
+.demo-head{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px 40px}
+.demo h2{font-size:clamp(30px,3.6vw,52px);color:#fff;max-width:17ch;margin-top:18px}
+.demo-head p{margin:0;color:var(--on-dark-muted);max-width:24rem}
+.read .when{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--on-dark-muted)}
+.read .time{font-family:Saira,sans-serif;font-weight:800;font-size:clamp(76px,9vw,132px);line-height:.92;color:#fff;font-variant-numeric:tabular-nums;margin:6px 0 4px}
+.read .score{display:flex;align-items:baseline;gap:10px;font-family:Saira,sans-serif;font-weight:700;font-size:30px;color:var(--gold);font-variant-numeric:tabular-nums}
+.read .score span{font-family:'DM Sans',sans-serif;font-weight:500;font-size:17px;color:var(--on-dark)}
+.read .why{margin:10px 0 0;min-height:3.1em;color:var(--on-dark-muted)}
+.read dl{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)}
+.read dt{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--on-dark-muted)}
+.read dd{margin:4px 0 0;font-family:Saira,sans-serif;font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
+html:not(.js) .plot{display:none}
+.chart{position:relative;padding-top:34px;touch-action:pan-y;cursor:ew-resize;-webkit-user-select:none;user-select:none}
+.bars{display:flex;align-items:flex-end;gap:1px;height:clamp(150px,19vw,240px)}
+.bars i{flex:1 1 0;min-width:0;background:rgba(241,233,220,.26);border-radius:1px 1px 0 0}
+.bars i.wet{background:rgba(241,233,220,.11)}
+.bars i.hi{background:var(--gold)}
+.bars i.sel{background:#fff}
+.pin{position:absolute;top:0;transform:translateX(-100%);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;color:var(--on-dark-muted);display:flex;flex-direction:column;align-items:flex-end;gap:5px;pointer-events:none}
+.pin::after{content:"";width:1px;height:10px;background:currentColor}
+.pin.best{color:var(--gold);transform:none;align-items:flex-start}
+.axis{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--on-dark-muted)}
+.plot input[type=range]{width:100%;margin:14px 0 0;accent-color:var(--gold);height:28px}
+.plot-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-top:14px}
+.chips{display:flex;gap:4px}
+.chips button{border:1px solid rgba(255,255,255,.25);background:none;color:var(--on-dark);min-height:40px;padding:0 14px;border-radius:var(--r-s);font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.chips button:hover{background:rgba(255,255,255,.08)}
+.chips button.gold{background:var(--gold);border-color:var(--gold);color:var(--dark)}
+.demo .go .t{background:var(--card);color:var(--ink)}.demo .go:hover .t{background:#fff}
+@media (max-width:860px){.demo{grid-template-columns:1fr;border-radius:var(--r-m);padding:24px 18px}.pin{font-size:9.5px}.launch{font-size:10.5px;white-space:nowrap;gap:8px;padding:8px 10px}}
 
 /* Grote uitspraak met grijs tweede deel */
 .statement{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:32px;padding-top:clamp(88px,11vw,160px);padding-bottom:clamp(64px,8vw,112px);border-bottom:1px solid var(--line)}
@@ -164,7 +220,7 @@ details a{color:var(--gold-deep)}
 /* Voet: donker beeld, uitspraak + wachtlijst, kolommen, groot merk */
 .foot{margin:8px;border-radius:var(--r-l);overflow:hidden;color:#fff;background:#1A1510 url(beeld-voet.jpg) center/cover no-repeat;padding:clamp(40px,5vw,64px) 32px 24px;position:relative}
 .foot-top{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:32px}
-.foot h2{font-size:clamp(30px,3.4vw,48px);max-width:16ch;font-weight:500;color:#fff}
+.foot h2{font-size:clamp(30px,3.4vw,48px);max-width:16ch;color:#fff}
 .foot .claim{margin:14px 0 24px;color:rgba(255,255,255,.75);max-width:30rem}
 .foot form{display:flex;flex-wrap:wrap;gap:4px;max-width:30rem}
 .foot input[type=email]{flex:1 1 220px;min-width:0;min-height:44px;padding:0 14px;border-radius:var(--r-s);border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:16px;font-family:inherit}
@@ -174,7 +230,6 @@ details a{color:var(--gold-deep)}
 .foot .go .a{min-height:44px;width:44px;background:#fff}
 .foot .note{flex:1 1 100%;margin:8px 0 0;font-size:13px;color:rgba(255,255,255,.65)}
 .foot .note a{color:#fff}
-#wachtlijst-msg{flex:1 1 100%;margin:6px 0 0;font-weight:600;color:var(--gold-soft)}
 .foot h4{margin:0 0 14px;font-family:var(--mono);font-weight:400;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6)}
 .foot ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .foot ul a{text-decoration:none;color:#fff}.foot ul a:hover{color:var(--gold-soft)}
@@ -195,9 +250,8 @@ details a{color:var(--gold-deep)}
 .phone img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:38px;background:var(--paper)}
 .phone::before{content:"";position:absolute;inset:9px;border-radius:38px;pointer-events:none;z-index:1;background:linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 28%)}
 .hero-phone{position:absolute;right:clamp(32px,7vw,140px);top:50%;transform:translateY(-48%) rotate(-5deg);width:min(300px,24vw)}
-.hero-foot{justify-content:flex-start!important}
 .hero .go .t{background:#F3EEE6;color:var(--ink)}.hero .go:hover .t{background:#fff}
-@media (max-width:1000px){.hero{min-height:0}.hero-phone{position:relative;right:auto;top:auto;transform:rotate(-4deg);width:min(240px,60vw);margin:36px auto 40px}}
+@media (max-width:1000px){.hero{min-height:0;padding-bottom:0}.hero-phone{position:relative;right:auto;top:auto;transform:rotate(-4deg);width:min(240px,60vw);margin:36px auto 40px}}
 
 /* Galerij: schermen naast elkaar, vegen of pijltjes */
 .gallery{margin:8px;border-radius:var(--r-l);background:radial-gradient(ellipse at 20% 0%,rgba(217,191,146,.16),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(184,149,95,.18),transparent 50%),#14100C;color:var(--on-dark);padding:clamp(56px,7vw,104px) 0 clamp(40px,5vw,72px);overflow:hidden}
@@ -233,7 +287,7 @@ details a{color:var(--gold-deep)}
 .band-photo{margin:8px;border-radius:var(--r-l);min-height:clamp(420px,62vw,720px);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:clamp(28px,4vw,56px);color:#fff;background:#2a241c center/cover no-repeat}
 .band-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(18,14,10,.55),transparent 55%)}
 .band-photo>*{position:relative;z-index:1}
-.band-photo blockquote{margin:0;text-align:right;margin-left:auto;max-width:22ch;font-size:clamp(30px,4vw,56px);font-weight:500;letter-spacing:-0.03em;line-height:1.06}
+.band-photo blockquote{margin:0;text-align:right;margin-left:auto;max-width:22ch;font-size:clamp(30px,4vw,56px);font-family:Saira,sans-serif;font-weight:700;letter-spacing:-0.02em;line-height:1.04}
 .band-photo cite{text-align:right;display:block;margin-top:18px;font-style:normal;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
 .duo{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
 .duo figure{margin:0;border-radius:var(--r-m);overflow:hidden;position:relative;min-height:clamp(320px,40vw,560px);background:#2a241c center/cover no-repeat}
@@ -275,7 +329,7 @@ body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org
 @media (max-width:900px){
   .hero{padding:96px 20px 24px}
   .hero h1{font-size:clamp(44px,13vw,64px)}
-  .statement{padding-top:72px;padding-bottom:48px;gap:20px;border-bottom:0}
+  .statement{padding-top:56px;padding-bottom:48px;gap:20px;border-bottom:0}
   .statement h2{font-size:clamp(32px,9vw,44px)}
   .statement p{margin:24px 0 20px}
   .band-photo{margin:0 8px;min-height:460px;border-radius:var(--r-m);padding:28px 24px;align-items:flex-start!important}
@@ -334,12 +388,20 @@ body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org
 
 <main id="top">
 <section class="hero">
-  <h1>Loop op het beste moment.</h1>
-  <div class="phone hero-phone" aria-hidden="true"><img src="app/vandaag.jpg" alt="" width="540" height="1199" fetchpriority="high"></div>
-  <div class="hero-foot">
-    <p>Weer, wind op je route, de buienradar en je eigen runs, per 5 minuten doorgerekend.</p>
-    <a class="go" href="#wachtlijst"><span class="t">Zet me op de wachtlijst</span><span class="a"><svg><use href="#pijl"/></svg></span></a>
+  <div class="hero-main">
+    <span class="launch"><i aria-hidden="true"></i>Google Play · 1 december<b id="aftel"></b></span>
+    <h1>Loop op het beste moment.</h1>
+    <p class="lede">Kadans rekent per 5 minuten uit wanneer jij moet vertrekken: het weer, de wind op je route, de buien en je eigen runs.</p>
+    <form class="wl" name="wachtlijst-boven" novalidate>
+      <p class="sr"><label>Niet invullen <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+      <label for="email-boven" class="sr">E-mailadres</label>
+      <input id="email-boven" name="email" type="email" required autocomplete="email" placeholder="jouw@email.nl">
+      <button type="submit" class="go"><span class="t">Zet me op de wachtlijst</span><span class="a"><svg><use href="#pijl"/></svg></span></button>
+      <p class="wl-msg" role="status"></p>
+    </form>
+    <ul class="trust"><li>Gratis te gebruiken</li><li>Eerst op Android</li><li>Geen reclame</li></ul>
   </div>
+  <div class="phone hero-phone" aria-hidden="true"><img src="app/vandaag.jpg" alt="" width="540" height="1199" fetchpriority="high"></div>
 </section>
 
 <div class="wrap">
@@ -349,6 +411,34 @@ body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org
       <h2>Weer, wind en je eigen runs samen in één antwoord: <span>wanneer je het best kunt vertrekken.</span></h2>
       <p>De meeste loop-apps vertellen je achteraf hoe het ging. Kadans helpt je vooraf. Je koppelt je runs, kiest je rondje en Kadans rekent het weer van de komende uren door, met de wind per kilometer en de buien van de komende twee uur. Hoe meer je loopt, hoe beter Kadans weet bij welk weer jij het snelst bent.</p>
       <a class="go" href="#app"><span class="t">Bekijk de app</span><span class="a"><svg><use href="#pijl"/></svg></span></a>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="demo reveal" id="probeer" aria-label="Probeer het: een voorbeelddag">
+    <div class="demo-head">
+      <div><span class="tag on-dark">Probeer het</span><h2>Sleep door de dag. Zie wat 45 minuten wachten oplevert.</h2></div>
+      <p>Een voorbeelddag in november, voor een rondje van 8,5 km. Elke streep is 5 minuten. Goud is top.</p>
+    </div>
+    <div class="read" aria-live="polite">
+      <div class="when" id="d-when">Beste moment</div>
+      <div class="time" id="d-time">16:35</div>
+      <div class="score"><b id="d-score">97</b><span id="d-label">Top</span></div>
+      <p class="why" id="d-why">Droog en weinig wind. Dit is je moment.</p>
+      <dl><div><dt>Gevoel</dt><dd id="d-feel">12°C</dd></div><div><dt>Wind</dt><dd id="d-wind">8 ZW</dd></div><div><dt>Regen</dt><dd id="d-rain">10%</dd></div></dl>
+    </div>
+    <div class="plot">
+      <div class="chart" id="d-chart">
+        <span class="pin" id="d-pin-nu">Nu 15:40</span><span class="pin best" id="d-pin-best">Beste 16:35</span>
+        <div class="bars" id="d-bars" aria-hidden="true"></div>
+      </div>
+      <div class="axis" aria-hidden="true"><span>10:00</span><span>12:00</span><span>14:00</span><span>16:00</span><span>18:00</span><span>20:00</span></div>
+      <input type="range" id="d-range" min="0" max="120" step="1" value="79" aria-label="Vertrektijd kiezen">
+      <div class="plot-foot">
+        <div class="chips"><button type="button" data-go="68">Nu</button><button type="button" class="gold" data-go="79">Beste moment</button></div>
+        <a class="go" href="#wachtlijst"><span class="t">Dit wil ik voor mijn rondje</span><span class="a"><svg><use href="#pijl"/></svg></span></a>
+      </div>
     </div>
   </section>
 </div>
@@ -508,12 +598,12 @@ body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org
     <div>
       <h2>Loop mee vanaf dag één.</h2>
       <p class="claim">Laat je e-mailadres achter. Je hoort het zodra je kunt meetesten.</p>
-      <form id="wachtlijst-form" name="wachtlijst" novalidate>
+      <form class="wl" name="wachtlijst" novalidate>
         <p class="sr"><label>Niet invullen <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
         <label for="email" class="sr">E-mailadres</label>
         <input id="email" name="email" type="email" required autocomplete="email" placeholder="jouw@email.nl">
         <button type="submit" class="go"><span class="t">Aanmelden</span><span class="a"><svg><use href="#pijl"/></svg></span></button>
-        <p id="wachtlijst-msg" role="status"></p>
+        <p class="wl-msg" role="status"></p>
         <p class="note">We mailen je alleen over de lancering. Afmelden kan altijd. <a href="privacy.html">Privacy</a></p>
       </form>
     </div>
@@ -579,28 +669,92 @@ body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
   els.forEach(function (e) { io.observe(e); });
 })();
+// Aftellen naar de lancering (1 december 2026); daarna verdwijnt de teller.
+(function () {
+  var el = document.getElementById('aftel'); if (!el) return;
+  var d = Math.ceil((new Date(2026, 11, 1) - new Date()) / 864e5);
+  if (d > 1) el.textContent = '· nog ' + d + ' dagen'; else if (d === 1) el.textContent = '· morgen';
+})();
+// Probeer het: voorbeelddag 10:00–20:00 per 5 minuten. De cijfers zijn een voorbeeld (zelfde dag als het Vandaag-scherm).
+(function () {
+  var bars = document.getElementById('d-bars'), range = document.getElementById('d-range'), chart = document.getElementById('d-chart');
+  if (!bars || !range) return;
+  var N = 120, NOW = 68, BEST = 79, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function lerp(k, t) { for (var i = 1; i < k.length; i++) if (t <= k[i][0]) { var a = k[i - 1], b = k[i]; return a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]); } return k[k.length - 1][1]; }
+  var WIND = [[10, 12], [12, 15], [14, 18], [15, 23], [15.67, 27], [16.17, 15], [16.58, 8], [17.5, 10], [19, 13], [20, 14]];
+  var RAIN = [[10, 5], [13, 10], [14.5, 30], [15.25, 70], [15.83, 85], [16.25, 35], [16.58, 10], [18, 10], [19, 25], [20, 40]];
+  var FEEL = [[10, 9], [13, 12], [14.5, 13], [15.83, 11], [16.58, 12], [18, 10], [20, 8]];
+  function at(i) {
+    var t = 10 + i / 12, w = lerp(WIND, t), r = lerp(RAIN, t), f = lerp(FEEL, t), dark = t > 17.25 ? Math.min(25, (t - 17.25) * 30) : 0;
+    var sc = 100 - Math.max(0, w - 7) - r * .2 - Math.max(0, r - 30) * .6 - Math.abs(f - 12) * 2 - dark;
+    return { t: t, wind: Math.round(w), rain: Math.round(r / 5) * 5, feel: Math.round(f), dark: dark > 0, score: Math.max(8, Math.min(97, Math.round(sc))) };
+  }
+  var data = [], i; for (i = 0; i <= N; i++) data.push(at(i));
+  data[BEST].score = 97;
+  var html = ''; for (i = 0; i <= N; i++) html += '<i style="height:' + data[i].score + '%" class="' + (data[i].score >= 90 ? 'hi' : data[i].rain > 50 ? 'wet' : '') + '"></i>';
+  bars.innerHTML = html; var els = bars.children;
+  document.getElementById('d-pin-nu').style.left = (NOW + .5) / (N + 1) * 100 + '%';
+  document.getElementById('d-pin-best').style.left = (BEST + .5) / (N + 1) * 100 + '%';
+  function hm(t) { var m = Math.round(t * 60); return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
+  var $ = function (id) { return document.getElementById(id); }, cur = -1;
+  function show(i) {
+    i = Math.max(0, Math.min(N, Math.round(i))); if (i === cur) return;
+    if (cur >= 0) els[cur].classList.remove('sel'); els[i].classList.add('sel'); cur = i;
+    var d = data[i], time = hm(d.t);
+    $('d-when').textContent = i === BEST ? 'Beste moment' : i === NOW ? 'Nu vertrekken' : 'Vertrek om';
+    $('d-time').textContent = time; $('d-score').textContent = d.score;
+    $('d-label').textContent = d.score >= 90 ? 'Top' : d.score >= 75 ? 'Goed' : d.score >= 55 ? 'Kan' : 'Liever niet';
+    $('d-feel').textContent = d.feel + '°C'; $('d-wind').textContent = d.wind + ' ZW'; $('d-rain').textContent = d.rain + '%';
+    $('d-why').textContent = i === BEST ? 'Droog en weinig wind. Dit is je moment.'
+      : d.rain > 50 ? 'Er trekt een bui over je route. Om 16:35 is het droog.'
+      : d.wind > 20 ? 'Veel wind: ' + d.wind + ' km/u. Om 16:35 is dat nog 8.'
+      : d.dark ? 'Het is al donker. Kan, maar 16:35 was beter.'
+      : d.score >= 90 ? 'Ook een mooi moment.' : 'Prima te doen, maar 16:35 scoort hoger.';
+    range.value = i; range.setAttribute('aria-valuetext', time + ', score ' + d.score);
+  }
+  var raf = 0;
+  function glide(to) {
+    cancelAnimationFrame(raf); if (still) { show(to); return; }
+    var from = cur, t0 = performance.now(), dur = 450 + Math.abs(to - from) * 45;
+    (function step(t) { var k = Math.min(1, (t - t0) / dur); k = 1 - Math.pow(1 - k, 3); show(from + (to - from) * k); if (k < 1) raf = requestAnimationFrame(step); })(t0);
+  }
+  range.addEventListener('input', function () { cancelAnimationFrame(raf); show(+range.value); });
+  function pick(e) { var r = bars.getBoundingClientRect(); cancelAnimationFrame(raf); show((e.clientX - r.left) / r.width * (N + 1) - .5); }
+  var down = false;
+  chart.addEventListener('pointerdown', function (e) { down = true; pick(e); });
+  chart.addEventListener('pointermove', function (e) { if (down || e.pointerType === 'mouse') pick(e); });
+  addEventListener('pointerup', function () { down = false; }); addEventListener('pointercancel', function () { down = false; });
+  document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { glide(+b.dataset.go); }); });
+  // Eerste keer in beeld: van "nu" naar het beste moment schuiven.
+  if (still || !('IntersectionObserver' in window)) { show(BEST); return; }
+  show(NOW);
+  var io = new IntersectionObserver(function (e) { if (!e[0].isIntersecting) return; io.disconnect(); setTimeout(function () { if (cur === NOW) glide(BEST); }, 500); }, { threshold: .5 });
+  io.observe(chart);
+})();
 // Wachtlijst: e-mailadres naar Supabase (tabel waitlist, alleen toevoegen). URL en openbare sleutel worden bij het
-// online zetten ingevuld (zie .github/workflows/site.yml).
+// online zetten ingevuld (zie .github/workflows/site.yml). Werkt voor het formulier bovenaan én in de voet.
 (function () {
   var URL_ = '__SUPABASE_URL__', KEY = '__SUPABASE_ANON_KEY__';
-  var form = document.getElementById('wachtlijst-form'), msg = document.getElementById('wachtlijst-msg');
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (form.elements['bot-field'].value) return;
-    var email = form.elements.email.value.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Vul een geldig e-mailadres in.'; return; }
-    if (URL_.indexOf('__') === 0) { msg.textContent = 'De wachtlijst staat nog niet aan. Probeer het later nog eens.'; return; }
-    var btn = form.querySelector('button'); btn.disabled = true; msg.textContent = 'Even geduld…';
-    fetch(URL_ + '/rest/v1/waitlist', {
-      method: 'POST',
-      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ email: email, source: 'website' })
-    }).then(function (r) {
-      if (r.ok || r.status === 409) { location.href = 'bedankt.html'; return; }
-      throw new Error(r.status);
-    }).catch(function () {
-      msg.textContent = 'Aanmelden lukte niet. Probeer het over een paar minuten opnieuw.';
-      btn.disabled = false;
+  document.querySelectorAll('form.wl').forEach(function (form) {
+    var msg = form.querySelector('.wl-msg');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (form.elements['bot-field'].value) return;
+      var email = form.elements.email.value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Vul een geldig e-mailadres in.'; return; }
+      if (URL_.indexOf('__') === 0) { msg.textContent = 'De wachtlijst staat nog niet aan. Probeer het later nog eens.'; return; }
+      var btn = form.querySelector('button'); btn.disabled = true; msg.textContent = 'Even geduld…';
+      fetch(URL_ + '/rest/v1/waitlist', {
+        method: 'POST',
+        headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ email: email, source: 'website' })
+      }).then(function (r) {
+        if (r.ok || r.status === 409) { location.href = 'bedankt.html'; return; }
+        throw new Error(r.status);
+      }).catch(function () {
+        msg.textContent = 'Aanmelden lukte niet. Probeer het over een paar minuten opnieuw.';
+        btn.disabled = false;
+      });
     });
   });
 })();
