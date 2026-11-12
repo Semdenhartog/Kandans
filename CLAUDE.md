@@ -41,7 +41,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   - `site.yml`: zet `site/` op GitHub Pages, eigen domein **https://kadans.fit** (sinds 7-11-2026, Namecheap, privacy aan; oud adres
     semdenhartog.github.io/Kandans stuurt door). Domein-stap in site.yml controleert DNS. Vult
     `__SUPABASE_URL__`/`__SUPABASE_ANON_KEY__` in. Links in `site/` zijn relatief.
-- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.6 (foto's + stappen). Aanmelden vraagt 16+ en akkoord (versies in user metadata).
+- Juridisch: `site/voorwaarden.html` (v1.0), `site/verwijderen.html` (Play Console-URL), privacy v1.7 (foto's + stappen; 10-11: anonieme coachvragen 90 dagen, algemene Claude-antwoorden in de kennis). Aanmelden vraagt 16+ en akkoord (versies in user metadata).
   Gezondheidsgegevens alleen na `HealthConsent.ensure(context)` (`data/services/health_consent.dart`), intrekken via Ik → Gezondheidsgegevens.
   Site gebruikt eigen lettertypes (`site/fonts.css`) en Leaflet uit `site.yml` (geen Google Fonts/unpkg → geen cookiebanner nodig).
   Site-stijl (unslop-controle 2-11-2026, score 0): geen tekst met kleurverloop (effen goud), kleurverloop alleen op het CTA-blok,
@@ -193,7 +193,12 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   doelcheck, wedstrijdplan, herstelweek; beginnen/terugkomen via `beginner_plan.dart`). UI `planner/custom_plan_screen.dart` (6 vragen, altijd donker-goud,
   fasebalk, km-staafjes, tempo-tabel, weken inklapbaar, details-sheet), PDF `planner/custom_plan_pdf.dart` (pakket `pdf`, A4 papierwit, delen via share_plus).
   Ingang: Trainingsschema-setup (kaart bovenaan) + coach (knop bij vraag over schema, suggestie "Maak een schema voor mij"). Wensen in prefs `custom_plan_wishes`.
-  Alleen looptrainingen gaan naar `plan_sessions`. 100 vragen: `docs/schema-op-maat-100-vragen.md`. Test `test/custom_plan_test.dart`.
+  Alleen looptrainingen gaan naar `plan_sessions`. 100 vragen: `docs/schema-op-maat-100-vragen.md`. Tests `test/custom_plan_test.dart` + `custom_plan_pdf_test.dart`.
+  Na Sems PDF-feedback (11-11): weken ma–zo (niets vóór de startdag), PDF zonder omkaderde weekblokken (gouden lijn per week), kracht/mobiliteit
+  één keer op het voorblad, rustdagen op één regel, piekweek zonder de wedstrijd, geen kracht in wedstrijdweek, lage omvang +2,5 km/week,
+  rustige runs ≥ 4 km vanaf 10 km, lange duurloop niet sneller dan rustig, waarschuwing bij te korte lange duurloop.
+  Opgeloste rekenfout: minutenlimiet deelde door 1000 (alle rustige runs werden 3 km). Schermtests `28a`/`28b` (`debugWishes`).
+  Pakket `pdf` vraagt `dependency_overrides: image: 4.5.4` (anders botst `archive`).
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -224,6 +229,11 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Alles wat gebouwd is: `VERBETERPUNTEN.md`. Play Store: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
+- Testen op telefoon (nieuw 11-11): Schema op maat (6 vragen, overzicht, Download PDF delen, "Zet in mijn plan" vervangt huidig schema),
+  coach-knop "Maak je schema op maat"; PDF opnieuw maken met de nieuwe APK en naar Claude sturen voor een laatste check.
+- Testen op telefoon (nieuw 10-11): Wolkje (Vandaag + handgeschreven pijl → coach, coach-avatar, lege schermen, recordkaart, wippen),
+  coach-antwoorden met herkomst ("Uit de Kadans-kennis" / "Uit je logboek"), beheerpagina kadans.fit/coach-beheer.html inloggen.
+- Main kan breken door Dependabot-pakketupdates (11-11: local_auth 3 → andere sessie loste `authenticate` op). Na zo'n update eerst de build checken.
 - Coach-kennis: af en toe kadans.fit/coach-beheer.html → Nakijken (Claude-antwoorden) en Onbeantwoord (koppelen of nieuw onderwerp).
 - KvK (november, KOR-keuze) → Kickstarter-betaalgegevens + Submit for review, betaallinks steunpagina.
 - Wachtlijst → Google Sheets: wacht op Sems keuzes (zie archief).
