@@ -369,10 +369,10 @@ class _Bubble extends StatelessWidget {
               ),
         border: Border.all(color: user ? RwColors.accent.withValues(alpha: 0.35) : RwColors.hairline),
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(20),
-          topRight: const Radius.circular(20),
-          bottomLeft: Radius.circular(user ? 20 : 6),
-          bottomRight: Radius.circular(user ? 6 : 20),
+          topLeft: const Radius.circular(RwRadius.m),
+          topRight: const Radius.circular(RwRadius.m),
+          bottomLeft: Radius.circular(user ? RwRadius.m : 4),
+          bottomRight: Radius.circular(user ? 4 : RwRadius.m),
         ),
       ),
       child: user
@@ -539,10 +539,10 @@ class _TypingState extends State<_Typing> with SingleTickerProviderStateMixin {
               color: RwColors.surface,
               border: Border.all(color: RwColors.hairline),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-                bottomLeft: Radius.circular(6),
+                topLeft: Radius.circular(RwRadius.m),
+                topRight: Radius.circular(RwRadius.m),
+                bottomRight: Radius.circular(RwRadius.m),
+                bottomLeft: Radius.circular(4),
               ),
             ),
             child: AnimatedBuilder(

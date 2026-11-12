@@ -287,7 +287,8 @@ class _GoldButton extends StatelessWidget {
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
           gradient: _goldGradient,
-          borderRadius: BorderRadius.circular(RwRadius.l),
+          // Blok, net als de andere knoppen (12-11).
+          borderRadius: BorderRadius.circular(RwRadius.s),
           boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 8))],
         ),
         child: FilledButton(
@@ -298,7 +299,7 @@ class _GoldButton extends StatelessWidget {
             shadowColor: Colors.transparent,
             foregroundColor: _ink,
             minimumSize: const Size.fromHeight(56),
-            shape: const StadiumBorder(),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
           ),
           child: child,
         ),

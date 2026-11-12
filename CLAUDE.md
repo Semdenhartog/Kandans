@@ -76,7 +76,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   **getters**: **nooit in `const`**. Weergave: `lib/core/appearance.dart`. Premium, Luxe, ledenkaart, deelkaart en posters altijd donker-goud.
 - Lettertypes: Saira (koppen/cijfers), DM Sans (tekst).
 - Vormen (12-11): knoppen uit het thema (Filled/Outlined/Segmented) zijn een blok met afronding 8 i.p.v. een pil, kaarten 16, bladen/dialogen 24,
-  melding 16, markering in de navigatiebalk 8. Tabwissel vervaagt kort (`_TabFade` in `home_shell.dart`). Vandaag: weercijfer per uur is te slepen (vasthouden + vegen, `_HourBarsState._scrub`, tikje per uur). Opnemen: cijfers ademen bij pauze (`_PausedBlink`), statusbalk en startgloed volgen de blokvorm. Chips en balkjes blijven pil.
+  melding 16, markering in de navigatiebalk 8. Tabwissel vervaagt kort (`_TabFade` in `home_shell.dart`). Vandaag: weercijfer per uur is te slepen (vasthouden + vegen, `_HourBarsState._scrub`, tikje per uur). Opnemen: cijfers ademen bij pauze (`_PausedBlink`), statusbalk en startgloed volgen de blokvorm. Coach: tekstballonnen 16/4, gouden paywall-knop is een blok. Rondleiding had al blokknoppen. Chips en balkjes blijven pil.
 - Talen: `lib/core/i18n.dart` (`tr()`, `trf()` met {invulplekken}), vertalingen in `tools/vertalingen.py` →
   `python3 tools/maak_vertalingen.py`. Nieuw scherm: `python3 tools/tr_codemod.py <bestand>`, daarna vertalingen aanvullen.
 
