@@ -34,6 +34,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Geen Flutter lokaal. Controle via GitHub Actions (repo `Semdenhartog/kandans`; gh: `repos/Semdenhartog/kandans/...`, `-R Semdenhartog/kandans`):
   - `build.yml`: analyse (`--no-fatal-infos --no-fatal-warnings`), tests, APK. Falende tests: uitvoer op branch `testuitvoer-<branch>`.
     Fouten lezen: `gh api repos/Semdenhartog/kandans/check-runs/<job-id>/annotations` (max 10 per stap).
+    Android-lint (`lintVital*`) staat uit in build.yml (12-11: lint crashte op `image_picker_android`, bug in lint zelf; zelfde code was een dag eerder groen).
   - `screens.yml`: schermafbeeldingen (licht + `6x_donker_*`, ook grote letters) naar branch `schermen-<branch>`, incl. `screens.txt`;
     faalt op "overflowed by". Play Store-plaatjes in `playstore/`.
   - `supabase-functies.yml`: zet edge functions live (met de hand én bij push naar main die `supabase/functions/**` raakt).

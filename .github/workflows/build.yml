@@ -216,6 +216,19 @@ jobs:
                   "",
               ])
               open(rg, "w").write(rt)
+          # 2c) Android-lint crasht sinds 12-11-2026 op image_picker_android (NoSuchMethodError in JavaDocParser,
+          #     bug in lint zelf). Lint bij het releasebouwen overslaan; flutter analyze blijft de echte controle.
+          rt = open(rg).read()
+          if "lint-uit" not in rt:
+              rt += "\n".join([
+                  "",
+                  "// lint-uit: lintVital-taken overslaan (lint-crash in plugins, niet in onze code).",
+                  "subprojects {",
+                  "    tasks.matching { it.name.startsWith(\"lintVital\") }.configureEach { enabled = false }",
+                  "}",
+                  "",
+              ])
+              open(rg, "w").write(rt)
           gp = "android/gradle.properties"
           gt = open(gp).read()
           if "kotlin.jvm.target.validation.mode" not in gt:
