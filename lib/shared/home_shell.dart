@@ -168,7 +168,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     final shell = widget.shell;
     return Scaffold(
       // Aura achter de tabbladen; de tabbladen zelf zijn doorzichtig.
-      body: Stack(children: [Positioned.fill(child: RwAura()), shell]),
+      body: Stack(children: [Positioned.fill(child: RwAura()), _TabFade(index: shell.currentIndex, child: shell)]),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -205,6 +205,39 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       ),
     );
   }
+}
+
+/// Wisselen van tabblad: de inhoud komt kort op (vervagen + een paar pixels omhoog) in plaats van te verspringen.
+/// Bij "minder beweging" gebeurt er niets.
+class _TabFade extends StatefulWidget {
+  const _TabFade({required this.index, required this.child});
+  final int index;
+  final Widget child;
+
+  @override
+  State<_TabFade> createState() => _TabFadeState();
+}
+
+class _TabFadeState extends State<_TabFade> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 240), value: 1);
+  late final Animation<double> _t = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+  late final Animation<Offset> _rise = Tween(begin: const Offset(0, 0.012), end: Offset.zero).animate(_t);
+
+  @override
+  void didUpdateWidget(_TabFade old) {
+    super.didUpdateWidget(old);
+    if (old.index != widget.index && !(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) _c.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      FadeTransition(opacity: _t, child: SlideTransition(position: _rise, child: widget.child));
 }
 
 /// Plaatsen in de balk → takken in de router (0 Vandaag, 1 Logboek, 2 Routes, 3 Coach, 4 Samen, 5 Ik).

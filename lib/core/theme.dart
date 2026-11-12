@@ -248,6 +248,7 @@ ThemeData buildTheme() {
         iconColor: WidgetStateProperty.resolveWith(
             (s) => s.contains(WidgetState.selected) ? RwColors.accentDark : RwColors.muted),
         side: WidgetStateProperty.all(BorderSide(color: RwColors.border)),
+        shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s))),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -262,13 +263,14 @@ ThemeData buildTheme() {
       margin: EdgeInsets.zero,
       // Zelfde rand als RwCard, zodat lijstkaarten (Ik, schema) en RwCards één familie zijn.
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(RwRadius.m),
         side: BorderSide(color: RwColors.hairline),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: RwColors.surface,
       indicatorColor: RwColors.accent,
+      indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
       iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
           color: states.contains(WidgetState.selected)
@@ -337,17 +339,17 @@ ThemeData buildTheme() {
         backgroundColor: RwColors.accent,
         foregroundColor: RwColors.accentDark,
         minimumSize: const Size.fromHeight(52),
-        shape: const StadiumBorder(),
-        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, fontSize: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
+        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: 0.2),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: RwColors.text,
         minimumSize: const Size.fromHeight(52),
-        shape: const StadiumBorder(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
         side: BorderSide(color: RwColors.border, width: 1.5),
-        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w600, fontSize: 15),
+        textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 15, letterSpacing: 0.2),
       ),
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -361,7 +363,7 @@ ThemeData buildTheme() {
       behavior: SnackBarBehavior.floating,
       backgroundColor: RwColors.palette.snack,
       elevation: 6,
-      shape: StadiumBorder(side: BorderSide(color: RwColors.hairline)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.m), side: BorderSide(color: RwColors.hairline)),
       insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 14),
       contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: dark ? RwColors.text : const Color(0xFFF7F2EA), fontWeight: FontWeight.w500),
     ),
@@ -380,7 +382,7 @@ ThemeData buildTheme() {
       dragHandleSize: Size(40, 4),
       // Lichte rand langs de bovenkant: het paneel "zweeft" boven de inhoud.
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(RwRadius.l)),
         side: BorderSide(color: RwColors.hairline),
       ),
     ),
@@ -389,7 +391,7 @@ ThemeData buildTheme() {
       surfaceTintColor: Colors.transparent,
       barrierColor: RwColors.palette.scrim,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(26)),
+        borderRadius: BorderRadius.all(Radius.circular(RwRadius.l)),
         side: BorderSide(color: RwColors.hairline),
       ),
       titleTextStyle: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800, color: RwColors.text),
@@ -404,7 +406,8 @@ ThemeData buildTheme() {
 }
 
 
-/// Vaste afrondingen (unslop-ronde): klein 8, middel 16, groot 24. Pil (999) alleen voor knoppen en chips.
+/// Vaste afrondingen (unslop-ronde): klein 8, middel 16, groot 24. Knoppen zijn sinds 12-11-2026 een blok (8), net als
+/// [KadansButton] en kadans.fit; pil (999) alleen nog voor chips en voortgangsbalkjes.
 class RwRadius {
   RwRadius._();
   static const double s = 8;
