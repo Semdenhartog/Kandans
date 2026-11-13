@@ -95,13 +95,13 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   (week/laatste/maand/vandaag/tempo/wedstrijd/kleding) rekent de server uit eigen runs/Open-Meteo. Geen match → `coach_onbeantwoord`
   (anoniem, 90 dagen) → Claude (alleen met sleutel, premium of gratis proefvragen) met JSON-opdracht; `algemeen`-versie gaat via
   `coach_kennis_van_claude` de kennis in (bron claude, `nakijken`). `coach_messages.via` = kennis|data|claude|onbekend; daglimiet telt alleen claude.
-  Startkennis: `supabase/coach_kennis/*.txt` (373 onderwerpen, 2032 vragen sinds 13-11; bestanden 12–16 = uitbreiding met 1004 vragen: `?` veelgesteld, `!` verwacht, `# +sleutel` = extra vragen) →
+  Startkennis: `supabase/coach_kennis/*.txt` (398 onderwerpen, 2175 vragen sinds 13-11 avond; bestand 17 = 25 onderwerpen + extra vragen uit online veelgestelde vragen: Google-vragen, Atletiekunie Start to Run, Beweegrichtlijn 2017, Deense levensduurstudie; bestanden 12–16 = uitbreiding met 1004 vragen: `?` veelgesteld, `!` verwacht, `# +sleutel` = extra vragen) →
   `tools/coach_kennis_naar_sql.py` (`--tel`) → workflow `coach-kennis.yml` (bij push naar main, upsert op sleutel, bron 'sem' blijft).
   **Kruisverwijzingen + vervolgvraag (13-11):** `zie=sleutel,…` in de kop (zonder: het script kiest de 3 best passende; categorie `buiten` nooit).
   Functie `coach` zet onder een kennis-antwoord "Wil je hierna meer weten over: <onderwerp>? Antwoord dan met ja." (`metVervolg`) en geeft
   `follow_ups` (eerste vraag van elk verwant onderwerp) terug; "ja" op die zin (`isJa` + `vervolgOnderwerp` op het vorige coachbericht) geeft dat
   onderwerp. App: chips "Ja, graag" + vervolgvragen vóór de slimme vragen. Onderwerpnamen moeten uniek zijn (script controleert).
-  Lokale zoektest 13-11: 1997 van 2025 vragen komen bij het eigen onderwerp uit, de rest bij een nauw verwant onderwerp.
+  Lokale zoektest 13-11 avond: 143 nieuwe vragen allemaal bij het eigen onderwerp, 1995 van 2032 oude vragen bij het eigen onderwerp (de rest bij een nauw verwant onderwerp of geen match; geen enkele oude vraag gaat naar een nieuw onderwerp).
   **Schema bouwen in het gesprek (13-11):** `domain/plan_chat.dart` (`PlanChat`: doel → datum → km/week → langste run → dagen → ambitie → 5 km-tijd;
   slaat over wat niet past of al uit het logboek bekend is; "stop" breekt af), op het toestel, niet naar de server en niet in `coach_messages`.
   Start bij "Maak een schema voor mij" e.d. (`PlanChat.wantsPlan`). Klaar → `planChatSummary` + knoppen "Bekijk het hele schema"
