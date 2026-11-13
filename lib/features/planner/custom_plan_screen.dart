@@ -18,8 +18,8 @@ import '../../shared/widgets.dart';
 import 'custom_plan_pdf.dart';
 
 /// Schema op maat: vragen naar je wensen, dan een uitgebreid schema in donker-goud, als PDF te downloaden.
-void openCustomPlan(BuildContext context) {
-  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CustomPlanScreen()));
+void openCustomPlan(BuildContext context, {PlanWishes? wishes}) {
+  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CustomPlanScreen(wishes: wishes)));
 }
 
 const _wishesKey = 'custom_plan_wishes';
@@ -61,7 +61,10 @@ Color phaseColor(PlanPhase p) => switch (p) {
     };
 
 class CustomPlanScreen extends ConsumerStatefulWidget {
-  const CustomPlanScreen({super.key, this.debugWishes});
+  const CustomPlanScreen({super.key, this.debugWishes, this.wishes});
+
+  /// Wensen uit het coachgesprek: meteen het schema hiervoor tonen (met je eigen tempo uit je runs).
+  final PlanWishes? wishes;
 
   /// Voor schermtests: meteen het schema voor deze wensen tonen.
   final PlanWishes? debugWishes;
@@ -110,6 +113,21 @@ class _CustomPlanScreenState extends ConsumerState<CustomPlanScreen> {
     final p = await SharedPreferences.getInstance();
     final saved = PlanWishes.fromJson(jsonDecode(p.getString(_wishesKey) ?? 'null'));
     final runs = ref.read(activitiesProvider).value ?? await ref.read(activitiesProvider.future).catchError((_) => <Activity>[]);
+    final given = widget.wishes;
+    if (given != null) {
+      final threshold = runs.length >= 3 ? estimateThresholdPace(runs) : null;
+      await p.setString(_wishesKey, jsonEncode(given.toJson()));
+      if (!mounted) return;
+      setState(() {
+        _threshold = threshold;
+        _w = given;
+        if (given.goalTimeSeconds != null) _goalTime.text = Fmt.duration(given.goalTimeSeconds!);
+        if (given.recent5kSeconds != null) _fiveK.text = Fmt.duration(given.recent5kSeconds!);
+        _plan = buildCustomPlan(given, start: DateTime.now().add(const Duration(days: 1)), thresholdPace: threshold);
+        _loaded = true;
+      });
+      return;
+    }
     final now = DateTime.now();
     final weeks = weeklyTotals(runs, now, weeks: 4);
     final weekly = weeks.isEmpty ? 0.0 : weeks.fold<double>(0, (s, w) => s + w.km) / weeks.length;

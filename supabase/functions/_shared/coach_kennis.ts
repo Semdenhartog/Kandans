@@ -216,6 +216,55 @@ export function kledingAntwoord(w: Weer): string {
   return regels.join("\n");
 }
 
+// ------------------------------------------------------------- vervolgvraag (kruisverwijzingen)
+
+/** "Ja" op de vervolgvraag van de coach. Alleen korte instemming, geen zin met een eigen vraag erin. */
+export function isJa(vraag: string): boolean {
+  return /^(ja|jazeker|ja graag|ja,? ?graag|graag|ja hoor|jawel|ok|oke|oké|okay|is goed|doe maar|ja doe maar|prima|yes|vertel|vertel maar)[\s.!]*$/i.test(vraag.trim());
+}
+
+const VERVOLG_BEGIN = "Wil je hierna meer weten over: ";
+const VERVOLG_EIND = "? Antwoord dan met ja.";
+
+/** De vervolgvraag die onder een antwoord komt. */
+export function vervolgZin(onderwerp: string): string {
+  return `${VERVOLG_BEGIN}${onderwerp.trim()}${VERVOLG_EIND}`;
+}
+
+/** Zet de vervolgvraag onder een antwoord (met een witregel ertussen). */
+export function metVervolg(antwoord: string, onderwerp: string | null | undefined): string {
+  const o = (onderwerp ?? "").trim();
+  return o ? `${antwoord.trimEnd()}\n\n${vervolgZin(o)}` : antwoord;
+}
+
+/** Het onderwerp uit de vervolgvraag aan het eind van een eerder antwoord; null als die er niet staat. */
+export function vervolgOnderwerp(antwoord: string): string | null {
+  const t = antwoord.trimEnd();
+  if (!t.endsWith(VERVOLG_EIND)) return null;
+  const i = t.lastIndexOf(VERVOLG_BEGIN);
+  if (i < 0) return null;
+  const o = t.slice(i + VERVOLG_BEGIN.length, t.length - VERVOLG_EIND.length).trim();
+  return o.length > 0 && o.length <= 120 ? o : null;
+}
+
+/** Zet verwante onderwerpen in de volgorde van `zie` en geeft per onderwerp de eerste vraag (max 3). */
+export function vervolgVragen(
+  zie: string[],
+  kennis: { id: number; sleutel: string | null; onderwerp: string }[],
+  vragen: { kennis_id: number; vraag: string }[],
+): { onderwerp: string; vraag: string }[] {
+  const uit: { onderwerp: string; vraag: string }[] = [];
+  for (const sleutel of zie) {
+    const k = kennis.find((x) => x.sleutel === sleutel);
+    if (!k) continue;
+    const v = vragen.find((x) => x.kennis_id === k.id);
+    if (!v) continue;
+    uit.push({ onderwerp: k.onderwerp, vraag: v.vraag });
+    if (uit.length === 3) break;
+  }
+  return uit;
+}
+
 // ------------------------------------------------------------- Claude (reserve)
 
 export const CLAUDE_OPDRACHT = `Je bent de Kadans Coach: een nuchtere hardlooptrainer in de Nederlandse app Kadans.

@@ -7,7 +7,11 @@ import '../../core/i18n.dart';
 import '../../shared/art/wolkje.dart';
 import '../planner/custom_plan_screen.dart';
 import '../../core/theme.dart';
+import '../../domain/custom_plan.dart';
+import '../../domain/plan_chat.dart';
 import '../../domain/run_goal.dart';
+import '../../domain/training_load.dart';
+import '../../domain/weekly_load.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../shared/first_tips.dart';
@@ -45,6 +49,15 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   /// Vraag over een (trainings)schema: toon de knop naar Schema op maat.
   static final _schemaVraag = RegExp(r'schema|trainingsplan|plan (voor|maken)|programma', caseSensitive: false);
   bool _schemaHint = false;
+
+  /// Vervolgvragen bij het laatste antwoord (kruisverwijzingen uit de Kadans-kennis), om op te tikken.
+  List<String> _followUps = const [];
+
+  /// Schema bouwen in het gesprek: de coach stelt vragen, de antwoorden blijven op het toestel.
+  PlanChat? _planChat;
+  List<String> _planOptions = const [];
+  CustomPlan? _planReady;
+  bool _planSaving = false;
   bool _sending = false;
   int? _freeLeft;
 
@@ -70,9 +83,14 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   Future<void> _send([String? preset]) async {
     final text = (preset ?? _input.text).trim();
     if (text.isEmpty || _sending) return;
+    if (_planChat != null || PlanChat.wantsPlan(text)) {
+      _planTurn(text);
+      return;
+    }
     FocusScope.of(context).unfocus();
     setState(() {
       _sending = true;
+      _followUps = const [];
       _pending.add(CoachMessage(role: 'user', content: text, createdAt: DateTime.now()));
       _input.clear();
     });
@@ -82,6 +100,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       setState(() {
         _pending.add(CoachMessage(role: 'assistant', content: r.reply, createdAt: DateTime.now(), via: r.via));
         if (_schemaVraag.hasMatch(text)) _schemaHint = true;
+        _followUps = r.followUps;
         _freeLeft = r.freeLeft;
       });
       _scrollDown();
@@ -98,6 +117,85 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     }
   }
 
+  /// Eén beurt in het schema-gesprek: start, antwoord op een vraag, of stoppen. Gaat niet naar de server.
+  void _planTurn(String text) {
+    FocusScope.of(context).unfocus();
+    final now = DateTime.now();
+    // Net als de coach zelf: Strava-runs tellen niet mee.
+    final runs = (ref.read(activitiesProvider).value ?? const <Activity>[]).where((a) => !a.viaStrava).toList();
+    void say(String t) => _pending.add(CoachMessage(role: 'assistant', content: t, createdAt: DateTime.now()));
+    setState(() {
+      _pending.add(CoachMessage(role: 'user', content: text, createdAt: now));
+      _input.clear();
+      _followUps = const [];
+      _schemaHint = false;
+      final chat = _planChat;
+      if (chat == null) {
+        final weeks = weeklyTotals(runs, now, weeks: 4);
+        final weekly = weeks.isEmpty ? 0.0 : weeks.fold<double>(0, (s, w) => s + w.km) / weeks.length;
+        final longest = runs
+            .where((r) => now.difference(r.startedAt).inDays <= 42)
+            .fold<double>(0, (m, r) => r.distanceMeters / 1000 > m ? r.distanceMeters / 1000 : m);
+        final started = PlanChat(
+          now: now,
+          weeklyKm: weekly > 0 ? (weekly * 2).round() / 2 : null,
+          longestKm: longest > 0 ? (longest * 2).round() / 2 : null,
+        );
+        final turn = started.start();
+        _planChat = started;
+        _planReady = null;
+        _planOptions = turn.options;
+        say(turn.text);
+      } else if (PlanChat.isStop(text)) {
+        _planChat = null;
+        _planOptions = const [];
+        say('Oké, ik stop met het schema. Wil je later verder? Typ dan "Maak een schema voor mij".');
+      } else {
+        final turn = chat.answer(text);
+        if (chat.done) {
+          final plan = buildCustomPlan(
+            chat.wishes,
+            start: now.add(const Duration(days: 1)),
+            thresholdPace: runs.length >= 3 ? estimateThresholdPace(runs) : null,
+          );
+          _planChat = null;
+          _planOptions = const [];
+          _planReady = plan;
+          say(planChatSummary(plan));
+        } else {
+          _planOptions = turn.options;
+          say(turn.text);
+        }
+      }
+    });
+    _scrollDown();
+  }
+
+  /// Zet het schema uit het gesprek in je plan (vervangt je huidige schema).
+  Future<void> _savePlan() async {
+    final plan = _planReady;
+    if (plan == null || _planSaving) return;
+    final ok = await confirmDialog(
+      context,
+      title: tr('Schema in je plan zetten?'),
+      message: tr('Je huidige schema wordt vervangen door dit schema.'),
+      confirmLabel: tr('Zet in mijn plan'),
+    );
+    if (!ok) return;
+    setState(() => _planSaving = true);
+    try {
+      await ref.read(repositoryProvider).savePlan(plan.runSessions);
+      ref.invalidate(planProvider);
+      if (!mounted) return;
+      setState(() => _planReady = null);
+      showMessage(context, tr('Je schema staat in je plan. Je training van vandaag zie je ook op Vandaag.'));
+    } catch (e) {
+      if (mounted) showMessage(context, friendlyError(e), error: true);
+    } finally {
+      if (mounted) setState(() => _planSaving = false);
+    }
+  }
+
   Future<void> _clear() async {
     final ok = await confirmDialog(
       context,
@@ -108,7 +206,13 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     if (!ok) return;
     try {
       await ref.read(repositoryProvider).clearCoachChat();
-      setState(_pending.clear);
+      setState(() {
+        _pending.clear();
+        _followUps = const [];
+        _planChat = null;
+        _planOptions = const [];
+        _planReady = null;
+      });
       ref.invalidate(coachMessagesProvider);
     } catch (e) {
       if (mounted) showMessage(context, friendlyError(e), error: true);
@@ -151,6 +255,10 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   Widget build(BuildContext context) {
     final history = ref.watch(coachMessagesProvider);
     final smart = _smartQuestions(ref);
+    // Tijdens het schema-gesprek: de keuzes bij de vraag. Anders eerst de vervolgvragen bij het laatste antwoord.
+    final chips = _planChat != null
+        ? _planOptions
+        : [if (_followUps.isNotEmpty) 'Ja, graag', ..._followUps, for (final q in smart) if (!_followUps.contains(q)) q];
     final profile = ref.watch(profileProvider).value;
     final premium = profile?.isPremium ?? false;
 
@@ -214,7 +322,32 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               },
             ),
           ),
-          if (_schemaHint && !_sending)
+          if (_planReady != null && !_sending)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+              child: Row(children: [
+                Expanded(
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF13110E),
+                      foregroundColor: const Color(0xFFD9BF92),
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                    onPressed: () => openCustomPlan(context, wishes: _planReady!.wishes),
+                    child: Text(tr('Bekijk het hele schema'), textAlign: TextAlign.center),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+                    onPressed: _planSaving ? null : _savePlan,
+                    child: Text(tr('Zet in mijn plan'), textAlign: TextAlign.center),
+                  ),
+                ),
+              ]),
+            ),
+          if (_schemaHint && _planChat == null && _planReady == null && !_sending)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
               child: FilledButton.icon(
@@ -228,17 +361,17 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                 label: Text(tr('Maak je schema op maat')),
               ),
             ),
-          if (!_sending && (history.value ?? const []).length + _pending.length > 0)
+          if (!_sending && chips.isNotEmpty && (history.value ?? const []).length + _pending.length > 0)
             SizedBox(
               height: 44,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                itemCount: smart.length,
+                itemCount: chips.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) => ActionChip(
-                  label: Text(smart[i]),
-                  onPressed: () => _send(smart[i]),
+                  label: Text(chips[i]),
+                  onPressed: () => _send(chips[i]),
                 ),
               ),
             ),

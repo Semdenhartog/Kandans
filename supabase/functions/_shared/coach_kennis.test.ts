@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   fmtTempo, kledingAntwoord, laatsteAntwoord, leesClaude, maandAntwoord, nlDag, runsVanWeek,
   tempoAntwoord, vandaagAntwoord, wedstrijdAntwoord, weekAntwoord, type Run,
+  isJa, metVervolg, vervolgOnderwerp, vervolgVragen,
 } from "./coach_kennis.ts";
 
 // Woensdag 11 november 2026, 12:00 Nederlandse tijd.
@@ -69,5 +70,23 @@ assert.equal(p.algemeen, null);
 const kapot = leesClaude("Gewoon tekst zonder json");
 assert.equal(kapot.antwoord, "Gewoon tekst zonder json");
 assert.equal(kapot.algemeen, null);
+
+// vervolgvraag en kruisverwijzingen
+for (const ja of ["ja", "Ja!", "ja graag", "Ja, graag.", "oké", "doe maar", "Vertel maar"]) assert.equal(isJa(ja), true, ja);
+for (const nee of ["ja maar hoe zit het met mijn knie?", "nee", "jammer", "", "ja en wat eet ik dan?"]) assert.equal(isJa(nee), false, nee);
+const metV = metVervolg("Loop rustig.\n", "De lange duurloop");
+assert.equal(metV, "Loop rustig.\n\nWil je hierna meer weten over: De lange duurloop? Antwoord dan met ja.");
+assert.equal(vervolgOnderwerp(metV), "De lange duurloop");
+assert.equal(vervolgOnderwerp(metVervolg("x", "Sportkeuring nodig?")), "Sportkeuring nodig?");
+assert.equal(vervolgOnderwerp(metVervolg("x", 'Snelkoppeling "Wanneer lopen?"')), 'Snelkoppeling "Wanneer lopen?"');
+assert.equal(vervolgOnderwerp("Loop rustig."), null);
+assert.equal(metVervolg("Loop rustig.", null), "Loop rustig.");
+assert.equal(metVervolg("Loop rustig.", "  "), "Loop rustig.");
+const vv = vervolgVragen(
+  ["b", "weg", "a", "c", "d"],
+  [{ id: 1, sleutel: "a", onderwerp: "A" }, { id: 2, sleutel: "b", onderwerp: "B" }, { id: 3, sleutel: "c", onderwerp: "C" }, { id: 4, sleutel: "d", onderwerp: "D" }],
+  [{ kennis_id: 1, vraag: "Vraag a?" }, { kennis_id: 2, vraag: "Vraag b1?" }, { kennis_id: 2, vraag: "Vraag b2?" }, { kennis_id: 4, vraag: "Vraag d?" }],
+);
+assert.deepEqual(vv, [{ onderwerp: "B", vraag: "Vraag b1?" }, { onderwerp: "A", vraag: "Vraag a?" }, { onderwerp: "D", vraag: "Vraag d?" }]);
 
 console.log("coach_kennis: alle tests geslaagd");

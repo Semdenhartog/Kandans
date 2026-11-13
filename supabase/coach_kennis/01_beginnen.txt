@@ -3,6 +3,9 @@
 ##   ? veelgestelde vraag
 ##   ! verwachte vraag
 ##   = antwoord (meerdere regels mag, tot de volgende lege regel)
+##   # +sleutel = extra vragen bij een onderwerp dat al bestaat
+##   zie=sleutel1,sleutel2 (in de kop, na de trefwoorden) = kruisverwijzingen: verwante onderwerpen voor de vervolgvraag.
+##     Zonder 'zie' kiest tools/coach_kennis_naar_sql.py zelf de drie best passende onderwerpen.
 ## Regels die met '##' beginnen zijn opmerkingen.
 
 # beginnen-start | Beginnen met hardlopen | beginnen | beginner, starten, beginnen, nooit gelopen

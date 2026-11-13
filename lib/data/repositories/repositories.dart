@@ -473,6 +473,7 @@ class RunWiseRepository {
         reply: data['reply'] as String,
         freeLeft: (data['free_left'] as num?)?.toInt(),
         via: data['via'] as String?,
+        followUps: [for (final f in (data['follow_ups'] as List? ?? const [])) if (f is String && f.isNotEmpty) f],
       );
     } on FunctionException catch (e) {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
@@ -581,8 +582,11 @@ class RunWiseRepository {
 
 /// Antwoord van de coach.
 class CoachReply {
-  CoachReply({required this.reply, this.freeLeft, this.via});
+  CoachReply({required this.reply, this.freeLeft, this.via, this.followUps = const []});
   final String reply;
+
+  /// Vervolgvragen uit verwante onderwerpen (kruisverwijzingen), om op te tikken.
+  final List<String> followUps;
 
   /// 'kennis', 'data', 'claude' of 'onbekend'.
   final String? via;

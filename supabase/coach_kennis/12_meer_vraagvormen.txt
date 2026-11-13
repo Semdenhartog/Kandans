@@ -1,0 +1,470 @@
+## Uitbreiding 13-11-2026: extra vraagvormen bij bestaande onderwerpen ('# +sleutel' = vragen erbij).
+
+# +beginnen-start
+! Ik wil fitter worden met rennen, hoe pak ik de eerste weken aan?
+# +beginnen-vaak
+! Is twee keer per week lopen genoeg om vooruit te gaan?
+# +beginnen-tempo
+! Mijn hartslag schiet meteen omhoog als ik ga rennen, loop ik te hard?
+# +beginnen-afstand
+! Hoeveel minuten ren ik de eerste week?
+# +beginnen-5k
+! Ik kan 2 km aan één stuk, hoe kom ik naar 5?
+# +beginnen-wandelen
+! Is het erg als ik stukjes moet wandelen tijdens mijn run?
+# +beginnen-motivatie-start
+! Na drie weken begin ik het lopen op te geven, hoe voorkom ik dat?
+# +beginnen-leeftijd
+! Ik ben 55, ben ik te oud om nog met hardlopen te beginnen?
+# +beginnen-gewicht
+! Kan ik gaan hardlopen als ik flink te zwaar ben?
+# +beginnen-keuring
+! Moet ik eerst naar de dokter voordat ik ga hardlopen?
+# +beginnen-loopgroep
+! Leer ik sneller lopen bij een vereniging dan in mijn eentje?
+# +beginnen-ochtend-avond
+! Op welk moment van de dag presteer je het best?
+# +beginnen-warmlopen
+! Hoe lang loop ik in voor een snelle training?
+# +beginnen-coolingdown
+! Moet ik na elke run nog uitwandelen?
+# +beginnen-spierpijn
+! Mag ik hardlopen als ik nog spierpijn heb van eergisteren?
+# +beginnen-steken
+! Hoe kom ik van een steek in mijn zij af terwijl ik loop?
+# +beginnen-ademhaling
+! Adem ik in door mijn neus of door mijn mond bij het rennen?
+# +beginnen-pasfrequentie
+! Hoeveel passen per minuut is goed?
+# +beginnen-techniek
+! Waar let ik als eerste op als ik mijn loopstijl wil verbeteren?
+# +beginnen-armen
+! Hoe houd ik mijn armen tijdens het rennen?
+# +beginnen-loopband
+! Telt een training op de loopband net zo zwaar als buiten?
+# +beginnen-dagboek
+! Wat schrijf ik op na een training?
+# +beginnen-hond
+! Vanaf welke leeftijd mag mijn hond mee rennen?
+# +beginnen-muziek
+! Loop ik beter met of zonder muziek?
+# +beginnen-veilig
+! Aan welke kant van de weg loop ik hard?
+# +beginnen-telefoon
+! Moet mijn telefoon mee als ik ga rennen?
+# +beginnen-eten-voor
+! Hoe lang na het avondeten kan ik gaan hardlopen?
+# +beginnen-water
+! Moet ik water meenemen op een run van 5 km?
+# +beginnen-pijn-algemeen
+! Hoe weet ik of pijn onschuldig is of een blessure?
+# +opbouw-10procent
+! Met hoeveel kilometer per week mag ik omhoog?
+# +rustweek
+! Om de hoeveel weken plan ik een lichtere week?
+# +rustdag
+! Wat doe ik op een rustdag: niets of een beetje bewegen?
+# +rustig-lopen
+! Word ik niet langzamer als ik steeds langzaam train?
+# +lange-duurloop
+! Hoe snel loop ik mijn lange run op zondag?
+# +intervallen
+! Wat is een goede intervaltraining voor een beginner?
+# +tempoloop
+! Hoe lang houd ik het tempo vast bij een drempeltraining?
+# +fartlek
+! Hoe doe ik een vaartspel zonder horloge?
+# +heuveltraining
+! Hoeveel heuvelsprints doe ik in één training?
+# +strides
+! Hoe lang is een versnelling na de duurloop?
+# +hartslagzones
+! Hoe stel ik mijn zones in als ik mijn maximale hartslag niet weet?
+# +maxhartslag
+! Klopt de formule 220 min je leeftijd?
+# +rusthartslag
+! Wat is een normale hartslag in rust voor een loper?
+# +hartslag-hoog
+! Is een hartslag van 180 tijdens het rennen gevaarlijk?
+# +hartslagdrift
+! Mijn hartslag kruipt het laatste halfuur omhoog bij een vlak tempo, is dat normaal?
+# +hartslag-meten
+! Is een borstband nauwkeuriger dan mijn horloge?
+# +vo2max
+! Hoe krijg ik mijn VO2max omhoog?
+# +trainingsschema-kadans
+! Waar vind ik mijn training van morgen in de app?
+# +training-gemist
+! Ik heb een week niets gedaan, pak ik het schema gewoon weer op?
+# +lopen-ziek
+! Kan ik trainen met een verkoudheid?
+# +training-moe
+! Mijn benen voelen als lood, moet ik toch gaan?
+# +sneller-5k
+! Welke training maakt me het snelst beter op de 5 kilometer?
+# +sneller-algemeen
+! Ik blijf op hetzelfde tempo hangen, hoe doorbreek ik dat?
+# +tempo-berekenen
+! Hoe reken ik minuten per kilometer om naar kilometer per uur?
+# +tempo-gelijk
+! Hoe leer ik een vlak tempo aan te voelen?
+# +kracht
+! Hoe vaak per week doe ik krachttraining naast het lopen?
+# +mobiliteit
+! Rek ik voor of na het hardlopen?
+# +crosstraining
+! Wat kan ik doen in plaats van lopen als ik geblesseerd ben?
+# +twee-per-dag
+! Heeft 's ochtends en 's avonds lopen zin?
+# +trainingsweek
+! Hoe verdeel ik drie trainingen over de week?
+# +loopsensor
+! Hoe koppel ik een voetsensor aan Kadans?
+# +barometer
+! Waarom wijken mijn hoogtemeters af van die van mijn loopmaatje?
+# +tussentijden
+! Waar zie ik mijn tijd per kilometer terug?
+# +tempo-kaart
+! Waarom heeft de lijn van mijn run op de kaart verschillende kleuren?
+# +wedstrijd-eerste
+! Hoe schrijf ik me in voor mijn eerste loopje?
+# +wedstrijd-zoeken
+! Welke lopen zijn er binnenkort bij mij in de omgeving?
+# +wedstrijd-toevoegen
+! Hoe zet ik mijn doeltijd bij een wedstrijd in de app?
+# +wedstrijd-dag
+! Hoe laat sta ik op voor een wedstrijd in de ochtend?
+# +wedstrijd-pacing
+! Loop ik de tweede helft sneller dan de eerste?
+# +taperen
+! Hoeveel loop ik nog in de laatste week voor mijn wedstrijd?
+# +na-wedstrijd
+! Hoeveel dagen rust neem ik na een halve marathon?
+# +10k
+! Ik loop nu 5 km, hoe lang duurt het naar 10?
+# +halve
+! Hoe lang moet mijn langste training zijn voor 21 km?
+# +marathon
+! Moet ik in training de volle 42 km lopen?
+# +muur
+! Waarom gaat het na 30 km ineens mis?
+# +carbo-loading
+! Hoeveel pasta eet ik de dagen voor de marathon?
+# +gels
+! Om de hoeveel minuten neem ik een gel?
+# +zenuwen
+! Ik lig wakker voor de start van morgen, kost dat me tijd?
+# +voorspelling
+! Wat kan ik lopen op de halve als ik mijn 10 km-tijd weet?
+# +loopgroep-wedstrijd
+! Hoe spreek ik af met vrienden bij een grote loop?
+# +pacer
+! Bij welke haas sluit ik aan?
+# +trail
+! Wat heb ik nodig voor mijn eerste trail?
+# +ultra
+! Hoe train ik voor een afstand langer dan de marathon?
+# +estafette
+! Hoe verdelen we de afstanden bij een teamloop?
+# +cross
+! Wat is het verschil tussen een cross en een trail?
+# +obstakel
+! Hoe bereid ik me voor op een modderrun?
+# +afstand-kiezen
+! Is een halve marathon te hoog gegrepen als eerste doel?
+# +scheen
+! Mijn scheenbeen doet zeer sinds ik meer ben gaan lopen, wat nu?
+# +knie
+! Ik heb pijn aan de buitenkant van mijn knie bij het rennen, wat kan ik doen?
+# +achilles
+! Mijn achillespees is 's ochtends stijf, mag ik dan lopen?
+# +voetzool
+! Mijn hiel doet pijn bij de eerste stappen uit bed, wat is dat?
+# +kuit
+! Waarom zijn mijn kuiten zo hard na het lopen?
+# +heup
+! Ik heb pijn in mijn lies na het hardlopen, wat doe ik?
+# +rug
+! Mijn onderrug doet zeer na een lange run, hoe komt dat?
+# +enkel
+! Wanneer mag ik weer rennen na een verstuikte enkel?
+# +blaren
+! Prik ik een blaar door of laat ik hem zitten?
+# +zwarte-teennagel
+! Mijn teennagel is blauw na een lange run, valt hij eraf?
+# +schuren
+! Wat smeer ik tegen schuren tussen mijn bovenbenen?
+# +blessure-terug
+! Hoe bouw ik op na zes weken blessure?
+# +pijntjes-app
+! Waar noteer ik een pijntje in de app?
+# +preventie
+! Wat is de grootste oorzaak van loopblessures?
+# +borst
+! Ik krijg een drukkend gevoel op mijn borst bij inspanning, wat moet ik doen?
+# +astma
+! Neem ik mijn pufje voor of na het lopen?
+# +diabetes
+! Waar let ik op met mijn bloedsuiker bij het rennen?
+# +zwanger
+! Tot welke maand kan ik blijven hardlopen als ik zwanger ben?
+# +menstruatie
+! Loop ik slechter tijdens mijn ongesteldheid?
+# +kinderen
+! Vanaf welke leeftijd mag een kind hardlopen?
+# +medicijnen
+! Heeft mijn medicatie invloed op mijn hartslag bij het sporten?
+# +ijzer
+! Kan vermoeidheid bij het lopen door een laag ijzer komen?
+# +hoofdpijn
+! Waarom bonkt mijn hoofd na een training?
+# +misselijk
+! Ik moet bijna overgeven na een harde training, hoe kan dat?
+# +eten-na
+! Hoe snel na de training moet ik iets eten?
+# +eiwit
+! Hoeveel gram eiwit per dag heb ik als loper nodig?
+# +koolhydraten
+! Zijn koolhydraten slecht als ik wil hardlopen?
+# +afvallen
+! Hoeveel moet ik lopen om een kilo af te vallen?
+# +cafeine
+! Helpt een kop koffie voor de training?
+# +alcohol
+! Kan ik lopen de ochtend na een avond drinken?
+# +zout
+! Heb ik zouttabletten nodig bij een lange run?
+# +supplementen
+! Welke vitamines zijn zinvol voor een hardloper?
+# +slaap
+! Heb ik meer nachtrust nodig in een zware trainingsweek?
+# +herstel-algemeen
+! Wat doe ik de avond na een zware training om goed te herstellen?
+# +hrr
+! Hoe snel moet mijn hartslag zakken na het stoppen?
+# +klaar-voor-training
+! Hoe weet ik of ik genoeg hersteld ben voor intervallen?
+# +stress
+! Kan ik zwaar trainen in een drukke periode op mijn werk?
+# +kleding-weer
+! Heb ik vandaag een jas nodig bij het lopen?
+# +kleding-temperatuur
+! Wat draag ik bij 5 graden?
+# +regen
+! Word ik ziek van lopen in de regen?
+# +onweer
+! Wat doe ik als het onweert terwijl ik onderweg ben?
+# +kou
+! Is rennen bij vorst slecht voor mijn longen?
+# +gladheid
+! Kan ik lopen als er sneeuw ligt?
+# +hitte
+! Boven welke temperatuur loop ik beter niet?
+# +wind
+! Begin ik met wind tegen of wind mee?
+# +donker
+! Wat draag ik om gezien te worden in het donker?
+# +luchtkwaliteit
+! Kan ik lopen als er een smogwaarschuwing is?
+# +weeradvies-app
+! Waar kijkt Kadans naar bij het kiezen van het beste moment?
+# +schoenen-kiezen
+! Hoeveel geef ik uit aan mijn eerste paar hardloopschoenen?
+# +schoenen-vervangen
+! Na hoeveel kilometer zijn schoenen op?
+# +carbon
+! Loop ik sneller op schoenen met een carbonplaat?
+# +sokken
+! Zijn dunne of dikke sokken beter bij het rennen?
+# +horloge
+! Heb ik een sporthorloge nodig als ik de app gebruik?
+# +strava
+! Hoe zet ik mijn run van Kadans door naar Strava?
+# +health-connect
+! Mijn horloge-runs staan niet in de app, hoe haal ik ze binnen?
+# +kleding-algemeen
+! Waarom is katoen geen goed idee bij het hardlopen?
+# +sportbeha
+! Hoe weet ik of mijn sportbeha genoeg steun geeft?
+# +app-wat
+! Wat maakt Kadans anders dan andere hardloop-apps?
+# +app-vandaag
+! Wat betekent de score bij het beste moment?
+# +app-opnemen
+! Hoe start en stop ik een opname?
+# +app-gps
+! Mijn afstand klopt niet, hoe komt dat?
+# +app-coachstem
+! Hoe kies ik een andere stem voor onderweg?
+# +app-routes
+! Hoe teken ik zelf een route op de kaart?
+# +app-route-volgen
+! Krijg ik aanwijzingen als ik een route loop?
+# +app-poi
+! Hoe vind ik een kraan of toilet langs mijn route?
+# +app-route-delen
+! Hoe stuur ik een route naar een vriend?
+# +app-live
+! Kan mijn partner zien waar ik loop?
+# +app-valdetectie
+! Wat gebeurt er als ik val tijdens een run?
+# +app-vergrendel
+! Kan ik de run zien zonder mijn telefoon te ontgrendelen?
+# +app-markeren
+! Hoe zet ik onderweg een markering op een plek?
+# +app-indeling
+! Kan ik zelf kiezen welke cijfers ik tijdens het lopen zie?
+# +app-tempoalarm
+! Kan de app waarschuwen als ik te snel ga?
+# +app-records
+! Waar zie ik mijn snelste 5 km?
+# +app-badges
+! Hoe verdien ik een gouden badge?
+# +app-bingo
+! Hoe werkt de bingokaart?
+# +app-segmenten
+! Kan ik mijn tijd op een vast stuk vergelijken?
+# +app-doelen
+! Hoe stel ik een maanddoel in?
+# +app-samen
+! Wie kan mijn runs zien in Samen?
+# +app-privacyzone
+! Hoe verberg ik mijn huisadres op de kaart?
+# +app-loopgroep
+! Hoe nodig ik iemand uit voor mijn groep?
+# +app-loopmaatjes
+! Hoe vind ik iemand in de buurt om mee te lopen?
+# +app-clubagenda
+! Hoe krijg ik de trainingen van mijn vereniging in de app?
+# +app-profiel
+! Hoe verander ik mijn naam of foto?
+# +app-stappen
+! Hoe doe ik mee aan de stappenwedstrijd?
+# +app-premium
+! Wat krijg ik extra als ik betaal?
+# +app-account-verwijderen
+! Hoe wis ik al mijn gegevens?
+# +app-privacy
+! Wat doet Kadans met mijn locatie?
+# +app-coach
+! Zijn de antwoorden van de coach gratis?
+# +app-deelkaart
+! Hoe maak ik een plaatje van mijn run voor WhatsApp?
+# +app-titel
+! Kan ik mijn run een eigen naam geven?
+# +app-run-verwijderen
+! Ik heb per ongeluk een run opgenomen, hoe haal ik die weg?
+# +app-widget
+! Hoe zet ik het beste moment op mijn startscherm?
+# +app-snelkoppeling
+! Kan ik het beste moment laten voorlezen?
+# +app-taal
+! Hoe zet ik de app in het donker?
+# +app-fout
+! De app loopt vast, wat kan ik proberen?
+# +app-iphone
+! Komt er ook een versie voor Apple?
+# +app-poster
+! Hoe laat ik mijn mooiste route afdrukken?
+# +app-luchtfoto
+! Waar zie ik de startplek van een wedstrijd?
+# +mijn-week
+! Wat is mijn weektotaal tot nu toe?
+# +mijn-laatste
+! Hoe ging mijn training van gisteren?
+# +mijn-maand
+! Ga ik vooruit de laatste tijd?
+# +mijn-vandaag
+! Moet ik vandaag rusten of lopen?
+# +mijn-tempo
+! Op welk tempo doe ik mijn rustige runs?
+# +mijn-wedstrijd
+! Hoeveel dagen nog tot mijn wedstrijd?
+# +mijn-gegevens-waar
+! Waar vind ik mijn totaal aantal kilometers van dit jaar?
+# +geen-zin
+! Het regent en ik heb nul motivatie, wat nu?
+# +dip
+! Ik word al maanden niet sneller, wat doe ik fout?
+# +vergelijken
+! Iedereen op Strava is sneller dan ik, hoe ga ik daarmee om?
+# +gewoonte
+! Hoe zorg ik dat ik blijf lopen na de eerste maand?
+# +eenzaam-lopen
+! Ik verveel me tijdens lange runs, wat helpt?
+# +mentaal-zwaar
+! Hoe ga ik door als mijn hoofd wil stoppen?
+# +beloning
+! Hoe vier ik een behaald doel?
+# +weer-excuus
+! Het is koud en donker, hoe krijg ik mezelf toch de deur uit?
+# +buiten-algemeen
+! Weet jij een goed recept voor vanavond?
+# +buiten-andere-sport
+! Kun je een schema maken voor wielrennen?
+# +buiten-medisch
+! Kun je zeggen welke ziekte ik heb?
+# +buiten-financieel
+! In welke aandelen moet ik beleggen?
+# +buiten-persoonlijk
+! Ben jij een mens of een computer?
+# +buiten-groet
+! Goedemorgen coach
+# +tijden-normaal
+! Is 30 minuten op de 5 km een goede tijd?
+# +dienstwerk
+! Hoe train ik in een week met nachtdiensten?
+# +kinderwagen
+! Vanaf welke leeftijd mag mijn baby mee in de loopbuggy?
+# +blote-voeten
+! Zijn barefootschoenen iets voor mij?
+# +zolen
+! Loop ik beter met inlegzolen?
+# +zand
+! Is rennen over het strand een goede training?
+# +vakantie
+! Hoe houd ik mijn conditie bij op een vakantie van twee weken?
+# +hoogte
+! Waarom ben ik in de bergen zo snel buiten adem?
+# +vasten
+! Kan ik trainen tijdens de ramadan?
+# +na-corona
+! Hoe begin ik weer na een longontsteking of zware griep?
+# +schoenen-wassen
+! Hoe krijg ik modder van mijn loopschoenen zonder ze te beschadigen?
+# +loopscholing
+! Welke loopoefeningen doe ik voor mijn training?
+# +knieen-gezond
+! Is hardlopen slecht voor je rug en gewrichten?
+# +loopgroep-vs-schema
+! Kan ik vooruitgaan zonder trainingsplan?
+# +beginnen-start
+! Welke spullen heb ik nodig voor mijn allereerste run?
+# +rustig-lopen
+! Hoe houd ik mezelf in op een rustige training?
+# +lange-duurloop
+! Hoeveel langer mag mijn lange run elke week worden?
+# +intervallen
+! Hoeveel rust neem ik tussen de snelle blokken?
+# +wedstrijd-dag
+! Wat ontbijt ik op de ochtend van mijn loop?
+# +taperen
+! Raak ik mijn vorm kwijt als ik minder ga trainen voor de wedstrijd?
+# +knie
+! Mijn knie doet zeer bij traplopen na het rennen, wat kan dat zijn?
+# +blessure-terug
+! Hoe test ik of mijn blessure over is?
+# +hitte
+! Hoe wen ik aan lopen in warm weer?
+# +schoenen-kiezen
+! Koop ik mijn loopschoenen online of in een speciaalzaak?
+# +app-opnemen
+! Loopt de opname door als mijn scherm uit is?
+# +app-coach
+! Wat kan ik de coach allemaal vragen?
+# +geen-zin
+! Ik stel mijn training steeds uit, hoe begin ik gewoon?
+# +gewoonte
+! Hoeveel weken duurt het voor lopen vanzelf gaat?
+# +mijn-vandaag
+! Welke training past het best bij vandaag?

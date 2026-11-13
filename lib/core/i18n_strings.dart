@@ -1280,4 +1280,7 @@ const kTranslations = <String, List<String>>{
   'Naar Instagram': ['To Instagram', 'Zu Instagram', 'Vers Instagram', 'A Instagram'],
   'Delen of opslaan': ['Share or save', 'Teilen oder speichern', 'Partager ou enregistrer', 'Compartir o guardar'],
   'Zelf indelen of naar Instagram': ['Customise or send to Instagram', 'Selbst gestalten oder zu Instagram', 'Personnaliser ou envoyer vers Instagram', 'Personalizar o enviar a Instagram'],
+  'Bekijk het hele schema': ['View the full plan', 'Ganzen Plan ansehen', 'Voir le plan complet', 'Ver el plan completo'],
+  'Schema in je plan zetten?': ['Add this plan to your schedule?', 'Plan in deinen Kalender übernehmen?', 'Ajouter ce plan à ton programme ?', '¿Añadir este plan a tu programa?'],
+  'Je huidige schema wordt vervangen door dit schema.': ['Your current plan will be replaced by this one.', 'Dein aktueller Plan wird durch diesen ersetzt.', 'Ton plan actuel sera remplacé par celui-ci.', 'Tu plan actual se sustituirá por este.'],
 };

@@ -76,11 +76,51 @@ def lees():
             fout.append(f"{it['waar']}: geen antwoord")
         if not it["veel"] and not it["verwacht"]:
             fout.append(f"{it['waar']}: geen vragen")
+    # De vervolgvraag van de coach zoekt een onderwerp terug op naam: die moet dus uniek zijn.
+    namen = [it["onderwerp"].strip().lower() for it in items]
+    for n in sorted({n for n in namen if namen.count(n) > 1}):
+        fout.append(f"dubbel onderwerp: {n}")
+    kruis(items, sleutels, fout)
     alle = [v.lower() for it in items for v in it["veel"] + it["verwacht"]]
     dubbel = {v for v in alle if alle.count(v) > 1}
     for d in sorted(dubbel):
         fout.append(f"dubbele vraag: {d}")
     return items, fout
+
+
+STOP = {"voor", "naar", "met", "van", "het", "een", "bij", "mijn", "tijdens", "lopen", "hardlopen", "kadans", "wat", "hoe", "als", "over"}
+
+
+def woorden(it):
+    tekst = " ".join([it["onderwerp"]] + it["trefwoorden"]).lower()
+    return {w[:6] for w in re.findall(r"[a-zà-ÿ0-9]{4,}", tekst) if w not in STOP}
+
+
+def kruis(items, sleutels, fout):
+    """Kruisverwijzingen: 'zie=a,b' uit het bestand, anders de 3 best passende onderwerpen (zelfde categorie, gedeelde woorden).
+
+    Onderwerpen in de categorie 'buiten' (niet over hardlopen) verwijzen nergens naar en worden niet aangeraden."""
+    w = {it["sleutel"]: woorden(it) for it in items}
+    for it in items:
+        opgegeven = [z.strip() for z in str(it.get("zie") or "").split(",") if z.strip()]
+        for z in opgegeven:
+            if z not in sleutels:
+                fout.append(f"{it['waar']}: zie verwijst naar onbekende sleutel {z}")
+            if z == it["sleutel"]:
+                fout.append(f"{it['waar']}: zie verwijst naar zichzelf")
+        if it["categorie"] == "buiten":
+            it["zie"] = []
+            continue
+        if not opgegeven:
+            scores = []
+            for o in items:
+                if o is it or o["categorie"] == "buiten":
+                    continue
+                score = 2 * len(w[it["sleutel"]] & w[o["sleutel"]]) + (1 if o["categorie"] == it["categorie"] else 0)
+                if score >= 1:
+                    scores.append((-score, o["sleutel"]))
+            opgegeven = [k for _, k in sorted(scores)[:3]]
+        it["zie"] = opgegeven[:3]
 
 
 def q(s):
@@ -95,11 +135,12 @@ def sql(items):
     out = ["begin;"]
     for it in items:
         out.append(
-            "with k as (insert into public.coach_kennis (sleutel, onderwerp, categorie, antwoord, actie, soort, trefwoorden, bron)\n"
+            "with k as (insert into public.coach_kennis (sleutel, onderwerp, categorie, antwoord, actie, soort, trefwoorden, zie, bron)\n"
             f"  values ({q(it['sleutel'])}, {q(it['onderwerp'])}, {q(it['categorie'])}, {q(it['antwoord'])}, "
-            f"{q(it['actie']) if it['actie'] else 'null'}, {q(it['soort'])}, {arr(it['trefwoorden'])}, 'kadans')\n"
+            f"{q(it['actie']) if it['actie'] else 'null'}, {q(it['soort'])}, {arr(it['trefwoorden'])}, {arr(it['zie'])}, 'kadans')\n"
             "  on conflict (sleutel) do update set onderwerp = excluded.onderwerp, categorie = excluded.categorie,\n"
-            "    antwoord = excluded.antwoord, actie = excluded.actie, soort = excluded.soort, trefwoorden = excluded.trefwoorden\n"
+            "    antwoord = excluded.antwoord, actie = excluded.actie, soort = excluded.soort, trefwoorden = excluded.trefwoorden,\n"
+            "    zie = excluded.zie\n"
             "  where public.coach_kennis.bron = 'kadans'\n"
             "  returning id),\n"
             "d as (delete from public.coach_vragen where kennis_id in (select id from k) and herkomst in ('veelgesteld', 'verwacht'))\n"
@@ -123,6 +164,7 @@ if __name__ == "__main__":
         cats = {}
         for i in items:
             cats[i["categorie"]] = cats.get(i["categorie"], 0) + len(i["veel"]) + len(i["verwacht"])
+        print(f"kruisverwijzingen: {sum(len(i['zie']) for i in items)} (onderwerpen zonder: {sum(1 for i in items if not i['zie'])})")
         print("per categorie:", ", ".join(f"{k} {v}" for k, v in sorted(cats.items(), key=lambda x: -x[1])))
     for f in fout:
         print("FOUT:", f, file=sys.stderr)

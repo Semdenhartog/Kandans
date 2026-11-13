@@ -14,8 +14,8 @@
 
 import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import {
-  CLAUDE_OPDRACHT, DREMPEL, kledingAntwoord, laatsteAntwoord, leesClaude, maandAntwoord, ONBEKEND_ANTWOORD,
-  tempoAntwoord, vandaagAntwoord, wedstrijdAntwoord, weekAntwoord, type Run,
+  CLAUDE_OPDRACHT, DREMPEL, isJa, kledingAntwoord, laatsteAntwoord, leesClaude, maandAntwoord, metVervolg, ONBEKEND_ANTWOORD,
+  tempoAntwoord, vandaagAntwoord, vervolgOnderwerp, vervolgVragen, wedstrijdAntwoord, weekAntwoord, type Run,
 } from "../_shared/coach_kennis.ts";
 
 const MAX_MESSAGE_CHARS = 1500;
@@ -427,28 +427,60 @@ Deno.serve(async (req) => {
   }
 
   // 1. Kennisbank (gratis, voor iedereen).
+  /** Antwoord uit één kennis-onderwerp, met een vervolgvraag en suggesties uit de kruisverwijzingen ('zie'). */
+  const uitKennis = async (kid: number, score: number | null): Promise<Response | null> => {
+    const { data: k } = await db.from("coach_kennis").select("*").eq("id", kid).single();
+    if (!k) return null;
+    let reply = String(k.antwoord ?? "");
+    let via = "kennis";
+    if (k.actie) {
+      const d = await dataAntwoord(k.actie, db, userId, profile).catch((e) => {
+        console.error("dataAntwoord", k.actie, e?.message ?? e);
+        return null;
+      });
+      if (d) { reply = d; via = "data"; }
+    }
+    if (!reply) return null;
+
+    // Kruisverwijzingen: de eerste vraag van elk verwant onderwerp, in de volgorde van 'zie'.
+    let vervolg: { onderwerp: string; vraag: string }[] = [];
+    const zie = (Array.isArray(k.zie) ? k.zie : []) as string[];
+    if (zie.length) {
+      const { data: verwant } = await db.from("coach_kennis").select("id, sleutel, onderwerp").in("sleutel", zie).eq("actief", true);
+      if (verwant?.length) {
+        const { data: vragen } = await db.from("coach_vragen").select("kennis_id, vraag")
+          .in("kennis_id", verwant.map((x) => x.id)).eq("herkomst", "veelgesteld").order("id");
+        vervolg = vervolgVragen(zie, verwant, vragen ?? []);
+      }
+    }
+    reply = metVervolg(reply, vervolg[0]?.onderwerp);
+
+    await db.rpc("coach_kennis_gebruikt", { kid: k.id });
+    await bewaar(db, userId, message, reply, via);
+    console.log(JSON.stringify({ event: "coach_kennis", via, kennis: k.id, score: score == null ? null : Number(score.toFixed(2)), vervolg: vervolg.length }));
+    return json(200, { reply, premium, free_left: null, via, follow_ups: vervolg.map((v) => v.vraag) });
+  };
+
+  // "Ja" op de vervolgvraag onder het vorige antwoord: ga door met dat onderwerp.
+  if (isJa(message)) {
+    const { data: vorige } = await db.from("coach_messages").select("content")
+      .eq("user_id", userId).eq("role", "assistant").order("created_at", { ascending: false }).limit(1);
+    const onderwerp = vorige?.[0] ? vervolgOnderwerp(String(vorige[0].content)) : null;
+    if (onderwerp) {
+      const { data: kk } = await db.from("coach_kennis").select("id").eq("onderwerp", onderwerp).eq("actief", true).limit(1);
+      if (kk?.[0]) {
+        const r = await uitKennis(kk[0].id, null);
+        if (r) return r;
+      }
+    }
+  }
+
   const { data: top, error: zoekErr } = await db.rpc("coach_kennis_top", { q: message, n: 1 });
   if (zoekErr) console.error("coach_kennis_top", zoekErr.message);
   const best = (top ?? [])[0] as { kennis_id: number; score: number } | undefined;
   if (best && best.score >= DREMPEL) {
-    const { data: k } = await db.from("coach_kennis").select("id, antwoord, actie").eq("id", best.kennis_id).single();
-    if (k) {
-      let reply = String(k.antwoord ?? "");
-      let via = "kennis";
-      if (k.actie) {
-        const d = await dataAntwoord(k.actie, db, userId, profile).catch((e) => {
-          console.error("dataAntwoord", k.actie, e?.message ?? e);
-          return null;
-        });
-        if (d) { reply = d; via = "data"; }
-      }
-      if (reply) {
-        await db.rpc("coach_kennis_gebruikt", { kid: k.id });
-        await bewaar(db, userId, message, reply, via);
-        console.log(JSON.stringify({ event: "coach_kennis", via, kennis: k.id, score: Number(best.score.toFixed(2)) }));
-        return json(200, { reply, premium, free_left: null, via });
-      }
-    }
+    const r = await uitKennis(best.kennis_id, Number(best.score));
+    if (r) return r;
   }
 
   // 2. Niet gevonden: (anoniem) loggen, zodat het in de beheerpagina verschijnt.

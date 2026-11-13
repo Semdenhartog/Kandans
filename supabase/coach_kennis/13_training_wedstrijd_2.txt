@@ -1,0 +1,493 @@
+## Uitbreiding 13-11-2026: trainingsvormen en wedstrijden. 'zie=' zijn kruisverwijzingen naar andere onderwerpen.
+
+# progressieloop | Progressieloop | training | progressieloop, steeds sneller, opbouwend, versnellen aan het eind | zie=tempoloop,lange-duurloop,tempo-gelijk
+? Wat is een progressieloop?
+? Hoe loop ik een run die steeds sneller wordt?
+? Is rustig beginnen en hard eindigen een goede training?
+! Hoe doe ik een opbouwende duurloop?
+! Laatste kilometers sneller lopen, heeft dat zin?
+= Bij een progressieloop begin je rustig en eindig je vlot.
+- Verdeel de run in drie stukken: rustig, gemiddeld, stevig.
+- Het laatste stuk loop je rond je tempoloop-tempo, niet voluit.
+- Eén keer per week of per twee weken is genoeg.
+Je leert zo tempo maken op vermoeide benen, zonder de zware belasting van een interval.
+
+# herstelloop | Herstelloop | training | herstelloop, losloop, heel rustig, dag na wedstrijd | zie=rustig-lopen,rustdag,training-moe
+? Wat is een herstelloop?
+? Hoe rustig moet een herstelloop zijn?
+? Heeft heel langzaam lopen wel zin?
+! Kan ik de dag na een zware training een stukje loslopen?
+! Hoe lang duurt een herstelloop?
+= Een herstelloop is kort en heel rustig, bedoeld om losser te worden.
+- Duur: 20 tot 40 minuten.
+- Tempo: duidelijk langzamer dan je normale rustige run. Je moet er fris van terugkomen.
+- Voel je je stijf of moe? Dan is wandelen of een rustdag net zo goed.
+Een herstelloop maakt je niet sneller door de snelheid, maar door de extra rustige kilometers.
+
+# zone2 | Zone 2-training | training | zone 2, zone twee, aerobe basis, vetverbranding, lage hartslag | zie=hartslagzones,rustig-lopen,polarisatie
+? Wat is zone 2-training?
+? Waarom is lopen in zone 2 zo populair?
+? Hoe weet ik of ik in zone 2 loop?
+! Ik moet wandelen om in zone 2 te blijven, klopt dat?
+! Hoeveel van mijn training moet in zone 2?
+= Zone 2 is rustig lopen waarbij je nog makkelijk kunt praten.
+- Het bouwt je uithoudingsvermogen op met weinig kans op blessures.
+- Richtlijn: ongeveer 60 tot 75% van je maximale hartslag, of gewoon praattempo.
+- Het grootste deel van je weekkilometers hoort hier te zitten.
+Moet je wandelen om je hartslag laag te houden? Dat is in het begin normaal. Het wordt beter als je het een paar weken volhoudt.
+
+# polarisatie | De 80/20-regel | training | 80/20, polariseren, verhouding rustig en snel, tachtig twintig | zie=rustig-lopen,zone2,trainingsweek
+? Wat is de 80/20-regel bij hardlopen?
+? Welk deel van mijn weekkilometers loop ik op praattempo?
+? Wat is gepolariseerd trainen?
+! Loop ik te vaak op gemiddeld tempo?
+! Hoeveel snelle trainingen per week is goed?
+= Ongeveer 80% van je looptijd rustig, 20% stevig. Dat werkt voor bijna iedere loper.
+- Bij 3 runs per week: twee rustig, één met snellere stukken.
+- Bij 5 runs per week: hooguit twee met tempo.
+- Vermijd dat elke run "een beetje hard" is. Dan word je moe zonder sneller te worden.
+Rustig is echt rustig, snel is echt snel.
+
+# overtraining | Overtraind raken | herstel | overtraining, overbelast, te veel getraind, uitgeput, oververmoeid | soort=arts | zie=training-moe,rustweek,slaap
+? Hoe weet ik of ik overtraind ben?
+? Wat zijn signalen dat ik te veel train?
+? Ik word steeds langzamer terwijl ik meer train, hoe kan dat?
+! Kan ik overtraind raken van drie keer per week lopen?
+! Hoe herstel ik van overtraining?
+= Te veel belasting en te weinig herstel zie je aan een patroon, niet aan één slechte dag.
+- Je tempo zakt terwijl de inspanning hoger voelt.
+- Je rusthartslag is dagenlang hoger dan normaal.
+- Je slaapt slecht, bent prikkelbaar of hebt nergens zin in.
+Neem dan een week met alleen wandelen of heel rustig lopen, en slaap extra. Blijft de vermoeidheid langer dan twee weken, of heb je andere klachten? Ga dan naar je huisarts.
+
+# conditie-verliezen | Conditie verliezen bij een pauze | training | conditie kwijt, pauze, niet gelopen, stilstand, achteruit | zie=blessure-terug,training-gemist,vakantie
+? Hoe snel verlies ik mijn conditie?
+? Ik heb twee weken niet gelopen, ben ik alles kwijt?
+? Hoe lang duurt het om conditie terug te krijgen?
+! Maakt een week niet lopen veel uit?
+! Hoe begin ik weer na een maand rust?
+= Je verliest conditie langzamer dan je denkt.
+- Tot een week rust: geen merkbaar verlies, vaak voel je je zelfs frisser.
+- Twee tot drie weken: je uithouding zakt wat, maar komt in twee tot drie weken terug.
+- Langer dan een maand: begin op ongeveer de helft van je oude omvang en bouw weer op.
+Begin altijd rustiger dan je denkt nodig te hebben. Je hart herstelt sneller dan je pezen en spieren.
+
+# conditie-opbouwen-duur | Hoe snel word je fitter | training | vooruitgang, hoe lang, fitter worden, resultaat zien | zie=opbouw-10procent,dip,beginnen-5k
+? Hoe lang duurt het voor ik vooruitgang merk?
+? Wanneer wordt hardlopen makkelijker?
+? Na hoeveel weken zie ik resultaat?
+! Waarom gaat mijn conditie zo langzaam vooruit?
+! Hoe lang moet ik trainen voor een goede conditie?
+= De eerste verbetering merk je meestal na drie tot vier weken regelmatig lopen.
+- Na 6 tot 8 weken voelt hetzelfde rondje duidelijk lichter.
+- Echte sprongen in tempo kosten maanden, geen weken.
+- Regelmaat telt zwaarder dan losse zware trainingen.
+Vergelijk jezelf met een maand geleden, niet met vorige week. In je logboek zie je het verschil.
+
+# rpe | Trainen op gevoel (zwaarte 1 tot 10) | training | rpe, gevoel, inspanning, schaal, zwaarte, zonder horloge | zie=hartslagzones,beginnen-tempo,loopgroep-vs-schema
+? Hoe train ik op gevoel?
+? Wat betekent zwaarte 1 tot 10 bij een training?
+? Kan ik trainen zonder hartslagmeter?
+! Hoe zwaar moet een rustige run voelen?
+! Is gevoel betrouwbaarder dan hartslag?
+= Je gevoel is een prima meetinstrument. Gebruik een schaal van 1 tot 10.
+- 3–4: rustig, je praat in hele zinnen. Hier loop je het meest.
+- 6–7: stevig, korte zinnen. Tempolopen.
+- 8–9: zwaar, losse woorden. Intervallen.
+Hartslag reageert traag en wordt beïnvloed door warmte, koffie en stress. Gevoel en hartslag samen geven het beste beeld.
+
+# minuten-of-km | Trainen op tijd of op afstand | training | minuten, kilometers, tijd of afstand, duur | zie=beginnen-afstand,trainingsschema-kadans,opbouw-10procent
+? Kan ik beter op tijd of op afstand trainen?
+? Waarom staan trainingen soms in minuten?
+? Is 30 minuten lopen beter dan 5 km lopen?
+! Wil ik mijn schema in minuten of kilometers?
+! Telt tijd of afstand voor de belasting?
+= Voor je lichaam telt vooral hoe lang je loopt.
+- Minuten zijn handig voor beginners en bij heuvels of slecht weer: het tempo doet er dan niet toe.
+- Kilometers zijn handig als je naar een wedstrijdafstand traint.
+- Kies wat je motiveert. Je kunt het ook afwisselen.
+In Schema op maat kun je kiezen of je trainingen in minuten of kilometers wilt zien.
+
+# baantraining | Trainen op de atletiekbaan | training | baan, atletiekbaan, 400 meter, rondjes, baanregels | zie=intervallen,strides,spikes
+? Hoe train ik op een atletiekbaan?
+? Hoe lang is een rondje op de baan?
+? Welke baan mag ik gebruiken op de atletiekbaan?
+! Mag ik zomaar een atletiekbaan op?
+! Wat zijn goede baantrainingen voor beginners?
+= Een rondje in de binnenbaan is 400 meter. Dat maakt de baan ideaal voor intervallen.
+- Snelle lopers gebruiken de binnenbaan. Loop je rustig of wandel je? Ga naar buiten.
+- Loop tegen de klok in, tenzij de vereniging anders aangeeft.
+- Begintraining: 6 keer 400 meter vlot, met 200 meter wandelen of dribbelen ertussen.
+Veel banen zijn van een vereniging. Vraag daar wanneer je mag komen.
+
+# yasso | 800 meter-herhalingen | training | 800 meter, yasso, herhalingen, marathontempo test | zie=intervallen,marathon,voorspelling
+? Wat zijn Yasso 800's?
+? Hoe loop ik een training met 800 meters?
+? Voorspellen 800 meter-herhalingen mijn marathontijd?
+! Hoeveel keer 800 meter moet ik lopen?
+! Hoeveel rust neem ik tussen 800 meters?
+= Je loopt een aantal keer 800 meter in een vast tempo, met evenveel tijd rustig dribbelen ertussen.
+- Begin met 4 herhalingen en bouw op naar 8 tot 10.
+- Het tempo is stevig maar gelijk: de laatste gaat net zo snel als de eerste.
+- De bekende vuistregel (3:30 per 800 m = marathon in 3:30) is een grove schatting en valt vaak te gunstig uit.
+Gebruik het als training, niet als voorspelling.
+
+# piramide | Piramidetraining | training | piramide, oplopend, aflopend, interval variatie | zie=intervallen,fartlek,baantraining
+? Wat is een piramidetraining?
+? Hoe ziet een piramide-interval eruit?
+? Hoe breng ik afwisseling in mijn intervallen?
+! Is 1-2-3-2-1 minuten een goede training?
+! Hoe snel loop ik de blokken in een piramide?
+= Bij een piramide worden de snelle blokken eerst langer en daarna weer korter.
+- Voorbeeld: 1, 2, 3, 4, 3, 2, 1 minuut vlot, met telkens de helft van de tijd rustig dribbelen.
+- Loop de korte blokken iets sneller dan de lange.
+- Warm 10 tot 15 minuten op en loop daarna uit.
+De afwisseling maakt de training mentaal lichter dan steeds hetzelfde blok.
+
+# cooper | Coopertest | training | coopertest, 12 minuten, conditietest, testloop | zie=vo2max,maxhartslag,tijden-normaal
+? Wat is de coopertest?
+? Hoe ver moet ik lopen in 12 minuten?
+? Hoe test ik mijn conditie?
+! Wat is een goede score op de coopertest?
+! Hoe vaak kan ik een conditietest doen?
+= Bij de coopertest loop je in 12 minuten zo ver mogelijk, het liefst op een baan.
+- Warm goed op en begin niet te snel.
+- Ruwe indicatie voor volwassenen: 2000 m is gemiddeld, 2400 m is goed, 2800 m of meer is zeer goed. Leeftijd en geslacht tellen mee.
+- Herhaal de test hooguit elke 6 tot 8 weken.
+Het is een voluit-inspanning. Doe hem alleen als je gezond en uitgerust bent.
+
+# loopeconomie | Zuiniger lopen | techniek | loopeconomie, efficiënt, zuinig, energie besparen | zie=beginnen-techniek,strides,kracht
+? Wat is loopeconomie?
+? Hoe ga ik efficiënter lopen?
+? Hoe kost hetzelfde tempo minder energie?
+! Waarom loopt iemand met dezelfde conditie sneller dan ik?
+! Helpt krachttraining om zuiniger te lopen?
+= Loopeconomie is hoeveel energie je nodig hebt voor een bepaald tempo.
+- Meer kilometers maken je vanzelf zuiniger. Dat kost maanden.
+- Korte versnellingen en heuvelsprints helpen.
+- Krachttraining voor benen en romp helpt aantoonbaar.
+Verander je techniek niet met geweld. Kleine aanpassingen, zoals een iets hogere pasfrequentie, zijn genoeg.
+
+# supercompensatie | Sterker worden door rust | herstel | supercompensatie, herstel, sterker, aanpassing, rust nodig | zie=rustdag,rustweek,herstel-algemeen
+? Waarom word ik sterker van rust?
+? Wat is supercompensatie?
+? Wanneer na een training ben ik weer hersteld?
+! Word ik beter van de training of van de rust?
+! Hoeveel tijd moet er tussen twee zware trainingen zitten?
+= Van de training zelf word je moe. In de rust erna herstelt je lichaam tot iets boven het oude niveau.
+- Na een rustige run ben je meestal binnen een dag hersteld.
+- Na een zware training of lange duurloop duurt dat twee tot drie dagen.
+- Train je te vroeg opnieuw zwaar, dan stapel je vermoeidheid.
+Plan daarom rustige dagen tussen je zware trainingen.
+
+# weekbelasting | Hoeveel is te veel | training | belasting, te veel, maximum, kilometers per week, omvang | zie=opbouw-10procent,overtraining,rustweek
+? Hoeveel kilometer per week is te veel?
+? Wat is een goede weekomvang?
+? Hoe weet ik of mijn trainingsbelasting te hoog is?
+! Is 50 km per week veel?
+! Mag ik in één week ineens veel meer lopen?
+= Er is geen vast maximum. Het gaat om hoeveel meer je doet dan je gewend bent.
+- Blijf binnen ongeveer 10% meer dan je gemiddelde van de laatste vier weken.
+- Een sprong van 30% of meer in één week geeft de meeste blessures.
+- Indicatie: 15–25 km per week voor fit blijven, 30–50 km voor een halve marathon, 50–70 km voor een marathon.
+In Kadans zie je bij Hoe ging mijn week hoe deze week zich verhoudt tot de vorige.
+
+# streak | Elke dag lopen | motivatie | streak, elke dag, reeks, dagelijks lopen | zie=beginnen-vaak,rustdag,overtraining
+? Is elke dag hardlopen een goed idee?
+? Wat is een run streak?
+? Hoe houd ik een reeks van elke dag lopen vol?
+! Kan ik een maand lang elke dag lopen?
+! Is een rustdag echt nodig als ik me goed voel?
+= Elke dag lopen kan, maar alleen als de meeste dagen kort en heel rustig zijn.
+- Tel een dag van 15 tot 20 minuten rustig ook mee.
+- Plan hooguit twee stevige dagen per week.
+- Stop de reeks bij pijn die erger wordt of bij ziekte. Een reeks is geen reden om door een blessure heen te lopen.
+Ben je beginner? Bouw dan eerst een paar maanden op met rustdagen ertussen.
+
+# off-season | Rustperiode na een seizoen | planning | rustperiode, off-season, pauze nemen, seizoen, na wedstrijd | zie=na-wedstrijd,conditie-verliezen,dip
+? Moet ik na een seizoen een rustperiode nemen?
+? Hoe lang rust ik na een groot doel?
+? Wat doe ik in een periode zonder wedstrijden?
+! Mag ik een paar weken helemaal niet lopen?
+! Hoe begin ik weer na mijn rustperiode?
+= Eén of twee keer per jaar een rustigere periode van twee tot vier weken houdt je fris.
+- Loop minder en zonder horloge, of doe iets anders: fietsen, wandelen, zwemmen.
+- Het beetje conditie dat je inlevert, heb je snel terug.
+- Gebruik de tijd voor kracht en voor plannen van je volgende doel.
+Daarna bouw je weer een paar weken rustig op voordat je snelle trainingen doet.
+
+# doelen-stellen | Een goed loopdoel kiezen | motivatie | doel, doelen stellen, haalbaar, ambitie, plannen | zie=afstand-kiezen,app-doelen,gewoonte
+? Hoe kies ik een goed hardloopdoel?
+? Wat is een haalbaar doel voor mij?
+? Hoe stel ik doelen die ik volhoud?
+! Moet ik altijd een wedstrijd als doel hebben?
+! Hoe groot mag mijn doel zijn?
+= Een goed doel is concreet, heeft een datum en past bij wat je nu kunt.
+- Kies één hoofddoel voor de komende drie tot zes maanden.
+- Maak het meetbaar: een afstand, een tijd of een aantal runs per week.
+- Zet er een tussendoel voor, zodat je onderweg ziet dat je op koers ligt.
+Een doel hoeft geen wedstrijd te zijn. Drie keer per week lopen tot de zomer is ook een doel.
+
+# sub30-5k | 5 km binnen 30 minuten | snelheid | 5 km onder 30, binnen een half uur, 6 minuten per kilometer | zie=sneller-5k,intervallen,tempo-berekenen
+? Hoe loop ik 5 km binnen 30 minuten?
+? Welk tempo heb ik nodig voor 5 km onder de 30 minuten?
+? Hoe lang duurt het om 5 km in een half uur te lopen?
+! Ik loop 5 km in 33 minuten, hoe kom ik onder de 30?
+! Welke training helpt het meest voor een snelle 5 km?
+= Voor 5 km in 30 minuten loop je 6:00 per kilometer.
+- Loop drie keer per week, waarvan één keer langer dan 5 km (6 tot 8 km rustig).
+- Doe één keer per week intervallen, bijvoorbeeld 5 keer 3 minuten op 5:50 per km met 2 minuten dribbelen.
+- Reken op 6 tot 10 weken als je nu rond de 33 minuten zit.
+Begin de testloop niet te snel: de eerste kilometer op 6:05 is beter dan op 5:40.
+
+# sub60-10k | 10 km binnen het uur | snelheid | 10 km onder het uur, binnen 60 minuten, zes minuten per kilometer | zie=10k,tempoloop,sub30-5k
+? Hoe loop ik 10 km binnen een uur?
+? Welk tempo is 10 km in 60 minuten?
+? Hoe train ik voor een 10 km onder het uur?
+! Ik loop 5 km in 29 minuten, kan ik dan 10 km binnen het uur?
+! Hoeveel moet ik per week lopen voor 10 km binnen 60 minuten?
+= Voor 10 km in een uur loop je 6:00 per kilometer.
+- Kun je 5 km in ongeveer 28 minuten? Dan zit het erin.
+- Loop 20 tot 30 km per week, met één lange run van 10 tot 12 km.
+- Doe één tempotraining per week, bijvoorbeeld 3 keer 8 minuten op 5:55 per km.
+Loop in de wedstrijd de eerste helft op 6:00 en versnel pas na 7 km als het kan.
+
+# sub2-halve | Halve marathon binnen 2 uur | snelheid | halve marathon onder 2 uur, binnen twee uur, 5:41 per kilometer | zie=halve,wedstrijd-pacing,gels
+? Hoe loop ik een halve marathon binnen 2 uur?
+? Welk tempo is een halve marathon in 2 uur?
+? Wat moet ik kunnen voor een halve onder de 2 uur?
+! Ik loop 10 km in 55 minuten, is 2 uur op de halve haalbaar?
+! Hoe deel ik een halve marathon van 2 uur in?
+= Voor 1:59:59 loop je 5:41 per kilometer.
+- Richtlijn: loop je 10 km in ongeveer 54 tot 55 minuten, dan is het haalbaar.
+- Train naar 35 tot 45 km per week, met lange runs tot 18 à 20 km.
+- Oefen stukken op wedstrijdtempo in je lange run, bijvoorbeeld de laatste 5 km.
+Neem na ongeveer 45 minuten iets van energie, en loop de eerste 5 km niet sneller dan 5:41.
+
+# sub4-marathon | Marathon binnen 4 uur | snelheid | marathon onder 4 uur, binnen vier uur, 5:41 per kilometer | zie=marathon,muur,carbo-loading
+? Hoe loop ik een marathon binnen 4 uur?
+? Welk tempo is een marathon in 4 uur?
+? Wat moet ik kunnen voor een marathon onder de 4 uur?
+! Ik loop de halve in 1:52, zit 4 uur op de marathon erin?
+! Hoeveel kilometers per week zijn nodig voor een marathon onder 4 uur?
+= Voor 3:59:59 loop je 5:41 per kilometer.
+- Richtlijn: een halve marathon rond 1:50 tot 1:53 maakt het realistisch.
+- Train 16 tot 18 weken, met piekweken van 50 tot 65 km.
+- Doe minstens drie lange runs van 28 tot 32 km.
+De marathon wordt beslist na 30 km. Start rustig, eet en drink vanaf het begin, en bewaar je kracht.
+
+# parkrun | Gratis 5 km op zaterdag (parkrun) | wedstrijd | parkrun, zaterdagochtend, gratis loopje, 5 km evenement | zie=wedstrijd-eerste,sneller-5k,beginnen-loopgroep
+? Wat is parkrun?
+? Is er een gratis wekelijkse 5 km bij mij in de buurt?
+? Is parkrun geschikt voor beginners?
+! Moet ik me aanmelden voor parkrun?
+! Mag ik wandelen bij een parkrun?
+= Parkrun is een gratis 5 km op zaterdagochtend, op vaste plekken in veel landen, ook in Nederland.
+- Je schrijft je één keer in op de website van parkrun en neemt je barcode mee.
+- Het is geen wedstrijd: wandelen mag en er loopt altijd iemand achteraan.
+- Je krijgt je tijd per mail.
+Een mooie manier om je 5 km-tijd te volgen. Kijk op de website van parkrun voor locaties en tijden, want die kunnen wijzigen.
+
+# tien-mijl | Trainen voor 15 km of 10 mijl | wedstrijd | 15 km, 10 engelse mijl, 16 kilometer, dam tot dam, zevenheuvelen | zie=10k,halve,lange-duurloop
+? Hoe train ik voor een 15 km?
+? Hoe bereid ik me voor op een 10 Engelse mijl?
+? Hoe lang moet mijn lange duurloop zijn voor 16 km?
+! Ik kan 10 km lopen, hoe kom ik naar 16 km?
+! Hoeveel weken training heb ik nodig voor een 15 km?
+= Van 10 naar 15 of 16 km is goed te doen in 8 tot 12 weken.
+- Maak je lange duurloop elke week of twee weken 1 tot 2 km langer, tot 13 à 14 km.
+- Loop drie keer per week: lang, rustig en één keer met tempo.
+- Het laatste stuk loop je op wedstrijddag op karakter. Dat kan, als de basis er is.
+Kies in Schema op maat het doel 15 km. Dan staat de opbouw voor je klaar.
+
+# wedstrijd-warm | Wedstrijd bij warm weer | wedstrijd | wedstrijd warmte, hitte, doeltijd aanpassen, warme dag | zie=hitte,wedstrijd-pacing,zout
+? Hoe loop ik een wedstrijd bij warm weer?
+? Moet ik mijn doeltijd aanpassen als het warm is?
+? Hoe blijf ik koel tijdens een wedstrijd?
+! Het wordt 25 graden op mijn wedstrijddag, wat nu?
+! Hoeveel langzamer loop je in de hitte?
+= Stel je doel bij. Warmte kost tijd, wat je ook doet.
+- Vuistregel: boven de 15 graden kost elke 5 graden extra ongeveer 1 tot 3% tijd.
+- Start trager dan gepland. Wie in de hitte te hard start, betaalt dubbel.
+- Drink bij elke post, gooi water over hoofd en nek en zoek schaduw.
+Stop bij duizeligheid, rillingen of verwardheid en zoek hulp bij de EHBO.
+
+# wedstrijd-regen | Wedstrijd in de regen | wedstrijd | wedstrijd regen, nat, wachten in startvak, vuilniszak | zie=regen,schuren,wedstrijd-dag
+? Hoe bereid ik me voor op een wedstrijd in de regen?
+? Wat trek ik aan bij een natte wedstrijd?
+? Hoe blijf ik warm in het startvak als het regent?
+! Loop ik langzamer in de regen?
+! Hoe voorkom ik blaren bij een regenwedstrijd?
+= Regen maakt je niet veel langzamer. Koud worden vóór de start wel.
+- Trek in het startvak een oude trui of een vuilniszak aan en gooi die bij de start weg.
+- Draag een pet tegen regen in je ogen en smeer schuurplekken extra in.
+- Kies dunne, nauwsluitende kleding. Katoen wordt zwaar.
+Neem droge kleren en schoenen mee voor na afloop.
+
+# startvak | Startvak en startnummer | wedstrijd | startvak, startnummer, opspelden, startgolf, inschrijven | zie=wedstrijd-eerste,wedstrijd-dag,chiptijd
+? In welk startvak moet ik gaan staan?
+? Hoe bevestig ik mijn startnummer?
+? Hoe werkt een start in golven?
+! Mag ik in een ander startvak starten dan op mijn nummer staat?
+! Waar speld ik mijn startnummer op?
+= Je startvak hoort bij de eindtijd die je bij inschrijving opgaf.
+- Sta je te ver vooraan, dan word je meegesleurd en loop je anderen in de weg.
+- Naar een later vak mag bijna altijd, naar een eerder vak meestal niet.
+- Speld het nummer met vier spelden op je buik of gebruik een startnummerband. Niet op je rug.
+Kom op tijd: vakken sluiten vaak 10 tot 15 minuten voor de start.
+
+# chiptijd | Netto- en brutotijd | wedstrijd | chiptijd, nettotijd, brutotijd, officiële tijd, tijdregistratie | zie=startvak,voorspelling,app-records
+? Wat is het verschil tussen netto- en brutotijd?
+? Wat is mijn chiptijd?
+? Welke tijd telt als mijn officiële tijd?
+! Telt de tijd vanaf het startschot of vanaf de startlijn?
+! Waarom wijkt mijn horloge af van de uitslag?
+= De brutotijd loopt vanaf het startschot. De nettotijd (chiptijd) loopt vanaf het moment dat jij over de startlijn gaat.
+- Voor je persoonlijke record telt de nettotijd.
+- Een horloge meet vaak iets meer afstand dan het parcours, omdat je niet de kortste lijn loopt.
+- De uitslag van de organisatie is leidend.
+Zet je horloge aan op de startlijn, niet bij het startschot.
+
+# wc-start | Naar het toilet voor de start | wedstrijd | toilet, wc, dixi, plassen, rij voor de start | zie=wedstrijd-dag,toiletdrang,zenuwen
+? Hoe regel ik het toilet voor een wedstrijd?
+? Hoe lang van tevoren moet ik bij de toiletten zijn?
+? Hoe voorkom ik dat ik onderweg moet plassen?
+! Moet ik stoppen met drinken voor de start?
+! Wat als ik tijdens de wedstrijd naar de wc moet?
+= Reken op een rij. Ga 30 tot 45 minuten voor de start naar het toilet.
+- Drink de laatste twee uur kleine slokjes in plaats van hele flessen.
+- Eet op de wedstrijdochtend wat je kent, en niets vezelrijks.
+- Onderweg staan bij grotere lopen toiletten langs het parcours. Het kost een minuut, niet je wedstrijd.
+Zenuwen maken dat je vaker moet. Dat is normaal.
+
+# drinkposten | Drinken bij een drinkpost | wedstrijd | drinkpost, bekertje, verzorgingspost, drinken onderweg | zie=beginnen-water,gels,wedstrijd-warm
+? Hoe drink ik uit een bekertje tijdens het lopen?
+? Moet ik bij elke drinkpost stoppen?
+? Hoeveel drink ik tijdens een wedstrijd?
+! Mag ik wandelen bij een drinkpost?
+! Neem ik water of sportdrank bij de post?
+= Knijp het bekertje bovenaan dicht tot een tuitje. Dan drink je zonder te morsen.
+- Tot een uur lopen hoef je bij koel weer weinig of niets te drinken.
+- Bij langere afstanden: bij elke post een paar slokken.
+- Even wandelen bij de post mag en kost bijna geen tijd.
+Pak een beker verderop bij de post. Bij de eerste tafel is het het drukst.
+
+# te-snel-gestart | Te snel gestart | wedstrijd | te hard gestart, ingestort, verzuurd, kapot halverwege | zie=wedstrijd-pacing,tempo-gelijk,muur
+? Ik ben te snel gestart, wat doe ik nu?
+? Hoe voorkom ik dat ik te hard van start ga?
+? Waarom stort ik halverwege de wedstrijd in?
+! Hoe herstel ik tijdens een wedstrijd van een te snelle start?
+! Hoe houd ik me in bij de start?
+= Merk je het onderweg? Neem meteen gas terug tot je ademhaling rustig is.
+- Loop een kilometer 15 tot 20 seconden langzamer dan gepland en pak dan je doeltempo weer op.
+- Voorkomen: loop de eerste kilometer bewust iets trager dan je doeltempo.
+- Kijk de eerste minuten vaker op je horloge. Door de adrenaline voelt alles te makkelijk.
+Wat je in het begin wint, verlies je aan het eind dubbel.
+
+# uitstappen | Uitstappen tijdens een wedstrijd | wedstrijd | uitstappen, dnf, opgeven, stoppen in de wedstrijd | zie=beginnen-pijn-algemeen,mentaal-zwaar,slechte-wedstrijd
+? Wanneer moet ik stoppen tijdens een wedstrijd?
+? Is uitstappen een schande?
+? Hoe weet ik of ik kan doorlopen of moet opgeven?
+! Wat doe ik als ik uitstap bij een wedstrijd?
+! Mag ik een stuk wandelen en dan weer verder?
+= Stoppen is soms de verstandigste keuze.
+- Stop bij scherpe of toenemende pijn, pijn op de borst, duizeligheid of verwardheid.
+- Loop door bij gewone vermoeidheid, zware benen of zin om te stoppen. Wandel een minuut en kijk dan opnieuw.
+- Uitstappen? Meld je bij een verzorgingspost of de EHBO, zodat de organisatie weet waar je bent.
+Er komt altijd een volgende wedstrijd.
+
+# wedstrijden-per-jaar | Hoeveel wedstrijden per jaar | planning | aantal wedstrijden, kort na elkaar, jaarplanning, twee wedstrijden | zie=na-wedstrijd,taperen,off-season
+? Hoeveel wedstrijden kan ik per jaar lopen?
+? Hoeveel tijd moet er tussen twee wedstrijden zitten?
+? Kan ik twee weekenden achter elkaar een wedstrijd lopen?
+! Hoeveel marathons per jaar is verstandig?
+! Kan ik een 10 km lopen als voorbereiding op een halve marathon?
+= Korte wedstrijden kun je vaak lopen, lange niet.
+- 5 en 10 km: elke paar weken kan, als je ertussen rustig traint.
+- Halve marathon: reken op twee tot drie weken herstel.
+- Marathon: twee per jaar is voor de meeste lopers het maximum.
+Een kortere wedstrijd drie tot vijf weken voor je hoofddoel is een goede test. Kies één of twee wedstrijden waar je echt voor traint.
+
+# eindsprint | Eindsprint | wedstrijd | eindsprint, laatste kilometer, versnellen, finish | zie=wedstrijd-pacing,strides,mentaal-zwaar
+? Hoe houd ik iets over voor een eindsprint?
+? Wanneer begin ik met versnellen in een wedstrijd?
+? Hoe train ik mijn eindsprint?
+! Is een eindsprint slim of zonde van de energie?
+! Waarom heb ik aan het eind nooit meer een versnelling?
+= Een goede eindsprint is het gevolg van een goede indeling.
+- Loop gelijkmatig en versnel pas in het laatste kwart.
+- Begin de echte sprint op 200 tot 400 meter voor de finish.
+- Train het met versnellingen aan het eind van een duurloop.
+Kun je nog voluit sprinten? Dan had je onderweg iets sneller gekund. Dat is goede informatie voor de volgende keer.
+
+# niets-nieuws | Niets nieuws op wedstrijddag | wedstrijd | niets nieuws, nieuwe schoenen, uittesten, generale repetitie | zie=wedstrijd-dag,gels,schoenen-kiezen
+? Kan ik op nieuwe schoenen een wedstrijd lopen?
+? Waarom moet ik alles van tevoren testen?
+? Wat test ik uit voor mijn wedstrijd?
+! Mag ik het shirt van de organisatie aan op de wedstrijd?
+! Kan ik gels gebruiken die ik nog nooit heb geprobeerd?
+= Gebruik in een wedstrijd alleen wat je in training al hebt geprobeerd.
+- Schoenen: minstens 30 tot 50 km ingelopen.
+- Kleding en sokken: een keer gedragen op een lange run.
+- Eten en drinken: hetzelfde merk en dezelfde timing als in training.
+Doe twee tot drie weken van tevoren een generale repetitie: lange run, wedstrijdkleding, wedstrijdontbijt.
+
+# heuvels-wedstrijd | Wedstrijd met heuvels | wedstrijd | heuvels in wedstrijd, klimmen, hoogtemeters, parcours | zie=heuveltraining,heuvel-techniek,wedstrijd-pacing
+? Hoe deel ik een wedstrijd met heuvels in?
+? Hoe loop ik een helling op in een wedstrijd?
+? Moet ik mijn doeltijd aanpassen bij een heuvelachtig parcours?
+! Kan ik bergop beter mijn tempo vasthouden of mijn inspanning?
+! Hoe train ik voor een heuvelachtige wedstrijd als ik vlak woon?
+= Loop op inspanning, niet op tempo.
+- Bergop: kleinere passen, zelfde ademhaling. Je tempo zakt en dat is goed.
+- Bergaf: laat je lopen, licht voorover, zonder te remmen.
+- Reken per 100 hoogtemeters grofweg op één tot twee minuten extra.
+Woon je vlak? Train op bruggen, viaducten of trappen, en doe krachtoefeningen voor je benen.
+
+# slechte-wedstrijd | Na een tegenvallende wedstrijd | motivatie | teleurgesteld, slechte wedstrijd, mislukt, doel niet gehaald | zie=dip,na-wedstrijd,doelen-stellen
+? Mijn wedstrijd ging slecht, wat nu?
+? Hoe ga ik om met een tegenvallende tijd?
+? Hoe verwerk ik een mislukte wedstrijd?
+! Moet ik snel weer een wedstrijd lopen om het goed te maken?
+! Waarom liep ik veel langzamer dan in training?
+= Eén wedstrijd zegt weinig over je vorm.
+- Schrijf op wat er meespeelde: weer, start, slaap, eten, drukte.
+- Zoek één ding dat je de volgende keer anders doet.
+- Herstel eerst gewoon. Uit frustratie meteen weer vol trainen levert vooral blessures op.
+Je training is niet weg. Vaak komt de goede tijd een paar weken later.
+
+# zwart-gat | Leeg gevoel na een groot doel | motivatie | zwart gat, na de marathon, doel bereikt, leegte, wat nu | zie=off-season,doelen-stellen,geen-zin
+? Ik heb mijn doel gehaald en nu heb ik geen zin meer, is dat normaal?
+? Wat doe ik na mijn marathon?
+? Hoe vind ik motivatie na een grote wedstrijd?
+! Hoe kies ik een nieuw doel na mijn wedstrijd?
+! Waarom voel ik me leeg na de finish?
+= Dat lege gevoel na een groot doel is heel gewoon.
+- Neem een paar weken waarin niets moet.
+- Loop zonder horloge, met iemand anders of op een nieuwe plek.
+- Kies daarna pas een nieuw doel. Dat mag iets anders zijn: een snellere 5 km, een trail, of gewoon regelmaat.
+De zin komt meestal terug zodra het niet meer hoeft.
+
+# traplopen | Trappen lopen als training | training | trap, traplopen, trappen, treden, viaduct | zie=heuveltraining,kracht,plyometrie
+? Is trappen lopen een goede training?
+? Hoe train ik heuvels als ik in een vlak gebied woon?
+? Hoe doe ik een trappentraining?
+! Hoe vaak kan ik een trappentraining doen?
+! Is traplopen slecht voor mijn knieën?
+= Trappen zijn een goede vervanger voor heuvels.
+- Loop 8 tot 10 keer een trap van 20 tot 40 treden op, en wandel rustig naar beneden.
+- Zet je hele voorvoet op de trede en gebruik je armen.
+- Eén keer per week is genoeg.
+Omhoog is vriendelijk voor je knieën. Naar beneden rennen belast ze meer, dus wandel terug.
+
+# zonder-horloge | Lopen zonder horloge | motivatie | zonder horloge, op gevoel, geen data, vrij lopen | zie=rpe,vergelijken,geen-zin
+? Is het goed om soms zonder horloge te lopen?
+? Hoe loop ik op gevoel zonder naar mijn tempo te kijken?
+? Word ik te afhankelijk van mijn horloge?
+! Ik word onrustig van al die cijfers, wat kan ik doen?
+! Telt een run zonder registratie wel mee?
+= Af en toe zonder cijfers lopen is gezond voor je gevoel en je plezier.
+- Laat je horloge thuis of zet het scherm op alleen de tijd.
+- Let op je ademhaling en je benen in plaats van op je tempo.
+- Wil je de run toch bewaren? Neem hem op en kijk pas achteraf.
+Elke run telt voor je lichaam, ook als hij nergens staat.

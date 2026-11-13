@@ -52,7 +52,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   donkere voet met groot logo `kadans-k-groot.png` + `kadans-adans-groot.png`). Foto's (7-11): zes gratis Unsplash-foto's in `site/foto/` (warm bijgekleurd;
   heide = hero, mist = fotoband, bos = app-blok, loper = nieuws, duin + boom = tweeluik), vermelding "Foto's Unsplash" in de voet. Bovenbalk scrolt op mobiel mee weg (8-11). Desktop en mobiel apart ingedeeld (7-11): desktop = hangende hero-telefoon, vlakken 01–03 over de mistfoto, § -labels; mobiel (≤900px) = compacter, vlakken/nieuws/tweeluik veegbaar, vaste wachtlijstknop `#ctabar`, tellende cijfers `[data-count]`. **Voorpagina 12-11 (live):** koppen in Saira (zoals de app), wachtlijstformulier ook in de hero (`form.wl`, beide formulieren delen één script), teller naar 1 december (`#aftel`), blok `#probeer` = voorbeelddag per 5 minuten om doorheen te slepen (cijfers zijn een voorbeeld, gelijk aan `site/app/vandaag.jpg`: nu 15:40, beste 16:35, score 97; klasse `hi` voor gouden strepen, níét `top` want dat is de bovenbalk). Subpagina's hebben nog de oude stijl. Alleen site gewijzigd → `[skip ci]` + `site.yml` met de hand starten (`gh workflow run site.yml --ref main`).
 - Privacyverklaring: bron `site/privacy.html` → `tools/privacy_naar_dart.py` → `lib/features/profile/privacy_text.dart`. In de app: `openPrivacy(context)`.
-- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0043** staan live (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg; 0042 = `race_calendar` (wedstrijdkalender, alleen lezen voor ingelogden); 0042b = pg_cron + pg_net, nachtelijke import 04:17 via `private.start_race_import()` met eenmalige code, log in `private.race_import_runs`). 0043 = coach-kennisbank (zie Coach hieronder). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
+- Supabase-project `jdswennyfczpqblfkrxt`. RLS overal. Migraties t/m **0044** staan live (0044 = `coach_kennis.zie`, kruisverwijzingen, 13-11); (0038 = profielen + stappen, 0039 = runtitel `activities.title`, 0040 = avatars-SELECT-regel + groepsagenda + emoji-reacties + @vermeldingen, 6-11-2026; 0041 = beveiliging na pentest 9-11: groepscodes crypto + max 15 pogingen/dag (`group_join` geeft null bij onbekende code), verborgen foto verliest pad (`private.hidden_avatars`), wachtlijst max 5/uur per IP; 0041b = oude tabel `Waitlist` weg; 0042 = `race_calendar` (wedstrijdkalender, alleen lezen voor ingelogden); 0042b = pg_cron + pg_net, nachtelijke import 04:17 via `private.start_race_import()` met eenmalige code, log in `private.race_import_runs`). 0043 = coach-kennisbank (zie Coach hieronder). Vriendcode-volgen: max 20/dag (`checkQuota` in `community`). Nieuwe migratie: eerst lokaal testen,
   dan zelf toepassen via MCP `apply_migration` (`drop` in een apart deel).
 - Edge-function-helpers in `supabase/functions/_shared/` zijn te testen met `node --experimental-strip-types`.
 - Migraties lokaal testen: Postgres 16 staat in de sessie (`su postgres -c '/usr/lib/postgresql/16/bin/initdb -D /tmp/pgt/data'`,
@@ -95,8 +95,17 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   (week/laatste/maand/vandaag/tempo/wedstrijd/kleding) rekent de server uit eigen runs/Open-Meteo. Geen match → `coach_onbeantwoord`
   (anoniem, 90 dagen) → Claude (alleen met sleutel, premium of gratis proefvragen) met JSON-opdracht; `algemeen`-versie gaat via
   `coach_kennis_van_claude` de kennis in (bron claude, `nakijken`). `coach_messages.via` = kennis|data|claude|onbekend; daglimiet telt alleen claude.
-  Startkennis: `supabase/coach_kennis/*.txt` (219 onderwerpen, 1024 vragen: `?` veelgesteld, `!` verwacht, `# +sleutel` = extra vragen) →
+  Startkennis: `supabase/coach_kennis/*.txt` (373 onderwerpen, 2032 vragen sinds 13-11; bestanden 12–16 = uitbreiding met 1004 vragen: `?` veelgesteld, `!` verwacht, `# +sleutel` = extra vragen) →
   `tools/coach_kennis_naar_sql.py` (`--tel`) → workflow `coach-kennis.yml` (bij push naar main, upsert op sleutel, bron 'sem' blijft).
+  **Kruisverwijzingen + vervolgvraag (13-11):** `zie=sleutel,…` in de kop (zonder: het script kiest de 3 best passende; categorie `buiten` nooit).
+  Functie `coach` zet onder een kennis-antwoord "Wil je hierna meer weten over: <onderwerp>? Antwoord dan met ja." (`metVervolg`) en geeft
+  `follow_ups` (eerste vraag van elk verwant onderwerp) terug; "ja" op die zin (`isJa` + `vervolgOnderwerp` op het vorige coachbericht) geeft dat
+  onderwerp. App: chips "Ja, graag" + vervolgvragen vóór de slimme vragen. Onderwerpnamen moeten uniek zijn (script controleert).
+  Lokale zoektest 13-11: 1997 van 2025 vragen komen bij het eigen onderwerp uit, de rest bij een nauw verwant onderwerp.
+  **Schema bouwen in het gesprek (13-11):** `domain/plan_chat.dart` (`PlanChat`: doel → datum → km/week → langste run → dagen → ambitie → 5 km-tijd;
+  slaat over wat niet past of al uit het logboek bekend is; "stop" breekt af), op het toestel, niet naar de server en niet in `coach_messages`.
+  Start bij "Maak een schema voor mij" e.d. (`PlanChat.wantsPlan`). Klaar → `planChatSummary` + knoppen "Bekijk het hele schema"
+  (`openCustomPlan(context, wishes:)`) en "Zet in mijn plan". Test `test/plan_chat_test.dart`.
   Beheer: **kadans.fit/coach-beheer.html** (inlog = app-account, `coach_admins`; Sem staat erin). Zoektest lokaal: 58/59 goed.
 - Community: `lib/features/community/` (Runs | Gesprekken), SQL `community_*` (0033), volgen/delen `social_*` (0034),
   `data/services/social_service.dart`, privacyzone `domain/privacy_zone.dart`. Strava-runs worden geweigerd (ook in SQL).
@@ -238,6 +247,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Alles wat gebouwd is: `VERBETERPUNTEN.md`. Play Store: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
+- Testen op telefoon (nieuw 13-11): coach → vervolgvraag onder een antwoord ("Ja, graag" of een vraag-chip), "Maak een schema voor mij"
+  (vragen beantwoorden met chips of typen, "stop", Bekijk het hele schema, Zet in mijn plan).
 - Testen op telefoon (nieuw 13-11): Deel je run → "Zelf indelen of naar Instagram" (slepen, knijpen, kleuren, foto wisselen, Naar Instagram).
   Voor rechtstreeks naar een verhaal mét sticker: Meta-app aanmaken (developers.facebook.com) en het App-ID doorgeven voor `META_APP_ID`.
 - Testen op telefoon (nieuw 11-11): Schema op maat (6 vragen, overzicht, Download PDF delen, "Zet in mijn plan" vervangt huidig schema),
