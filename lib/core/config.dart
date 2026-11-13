@@ -30,6 +30,10 @@ class AppConfig {
   /// Leeg = abonnementen nog niet ingesteld; de paywall toont dan "binnenkort".
   static const revenueCatAndroidKey = String.fromEnvironment('REVENUECAT_ANDROID_KEY');
 
+  /// Meta (Facebook) App-ID voor "Naar Instagram" (openbaar nummer, geen geheim). Leeg = Instagram opent zijn
+  /// eigen keuzescherm; ingevuld = rechtstreeks naar een nieuw verhaal, doorzichtig beeld als sticker.
+  static const metaAppId = String.fromEnvironment('META_APP_ID');
+
   static bool get billingConfigured => revenueCatAndroidKey.isNotEmpty;
 
   static bool get isConfigured =>

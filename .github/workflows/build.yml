@@ -158,6 +158,16 @@ jobs:
                   '        </receiver>\n'
                   '    </application>'), 1)
               open(p, "w").write(s)
+          # 1c) Deelbeeld naar Instagram (kanaal kadans/instagram): eigen FileProvider + Instagram mogen vinden.
+          if "KadansFileProvider" not in s:
+              s = s.replace("</application>", (
+                  '    <provider android:name=".KadansFileProvider" android:authorities="${applicationId}.kadans.deel"\n'
+                  '            android:exported="false" android:grantUriPermissions="true">\n'
+                  '            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/kadans_share_paths" />\n'
+                  '        </provider>\n'
+                  '    </application>'), 1)
+              s = s.replace("<queries>", '<queries>\n        <package android:name="com.instagram.android" />', 1)
+              open(p, "w").write(s)
           kdir = os.path.dirname(glob.glob("android/app/src/main/kotlin/**/MainActivity.kt", recursive=True)[0])
           shutil.copy("android_extra/kotlin/BestMomentWidget.kt", kdir)
           shutil.copy("android_extra/kotlin/KadansChannels.kt", kdir)

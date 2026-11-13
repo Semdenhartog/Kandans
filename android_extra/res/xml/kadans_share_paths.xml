@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Alleen de map met het deelbeeld (cache/deel) mag met Instagram gedeeld worden. -->
+<paths>
+    <cache-path name="deel" path="deel/" />
+</paths>

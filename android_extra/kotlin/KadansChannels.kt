@@ -1,6 +1,7 @@
 package nl.runwise.runwise
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -15,14 +16,17 @@ import android.os.Looper
 import android.provider.CalendarContract
 import android.view.KeyEvent
 import android.view.WindowManager
+import androidx.core.content.FileProvider
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 /**
  * Eigen kanalen van Kadans (geen extra pakketten nodig):
  *  - kadans/calendar: drukke tijden uit de telefoonagenda (alleen begin en eind, geen titels).
  *  - kadans/media (+ /events): de knop op je oortjes tijdens een run.
+ *  - kadans/instagram: een afbeelding uit Kadans openen in Instagram (verhaal, of het keuzescherm van Instagram).
  *  - kadans/screen: tijdens een run het opnamescherm boven het vergrendelscherm tonen (geen ontgrendelen nodig).
  */
 object KadansChannels {
@@ -58,6 +62,51 @@ object KadansChannels {
             when (call.method) {
                 "start" -> { m.start(); result.success(null) }
                 "stop" -> { m.stop(); result.success(null) }
+                else -> result.notImplemented()
+            }
+        }
+        MethodChannel(messenger, "kadans/instagram").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "share" -> {
+                    val path = call.argument<String>("path") ?: ""
+                    val appId = call.argument<String>("appId") ?: ""
+                    val sticker = call.argument<Boolean>("sticker") ?: false
+                    val top = call.argument<String>("top") ?: "#13110E"
+                    val bottom = call.argument<String>("bottom") ?: "#25201B"
+                    try {
+                        val pkg = "com.instagram.android"
+                        val uri = FileProvider.getUriForFile(ctx, ctx.packageName + ".kadans.deel", File(path))
+                        val intent = if (appId.isNotEmpty()) {
+                            // Rechtstreeks naar een nieuw verhaal (Meta vraagt hiervoor een App-ID).
+                            Intent("com.instagram.share.ADD_TO_STORY").apply {
+                                putExtra("source_application", appId)
+                                if (sticker) {
+                                    type = "image/png"
+                                    putExtra("interactive_asset_uri", uri)
+                                    putExtra("top_background_color", top)
+                                    putExtra("bottom_background_color", bottom)
+                                } else {
+                                    setDataAndType(uri, "image/png")
+                                }
+                            }
+                        } else {
+                            // Zonder App-ID: Instagram laat zelf kiezen tussen verhaal, bericht, reel of chat.
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                            }
+                        }
+                        intent.setPackage(pkg)
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        activity.grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        activity.startActivity(intent)
+                        result.success(true)
+                    } catch (e: ActivityNotFoundException) {
+                        result.success(false)
+                    } catch (e: Exception) {
+                        result.error("failed", e.message, null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
@@ -190,3 +239,6 @@ class MediaButtons(private val ctx: Context) {
         }
     }
 }
+
+/** Geeft Instagram leesrecht op het deelbeeld (alleen de map cache/deel, zie res/xml/kadans_share_paths.xml). */
+class KadansFileProvider : FileProvider()

@@ -202,6 +202,12 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   rustige runs ≥ 4 km vanaf 10 km, lange duurloop niet sneller dan rustig, waarschuwing bij te korte lange duurloop.
   Opgeloste rekenfout: minutenlimiet deelde door 1000 (alle rustige runs werden 3 km). Schermtests `28a`/`28b` (`debugWishes`).
   Pakket `pdf` vraagt `dependency_overrides: image: 4.5.4` (anders botst `archive`).
+- **Deelbeeld zelf indelen (13-11):** `activities/share_studio_screen.dart` (`openShareStudio`, knop "Zelf indelen of naar Instagram" in `share_run_screen.dart`):
+  lijn, afstand, tijd, tempo, datum, eigen tekst en logo los te verslepen/knijpen, kleur per onderdeel, lijndikte, achtergrond doorzichtig/donker/eigen foto
+  (altijd te wisselen, onderdelen blijven staan), formaat verhaal/bericht/vierkant; indeling bewaard in prefs `share_studio_layout` (`StudioLayout`).
+  "Naar Instagram": `data/services/instagram_share.dart` → kanaal `kadans/instagram` (KadansChannels.kt, `KadansFileProvider`, map cache/deel,
+  manifest-stukje in build.yml 1c). `META_APP_ID` (app_config.json, openbaar nummer) leeg = keuzescherm van Instagram; ingevuld = rechtstreeks
+  naar een verhaal, doorzichtig beeld als sticker. Test `test/share_studio_test.dart`. Ontwerp: Design-canvas "Kadans deelkaarten voor Instagram".
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
@@ -232,6 +238,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Alles wat gebouwd is: `VERBETERPUNTEN.md`. Play Store: `docs/play-store.md`. Inkomsten: `docs/inkomsten.md`.
 
 ## Open punten voor Sem
+- Testen op telefoon (nieuw 13-11): Deel je run → "Zelf indelen of naar Instagram" (slepen, knijpen, kleuren, foto wisselen, Naar Instagram).
+  Voor rechtstreeks naar een verhaal mét sticker: Meta-app aanmaken (developers.facebook.com) en het App-ID doorgeven voor `META_APP_ID`.
 - Testen op telefoon (nieuw 11-11): Schema op maat (6 vragen, overzicht, Download PDF delen, "Zet in mijn plan" vervangt huidig schema),
   coach-knop "Maak je schema op maat"; PDF opnieuw maken met de nieuwe APK en naar Claude sturen voor een laatste check.
 - Testen op telefoon (nieuw 10-11): Wolkje (Vandaag + handgeschreven pijl → coach, coach-avatar, lege schermen, recordkaart, wippen),

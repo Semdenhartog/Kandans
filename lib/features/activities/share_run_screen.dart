@@ -23,6 +23,7 @@ import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
 import '../luxe/luxe.dart';
 import '../routes/route_map.dart' show windColor, baseTileLayer;
+import 'share_studio_screen.dart';
 
 void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<String> badges = const []}) {
   Navigator.of(context).push(MaterialPageRoute<void>(
@@ -214,6 +215,13 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     title: const Text('Verberg waar je woont'),
                     subtitle: const Text('Laat de eerste en laatste 300 m van je route weg'),
                   ),
+                  // Zelf indelen: lijn, afstand en tijd verslepen, kleuren kiezen, eigen foto erachter, naar Instagram.
+                  OutlinedButton.icon(
+                    onPressed: () => openShareStudio(context, widget.activity, route: widget.route),
+                    icon: const Icon(Icons.tune),
+                    label: Text(tr('Zelf indelen of naar Instagram')),
+                  ),
+                  const SizedBox(height: 8),
                   FilledButton.icon(
                     onPressed: _busy ? null : _share,
                     icon: _busy
