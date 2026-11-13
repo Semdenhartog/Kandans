@@ -217,6 +217,11 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   "Naar Instagram": `data/services/instagram_share.dart` → kanaal `kadans/instagram` (KadansChannels.kt, `KadansFileProvider`, map cache/deel,
   manifest-stukje in build.yml 1c). `META_APP_ID` (app_config.json, openbaar nummer) leeg = keuzescherm van Instagram; ingevuld = rechtstreeks
   naar een verhaal, doorzichtig beeld als sticker. Test `test/share_studio_test.dart`. Ontwerp: Design-canvas "Kadans deelkaarten voor Instagram".
+- **Routevideo (13-11):** Deel je run → "Bewegende video van je route" (`activities/route_anim_screen.dart`): 5 stijlen Tekenen/Komeet/Kilometers/Tempo/Echo
+  (Tempo alleen met streams). Logica `domain/route_anim.dart` (`RoutePath`, `routeProgress`, tempo-stukken), tekening `activities/route_anim_painter.dart`
+  (1080×1920 ontwerpmaat, zelfde painter voor voorbeeld en export), encoder `data/services/video_encoder.dart` → kanaal `kadans/video` (`KadansVideo` in
+  KadansChannels.kt: MediaCodec H.264 720×1280, 24 fps, RGBA→YUV, mp4 in cache/deel). Instagram-kanaal kreeg `mime` (video/mp4). Stil, niet transparant. Test `test/route_anim_test.dart`.
+  Script voor losse Instagram-video's: `tools/insta/route_anim.py`. Niet op een telefoon getest.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;

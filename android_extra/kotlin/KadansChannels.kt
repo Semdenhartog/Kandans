@@ -8,6 +8,10 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.media.MediaCodec
+import android.media.MediaCodecInfo
+import android.media.MediaFormat
+import android.media.MediaMuxer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Build
@@ -21,12 +25,14 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.util.concurrent.Executors
 
 /**
  * Eigen kanalen van Kadans (geen extra pakketten nodig):
  *  - kadans/calendar: drukke tijden uit de telefoonagenda (alleen begin en eind, geen titels).
  *  - kadans/media (+ /events): de knop op je oortjes tijdens een run.
  *  - kadans/instagram: een afbeelding uit Kadans openen in Instagram (verhaal, of het keuzescherm van Instagram).
+ *  - kadans/video: beelden (RGBA) één voor één omzetten naar een mp4 (H.264) voor de routevideo.
  *  - kadans/screen: tijdens een run het opnamescherm boven het vergrendelscherm tonen (geen ontgrendelen nodig).
  */
 object KadansChannels {
@@ -71,6 +77,7 @@ object KadansChannels {
                     val path = call.argument<String>("path") ?: ""
                     val appId = call.argument<String>("appId") ?: ""
                     val sticker = call.argument<Boolean>("sticker") ?: false
+                    val mime = call.argument<String>("mime") ?: "image/png"
                     val top = call.argument<String>("top") ?: "#13110E"
                     val bottom = call.argument<String>("bottom") ?: "#25201B"
                     try {
@@ -86,13 +93,13 @@ object KadansChannels {
                                     putExtra("top_background_color", top)
                                     putExtra("bottom_background_color", bottom)
                                 } else {
-                                    setDataAndType(uri, "image/png")
+                                    setDataAndType(uri, mime)
                                 }
                             }
                         } else {
                             // Zonder App-ID: Instagram laat zelf kiezen tussen verhaal, bericht, reel of chat.
                             Intent(Intent.ACTION_SEND).apply {
-                                type = "image/png"
+                                type = mime
                                 putExtra(Intent.EXTRA_STREAM, uri)
                             }
                         }
@@ -107,6 +114,27 @@ object KadansChannels {
                         result.error("failed", e.message, null)
                     }
                 }
+                else -> result.notImplemented()
+            }
+        }
+        val video = KadansVideo()
+        MethodChannel(messenger, "kadans/video").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "begin" -> {
+                    val path = call.argument<String>("path") ?: ""
+                    val w = call.argument<Int>("width") ?: 720
+                    val h = call.argument<Int>("height") ?: 1280
+                    val fps = call.argument<Int>("fps") ?: 24
+                    video.run(main, result) { video.begin(path, w, h, fps) }
+                }
+                "frame" -> {
+                    val rgba = call.argument<ByteArray>("rgba")
+                    val index = call.argument<Int>("index") ?: 0
+                    if (rgba == null) result.error("failed", "geen beeld", null)
+                    else video.run(main, result) { video.frame(rgba, index) }
+                }
+                "finish" -> video.run(main, result) { video.finish() }
+                "cancel" -> video.run(main, result) { video.cancel() }
                 else -> result.notImplemented()
             }
         }
@@ -242,3 +270,149 @@ class MediaButtons(private val ctx: Context) {
 
 /** Geeft Instagram leesrecht op het deelbeeld (alleen de map cache/deel, zie res/xml/kadans_share_paths.xml). */
 class KadansFileProvider : FileProvider()
+
+/** Zet RGBA-beelden met vaste tijdstippen om in een mp4 (H.264). Alles draait op één eigen draad, zodat de volgorde klopt. */
+class KadansVideo {
+    private val worker = Executors.newSingleThreadExecutor()
+    private var codec: MediaCodec? = null
+    private var muxer: MediaMuxer? = null
+    private var track = -1
+    private var started = false
+    private var w = 0
+    private var h = 0
+    private var fps = 24
+    private val info = MediaCodec.BufferInfo()
+
+    fun run(main: Handler, result: MethodChannel.Result, block: () -> Any?) {
+        worker.execute {
+            try {
+                val r = block()
+                main.post { result.success(r) }
+            } catch (e: Exception) {
+                release()
+                main.post { result.error("failed", e.message ?: e.toString(), null) }
+            }
+        }
+    }
+
+    fun begin(path: String, width: Int, height: Int, rate: Int): Boolean {
+        release()
+        w = width; h = height; fps = rate
+        File(path).delete()
+        val fmt = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, w, h).apply {
+            setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)
+            setInteger(MediaFormat.KEY_BIT_RATE, 5_000_000)
+            setInteger(MediaFormat.KEY_FRAME_RATE, fps)
+            setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
+        }
+        val c = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
+        c.configure(fmt, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+        c.start()
+        codec = c
+        muxer = MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+        track = -1
+        started = false
+        return true
+    }
+
+    fun frame(rgba: ByteArray, index: Int): Boolean {
+        val c = codec ?: throw IllegalStateException("encoder niet gestart")
+        if (rgba.size < w * h * 4) throw IllegalArgumentException("beeld te klein")
+        var i = c.dequeueInputBuffer(10_000)
+        while (i < 0) {
+            drain(false)
+            i = c.dequeueInputBuffer(10_000)
+        }
+        val img = c.getInputImage(i) ?: throw IllegalStateException("geen invoerbeeld")
+        fill(img, rgba)
+        c.queueInputBuffer(i, 0, w * h * 3 / 2, index * 1_000_000L / fps, 0)
+        drain(false)
+        return true
+    }
+
+    fun finish(): Boolean {
+        val c = codec ?: return false
+        var i = c.dequeueInputBuffer(10_000)
+        while (i < 0) {
+            drain(false)
+            i = c.dequeueInputBuffer(10_000)
+        }
+        c.queueInputBuffer(i, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+        drain(true)
+        release()
+        return true
+    }
+
+    fun cancel(): Boolean {
+        release()
+        return true
+    }
+
+    private fun drain(untilEnd: Boolean) {
+        val c = codec ?: return
+        while (true) {
+            val o = c.dequeueOutputBuffer(info, if (untilEnd) 10_000 else 0)
+            when {
+                o == MediaCodec.INFO_TRY_AGAIN_LATER -> if (!untilEnd) return
+                o == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
+                    track = muxer!!.addTrack(c.outputFormat)
+                    muxer!!.start()
+                    started = true
+                }
+                o >= 0 -> {
+                    val buf = c.getOutputBuffer(o)
+                    if (buf != null && info.size > 0 && started && (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG) == 0) {
+                        buf.position(info.offset)
+                        buf.limit(info.offset + info.size)
+                        muxer!!.writeSampleData(track, buf, info)
+                    }
+                    c.releaseOutputBuffer(o, false)
+                    if ((info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) return
+                }
+            }
+        }
+    }
+
+    private fun release() {
+        try { codec?.stop() } catch (_: Exception) {}
+        try { codec?.release() } catch (_: Exception) {}
+        try { if (started) muxer?.stop() } catch (_: Exception) {}
+        try { muxer?.release() } catch (_: Exception) {}
+        codec = null; muxer = null; started = false; track = -1
+    }
+
+    /** RGBA naar YUV420 (BT.601, beperkt bereik) rechtstreeks in de vlakken van het invoerbeeld. */
+    private fun fill(img: android.media.Image, rgba: ByteArray) {
+        val yp = img.planes[0]; val up = img.planes[1]; val vp = img.planes[2]
+        val yb = yp.buffer; val ub = up.buffer; val vb = vp.buffer
+        for (y in 0 until h) {
+            val row = y * w * 4
+            val yo = y * yp.rowStride
+            for (x in 0 until w) {
+                val k = row + x * 4
+                val r = rgba[k].toInt() and 0xFF
+                val g = rgba[k + 1].toInt() and 0xFF
+                val b = rgba[k + 2].toInt() and 0xFF
+                yb.put(yo + x, (((66 * r + 129 * g + 25 * b + 128) shr 8) + 16).toByte())
+            }
+        }
+        for (y in 0 until h / 2) {
+            val uo = y * up.rowStride
+            val vo = y * vp.rowStride
+            for (x in 0 until w / 2) {
+                var r = 0; var g = 0; var b = 0
+                for (dy in 0..1) for (dx in 0..1) {
+                    val k = ((y * 2 + dy) * w + (x * 2 + dx)) * 4
+                    r += rgba[k].toInt() and 0xFF
+                    g += rgba[k + 1].toInt() and 0xFF
+                    b += rgba[k + 2].toInt() and 0xFF
+                }
+                r /= 4; g /= 4; b /= 4
+                val u = ((-38 * r - 74 * g + 112 * b + 128) shr 8) + 128
+                val v = ((112 * r - 94 * g - 18 * b + 128) shr 8) + 128
+                ub.put(uo + x * up.pixelStride, u.coerceIn(0, 255).toByte())
+                vb.put(vo + x * vp.pixelStride, v.coerceIn(0, 255).toByte())
+            }
+        }
+    }
+}

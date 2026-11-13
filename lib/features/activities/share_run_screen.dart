@@ -23,6 +23,7 @@ import '../../domain/weather_correction.dart';
 import '../../shared/widgets.dart';
 import '../luxe/luxe.dart';
 import '../routes/route_map.dart' show windColor, baseTileLayer;
+import 'route_anim_screen.dart';
 import 'share_studio_screen.dart';
 
 void openShareRun(BuildContext context, Activity a, {RunRoute? route, List<String> badges = const []}) {
@@ -221,6 +222,14 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     icon: const Icon(Icons.tune),
                     label: Text(tr('Zelf indelen of naar Instagram')),
                   ),
+                  if (widget.activity.hasTrack || widget.route != null) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => openRouteAnim(context, widget.activity, route: widget.route),
+                      icon: const Icon(Icons.movie_creation_outlined),
+                      label: Text(tr('Bewegende video van je route')),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   FilledButton.icon(
                     onPressed: _busy ? null : _share,
