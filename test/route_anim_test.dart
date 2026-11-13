@@ -12,7 +12,7 @@ void main() {
   test('tijd en afstand opmaken', () {
     expect(formatAnimTime(2878), '47:58');
     expect(formatAnimTime(3912), '1:05:12');
-    expect(formatAnimKm(10230), '10,23');
+    expect(formatAnimKm(10230), '10,2 km');
   });
 
   test('voortgang loopt van 0 naar 1 en lussen blijven op 1', () {
