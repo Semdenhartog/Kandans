@@ -699,7 +699,7 @@ class _ResultsState extends State<_Results> {
             Positioned(
               right: 18,
               top: -96,
-              child: _AskWolkje(mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather)),
+              child: _AskCloudy(mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather)),
             ),
           ]),
         ),
@@ -1842,9 +1842,9 @@ class _WeekRow extends ConsumerWidget {
   }
 }
 
-/// "vraag het Wolkje → tik hier" in handschrift, met een getekende pijl naar Wolkje. Het hele vlak gaat naar de coach.
-class _AskWolkje extends StatelessWidget {
-  const _AskWolkje({required this.mood});
+/// "vraag Cloudy → tik hier" in handschrift, met een getekende pijl naar Wolkje. Het hele vlak gaat naar de coach.
+class _AskCloudy extends StatelessWidget {
+  const _AskCloudy({required this.mood});
   final WolkjeMood mood;
 
   static const _goud = Color(0xFFD9BF92);
@@ -1852,7 +1852,7 @@ class _AskWolkje extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
         button: true,
-        label: tr('Vraag het Wolkje, je coach'),
+        label: tr('Vraag Cloudy, je coach'),
         excludeSemantics: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -1870,7 +1870,7 @@ class _AskWolkje extends StatelessWidget {
                 child: Transform.rotate(
                   angle: -0.07,
                   child: Text(
-                    '${tr('vraag het Wolkje')}\n→ ${tr('tik hier')}',
+                    '${tr('vraag Cloudy')}\n→ ${tr('tik hier')}',
                     style: const TextStyle(
                       fontFamily: 'Caveat',
                       fontVariations: [FontVariation('wght', 700)],

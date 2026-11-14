@@ -218,7 +218,7 @@ class EmptyArt extends StatelessWidget {
                 top: size * 0.16,
                 child: Center(
                   child: Stack(clipBehavior: Clip.none, children: [
-                    Wolkje(size: size * 0.5),
+                    Wolkje(size: size * 0.5, opensCoach: true),
                     Positioned(
                       right: -size * 0.06,
                       bottom: -size * 0.02,

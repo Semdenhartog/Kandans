@@ -175,7 +175,7 @@ class _RecordCard extends StatelessWidget {
           Text(Fmt.dateLong(date), style: TextStyle(color: light.withValues(alpha: 0.7), fontSize: 12)),
         ]),
         const Spacer(),
-        const Wolkje(size: 72, mood: WolkjeMood.blij),
+        const Wolkje(size: 72, mood: WolkjeMood.blij, opensCoach: true),
         const SizedBox(height: 8),
         Text(tr('Persoonlijk record'), style: TextStyle(color: light.withValues(alpha: 0.85), fontSize: 16, fontWeight: FontWeight.w600)),
         Text(main.label,

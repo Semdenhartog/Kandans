@@ -373,17 +373,17 @@ Je vindt het via Ik → Trainingsschema, of vraag de coach om een schema.
 - Daarna zie je een samenvatting en kun je het hele schema bekijken of in je plan zetten.
 Typ "stop" om tussentijds te stoppen.
 
-# app-wolkje | Wolkje | app | wolkje, mascotte, figuurtje, wolk | zie=app-coach,app-vandaag,weeradvies-app
-? Wie is Wolkje?
+# app-wolkje | Cloudy | app | cloudy, wolkje, mascotte, figuurtje, wolk | zie=app-coach,app-vandaag,weeradvies-app
+? Wie is Cloudy?
 ? Wat is dat wolkje op het scherm Vandaag?
-? Waarom ziet Wolkje er steeds anders uit?
-! Is Wolkje hetzelfde als de coach?
+? Waarom ziet Cloudy er steeds anders uit?
+! Is Cloudy hetzelfde als de coach?
 ! Wat doet het wolkje bij de coach?
-= Wolkje is de mascotte van Kadans en het gezicht van de coach.
-- Op Vandaag kijkt Wolkje over de advieskaart mee en past zich aan het weer van nu aan: regen, zon, wind, kou of nacht.
-- In de coach is Wolkje het plaatje bij de antwoorden.
-- Je ziet Wolkje ook op lege schermen en bij een record.
-Tik op "vraag het Wolkje" op Vandaag om naar de coach te gaan.
+= Cloudy is de mascotte van Kadans en het gezicht van de coach.
+- Op Vandaag kijkt Cloudy over de advieskaart mee en past zich aan het weer van nu aan: regen, zon, wind, kou of nacht.
+- In de coach is Cloudy het plaatje bij de antwoorden.
+- Je ziet Cloudy ook op lege schermen en bij een record.
+Tik op "vraag Cloudy" op Vandaag om naar de coach te gaan.
 
 # schoenen-bijhouden | Schoenen bijhouden in Kadans | app | mijn schoenen, schoenkilometers, schoen toevoegen, standaardschoen | zie=schoenen-vervangen,schoenen-afwisselen,mijn-gegevens-waar
 ? Hoe houd ik de kilometers van mijn schoenen bij?

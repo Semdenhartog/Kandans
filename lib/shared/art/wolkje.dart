@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/i18n.dart';
 import '../../data/models/models.dart';
@@ -174,13 +176,16 @@ List<List<Color?>> wolkjePixels(WolkjeMood mood, {int stap = 0}) {
 }
 
 class Wolkje extends StatefulWidget {
-  const Wolkje({super.key, this.mood = WolkjeMood.gewoon, this.size = 72, this.animate = true});
+  const Wolkje({super.key, this.mood = WolkjeMood.gewoon, this.size = 72, this.animate = true, this.opensCoach = false});
 
   final WolkjeMood mood;
 
   /// Breedte; de hoogte is 16/18 daarvan.
   final double size;
   final bool animate;
+
+  /// Tikken op Cloudy opent de coach (waar Cloudy los op een scherm staat).
+  final bool opensCoach;
 
   @override
   State<Wolkje> createState() => _WolkjeState();
@@ -231,15 +236,29 @@ class _WolkjeState extends State<Wolkje> {
   Widget build(BuildContext context) {
     final w = widget.size, h = widget.size * _hoog / _breed;
     final wip = _timer != null && _tik.isOdd ? -w / _breed * 0.6 : 0.0;
+    final plaatje = SizedBox(
+      width: w,
+      height: h,
+      child: Transform.translate(
+        offset: Offset(0, wip),
+        child: CustomPaint(painter: _WolkjePainter(wolkjePixels(widget.mood, stap: _stap))),
+      ),
+    );
+    if (!widget.opensCoach) return Semantics(label: tr('Cloudy, je coach'), image: true, child: plaatje);
+    // Ruim tikvlak (minstens 48 px), zodat Cloudy ook klein goed te raken is.
     return Semantics(
-      label: tr('Wolkje, je coach'),
-      image: true,
-      child: SizedBox(
-        width: w,
-        height: h,
-        child: Transform.translate(
-          offset: Offset(0, wip),
-          child: CustomPaint(painter: _WolkjePainter(wolkjePixels(widget.mood, stap: _stap))),
+      label: tr('Vraag Cloudy, je coach'),
+      button: true,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          context.go('/coach');
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          child: Center(child: plaatje),
         ),
       ),
     );
