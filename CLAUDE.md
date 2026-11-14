@@ -221,7 +221,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   (Tempo alleen met streams). Logica `domain/route_anim.dart` (`RoutePath`, `routeProgress`, tempo-stukken), tekening `activities/route_anim_painter.dart`
   (1080×1920 ontwerpmaat, zelfde painter voor voorbeeld en export), encoder `data/services/video_encoder.dart` → kanaal `kadans/video` (`KadansVideo` in
   KadansChannels.kt: MediaCodec H.264 720×1280, 24 fps, RGBA→YUV, mp4 in cache/deel). Instagram-kanaal kreeg `mime` (video/mp4). Stil, niet transparant. Test `test/route_anim_test.dart`.
-  Script voor losse Instagram-video's: `tools/insta/route_anim.py`. Niet op een telefoon getest.
+  **14-11:** foto erachter (kiezen uit galerij, vullend bijgesneden + donkere laag, `RouteAnimData.background`), label/cijfers/logo te verslepen in het voorbeeld
+  (`RouteAnimLayout` in `domain/route_anim.dart`, pref `route_anim_layout`, "Teksten terugzetten"), vloeiender: 30 fps (`routeAnimFps`), lijnen als `RoutePath.fullPath/slicePath`
+  (geen punten kopiëren), gloed met gestapelde doorzichtige lijnen en kleurverloop i.p.v. blur, tekst bewaard (`_cache`), geen `saveLayer`, voorbeeld = één painter met `clock` + `repaint`.
+  Lag nooit op een echt toestel gemeten. Script voor losse Instagram-video's: `tools/insta/route_anim.py`. Niet op een telefoon getest.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
 - **Kadans-stem:** edge function `tts` → **Google Cloud TTS, Chirp 3 HD (nl-NL)**, geheim `GOOGLE_TTS_KEY` (1 mln tekens/maand gratis;
