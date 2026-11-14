@@ -1,13 +1,14 @@
 import 'dart:math' as math;
-import 'dart:ui' show Color, Offset, Rect;
+import 'dart:convert';
+import 'dart:ui' show Color, Offset, Path, PathMetric, Rect, Size;
 
 import 'geo.dart';
 
 /// Stijlen van de bewegende routevideo (ontwerp: canvas "Animaties voor in de app").
 enum RouteAnimStyle { draw, comet, km, pace, echo }
 
-/// Beelden per seconde van de video.
-const routeAnimFps = 24;
+/// Beelden per seconde van de video (30 oogt vloeiender dan 24, vooral bij de komeet).
+const routeAnimFps = 30;
 
 extension RouteAnimStyleX on RouteAnimStyle {
   /// Lengte van de video in seconden. Komeet en echo lopen naadloos rond.
@@ -73,6 +74,33 @@ class RoutePath {
   final List<double> cum;
 
   double get length => cum.last;
+
+  /// De hele lijn als pad, één keer gebouwd (scheelt per beeld het opnieuw opbouwen).
+  late final Path fullPath = _build(points);
+
+  late final PathMetric? _metric = () {
+    final it = fullPath.computeMetrics().iterator;
+    return it.moveNext() ? it.current : null;
+  }();
+
+  static Path _build(List<Offset> pts) {
+    final p = Path();
+    if (pts.isEmpty) return p;
+    p.moveTo(pts.first.dx, pts.first.dy);
+    for (var i = 1; i < pts.length; i++) {
+      p.lineTo(pts[i].dx, pts[i].dy);
+    }
+    return p;
+  }
+
+  /// Pad van afstand [from] tot [to] (beeldpunten), zonder punten te kopiëren.
+  Path slicePath(double from, double to) {
+    final m = _metric;
+    final a = from < 0 ? 0.0 : from;
+    final b = to > length ? length : to;
+    if (m == null || b <= a) return Path();
+    return m.extractPath(a, b > m.length ? m.length : b);
+  }
 
   /// Past [track] in [box] (verhouding blijft kloppen), maakt de lijn glad. Null bij te weinig route.
   static RoutePath? fit(List<LatLng> track, Rect box, {double step = 2, double smoothSigma = 7}) {
@@ -246,4 +274,60 @@ double trackMeters(List<LatLng> p) {
     s += distanceMeters(p[i - 1], p[i]);
   }
   return s;
+}
+
+/// Onderdelen van de video die je kunt verslepen.
+enum RouteAnimPart { label, stats, brand }
+
+/// Verschuiving van de onderdelen t.o.v. hun standaardplek, in ontwerpmaat (1080×1920).
+class RouteAnimLayout {
+  const RouteAnimLayout({this.label = Offset.zero, this.stats = Offset.zero, this.brand = Offset.zero});
+
+  final Offset label;
+  final Offset stats;
+  final Offset brand;
+
+  static const none = RouteAnimLayout();
+  static const frame = Size(1080, 1920);
+
+  bool get isDefault => label == Offset.zero && stats == Offset.zero && brand == Offset.zero;
+
+  Offset of(RouteAnimPart p) => switch (p) {
+        RouteAnimPart.label => label,
+        RouteAnimPart.stats => stats,
+        RouteAnimPart.brand => brand,
+      };
+
+  RouteAnimLayout with_(RouteAnimPart p, Offset v) => switch (p) {
+        RouteAnimPart.label => RouteAnimLayout(label: v, stats: stats, brand: brand),
+        RouteAnimPart.stats => RouteAnimLayout(label: label, stats: v, brand: brand),
+        RouteAnimPart.brand => RouteAnimLayout(label: label, stats: stats, brand: v),
+      };
+
+  /// Schuift [p] met [delta]; [base] is de standaardplek van het onderdeel. Blijft altijd binnen beeld.
+  RouteAnimLayout moved(RouteAnimPart p, Offset delta, Rect base) {
+    final cur = of(p) + delta;
+    final dx = cur.dx.clamp(-base.left, frame.width - base.right).toDouble();
+    final dy = cur.dy.clamp(-base.top, frame.height - base.bottom).toDouble();
+    return with_(p, Offset(dx, dy));
+  }
+
+  String toJson() => jsonEncode([label.dx, label.dy, stats.dx, stats.dy, brand.dx, brand.dy]);
+
+  static RouteAnimLayout fromJson(String? s) {
+    if (s == null) return none;
+    try {
+      final v = (jsonDecode(s) as List).map((e) => (e as num).toDouble()).toList();
+      if (v.length != 6) return none;
+      return RouteAnimLayout(label: Offset(v[0], v[1]), stats: Offset(v[2], v[3]), brand: Offset(v[4], v[5]));
+    } catch (_) {
+      return none;
+    }
+  }
+
+  @override
+  bool operator ==(Object other) => other is RouteAnimLayout && other.label == label && other.stats == stats && other.brand == brand;
+
+  @override
+  int get hashCode => Object.hash(label, stats, brand);
 }

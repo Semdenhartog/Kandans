@@ -5,6 +5,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/config.dart';
@@ -48,6 +50,10 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
   String? _videoPath;
   bool _cancel = false;
   String? _error;
+  ui.Image? _bg;
+  RouteAnimLayout _layout = RouteAnimLayout.none;
+  RouteAnimPart? _drag;
+  static const _layoutKey = 'route_anim_layout';
 
   @override
   void initState() {
@@ -66,6 +72,77 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
       if (mounted) _rebuild();
     });
     _loadLogo();
+    SharedPreferences.getInstance().then((p) {
+      final l = RouteAnimLayout.fromJson(p.getString(_layoutKey));
+      if (mounted && !l.isDefault) {
+        _layout = l;
+        _rebuild();
+      }
+    }).ignore();
+  }
+
+  Future<void> _pickPhoto() async {
+    try {
+      final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600, maxHeight: 2400, imageQuality: 88);
+      if (file == null) return;
+      final codec = await ui.instantiateImageCodec(await file.readAsBytes());
+      final img = (await codec.getNextFrame()).image;
+      if (!mounted) {
+        img.dispose();
+        return;
+      }
+      final old = _bg;
+      _bg = img;
+      _videoPath = null;
+      _rebuild();
+      // Het oude beeld pas loslaten als het scherm het niet meer tekent.
+      WidgetsBinding.instance.addPostFrameCallback((_) => old?.dispose());
+    } catch (_) {
+      if (mounted) showMessage(context, tr('De foto kon niet worden geladen.'), error: true);
+    }
+  }
+
+  void _clearPhoto() {
+    final old = _bg;
+    _bg = null;
+    _videoPath = null;
+    _rebuild();
+    WidgetsBinding.instance.addPostFrameCallback((_) => old?.dispose());
+  }
+
+  void _saveLayout() => SharedPreferences.getInstance().then((p) => p.setString(_layoutKey, _layout.toJson())).ignore();
+
+  RouteAnimPart? _partAt(Offset p) {
+    for (final part in const [RouteAnimPart.brand, RouteAnimPart.label, RouteAnimPart.stats]) {
+      if (RouteAnimPainter.baseRect(_style, part).shift(_layout.of(part)).inflate(30).contains(p)) return part;
+    }
+    return null;
+  }
+
+  void _dragMove(Offset delta) {
+    final part = _drag;
+    final d = _data;
+    if (part == null || d == null) return;
+    setState(() {
+      _layout = _layout.moved(part, delta, RouteAnimPainter.baseRect(_style, part));
+      _data = d.copyWith(layout: _layout);
+    });
+  }
+
+  void _dragEnd() {
+    if (_drag == null) return;
+    setState(() {
+      _drag = null;
+      _videoPath = null;
+    });
+    _saveLayout();
+  }
+
+  void _resetLayout() {
+    _layout = RouteAnimLayout.none;
+    _videoPath = null;
+    _rebuild();
+    _saveLayout();
   }
 
   Future<void> _loadLogo() async {
@@ -83,6 +160,7 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
   void dispose() {
     _cancel = true;
     _ctl.dispose();
+    _bg?.dispose();
     if (_progress != null) VideoEncoder.cancel();
     super.dispose();
   }
@@ -136,6 +214,8 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
           slowPace: slow,
           fastPace: fast,
           logo: _logo,
+          background: _bg,
+          layout: _layout,
         ));
     if (spans.isEmpty && _style == RouteAnimStyle.pace) _setStyle(RouteAnimStyle.draw);
   }
@@ -255,20 +335,37 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
                             borderRadius: BorderRadius.circular(RwRadius.m),
                             child: data == null
                                 ? const ColoredBox(color: Color(0xFF1A1410))
-                                : AnimatedBuilder(
-                                    animation: _ctl,
-                                    builder: (_, __) => CustomPaint(
-                                      painter: RouteAnimPainter(style: _style, data: data, t: _ctl.value * _style.seconds),
-                                      size: Size.infinite,
-                                    ),
-                                  ),
+                                : LayoutBuilder(builder: (_, box) {
+                                    final k = routeAnimDesign.width / box.maxWidth;
+                                    return GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onPanStart: busy ? null : (d) => setState(() => _drag = _partAt(d.localPosition * k)),
+                                      onPanUpdate: busy ? null : (d) => _dragMove(d.delta * k),
+                                      onPanEnd: busy ? null : (_) => _dragEnd(),
+                                      onPanCancel: busy ? null : _dragEnd,
+                                      // Eén painter die zelf meeloopt met de klok: geen nieuwe widgetboom per beeld.
+                                      child: RepaintBoundary(
+                                        child: CustomPaint(
+                                          painter: RouteAnimPainter(
+                                            style: _style,
+                                            data: data,
+                                            clock: () => _ctl.value * _style.seconds,
+                                            repaint: _ctl,
+                                            highlight: _drag,
+                                          ),
+                                          size: Size.infinite,
+                                        ),
+                                      ),
+                                    );
+                                  }),
                           ),
                         ),
                       ),
                     ),
                   ),
+                  Text(tr('Sleep de tekst of het logo om ze te verplaatsen'), style: TextStyle(fontSize: 12, color: RwColors.muted)),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -278,6 +375,17 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
                           selected: {_style},
                           onSelectionChanged: busy ? null : (v) => _setStyle(v.first),
                         ),
+                        Row(children: [
+                          Expanded(
+                            child: TextButton.icon(
+                              onPressed: busy ? null : _pickPhoto,
+                              icon: const Icon(Icons.image_outlined),
+                              label: Text(_bg == null ? tr('Foto erachter') : tr('Andere foto')),
+                            ),
+                          ),
+                          if (_bg != null) Expanded(child: TextButton(onPressed: busy ? null : _clearPhoto, child: Text(tr('Zonder foto')))),
+                          if (!_layout.isDefault) Expanded(child: TextButton(onPressed: busy ? null : _resetLayout, child: Text(tr('Teksten terugzetten')))),
+                        ]),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           value: _hideHome,

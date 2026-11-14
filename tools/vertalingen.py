@@ -1607,6 +1607,12 @@ T.update({
     'Stoppen': ('Stop', 'Stopp', 'Arrêter', 'Parar'),
     'Offline bewaard ({mb})': ('Saved offline ({mb})', 'Offline gespeichert ({mb})', 'Enregistrée hors ligne ({mb})', 'Guardado sin conexión ({mb})'),
     'Kaart offline bewaren (± {mb})': ('Save map offline (± {mb})', 'Karte offline speichern (± {mb})', 'Enregistrer la carte hors ligne (± {mb})', 'Guardar mapa sin conexión (± {mb})'),
+    # Routevideo foto + plaatsen (14-11)
+    'Foto erachter': ('Photo behind', 'Foto dahinter', 'Photo en fond', 'Foto detrás'),
+    'Andere foto': ('Other photo', 'Anderes Foto', 'Autre photo', 'Otra foto'),
+    'Zonder foto': ('No photo', 'Ohne Foto', 'Sans photo', 'Sin foto'),
+    'Teksten terugzetten': ('Reset text', 'Texte zurücksetzen', 'Réinitialiser', 'Restablecer texto'),
+    'Sleep de tekst of het logo om ze te verplaatsen': ('Drag the text or logo to move them', 'Ziehe Text oder Logo, um sie zu verschieben', 'Fais glisser le texte ou le logo pour les déplacer', 'Arrastra el texto o el logo para moverlos'),
     # Routevideo (13-11)
     'Bewegende video van je route': ('Moving video of your route', 'Bewegtes Video deiner Route', 'Vidéo animée de ton parcours', 'Vídeo animado de tu ruta'),
     'Tekenen': ('Draw', 'Zeichnen', 'Tracé', 'Trazar'),
