@@ -82,7 +82,7 @@ class RunSummaryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = activity;
     final records = efforts.where(_isRecord).toList();
-    final splits = streams == null ? const <KmSplit>[] : splitsOf(streams!);
+    final splits = streams == null ? <KmSplit>[] : splitsOf(streams!);
     final ex = extremes(splits);
     final hour = a.startedAt.toLocal().hour;
     final greeting = hour < 12 ? 'Lekker begonnen aan je dag!' : (hour < 18 ? 'Goed gelopen!' : 'Mooi afgesloten!');
@@ -94,20 +94,20 @@ class RunSummaryScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('Run opgeslagen'),
-          actions: [IconButton(tooltip: 'Sluiten', onPressed: () => _close(context), icon: const Icon(Icons.close))],
+          title: Text(tr('Run opgeslagen')),
+          actions: [IconButton(tooltip: tr('Sluiten'), onPressed: () => _close(context), icon: Icon(Icons.close))],
         ),
         body: Stack(children: [
           ListView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
+          padding: EdgeInsets.fromLTRB(20, 4, 20, 32),
           children: [
-            Text(greeting, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800)),
+            Text(greeting, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 28, fontWeight: FontWeight.w800)),
             Text('${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}', style: TextStyle(color: RwColors.subtle)),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Kilometers tellen op tot je afstand.
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: a.distanceMeters / 1000),
-              duration: const Duration(milliseconds: 1400),
+              duration: Duration(milliseconds: 1400),
               curve: Curves.easeOutCubic,
               builder: (_, v, _) => Text(
                 v.toStringAsFixed(2).replaceAll('.', ','),
@@ -120,21 +120,21 @@ class RunSummaryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Text('kilometer', style: TextStyle(color: RwColors.muted, fontSize: 16)),
-            const SizedBox(height: 16),
+            Text(tr('kilometer'), style: TextStyle(color: RwColors.muted, fontSize: 16)),
+            SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(a.movingTimeSeconds))),
-                const SizedBox(width: 8),
-                Expanded(child: StatTile(label: 'Tempo', value: Fmt.pace(a.paceSecondsPerKm).replaceAll(' /km', ''))),
-                const SizedBox(width: 8),
+                Expanded(child: StatTile(label: tr('Tijd'), value: Fmt.duration(a.movingTimeSeconds))),
+                SizedBox(width: 8),
+                Expanded(child: StatTile(label: tr('Tempo'), value: Fmt.pace(a.paceSecondsPerKm).replaceAll(' /km', ''))),
+                SizedBox(width: 8),
                 Expanded(
-                  child: StatTile(label: 'Hartslag', value: a.averageHeartRate == null ? '–' : '${a.averageHeartRate}'),
+                  child: StatTile(label: tr('Hartslag'), value: a.averageHeartRate == null ? '–' : '${a.averageHeartRate}'),
                 ),
               ],
             ),
             if (records.isNotEmpty) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               if (autoCelebrate) _AutoCelebrate(wins: _wins(records), date: a.startedAt),
               GestureDetector(
                 onTap: () => openRecordCelebration(context, _wins(records), date: a.startedAt),
@@ -144,32 +144,32 @@ class RunSummaryScreen extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
                   onPressed: () => openRecordCelebration(context, _wins(records), date: a.startedAt),
-                  icon: const Icon(Icons.ios_share, size: 18),
+                  icon: Icon(Icons.ios_share, size: 18),
                   label: Text(tr('Deel je record')),
                 ),
               ),
             ],
             if (laps.length >= 2) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _LapsCard(laps: laps, indoor: a.distanceMeters <= 0),
             ],
             if (a.id != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _QuickFeel(activityId: a.id!),
             ],
             if (a.routeId != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _PosterTip(routeId: a.routeId!, record: records.isNotEmpty),
             ],
-            const SizedBox(height: 12),
-            const CooldownTip(),
+            SizedBox(height: 12),
+            CooldownTip(),
             const _HomeSafe(),
             if (badges.isNotEmpty) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               NewBadgesBanner(badges: badges),
             ],
             if (a.hasTrack) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               SizedBox(
                 height: 220,
                 child: RouteMap(
@@ -183,21 +183,21 @@ class RunSummaryScreen extends StatelessWidget {
               ),
             ],
             if (efforts.isNotEmpty) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               RwCard(
-                title: 'SNELSTE STUKKEN',
+                title: tr('SNELSTE STUKKEN'),
                 child: Column(
                   children: [
                     for (final b in efforts)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        padding: EdgeInsets.symmetric(vertical: 5),
                         child: Row(
                           children: [
-                            SizedBox(width: 120, child: Text(b.label, style: const TextStyle(fontWeight: FontWeight.w600))),
-                            Expanded(child: Text(Fmt.duration(b.seconds), style: const TextStyle(fontWeight: FontWeight.w700))),
+                            SizedBox(width: 120, child: Text(b.label, style: TextStyle(fontWeight: FontWeight.w600))),
+                            Expanded(child: Text(Fmt.duration(b.seconds), style: TextStyle(fontWeight: FontWeight.w700))),
                             Text(Fmt.pace(b.paceSecPerKm), style: TextStyle(color: RwColors.muted)),
                             if (_isRecord(b)) ...[
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Icon(Icons.emoji_events, color: RwColors.accent, size: 18),
                             ],
                           ],
@@ -208,20 +208,20 @@ class RunSummaryScreen extends StatelessWidget {
               ),
             ],
             if (splits.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               RwCard(
-                title: 'PER KILOMETER',
+                title: tr('PER KILOMETER'),
                 child: Column(
                   children: [
                     for (final sp in splits)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        padding: EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
                             SizedBox(
                               width: 48,
                               child: Text(sp.partial ? (sp.meters / 1000).toStringAsFixed(2).replaceAll('.', ',') : '${sp.index}',
-                                  style: const TextStyle(fontWeight: FontWeight.w600)),
+                                  style: TextStyle(fontWeight: FontWeight.w600)),
                             ),
                             Expanded(
                               child: LayoutBuilder(
@@ -242,11 +242,11 @@ class RunSummaryScreen extends StatelessWidget {
                                 },
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: 10),
                             SizedBox(
                               width: 52,
                               child: Text(Fmt.pace(sp.paceSecPerKm).replaceAll(' /km', ''),
-                                  textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w700)),
+                                  textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w700)),
                             ),
                           ],
                         ),
@@ -255,7 +255,7 @@ class RunSummaryScreen extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _NewRoadsCard(activity: a),
             Builder(builder: (context) {
               final hr = streams?.heartRate;
@@ -269,16 +269,16 @@ class RunSummaryScreen extends StatelessWidget {
                 when: a.startedAt,
               );
               return Padding(
-                padding: const EdgeInsets.only(top: 12),
+                padding: EdgeInsets.only(top: 12),
                 child: RwCard(
-                  title: 'HERSTEL',
+                  title: tr('HERSTEL'),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Icon(Icons.restaurant_outlined, color: RwColors.accent),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(tip.title, style: const TextStyle(fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 4),
+                        Text(tip.title, style: TextStyle(fontWeight: FontWeight.w700)),
+                        SizedBox(height: 4),
                         Text(tip.text, style: TextStyle(color: RwColors.muted, height: 1.45)),
                       ]),
                     ),
@@ -287,21 +287,21 @@ class RunSummaryScreen extends StatelessWidget {
               );
             }),
             if (healthWritten) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
                   Icon(Icons.check_circle_outline, color: RwColors.good, size: 18),
                   SizedBox(width: 8),
-                  Expanded(child: Text('Ook opgeslagen in Health Connect (Samsung Health).', style: TextStyle(color: RwColors.muted))),
+                  Expanded(child: Text(tr('Ook opgeslagen in Health Connect (Samsung Health).'), style: TextStyle(color: RwColors.muted))),
                 ],
               ),
             ],
             if (batteryUsedPct != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.battery_std, color: RwColors.subtle, size: 18),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       batteryUsedPct == 0 ? 'Deze run kostte minder dan 1% accu.' : 'Deze run kostte $batteryUsedPct% accu.',
@@ -311,7 +311,7 @@ class RunSummaryScreen extends StatelessWidget {
                 ],
               ),
             ],
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             // Voorproefje van je deelkaart: tik om te delen.
             if (a.hasTrack)
               RwCard(
@@ -332,43 +332,43 @@ class RunSummaryScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: 14),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Je deelkaart staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                      Text(tr('Je deelkaart staat klaar'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                       SizedBox(height: 2),
-                      Text('Voor Instagram, WhatsApp of je verhaal. Kies kaart, donker, oranje of sticker.',
+                      Text(tr('Voor Instagram, WhatsApp of je verhaal. Kies kaart, donker, oranje of sticker.'),
                           style: TextStyle(color: RwColors.muted, height: 1.35)),
                     ]),
                   ),
                   Icon(Icons.ios_share, color: RwColors.accent),
                 ]),
               ),
-            if (a.hasTrack) const SizedBox(height: 12),
+            if (a.hasTrack) SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                    style: OutlinedButton.styleFrom(minimumSize: Size.fromHeight(52)),
                     onPressed: () => openShareRun(context, a, badges: [for (final r in records) 'Record ${r.label}', for (final b in badges) b.title]),
-                    icon: const Icon(Icons.ios_share),
-                    label: const Text('Delen'),
+                    icon: Icon(Icons.ios_share),
+                    label: Text(tr('Delen')),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
-                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                    style: FilledButton.styleFrom(minimumSize: Size.fromHeight(52)),
                     onPressed: () => _close(context),
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Bekijk run'),
+                    icon: Icon(Icons.arrow_forward),
+                    label: Text(tr('Bekijk run')),
                   ),
                 ),
               ],
             ),
           ],
         ),
-          if (records.isNotEmpty || badges.isNotEmpty) const Positioned.fill(child: IgnorePointer(child: Confetti())),
+          if (records.isNotEmpty || badges.isNotEmpty) Positioned.fill(child: IgnorePointer(child: Confetti())),
         ]),
       ),
     );
@@ -421,7 +421,7 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
   Widget build(BuildContext context) {
     const options = [(1, 'Zwaar', Icons.sentiment_dissatisfied), (2, 'Oké', Icons.sentiment_neutral), (3, 'Top', Icons.sentiment_very_satisfied)];
     return RwCard(
-      title: 'HOE VOELDE HET?',
+      title: tr('HOE VOELDE HET?'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -430,13 +430,13 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
               for (final (v, label, icon) in options)
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 4),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(RwRadius.m),
                       onTap: () => _save(v),
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        duration: Duration(milliseconds: 180),
+                        padding: EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: _feel == v ? RwColors.accent : RwColors.surfaceHigh,
                           borderRadius: BorderRadius.circular(RwRadius.m),
@@ -444,7 +444,7 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                         child: Column(
                           children: [
                             Icon(icon, size: 30, color: _feel == v ? RwColors.accentDark : RwColors.muted),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(label,
                                 style: TextStyle(fontWeight: FontWeight.w700, color: _feel == v ? RwColors.accentDark : RwColors.text)),
                           ],
@@ -455,7 +455,7 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           // Snelle tags: één tik in plaats van typen.
           Wrap(spacing: 6, runSpacing: 6, children: [
             for (final t in _tags)
@@ -482,18 +482,18 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                   ref.invalidate(activitiesProvider);
                   if (t == 'Pijntje' && on && mounted) {
                     final spot = parsePain(_note.text).firstOrNull?.$1;
-                    final runs = await ref.read(activitiesProvider.future).catchError((Object _) => const <Activity>[]);
+                    final runs = await ref.read(activitiesProvider.future).catchError((Object _) => <Activity>[]);
                     final msg = spot == null ? null : painPatternMessage(runs, spot);
                     if (msg != null && mounted) showMessage(context, msg);
                   }
                 },
               ),
           ]),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           TextField(
             controller: _note,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(hintText: 'Notitie (optioneel), bijv. zware benen', isDense: true),
+            decoration: InputDecoration(hintText: tr('Notitie (optioneel), bijv. zware benen'), isDense: true),
             onSubmitted: (_) => _feel == null ? null : _save(_feel!),
           ),
         ],
@@ -517,17 +517,17 @@ class _RecordPlaque extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(1.4),
+        padding: EdgeInsets.all(1.4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(RwRadius.m),
           gradient: _goldGradient,
           boxShadow: [BoxShadow(color: _gold.withValues(alpha: 0.25), blurRadius: 26, spreadRadius: -4)],
         ),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+          padding: EdgeInsets.fromLTRB(18, 16, 18, 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(RwRadius.m),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [Color(0xFF221A0B), Color(0xFF110D06)],
@@ -538,28 +538,28 @@ class _RecordPlaque extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: _goldGradient),
-                child: const Icon(Icons.emoji_events, color: Color(0xFF1C1405), size: 24),
+                decoration: BoxDecoration(shape: BoxShape.circle, gradient: _goldGradient),
+                child: Icon(Icons.emoji_events, color: Color(0xFF1C1405), size: 24),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(records.length == 1 ? 'NIEUW RECORD' : '${records.length} NIEUWE RECORDS',
-                      style: const TextStyle(color: _gold, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.8)),
-                  Text('Persoonlijk beste', style: TextStyle(fontFamily: RwFonts.display, fontSize: 18, fontWeight: FontWeight.w800, color: rwZandAvond.text)),
+                      style: TextStyle(color: _gold, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.8)),
+                  Text(tr('Persoonlijk beste'), style: TextStyle(fontFamily: RwFonts.display, fontSize: 18, fontWeight: FontWeight.w800, color: rwZandAvond.text)),
                 ]),
               ),
             ]),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             for (final (i, r) in records.indexed) ...[
               if (i > 0) Container(height: 1, color: _gold.withValues(alpha: 0.14)),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: EdgeInsets.symmetric(vertical: 8),
                 child: Row(children: [
                   // Altijd donker-goud: tekst expliciet licht (anders onleesbaar als de app licht staat).
                   Expanded(child: Text(r.label, style: TextStyle(fontWeight: FontWeight.w600, color: rwZandAvond.text))),
                   Text(Fmt.duration(r.seconds),
-                      style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFF2D892))),
+                      style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFF2D892))),
                 ]),
               ),
             ],
@@ -591,12 +591,12 @@ class _HomeSafeState extends State<_HomeSafe> {
   @override
   Widget build(BuildContext context) {
     final c = _c;
-    if (c == null) return const SizedBox.shrink();
+    if (c == null) return SizedBox.shrink();
     final who = c.name.isEmpty ? 'je noodcontact' : c.name;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: 12),
       child: OutlinedButton.icon(
-        icon: const Icon(Icons.home_outlined),
+        icon: Icon(Icons.home_outlined),
         label: Text('Laat $who weten dat je thuis bent'),
         onPressed: () async {
           HapticFeedback.selectionClick();
@@ -621,28 +621,28 @@ class _NewRoadsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final poly = activity.trackPolyline;
-    if (poly == null || poly.isEmpty) return const SizedBox.shrink();
+    if (poly == null || poly.isEmpty) return SizedBox.shrink();
     final runs = ref.watch(activitiesProvider).value;
-    if (runs == null) return const SizedBox.shrink();
+    if (runs == null) return SizedBox.shrink();
     final previous = [
       for (final r in runs)
         if (r.id != activity.id && r.hasTrack && r.startedAt.isBefore(activity.startedAt)) decodePolyline(r.trackPolyline!),
     ];
     // Bij je eerste runs is alles nieuw: dan zeggen we nog niets.
-    if (previous.length < 3) return const SizedBox.shrink();
+    if (previous.length < 3) return SizedBox.shrink();
     final m = newRoadMeters(decodePolyline(poly), previous);
-    if (m < 200) return const SizedBox.shrink();
+    if (m < 200) return SizedBox.shrink();
     final share = activity.distanceMeters <= 0 ? 0 : (m / activity.distanceMeters * 100).round().clamp(0, 100);
     return RwCard(
       title: m >= 1000 ? 'ONTDEKKER' : 'NIEUWE WEGEN',
       child: Row(children: [
         Icon(Icons.explore, color: RwColors.accent),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: Text(
             'Je liep ${Fmt.km(m, decimals: 1)} over wegen waar je nog nooit eerder liep ($share% van deze run).'
             '${m >= 1000 ? ' Echte ontdekker!' : ''}',
-            style: const TextStyle(height: 1.4),
+            style: TextStyle(height: 1.4),
           ),
         ),
       ]),
@@ -664,7 +664,7 @@ class _LapsCard extends StatelessWidget {
       child: Column(children: [
         for (final (i, l) in laps.indexed)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5),
+            padding: EdgeInsets.symmetric(vertical: 5),
             child: Row(children: [
               SizedBox(width: 34, child: Text('${i + 1}', style: TextStyle(color: RwColors.subtle))),
               Expanded(
@@ -679,7 +679,7 @@ class _LapsCard extends StatelessWidget {
               ),
               if (!indoor && l.meters > 50) ...[
                 Text(Fmt.km(l.meters, decimals: 2), style: TextStyle(color: RwColors.muted)),
-                const SizedBox(width: 14),
+                SizedBox(width: 14),
                 SizedBox(
                   width: 64,
                   child: Text('${Fmt.pace(l.seconds / (l.meters / 1000))}/km',
@@ -702,23 +702,23 @@ class _PosterTip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final route = (ref.watch(routesProvider).value ?? const <RunRoute>[]).where((r) => r.id == routeId).firstOrNull;
-    if (route == null || route.polyline.isEmpty) return const SizedBox.shrink();
-    final runs = (ref.watch(activitiesProvider).value ?? const <Activity>[]).where((x) => x.routeId == routeId).toList();
+    final route = (ref.watch(routesProvider).value ?? <RunRoute>[]).where((r) => r.id == routeId).firstOrNull;
+    if (route == null || route.polyline.isEmpty) return SizedBox.shrink();
+    final runs = (ref.watch(activitiesProvider).value ?? <Activity>[]).where((x) => x.routeId == routeId).toList();
     final n = runs.length;
     const milestones = {1, 10, 25, 50, 100};
-    if (!record && !milestones.contains(n)) return const SizedBox.shrink();
+    if (!record && !milestones.contains(n)) return SizedBox.shrink();
     final fastest = runs.isEmpty ? null : runs.map((x) => x.movingTimeSeconds).reduce((x, y) => x < y ? x : y);
     final why = record ? 'Nieuw record op ${route.name}.' : (n == 1 ? 'Je eerste keer op ${route.name}.' : 'Al $n keer ${route.name} gelopen.');
     return RwCard(
       onTap: () => openRoutePoster(context, route, fastestSeconds: fastest, timesRun: n),
       child: Row(children: [
         Icon(Icons.image_outlined, color: RwColors.accent),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Zet hem aan de muur', style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
+            Text(tr('Zet hem aan de muur'), style: TextStyle(fontWeight: FontWeight.w700)),
+            SizedBox(height: 2),
             Text('$why Maak er een poster van, met je snelste tijd erop.',
                 style: TextStyle(color: RwColors.muted, fontSize: 13, height: 1.35)),
           ]),
@@ -744,12 +744,12 @@ class _AutoCelebrateState extends State<_AutoCelebrate> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(const Duration(milliseconds: 900), () {
+      Future<void>.delayed(Duration(milliseconds: 900), () {
         if (mounted && ModalRoute.of(context)?.isCurrent == true) openRecordCelebration(context, widget.wins, date: widget.date);
       });
     });
   }
 
   @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
+  Widget build(BuildContext context) => SizedBox.shrink();
 }
