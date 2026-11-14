@@ -89,10 +89,10 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
     messenger.hideCurrentSnackBar();
     var undone = false;
     final bar = messenger.showSnackBar(SnackBar(
-      duration: const Duration(seconds: 5),
+      duration: Duration(seconds: 5),
       content: Text('Run van ${Fmt.date(a.startedAt)} verwijderd'),
       action: SnackBarAction(
-        label: 'Ongedaan maken',
+        label: tr('Ongedaan maken'),
         onPressed: () {
           undone = true;
           if (mounted) setState(() => _hidden.remove(id));
@@ -115,15 +115,15 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
   }
 
   Future<void> _export(bool gpx) async {
-    final all = ref.read(activitiesProvider).value ?? const <Activity>[];
+    final all = ref.read(activitiesProvider).value ?? <Activity>[];
     // Strava-runs exporteer je in Strava zelf; hier alleen je eigen runs.
     final runs = all.where((a) => a.source != 'strava').toList();
     if (runs.isEmpty) {
       showMessage(context, 'Er zijn nog geen eigen runs om te exporteren.');
       return;
     }
-    final shoes = {for (final s in ref.read(shoesProvider).value ?? const <Shoe>[]) if (s.id != null) s.id!: s.name};
-    final routes = {for (final r in ref.read(routesProvider).value ?? const <RunRoute>[]) if (r.id != null) r.id!: r.name};
+    final shoes = {for (final s in ref.read(shoesProvider).value ?? <Shoe>[]) if (s.id != null) s.id!: s.name};
+    final routes = {for (final r in ref.read(routesProvider).value ?? <RunRoute>[]) if (r.id != null) r.id!: r.name};
     final date = DateTime.now().toIso8601String().substring(0, 10);
     final String text, name, mime;
     if (gpx) {
@@ -167,7 +167,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
       final run = plain.endsWith('.gpx') && !lower.endsWith('.gz')
           ? parseRunFile(utf8.decode(bytes, allowMalformed: true))
           : parseStravaArchiveFile(lower, bytes);
-      final existing = ref.read(activitiesProvider).value ?? const <Activity>[];
+      final existing = ref.read(activitiesProvider).value ?? <Activity>[];
       if (existing.any((a) => a.startedAt.difference(run.start).inMinutes.abs() < 20)) {
         if (mounted) showMessage(context, 'Deze run staat er al in (rond hetzelfde tijdstip).');
         return;
@@ -176,7 +176,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
       HourWeather? w;
       final first = run.track.isNotEmpty ? run.track.first : null;
       if (first != null) w = await ref.read(weatherServiceProvider).historical(first.lat, first.lon, run.start);
-      final shoes = ref.read(shoesProvider).value ?? const <Shoe>[];
+      final shoes = ref.read(shoesProvider).value ?? <Shoe>[];
       final repo = ref.read(repositoryProvider);
       final id = await repo.addActivityReturningId(Activity(
         startedAt: run.start,
@@ -232,18 +232,18 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             ? TextField(
                 autofocus: true,
                 textInputAction: TextInputAction.search,
-                decoration: const InputDecoration(
-                  hintText: 'Zoek op naam, route, notitie of datum',
+                decoration: InputDecoration(
+                  hintText: tr('Zoek op naam, route, notitie of datum'),
                   filled: false,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
                 ),
-                style: const TextStyle(fontSize: 17),
+                style: TextStyle(fontSize: 17),
                 onChanged: (v) => setState(() => _query = v),
               )
-            : const Text('Logboek'),
+            : Text(tr('Logboek')),
         actions: [
           IconButton(
             tooltip: _searching ? 'Zoeken sluiten' : 'Zoeken',
@@ -259,17 +259,17 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             icon: Badge(
               isLabelVisible: active > 0,
               label: Text('$active'),
-              child: const Icon(Icons.filter_list),
+              child: Icon(Icons.filter_list),
             ),
             onPressed: _openFilter,
           ),
           IconButton(
-            tooltip: 'Doelen, badges en records',
-            icon: const Icon(Icons.emoji_events_outlined),
+            tooltip: tr('Doelen, badges en records'),
+            icon: Icon(Icons.emoji_events_outlined),
             onPressed: () => openGoals(context),
           ),
           PopupMenuButton<String>(
-            tooltip: 'Meer',
+            tooltip: tr('Meer'),
             onSelected: (v) {
               switch (v) {
                 case 'coach':
@@ -309,36 +309,36 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
               // Ontgrendelen: vorm en records na 5 runs, heatmap en jaaroverzicht na 20.
               final n = ref.read(activitiesProvider).value?.length ?? 0;
               return [
-              const PopupMenuItem(value: 'coach', child: ListTile(leading: Icon(Icons.auto_awesome_outlined), title: Text('Vraag de coach'))),
-              const PopupMenuDivider(),
-              if (n >= 5) const PopupMenuItem(value: 'form', child: ListTile(leading: Icon(Icons.monitor_heart_outlined), title: Text('Vorm'))),
-              if (n >= 5) const PopupMenuItem(value: 'records', child: ListTile(leading: Icon(Icons.timer_outlined), title: Text('Mijn records'))),
-              const PopupMenuItem(value: 'shoes', child: ListTile(leading: Icon(Icons.directions_run), title: Text('Mijn schoenen'))),
-              const PopupMenuItem(value: 'pain', child: ListTile(leading: Icon(Icons.healing_outlined), title: Text('Pijntjes'))),
-              const PopupMenuItem(value: 'strength', child: ListTile(leading: Icon(Icons.fitness_center), title: Text('Kracht en mobiliteit'))),
-              const PopupMenuDivider(),
-              const PopupMenuItem(value: 'calendar', child: ListTile(leading: Icon(Icons.calendar_month_outlined), title: Text('Kalender'))),
-              if (n >= 20) const PopupMenuItem(value: 'heatmap', child: ListTile(leading: Icon(Icons.map_outlined), title: Text('Mijn heatmap'))),
-              const PopupMenuItem(value: 'photos', child: ListTile(leading: Icon(Icons.photo_library_outlined), title: Text('Fotomuur'))),
-              if (n >= 20) const PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text('Jaaroverzicht'))),
-              const PopupMenuDivider(),
-              const PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text('Run met de hand toevoegen'))),
-              const PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text('Run importeren (GPX/TCX/FIT)'))),
-              const PopupMenuItem(value: 'archive', child: ListTile(leading: Icon(Icons.folder_zip_outlined), title: Text('Strava-archief importeren'))),
-              const PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text('Exporteer runs (CSV)'))),
-              const PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text('Exporteer GPS-sporen (GPX)'))),
+              PopupMenuItem(value: 'coach', child: ListTile(leading: Icon(Icons.auto_awesome_outlined), title: Text(tr('Vraag de coach')))),
+              PopupMenuDivider(),
+              if (n >= 5) PopupMenuItem(value: 'form', child: ListTile(leading: Icon(Icons.monitor_heart_outlined), title: Text(tr('Vorm')))),
+              if (n >= 5) PopupMenuItem(value: 'records', child: ListTile(leading: Icon(Icons.timer_outlined), title: Text(tr('Mijn records')))),
+              PopupMenuItem(value: 'shoes', child: ListTile(leading: Icon(Icons.directions_run), title: Text(tr('Mijn schoenen')))),
+              PopupMenuItem(value: 'pain', child: ListTile(leading: Icon(Icons.healing_outlined), title: Text(tr('Pijntjes')))),
+              PopupMenuItem(value: 'strength', child: ListTile(leading: Icon(Icons.fitness_center), title: Text(tr('Kracht en mobiliteit')))),
+              PopupMenuDivider(),
+              PopupMenuItem(value: 'calendar', child: ListTile(leading: Icon(Icons.calendar_month_outlined), title: Text(tr('Kalender')))),
+              if (n >= 20) PopupMenuItem(value: 'heatmap', child: ListTile(leading: Icon(Icons.map_outlined), title: Text(tr('Mijn heatmap')))),
+              PopupMenuItem(value: 'photos', child: ListTile(leading: Icon(Icons.photo_library_outlined), title: Text(tr('Fotomuur')))),
+              if (n >= 20) PopupMenuItem(value: 'year', child: ListTile(leading: Icon(Icons.insights), title: Text(tr('Jaaroverzicht')))),
+              PopupMenuDivider(),
+              PopupMenuItem(value: 'new', child: ListTile(leading: Icon(Icons.edit_note), title: Text(tr('Run met de hand toevoegen')))),
+              PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_open_outlined), title: Text(tr('Run importeren (GPX/TCX/FIT)')))),
+              PopupMenuItem(value: 'archive', child: ListTile(leading: Icon(Icons.folder_zip_outlined), title: Text(tr('Strava-archief importeren')))),
+              PopupMenuItem(value: 'csv', child: ListTile(leading: Icon(Icons.table_view_outlined), title: Text(tr('Exporteer runs (CSV)')))),
+              PopupMenuItem(value: 'gpx', child: ListTile(leading: Icon(Icons.route_outlined), title: Text(tr('Exporteer GPS-sporen (GPX)')))),
             ];
             },
           ),
-          const MeButton(),
+          MeButton(),
         ],
       ),
       body: Column(children: [
-        const FirstTip(id: 'runs', icon: Icons.directions_run, text: 'Hier staan al je runs. Tik op een run voor kaart, tussentijden en weer. Houd een run ingedrukt om hem te delen of te verwijderen.'),
+        FirstTip(id: 'runs', icon: Icons.directions_run, text: 'Hier staan al je runs. Tik op een run voor kaart, tussentijden en weer. Houd een run ingedrukt om hem te delen of te verwijderen.'),
         Expanded(child: FabScrollWatcher(
         extended: _fabExtended,
         child: activities.when(
-        loading: () => const LoadingView(),
+        loading: () => LoadingView(),
         error: (e, _) => ErrorView(
           message: friendlyError(e),
           onRetry: () => ref.invalidate(activitiesProvider),
@@ -347,14 +347,14 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
           if (list.isEmpty) {
             return EmptyState(
               icon: Icons.directions_run,
-              title: 'Nog geen runs',
-              message: 'Neem een run op met de ronde knop onderin, voeg er een met de hand toe of koppel je horloge of Strava (Ik, rechtsboven). Na 8 runs leert Kadans bij welk weer jij het snelst loopt.',
-              actionLabel: 'Eerste run toevoegen',
+              title: tr('Nog geen runs'),
+              message: tr('Neem een run op met de ronde knop onderin, voeg er een met de hand toe of koppel je horloge of Strava (Ik, rechtsboven). Na 8 runs leert Kadans bij welk weer jij het snelst loopt.'),
+              actionLabel: tr('Eerste run toevoegen'),
               onAction: () => context.go('/runs/new'),
             );
           }
           final q = _query.trim().toLowerCase();
-          final routeList = ref.watch(routesProvider).value ?? const <RunRoute>[];
+          final routeList = ref.watch(routesProvider).value ?? <RunRoute>[];
           final routesById = {for (final r in routeList) if (r.id != null) r.id!: r};
           final shown = _filter.apply(list).where((a) {
             if (_hidden.contains(a.id)) return false;
@@ -370,7 +370,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             return q.split(' ').where((w) => w.isNotEmpty).every(hay.contains);
           }).toList();
           final km = shown.fold<double>(0, (s, a) => s + a.distanceMeters);
-          final routeNames = {for (final r in ref.watch(routesProvider).value ?? const <RunRoute>[]) if (r.id != null) r.id!: r.name};
+          final routeNames = {for (final r in ref.watch(routesProvider).value ?? <RunRoute>[]) if (r.id != null) r.id!: r.name};
           // Runs per week, met een kopje per week.
           final rows = <Object>[];
           DateTime? week;
@@ -395,16 +395,16 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
             },
             child: ListView.separated(
               controller: _listCtrl,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+              physics: AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 100),
               itemCount: rows.length + 2,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              separatorBuilder: (_, _) => SizedBox(height: 8),
               itemBuilder: (context, i) => StaggerIn(index: i, since: _since, child: Builder(builder: (context) {
-                if (i == 0) return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [const SeasonBanner(), const SizedBox(height: 8), _Overview(activities: list)]);
+                if (i == 0) return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [SeasonBanner(), SizedBox(height: 8), _Overview(activities: list)]);
                 if (i == 1) {
-                  if (_filter.isEmpty) return const SizedBox.shrink();
+                  if (_filter.isEmpty) return SizedBox.shrink();
                   return Padding(
-                    padding: const EdgeInsets.only(top: 6),
+                    padding: EdgeInsets.only(top: 6),
                     child: Row(
                       children: [
                         Expanded(
@@ -416,7 +416,7 @@ class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
                           ),
                         ),
                         if (!_filter.isEmpty)
-                          TextButton(onPressed: () => setState(() => _filter = const RunFilter()), child: const Text('Wis filters')),
+                          TextButton(onPressed: () => setState(() => _filter = const RunFilter()), child: Text(tr('Wis filters'))),
                       ],
                     ),
                   );
@@ -473,7 +473,7 @@ class _OverviewState extends ConsumerState<_Overview> {
     // Gemiddelde van de laatste 4 hele weken, voor de voorstellen.
     final now = DateTime.now();
     final weekStart = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
-    final from = weekStart.subtract(const Duration(days: 28));
+    final from = weekStart.subtract(Duration(days: 28));
     final avg = widget.activities
             .where((a) => !a.startedAt.toLocal().isBefore(from) && a.startedAt.toLocal().isBefore(weekStart))
             .fold<double>(0, (t, a) => t + a.distanceMeters / 1000) /
@@ -484,24 +484,24 @@ class _OverviewState extends ConsumerState<_Overview> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
-          title: const Text('Weekdoel'),
+          title: Text(tr('Weekdoel')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Hoeveel kilometer wil je per week lopen?', style: TextStyle(color: RwColors.muted)),
-              const SizedBox(height: 12),
+              Text(tr('Hoeveel kilometer wil je per week lopen?'), style: TextStyle(color: RwColors.muted)),
+              SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(tooltip: '1 kilometer minder', onPressed: () => set(() => km = (km - 1).clamp(1, 300)), icon: const Icon(Icons.remove_circle_outline)),
-                  Text('$km km', style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 30, fontWeight: FontWeight.w800)),
-                  IconButton(tooltip: '1 kilometer meer', onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: const Icon(Icons.add_circle_outline)),
+                  IconButton(tooltip: tr('1 kilometer minder'), onPressed: () => set(() => km = (km - 1).clamp(1, 300)), icon: Icon(Icons.remove_circle_outline)),
+                  Text('$km km', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 30, fontWeight: FontWeight.w800)),
+                  IconButton(tooltip: tr('1 kilometer meer'), onPressed: () => set(() => km = (km + 1).clamp(1, 300)), icon: Icon(Icons.add_circle_outline)),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(avg >= 3 ? 'Je liep de laatste 4 weken gemiddeld ${avg.toStringAsFixed(1).replaceAll('.', ',')} km. Voorstellen:' : 'Voorstellen om mee te beginnen:',
                   textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Wrap(spacing: 8, alignment: WrapAlignment.center, children: [
                 for (final (i, g) in ideas.indexed)
                   ChoiceChip(
@@ -516,8 +516,8 @@ class _OverviewState extends ConsumerState<_Overview> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, 0), child: const Text('Geen doel')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, km), child: const Text('Opslaan')),
+            TextButton(onPressed: () => Navigator.pop(ctx, 0), child: Text(tr('Geen doel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, km), child: Text(tr('Opslaan'))),
           ],
         ),
       ),
@@ -561,13 +561,13 @@ class _OverviewState extends ConsumerState<_Overview> {
           Row(
             children: [
               Expanded(
-                child: Text('DEZE WEEK',
+                child: Text(tr('DEZE WEEK'),
                     style: RwText.overline),
               ),
               Text(Fmt.km(weekKm * 1000, decimals: 1), style: TextStyle(fontWeight: FontWeight.w700, color: RwColors.accent)),
             ],
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Semantics(
             label: 'Deze week: ${[for (final d in strip) if (d.runs > 0) '${_days[d.date.weekday - 1]} ${d.km.toStringAsFixed(1)} km'].join(', ')}.',
             excludeSemantics: true,
@@ -582,7 +582,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                                 fontSize: 11,
                                 color: d.isToday ? RwColors.text : RwColors.subtle,
                                 fontWeight: d.isToday ? FontWeight.w700 : FontWeight.w400)),
-                        const SizedBox(height: 5),
+                        SizedBox(height: 5),
                         Container(
                           width: 38,
                           height: 38,
@@ -617,14 +617,14 @@ class _OverviewState extends ConsumerState<_Overview> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (_goalKm == null)
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: _setGoal,
-                icon: const Icon(Icons.flag_outlined, size: 18),
-                label: const Text('Stel een weekdoel in'),
+                icon: Icon(Icons.flag_outlined, size: 18),
+                label: Text(tr('Stel een weekdoel in')),
               ),
             )
           else
@@ -632,7 +632,7 @@ class _OverviewState extends ConsumerState<_Overview> {
               onTap: _setGoal,
               borderRadius: BorderRadius.circular(RwRadius.s),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
+                padding: EdgeInsets.symmetric(vertical: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -643,7 +643,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                             weekKm >= _goalKm!
                                 ? 'Weekdoel gehaald! ${Fmt.km(weekKm * 1000, decimals: 1)} van ${_goalKm!.round()} km'
                                 : 'Weekdoel: ${Fmt.km(weekKm * 1000, decimals: 1)} van ${_goalKm!.round()} km',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                            style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                         Text(
@@ -652,7 +652,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(RwRadius.s),
                       child: LinearProgressIndicator(
@@ -667,32 +667,32 @@ class _OverviewState extends ConsumerState<_Overview> {
               ),
             ),
           if (streak >= 2) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Icon(Icons.local_fire_department, color: RwColors.accent, size: 20),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                       '$streak weken op rij gelopen${pausedNow ? '. Je reeks staat stil tijdens je pauze.' : strip.every((d) => d.runs == 0) ? '. Loop deze week om je reeks te houden.' : '.'}',
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                      style: TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
           ],
           if (msg != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(check.tooFast ? Icons.warning_amber_rounded : Icons.info_outline,
                     color: check.tooFast ? RwColors.warning : RwColors.muted, size: 20),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(child: Text(msg, style: TextStyle(color: RwColors.muted, height: 1.4))),
               ],
             ),
           ],
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           // Slanke doorklikregel i.p.v. een grote knop: rustiger in de weekkaart.
           InkWell(
             borderRadius: BorderRadius.circular(RwRadius.m),
@@ -702,35 +702,35 @@ class _OverviewState extends ConsumerState<_Overview> {
               child: Row(children: [
                 Icon(Icons.show_chart, color: RwColors.accent, size: 20),
                 SizedBox(width: 10),
-                Expanded(child: Text('Fitheid en vorm', style: TextStyle(fontWeight: FontWeight.w600))),
+                Expanded(child: Text(tr('Fitheid en vorm'), style: TextStyle(fontWeight: FontWeight.w600))),
                 Icon(Icons.chevron_right, color: RwColors.subtle),
               ]),
             ),
           ),
-          const KadansEffectRow(),
-          const Divider(height: 20),
+          KadansEffectRow(),
+          Divider(height: 20),
           RwSegmented<Period>(
-            items: const [
-              (value: Period.week, label: 'Week', icon: null),
-              (value: Period.month, label: 'Maand', icon: null),
-              (value: Period.year, label: 'Jaar', icon: null),
+            items: [
+              (value: Period.week, label: tr('Week'), icon: null),
+              (value: Period.month, label: tr('Maand'), icon: null),
+              (value: Period.year, label: tr('Jaar'), icon: null),
             ],
             selected: _period,
             onChanged: (p) => setState(() => _period = p),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(cur.km * 1000, decimals: cur.km >= 100 ? 0 : 1))),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Runs', value: '${cur.runs}')),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(cur.seconds))),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Tempo', value: cur.paceSecPerKm <= 0 ? '–' : Fmt.pace(cur.paceSecPerKm).replaceAll(' /km', ''))),
+              Expanded(child: StatTile(label: tr('Afstand'), value: Fmt.km(cur.km * 1000, decimals: cur.km >= 100 ? 0 : 1))),
+              SizedBox(width: 8),
+              Expanded(child: StatTile(label: tr('Runs'), value: '${cur.runs}')),
+              SizedBox(width: 8),
+              Expanded(child: StatTile(label: tr('Tijd'), value: Fmt.duration(cur.seconds))),
+              SizedBox(width: 8),
+              Expanded(child: StatTile(label: tr('Tempo'), value: cur.paceSecPerKm <= 0 ? '–' : Fmt.pace(cur.paceSecPerKm).replaceAll(' /km', ''))),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Semantics(
             label: 'Kilometers per ${_period == Period.week ? 'week' : _period == Period.month ? 'maand' : 'jaar'}: '
                 '${totals.map((w) => w.km.round()).join(', ')}. Laatste is $periodWord.',
@@ -744,7 +744,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                   for (final (i, w) in totals.indexed)
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                        padding: EdgeInsets.symmetric(horizontal: 2.5),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -755,7 +755,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                                       color: i == totals.length - 1 ? RwColors.accent : RwColors.subtle,
                                       fontWeight: FontWeight.w600)),
                             ),
-                            const SizedBox(height: 3),
+                            SizedBox(height: 3),
                             // Groeit bij openen omhoog; huidige periode in oranje verloop met gloed.
                             TweenAnimationBuilder<double>(
                               key: ValueKey('$_period$i'),
@@ -779,7 +779,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             FittedBox(
                               child: Text(_barLabel(w, i == totals.length - 1),
                                   style: TextStyle(fontSize: 10, color: RwColors.subtle)),
@@ -818,22 +818,22 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   };
 
   Widget _label(String t) => Padding(
-        padding: const EdgeInsets.only(top: 16, bottom: 8),
+        padding: EdgeInsets.only(top: 16, bottom: 8),
         child: Text(t, style: RwText.overline),
       );
 
   @override
   Widget build(BuildContext context) {
-    final routes = ref.watch(routesProvider).value ?? const <RunRoute>[];
-    final shoes = ref.watch(shoesProvider).value ?? const <Shoe>[];
+    final routes = ref.watch(routesProvider).value ?? <RunRoute>[];
+    final shoes = ref.watch(shoesProvider).value ?? <Shoe>[];
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Runs filteren', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
+              Text(tr('Runs filteren'), style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800)),
               _label('AFSTAND'),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 for (final b in DistanceBand.values)
@@ -841,7 +841,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
               ]),
               _label('BRON'),
               Wrap(spacing: 8, runSpacing: 8, children: [
-                ChoiceChip(label: const Text('Alles'), selected: _f.source == null, onSelected: (_) => setState(() => _f = _f.copyWith(source: () => null))),
+                ChoiceChip(label: Text(tr('Alles')), selected: _f.source == null, onSelected: (_) => setState(() => _f = _f.copyWith(source: () => null))),
                 for (final e in _sources.entries)
                   ChoiceChip(label: Text(e.value), selected: _f.source == e.key, onSelected: (_) => setState(() => _f = _f.copyWith(source: () => e.key))),
               ]),
@@ -850,9 +850,9 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                 DropdownButtonFormField<String?>(
                   initialValue: routes.any((r) => r.id == _f.routeId) ? _f.routeId : null,
                   isExpanded: true,
-                  decoration: const InputDecoration(isDense: true),
+                  decoration: InputDecoration(isDense: true),
                   items: [
-                    const DropdownMenuItem<String?>(value: null, child: Text('Alle routes')),
+                    DropdownMenuItem<String?>(value: null, child: Text(tr('Alle routes'))),
                     for (final r in routes) DropdownMenuItem<String?>(value: r.id, child: Text(r.name, overflow: TextOverflow.ellipsis)),
                   ],
                   onChanged: (v) => setState(() => _f = _f.copyWith(routeId: () => v)),
@@ -863,37 +863,37 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                 DropdownButtonFormField<String?>(
                   initialValue: shoes.any((s) => s.id == _f.shoeId) ? _f.shoeId : null,
                   isExpanded: true,
-                  decoration: const InputDecoration(isDense: true),
+                  decoration: InputDecoration(isDense: true),
                   items: [
-                    const DropdownMenuItem<String?>(value: null, child: Text('Alle schoenen')),
+                    DropdownMenuItem<String?>(value: null, child: Text(tr('Alle schoenen'))),
                     for (final s in shoes) DropdownMenuItem<String?>(value: s.id, child: Text(s.name, overflow: TextOverflow.ellipsis)),
                   ],
                   onChanged: (v) => setState(() => _f = _f.copyWith(shoeId: () => v)),
                 ),
               ],
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Alleen met veel wind'),
-                subtitle: const Text('20 km/u of meer'),
+                title: Text(tr('Alleen met veel wind')),
+                subtitle: Text(tr('20 km/u of meer')),
                 value: _f.windyOnly,
                 onChanged: (v) => setState(() => _f = _f.copyWith(windyOnly: v)),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Alleen met gevoel of notitie'),
+                title: Text(tr('Alleen met gevoel of notitie')),
                 value: _f.withNote,
                 onChanged: (v) => setState(() => _f = _f.copyWith(withNote: v)),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(onPressed: () => Navigator.pop(context, const RunFilter()), child: const Text('Wissen')),
+                    child: OutlinedButton(onPressed: () => Navigator.pop(context, RunFilter()), child: Text(tr('Wissen'))),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
-                    child: FilledButton(onPressed: () => Navigator.pop(context, _f), child: const Text('Toon runs')),
+                    child: FilledButton(onPressed: () => Navigator.pop(context, _f), child: Text(tr('Toon runs'))),
                   ),
                 ],
               ),
@@ -928,27 +928,27 @@ class _ActivityTile extends StatelessWidget {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
-            leading: const Icon(Icons.open_in_new),
-            title: const Text('Openen'),
+            leading: Icon(Icons.open_in_new),
+            title: Text(tr('Openen')),
             onTap: () => Navigator.pop(ctx, 'open'),
           ),
           if (onRunAgain != null)
             ListTile(
               leading: Icon(Icons.replay, color: RwColors.accent),
               title: Text('Loop ${routeName ?? 'deze route'} opnieuw'),
-              subtitle: const Text('Met de route op je scherm en tegen je record'),
+              subtitle: Text(tr('Met de route op je scherm en tegen je record')),
               onTap: () => Navigator.pop(ctx, 'again'),
             ),
           if (onShare != null)
             ListTile(
-              leading: const Icon(Icons.ios_share),
-              title: const Text('Delen'),
+              leading: Icon(Icons.ios_share),
+              title: Text(tr('Delen')),
               onTap: () => Navigator.pop(ctx, 'share'),
             ),
           ListTile(
             leading: Icon(Icons.delete_outline, color: RwColors.danger),
-            title: Text('Verwijderen', style: TextStyle(color: RwColors.danger)),
-            subtitle: const Text('Je kunt het nog 5 seconden ongedaan maken'),
+            title: Text(tr('Verwijderen'), style: TextStyle(color: RwColors.danger)),
+            subtitle: Text(tr('Je kunt het nog 5 seconden ongedaan maken')),
             onTap: () => Navigator.pop(ctx, 'delete'),
           ),
         ]),
@@ -984,19 +984,19 @@ class _ActivityTile extends StatelessWidget {
         onTap: onTap,
         onLongPress: () => _menu(context),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12),
           child: Row(
             children: [
               Container(
                 width: 64,
                 height: 64,
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(color: RwColors.surfaceHigh, borderRadius: BorderRadius.circular(RwRadius.m)),
                 child: a.hasTrack
                     ? RouteShape(polyline: a.trackPolyline!, strokeWidth: 2.2)
                     : Icon(sourceIcon, color: RwColors.accent, size: 28),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1005,7 +1005,7 @@ class _ActivityTile extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(runTitle(a, routeName: routeName),
-                              maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                              maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                         ),
                         if (a.feel != null)
                           Icon(
@@ -1017,7 +1017,7 @@ class _ActivityTile extends StatelessWidget {
                     ),
                     Text('${Fmt.date(a.startedAt)} · ${Fmt.time(a.startedAt)}${weather.isEmpty ? '' : ' · $weather'}',
                         maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
@@ -1032,7 +1032,7 @@ class _ActivityTile extends StatelessWidget {
                     // Eerlijk vergelijken: wat dit tempo bij ideaal weer was geweest (alleen als het weer echt uitmaakte).
                     if (a.distanceMeters >= 1000 && weatherCost(a).matters)
                       Padding(
-                        padding: const EdgeInsets.only(top: 2),
+                        padding: EdgeInsets.only(top: 2),
                         child: Text(
                           '≈ ${Fmt.pace(correctedSeconds(a) / (a.distanceMeters / 1000))} bij ideaal weer',
                           maxLines: 1,
@@ -1041,7 +1041,7 @@ class _ActivityTile extends StatelessWidget {
                         ),
                       ),
                     if (badges.isNotEmpty) ...[
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       Wrap(spacing: 6, runSpacing: 4, children: [for (final b in badges.take(2)) RecordBadge(b, small: true)]),
                     ],
                   ],
@@ -1062,9 +1062,9 @@ class _TileStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(right: 14),
+        padding: EdgeInsets.only(right: 14),
         child: Text.rich(TextSpan(children: [
-          TextSpan(text: value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w700, fontSize: 18)),
+          TextSpan(text: value, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w700, fontSize: 18)),
           if (unit.isNotEmpty) TextSpan(text: ' $unit', style: TextStyle(color: RwColors.subtle, fontSize: 12)),
         ])),
       );
@@ -1083,7 +1083,7 @@ class _WeekHeader extends StatelessWidget {
     final diff = (thisWeek.difference(start).inHours / 24 / 7).round();
     final label = diff == 0 ? 'DEZE WEEK' : (diff == 1 ? 'VORIGE WEEK' : 'WEEK VAN ${Fmt.date(start).toUpperCase()}');
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
+      padding: EdgeInsets.fromLTRB(4, 10, 4, 0),
       child: Row(
         children: [
           Expanded(

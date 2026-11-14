@@ -85,7 +85,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     });
     _loadDuration();
     // Live: elke 5 minuten de buienradar en de berekening verversen.
-    _live = Timer.periodic(const Duration(minutes: 5), (_) {
+    _live = Timer.periodic(Duration(minutes: 5), (_) {
       if (mounted) ref.invalidate(rainNowcastProvider);
     });
   }
@@ -117,17 +117,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void _rescheduleReminder() {
     final f = ref.read(forecastProvider).value;
     if (f == null || f.hours.isEmpty) return;
-    final routes = ref.read(routesProvider).value ?? const <RunRoute>[];
+    final routes = ref.read(routesProvider).value ?? <RunRoute>[];
     final route = routes.where((r) => r.id == _routeId).firstOrNull;
     NotificationService.instance
         .reschedule(
           forecast: f,
           profile: ref.read(insightsProvider),
-          track: route == null ? const [] : decodePolyline(route.polyline),
+          track: route == null ? [] : decodePolyline(route.polyline),
           durationMinutes: _durationMinutes,
           rain: ref.read(rainNowcastProvider).value,
           availability: ref.read(availabilityProvider).value ?? Availability.always,
-          runStarts: [for (final a in ref.read(activitiesProvider).value ?? const <Activity>[]) a.startedAt],
+          runStarts: [for (final a in ref.read(activitiesProvider).value ?? <Activity>[]) a.startedAt],
         )
         .ignore();
   }
@@ -161,8 +161,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final profile = ref.watch(profileProvider);
     final routes = ref.watch(routesProvider).when(
           data: (r) => r,
-          loading: () => const <RunRoute>[],
-          error: (_, _) => const <RunRoute>[],
+          loading: () => <RunRoute>[],
+          error: (_, _) => <RunRoute>[],
         );
     final insights = ref.watch(insightsProvider);
     final rain = ref.watch(rainNowcastProvider).value;
@@ -201,13 +201,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         builder: (ctx) => StatefulBuilder(
           builder: (ctx, setSheet) => SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Wat ga je lopen?', style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 12),
+                  Text(tr('Wat ga je lopen?'), style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 22, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 12),
                   _TypePicker(
                     value: _type,
                     onChanged: (t) {
@@ -217,7 +217,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       NotificationService.instance.rememberTrainingType(t).then((_) => _rescheduleReminder()).ignore();
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _RouteAndDuration(
                     routes: routes,
                     routeId: _routeId,
@@ -238,8 +238,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       SharedPreferences.getInstance().then((p) => p.setInt(_durationKey, m)).ignore();
                     },
                   ),
-                  const SizedBox(height: 16),
-                  FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('Klaar')),
+                  SizedBox(height: 16),
+                  FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Klaar'))),
                 ],
               ),
             ),
@@ -263,7 +263,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     };
     final extrasOnly = [
       for (final c in layout.visible)
-        if (extras[c] case final w?) ...[const SizedBox(height: 12), w],
+        if (extras[c] case final w?) ...[SizedBox(height: 12), w],
     ];
 
     return Scaffold(
@@ -277,13 +277,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: ListView(
             padding: EdgeInsets.fromLTRB(scene ? 10 : 20, scene ? 8 : 20, scene ? 10 : 20, scene ? 40 : 96),
             children: [
-              const FirstTip(
+              FirstTip(
                 id: 'today',
                 icon: Icons.wb_sunny_outlined,
                 padding: EdgeInsets.only(bottom: 14),
                 text: 'Vandaag zie je het beste moment om te lopen. Tik op een uur in de grafiek voor het weer en kledingadvies op dat moment. Kaarten kiezen en ordenen doe je onder \"Meer vandaag\".',
               ),
-              const PauseBanner(),
+              PauseBanner(),
               if (!scene) ...[
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,27 +293,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         index: 0,
                         child: Text(
                           greeting,
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
+                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, fontFamily: RwFonts.display, fontFeatures: rwTnum),
                         ),
                       ),
                     ),
-                    const CoachButton(),
-                    const MeButton(),
+                    CoachButton(),
+                    MeButton(),
                   ],
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 StaggerIn(index: 2, child: Text(subLine, style: TextStyle(color: RwColors.subtle))),
-                const SizedBox(height: 18),
+                SizedBox(height: 18),
               ],
               ...forecast.when<List<Widget>>(
                 loading: () => [
                   settings,
-                  const Padding(padding: EdgeInsets.only(top: 60), child: LoadingView()),
+                  Padding(padding: EdgeInsets.only(top: 60), child: LoadingView()),
                   ...extrasOnly,
                 ],
                 error: (e, _) => [
                   settings,
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   ErrorView(message: friendlyError(e), onRetry: () => ref.invalidate(forecastProvider)),
                   ...extrasOnly,
                 ],
@@ -321,15 +321,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   if (f.hours.isEmpty) {
                     return [
                       settings,
-                      const SizedBox(height: 20),
-                      ErrorView(message: 'Er is geen weerdata beschikbaar.', onRetry: () => ref.invalidate(forecastProvider)),
+                      SizedBox(height: 20),
+                      ErrorView(message: tr('Er is geen weerdata beschikbaar.'), onRetry: () => ref.invalidate(forecastProvider)),
                       ...extrasOnly,
                     ];
                   }
                   final planner = StartTimePlanner(
                     forecast: f,
                     profile: insights,
-                    track: selectedRoute == null ? const [] : decodePolyline(selectedRoute.polyline),
+                    track: selectedRoute == null ? [] : decodePolyline(selectedRoute.polyline),
                     durationMinutes: _durationMinutes,
                     rain: rain,
                     availability: ref.watch(availabilityProvider).value ?? Availability.always,
@@ -340,7 +340,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       type: _type,
                       insightsPersonal: insights.isPersonal,
                       rain: rain,
-                      air: ref.watch(airQualityProvider).value ?? const [],
+                      air: ref.watch(airQualityProvider).value ?? [],
                       settings: settings,
                       layout: layout,
                       extras: extras,
@@ -394,7 +394,7 @@ class _TypePicker extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(value.description, style: TextStyle(color: RwColors.subtle, fontSize: 13)),
       ],
     );
@@ -427,9 +427,9 @@ class _RouteAndDuration extends StatelessWidget {
           child: DropdownButtonFormField<String?>(
             initialValue: routes.any((r) => r.id == routeId) ? routeId : null,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Route', isDense: true),
+            decoration: InputDecoration(labelText: tr('Route'), isDense: true),
             items: [
-              const DropdownMenuItem<String?>(value: null, child: Text('Geen route')),
+              DropdownMenuItem<String?>(value: null, child: Text(tr('Geen route'))),
               for (final r in routes)
                 DropdownMenuItem<String?>(
                   value: r.id,
@@ -440,14 +440,14 @@ class _RouteAndDuration extends StatelessWidget {
             onChanged: onRoute,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10),
         Expanded(
           flex: 2,
           child: DropdownButtonFormField<int>(
             key: ValueKey(durationMinutes),
             initialValue: durationMinutes,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Duur', isDense: true),
+            decoration: InputDecoration(labelText: tr('Duur'), isDense: true),
             items: [
               for (final d in durationItems)
                 DropdownMenuItem(value: d, child: Text(Fmt.duration(d * 60))),
@@ -529,7 +529,7 @@ class _ResultsState extends State<_Results> {
     final all = widget.planner.scoreAll(widget.type);
     final extras = [
       for (final c in widget.layout.visible)
-        if (widget.extras[c] case final w?) ...[const SizedBox(height: 12), w],
+        if (widget.extras[c] case final w?) ...[SizedBox(height: 12), w],
     ];
     if (all.isEmpty) {
       final custom = !widget.planner.availability.isAlways;
@@ -537,16 +537,16 @@ class _ResultsState extends State<_Results> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _TodayScene(greeting: widget.greeting, subLine: widget.subLine, weather: widget.nowWeather, overlap: 0),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           widget.settings,
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           EmptyState(
             icon: Icons.nights_stay_outlined,
-            title: 'Geen loopmomenten meer',
+            title: tr('Geen loopmomenten meer'),
             message: custom
                 ? 'Binnen je looptijden is er de komende 36 uur geen moment meer. Pas je looptijden aan of kijk in de weekplanner.'
                 : 'Er zijn in de komende uren geen geschikte tijden tussen 05:00 en 22:00.',
-            actionLabel: 'Weekplanner',
+            actionLabel: tr('Weekplanner'),
             onAction: () => openWeekPlanner(context),
           ),
           ...extras,
@@ -590,7 +590,7 @@ class _ResultsState extends State<_Results> {
         pollen: widget.pollen,
         recentMaxTemp: widget.recentMaxTemp,
         hasRoute: widget.planner.track.length >= 2,
-        route: widget.planner.track.length >= 2 ? trackSegments(widget.planner.track) : const [],
+        route: widget.planner.track.length >= 2 ? trackSegments(widget.planner.track) : [],
         dog: widget.dog);
 
     Widget? card(DashCard c) => switch (c) {
@@ -609,8 +609,8 @@ class _ResultsState extends State<_Results> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(children: [
-                    const Expanded(child: SectionLabel('Weercijfer per uur', number: 2)),
-                    Text('Goede uren', style: TextStyle(color: RwColors.muted, fontSize: 13)),
+                    Expanded(child: SectionLabel('Weercijfer per uur', number: 2)),
+                    Text(tr('Goede uren'), style: TextStyle(color: RwColors.muted, fontSize: 13)),
                     Transform.scale(
                       scale: 0.8,
                       child: Switch(
@@ -622,11 +622,11 @@ class _ResultsState extends State<_Results> {
                       ),
                     ),
                   ]),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   if (bars.isEmpty)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text('Geen uren met een goede score (70 of hoger) in de komende 36 uur.',
+                      child: Text(tr('Geen uren met een goede score (70 of hoger) in de komende 36 uur.'),
                           style: TextStyle(color: RwColors.muted)),
                     )
                   else
@@ -638,8 +638,8 @@ class _ResultsState extends State<_Results> {
                     ),
                   if (bars.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text('Hoger en warmer = beter moment · tik op een uur, of houd vast en sleep door de dag',
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text(tr('Hoger en warmer = beter moment · tik op een uur, of houd vast en sleep door de dag'),
                           style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                     ),
                 ],
@@ -654,7 +654,7 @@ class _ResultsState extends State<_Results> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Consumer(builder: (context, ref, _) {
-          final plan = ref.watch(planProvider).value ?? const <PlanSession>[];
+          final plan = ref.watch(planProvider).value ?? <PlanSession>[];
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final session = plan.where((x) => x.date == today).firstOrNull;
@@ -677,12 +677,12 @@ class _ResultsState extends State<_Results> {
         }),
         // Alles hieronder schuift omhoog, zodat de advieskaart half over het beeld ligt.
         Transform.translate(
-          offset: const Offset(0, -overlap),
+          offset: Offset(0, -overlap),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: 12),
           child: Stack(clipBehavior: Clip.none, fit: StackFit.passthrough, children: [
             _TiltCard(
               child: _HeroCard(
@@ -705,23 +705,23 @@ class _ResultsState extends State<_Results> {
         ),
         // Het weercijfer per uur staat altijd op Vandaag, direct onder het advies (Sems keuze, 8-11).
         if (card(DashCard.hours) case final hours?) ...[
-          const SizedBox(height: 12),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: hours),
+          SizedBox(height: 12),
+          Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: hours),
         ],
-        const SizedBox(height: 12),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: widget.settings),
+        SizedBox(height: 12),
+        Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: widget.settings),
         Padding(
-          padding: const EdgeInsets.fromLTRB(10, 22, 10, 0),
+          padding: EdgeInsets.fromLTRB(10, 22, 10, 0),
           child: _WeekRow(scores: all, type: widget.type),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-        const SizedBox(height: 12),
-        const TodayCard(),
-        const RaceCountdownCard(),
+        SizedBox(height: 12),
+        TodayCard(),
+        RaceCountdownCard(),
         ...() {
           // Hooguit drie kaarten die er nú toe doen (waarschuwing, buien, aantrekken, wind op je route...);
           // de rest staat achter "Meer vandaag". Volgorde en verbergen blijven zoals je ze instelt.
@@ -737,10 +737,10 @@ class _ResultsState extends State<_Results> {
               more.add(w);
             }
           }
-          more.addAll(const [WeeklyReportCard(), YearStoryCard()]);
+          more.addAll([WeeklyReportCard(), YearStoryCard()]);
           return <Widget>[
-            for (final w in smart) ...[const SizedBox(height: 12), w],
-            const SizedBox(height: 12),
+            for (final w in smart) ...[SizedBox(height: 12), w],
+            SizedBox(height: 12),
             Wrap(spacing: 8, runSpacing: 8, children: [
               OutlinedButton.icon(
                 onPressed: () => setState(() => _more = !_more),
@@ -749,20 +749,20 @@ class _ResultsState extends State<_Results> {
               ),
             ]),
             if (_more) ...[
-              for (final w in more) ...[const SizedBox(height: 12), w],
-              const SizedBox(height: 8),
+              for (final w in more) ...[SizedBox(height: 12), w],
+              SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
                   onPressed: () => showDashLayoutSheet(context),
-                  icon: const Icon(Icons.tune, size: 18),
-                  label: const Text('Kaarten kiezen en ordenen'),
+                  icon: Icon(Icons.tune, size: 18),
+                  label: Text(tr('Kaarten kiezen en ordenen')),
                 ),
               ),
             ],
           ];
         }(),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Text(
           widget.insightsPersonal
               ? 'Berekend met jouw persoonlijke loopprofiel.'
@@ -856,7 +856,7 @@ class _HeroCard extends StatelessWidget {
     // Bij "Nu lopen" gaan dag, weer en cijfers over nú, niet over het (latere) beste moment.
     final s = goNowShown ? v.now : shown;
     final w = s.weather;
-    final remindAt = s.start.subtract(const Duration(minutes: 15));
+    final remindAt = s.start.subtract(Duration(minutes: 15));
     final gain = v.best.score - v.now.score;
     // Redenen die nog niet in de tekst hierboven staan.
     final shownText = isBest ? v.detail.toLowerCase() : '';
@@ -873,23 +873,23 @@ class _HeroCard extends StatelessWidget {
           color: RwColors.surface,
           border: Border.all(color: RwColors.hairline),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: RwColors.isDark ? 0.35 : 0.14), blurRadius: 36, offset: const Offset(0, 18)),
+            BoxShadow(color: Colors.black.withValues(alpha: RwColors.isDark ? 0.35 : 0.14), blurRadius: 36, offset: Offset(0, 18)),
           ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(children: [
           Positioned.fill(child: WeatherAmbience(weather: w, golden: _golden(s.start, lat, lon))),
           Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+        padding: EdgeInsets.fromLTRB(20, 18, 20, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ExcludeSemantics(
               child: Row(
                 children: [
-                  Expanded(child: SectionLabel(isBest ? label : 'Gekozen moment', number: 1, color: color)),
+                  Expanded(child: SectionLabel(isBest ? label : tr('Gekozen moment'), number: 1, color: color)),
                   IconButton(
-                    tooltip: 'Nodig iemand uit om mee te lopen',
+                    tooltip: tr('Nodig iemand uit om mee te lopen'),
                     visualDensity: VisualDensity.compact,
                     icon: Icon(Icons.group_add_outlined, size: 20, color: RwColors.muted),
                     onPressed: () {
@@ -903,17 +903,17 @@ class _HeroCard extends StatelessWidget {
                   ),
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0, end: s.score.toDouble()),
-                    duration: const Duration(milliseconds: 900),
+                    duration: Duration(milliseconds: 900),
                     curve: Curves.easeOutCubic,
                     builder: (_, v, _) => Text('${v.round()}',
                         style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800, fontSize: 22, color: _scoreColor(s.score))),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   Text(s.verdict, style: TextStyle(color: _scoreColor(s.score), fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             ExcludeSemantics(
               // Wrap: met grote letters gaat "Morgen / bewolkt" netjes onder de tijd in plaats van letter voor letter.
               child: Wrap(
@@ -933,11 +933,11 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: EdgeInsets.only(bottom: 10),
                     child: AnimatedWeatherIcon(code: w.weatherCode, day: w.isDay, size: 40),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: EdgeInsets.only(bottom: 8),
                     child: Text(
                       '${_dayLabel(s.start)}\n${weatherLabel(w.weatherCode)}',
                       style: TextStyle(color: RwColors.muted, height: 1.3),
@@ -947,31 +947,31 @@ class _HeroCard extends StatelessWidget {
               ),
             ),
             ConfidenceChip(lat: lat, lon: lon, start: s.start, minutes: durationMinutes, weather: w, isBest: isBest),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(isBest ? v.detail : 'Je bekijkt ${Fmt.time(s.start)}. Het beste moment is ${Fmt.time(v.best.start)} (score ${v.best.score}).',
                 style: TextStyle(color: RwColors.muted, height: 1.4)),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             _FactRow(facts: [
               ('Gevoel', Fmt.temp(w.feelsLike ?? w.temperature)),
               ('Wind', w.windDirection == null ? Fmt.wind(w.windSpeed) : '${w.windSpeed.round()} ${Fmt.compass(w.windDirection!)}'),
               ('Regen', Fmt.pct(w.precipitationProbability)),
             ]),
             if (extraReasons.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               for (final r in extraReasons.take(2))
                 Padding(
-                  padding: const EdgeInsets.only(top: 3),
+                  padding: EdgeInsets.only(top: 3),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(padding: EdgeInsets.only(top: 2), child: Icon(Icons.info_outline, size: 15, color: RwColors.subtle)),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(child: Text(r, style: TextStyle(color: RwColors.muted, fontSize: 13))),
                     ],
                   ),
                 ),
             ],
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             // Wanneer ben je terug, en is het dan nog licht?
             Builder(builder: (context) {
               final start = goNowShown ? DateTime.now() : s.start;
@@ -980,7 +980,7 @@ class _HeroCard extends StatelessWidget {
               return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Icon(Icons.home_outlined, size: 16, color: RwColors.subtle),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       '${goNowShown ? 'Ga je nu' : 'Ga je om ${Fmt.time(start)}'}, dan ben je rond ${Fmt.time(back)} terug ($durationMinutes min).',
@@ -990,23 +990,23 @@ class _HeroCard extends StatelessWidget {
                 ]),
                 if (dark != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding: EdgeInsets.only(top: 4),
                     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Padding(padding: EdgeInsets.only(top: 1), child: Icon(Icons.nights_stay_outlined, size: 16, color: RwColors.warning)),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6),
                       Expanded(child: Text(dark, style: TextStyle(color: RwColors.warning, fontSize: 13, height: 1.35))),
                     ]),
                   ),
               ]);
             }),
             _MoreDetails(child: SunArc(start: s.start, minutes: durationMinutes, lat: lat, lon: lon)),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 if (goNowShown)
                   Expanded(
                     // Glas-stijl: de oranje hoofdknop "Start run" zweeft al onderin.
-                    child: KadansButton(label: 'Start run', icon: Icons.play_arrow, onPressed: () => openRecorder(context)),
+                    child: KadansButton(label: tr('Start run'), icon: Icons.play_arrow, onPressed: () => openRecorder(context)),
                   )
                 else if (remindAt.isAfter(DateTime.now()))
                   Expanded(
@@ -1024,20 +1024,20 @@ class _HeroCard extends StatelessWidget {
                   )
                 else
                   Expanded(
-                    child: KadansButton(label: 'Start run', icon: Icons.play_arrow, onPressed: () => openRecorder(context)),
+                    child: KadansButton(label: tr('Start run'), icon: Icons.play_arrow, onPressed: () => openRecorder(context)),
                   ),
                 if (!goNowShown) ...[
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   IconButton.outlined(
-                    tooltip: 'In je agenda zetten',
+                    tooltip: tr('In je agenda zetten'),
                     style: IconButton.styleFrom(
-                      minimumSize: const Size(52, 52),
+                      minimumSize: Size(52, 52),
                       side: BorderSide(color: RwColors.hairline),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
                     ),
                     onPressed: () => addToCalendar(
                       context,
-                      title: 'Hardlopen (Kadans)',
+                      title: tr('Hardlopen (Kadans)'),
                       start: s.start,
                       minutes: durationMinutes,
                       details: 'Beste moment volgens Kadans: score ${s.score}. ${Fmt.temp(w.feelsLike ?? w.temperature)} gevoel, wind ${Fmt.wind(w.windSpeed)}.',
@@ -1046,25 +1046,25 @@ class _HeroCard extends StatelessWidget {
                   ),
                 ],
                 if (v.kind == VerdictKind.tough) ...[
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10),
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => openWeekPlanner(context),
-                      child: const Text('Betere dag'),
+                      child: Text(tr('Betere dag')),
                     ),
                   ),
                 ],
               ],
             ),
             if (!isBest)
-              Center(child: TextButton(onPressed: onShowBest, child: const Text('Terug naar het beste moment')))
+              Center(child: TextButton(onPressed: onShowBest, child: Text(tr('Terug naar het beste moment'))))
             else if (v.kind != VerdictKind.goNow && gain > 0)
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only(top: 10),
                 child: Row(
                   children: [
                     Icon(Icons.directions_run, size: 16, color: RwColors.subtle),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6),
                     Expanded(
                       child: Text(
                           'Nu vertrekken kan ook: ${gain <= 3 ? 'bijna even goed' : (gain >= 25 ? 'een stuk minder' : 'iets minder')}.'
@@ -1074,7 +1074,7 @@ class _HeroCard extends StatelessWidget {
                     TextButton(
                       style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accent),
                       onPressed: () => openRecorder(context),
-                      child: const Text('Toch nu'),
+                      child: Text(tr('Toch nu')),
                     ),
                   ],
                 ),
@@ -1101,22 +1101,22 @@ class _PlanRow extends StatelessWidget {
         color: RwColors.surface,
         shape: StadiumBorder(side: BorderSide(color: RwColors.border)),
         child: InkWell(
-          customBorder: const StadiumBorder(),
+          customBorder: StadiumBorder(),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+            padding: EdgeInsets.fromLTRB(16, 12, 12, 12),
             child: Row(
               children: [
                 Icon(Icons.directions_run, size: 20, color: RwColors.accent),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     '${type.label} · ${Fmt.duration(durationMinutes * 60)}${route == null ? '' : ' · ${route!.name}'}',
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
-                Text('Wijzig', style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w600)),
+                Text(tr('Wijzig'), style: TextStyle(color: RwColors.accent, fontWeight: FontWeight.w600)),
                 Icon(Icons.chevron_right, color: RwColors.accent, size: 20),
               ],
             ),
@@ -1183,7 +1183,7 @@ class _HourBarsState extends State<_HourBars> {
         controller: _scroll,
         scrollDirection: Axis.horizontal,
         itemCount: scores.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 6),
+        separatorBuilder: (_, _) => SizedBox(width: 6),
         itemBuilder: (context, i) {
           final s = scores[i];
           final isSel = s.start == selected;
@@ -1223,7 +1223,7 @@ class _HourBarsState extends State<_HourBars> {
                       color: isBest ? RwColors.accent : RwColors.text,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
@@ -1237,7 +1237,7 @@ class _HourBarsState extends State<_HourBars> {
                           heightFactor: h,
                           // Kleur loopt vloeiend over als je een ander uur kiest.
                           child: AnimatedContainer(
-                            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 180),
+                            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : Duration(milliseconds: 180),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -1261,7 +1261,7 @@ class _HourBarsState extends State<_HourBars> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   Text(
                     s.start.hour.toString().padLeft(2, '0'),
                     style: TextStyle(
@@ -1306,7 +1306,7 @@ class _RouteWindCard extends StatelessWidget {
     final w = score.weather;
     final advice = adviseDirection(track, w.windSpeed, w.windDirection);
     return RwCard(
-      title: 'WIND OP JE ROUTE',
+      title: tr('WIND OP JE ROUTE'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1318,13 +1318,13 @@ class _RouteWindCard extends StatelessWidget {
                   advice.bestLabel == 'linksom' ? Icons.rotate_left : Icons.rotate_right,
                   color: RwColors.accent,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 Expanded(
-                  child: Text(advice.text, style: const TextStyle(height: 1.5, fontWeight: FontWeight.w600)),
+                  child: Text(advice.text, style: TextStyle(height: 1.5, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
           ],
           Text(text, style: TextStyle(height: 1.5, color: RwColors.muted)),
         ],
@@ -1346,15 +1346,15 @@ class _ClothingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(advice.summary, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
+          Text(advice.summary, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          SizedBox(height: 10),
           Wrap(
             spacing: 6,
             runSpacing: 6,
             children: [
               for (final item in advice.items)
                 Container(
-                  padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
+                  padding: EdgeInsets.fromLTRB(8, 6, 12, 6),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(colors: [RwColors.surface, RwColors.surfaceHigh]),
                     border: Border.all(color: RwColors.hairline),
@@ -1362,20 +1362,20 @@ class _ClothingCard extends StatelessWidget {
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     Icon(_clothingIcon(item), size: 16, color: RwColors.accentLight),
-                    const SizedBox(width: 6),
-                    Flexible(child: Text(item, style: const TextStyle(fontSize: 13))),
+                    SizedBox(width: 6),
+                    Flexible(child: Text(item, style: TextStyle(fontSize: 13))),
                   ]),
                 ),
             ],
           ),
           for (final tip in advice.extras)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: EdgeInsets.only(top: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.info_outline, size: 16, color: RwColors.accent),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(child: Text(tip, style: TextStyle(color: RwColors.muted, height: 1.4))),
                 ],
               ),
@@ -1406,12 +1406,12 @@ class _RainCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final maxMm = rain.points.fold<double>(1, (m, p) => p.mmPerHour > m ? p.mmPerHour : m);
     return RwCard(
-      title: 'BUIEN KOMENDE 2 UUR · LIVE',
+      title: tr('BUIEN KOMENDE 2 UUR · LIVE'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_summary, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 12),
+          Text(_summary, style: TextStyle(fontWeight: FontWeight.w600)),
+          SizedBox(height: 12),
           SizedBox(
             height: 48,
             child: Row(
@@ -1420,13 +1420,13 @@ class _RainCard extends StatelessWidget {
                 for (final p in rain.points)
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 1),
+                      padding: EdgeInsets.symmetric(horizontal: 1),
                       child: FractionallySizedBox(
                         alignment: Alignment.bottomCenter,
                         heightFactor: p.mmPerHour < 0.1 ? 0.06 : (0.2 + 0.8 * (p.mmPerHour / maxMm)).clamp(0.2, 1.0),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: p.mmPerHour < 0.1 ? RwColors.bar : const Color(0xFF5AA9FF),
+                            color: p.mmPerHour < 0.1 ? RwColors.bar : Color(0xFF5AA9FF),
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -1436,15 +1436,15 @@ class _RainCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Row(
             children: [
               Text(Fmt.time(rain.points.first.time), style: TextStyle(fontSize: 11, color: RwColors.subtle)),
-              const Spacer(),
+              Spacer(),
               Text(Fmt.time(rain.points.last.time), style: TextStyle(fontSize: 11, color: RwColors.subtle)),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SourcesLink(prefix: 'Bijgewerkt ${Fmt.time(rain.fetchedAt)} · '),
         ],
       ),
@@ -1480,22 +1480,22 @@ class _WarningsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RwCard(
-      title: 'LET OP',
+      title: tr('LET OP'),
       child: Column(
         children: [
           for (final (i, w) in warnings.indexed) ...[
-            if (i > 0) const SizedBox(height: 12),
+            if (i > 0) SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(_icon(w.kind), color: _color(w.level), size: 22),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(w.title, style: TextStyle(fontWeight: FontWeight.w700, color: _color(w.level) == RwColors.muted ? RwColors.text : _color(w.level))),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       Text(w.text, style: TextStyle(color: RwColors.muted, height: 1.4)),
                     ],
                   ),
@@ -1552,8 +1552,8 @@ class _TodayScene extends StatelessWidget {
     final w = weather;
     final night = w != null && !w.isDay;
     final sky = night
-        ? const [Color(0xFF12151C), Color(0xFF2A2721), Color(0xFF3A3226)]
-        : const [Color(0xFF4F5A55), Color(0xFF8C8670), Color(0xFFCDB68E)];
+        ? [Color(0xFF12151C), Color(0xFF2A2721), Color(0xFF3A3226)]
+        : [Color(0xFF4F5A55), Color(0xFF8C8670), Color(0xFFCDB68E)];
     const white = Color(0xFFFFFBF3);
     return Semantics(
       container: true,
@@ -1571,10 +1571,10 @@ class _TodayScene extends StatelessWidget {
             child: Image.asset(
               _foggy(w) ? 'assets/foto/mist.jpg' : 'assets/foto/heide.jpg',
               fit: BoxFit.cover,
-              alignment: const Alignment(0, -0.1),
+              alignment: Alignment(0, -0.1),
               color: night ? Colors.black.withValues(alpha: 0.45) : null,
               colorBlendMode: night ? BlendMode.darken : null,
-              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              errorBuilder: (_, _, _) => SizedBox.shrink(),
             ),
           ),
           // Donker verloop boven- en onderin, zodat de witte tekst altijd leesbaar is (ook in de zon).
@@ -1585,7 +1585,7 @@ class _TodayScene extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [Colors.black.withValues(alpha: 0.5), Colors.black.withValues(alpha: 0.05), Colors.transparent],
-                  stops: const [0, 0.6, 1],
+                  stops: [0, 0.6, 1],
                 ),
               ),
             ),
@@ -1597,22 +1597,22 @@ class _TodayScene extends StatelessWidget {
                 Expanded(child: Text(subLine.toUpperCase(), maxLines: 2, style: SectionLabel.style(color: white.withValues(alpha: 0.8)).copyWith(fontSize: 10.5))),
                 MeButton(color: white),
               ]),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               StaggerIn(
                 index: 0,
                 child: Text(greeting,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 34, fontWeight: FontWeight.w700, height: 1.02, letterSpacing: -0.4, color: white)),
               ),
               if (line != null) ...[
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(
                     child: Text(line!, style: TextStyle(fontSize: 15.5, height: 1.4, fontWeight: FontWeight.w500, color: white.withValues(alpha: 0.92))),
                   ),
                   if (onSpeak != null)
                     IconButton(
-                      tooltip: 'Voorlezen',
+                      tooltip: tr('Voorlezen'),
                       visualDensity: VisualDensity.compact,
                       icon: Icon(Icons.volume_up_outlined, color: white.withValues(alpha: 0.85)),
                       onPressed: onSpeak,
@@ -1664,7 +1664,7 @@ class _CountClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = time;
-    if (t == null) return Text('Nu', style: style);
+    if (t == null) return Text(tr('Nu'), style: style);
     final target = (t.hour * 60 + t.minute).toDouble();
     return CountUpText(
       key: ValueKey(t),
@@ -1686,7 +1686,7 @@ class _FactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           border: Border.symmetric(horizontal: BorderSide(color: RwColors.hairline)),
         ),
@@ -1695,7 +1695,7 @@ class _FactRow extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(label.toUpperCase(), style: SectionLabel.style(color: RwColors.subtle).copyWith(fontSize: 10)),
-                const SizedBox(height: 3),
+                SizedBox(height: 3),
                 Text(value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1730,9 +1730,9 @@ class _MoreDetailsState extends State<_MoreDetails> {
           ),
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 220),
+          duration: Duration(milliseconds: 220),
           curve: Curves.easeOut,
-          child: _open ? widget.child : const SizedBox(width: double.infinity),
+          child: _open ? widget.child : SizedBox(width: double.infinity),
         ),
       ]);
 }
@@ -1746,7 +1746,7 @@ class _WeekRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final plan = ref.watch(planProvider).value ?? const <PlanSession>[];
+    final plan = ref.watch(planProvider).value ?? <PlanSession>[];
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final next = [
@@ -1771,23 +1771,23 @@ class _WeekRow extends ConsumerWidget {
     }
 
     final head = Row(children: [
-      const Expanded(child: SectionLabel('Deze week', number: 3)),
+      Expanded(child: SectionLabel('Deze week', number: 3)),
       TextButton(
         style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: RwColors.accentDeep),
         onPressed: () => openThisWeek(context),
-        child: const Text('Alles →'),
+        child: Text(tr('Alles →')),
       ),
     ]);
     if (next.isEmpty) {
       return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         head,
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         RwCard(
           onTap: () => openThisWeek(context),
           child: Row(children: [
             Icon(Icons.date_range_outlined, color: RwColors.accentDeep),
-            const SizedBox(width: 12),
-            Expanded(child: Text('Bekijk je week: de beste momenten per dag.', style: TextStyle(color: RwColors.muted))),
+            SizedBox(width: 12),
+            Expanded(child: Text(tr('Bekijk je week: de beste momenten per dag.'), style: TextStyle(color: RwColors.muted))),
             Icon(Icons.chevron_right, color: RwColors.subtle),
           ]),
         ),
@@ -1795,7 +1795,7 @@ class _WeekRow extends ConsumerWidget {
     }
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       head,
-      const SizedBox(height: 6),
+      SizedBox(height: 6),
       LayoutBuilder(builder: (context, c) {
         final cardW = math.min(170.0, c.maxWidth * 0.42);
         final big = MediaQuery.textScalerOf(context).scale(1) > 1.25;
@@ -1805,31 +1805,31 @@ class _WeekRow extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             itemCount: next.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => SizedBox(width: 10),
             itemBuilder: (context, i) {
               final p = next[i];
               final first = i == 0;
               final t = bestOn(p.date);
-              final fg = first ? const Color(0xFFF1E9DC) : RwColors.text;
-              final soft = first ? const Color(0xFFBDB1A0) : RwColors.muted;
+              final fg = first ? Color(0xFFF1E9DC) : RwColors.text;
+              final soft = first ? Color(0xFFBDB1A0) : RwColors.muted;
               return GestureDetector(
                 onTap: () => openThisWeek(context),
                 child: Container(
                   width: cardW,
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: first ? const Color(0xFF211A14) : RwColors.surface,
+                    color: first ? Color(0xFF211A14) : RwColors.surface,
                     borderRadius: BorderRadius.circular(RwRadius.m),
-                    border: Border.all(color: first ? const Color(0xFF211A14) : RwColors.hairline),
+                    border: Border.all(color: first ? Color(0xFF211A14) : RwColors.hairline),
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(dayLabel(p.date).toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
                         style: SectionLabel.style(color: soft).copyWith(fontSize: 10)),
-                    const Spacer(),
+                    Spacer(),
                     Text(t == null ? (p.distanceMeters == null ? '–' : Fmt.km(p.distanceMeters!)) : Fmt.time(t),
                         maxLines: 1,
                         style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w700, color: fg)),
-                    const Spacer(),
+                    Spacer(),
                     Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, height: 1.3, color: soft)),
                   ]),
                 ),
@@ -1871,7 +1871,7 @@ class _AskCloudy extends StatelessWidget {
                   angle: -0.07,
                   child: Text(
                     '${tr('vraag Cloudy')}\n→ ${tr('tik hier')}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Caveat',
                       fontVariations: [FontVariation('wght', 700)],
                       fontSize: 25,
@@ -1882,7 +1882,7 @@ class _AskCloudy extends StatelessWidget {
                   ),
                 ),
               ),
-              const Positioned.fill(child: CustomPaint(painter: _HandArrowPainter(_goud))),
+              Positioned.fill(child: CustomPaint(painter: _HandArrowPainter(_goud))),
               Positioned(right: 0, bottom: 0, child: Wolkje(size: 52, mood: mood)),
             ]),
           ),

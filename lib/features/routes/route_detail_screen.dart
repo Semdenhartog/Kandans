@@ -85,7 +85,7 @@ class RouteDetailScreen extends ConsumerWidget {
     final weather = ref.watch(_routeWeatherProvider(routeId));
 
     return route.when(
-      loading: () => const Scaffold(body: LoadingView()),
+      loading: () => Scaffold(body: LoadingView()),
       error: (e, _) => Scaffold(
         appBar: AppBar(),
         body: ErrorView(
@@ -107,8 +107,8 @@ class RouteDetailScreen extends ConsumerWidget {
           floatingActionButton: FloatingActionButton.extended(
             heroTag: 'run-route',
             onPressed: () => openRecorder(context, route: r),
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Loop deze route'),
+            icon: Icon(Icons.play_arrow),
+            label: Text(tr('Loop deze route')),
           ),
           appBar: AppBar(
             title: Text(r.name, overflow: TextOverflow.ellipsis),
@@ -120,47 +120,47 @@ class RouteDetailScreen extends ConsumerWidget {
                 onPressed: () => _toggleFavorite(context, ref, r),
               ),
               IconButton(
-                tooltip: 'Deel als poster',
-                icon: const Icon(Icons.image_outlined),
+                tooltip: tr('Deel als poster'),
+                icon: Icon(Icons.image_outlined),
                 onPressed: () {
-                  final runs = (ref.read(activitiesProvider).value ?? const <Activity>[]).where((a) => a.routeId == r.id).toList();
+                  final runs = (ref.read(activitiesProvider).value ?? <Activity>[]).where((a) => a.routeId == r.id).toList();
                   final fastest = runs.isEmpty ? null : runs.map((a) => a.movingTimeSeconds).reduce((a, b) => a < b ? a : b);
                   openRoutePoster(context, r, fastestSeconds: fastest, timesRun: runs.length);
                 },
               ),
               IconButton(
-                tooltip: 'Naar je horloge',
-                icon: const Icon(Icons.watch_outlined),
+                tooltip: tr('Naar je horloge'),
+                icon: Icon(Icons.watch_outlined),
                 onPressed: () => sendRouteToWatch(context, r, onRunWithPhone: () => openRecorder(context, route: r)),
               ),
               IconButton(
-                tooltip: 'Verwijderen',
-                icon: const Icon(Icons.delete_outline),
+                tooltip: tr('Verwijderen'),
+                icon: Icon(Icons.delete_outline),
                 onPressed: () => deleteRouteWithUndo(context, r),
               ),
             ],
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
               if (isNew) ...[
                 _NewRouteCard(route: r),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
               ],
               Row(
                 children: [
-                  Expanded(child: StatTile(label: 'Afstand', value: Fmt.km(r.distanceMeters))),
-                  const SizedBox(width: 8),
+                  Expanded(child: StatTile(label: tr('Afstand'), value: Fmt.km(r.distanceMeters))),
+                  SizedBox(width: 8),
                   Expanded(
                     child: StatTile(
-                      label: 'Hoogtemeters',
+                      label: tr('Hoogtemeters'),
                       value: r.elevationGainMeters == null ? '–' : '${r.elevationGainMeters!.round()} m',
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: StatTile(
-                      label: 'Verwacht',
+                      label: tr('Verwacht'),
                       value: r.estimatedDurationSeconds == null
                           ? '–'
                           : Fmt.duration(r.estimatedDurationSeconds!),
@@ -168,7 +168,7 @@ class RouteDetailScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _WatchButton(route: r),
               Wrap(alignment: WrapAlignment.center, children: [
               TextButton.icon(
@@ -183,28 +183,28 @@ class RouteDetailScreen extends ConsumerWidget {
                         : '${Fmt.temp(best.weather.feelsLike ?? best.weather.temperature)}, wind ${Fmt.wind(best.weather.windSpeed)}',
                   );
                 },
-                icon: const Icon(Icons.group_add_outlined),
-                label: const Text('Nodig een loopmaatje uit'),
+                icon: Icon(Icons.group_add_outlined),
+                label: Text(tr('Nodig een loopmaatje uit')),
               ),
               TextButton.icon(
                 onPressed: () => shareRouteLink(context, r),
-                icon: const Icon(Icons.link),
-                label: const Text('Deel als link'),
+                icon: Icon(Icons.link),
+                label: Text(tr('Deel als link')),
               ),
               if (r.polyline.isNotEmpty)
                 TextButton.icon(
                   onPressed: () => _reverse(context, ref, r),
-                  icon: const Icon(Icons.swap_horiz),
+                  icon: Icon(Icons.swap_horiz),
                   label: Text(tr('Andersom lopen')),
                 ),
               if (r.polyline.isNotEmpty)
                 TextButton.icon(
                   onPressed: () => openRouteFlyover(context, r),
-                  icon: const Icon(Icons.flight_takeoff),
+                  icon: Icon(Icons.flight_takeoff),
                   label: Text(tr('Vlieg over de route')),
                 ),
               ]),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               _MapAndProfile(
                 route: r,
                 windSpeedKmh: w?.windSpeed,
@@ -212,11 +212,11 @@ class RouteDetailScreen extends ConsumerWidget {
                 reversed: advice?.reverse ?? false,
                 directionLabel: advice?.bestLabel,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               RwCard(
-                title: 'WIND OP DEZE ROUTE, NU',
+                title: tr('WIND OP DEZE ROUTE, NU'),
                 child: w == null
-                    ? Text('Weer wordt geladen…', style: TextStyle(color: RwColors.muted))
+                    ? Text(tr('Weer wordt geladen…'), style: TextStyle(color: RwColors.muted))
                     : Text(
                         rw == null
                             ? 'Wind ${Fmt.wind(w.windSpeed)}.'
@@ -224,40 +224,40 @@ class RouteDetailScreen extends ConsumerWidget {
                                 'Gemiddeld ${rw.headwindAvg.round()} km/u tegenwind en '
                                 '${rw.tailwindAvg.round()} km/u rugwind. '
                                 '${rw.secondHalfHead - rw.firstHalfHead > 4 ? 'De terugweg is het zwaarst.' : rw.firstHalfHead - rw.secondHalfHead > 4 ? 'De heenweg is het zwaarst.' : ''}',
-                        style: const TextStyle(height: 1.5),
+                        style: TextStyle(height: 1.5),
                       ),
               ),
               if (advice != null) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 RwCard(
-                  title: 'LOOPRICHTING, NU',
+                  title: tr('LOOPRICHTING, NU'),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(advice.bestLabel == 'linksom' ? Icons.rotate_left : Icons.rotate_right,
                           color: RwColors.accent),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text(advice.text, style: const TextStyle(height: 1.5))),
+                      SizedBox(width: 10),
+                      Expanded(child: Text(advice.text, style: TextStyle(height: 1.5))),
                     ],
                   ),
                 ),
               ],
               if (track.length > 1) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 TurnListCard(track: track),
               ],
               if (r.polyline.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _SurfaceCard(routeId: routeId, polyline: r.polyline),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _LightingCard(polyline: r.polyline),
               ],
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _RouteHistoryCard(routeId: routeId),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               if (r.points.length > 1)
                 RwCard(
-                  title: 'PER KILOMETER',
+                  title: tr('PER KILOMETER'),
                   child: Column(
                     children: [
                       for (final p in r.points)
@@ -297,13 +297,13 @@ class _KmRow extends StatelessWidget {
       }
     }
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           SizedBox(
             width: 70,
             child: Text('km ${point.kmMarker.toStringAsFixed(1).replaceAll('.', ',')}',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+                style: TextStyle(fontWeight: FontWeight.w600)),
           ),
           SizedBox(
             width: 70,
@@ -358,7 +358,7 @@ class _MapAndProfileState extends ConsumerState<_MapAndProfile> {
     final base = r.profileOrKmPoints;
     final profile = widget.reversed ? reverseProfile(base) : base;
     final poisAsync = ref.watch(routePoisProvider(r.polyline));
-    final pois = poisAsync.value ?? const <RoutePoi>[];
+    final pois = poisAsync.value ?? <RoutePoi>[];
     void expand() => openRouteMap(
           context,
           RouteMapData(
@@ -388,7 +388,7 @@ class _MapAndProfileState extends ConsumerState<_MapAndProfile> {
             pois: pois,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           widget.directionLabel == null
               ? 'Pijltjes tonen de looprichting. Tik op de kaart om hem groot te openen.'
@@ -397,20 +397,20 @@ class _MapAndProfileState extends ConsumerState<_MapAndProfile> {
           style: TextStyle(color: RwColors.subtle, fontSize: 12),
         ),
         if (profile.length >= 3) ...[
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           RwCard(
-            title: 'HOOGTEPROFIEL',
+            title: tr('HOOGTEPROFIEL'),
             child: ElevationProfileChart(profile: profile, highlight: _highlight),
           ),
         ],
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         RoutePhotosCard(
           polyline: r.polyline,
           length: r.distanceMeters,
           reversed: widget.reversed,
           onHighlight: (f) => _highlight.value = f,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         _PoiCard(
           pois: pois,
           loading: poisAsync.isLoading,
@@ -431,14 +431,12 @@ class _RouteHistoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final all = ref.watch(activitiesProvider).value ?? <Activity>[];
     final h = routeHistory(all, routeId);
     if (h.isEmpty) {
       return RwCard(
-        title: 'JOUW RUNS OP DEZE ROUTE',
-        child: Text(
-          'Nog geen runs op deze route. Koppel een run aan deze route (open de run bij Runs) '
-          'of kies de route als je een run toevoegt. Dan zie je hier je tijden naast elkaar, gecorrigeerd voor het weer.',
+        title: tr('JOUW RUNS OP DEZE ROUTE'),
+        child: Text(tr('Nog geen runs op deze route. Koppel een run aan deze route (open de run bij Runs) of kies de route als je een run toevoegt. Dan zie je hier je tijden naast elkaar, gecorrigeerd voor het weer.'),
           style: TextStyle(color: RwColors.muted, height: 1.45),
         ),
       );
@@ -457,20 +455,20 @@ class _RouteHistoryCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Expanded(child: StatTile(label: 'Snelste tijd', value: Fmt.duration(fastest.activity.movingTimeSeconds))),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Bij ideaal weer', value: Fmt.duration(fastestW.correctedSeconds))),
+              Expanded(child: StatTile(label: tr('Snelste tijd'), value: Fmt.duration(fastest.activity.movingTimeSeconds))),
+              SizedBox(width: 8),
+              Expanded(child: StatTile(label: tr('Bij ideaal weer'), value: Fmt.duration(fastestW.correctedSeconds))),
             ],
           ),
           if (trend != null) ...[
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(
               children: [
                 Icon(
                   trend < -2 ? Icons.trending_down : trend > 2 ? Icons.trending_up : Icons.trending_flat,
                   color: trend < -2 ? RwColors.good : trend > 2 ? RwColors.warning : RwColors.muted,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     trend < -2
@@ -478,18 +476,18 @@ class _RouteHistoryCard extends ConsumerWidget {
                         : trend > 2
                             ? 'Iets trager dan je eerste keren (${trend.round()} s/km, gecorrigeerd voor het weer). Rustig aan of moe?'
                             : 'Je tempo is stabiel op deze route.',
-                    style: const TextStyle(height: 1.4),
+                    style: TextStyle(height: 1.4),
                   ),
                 ),
               ],
             ),
           ],
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           for (final r in maxShown)
             InkWell(
               onTap: r.activity.id == null ? null : () => context.go('/runs/${r.activity.id}'),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+                padding: EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
                     SizedBox(
@@ -501,7 +499,7 @@ class _RouteHistoryCard extends ConsumerWidget {
                       child: Text(Fmt.duration(r.activity.movingTimeSeconds),
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: sameRun(r.activity, fastest.activity) ? (RwColors.isDark ? const Color(0xFFF2D892) : const Color(0xFF8A6A22)) : RwColors.text,
+                            color: sameRun(r.activity, fastest.activity) ? (RwColors.isDark ? Color(0xFFF2D892) : Color(0xFF8A6A22)) : RwColors.text,
                           )),
                     ),
                     // Balkje: korter = sneller (weergecorrigeerd tempo).
@@ -515,14 +513,14 @@ class _RouteHistoryCard extends ConsumerWidget {
                             child: Row(mainAxisSize: MainAxisSize.min, children: [
                               TweenAnimationBuilder<double>(
                                 tween: Tween(begin: 0, end: (c.maxWidth - (top ? 20 : 0)).clamp(0.0, double.infinity) * f),
-                                duration: const Duration(milliseconds: 900),
+                                duration: Duration(milliseconds: 900),
                                 curve: Curves.easeOutCubic,
                                 builder: (_, w, _) => Container(
                                   height: 8,
                                   width: w,
                                   decoration: BoxDecoration(
                                     gradient: top
-                                        ? const LinearGradient(colors: [Color(0xFF9C7A2A), Color(0xFFD9B45A), Color(0xFFF6E3A1)])
+                                        ? LinearGradient(colors: [Color(0xFF9C7A2A), Color(0xFFD9B45A), Color(0xFFF6E3A1)])
                                         : null,
                                     color: top ? null : RwColors.bar,
                                     boxShadow: top ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 8)] : null,
@@ -530,13 +528,13 @@ class _RouteHistoryCard extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              if (top) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.workspace_premium, size: 16, color: Color(0xFFD9B45A))),
+                              if (top) Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.workspace_premium, size: 16, color: Color(0xFFD9B45A))),
                             ]),
                           );
                         },
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     SizedBox(
                       width: 58,
                       child: Text(
@@ -549,9 +547,8 @@ class _RouteHistoryCard extends ConsumerWidget {
                 ),
               ),
             ),
-          const SizedBox(height: 4),
-          Text(
-            'Balk: tempo gecorrigeerd voor het weer (langer = sneller). Goud = beste prestatie.',
+          SizedBox(height: 4),
+          Text(tr('Balk: tempo gecorrigeerd voor het weer (langer = sneller). Goud = beste prestatie.'),
             style: TextStyle(color: RwColors.subtle, fontSize: 11),
           ),
         ],
@@ -583,27 +580,26 @@ class _PoiCard extends StatelessWidget {
     final water = pois.where((p) => p.kind == PoiKind.water).length;
     final toilets = pois.length - water;
     return RwCard(
-      title: 'WATER EN TOILET',
+      title: tr('WATER EN TOILET'),
       child: loading && pois.isEmpty
           ? Row(
               children: [
                 SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                 SizedBox(width: 10),
-                Expanded(child: Text('Zoeken langs je route… dit kan even duren.', style: TextStyle(color: RwColors.muted))),
+                Expanded(child: Text(tr('Zoeken langs je route… dit kan even duren.'), style: TextStyle(color: RwColors.muted))),
               ],
             )
           : failed
               ? Row(
                   children: [
                     Expanded(
-                      child: Text('Kon de voorzieningen nu niet laden.', style: TextStyle(color: RwColors.muted)),
+                      child: Text(tr('Kon de voorzieningen nu niet laden.'), style: TextStyle(color: RwColors.muted)),
                     ),
-                    TextButton(onPressed: onRetry, child: const Text('Opnieuw')),
+                    TextButton(onPressed: onRetry, child: Text(tr('Opnieuw'))),
                   ],
                 )
               : pois.isEmpty
-                  ? Text(
-                      'Geen watertappunten of toiletten gevonden binnen 150 m van je route. Neem bij een lange run zelf drinken mee.',
+                  ? Text(tr('Geen watertappunten of toiletten gevonden binnen 150 m van je route. Neem bij een lange run zelf drinken mee.'),
                       style: TextStyle(color: RwColors.muted, height: 1.45),
                     )
                   : Column(
@@ -614,16 +610,16 @@ class _PoiCard extends StatelessWidget {
                             if (water > 0) '$water ${water == 1 ? 'watertappunt' : 'watertappunten'}',
                             if (toilets > 0) '$toilets ${toilets == 1 ? 'toilet' : 'toiletten'}',
                           ].join(' en '),
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          style: TextStyle(fontWeight: FontWeight.w700),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         for (final p in (reversed ? pois.reversed : pois).take(10))
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            padding: EdgeInsets.symmetric(vertical: 5),
                             child: Row(
                               children: [
                                 PoiIcon(p.kind, size: 24),
-                                const SizedBox(width: 10),
+                                SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     '${p.label}${p.name == null ? '' : ' · ${p.name}'}${p.seasonal ? ' · niet het hele jaar' : ''}',
@@ -638,12 +634,11 @@ class _PoiCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Controleer ter plekke of een kraan werkt.',
+                        SizedBox(height: 6),
+                        Text(tr('Controleer ter plekke of een kraan werkt.'),
                           style: TextStyle(color: RwColors.subtle, fontSize: 11),
                         ),
-                        const SourcesLink(),
+                        SourcesLink(),
                       ],
                     ),
     );
@@ -659,16 +654,16 @@ class _LightingCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = ref.watch(routeLightingProvider(polyline));
     return RwCard(
-      title: 'VERLICHTING',
+      title: tr('VERLICHTING'),
       child: l.when(
-        loading: () => Text('Verlichting wordt geladen… De eerste keer duurt dit even; daarna staat het meteen klaar.', style: TextStyle(color: RwColors.muted, height: 1.35)),
+        loading: () => Text(tr('Verlichting wordt geladen… De eerste keer duurt dit even; daarna staat het meteen klaar.'), style: TextStyle(color: RwColors.muted, height: 1.35)),
         error: (_, _) => Row(children: [
-          Expanded(child: Text('Verlichting is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted))),
-          TextButton(onPressed: () => ref.invalidate(routeLightingProvider(polyline)), child: const Text('Opnieuw')),
+          Expanded(child: Text(tr('Verlichting is nu niet beschikbaar.'), style: TextStyle(color: RwColors.muted))),
+          TextButton(onPressed: () => ref.invalidate(routeLightingProvider(polyline)), child: Text(tr('Opnieuw'))),
         ]),
         data: (v) {
           final total = v.lit + v.unlit + v.unknown;
-          if (total <= 0) return Text('Geen gegevens over verlichting voor deze route.', style: TextStyle(color: RwColors.muted));
+          if (total <= 0) return Text(tr('Geen gegevens over verlichting voor deze route.'), style: TextStyle(color: RwColors.muted));
           final lit = (v.lit / total * 100).round();
           final unlit = (v.unlit / total * 100).round();
           final unknown = 100 - lit - unlit;
@@ -687,21 +682,21 @@ class _LightingCard extends ConsumerWidget {
               child: SizedBox(
                 height: 14,
                 child: Row(children: [
-                  if (v.lit > 0) Expanded(flex: math.max(1, (v.lit / total * 1000).round()), child: Container(color: const Color(0xFFFFD166))),
-                  if (v.unlit > 0) Expanded(flex: math.max(1, (v.unlit / total * 1000).round()), child: Container(color: const Color(0xFF2E3A59))),
+                  if (v.lit > 0) Expanded(flex: math.max(1, (v.lit / total * 1000).round()), child: Container(color: Color(0xFFFFD166))),
+                  if (v.unlit > 0) Expanded(flex: math.max(1, (v.unlit / total * 1000).round()), child: Container(color: Color(0xFF2E3A59))),
                   if (v.unknown > 0)
-                    Expanded(flex: math.max(1, (v.unknown / total * 1000).round()), child: Container(color: const Color(0xFF4A4A55))),
+                    Expanded(flex: math.max(1, (v.unknown / total * 1000).round()), child: Container(color: Color(0xFF4A4A55))),
                 ]),
               ),
             ),
-            const SizedBox(height: 8),
-            Text('$lit% verlicht · $unlit% onverlicht · $unknown% onbekend', style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
+            SizedBox(height: 8),
+            Text('$lit% verlicht · $unlit% onverlicht · $unknown% onbekend', style: TextStyle(fontWeight: FontWeight.w600)),
+            SizedBox(height: 4),
             Text(advice, style: TextStyle(color: RwColors.muted, height: 1.4)),
-            const SizedBox(height: 4),
-            Text('Niet van elke weg is bekend of er lantaarnpalen staan.',
+            SizedBox(height: 4),
+            Text(tr('Niet van elke weg is bekend of er lantaarnpalen staan.'),
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),
-            const SourcesLink(),
+            SourcesLink(),
           ]);
         },
       ),
@@ -735,14 +730,14 @@ class _SurfaceCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(routeSurfaceProvider((id: routeId, polyline: polyline)));
     return RwCard(
-      title: 'ONDERGROND',
+      title: tr('ONDERGROND'),
       child: s.when(
-        loading: () => Text('Ondergrond wordt geladen…', style: TextStyle(color: RwColors.muted)),
-        error: (_, _) => Text('Ondergrond is nu niet beschikbaar.', style: TextStyle(color: RwColors.muted)),
+        loading: () => Text(tr('Ondergrond wordt geladen…'), style: TextStyle(color: RwColors.muted)),
+        error: (_, _) => Text(tr('Ondergrond is nu niet beschikbaar.'), style: TextStyle(color: RwColors.muted)),
         data: (m) {
           final total = m.entries.where((e) => !e.key.startsWith('_')).fold<double>(0, (a, e) => a + e.value);
           final guessedPct = total <= 0 ? 0 : ((m['_geschat'] ?? 0) / total * 100).round();
-          if (total <= 0) return Text('Geen gegevens over de ondergrond voor deze route.', style: TextStyle(color: RwColors.muted));
+          if (total <= 0) return Text(tr('Geen gegevens over de ondergrond voor deze route.'), style: TextStyle(color: RwColors.muted));
           final types = [for (final t in _order) if ((m[t] ?? 0) > 0) t];
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -757,24 +752,24 @@ class _SurfaceCard extends ConsumerWidget {
                   ]),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               for (final t in types)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  padding: EdgeInsets.symmetric(vertical: 2),
                   child: Row(children: [
                     Container(width: 10, height: 10, decoration: BoxDecoration(color: _colors[t], shape: BoxShape.circle)),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(child: Text(_labels[t] ?? t)),
-                    Text('${(m[t]! / total * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w700)),
+                    Text('${(m[t]! / total * 100).round()}%', style: TextStyle(fontWeight: FontWeight.w700)),
                   ]),
                 ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               if (guessedPct > 0)
                 Text('Waarvan $guessedPct% geschat: waar de kaart geen ondergrond noemt, kijkt Kadans naar het soort weg '
                     '(straat en fietspad = verhard, stoep = tegels, bosweg = halfverhard, pad = onverhard).',
                     style: TextStyle(color: RwColors.muted, fontSize: 12, height: 1.35)),
-              const SizedBox(height: 2),
-              const SourcesLink(),
+              SizedBox(height: 2),
+              SourcesLink(),
             ],
           );
         },
@@ -793,7 +788,7 @@ class _NewRouteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: RwColors.accent.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(RwRadius.m),
@@ -803,12 +798,12 @@ class _NewRouteCard extends StatelessWidget {
         Row(children: [
           Icon(Icons.check_circle, color: RwColors.accent),
           SizedBox(width: 8),
-          Expanded(child: Text('Je route staat klaar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
+          Expanded(child: Text(tr('Je route staat klaar'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
         ]),
-        const SizedBox(height: 6),
-        Text('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: Kadans zegt elke afslag.',
+        SizedBox(height: 6),
+        Text(tr('Zet hem nu op je horloge, dan wijst dat de weg. Of loop hem met je telefoon: Kadans zegt elke afslag.'),
             style: TextStyle(color: RwColors.muted, height: 1.4)),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         _WatchButton(route: route),
       ]),
     );
@@ -838,13 +833,13 @@ class _WatchButtonState extends State<_WatchButton> {
   Widget build(BuildContext context) {
     final b = _brand;
     return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+      style: OutlinedButton.styleFrom(minimumSize: Size.fromHeight(48)),
       onPressed: () async {
         await sendRouteToWatch(context, widget.route, onRunWithPhone: () => openRecorder(context, route: widget.route));
         final nb = await loadWatchBrand();
         if (mounted) setState(() => _brand = nb);
       },
-      icon: const Icon(Icons.watch_outlined),
+      icon: Icon(Icons.watch_outlined),
       label: Text(b == WatchBrand.garminBasic ? 'Afslagen op je Garmin' : (b == null || !b.canImport ? 'Route naar je horloge' : 'Zet op je ${b.label}')),
     );
   }
