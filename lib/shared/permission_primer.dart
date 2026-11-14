@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../data/services/location_service.dart';
+import '../core/i18n.dart';
 
 /// Legt uit waarom Kadans je locatie wil, vóórdat Android de vraag stelt.
 /// Alleen als er nog geen toestemming is en de uitleg nog niet getoond is.
@@ -17,11 +18,11 @@ Future<void> explainLocationFirst(BuildContext context, {required String why}) a
   await showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
-      icon: const Icon(Icons.my_location),
-      title: const Text('Je locatie'),
+      icon: Icon(Icons.my_location),
+      title: Text(tr('Je locatie')),
       content: Text('$why\n\nJe locatie blijft van jou: Kadans verkoopt of deelt hem niet. '
           'Je telefoon vraagt zo om toestemming; kies "Tijdens gebruik van de app".'),
-      actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('Begrepen'))],
+      actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Begrepen')))],
     ),
   );
   await markLocationExplained();

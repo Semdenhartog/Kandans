@@ -244,7 +244,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           try {
             final c = p.getString('rec_cues');
             if (c != null) _cues = CueSettings.fromJson(jsonDecode(c));
-          } catch (_) {}
+          } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
           _batteryDone = !Platform.isAndroid || (p.getBool('battery_explained') ?? false);
         });
       }
@@ -263,7 +263,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
       if (raw == null || !mounted) return;
       try {
         setState(() => _plan = IntervalPlan.fromJson(jsonDecode(raw)));
-      } catch (_) {}
+      } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
     }).ignore();
     if (!_svc.isRecording && !RecordRunScreen.debugSkipWarmUp) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -321,7 +321,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         _battery = level;
         _charging = state == BatteryState.charging || state == BatteryState.full;
       });
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
   }
 
   /// Volgt de opname: start zodra de GPS klaar is (als je dat vroeg) en meldt je doelafstand.
@@ -567,7 +567,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         secondHalfHead: rw?.secondHalfHead,
       );
       if (mounted && identical(route, _route)) setState(() => _briefing = text);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
   }
 
   Future<void> _chooseTurnaround() async {
@@ -743,7 +743,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
     try {
       final p = await SharedPreferences.getInstance();
       plan == null ? await p.remove(_planKey) : await p.setString(_planKey, jsonEncode(plan.toJson()));
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
   }
 
   void _setLiveEvery(double e) {
@@ -1250,7 +1250,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
         _ghost = st;
         _ghostTime = same.first.movingTimeSeconds;
       });
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
   }
 
   Future<void> _chooseShoe(List<Shoe> shoes) async {
@@ -1316,7 +1316,7 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
           mk = m.copyWith(photo: path, clearLocal: true);
           left--;
           File(local).delete().ignore();
-        } catch (_) {}
+        } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'record_run_screen.dart'); }
       }
       out.add(mk.toJson());
     }

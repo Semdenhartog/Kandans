@@ -8,11 +8,12 @@ import '../core/theme.dart';
 import 'art/landscape.dart';
 import 'art/wolkje.dart';
 import 'rolling_text.dart';
+import '../core/i18n.dart';
 
 /// Kaart met optionele titel, in Kadans-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
 /// en als je erop kunt tikken veert hij een fractie in.
 class RwCard extends StatefulWidget {
-  const RwCard({super.key, this.title, required this.child, this.padding, this.onTap, this.trailing});
+  RwCard({super.key, this.title, required this.child, this.padding, this.onTap, this.trailing});
 
   final String? title;
 
@@ -33,7 +34,7 @@ class _RwCardState extends State<RwCard> {
   Widget build(BuildContext context) {
     final w = widget;
     final content = Padding(
-      padding: w.padding ?? const EdgeInsets.all(18),
+      padding: w.padding ?? EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -52,7 +53,7 @@ class _RwCardState extends State<RwCard> {
     );
     return AnimatedScale(
       scale: _down ? 0.985 : 1,
-      duration: const Duration(milliseconds: 140),
+      duration: Duration(milliseconds: 140),
       curve: Curves.easeOut,
       child: DecoratedBox(
         // Rand: licht aan de bovenkant, wegvallend naar onder.
@@ -62,12 +63,12 @@ class _RwCardState extends State<RwCard> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [Colors.white.withValues(alpha: RwColors.isDark ? 0.11 : 0.8), RwColors.border.withValues(alpha: 0.6), RwColors.border.withValues(alpha: 0.35)],
-            stops: const [0, 0.35, 1],
+            stops: [0, 0.35, 1],
           ),
-          boxShadow: [BoxShadow(color: RwColors.palette.shadow, blurRadius: 24, offset: const Offset(0, 10), spreadRadius: -8)],
+          boxShadow: [BoxShadow(color: RwColors.palette.shadow, blurRadius: 24, offset: Offset(0, 10), spreadRadius: -8)],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(1),
+          padding: EdgeInsets.all(1),
           child: Material(
             color: RwColors.surface,
             borderRadius: BorderRadius.circular(RwRadius.m),
@@ -77,7 +78,7 @@ class _RwCardState extends State<RwCard> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [RwColors.isDark ? const Color(0xFF221D18) : const Color(0xFFFBF8F2), RwColors.surface],
+                  colors: [RwColors.isDark ? Color(0xFF221D18) : Color(0xFFFBF8F2), RwColors.surface],
                 ),
               ),
               child: w.onTap == null
@@ -97,7 +98,7 @@ class _RwCardState extends State<RwCard> {
 
 /// Klein blokje met label en waarde (bijv. temperatuur).
 class StatTile extends StatelessWidget {
-  const StatTile({super.key, required this.label, required this.value});
+  StatTile({super.key, required this.label, required this.value});
 
   final String label;
   final String value;
@@ -105,7 +106,7 @@ class StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: RwColors.surfaceHigh,
         borderRadius: BorderRadius.circular(RwRadius.m),
@@ -118,12 +119,12 @@ class StatTile extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(label, maxLines: 1, style: TextStyle(fontSize: 12, color: RwColors.subtle)),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           // Altijd op één regel: lange waarden (bijv. "0,0 km") worden iets kleiner in plaats van af te breken.
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: OdometerIn(value, style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 19, fontWeight: FontWeight.w700)),
+            child: OdometerIn(value, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 19, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -133,7 +134,7 @@ class StatTile extends StatelessWidget {
 
 /// Lege-staat met uitleg en optionele knop.
 class EmptyState extends StatelessWidget {
-  const EmptyState({
+  EmptyState({
     super.key,
     required this.icon,
     required this.title,
@@ -152,21 +153,21 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             EmptyArt(icon: icon),
-            const SizedBox(height: 18),
+            SizedBox(height: 18),
             Text(title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
+                style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800)),
+            SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: RwColors.muted, height: 1.5)),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               SizedBox(
                 width: 240,
                 child: FilledButton(onPressed: onAction, child: Text(actionLabel!)),
@@ -182,7 +183,7 @@ class EmptyState extends StatelessWidget {
 /// Illustratie voor lege schermen: een Hollands landschap dat met het seizoen meekleurt,
 /// met het icoon van het scherm erboven. Komt zacht binnen.
 class EmptyArt extends StatelessWidget {
-  const EmptyArt({super.key, required this.icon, this.size = 168});
+  EmptyArt({super.key, required this.icon, this.size = 168});
   final IconData icon;
   final double size;
 
@@ -191,7 +192,7 @@ class EmptyArt extends StatelessWidget {
     final w = size * 1.5;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 900),
+      duration: Duration(milliseconds: 900),
       curve: Curves.easeOutCubic,
       builder: (_, t, child) => Opacity(
         opacity: t,
@@ -211,7 +212,7 @@ class EmptyArt extends StatelessWidget {
               ),
             ),
             child: Stack(children: [
-              const Positioned.fill(child: KadansLandscape()),
+              Positioned.fill(child: KadansLandscape()),
               Positioned(
                 left: 0,
                 right: 0,
@@ -246,7 +247,7 @@ class EmptyArt extends StatelessWidget {
 
 /// Foutmelding met "Opnieuw proberen".
 class ErrorView extends StatelessWidget {
-  const ErrorView({super.key, required this.message, required this.onRetry});
+  ErrorView({super.key, required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;
@@ -255,9 +256,9 @@ class ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.cloud_off_outlined,
-      title: 'Er ging iets mis',
+      title: tr('Er ging iets mis'),
       message: message,
-      actionLabel: 'Opnieuw proberen',
+      actionLabel: tr('Opnieuw proberen'),
       onAction: onRetry,
     );
   }
@@ -266,7 +267,7 @@ class ErrorView extends StatelessWidget {
 /// Laden: grijze, zacht pulserende kaarten in de vorm van wat er komt (zoals Strava en Garmin),
 /// of een draaiend rondje met [spinner].
 class LoadingView extends StatefulWidget {
-  const LoadingView({super.key, this.spinner = false, this.cards = 3});
+  LoadingView({super.key, this.spinner = false, this.cards = 3});
   final bool spinner;
   final int cards;
 
@@ -275,7 +276,7 @@ class LoadingView extends StatefulWidget {
 }
 
 class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat();
+  late final _c = AnimationController(vsync: this, duration: Duration(milliseconds: 1500))..repeat();
 
   @override
   void dispose() {
@@ -297,7 +298,7 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
                 begin: Alignment(-1 + t * 2 - 1, 0),
                 end: Alignment(1 + t * 2 - 1, 0),
                 colors: [RwColors.surfaceHigh, RwColors.border, RwColors.surfaceHigh],
-                stops: const [0.25, 0.5, 0.75],
+                stops: [0.25, 0.5, 0.75],
               ),
             ),
           );
@@ -306,19 +307,19 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    if (widget.spinner) return const Center(child: CircularProgressIndicator());
+    if (widget.spinner) return Center(child: CircularProgressIndicator());
     return Semantics(
-      label: 'Laden',
+      label: tr('Laden'),
       child: KeyedSubtree(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < widget.cards; i++)
                 Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: RwColors.surface,
                     borderRadius: BorderRadius.circular(RwRadius.m),
@@ -327,15 +328,15 @@ class _LoadingViewState extends State<LoadingView> with SingleTickerProviderStat
                   child: Row(
                     children: [
                       _bar(56, 56, radius: 14),
-                      const SizedBox(width: 14),
+                      SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _bar(140, 14),
-                            const SizedBox(height: 10),
+                            SizedBox(height: 10),
                             _bar(double.infinity, 10),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             _bar(90, 10),
                           ],
                         ),
@@ -359,10 +360,10 @@ void showMessage(BuildContext context, String message, {bool error = false}) {
     ..showSnackBar(SnackBar(
       content: Row(children: [
         Icon(error ? Icons.error_outline : Icons.check_circle_outline, color: error ? RwColors.danger : RwColors.good, size: 20),
-        const SizedBox(width: 10),
+        SizedBox(width: 10),
         Expanded(child: Text(message)),
       ]),
-      backgroundColor: error ? const Color(0xFF3A1820) : null,
+      backgroundColor: error ? Color(0xFF3A1820) : null,
     ));
 }
 
@@ -380,7 +381,7 @@ Future<bool> confirmDialog(
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuleren')),
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Annuleren'))),
         destructive
             ? TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
@@ -396,7 +397,7 @@ Future<bool> confirmDialog(
 /// Laat lijstonderdelen bij openen één voor één invliegen (schuiven + vagen).
 /// [since] is het moment dat de lijst verscheen: daarna (bij terugscrollen) geen animatie meer.
 class StaggerIn extends StatefulWidget {
-  const StaggerIn({super.key, required this.index, required this.child, this.since});
+  StaggerIn({super.key, required this.index, required this.child, this.since});
   final int index;
   final DateTime? since;
   final Widget child;
@@ -406,12 +407,12 @@ class StaggerIn extends StatefulWidget {
 }
 
 class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 460));
+  late final AnimationController _c = AnimationController(vsync: this, duration: Duration(milliseconds: 460));
 
   @override
   void initState() {
     super.initState();
-    final late = widget.since != null && DateTime.now().difference(widget.since!) > const Duration(milliseconds: 1400);
+    final late = widget.since != null && DateTime.now().difference(widget.since!) > Duration(milliseconds: 1400);
     final still = WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
     if (late || still || widget.index > 9) {
       _c.value = 1;
@@ -433,14 +434,14 @@ class _StaggerInState extends State<StaggerIn> with SingleTickerProviderStateMix
     final a = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
     return FadeTransition(
       opacity: a,
-      child: SlideTransition(position: Tween(begin: const Offset(0, 0.12), end: Offset.zero).animate(a), child: widget.child),
+      child: SlideTransition(position: Tween(begin: Offset(0, 0.12), end: Offset.zero).animate(a), child: widget.child),
     );
   }
 }
 
 /// Vlak met een lichtglans die eroverheen trekt: tijdelijke plek voor iets dat nog laadt.
 class ShimmerBox extends StatefulWidget {
-  const ShimmerBox({super.key, this.radius = 14, this.width, this.height});
+  ShimmerBox({super.key, this.radius = 14, this.width, this.height});
   final double radius;
   final double? width, height;
 
@@ -449,7 +450,7 @@ class ShimmerBox extends StatefulWidget {
 }
 
 class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+  late final _c = AnimationController(vsync: this, duration: Duration(milliseconds: 1500));
 
   @override
   void initState() {
@@ -488,7 +489,7 @@ class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateM
 /// Getal dat bij verschijnen als een kilometerteller vanaf nul naar zijn waarde rolt.
 /// Daarna rolt het gewoon mee bij elke verandering.
 class OdometerIn extends StatefulWidget {
-  const OdometerIn(this.text, {super.key, required this.style});
+  OdometerIn(this.text, {super.key, required this.style});
   final String text;
   final TextStyle style;
 
@@ -503,7 +504,7 @@ class _OdometerInState extends State<OdometerIn> {
   void initState() {
     super.initState();
     if (_shown == widget.text) return;
-    Future<void>.delayed(const Duration(milliseconds: 180), () {
+    Future<void>.delayed(Duration(milliseconds: 180), () {
       if (mounted) setState(() => _shown = widget.text);
     });
   }
@@ -515,13 +516,13 @@ class _OdometerInState extends State<OdometerIn> {
   }
 
   @override
-  Widget build(BuildContext context) => RollingText(_shown, style: widget.style, duration: const Duration(milliseconds: 650));
+  Widget build(BuildContext context) => RollingText(_shown, style: widget.style, duration: Duration(milliseconds: 650));
 }
 
 /// Hoofdknop (zwevend) in oranje verloop met gloed. Klapt in tot alleen het icoon
 /// zodra je naar beneden scrolt, zodat hij geen inhoud bedekt; komt terug bij omhoog scrollen.
 class RwFab extends StatelessWidget {
-  const RwFab({super.key, required this.label, required this.icon, required this.onPressed, required this.extended, this.heroTag, this.onLongPress});
+  RwFab({super.key, required this.label, required this.icon, required this.onPressed, required this.extended, this.heroTag, this.onLongPress});
   final VoidCallback? onLongPress;
   final String label;
   final IconData icon;
@@ -541,7 +542,7 @@ class RwFab extends StatelessWidget {
               colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
             ),
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 22, spreadRadius: -4, offset: const Offset(0, 8)),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 22, spreadRadius: -4, offset: Offset(0, 8)),
             ],
           ),
           child: Material(
@@ -558,7 +559,7 @@ class RwFab extends StatelessWidget {
                 label: label,
                 excludeSemantics: true,
                 child: AnimatedSize(
-                  duration: const Duration(milliseconds: 260),
+                  duration: Duration(milliseconds: 260),
                   curve: Curves.easeOutCubic,
                   child: SizedBox(
                     height: 56,
@@ -567,7 +568,7 @@ class RwFab extends StatelessWidget {
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(icon, color: RwColors.accentDark),
                         if (ext) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(label,
                               style: TextStyle(color: RwColors.accentDark, fontWeight: FontWeight.w700, fontSize: 16)),
                         ],
@@ -584,7 +585,7 @@ class RwFab extends StatelessWidget {
 
 /// Zet [extended] op false bij naar beneden scrollen en weer op true bij omhoog scrollen.
 class FabScrollWatcher extends StatelessWidget {
-  const FabScrollWatcher({super.key, required this.extended, required this.child});
+  FabScrollWatcher({super.key, required this.extended, required this.child});
   final ValueNotifier<bool> extended;
   final Widget child;
 
@@ -602,7 +603,7 @@ class FabScrollWatcher extends StatelessWidget {
 
 /// Icoon in een getint tegeltje (zoals in de instellingen van een iPhone): rustiger en chiquer in lijsten.
 class TileIcon extends StatelessWidget {
-  const TileIcon(this.icon, {super.key, Color? color}) : _color = color;
+  TileIcon(this.icon, {super.key, Color? color}) : _color = color;
   final IconData icon;
   final Color? _color;
   Color get color => _color ?? RwColors.muted;
@@ -626,7 +627,7 @@ class TileIcon extends StatelessWidget {
 
 /// Zwevend pilletje "Naar boven" bovenin lange lijsten, zodra je ver naar beneden bent.
 class BackToTop extends StatefulWidget {
-  const BackToTop({super.key, required this.controller, required this.child, this.threshold = 1400});
+  BackToTop({super.key, required this.controller, required this.child, this.threshold = 1400});
   final ScrollController controller;
   final Widget child;
   final double threshold;
@@ -670,21 +671,21 @@ class _BackToTopState extends State<BackToTop> {
           right: 0,
           child: Center(
             child: AnimatedSlide(
-              offset: _show ? Offset.zero : const Offset(0, -1.6),
-              duration: const Duration(milliseconds: 280),
+              offset: _show ? Offset.zero : Offset(0, -1.6),
+              duration: Duration(milliseconds: 280),
               curve: Curves.easeOutCubic,
               child: AnimatedOpacity(
                 opacity: _show ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 200),
                 child: Material(
                   color: RwColors.surface.withValues(alpha: 0.95),
                   shape: StadiumBorder(side: BorderSide(color: RwColors.border)),
                   elevation: 6,
                   child: InkWell(
-                    customBorder: const StadiumBorder(),
+                    customBorder: StadiumBorder(),
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      widget.controller.animateTo(0, duration: const Duration(milliseconds: 600), curve: Curves.easeOutCubic);
+                      widget.controller.animateTo(0, duration: Duration(milliseconds: 600), curve: Curves.easeOutCubic);
                       setState(() => _show = false);
                     },
                     child: Padding(
@@ -692,7 +693,7 @@ class _BackToTopState extends State<BackToTop> {
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(Icons.arrow_upward, size: 16, color: RwColors.accentLight),
                         SizedBox(width: 6),
-                        Text('Naar boven', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                        Text(tr('Naar boven'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                       ]),
                     ),
                   ),
@@ -706,7 +707,7 @@ class _BackToTopState extends State<BackToTop> {
 
 /// Sectielabel in typemachine-stijl, zoals op kadans.fit: "01  LATER LOPEN".
 class SectionLabel extends StatelessWidget {
-  const SectionLabel(this.text, {super.key, this.number, this.color});
+  SectionLabel(this.text, {super.key, this.number, this.color});
   final String text;
   final int? number;
   final Color? color;
@@ -738,7 +739,7 @@ class SectionLabel extends StatelessWidget {
 /// Hoofdknop in huisstijl: donker blok met tekst in typemachine-letters + goud vierkant met pijl
 /// (dezelfde knop als op kadans.fit). In donkere weergave een licht blok.
 class KadansButton extends StatefulWidget {
-  const KadansButton({super.key, required this.label, required this.onPressed, this.icon = Icons.arrow_forward});
+  KadansButton({super.key, required this.label, required this.onPressed, this.icon = Icons.arrow_forward});
   final String label;
   final VoidCallback? onPressed;
   final IconData icon;
@@ -753,8 +754,8 @@ class _KadansButtonState extends State<KadansButton> {
   @override
   Widget build(BuildContext context) {
     final dark = RwColors.isDark;
-    final block = dark ? const Color(0xFFF1E9DC) : const Color(0xFF211A14);
-    final onBlock = dark ? const Color(0xFF211A14) : const Color(0xFFF1E9DC);
+    final block = dark ? Color(0xFFF1E9DC) : Color(0xFF211A14);
+    final onBlock = dark ? Color(0xFF211A14) : Color(0xFFF1E9DC);
     const gold = Color(0xFFD9BF92);
     final enabled = widget.onPressed != null;
     return Semantics(
@@ -773,16 +774,16 @@ class _KadansButtonState extends State<KadansButton> {
             : null,
         child: AnimatedScale(
           scale: _down ? 0.97 : 1,
-          duration: const Duration(milliseconds: 120),
+          duration: Duration(milliseconds: 120),
           child: Opacity(
             opacity: enabled ? 1 : 0.5,
             child: ExcludeSemantics(
               child: Row(children: [
                 Expanded(
                   child: Container(
-                    constraints: const BoxConstraints(minHeight: 52),
+                    constraints: BoxConstraints(minHeight: 52),
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(color: block, borderRadius: BorderRadius.circular(RwRadius.s)),
                     child: Text(
                       widget.label.toUpperCase(),
@@ -791,12 +792,12 @@ class _KadansButtonState extends State<KadansButton> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
                 Container(
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(RwRadius.s)),
-                  child: Icon(widget.icon, color: const Color(0xFF211A14), size: 22),
+                  child: Icon(widget.icon, color: Color(0xFF211A14), size: 22),
                 ),
               ]),
             ),
@@ -809,7 +810,7 @@ class _KadansButtonState extends State<KadansButton> {
 
 /// Een getal dat bij verschijnen optelt (zoals de cijfers op kadans.fit). Bij "minder beweging" meteen goed.
 class CountUpText extends StatelessWidget {
-  const CountUpText({super.key, required this.value, required this.format, this.style, this.from});
+  CountUpText({super.key, required this.value, required this.format, this.style, this.from});
   final double value;
   final double? from;
   final String Function(double) format;
@@ -821,7 +822,7 @@ class CountUpText extends StatelessWidget {
     if (still) return Text(format(value), style: style);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: from ?? 0, end: value),
-      duration: const Duration(milliseconds: 1100),
+      duration: Duration(milliseconds: 1100),
       curve: Curves.easeOutCubic,
       builder: (_, v, _) => Text(format(v), style: style),
     );

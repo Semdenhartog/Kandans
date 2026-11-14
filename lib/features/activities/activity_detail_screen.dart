@@ -23,6 +23,7 @@ import '../routes/route_map.dart';
 import 'activities_screen.dart' show runTitle;
 import 'activity_providers.dart';
 import 'run_replay_screen.dart';
+import 'route_anim_screen.dart';
 import 'share_run_screen.dart';
 import 'gps_spike_screen.dart';
 import '../community/share_to_feed.dart';
@@ -38,7 +39,7 @@ import 'trim_run_screen.dart';
 
 /// Eén run: tijden, weer, records, route en delen.
 class ActivityDetailScreen extends ConsumerWidget {
-  const ActivityDetailScreen({super.key, required this.activityId});
+  ActivityDetailScreen({super.key, required this.activityId});
   final String activityId;
 
   Future<void> _linkRoute(BuildContext context, WidgetRef ref, Activity a) async {
@@ -56,9 +57,9 @@ class ActivityDetailScreen extends ConsumerWidget {
         child: ListView(
           shrinkWrap: true,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text('Op welke route liep je?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              child: Text(tr('Op welke route liep je?'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
             for (final r in routes)
               ListTile(
@@ -74,7 +75,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             if (a.routeId != null)
               ListTile(
                 leading: Icon(Icons.link_off, color: RwColors.danger),
-                title: const Text('Losmaken van route'),
+                title: Text(tr('Losmaken van route')),
                 onTap: () => Navigator.pop(ctx, ''),
               ),
           ],
@@ -128,19 +129,19 @@ class ActivityDetailScreen extends ConsumerWidget {
     if (a == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: loading ? const LoadingView() : const Center(child: Text('Deze run bestaat niet meer.')),
+        body: loading ? LoadingView() : Center(child: Text(tr('Deze run bestaat niet meer.'))),
       );
     }
     final records = ref.watch(recordsProvider);
     final badges = records.badgesFor(a);
     final cost = weatherCost(a);
     final corrected = correctedSeconds(a);
-    final routes = ref.watch(routesProvider).value ?? const <RunRoute>[];
+    final routes = ref.watch(routesProvider).value ?? <RunRoute>[];
     RunRoute? route;
     for (final r in routes) {
       if (r.id == a.routeId) route = r;
     }
-    final all = ref.watch(activitiesProvider).value ?? const <Activity>[];
+    final all = ref.watch(activitiesProvider).value ?? <Activity>[];
     final history = a.routeId == null ? null : routeHistory(all, a.routeId!);
 
     final list = ListView(
@@ -156,10 +157,10 @@ class ActivityDetailScreen extends ConsumerWidget {
               Flexible(
                 child: Text(
                   runTitle(a, routeName: route?.name),
-                  style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800),
+                  style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800),
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Icon(Icons.edit_outlined, size: 18, color: RwColors.subtle),
             ]),
           ),
@@ -167,22 +168,22 @@ class ActivityDetailScreen extends ConsumerWidget {
             '${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}',
             style: TextStyle(color: RwColors.subtle),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             Fmt.km(a.distanceMeters),
-            style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 48, fontWeight: FontWeight.w800, height: 1.1),
+            style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 48, fontWeight: FontWeight.w800, height: 1.1),
           ),
           if (badges.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Wrap(spacing: 8, runSpacing: 8, children: [for (final b in badges) RecordBadge(b)]),
           ],
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: StatTile(label: 'Tijd', value: Fmt.duration(a.movingTimeSeconds))),
-              const SizedBox(width: 8),
-              Expanded(child: StatTile(label: 'Tempo', value: Fmt.pace(a.paceSecondsPerKm))),
-              const SizedBox(width: 8),
+              Expanded(child: StatTile(label: tr('Tijd'), value: Fmt.duration(a.movingTimeSeconds))),
+              SizedBox(width: 8),
+              Expanded(child: StatTile(label: tr('Tempo'), value: Fmt.pace(a.paceSecondsPerKm))),
+              SizedBox(width: 8),
               Expanded(
                 child: StatTile(
                   label: a.averageHeartRate != null ? 'Hartslag' : 'Hoogte',
@@ -193,39 +194,37 @@ class ActivityDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (a.id != null) _JumpChips(activity: a),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           RwCard(
-            title: 'ROUTE',
+            title: tr('ROUTE'),
             child: route == null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (a.hasTrack) ...[
-                        Text(
-                          'Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt Kadans je volgende runs hier vanzelf aan.',
+                        Text(tr('Dit rondje past bij geen van je routes. Bewaar het als route, dan koppelt Kadans je volgende runs hier vanzelf aan.'),
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ] else
-                        Text(
-                          'Koppel deze run aan een route. Dan zie je je tijden op die route naast elkaar, eerlijk vergeleken voor het weer.',
+                        Text(tr('Koppel deze run aan een route. Dan zie je je tijden op die route naast elkaar, eerlijk vergeleken voor het weer.'),
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       if (a.hasTrack)
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: EdgeInsets.only(bottom: 8),
                           child: FilledButton.tonalIcon(
                             onPressed: a.id == null ? null : () => _saveAsRoute(context, ref, a),
-                            icon: const Icon(Icons.bookmark_add_outlined),
-                            label: const Text('Bewaar als route'),
+                            icon: Icon(Icons.bookmark_add_outlined),
+                            label: Text(tr('Bewaar als route')),
                           ),
                         ),
                       OutlinedButton.icon(
                         onPressed: a.id == null ? null : () => _linkRoute(context, ref, a),
-                        icon: const Icon(Icons.add_link),
-                        label: const Text('Koppel aan route'),
+                        icon: Icon(Icons.add_link),
+                        label: Text(tr('Koppel aan route')),
                       ),
                     ],
                   )
@@ -238,17 +237,17 @@ class ActivityDetailScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(route.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                                Text(route.name, style: TextStyle(fontWeight: FontWeight.w700)),
                                 if (a.autoLinked)
-                                  Text('Automatisch herkend aan je GPS-spoor',
+                                  Text(tr('Automatisch herkend aan je GPS-spoor'),
                                       style: TextStyle(color: RwColors.subtle, fontSize: 12)),
                               ],
                             ),
                           ),
-                          TextButton(onPressed: () => _linkRoute(context, ref, a), child: const Text('Wijzig')),
+                          TextButton(onPressed: () => _linkRoute(context, ref, a), child: Text(tr('Wijzig'))),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       SizedBox(
                         height: 180,
                         child: RouteMap(
@@ -262,13 +261,13 @@ class ActivityDetailScreen extends ConsumerWidget {
                         ),
                       ),
                       if (history != null && history.runs.length > 1) ...[
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Text(
                           _historyLine(a, history),
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ],
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       FilledButton.icon(
                         style: FilledButton.styleFrom(
                           backgroundColor: RwColors.accent.withValues(alpha: 0.16),
@@ -276,28 +275,28 @@ class ActivityDetailScreen extends ConsumerWidget {
                           side: BorderSide(color: RwColors.accent.withValues(alpha: 0.35)),
                         ),
                         onPressed: () => openRecorder(context, route: route),
-                        icon: const Icon(Icons.replay),
-                        label: const Text('Loop deze route opnieuw'),
+                        icon: Icon(Icons.replay),
+                        label: Text(tr('Loop deze route opnieuw')),
                       ),
                       TextButton.icon(
                         onPressed: () => context.go('/routes/${route!.id}'),
-                        icon: const Icon(Icons.timeline),
-                        label: const Text('Al je runs op deze route'),
+                        icon: Icon(Icons.timeline),
+                        label: Text(tr('Al je runs op deze route')),
                       ),
                     ],
                   ),
           ),
           if (a.id != null && !a.viaStrava) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'coach'), child: _CoachSummaryCard(activity: a)),
           ],
           if (HindsightCard.applies(a)) HindsightCard(key: ValueKey('hindsight-${a.id}'), activity: a),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           RwCard(
             key: _sectionKey(a, 'weer'),
-            title: 'HET WEER TIJDENS JE RUN',
+            title: tr('HET WEER TIJDENS JE RUN'),
             child: a.temperatureCelsius == null && a.windSpeedKmh == null
-                ? Text('Geen weergegevens bij deze run.', style: TextStyle(color: RwColors.muted))
+                ? Text(tr('Geen weergegevens bij deze run.'), style: TextStyle(color: RwColors.muted))
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -308,9 +307,9 @@ class ActivityDetailScreen extends ConsumerWidget {
                           if (a.windSpeedKmh != null)
                             'wind ${Fmt.wind(a.windSpeedKmh)}${a.windDirectionDegrees == null ? '' : ' uit het ${Fmt.compass(a.windDirectionDegrees!)}'}',
                         ].join(' · '),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       if (cost.matters) ...[
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -325,11 +324,11 @@ class ActivityDetailScreen extends ConsumerWidget {
                                 height: 1,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             // Flexible: bij grote letters loopt de tekst door op de volgende regel.
                             Flexible(
                               child: Padding(
-                                padding: const EdgeInsets.only(bottom: 3),
+                                padding: EdgeInsets.only(bottom: 3),
                                 child: Text(
                                   'bij ideaal weer · ${Fmt.pace(corrected / (a.distanceMeters / 1000))}',
                                   style: TextStyle(color: RwColors.muted),
@@ -338,26 +337,25 @@ class ActivityDetailScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           'Het weer kostte je ongeveer ${Fmt.duration(cost.totalSeconds)} (${cost.explanation}). '
                           'Zo vergelijk je runs eerlijk, ook als het hard waaide.',
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ] else
-                        Text(
-                          'Prima loopweer: het weer had nauwelijks invloed op je tijd.',
+                        Text(tr('Prima loopweer: het weer had nauwelijks invloed op je tijd.'),
                           style: TextStyle(color: RwColors.muted),
                         ),
                     ],
                   ),
           ),
           if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'splits'), child: SplitsCard(activity: a)),
           ],
           if (a.id != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'hoogte'), child: ElevationCard(activity: a)),
           ],
           // Verdieping (vocht, hartslagherstel, markeringen, stukken) achter één kopje: de run zelf blijft overzichtelijk.
@@ -368,34 +366,42 @@ class ActivityDetailScreen extends ConsumerWidget {
               if (a.id != null && a.source == 'runwise') MarkersCard(activity: a),
               if (a.id != null && a.source == 'runwise') SegmentEffortsCard(activity: a),
             ];
-            return extra.isEmpty ? const <Widget>[] : <Widget>[const SizedBox(height: 12), _MoreAnalysis(children: extra)];
+            return extra.isEmpty ? <Widget>[] : <Widget>[SizedBox(height: 12), _MoreAnalysis(children: extra)];
           }(),
           if (a.id != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             PhotosCard(activity: a),
           ],
           if (a.id != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _FeelCard(activity: a),
           ],
           GpsSpikeCard(activity: a),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => openShareRun(context, a, route: route, badges: badges),
-            icon: const Icon(Icons.ios_share),
-            label: const Text('Deel je run'),
+            icon: Icon(Icons.ios_share),
+            label: Text(tr('Deel je run')),
           ),
+          if (a.hasTrack || route != null) ...[
+            SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => openRouteAnim(context, a, route: route),
+              icon: Icon(Icons.movie_creation_outlined),
+              label: Text(tr('Bewegende video van je route')),
+            ),
+          ],
           ShareToFeedButton(activity: a),
           // Alleen eigen opnames: die hebben het verloop per seconde dat nodig is om te knippen.
           if (a.source == 'runwise' && a.id != null) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => openTrimRun(context, a),
-              icon: const Icon(Icons.content_cut),
-              label: const Text('Run bijsnijden'),
+              icon: Icon(Icons.content_cut),
+              label: Text(tr('Run bijsnijden')),
             ),
             if (ref.watch(stravaConnectionProvider).value != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () async {
                   try {
@@ -405,13 +411,13 @@ class ActivityDetailScreen extends ConsumerWidget {
                     if (context.mounted) showMessage(context, friendlyError(e), error: true);
                   }
                 },
-                icon: const Icon(Icons.upload_outlined),
+                icon: Icon(Icons.upload_outlined),
                 label: Text(tr('Naar Strava sturen')),
               ),
             ],
           ],
           if (a.viaStrava) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(a.source == 'strava' ? 'Gegevens via Strava' : 'Gegevens van de Strava-app (via Health Connect)',
                 textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
@@ -423,8 +429,8 @@ class ActivityDetailScreen extends ConsumerWidget {
         title: Text(Fmt.date(a.startedAt)),
         actions: [
           IconButton(
-            tooltip: 'Delen',
-            icon: const Icon(Icons.ios_share),
+            tooltip: tr('Delen'),
+            icon: Icon(Icons.ios_share),
             onPressed: () => openShareRun(context, a, route: route, badges: badges),
           ),
         ],
@@ -447,19 +453,19 @@ class ActivityDetailScreen extends ConsumerWidget {
             actions: [
               if (a.hasTrack)
                 IconButton(
-                  tooltip: 'Bekijk je run nog eens',
-                  icon: const Icon(Icons.play_circle_outline),
+                  tooltip: tr('Bekijk je run nog eens'),
+                  icon: Icon(Icons.play_circle_outline),
                   onPressed: () => openRunReplay(context, a),
                 ),
               IconButton(
-                tooltip: 'Delen',
-                icon: const Icon(Icons.ios_share),
+                tooltip: tr('Delen'),
+                icon: Icon(Icons.ios_share),
                 onPressed: () => openShareRun(context, a, route: route, badges: badges),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
-              stretchModes: const [StretchMode.zoomBackground],
+              stretchModes: [StretchMode.zoomBackground],
               background: Stack(fit: StackFit.expand, children: [
                 Padding(
                   // Ruimte voor titel en knoppen, zodat ze niet over de kaartknoppen vallen.
@@ -468,7 +474,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                   child: Consumer(builder: (context, ref, _) {
                     final json = a.id == null ? null : ref.watch(activityStreamsProvider(a.id!)).value;
                     final s = json == null ? null : RunStreams.fromJson(json);
-                    final colored = s == null ? const <({List<LatLng> points, Color color})>[] : coloredRunSegments(s);
+                    final colored = s == null ? <({List<LatLng> points, Color color})>[] : coloredRunSegments(s);
                     return Stack(fit: StackFit.expand, children: [
                       RouteMap(
                         polyline: a.trackPolyline!,
@@ -482,7 +488,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                         showLegend: colored.isEmpty,
                         colorSegments: colored.isEmpty ? null : colored,
                       ),
-                      if (colored.isNotEmpty) const Positioned(left: 12, bottom: 34, child: IgnorePointer(child: PaceLegend())),
+                      if (colored.isNotEmpty) Positioned(left: 12, bottom: 34, child: IgnorePointer(child: PaceLegend())),
                     ]);
                   }),
                 ),
@@ -521,7 +527,7 @@ class ActivityDetailScreen extends ConsumerWidget {
 
 /// Labeltje voor een record.
 class RecordBadge extends StatelessWidget {
-  const RecordBadge(this.label, {super.key, this.small = false});
+  RecordBadge(this.label, {super.key, this.small = false});
   final String label;
   final bool small;
 
@@ -600,7 +606,7 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
 
   @override
   Widget build(BuildContext context) {
-    final shoes = (ref.watch(shoesProvider).value ?? const <Shoe>[]).where((s) => !s.retired).toList();
+    final shoes = (ref.watch(shoesProvider).value ?? <Shoe>[]).where((s) => !s.retired).toList();
     final current = shoeFor(widget.activity, shoes);
     Widget chip(int v, String label, IconData icon) => ChoiceChip(
           avatar: Icon(icon, size: 18),
@@ -609,7 +615,7 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
           onSelected: (on) => on ? _save(feel: v) : _save(clearFeel: true),
         );
     return RwCard(
-      title: 'HOE VOELDE HET?',
+      title: tr('HOE VOELDE HET?'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -618,7 +624,7 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
             chip(2, 'Oké', Icons.sentiment_neutral_outlined),
             chip(3, 'Top', Icons.sentiment_very_satisfied_outlined),
           ]),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           TextField(
             controller: _note,
             maxLength: 500,
@@ -629,18 +635,18 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
               if (!_dirtyNote) setState(() => _dirtyNote = true);
             },
             decoration: InputDecoration(
-              hintText: 'Notitie, bijv. kuiten stijf of lekker gelopen',
+              hintText: tr('Notitie, bijv. kuiten stijf of lekker gelopen'),
               counterText: '',
               suffixIcon: _dirtyNote
-                  ? IconButton(tooltip: 'Notitie opslaan', icon: const Icon(Icons.check), onPressed: () => _save())
+                  ? IconButton(tooltip: tr('Notitie opslaan'), icon: Icon(Icons.check), onPressed: () => _save())
                   : null,
             ),
           ),
           if (shoes.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             DropdownButtonFormField<String?>(
               initialValue: widget.activity.shoeId ?? current?.id,
-              decoration: const InputDecoration(labelText: 'Schoen'),
+              decoration: InputDecoration(labelText: tr('Schoen')),
               items: [
                 for (final s in shoes) DropdownMenuItem(value: s.id, child: Text(s.name)),
               ],
@@ -690,31 +696,31 @@ class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
   Widget build(BuildContext context) {
     final t = _text;
     return RwCard(
-      title: 'COACH',
+      title: tr('COACH'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (t != null)
-            Text(t, style: const TextStyle(height: 1.45))
+            Text(t, style: TextStyle(height: 1.45))
           else ...[
-            Text('Laat de coach in een paar zinnen vertellen wat goed ging, wat het weer deed en wat je volgende keer kunt doen.',
+            Text(tr('Laat de coach in een paar zinnen vertellen wat goed ging, wat het weer deed en wat je volgende keer kunt doen.'),
                 style: TextStyle(color: RwColors.muted)),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: _busy ? null : _ask,
               icon: _busy
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.auto_awesome_outlined),
+                  ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : Icon(Icons.auto_awesome_outlined),
               label: Text(_busy ? 'De coach kijkt…' : 'Laat de coach je run bekijken'),
             ),
           ],
           if (_error != null) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(_error!, style: TextStyle(color: RwColors.danger)),
           ],
           if (t != null) ...[
-            const SizedBox(height: 6),
-            Text('Gemaakt door AI; kan fouten bevatten.', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
+            SizedBox(height: 6),
+            Text(tr('Gemaakt door AI; kan fouten bevatten.'), style: TextStyle(color: RwColors.subtle, fontSize: 11)),
           ],
         ],
       ),
@@ -745,7 +751,7 @@ class _JumpChips extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => SizedBox(width: 8),
         itemBuilder: (context, i) {
           final (id, label, icon) = items[i];
           return ActionChip(
@@ -758,7 +764,7 @@ class _JumpChips extends StatelessWidget {
                 return;
               }
               HapticFeedback.selectionClick();
-              Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic, alignment: 0.05);
+              Scrollable.ensureVisible(ctx, duration: Duration(milliseconds: 500), curve: Curves.easeOutCubic, alignment: 0.05);
             },
           );
         },
@@ -812,15 +818,15 @@ Future<void> _editTitle(BuildContext context, WidgetRef ref, Activity a, String?
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(ctx).bottom),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(tr('Titel van je run'), style: RwText.title),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         TextField(controller: c, autofocus: true, maxLength: 80, textCapitalization: TextCapitalization.sentences),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final s in suggestions) ActionChip(label: Text(s), onPressed: () => c.text = s),
         ]),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Row(children: [
           TextButton(onPressed: () => Navigator.pop(ctx, ''), child: Text(tr('Automatisch'))),
-          const Spacer(),
+          Spacer(),
           FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(tr('Opslaan'))),
         ]),
       ]),

@@ -183,6 +183,8 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
         final t = i / routeAnimFps;
         final rgba = await renderRouteAnimFrame(RouteAnimPainter(style: style, data: data, t: t), _w, _h);
         await enc.frame(rgba, i);
+        // Even ruimte voor het scherm (Stoppen, voortgangsbalk), ook op trage toestellen.
+        await Future<void>.delayed(Duration.zero);
         if (i % 4 == 0 && mounted) setState(() => _progress = i / n);
       }
       final path = await enc.finish();

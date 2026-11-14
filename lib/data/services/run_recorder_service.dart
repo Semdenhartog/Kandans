@@ -34,6 +34,7 @@ import 'recording_store.dart';
 import '../../domain/live_quests.dart';
 import '../../domain/run_helpers.dart';
 import 'kadans_voice.dart';
+import '../../core/error_reporter.dart';
 
 /// Wat het opnamescherm laat zien.
 @immutable
@@ -242,7 +243,7 @@ class RunRecorderService {
     try {
       await _tts!.setSpeechRate(speechRate);
       await _tts!.speak(text);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
   }
   FuelReminder? _fuel;
   GuidedPlayer? _guided;
@@ -329,7 +330,7 @@ class RunRecorderService {
       await t.setQueueMode(1);
       await t.awaitSpeakCompletion(true);
       await t.setAudioAttributesForNavigation();
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
   }
 
   ({String name, String locale})? _auto;
@@ -350,7 +351,7 @@ class RunRecorderService {
     if (preview.isNotEmpty) {
       try {
         await _tts!.speak(preview);
-      } catch (_) {}
+      } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
     }
   }
 
@@ -612,7 +613,7 @@ class RunRecorderService {
   }) async {
     try {
       _simpleArrows = (await SharedPreferences.getInstance()).getBool('simple_turn_arrows') ?? false;
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null || quests;
     this.shareLive = shareLive && !indoor;
@@ -726,7 +727,7 @@ class RunRecorderService {
         if (rec == null || rec.status == RecorderStatus.paused || fallCountdown.value != null) return;
         if (_fall!.add(_sw.elapsedMilliseconds / 1000, e.x, e.y, e.z)) _suspectFall();
       }, onError: (Object _) {});
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
   }
 
   void _stopFallWatch() {
@@ -1101,7 +1102,7 @@ class RunRecorderService {
           await KadansVoice.instance.stopPlayback();
           await _ensureTts();
           await _tts?.speak(t, focus: true).timeout(const Duration(seconds: 20));
-        } catch (_) {}
+        } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
       },
       stopFallback: () async {
         await _tts?.stop();

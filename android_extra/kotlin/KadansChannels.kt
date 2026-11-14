@@ -318,12 +318,8 @@ class KadansVideo {
     fun frame(rgba: ByteArray, index: Int): Boolean {
         val c = codec ?: throw IllegalStateException("encoder niet gestart")
         if (rgba.size < w * h * 4) throw IllegalArgumentException("beeld te klein")
-        var i = c.dequeueInputBuffer(10_000)
-        while (i < 0) {
-            drain(false)
-            i = c.dequeueInputBuffer(10_000)
-        }
-        val img = c.getInputImage(i) ?: throw IllegalStateException("geen invoerbeeld")
+        val i = waitInput(c)
+        val img = c.getInputImage(i) ?: throw IllegalStateException("Dit toestel ondersteunt dit videoformaat niet")
         fill(img, rgba)
         c.queueInputBuffer(i, 0, w * h * 3 / 2, index * 1_000_000L / fps, 0)
         drain(false)
@@ -332,15 +328,23 @@ class KadansVideo {
 
     fun finish(): Boolean {
         val c = codec ?: return false
-        var i = c.dequeueInputBuffer(10_000)
-        while (i < 0) {
-            drain(false)
-            i = c.dequeueInputBuffer(10_000)
-        }
+        val i = waitInput(c)
         c.queueInputBuffer(i, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
         drain(true)
         release()
         return true
+    }
+
+    /** Wacht op een vrije invoerplek; na ongeveer 10 seconden zonder voortgang geven we op in plaats van te blijven hangen. */
+    private fun waitInput(c: MediaCodec): Int {
+        var tries = 0
+        var i = c.dequeueInputBuffer(10_000)
+        while (i < 0) {
+            if (++tries > 1000) throw IllegalStateException("De videoencoder reageert niet meer")
+            drain(false)
+            i = c.dequeueInputBuffer(10_000)
+        }
+        return i
     }
 
     fun cancel(): Boolean {

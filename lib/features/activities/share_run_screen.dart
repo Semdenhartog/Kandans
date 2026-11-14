@@ -36,7 +36,7 @@ enum _CardStyle { kaart, donker, oranje, goud, foto, sticker }
 
 /// Maakt een mooie afbeelding van je run om te delen (Instagram, WhatsApp, ...).
 class ShareRunScreen extends ConsumerStatefulWidget {
-  const ShareRunScreen({super.key, required this.activity, this.route, this.badges = const []});
+  ShareRunScreen({super.key, required this.activity, this.route, this.badges = const []});
   final Activity activity;
   final RunRoute? route;
   final List<String> badges;
@@ -137,13 +137,13 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Deel je run')),
+      appBar: AppBar(title: Text(tr('Deel je run'))),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
                 child: Center(
                   child: FittedBox(
                     // Bij de sticker een gestreepte achtergrond in het voorbeeld, zodat je ziet wat doorzichtig is.
@@ -151,7 +151,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                       decoration: _style == _CardStyle.sticker
                           ? BoxDecoration(
                               borderRadius: BorderRadius.circular(RwRadius.m),
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 colors: [Color(0xFF2E3A46), Color(0xFF4A3A2E)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -178,33 +178,33 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SegmentedButton<_CardStyle>(
                     segments: [
                       if (widget.activity.hasTrack || widget.route != null)
-                        const ButtonSegment(value: _CardStyle.kaart, label: Text('Kaart')),
-                      const ButtonSegment(value: _CardStyle.donker, label: Text('Donker')),
-                      const ButtonSegment(value: _CardStyle.oranje, label: Text('Oranje')),
+                        ButtonSegment(value: _CardStyle.kaart, label: Text(tr('Kaart'))),
+                      ButtonSegment(value: _CardStyle.donker, label: Text(tr('Donker'))),
+                      ButtonSegment(value: _CardStyle.oranje, label: Text(tr('Oranje'))),
                       ButtonSegment(
                         value: _CardStyle.goud,
-                        label: const Text('Goud'),
-                        icon: (ref.watch(luxeAccessProvider).value ?? false) ? null : const Icon(Icons.lock, size: 14, color: luxeGold),
+                        label: Text(tr('Goud')),
+                        icon: (ref.watch(luxeAccessProvider).value ?? false) ? null : Icon(Icons.lock, size: 14, color: luxeGold),
                       ),
-                      if (_photo != null) const ButtonSegment(value: _CardStyle.foto, label: Text('Foto')),
-                      const ButtonSegment(value: _CardStyle.sticker, label: Text('Sticker')),
+                      if (_photo != null) ButtonSegment(value: _CardStyle.foto, label: Text(tr('Foto'))),
+                      ButtonSegment(value: _CardStyle.sticker, label: Text(tr('Sticker'))),
                     ],
                     selected: {_style},
                     onSelectionChanged: (s) => setState(() => _style = s.first),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   if (_style != _CardStyle.sticker)
                     SegmentedButton<bool>(
                       segments: [
-                        ButtonSegment(value: false, icon: const Icon(Icons.crop_portrait, size: 18), label: Text(tr('Bericht'))),
-                        ButtonSegment(value: true, icon: const Icon(Icons.smartphone, size: 18), label: Text(tr('Verhaal'))),
+                        ButtonSegment(value: false, icon: Icon(Icons.crop_portrait, size: 18), label: Text(tr('Bericht'))),
+                        ButtonSegment(value: true, icon: Icon(Icons.smartphone, size: 18), label: Text(tr('Verhaal'))),
                       ],
                       selected: {_story},
                       onSelectionChanged: (v) => setState(() => _story = v.first),
@@ -213,24 +213,24 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     contentPadding: EdgeInsets.zero,
                     value: _hideHome,
                     onChanged: _setHideHome,
-                    title: const Text('Verberg waar je woont'),
-                    subtitle: const Text('Laat de eerste en laatste 300 m van je route weg'),
+                    title: Text(tr('Verberg waar je woont')),
+                    subtitle: Text(tr('Laat de eerste en laatste 300 m van je route weg')),
                   ),
                   // Zelf indelen: lijn, afstand en tijd verslepen, kleuren kiezen, eigen foto erachter, naar Instagram.
                   OutlinedButton.icon(
                     onPressed: () => openShareStudio(context, widget.activity, route: widget.route),
-                    icon: const Icon(Icons.tune),
+                    icon: Icon(Icons.tune),
                     label: Text(tr('Zelf indelen of naar Instagram')),
                   ),
                   if (widget.activity.hasTrack || widget.route != null) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () => openRouteAnim(context, widget.activity, route: widget.route),
-                      icon: const Icon(Icons.movie_creation_outlined),
+                      icon: Icon(Icons.movie_creation_outlined),
                       label: Text(tr('Bewegende video van je route')),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   FilledButton.icon(
                     onPressed: _busy ? null : _share,
                     icon: _busy
@@ -239,8 +239,8 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2.5, color: RwColors.accentDark),
                           )
-                        : const Icon(Icons.ios_share),
-                    label: const Text('Delen of opslaan'),
+                        : Icon(Icons.ios_share),
+                    label: Text(tr('Delen of opslaan')),
                   ),
                 ],
               ),
@@ -254,7 +254,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
 
 /// De deelkaart zelf: 360 × 450 (wordt 1080 × 1350 px, het staande Instagram-formaat).
 class RunShareCard extends StatelessWidget {
-  const RunShareCard({
+  RunShareCard({
     super.key,
     required this.activity,
     this.route,
@@ -314,7 +314,7 @@ class RunShareCard extends StatelessWidget {
     ].join(' · ');
     // Liever het echte GPS-spoor van de run, anders de gekoppelde route.
     final line = a.hasTrack ? a.trackPolyline! : route?.polyline;
-    final raw = line == null ? const <LatLng>[] : decodePolyline(line);
+    final raw = line == null ? <LatLng>[] : decodePolyline(line);
     final shown = hideHome ? trimPrivacyZone(raw, radius: 300) : raw;
     final track = shown.length < 2 ? null : RouteTrack(shown);
 
@@ -323,7 +323,7 @@ class RunShareCard extends StatelessWidget {
       height: 450,
       child: DecoratedBox(
         decoration: sticker
-            ? const BoxDecoration()
+            ? BoxDecoration()
             : BoxDecoration(
           gradient: orange
               ? LinearGradient(
@@ -332,7 +332,7 @@ class RunShareCard extends StatelessWidget {
                   colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
                 )
               : gold
-                  ? const LinearGradient(
+                  ? LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [Color(0xFF1E170B), Color(0xFF0A0806), Color(0xFF15100A)],
@@ -348,7 +348,7 @@ class RunShareCard extends StatelessWidget {
             if (map && track != null && track.isValid) ...[
               Positioned.fill(child: _ShareMap(points: shown)),
               // Boven en onder donker laten verlopen, zodat de tekst leesbaar blijft.
-              const Positioned.fill(
+              Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -362,15 +362,15 @@ class RunShareCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 right: 8,
                 bottom: 4,
-                child: Text('Kaart © Kadaster / PDOK', style: TextStyle(color: Color(0x99FFFFFF), fontSize: 7)),
+                child: Text(tr('Kaart © Kadaster / PDOK'), style: TextStyle(color: Color(0x99FFFFFF), fontSize: 7)),
               ),
             ],
             if (photo != null) ...[
               Positioned.fill(child: Image.memory(photo!, fit: BoxFit.cover)),
-              const Positioned.fill(
+              Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -386,7 +386,7 @@ class RunShareCard extends StatelessWidget {
               Positioned.fill(
                 child: IgnorePointer(
                   child: Padding(
-                    padding: const EdgeInsets.all(9),
+                    padding: EdgeInsets.all(9),
                     child: DecoratedBox(decoration: BoxDecoration(border: Border.all(color: luxeGold.withValues(alpha: 0.7)))),
                   ),
                 ),
@@ -410,10 +410,10 @@ class RunShareCard extends StatelessWidget {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
+              padding: EdgeInsets.fromLTRB(24, 22, 24, 20),
               child: DefaultTextStyle.merge(
                 // Sticker: zachte schaduw, zodat de tekst op elke foto leesbaar is.
-                style: TextStyle(shadows: sticker ? const [Shadow(color: Color(0x99000000), blurRadius: 8, offset: Offset(0, 1))] : null),
+                style: TextStyle(shadows: sticker ? [Shadow(color: Color(0x99000000), blurRadius: 8, offset: Offset(0, 1))] : null),
                 child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -424,17 +424,17 @@ class RunShareCard extends StatelessWidget {
                         mark: _tint(Image.asset('assets/logo/mark.png', height: 18), orange),
                         color: orange ? RwColors.accentDark : Colors.white,
                       ),
-                      const Spacer(),
+                      Spacer(),
                       Text(
                         Fmt.date(a.startedAt),
                         style: TextStyle(color: muted, fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   Expanded(
                     child: map && track != null && track.isValid
-                        ? const SizedBox.expand()
+                        ? SizedBox.expand()
                         : track != null && track.isValid
                         ? CustomPaint(
                             size: Size.infinite,
@@ -452,11 +452,11 @@ class RunShareCard extends StatelessWidget {
                             child: Icon(Icons.directions_run, size: 90, color: fg.withValues(alpha: 0.12)),
                           ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   if (headline != null)
                     Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      margin: EdgeInsets.only(bottom: 6),
+                      padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                       decoration: BoxDecoration(
                         color: orange ? RwColors.accentDark : (gold ? luxeGold : RwColors.accent),
                         borderRadius: BorderRadius.circular(999),
@@ -486,14 +486,13 @@ class RunShareCard extends StatelessWidget {
                           letterSpacing: -1.5,
                         ),
                       )),
-                      const SizedBox(width: 6),
-                      Text(
-                        'km',
+                      SizedBox(width: 6),
+                      Text(tr('km'),
                         style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800, color: fg),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   Row(
                     children: [
                       _stat('TIJD', Fmt.duration(a.movingTimeSeconds), fg, muted),
@@ -502,15 +501,15 @@ class RunShareCard extends StatelessWidget {
                     ],
                   ),
                   if (cost.matters) ...[
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Text(
                       'Bij ideaal loopweer: ${Fmt.duration(correctedSeconds(a))}',
                       style: TextStyle(color: muted, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],
                   if (a.source == 'strava') ...[
-                    const SizedBox(height: 4),
-                    Text('Gegevens via Strava', style: TextStyle(color: muted, fontSize: 9)),
+                    SizedBox(height: 4),
+                    Text(tr('Gegevens via Strava'), style: TextStyle(color: muted, fontSize: 9)),
                   ],
                 ],
               ),
@@ -531,7 +530,7 @@ class RunShareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label, style: TextStyle(color: muted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
-            const SizedBox(height: 3),
+            SizedBox(height: 3),
             Text(
               value,
               maxLines: 1,
@@ -645,17 +644,17 @@ class _ShareMap extends StatelessWidget {
           // Ruimte boven (logo) en onder (cijfers) vrijlaten, zodat de route in het midden staat.
           initialCameraFit: CameraFit.coordinates(
             coordinates: pts,
-            padding: const EdgeInsets.fromLTRB(36, 70, 36, 190),
+            padding: EdgeInsets.fromLTRB(36, 70, 36, 190),
             maxZoom: 17,
           ),
-          interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+          interactionOptions: InteractionOptions(flags: InteractiveFlag.none),
           backgroundColor: RwColors.background,
         ),
         children: [
           baseTileLayer(false),
           PolylineLayer(polylines: [
             Polyline(points: pts, strokeWidth: 12, color: RwColors.accent.withValues(alpha: 0.25)),
-            Polyline(points: pts, strokeWidth: 4.5, color: RwColors.accent, borderStrokeWidth: 1.5, borderColor: const Color(0xFF7A3300)),
+            Polyline(points: pts, strokeWidth: 4.5, color: RwColors.accent, borderStrokeWidth: 1.5, borderColor: Color(0xFF7A3300)),
           ]),
           CircleLayer(circles: [
             CircleMarker(point: pts.last, radius: 6, color: Colors.white, borderColor: RwColors.accent, borderStrokeWidth: 3),
@@ -671,7 +670,7 @@ Widget _goldIf(bool on, Widget child) => !on
     ? child
     : ShaderMask(
         blendMode: BlendMode.srcIn,
-        shaderCallback: (r) => const LinearGradient(
+        shaderCallback: (r) => LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFFF3DC95), luxeGold, Color(0xFF9C7A2E), Color(0xFFE8C977)],

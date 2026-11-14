@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/i18n.dart';
 import '../../core/theme.dart';
@@ -75,8 +76,8 @@ class AerialHeader extends StatelessWidget {
               top: ty * size - top,
               width: size + 0.5,
               height: size + 0.5,
-              child: Image.network(
-                '$_photoTiles/$zoom/$tx/$ty.jpeg',
+              child: Image(
+                image: CachedNetImage('$_photoTiles/$zoom/$tx/$ty.jpeg'),
                 fit: BoxFit.fill,
                 gaplessPlayback: true,
                 errorBuilder: (_, __, ___) => const SizedBox.shrink(),

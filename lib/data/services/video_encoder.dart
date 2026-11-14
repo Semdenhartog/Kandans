@@ -18,8 +18,22 @@ class VideoEncoder {
     final dir = Directory('${(await getTemporaryDirectory()).path}/deel');
     await dir.create(recursive: true);
     final path = '${dir.path}/kadans-route.mp4';
+    await _cleanup(dir, keep: path);
     await _channel.invokeMethod('begin', {'path': path, 'width': width, 'height': height, 'fps': fps});
     return VideoEncoder._(path);
+  }
+
+  /// Ruimt oude deelbestanden op (ouder dan een dag), zodat de cache niet vol loopt.
+  static Future<void> _cleanup(Directory dir, {required String keep}) async {
+    try {
+      final limit = DateTime.now().subtract(const Duration(days: 1));
+      await for (final e in dir.list()) {
+        if (e is! File || e.path == keep) continue;
+        if ((await e.lastModified()).isBefore(limit)) await e.delete();
+      }
+    } catch (_) {
+      // Opruimen mag falen.
+    }
   }
 
   Future<void> frame(Uint8List rgba, int index) => _channel.invokeMethod('frame', {'rgba': rgba, 'index': index});

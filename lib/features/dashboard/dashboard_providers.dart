@@ -11,6 +11,7 @@ import '../../domain/dashboard_layout.dart';
 import '../../domain/geo.dart';
 import '../../domain/performance_model.dart';
 import '../../domain/start_time_scoring.dart';
+import '../../core/error_reporter.dart';
 
 /// Weersverwachting voor de komende 4 dagen op de weerlocatie (ook voor de weekendvooruitblik).
 final forecastProvider = FutureProvider<Forecast>((ref) async {
@@ -48,7 +49,7 @@ class RainPreferenceNotifier extends Notifier<RainPreference> {
       final name = p.getString(_key);
       final match = RainPreference.values.where((r) => r.name == name);
       if (match.isNotEmpty) state = match.first;
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 
   Future<void> set(RainPreference value) async {
@@ -56,7 +57,7 @@ class RainPreferenceNotifier extends Notifier<RainPreference> {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_key, value.name);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 }
 
@@ -78,14 +79,14 @@ class _EnumPref<T extends Enum> extends Notifier<T> {
       final name = (await SharedPreferences.getInstance()).getString(_key);
       final match = _values.where((v) => v.name == name);
       if (match.isNotEmpty) state = match.first;
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 
   Future<void> set(T value) async {
     state = value;
     try {
       await (await SharedPreferences.getInstance()).setString(_key, value.name);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 }
 
@@ -112,14 +113,14 @@ class BoolPref extends Notifier<bool> {
     try {
       final v = (await SharedPreferences.getInstance()).getBool(_key);
       if (v != null) state = v;
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 
   Future<void> set(bool value) async {
     state = value;
     try {
       await (await SharedPreferences.getInstance()).setBool(_key, value);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 }
 
@@ -176,7 +177,7 @@ class DashLayoutNotifier extends Notifier<DashLayout> {
       final p = await SharedPreferences.getInstance();
       final s = p.getString(_key);
       if (s != null) state = DashLayout.decode(s);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'dashboard_providers.dart'); }
   }
 
   void _save() => SharedPreferences.getInstance().then((p) => p.setString(_key, state.encode())).ignore();

@@ -15,6 +15,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../domain/usual_time.dart';
 import '../models/models.dart';
 import 'run_pause_store.dart';
+import '../../core/error_reporter.dart';
 
 /// Instellingen voor de dagelijkse melding.
 class DailyReminderSettings {
@@ -104,7 +105,7 @@ class NotificationService {
           ),
         ),
       );
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   /// Mag Kadans meldingen tonen? (Android 13+ vraagt hier apart om.)
@@ -152,7 +153,7 @@ class NotificationService {
           ),
         ),
       );
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   /// Stappenwedstrijd: iemand heeft je ingehaald (punt 42).
@@ -174,7 +175,7 @@ class NotificationService {
           ),
         ),
       );
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   /// Afslag-melding tijdens het volgen van een route. Gewone (niet vaste) meldingen komen
@@ -203,21 +204,21 @@ class NotificationService {
           ),
         ),
       );
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   Future<void> cancelTurn() async {
     if (!_ready) return;
     try {
       await _plugin.cancel(_turnId);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   Future<void> cancelRunProgress() async {
     if (!_ready) return;
     try {
       await _plugin.cancel(_runId);
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   Future<void> init() async {
@@ -333,7 +334,7 @@ class NotificationService {
           );
         }
       }
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
     for (var day = 0; day < _ids.length; day++) {
       final id = _ids[day];
       await _plugin.cancel(id);
@@ -398,7 +399,7 @@ class NotificationService {
         _details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   static const _weeklyId = 103;
@@ -412,7 +413,7 @@ class NotificationService {
       for (final id in [..._ids, _soonId, _weekendId, _weeklyId]) {
         await _plugin.cancel(id);
       }
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 
   /// Elke maandag om 8:00 een seintje dat je weekoverzicht klaarstaat (alleen als meldingen aan staan).
@@ -444,6 +445,6 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
-    } catch (_) {}
+    } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'notification_service.dart'); }
   }
 }

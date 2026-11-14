@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/disk_image_cache.dart';
 import '../../core/theme.dart';
 import '../../shared/art/landscape.dart';
 
@@ -202,12 +203,11 @@ class _RunnerAvatarState extends State<RunnerAvatar> {
         ),
         clipBehavior: s?.photoUrl != null ? Clip.antiAlias : Clip.none,
         child: s?.photoUrl != null
-            ? Image.network(
-                s!.photoUrl!,
+            ? Image(
+                image: ResizeImage(CachedNetImage(s!.photoUrl!), width: (size * MediaQuery.devicePixelRatioOf(context)).round()),
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
-                cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
                 // Foto (nog) niet te laden: dan gewoon het icoon of de letter.
                 errorBuilder: (_, _, _) => icon != null
                     ? Icon(icon, size: size * 0.5, color: Colors.white)
