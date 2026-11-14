@@ -24,7 +24,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
    Sem wil pas een nieuwe APK als een wijziging af is. Alleen tekst/docs: commit met `[skip ci]`.
    Let op: staat een `[skip ci]`-commit **bovenaan** bij een merge naar main, dan wordt er géén APK gebouwd → zet er dan
    een lege commit zonder `[skip ci]` achter.
-6. Commit-regels eindigen met `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` en de
+6. Commit-regels eindigen met `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` en de
    `Claude-Session:`-link van de **huidige** sessie.
 
 ## Techniek
