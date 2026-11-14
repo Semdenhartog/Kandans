@@ -39,7 +39,7 @@ import 'trim_run_screen.dart';
 
 /// Eén run: tijden, weer, records, route en delen.
 class ActivityDetailScreen extends ConsumerWidget {
-  ActivityDetailScreen({super.key, required this.activityId});
+  const ActivityDetailScreen({super.key, required this.activityId});
   final String activityId;
 
   Future<void> _linkRoute(BuildContext context, WidgetRef ref, Activity a) async {
@@ -57,7 +57,7 @@ class ActivityDetailScreen extends ConsumerWidget {
         child: ListView(
           shrinkWrap: true,
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(tr('Op welke route liep je?'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
@@ -160,7 +160,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                   style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 24, fontWeight: FontWeight.w800),
                 ),
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Icon(Icons.edit_outlined, size: 18, color: RwColors.subtle),
             ]),
           ),
@@ -168,22 +168,22 @@ class ActivityDetailScreen extends ConsumerWidget {
             '${Fmt.dateLong(a.startedAt)} · ${Fmt.time(a.startedAt)}',
             style: TextStyle(color: RwColors.subtle),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             Fmt.km(a.distanceMeters),
             style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 48, fontWeight: FontWeight.w800, height: 1.1),
           ),
           if (badges.isNotEmpty) ...[
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Wrap(spacing: 8, runSpacing: 8, children: [for (final b in badges) RecordBadge(b)]),
           ],
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(child: StatTile(label: tr('Tijd'), value: Fmt.duration(a.movingTimeSeconds))),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(child: StatTile(label: tr('Tempo'), value: Fmt.pace(a.paceSecondsPerKm))),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: StatTile(
                   label: a.averageHeartRate != null ? 'Hartslag' : 'Hoogte',
@@ -194,9 +194,9 @@ class ActivityDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           if (a.id != null) _JumpChips(activity: a),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           RwCard(
             title: tr('ROUTE'),
             child: route == null
@@ -211,7 +211,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                         Text(tr('Koppel deze run aan een route. Dan zie je je tijden op die route naast elkaar, eerlijk vergeleken voor het weer.'),
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       if (a.hasTrack)
                         Padding(
                           padding: EdgeInsets.only(bottom: 8),
@@ -247,7 +247,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                           TextButton(onPressed: () => _linkRoute(context, ref, a), child: Text(tr('Wijzig'))),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       SizedBox(
                         height: 180,
                         child: RouteMap(
@@ -261,13 +261,13 @@ class ActivityDetailScreen extends ConsumerWidget {
                         ),
                       ),
                       if (history != null && history.runs.length > 1) ...[
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
                           _historyLine(a, history),
                           style: TextStyle(color: RwColors.muted, height: 1.45),
                         ),
                       ],
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       FilledButton.icon(
                         style: FilledButton.styleFrom(
                           backgroundColor: RwColors.accent.withValues(alpha: 0.16),
@@ -287,11 +287,11 @@ class ActivityDetailScreen extends ConsumerWidget {
                   ),
           ),
           if (a.id != null && !a.viaStrava) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'coach'), child: _CoachSummaryCard(activity: a)),
           ],
           if (HindsightCard.applies(a)) HindsightCard(key: ValueKey('hindsight-${a.id}'), activity: a),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           RwCard(
             key: _sectionKey(a, 'weer'),
             title: tr('HET WEER TIJDENS JE RUN'),
@@ -309,7 +309,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                         ].join(' · '),
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       if (cost.matters) ...[
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -324,7 +324,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                                 height: 1,
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             // Flexible: bij grote letters loopt de tekst door op de volgende regel.
                             Flexible(
                               child: Padding(
@@ -337,7 +337,7 @@ class ActivityDetailScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Het weer kostte je ongeveer ${Fmt.duration(cost.totalSeconds)} (${cost.explanation}). '
                           'Zo vergelijk je runs eerlijk, ook als het hard waaide.',
@@ -351,11 +351,11 @@ class ActivityDetailScreen extends ConsumerWidget {
                   ),
           ),
           if (a.id != null && (a.source == 'strava' || a.source == 'runwise' || (a.source == 'manual' && a.hasTrack))) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'splits'), child: SplitsCard(activity: a)),
           ],
           if (a.id != null) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             KeyedSubtree(key: _sectionKey(a, 'hoogte'), child: ElevationCard(activity: a)),
           ],
           // Verdieping (vocht, hartslagherstel, markeringen, stukken) achter één kopje: de run zelf blijft overzichtelijk.
@@ -369,22 +369,22 @@ class ActivityDetailScreen extends ConsumerWidget {
             return extra.isEmpty ? <Widget>[] : <Widget>[SizedBox(height: 12), _MoreAnalysis(children: extra)];
           }(),
           if (a.id != null) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             PhotosCard(activity: a),
           ],
           if (a.id != null) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _FeelCard(activity: a),
           ],
           GpsSpikeCard(activity: a),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => openShareRun(context, a, route: route, badges: badges),
             icon: Icon(Icons.ios_share),
             label: Text(tr('Deel je run')),
           ),
           if (a.hasTrack || route != null) ...[
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => openRouteAnim(context, a, route: route),
               icon: Icon(Icons.movie_creation_outlined),
@@ -394,14 +394,14 @@ class ActivityDetailScreen extends ConsumerWidget {
           ShareToFeedButton(activity: a),
           // Alleen eigen opnames: die hebben het verloop per seconde dat nodig is om te knippen.
           if (a.source == 'runwise' && a.id != null) ...[
-            SizedBox(height: 8),
+              const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => openTrimRun(context, a),
               icon: Icon(Icons.content_cut),
               label: Text(tr('Run bijsnijden')),
             ),
             if (ref.watch(stravaConnectionProvider).value != null) ...[
-              SizedBox(height: 8),
+            const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () async {
                   try {
@@ -417,7 +417,7 @@ class ActivityDetailScreen extends ConsumerWidget {
             ],
           ],
           if (a.viaStrava) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(a.source == 'strava' ? 'Gegevens via Strava' : 'Gegevens van de Strava-app (via Health Connect)',
                 textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ],
@@ -527,7 +527,7 @@ class ActivityDetailScreen extends ConsumerWidget {
 
 /// Labeltje voor een record.
 class RecordBadge extends StatelessWidget {
-  RecordBadge(this.label, {super.key, this.small = false});
+  const RecordBadge(this.label, {super.key, this.small = false});
   final String label;
   final bool small;
 
@@ -624,7 +624,7 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
             chip(2, 'Oké', Icons.sentiment_neutral_outlined),
             chip(3, 'Top', Icons.sentiment_very_satisfied_outlined),
           ]),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           TextField(
             controller: _note,
             maxLength: 500,
@@ -643,7 +643,7 @@ class _FeelCardState extends ConsumerState<_FeelCard> {
             ),
           ),
           if (shoes.isNotEmpty) ...[
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String?>(
               initialValue: widget.activity.shoeId ?? current?.id,
               decoration: InputDecoration(labelText: tr('Schoen')),
@@ -705,7 +705,7 @@ class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
           else ...[
             Text(tr('Laat de coach in een paar zinnen vertellen wat goed ging, wat het weer deed en wat je volgende keer kunt doen.'),
                 style: TextStyle(color: RwColors.muted)),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: _busy ? null : _ask,
               icon: _busy
@@ -719,7 +719,7 @@ class _CoachSummaryCardState extends ConsumerState<_CoachSummaryCard> {
             Text(_error!, style: TextStyle(color: RwColors.danger)),
           ],
           if (t != null) ...[
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(tr('Gemaakt door AI; kan fouten bevatten.'), style: TextStyle(color: RwColors.subtle, fontSize: 11)),
           ],
         ],
@@ -818,15 +818,15 @@ Future<void> _editTitle(BuildContext context, WidgetRef ref, Activity a, String?
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(ctx).bottom),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(tr('Titel van je run'), style: RwText.title),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         TextField(controller: c, autofocus: true, maxLength: 80, textCapitalization: TextCapitalization.sentences),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final s in suggestions) ActionChip(label: Text(s), onPressed: () => c.text = s),
         ]),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(children: [
           TextButton(onPressed: () => Navigator.pop(ctx, ''), child: Text(tr('Automatisch'))),
-          Spacer(),
+          const Spacer(),
           FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(tr('Opslaan'))),
         ]),
       ]),

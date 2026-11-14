@@ -36,7 +36,7 @@ enum _CardStyle { kaart, donker, oranje, goud, foto, sticker }
 
 /// Maakt een mooie afbeelding van je run om te delen (Instagram, WhatsApp, ...).
 class ShareRunScreen extends ConsumerStatefulWidget {
-  ShareRunScreen({super.key, required this.activity, this.route, this.badges = const []});
+  const ShareRunScreen({super.key, required this.activity, this.route, this.badges = const []});
   final Activity activity;
   final RunRoute? route;
   final List<String> badges;
@@ -120,7 +120,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
       width: 360,
       height: 640,
       child: Stack(children: [
-        Positioned.fill(
+              const Positioned.fill(
           child: ClipRect(
             child: ImageFiltered(
               imageFilter: ui.ImageFilter.blur(sigmaX: 28, sigmaY: 28),
@@ -199,7 +199,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     selected: {_style},
                     onSelectionChanged: (s) => setState(() => _style = s.first),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   if (_style != _CardStyle.sticker)
                     SegmentedButton<bool>(
                       segments: [
@@ -223,14 +223,14 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
                     label: Text(tr('Zelf indelen of naar Instagram')),
                   ),
                   if (widget.activity.hasTrack || widget.route != null) ...[
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () => openRouteAnim(context, widget.activity, route: widget.route),
                       icon: Icon(Icons.movie_creation_outlined),
                       label: Text(tr('Bewegende video van je route')),
                     ),
                   ],
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   FilledButton.icon(
                     onPressed: _busy ? null : _share,
                     icon: _busy
@@ -254,7 +254,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
 
 /// De deelkaart zelf: 360 × 450 (wordt 1080 × 1350 px, het staande Instagram-formaat).
 class RunShareCard extends StatelessWidget {
-  RunShareCard({
+  const RunShareCard({
     super.key,
     required this.activity,
     this.route,
@@ -348,7 +348,7 @@ class RunShareCard extends StatelessWidget {
             if (map && track != null && track.isValid) ...[
               Positioned.fill(child: _ShareMap(points: shown)),
               // Boven en onder donker laten verlopen, zodat de tekst leesbaar blijft.
-              Positioned.fill(
+              const Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -362,7 +362,7 @@ class RunShareCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
+              const Positioned(
                 right: 8,
                 bottom: 4,
                 child: Text(tr('Kaart © Kadaster / PDOK'), style: TextStyle(color: Color(0x99FFFFFF), fontSize: 7)),
@@ -424,14 +424,14 @@ class RunShareCard extends StatelessWidget {
                         mark: _tint(Image.asset('assets/logo/mark.png', height: 18), orange),
                         color: orange ? RwColors.accentDark : Colors.white,
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Text(
                         Fmt.date(a.startedAt),
                         style: TextStyle(color: muted, fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
-                  SizedBox(height: 14),
+                  const SizedBox(height: 14),
                   Expanded(
                     child: map && track != null && track.isValid
                         ? SizedBox.expand()
@@ -452,7 +452,7 @@ class RunShareCard extends StatelessWidget {
                             child: Icon(Icons.directions_run, size: 90, color: fg.withValues(alpha: 0.12)),
                           ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   if (headline != null)
                     Container(
                       margin: EdgeInsets.only(bottom: 6),
@@ -486,13 +486,13 @@ class RunShareCard extends StatelessWidget {
                           letterSpacing: -1.5,
                         ),
                       )),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Text(tr('km'),
                         style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 26, fontWeight: FontWeight.w800, color: fg),
                       ),
                     ],
                   ),
-                  SizedBox(height: 14),
+                  const SizedBox(height: 14),
                   Row(
                     children: [
                       _stat('TIJD', Fmt.duration(a.movingTimeSeconds), fg, muted),
@@ -501,14 +501,14 @@ class RunShareCard extends StatelessWidget {
                     ],
                   ),
                   if (cost.matters) ...[
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       'Bij ideaal loopweer: ${Fmt.duration(correctedSeconds(a))}',
                       style: TextStyle(color: muted, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],
                   if (a.source == 'strava') ...[
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(tr('Gegevens via Strava'), style: TextStyle(color: muted, fontSize: 9)),
                   ],
                 ],
@@ -530,7 +530,7 @@ class RunShareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label, style: TextStyle(color: muted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
-            SizedBox(height: 3),
+            const SizedBox(height: 3),
             Text(
               value,
               maxLines: 1,
