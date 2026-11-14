@@ -120,7 +120,7 @@ class _ShareRunScreenState extends ConsumerState<ShareRunScreen> {
       width: 360,
       height: 640,
       child: Stack(children: [
-              const Positioned.fill(
+              Positioned.fill(
           child: ClipRect(
             child: ImageFiltered(
               imageFilter: ui.ImageFilter.blur(sigmaX: 28, sigmaY: 28),
@@ -362,7 +362,7 @@ class RunShareCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 right: 8,
                 bottom: 4,
                 child: Text(tr('Kaart © Kadaster / PDOK'), style: TextStyle(color: Color(0x99FFFFFF), fontSize: 7)),

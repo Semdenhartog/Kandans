@@ -57,7 +57,7 @@ class ActivityDetailScreen extends ConsumerWidget {
         child: ListView(
           shrinkWrap: true,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(tr('Op welke route liep je?'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
