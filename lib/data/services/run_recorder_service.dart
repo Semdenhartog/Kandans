@@ -13,6 +13,7 @@ import '../../core/format.dart';
 import '../../domain/intervals.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/guided_runs.dart';
+import '../../domain/hr_alarm.dart';
 import '../../domain/run_coach.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/run_markers.dart';
@@ -210,6 +211,7 @@ class RunRecorderService {
   LatLng? _position;
   CueScheduler? _cues;
   PaceCoach? _coach;
+  HrAlarm _hrAlarm = HrAlarm();
   QuestMaster? _quests;
   final List<({double seconds, double meters})> _laps = [];
   double _lapStartT = 0, _lapStartD = 0;
@@ -493,6 +495,9 @@ class RunRecorderService {
     view.value = _snapshot();
     if (r == null || !isRecording || r.status == RecorderStatus.idle) return;
     _ticks++;
+    if (r.isActive && _hrAlarm.tick(HeartRateService.instance.bpm.value, HeartRateService.instance.maxHr.value)) {
+      say('Je hartslag is hoog. Even rustiger aan.', buzz: true);
+    }
     _watchdog(r);
     if (shareLive && _ticks % 20 == 0) _checkCheers().ignore();
     if (_ticks % 5 == 0) _updateNotification(r);
@@ -612,7 +617,9 @@ class RunRecorderService {
     int questGapMinutes = 5,
   }) async {
     try {
-      _simpleArrows = (await SharedPreferences.getInstance()).getBool('simple_turn_arrows') ?? false;
+      final prefs = await SharedPreferences.getInstance();
+      _simpleArrows = prefs.getBool('simple_turn_arrows') ?? false;
+      _hrAlarm = HrAlarm(limitZone: prefs.getInt('hr_alarm_zone') ?? 0);
     } catch (kErr, kSt) { ErrorReporter.report(kErr, kSt, context: 'run_recorder_service.dart'); }
     this.haptics = haptics;
     this.voice = voice || intervals != null || targetPace != null || quests;

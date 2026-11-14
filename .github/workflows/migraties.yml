@@ -1,0 +1,25 @@
+name: Migraties testen
+
+# Draait alle SQL-migraties op een lege Postgres, zodat een kapotte migratie opvalt vóór hij live gaat.
+on:
+  push:
+    paths: ['supabase/migrations/**', 'tools/migraties_testen.sh', '.github/workflows/migraties.yml']
+  pull_request:
+    paths: ['supabase/migrations/**']
+  workflow_dispatch:
+
+jobs:
+  migraties:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Migraties een voor een toepassen
+        run: tools/migraties_testen.sh "postgresql://postgres:test@localhost:5432/postgres"

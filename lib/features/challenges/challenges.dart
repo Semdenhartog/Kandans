@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -109,6 +110,8 @@ class ChallengesScreen extends ConsumerWidget {
     final progress = ref.watch(challengeProgressProvider);
     final active = [for (final p in progress) if (!p.completed && !now.isAfter(p.challenge.end)) p];
     final medals = ref.watch(challengeMedalsProvider);
+    // Afgelopen zonder te halen: laten zien hoe ver je kwam, in plaats van geruisloos te verdwijnen.
+    final over = [for (final p in progress) if (!p.completed && now.isAfter(p.challenge.end)) p];
     final offer = [
       for (final c in availableChallenges(now, suggestedMonthKm: suggestedGoalKm(runs, now).toDouble()))
         if (!joined.any((j) => j.key == c.key)) c,
@@ -145,6 +148,14 @@ class ChallengesScreen extends ConsumerWidget {
             const _Heading('BEZIG'),
             for (final p in active) ...[
               _ActiveCard(progress: p, onLeave: () => _leave(context, ref, p.challenge)),
+              const SizedBox(height: 10),
+            ],
+            const SizedBox(height: 12),
+          ],
+          if (over.isNotEmpty) ...[
+            const _Heading('AFGELOPEN'),
+            for (final p in over) ...[
+              _OverCard(progress: p, onClose: () => ref.read(joinedChallengesProvider.notifier).leave(p.challenge.key)),
               const SizedBox(height: 10),
             ],
             const SizedBox(height: 12),
@@ -241,6 +252,36 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) => old.f != f;
+}
+
+/// Een uitdaging die voorbij is zonder gehaald te zijn: je eindstand en een zetje voor de volgende.
+class _OverCard extends StatelessWidget {
+  const _OverCard({required this.progress, required this.onClose});
+  final ChallengeProgress progress;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = progress.challenge;
+    final pct = (progress.fraction * 100).round();
+    return RwCard(
+      child: Row(children: [
+        ChallengeRing(fraction: progress.fraction, icon: c.icon),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(c.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            const SizedBox(height: 2),
+            Text(_value(progress), style: const TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(trf('Afgelopen: {p}% gehaald. Kies een nieuwe uitdaging.', {'p': '$pct'}),
+                style: TextStyle(color: RwColors.muted, fontSize: 13)),
+          ]),
+        ),
+        IconButton(tooltip: tr('Weghalen'), onPressed: onClose, icon: Icon(Icons.close, color: RwColors.subtle)),
+      ]),
+    );
+  }
 }
 
 class _ActiveCard extends StatelessWidget {

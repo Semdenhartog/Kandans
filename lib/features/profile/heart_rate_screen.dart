@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme.dart';
 import '../../core/i18n.dart';
@@ -193,6 +194,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
               ),
             ),
           ),
+          const _HrAlarmCard(),
           const HrrCard(),
           const SizedBox(height: 16),
           const _StrideSensorCard(),
@@ -328,6 +330,64 @@ class _StrideSensorCardState extends State<_StrideSensorCard> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Alarm tijdens een run als je hartslag te lang te hoog zit (bewaard als `hr_alarm_zone`, 0 = uit).
+class _HrAlarmCard extends StatefulWidget {
+  const _HrAlarmCard();
+
+  @override
+  State<_HrAlarmCard> createState() => _HrAlarmCardState();
+}
+
+class _HrAlarmCardState extends State<_HrAlarmCard> {
+  int _zone = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      if (mounted) setState(() => _zone = p.getInt('hr_alarm_zone') ?? 0);
+    }).ignore();
+  }
+
+  Future<void> _set(int z) async {
+    setState(() => _zone = z);
+    await (await SharedPreferences.getInstance()).setInt('hr_alarm_zone', z);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final max = HeartRateService.instance.maxHr.value;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: RwCard(
+        title: tr('HARTSLAGALARM'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(spacing: 8, children: [
+              for (final z in const [0, 2, 3, 4])
+                ChoiceChip(
+                  label: Text(z == 0 ? tr('Uit') : trf('Boven zone {z}', {'z': '$z'})),
+                  selected: _zone == z,
+                  onSelected: (_) => _set(z),
+                ),
+            ]),
+            const SizedBox(height: 8),
+            Text(
+              _zone == 0
+                  ? tr('Kadans zegt iets als je hartslag te lang te hoog zit. Werkt met een hartslagband.')
+                  : trf('Alarm bij meer dan {bpm} bpm, als dat 15 seconden duurt. Daarna hooguit elke 90 seconden.',
+                      {'bpm': '${(max * (0.5 + 0.1 * _zone)).round()}'}),
+              style: TextStyle(color: RwColors.muted, height: 1.4),
+            ),
+          ],
         ),
       ),
     );
