@@ -251,6 +251,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   ratchet-test `test/untranslated_ratchet_test.dart` (onvertaalde teksten, nu 550, mag alleen dalen), lijst `docs/verbeterpunten-later.md`.
   Bestond al (niet opnieuw bouwen): herstel na crash (`RecordingStore`, `_offerRestore`), foutrapporten (`ErrorReporter` → `app_errors`), GPS-gaten (`GpsQuality`),
   slaap/herstel (`readiness.dart`), Dependabot gegroepeerd, widget/melding kijken ook naar morgen.
+- **Offline kaarten (14-11):** `domain/map_tiles.dart` (tegelrekenwerk, `tilePlanForTrack`: zoom 13–17, 500 m om de route, max 3000 tegels, alleen Nederland/PDOK grijs),
+  `data/services/offline_maps.dart` (download met 4 werkers, `packs.json`), vastgezette tegels in `DiskImageCache.pin/unpin` (map `offline_tiles` in application support,
+  nooit opgeruimd, wordt bij uitloggen gewist; `load` kijkt daar eerst), knop `routes/offline_map_button.dart` op routedetail. Luchtfoto niet offline. Test `test/map_tiles_test.dart`. Niet op een telefoon getest.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).
