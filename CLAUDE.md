@@ -245,6 +245,12 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   Captions: nuchter/droge humor, herkenbare looperszinnen ("Het is maar regen, je smelt niet", "Ik heb geen zin", "Ga gewoon"),
   eerste zin < 125 tekens, één vraag, max 5 hashtags, CTA "Stuur WEER". Doel: 100 testers. Eerste 5 captions staan in de chat van 9-11
   (rondje, wind, donker, kou, gewoonte). Nog te doen: posten + alt-tekst, contentmaakster echte split-foto's laten maken (zelfde plek, 2 momenten).
+- **Ronde 14-11 (nacht):** hartslagalarm (`domain/hr_alarm.dart`, pref `hr_alarm_zone`, kaart in `profile/heart_rate_screen.dart`, spreekt via `RunRecorderService.say`),
+  "Waarom dit moment?" op de advieskaart (`_showWhySheet` in `dashboard_screen.dart`), sectie AFGELOPEN bij Uitdagingen (`_OverCard`),
+  migratietest `tools/migraties_testen.sh` + workflow `migraties.yml` (nepversies van auth/storage/pg_cron/pg_net; alle 46 migraties groen),
+  ratchet-test `test/untranslated_ratchet_test.dart` (onvertaalde teksten, nu 550, mag alleen dalen), lijst `docs/verbeterpunten-later.md`.
+  Bestond al (niet opnieuw bouwen): herstel na crash (`RecordingStore`, `_offerRestore`), foutrapporten (`ErrorReporter` → `app_errors`), GPS-gaten (`GpsQuality`),
+  slaap/herstel (`readiness.dart`), Dependabot gegroepeerd, widget/melding kijken ook naar morgen.
 - Premium/RevenueCat: `docs/revenuecat.md` (recht `kadans_pro`, paywall + Customer Center via `purchases_ui_flutter`)
 - Shop: `lib/features/shop/` · Route delen: `domain/route_share.dart`, `site/route.html`, deeplink `runwise://app/route-delen?n=&p=`
 - Posters (Stripe + Gelato): `poster-order`, `stripe-webhook` — **nog niet live**. Actiecodes: `redeem_promo`/`create_promo` (0032).
