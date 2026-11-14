@@ -39,8 +39,47 @@ class DiskImageCache {
     return '${a.toRadixString(16)}${b.toRadixString(16)}.img';
   }
 
+  Directory? _offDir;
+
+  /// Vastgezette tegels (offline kaarten): blijven staan, worden nooit opgeruimd en verlopen niet.
+  Future<Directory> offlineFolder() async {
+    final d = _offDir ??= Directory('${(await getApplicationSupportDirectory()).path}/offline_tiles');
+    if (!await d.exists()) await d.create(recursive: true);
+    return d;
+  }
+
+  /// Haalt [url] op en bewaart hem vast. Geeft de bestandsnaam en de grootte terug; grootte 0 = leeg of niet beschikbaar (404).
+  Future<({String name, int bytes})> pin(String url, {Map<String, String>? headers}) async {
+    final name = fileName(url);
+    final f = File('${(await offlineFolder()).path}/$name');
+    if (await f.exists()) return (name: name, bytes: await f.length());
+    final res = await _client.get(Uri.parse(url), headers: headers).timeout(const Duration(seconds: 20));
+    if (res.statusCode == 404 || res.statusCode == 204) return (name: name, bytes: 0);
+    if (res.statusCode != 200 || res.bodyBytes.isEmpty) throw HttpException('HTTP ${res.statusCode}');
+    final tmp = File('${f.path}.tmp');
+    await tmp.writeAsBytes(res.bodyBytes, flush: true);
+    await tmp.rename(f.path);
+    return (name: name, bytes: res.bodyBytes.length);
+  }
+
+  /// Vastgezette bestanden weghalen (alleen de genoemde namen).
+  Future<void> unpin(Iterable<String> names) async {
+    final d = await offlineFolder();
+    for (final n in names) {
+      try {
+        final f = File('${d.path}/$n');
+        if (await f.exists()) await f.delete();
+      } catch (_) {}
+    }
+  }
+
   Future<Uint8List> load(String url, {String? key, Map<String, String>? headers}) async {
-    final f = File('${(await _folder()).path}/${fileName(key ?? url)}');
+    final name = fileName(key ?? url);
+    try {
+      final pinned = File('${(await offlineFolder()).path}/$name');
+      if (await pinned.exists()) return await pinned.readAsBytes();
+    } catch (_) {}
+    final f = File('${(await _folder()).path}/$name');
     try {
       if (await f.exists() && DateTime.now().difference(await f.lastModified()) < maxAge) {
         return await f.readAsBytes();
@@ -85,6 +124,12 @@ class DiskImageCache {
       final d = await _folder();
       await d.delete(recursive: true);
       _dir = null;
+    } catch (_) {}
+    // Ook de offline kaarten: die verraden waar je loopt.
+    try {
+      final o = await offlineFolder();
+      await o.delete(recursive: true);
+      _offDir = null;
     } catch (_) {}
   }
 }

@@ -1,3 +1,4 @@
+import 'offline_map_button.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -191,6 +192,7 @@ class RouteDetailScreen extends ConsumerWidget {
                 icon: Icon(Icons.link),
                 label: Text(tr('Deel als link')),
               ),
+              if (track.length >= 2 && r.id != null) OfflineMapButton(routeId: r.id!, name: r.name, track: track),
               if (r.polyline.isNotEmpty)
                 TextButton.icon(
                   onPressed: () => _reverse(context, ref, r),

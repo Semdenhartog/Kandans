@@ -1598,6 +1598,15 @@ T.update({
     'Alarm bij meer dan {bpm} bpm, als dat 15 seconden duurt. Daarna hooguit elke 90 seconden.': ('Alarm above {bpm} bpm if that lasts 15 seconds. After that at most every 90 seconds.', 'Alarm über {bpm} bpm, wenn das 15 Sekunden anhält. Danach höchstens alle 90 Sekunden.', 'Alarme au-dessus de {bpm} bpm si cela dure 15 secondes. Ensuite au plus toutes les 90 secondes.', 'Alarma por encima de {bpm} ppm si dura 15 segundos. Después, como máximo cada 90 segundos.'),
     'Afgelopen: {p}% gehaald. Kies een nieuwe uitdaging.': ('Over: {p}% done. Pick a new challenge.', 'Vorbei: {p}% geschafft. Wähle eine neue Herausforderung.', 'Terminé : {p}% atteint. Choisis un nouveau défi.', 'Terminado: {p}% logrado. Elige un nuevo reto.'),
     'Weghalen': ('Remove', 'Entfernen', 'Retirer', 'Quitar'),
+    # Ronde 14-11 (5): offline kaarten
+    'Kaart bewaard ({mb}). Werkt nu ook zonder internet.': ('Map saved ({mb}). Now works without internet too.', 'Karte gespeichert ({mb}). Funktioniert jetzt auch ohne Internet.', 'Carte enregistrée ({mb}). Fonctionne maintenant aussi sans internet.', 'Mapa guardado ({mb}). Ahora funciona también sin internet.'),
+    'Bewaren van de kaart is niet gelukt. Controleer je internet en probeer het opnieuw.': ('Saving the map did not work. Check your internet and try again.', 'Das Speichern der Karte hat nicht geklappt. Prüfe dein Internet und versuche es erneut.', 'L’enregistrement de la carte a échoué. Vérifie ta connexion et réessaie.', 'No se pudo guardar el mapa. Revisa tu internet e inténtalo de nuevo.'),
+    'Offline kaart verwijderen?': ('Remove offline map?', 'Offline-Karte entfernen?', 'Supprimer la carte hors ligne ?', '¿Quitar el mapa sin conexión?'),
+    'De route zelf blijft staan. Alleen de bewaarde kaart gaat weg.': ('The route itself stays. Only the saved map is removed.', 'Die Route bleibt erhalten. Nur die gespeicherte Karte wird entfernt.', 'Le parcours reste. Seule la carte enregistrée est supprimée.', 'La ruta se queda. Solo se quita el mapa guardado.'),
+    'Kaart bewaren… {p}%': ('Saving map… {p}%', 'Karte wird gespeichert… {p}%', 'Enregistrement de la carte… {p}%', 'Guardando mapa… {p}%'),
+    'Stoppen': ('Stop', 'Stopp', 'Arrêter', 'Parar'),
+    'Offline bewaard ({mb})': ('Saved offline ({mb})', 'Offline gespeichert ({mb})', 'Enregistrée hors ligne ({mb})', 'Guardado sin conexión ({mb})'),
+    'Kaart offline bewaren (± {mb})': ('Save map offline (± {mb})', 'Karte offline speichern (± {mb})', 'Enregistrer la carte hors ligne (± {mb})', 'Guardar mapa sin conexión (± {mb})'),
     # Routevideo (13-11)
     'Bewegende video van je route': ('Moving video of your route', 'Bewegtes Video deiner Route', 'Vidéo animée de ton parcours', 'Vídeo animado de tu ruta'),
     'Tekenen': ('Draw', 'Zeichnen', 'Tracé', 'Trazar'),

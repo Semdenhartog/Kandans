@@ -12,6 +12,7 @@ import '../../core/disk_image_cache.dart';
 import '../../core/format.dart';
 import '../../core/i18n.dart';
 import '../../core/theme.dart';
+import '../../domain/map_tiles.dart';
 import '../../domain/geo.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
@@ -45,7 +46,7 @@ class _MapLayerNotifier extends ValueNotifier<MapLayer> {
 
 /// Gratis Nederlandse kaarten van PDOK (Kadaster), zonder sleutel.
 /// Buiten Nederland blijft de ondergrond leeg; de route wordt wel getekend.
-const _greyTiles = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png';
+const _greyTiles = pdokGreyTiles;
 const _photoTiles = 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg';
 
 /// Maakt van de lichtgrijze kaart een donkere kaart in Kadans-stijl:
