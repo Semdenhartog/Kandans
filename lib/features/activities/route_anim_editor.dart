@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/painting.dart' show Offset;
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
