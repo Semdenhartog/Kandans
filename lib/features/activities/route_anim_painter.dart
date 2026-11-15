@@ -48,7 +48,7 @@ class RouteAnimPainter extends CustomPainter {
     final k = size.width / routeAnimDesign.width;
     canvas.save();
     canvas.scale(k);
-    _fx.background(canvas, data.background);
+    _fx.background(canvas, data.background, zoom: data.photoZoom, pan: data.photoPan);
     final e = routeProgress(style, t);
     switch (style) {
       case RouteAnimStyle.draw:
@@ -68,6 +68,12 @@ class RouteAnimPainter extends CustomPainter {
     final hl = highlight;
     if (hl != null) {
       final r = baseRect(style, hl).shift(data.layout.of(hl)).inflate(14);
+      if (data.layout.of(hl).dx == 0) {
+        // Hulplijn: het onderdeel zit op de standaard-marge.
+        canvas.drawLine(const Offset(90, 120), const Offset(90, 1800), Paint()
+          ..strokeWidth = 2
+          ..color = raGold.withValues(alpha: 0.5));
+      }
       canvas.drawRRect(RRect.fromRectAndRadius(r, const Radius.circular(10)), Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4

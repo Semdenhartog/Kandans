@@ -5,8 +5,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/config.dart';
@@ -22,6 +20,7 @@ import '../../domain/route_geometry.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/widgets.dart';
 import 'route_anim_controls.dart';
+import 'route_anim_editor.dart';
 import 'route_anim_painter.dart';
 
 void openRouteAnim(BuildContext context, Activity a, {RunRoute? route}) {
@@ -51,10 +50,8 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
   String? _videoPath;
   bool _cancel = false;
   String? _error;
-  ui.Image? _bg;
-  RouteAnimLayout _layout = RouteAnimLayout.none;
-  RouteAnimPart? _drag;
-  static const _layoutKey = 'route_anim_layout';
+  final _ed = RouteAnimEditor();
+  String? _shownTitle;
 
   @override
   void initState() {
@@ -73,95 +70,49 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
       if (mounted) _rebuild();
     });
     _loadLogo();
-    SharedPreferences.getInstance().then((p) {
-      final l = RouteAnimLayout.fromJson(p.getString(_layoutKey));
-      if (mounted && !l.isDefault) {
-        _layout = l;
-        _rebuild();
-      }
+    _ed.load().then((_) {
+      if (mounted && !_ed.layout.isDefault) _rebuild();
+    });
+    _ed.addListener(_onEdit);
+  }
     }).ignore();
   }
 
-  Future<void> _pickPhoto() async {
-    try {
-      final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600, maxHeight: 2400, imageQuality: 88);
-      if (file == null) return;
-      final codec = await ui.instantiateImageCodec(await file.readAsBytes());
-      final img = (await codec.getNextFrame()).image;
-      if (!mounted) {
-        img.dispose();
-        return;
-      }
-      final old = _bg;
-      _bg = img;
-      _videoPath = null;
-      _rebuild();
-      // Het oude beeld pas loslaten als het scherm het niet meer tekent.
-      WidgetsBinding.instance.addPostFrameCallback((_) => old?.dispose());
-    } catch (_) {
-      if (mounted) showMessage(context, tr('De foto kon niet worden geladen.'), error: true);
-    }
+  Future<void> _editTitle() async {
+    final c = TextEditingController(text: _data?.label ?? '');
+    final v = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Titel boven de video')),
+        content: TextField(controller: c, autofocus: true, maxLength: 26, textCapitalization: TextCapitalization.sentences),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Annuleren'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, c.text.trim()), child: Text(tr('Opslaan'))),
+        ],
+      ),
+    );
+    if (v != null) _ed.setTitle(v);
   }
 
-  void _clearPhoto() {
-    final old = _bg;
-    _bg = null;
+  /// De editor (foto, plek van de tekst, titel) is veranderd: een eerder gemaakte video klopt niet meer.
+  void _onEdit() {
+    if (!mounted) return;
     _videoPath = null;
-    _rebuild();
-    WidgetsBinding.instance.addPostFrameCallback((_) => old?.dispose());
-  }
-
-  void _saveLayout() => SharedPreferences.getInstance().then((p) => p.setString(_layoutKey, _layout.toJson())).ignore();
-
-  RouteAnimPart? _partAt(Offset p) {
-    for (final part in const [RouteAnimPart.brand, RouteAnimPart.label, RouteAnimPart.stats]) {
-      if (RouteAnimPainter.baseRect(_style, part).shift(_layout.of(part)).inflate(30).contains(p)) return part;
-    }
-    return null;
-  }
-
-  void _dragMove(Offset delta) {
-    final part = _drag;
     final d = _data;
-    if (part == null || d == null) return;
-    setState(() {
-      _layout = _layout.moved(part, delta, RouteAnimPainter.baseRect(_style, part));
-      _data = d.copyWith(layout: _layout);
-    });
-  }
-
-  void _dragEnd() {
-    if (_drag == null) return;
-    setState(() {
-      _drag = null;
-      _videoPath = null;
-    });
-    _saveLayout();
-  }
-
-  void _resetLayout() {
-    _layout = RouteAnimLayout.none;
-    _videoPath = null;
-    _rebuild();
-    _saveLayout();
-  }
-
-  Future<void> _loadLogo() async {
-    try {
-      final data = await rootBundle.load('assets/logo/k_goud.webp');
-      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetHeight: 144);
-      final img = (await codec.getNextFrame()).image;
-      if (!mounted) return;
-      setState(() => _logo = img);
+    // Alleen verplaatsen of zoomen: goedkoop bijwerken. Andere foto of titel: alles opnieuw opbouwen.
+    if (d != null && identical(d.background, _ed.bg) && _ed.title == _shownTitle) {
+      setState(() => _data = d.copyWith(layout: _ed.layout, photoZoom: _ed.zoom, photoPan: _ed.pan));
+    } else {
       _rebuild();
-    } catch (_) {}
+    }
   }
 
   @override
   void dispose() {
     _cancel = true;
     _ctl.dispose();
-    _bg?.dispose();
+    _ed.removeListener(_onEdit);
+    _ed.dispose();
     if (_progress != null) VideoEncoder.cancel();
     super.dispose();
   }
@@ -202,7 +153,8 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
     final fullLen = trackMeters(_raw);
     final shownLen = trackMeters(shown);
     final start = _hideHome && _raw.length > 1 && shown.isNotEmpty ? _lenBefore(shown.first) : 0.0;
-    var title = a.title ?? '';
+    _shownTitle = _ed.title;
+    var title = _ed.title ?? a.title ?? '';
     if (title.isEmpty) title = Fmt.date(a.startedAt);
     setState(() => _data = RouteAnimData(
           path: path,
@@ -215,8 +167,10 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
           slowPace: slow,
           fastPace: fast,
           logo: _logo,
-          background: _bg,
-          layout: _layout,
+          background: _ed.bg,
+          layout: _ed.layout,
+          photoZoom: _ed.zoom,
+          photoPan: _ed.pan,
         ));
     if (spans.isEmpty && _style == RouteAnimStyle.pace) _setStyle(RouteAnimStyle.draw);
   }
@@ -272,15 +226,23 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
       if (!mounted) return;
       setState(() => _videoPath = path);
       HapticFeedback.mediumImpact();
-    } catch (_) {
+    } catch (e) {
       await VideoEncoder.cancel();
-      if (mounted) setState(() => _error = tr('De video maken is niet gelukt.'));
+      if (mounted) setState(() => _error = _reason(e));
     } finally {
       if (mounted) {
         setState(() => _progress = null);
         _ctl.repeat();
       }
     }
+  }
+
+  /// Korte, begrijpelijke reden uit de fout van de encoder (de telefoon geeft meestal een Engelse tekst mee).
+  String _reason(Object e) {
+    final m = (e is PlatformException ? e.message : null) ?? '';
+    if (m.contains('ondersteunt')) return tr('Dit toestel ondersteunt dit videoformaat niet.');
+    if (m.contains('reageert niet')) return tr('De videoencoder reageert niet. Sluit andere apps en probeer het opnieuw.');
+    return tr('De video maken is niet gelukt.');
   }
 
   Future<void> _share() async {
@@ -340,10 +302,9 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
                                     final k = routeAnimDesign.width / box.maxWidth;
                                     return GestureDetector(
                                       behavior: HitTestBehavior.opaque,
-                                      onPanStart: busy ? null : (d) => setState(() => _drag = _partAt(d.localPosition * k)),
-                                      onPanUpdate: busy ? null : (d) => _dragMove(d.delta * k),
-                                      onPanEnd: busy ? null : (_) => _dragEnd(),
-                                      onPanCancel: busy ? null : _dragEnd,
+                                      onScaleStart: busy ? null : (d) => setState(() => _ed.start(_style, d.localFocalPoint * k)),
+                                      onScaleUpdate: busy ? null : (d) => _ed.update(_style, d.focalPointDelta * k, d.scale),
+                                      onScaleEnd: busy ? null : (_) => setState(_ed.end),
                                       // Eén painter die zelf meeloopt met de klok: geen nieuwe widgetboom per beeld.
                                       child: RepaintBoundary(
                                         child: CustomPaint(
@@ -352,7 +313,7 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
                                             data: data,
                                             clock: () => _ctl.value * _style.seconds,
                                             repaint: _ctl,
-                                            highlight: _drag,
+                                            highlight: _ed.drag,
                                           ),
                                           size: Size.infinite,
                                         ),
@@ -372,15 +333,18 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
                     busy: busy,
                     progress: _progress,
                     hasData: data != null,
-                    hasPhoto: _bg != null,
-                    layoutChanged: !_layout.isDefault,
+                    hasPhoto: _ed.bg != null,
+                    layoutChanged: !_ed.layout.isDefault,
                     hideHome: _hideHome,
                     hasVideo: _videoPath != null,
                     error: _error,
                     onStyle: _setStyle,
-                    onPhoto: _pickPhoto,
-                    onClearPhoto: _clearPhoto,
-                    onResetLayout: _resetLayout,
+                    onPhoto: () => _ed.pickPhoto().then((ok) {
+                      if (!ok && mounted) showMessage(context, tr('De foto kon niet worden geladen.'), error: true);
+                    }),
+                    onTitle: _editTitle,
+                    onClearPhoto: _ed.clearPhoto,
+                    onResetLayout: _ed.resetLayout,
                     onHideHome: (v) {
                       _hideHome = v;
                       _videoPath = null;

@@ -1613,6 +1613,11 @@ T.update({
     'Zonder foto': ('No photo', 'Ohne Foto', 'Sans photo', 'Sin foto'),
     'Teksten terugzetten': ('Reset text', 'Texte zurücksetzen', 'Réinitialiser', 'Restablecer texto'),
     'Sleep de tekst of het logo om ze te verplaatsen': ('Drag the text or logo to move them', 'Ziehe Text oder Logo, um sie zu verschieben', 'Fais glisser le texte ou le logo pour les déplacer', 'Arrastra el texto o el logo para moverlos'),
+    # Routevideo titel + foto verschuiven (15-11)
+    'Titel boven de video': ('Title above the video', 'Titel über dem Video', 'Titre au-dessus de la vidéo', 'Título sobre el vídeo'),
+    'Sleep de tekst, of de foto om hem te verschuiven. Knijp om in te zoomen': ('Drag the text, or the photo to shift it. Pinch to zoom', 'Ziehe den Text oder das Foto, um es zu verschieben. Zum Zoomen zusammenziehen', 'Fais glisser le texte, ou la photo pour la déplacer. Pince pour zoomer', 'Arrastra el texto, o la foto para moverla. Pellizca para ampliar'),
+    'Dit toestel ondersteunt dit videoformaat niet.': ("This device doesn't support this video format.", 'Dieses Gerät unterstützt dieses Videoformat nicht.', "Cet appareil ne prend pas en charge ce format vidéo.", 'Este dispositivo no admite este formato de vídeo.'),
+    'De videoencoder reageert niet. Sluit andere apps en probeer het opnieuw.': ("The video encoder isn't responding. Close other apps and try again.", 'Der Video-Encoder reagiert nicht. Schließe andere Apps und versuche es erneut.', "L'encodeur vidéo ne répond pas. Ferme les autres applis et réessaie.", 'El codificador de vídeo no responde. Cierra otras apps e inténtalo de nuevo.'),
     # Routevideo (13-11)
     'Bewegende video van je route': ('Moving video of your route', 'Bewegtes Video deiner Route', 'Vidéo animée de ton parcours', 'Vídeo animado de tu ruta'),
     'Tekenen': ('Draw', 'Zeichnen', 'Tracé', 'Trazar'),

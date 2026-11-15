@@ -21,15 +21,13 @@ class RouteAnimFx {
     ..color = col;
 
   /// Eigen foto (vullend bijgesneden) met een donkere laag, of effen donker. Eén tekenopdracht per beeld.
-  void background(Canvas c, ui.Image? background) {
+  void background(Canvas c, ui.Image? background, {double zoom = 1, Offset pan = Offset.zero}) {
     const full = Rect.fromLTWH(0, 0, 1080, 1920);
     c.drawRect(full, Paint()..color = raInk);
     final img = background;
     if (img == null) return;
-    final iw = img.width.toDouble(), ih = img.height.toDouble();
-    final s = math.max(full.width / iw, full.height / ih);
-    final sw = full.width / s, sh = full.height / s;
-    c.drawImageRect(img, Rect.fromLTWH((iw - sw) / 2, (ih - sh) / 2, sw, sh), full, Paint()..filterQuality = FilterQuality.medium);
+    final src = routeAnimPhotoCrop(img.width.toDouble(), img.height.toDouble(), zoom: zoom, pan: pan);
+    c.drawImageRect(img, src, full, Paint()..filterQuality = FilterQuality.medium);
     c.drawRect(
         full,
         Paint()

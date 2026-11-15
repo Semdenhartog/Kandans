@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/disk_image_cache.dart';
@@ -272,6 +273,30 @@ class _RaceCalendarScreenState extends ConsumerState<RaceCalendarScreen> {
   static const _radii = <double?>[25, 50, 100, null];
 
   @override
+  void initState() {
+    super.initState();
+    // Straal en soort van de vorige keer terug (0 = heel Nederland).
+    SharedPreferences.getInstance().then((p) {
+      if (!mounted) return;
+      final km = p.getInt('race_filter_km');
+      final kind = p.getString('race_filter_kind');
+      setState(() {
+        if (km != null) _km = km == 0 ? null : km.toDouble();
+        _kind = RaceKind.values.where((k) => k.name == kind).firstOrNull;
+      });
+    }).ignore();
+  }
+
+  void _remember() => SharedPreferences.getInstance().then((p) {
+        p.setInt('race_filter_km', _km?.round() ?? 0);
+        if (_kind == null) {
+          p.remove('race_filter_kind');
+        } else {
+          p.setString('race_filter_kind', _kind!.name);
+        }
+      }).ignore();
+
+  @override
   Widget build(BuildContext context) {
     final async = ref.watch(raceCalendarProvider);
     final state = async.value;
@@ -322,7 +347,10 @@ class _RaceCalendarScreenState extends ConsumerState<RaceCalendarScreen> {
                   ChoiceChip(
                     label: Text(r == null ? tr('Heel Nederland') : trf('{km} km', {'km': '${r.round()}'})),
                     selected: _km == r,
-                    onSelected: (_) => setState(() => _km = r),
+                    onSelected: (_) {
+                      setState(() => _km = r);
+                      _remember();
+                    },
                   ),
               ]),
               const SizedBox(height: 8),
@@ -336,7 +364,10 @@ class _RaceCalendarScreenState extends ConsumerState<RaceCalendarScreen> {
                     child: FilterChip(
                       label: Text(k == null ? tr('Alle') : raceKindLabel(k)),
                       selected: _kind == k,
-                      onSelected: (_) => setState(() => _kind = k),
+                      onSelected: (_) {
+                        setState(() => _kind = k);
+                        _remember();
+                      },
                     ),
                   ),
               ]),

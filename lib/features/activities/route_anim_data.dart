@@ -35,6 +35,8 @@ class RouteAnimData {
     this.logo,
     this.background,
     this.layout = RouteAnimLayout.none,
+    this.photoZoom = 1,
+    this.photoPan = Offset.zero,
   });
 
   final RoutePath path;
@@ -60,7 +62,11 @@ class RouteAnimData {
   /// Verschuiving van label, cijfers en logo.
   final RouteAnimLayout layout;
 
-  RouteAnimData copyWith({RouteAnimLayout? layout}) => RouteAnimData(
+  /// Inzoomen (≥ 1) en verschuiven (-1..1) van de foto.
+  final double photoZoom;
+  final Offset photoPan;
+
+  RouteAnimData copyWith({RouteAnimLayout? layout, double? photoZoom, Offset? photoPan}) => RouteAnimData(
         path: path,
         label: label,
         meters: meters,
@@ -73,6 +79,8 @@ class RouteAnimData {
         logo: logo,
         background: background,
         layout: layout ?? this.layout,
+        photoZoom: photoZoom ?? this.photoZoom,
+        photoPan: photoPan ?? this.photoPan,
       );
 }
 

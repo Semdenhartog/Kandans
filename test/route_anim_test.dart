@@ -61,4 +61,30 @@ void main() {
     expect(RouteAnimLayout.fromJson('kapot').isDefault, isTrue);
     expect(RouteAnimLayout.fromJson(null).isDefault, isTrue);
   });
+
+  test('foto-uitsnede blijft binnen de foto en schuift mee', () {
+    // Liggende foto 4000×3000: bij zoom 1 vult de hoogte het beeld, links/rechts is ruimte over.
+    final mid = routeAnimPhotoCrop(4000, 3000);
+    expect(mid.height, closeTo(3000, 0.01));
+    final left = routeAnimPhotoCrop(4000, 3000, pan: const Offset(-1, 0));
+    final right = routeAnimPhotoCrop(4000, 3000, pan: const Offset(1, 0));
+    expect(left.left, closeTo(0, 0.01));
+    expect(right.right, closeTo(4000, 0.01));
+    final zoomed = routeAnimPhotoCrop(4000, 3000, zoom: 2);
+    expect(zoomed.width, closeTo(mid.width / 2, 0.01));
+    // Slepen naar rechts laat meer van links zien; buiten de rand blijft het begrensd.
+    final pan = routeAnimPhotoPan(4000, 3000, 1, Offset.zero, const Offset(100, 0));
+    expect(pan.dx, lessThan(0));
+    expect(routeAnimPhotoPan(4000, 3000, 1, const Offset(-1, 0), const Offset(5000, 0)).dx, -1);
+    // Foto die precies past: geen ruimte, dus geen verschuiving.
+    expect(routeAnimPhotoPan(1080, 1920, 1, Offset.zero, const Offset(50, 50)), Offset.zero);
+  });
+
+  test('klikken op de standaardplek', () {
+    var l = const RouteAnimLayout(label: Offset(10, -9));
+    l = l.snapped(RouteAnimPart.label);
+    expect(l.label, Offset.zero);
+    l = const RouteAnimLayout(stats: Offset(40, 3)).snapped(RouteAnimPart.stats);
+    expect(l.stats, const Offset(40, 0));
+  });
 }

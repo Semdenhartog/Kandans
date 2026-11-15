@@ -21,6 +21,7 @@ class RouteAnimControls extends StatelessWidget {
     required this.error,
     required this.onStyle,
     required this.onPhoto,
+    required this.onTitle,
     required this.onClearPhoto,
     required this.onResetLayout,
     required this.onHideHome,
@@ -37,14 +38,14 @@ class RouteAnimControls extends StatelessWidget {
   final double? progress;
   final String? error;
   final ValueChanged<RouteAnimStyle> onStyle;
-  final VoidCallback onPhoto, onClearPhoto, onResetLayout, onMake, onStop, onShare, onInstagram;
+  final VoidCallback onPhoto, onTitle, onClearPhoto, onResetLayout, onMake, onStop, onShare, onInstagram;
   final ValueChanged<bool> onHideHome;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(tr('Sleep de tekst of het logo om ze te verplaatsen'), style: TextStyle(fontSize: 12, color: RwColors.muted)),
+        Text(hasPhoto ? tr('Sleep de tekst, of de foto om hem te verschuiven. Knijp om in te zoomen') : tr('Sleep de tekst of het logo om ze te verplaatsen'), style: TextStyle(fontSize: 12, color: RwColors.muted)),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
           child: Column(
@@ -64,6 +65,7 @@ class RouteAnimControls extends StatelessWidget {
                     label: Text(hasPhoto ? tr('Andere foto') : tr('Foto erachter')),
                   ),
                 ),
+                IconButton(onPressed: busy ? null : onTitle, tooltip: tr('Titel boven de video'), icon: const Icon(Icons.edit_outlined)),
                 if (hasPhoto) Expanded(child: TextButton(onPressed: busy ? null : onClearPhoto, child: Text(tr('Zonder foto')))),
                 if (layoutChanged) Expanded(child: TextButton(onPressed: busy ? null : onResetLayout, child: Text(tr('Teksten terugzetten')))),
               ]),

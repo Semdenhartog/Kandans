@@ -312,6 +312,12 @@ class RouteAnimLayout {
     return with_(p, Offset(dx, dy));
   }
 
+  /// Klikt [p] op de standaardplek als het onderdeel er dichtbij komt ([within] beeldpunten), per richting apart.
+  RouteAnimLayout snapped(RouteAnimPart p, {double within = 14}) {
+    final v = of(p);
+    return with_(p, Offset(v.dx.abs() <= within ? 0 : v.dx, v.dy.abs() <= within ? 0 : v.dy));
+  }
+
   String toJson() => jsonEncode([label.dx, label.dy, stats.dx, stats.dy, brand.dx, brand.dy]);
 
   static RouteAnimLayout fromJson(String? s) {
@@ -330,4 +336,22 @@ class RouteAnimLayout {
 
   @override
   int get hashCode => Object.hash(label, stats, brand);
+}
+
+/// Uitsnede van een foto achter de video: [zoom] ≥ 1, [pan] -1..1 (0 = midden) binnen de ruimte die er over is.
+Rect routeAnimPhotoCrop(double imgW, double imgH, {double zoom = 1, Offset pan = Offset.zero}) {
+  const w = 1080.0, h = 1920.0;
+  final s = math.max(w / imgW, h / imgH) * (zoom < 1 ? 1 : zoom);
+  final sw = w / s, sh = h / s;
+  final left = (imgW - sw) / 2 * (1 + pan.dx.clamp(-1.0, 1.0));
+  final top = (imgH - sh) / 2 * (1 + pan.dy.clamp(-1.0, 1.0));
+  return Rect.fromLTWH(left, top, sw, sh);
+}
+
+/// Nieuwe [pan] nadat de foto [deltaDesign] beeldpunten (ontwerpmaat) is meegesleept.
+Offset routeAnimPhotoPan(double imgW, double imgH, double zoom, Offset pan, Offset deltaDesign) {
+  final s = math.max(1080 / imgW, 1920 / imgH) * (zoom < 1 ? 1 : zoom);
+  final slackX = (imgW - 1080 / s) / 2, slackY = (imgH - 1920 / s) / 2;
+  double mv(double cur, double d, double slack) => slack < 1e-6 ? 0 : (cur - d / s / slack).clamp(-1.0, 1.0);
+  return Offset(mv(pan.dx, deltaDesign.dx, slackX), mv(pan.dy, deltaDesign.dy, slackY));
 }
