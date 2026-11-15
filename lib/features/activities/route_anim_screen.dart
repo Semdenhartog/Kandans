@@ -75,8 +75,19 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
     });
     _ed.addListener(_onEdit);
   }
-    }).ignore();
+
+  Future<void> _loadLogo() async {
+    try {
+      final data = await rootBundle.load('assets/logo/k_goud.webp');
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetHeight: 144);
+      final img = (await codec.getNextFrame()).image;
+      if (!mounted) return;
+      setState(() => _logo = img);
+      _rebuild();
+    } catch (_) {}
   }
+
+  @override
 
   Future<void> _editTitle() async {
     final c = TextEditingController(text: _data?.label ?? '');
