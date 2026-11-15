@@ -87,21 +87,8 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
     } catch (_) {}
   }
 
-  @override
-
   Future<void> _editTitle() async {
-    final c = TextEditingController(text: _data?.label ?? '');
-    final v = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Titel boven de video')),
-        content: TextField(controller: c, autofocus: true, maxLength: 26, textCapitalization: TextCapitalization.sentences),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Annuleren'))),
-          TextButton(onPressed: () => Navigator.pop(ctx, c.text.trim()), child: Text(tr('Opslaan'))),
-        ],
-      ),
-    );
+    final v = await askRouteAnimTitle(context, _data?.label ?? '');
     if (v != null) _ed.setTitle(v);
   }
 
@@ -239,21 +226,13 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
       HapticFeedback.mediumImpact();
     } catch (e) {
       await VideoEncoder.cancel();
-      if (mounted) setState(() => _error = _reason(e));
+      if (mounted) setState(() => _error = routeAnimErrorReason(e));
     } finally {
       if (mounted) {
         setState(() => _progress = null);
         _ctl.repeat();
       }
     }
-  }
-
-  /// Korte, begrijpelijke reden uit de fout van de encoder (de telefoon geeft meestal een Engelse tekst mee).
-  String _reason(Object e) {
-    final m = (e is PlatformException ? e.message : null) ?? '';
-    if (m.contains('ondersteunt')) return tr('Dit toestel ondersteunt dit videoformaat niet.');
-    if (m.contains('reageert niet')) return tr('De videoencoder reageert niet. Sluit andere apps en probeer het opnieuw.');
-    return tr('De video maken is niet gelukt.');
   }
 
   Future<void> _share() async {

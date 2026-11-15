@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 
 import '../../core/i18n.dart';
 import '../../core/theme.dart';
@@ -98,4 +99,28 @@ class RouteAnimControls extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Vraagt een eigen titel voor boven de video; null als de gebruiker annuleert, leeg = standaardtitel.
+Future<String?> askRouteAnimTitle(BuildContext context, String initial) {
+  final c = TextEditingController(text: initial);
+  return showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(tr('Titel boven de video')),
+      content: TextField(controller: c, autofocus: true, maxLength: 26, textCapitalization: TextCapitalization.sentences),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Annuleren'))),
+        TextButton(onPressed: () => Navigator.pop(ctx, c.text.trim()), child: Text(tr('Opslaan'))),
+      ],
+    ),
+  );
+}
+
+/// Korte, begrijpelijke reden uit de fout van de encoder.
+String routeAnimErrorReason(Object e) {
+  final m = (e is PlatformException ? e.message : null) ?? '';
+  if (m.contains('ondersteunt')) return tr('Dit toestel ondersteunt dit videoformaat niet.');
+  if (m.contains('reageert niet')) return tr('De videoencoder reageert niet. Sluit andere apps en probeer het opnieuw.');
+  return tr('De video maken is niet gelukt.');
 }
