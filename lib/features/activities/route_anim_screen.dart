@@ -21,6 +21,7 @@ import '../../domain/route_anim.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/widgets.dart';
+import 'route_anim_controls.dart';
 import 'route_anim_painter.dart';
 
 void openRouteAnim(BuildContext context, Activity a, {RunRoute? route}) {
@@ -364,60 +365,31 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
                     ),
                   ),
                   Text(tr('Sleep de tekst of het logo om ze te verplaatsen'), style: TextStyle(fontSize: 12, color: RwColors.muted)),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SegmentedButton<RouteAnimStyle>(
-                          showSelectedIcon: false,
-                          segments: [for (final s in styles) ButtonSegment(value: s, label: Text(_name(s)))],
-                          selected: {_style},
-                          onSelectionChanged: busy ? null : (v) => _setStyle(v.first),
-                        ),
-                        Row(children: [
-                          Expanded(
-                            child: TextButton.icon(
-                              onPressed: busy ? null : _pickPhoto,
-                              icon: const Icon(Icons.image_outlined),
-                              label: Text(_bg == null ? tr('Foto erachter') : tr('Andere foto')),
-                            ),
-                          ),
-                          if (_bg != null) Expanded(child: TextButton(onPressed: busy ? null : _clearPhoto, child: Text(tr('Zonder foto')))),
-                          if (!_layout.isDefault) Expanded(child: TextButton(onPressed: busy ? null : _resetLayout, child: Text(tr('Teksten terugzetten')))),
-                        ]),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _hideHome,
-                          onChanged: busy
-                              ? null
-                              : (v) {
-                                  _hideHome = v;
-                                  _videoPath = null;
-                                  _rebuild();
-                                },
-                          title: Text(tr('Verberg waar je woont')),
-                          subtitle: Text(tr('Laat de eerste en laatste 300 m van je route weg')),
-                        ),
-                        if (_error != null)
-                          Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(_error!, style: TextStyle(color: RwColors.danger))),
-                        if (busy) ...[
-                          LinearProgressIndicator(value: _progress),
-                          const SizedBox(height: 8),
-                          TextButton(onPressed: () => _cancel = true, child: Text(tr('Stoppen'))),
-                        ] else if (_videoPath == null)
-                          FilledButton.icon(onPressed: data == null ? null : _make, icon: const Icon(Icons.movie_creation_outlined), label: Text(tr('Maak video')))
-                        else ...[
-                          FilledButton.icon(onPressed: _share, icon: const Icon(Icons.ios_share), label: Text(tr('Deel video'))),
-                          const SizedBox(height: 8),
-                          Row(children: [
-                            Expanded(child: OutlinedButton(onPressed: _instagram, child: Text(tr('Naar Instagram')))),
-                            const SizedBox(width: 8),
-                            Expanded(child: OutlinedButton(onPressed: _make, child: Text(tr('Opnieuw maken')))),
-                          ]),
-                        ],
-                      ],
-                    ),
+                  RouteAnimControls(
+                    styles: styles,
+                    style: _style,
+                    styleName: _name,
+                    busy: busy,
+                    progress: _progress,
+                    hasData: data != null,
+                    hasPhoto: _bg != null,
+                    layoutChanged: !_layout.isDefault,
+                    hideHome: _hideHome,
+                    hasVideo: _videoPath != null,
+                    error: _error,
+                    onStyle: _setStyle,
+                    onPhoto: _pickPhoto,
+                    onClearPhoto: _clearPhoto,
+                    onResetLayout: _resetLayout,
+                    onHideHome: (v) {
+                      _hideHome = v;
+                      _videoPath = null;
+                      _rebuild();
+                    },
+                    onMake: _make,
+                    onStop: () => _cancel = true,
+                    onShare: _share,
+                    onInstagram: _instagram,
                   ),
                 ],
               ),

@@ -70,6 +70,13 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - `query "vrije tekst"` geeft veel ruis. `GRAPH_REPORT.md` niet in z'n geheel lezen.
 - Kaart is alleen van **main**; op een branch kloppen nieuwe/gewijzigde bestanden niet — dan zelf lezen.
 
+## Bouwregels (Sem, 15-11)
+- Eén taak per bestand, **nieuwe en gewijzigde bestanden ≤ 300 regels** (oude grote bestanden worden pas gesplitst als je er toch in werkt).
+- Indeling blijft: scherm in `lib/features/<onderdeel>/`, gedeelde stukken in `lib/shared/`, rekenwerk in `lib/domain/`, opslaan/laden in `lib/data/`
+  (niet `pages/`/`components/` — dat past niet bij dit project).
+- Eerst zoeken of iets al bestaat (codekaart, grep) vóór je iets nieuws schrijft.
+- Routevideo is zo gesplitst: `route_anim_data.dart` (kleuren + data), `_effects` (lijn/gloed), `_text`, `_painter`, `_controls` (knoppen), `_screen`.
+
 ## Huisstijl
 - Naam **Kadans**. Logo en app-icoon zijn definitief: **niets aanpassen** (details in het archief).
 - Kleuren: `RwPalette` in `lib/core/theme.dart` met `rwZand` (licht) en `rwZandAvond` (donker). `RwColors.*` en `RwText.*` zijn
