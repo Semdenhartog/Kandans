@@ -77,3 +77,8 @@ Alles is nog niet op een telefoon getest; punten met "meten" kunnen alleen op Se
 ## Advies voor de volgorde
 Eerst goedkope punten met direct effect: 1, 2, 4, 21, 22, 32, 33, 45, 46, 48. Daarna 11 (voorkomt dubbel werk), 6 en 16.
 Grote opsplitsingen (26, 31) apart plannen: één bestand per ronde, anders loopt de build-controle uit de hand.
+
+## Stand 15-11 (nacht)
+Gedaan: 1, 2, 4, 6 (alleen reden tonen, geen lagere-bitrate-terugval), 40, 46 (bewaking van de filters, geen volledige querycontrole), 48, 50.
+Al aanwezig, dus geen werk: 17 (MB per route + verwijderen), 19 (knop is al verborgen buiten Nederland), 32 (`isJa` herkent "ja graag", "doe maar", "oké").
+Niet gedaan: de rest. Reden: alleen op de telefoon te testen (20, 39), te groot voor deze ronde (9, 26, 31, 38) of eerst controleren in de code `(*)`.

@@ -231,6 +231,10 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   **14-11:** foto erachter (kiezen uit galerij, vullend bijgesneden + donkere laag, `RouteAnimData.background`), label/cijfers/logo te verslepen in het voorbeeld
   (`RouteAnimLayout` in `domain/route_anim.dart`, pref `route_anim_layout`, "Teksten terugzetten"), vloeiender: 30 fps (`routeAnimFps`), lijnen als `RoutePath.fullPath/slicePath`
   (geen punten kopiëren), gloed met gestapelde doorzichtige lijnen en kleurverloop i.p.v. blur, tekst bewaard (`_cache`), geen `saveLayer`, voorbeeld = één painter met `clock` + `repaint`.
+  **15-11:** foto verschuiven (slepen) en inzoomen (knijpen) via `RouteAnimEditor` (`route_anim_editor.dart`; zoom/pan in `RouteAnimData`, `routeAnimPhotoCrop/Pan` in domain),
+  eigen titel (potlood in `RouteAnimControls`), tekst klikt op de standaardplek (`RouteAnimLayout.snapped`, gouden hulplijn op de marge), foutreden uit de encoder (`routeAnimErrorReason`).
+  Wedstrijdkalender onthoudt straal en soort (prefs `race_filter_km/kind`). Tests: `route_anim_painter_test.dart`, `file_size_ratchet_test.dart` (+ `test/file_size_baseline.txt`:
+  bestanden >300 regels mogen niet groeien), `strava_filter_guard_test.dart`.
   Lag nooit op een echt toestel gemeten. Script voor losse Instagram-video's: `tools/insta/route_anim.py`. Niet op een telefoon getest.
 - Kadans delen: `profile/share_app_screen.dart` (3 kaarten, bericht 4:5 of verhaal 9:16, eigen tekstje; vanuit Ik → Vertel een vriend).
 - Strava-upload: functie `strava` actie `upload` (GPX `_shared/gpx.ts`, external_id `kadans-<id>` wordt bij sync overgeslagen).
