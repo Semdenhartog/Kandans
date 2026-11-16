@@ -79,6 +79,7 @@ class HelpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const versie = 'Kadans ${ErrorReporter.appVersion}';
     return Scaffold(
       appBar: AppBar(title: const Text('Hulp')),
       body: ListView(
@@ -147,7 +148,7 @@ class HelpScreen extends StatelessWidget {
           const SizedBox(height: 16),
           // Versie bij een bugmelding: dan weten we welke build het was.
           Center(
-            child: SelectableText('Kadans ${ErrorReporter.appVersion}',
+            child: SelectableText(versie,
                 style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:runwise/core/error_reporter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -179,8 +180,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
             _end = list.length < 20;
           });
         }
-      } catch (_) {
-      } finally {
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'community_feed_screen.dart'); } finally {
         _loadingMore = false;
       }
       return;
@@ -195,8 +195,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
           _end = list.length < 30;
         });
       }
-    } catch (_) {
-    } finally {
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'community_feed_screen.dart'); } finally {
       _loadingMore = false;
     }
   }
