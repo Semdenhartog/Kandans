@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/stride_sensor.dart';
 import 'heart_rate_service.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Loopsensor via Bluetooth (voetsensor zoals Stryd of Polar Stride): cadans en snelheid.
 /// Werkt ook mee met een hartslagband die dezelfde dienst heeft (bijv. Wahoo Tickr X):
@@ -43,7 +44,7 @@ class StrideSensorService {
       final p = await SharedPreferences.getInstance();
       _deviceId = p.getString(_idKey);
       deviceName = p.getString(_nameKey);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'stride_sensor_service.dart'); }
   }
 
   bool get hasSavedDevice => _deviceId != null;
@@ -65,7 +66,7 @@ class StrideSensorService {
       final p = await SharedPreferences.getInstance();
       await p.setString(_idKey, id);
       await p.setString(_nameKey, deviceName!);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'stride_sensor_service.dart'); }
     _wanted = true;
     await _open();
   }
@@ -159,6 +160,6 @@ class StrideSensorService {
       final p = await SharedPreferences.getInstance();
       await p.remove(_idKey);
       await p.remove(_nameKey);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'stride_sensor_service.dart'); }
   }
 }

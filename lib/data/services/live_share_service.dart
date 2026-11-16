@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 enum LiveStatus { idle, starting, active, paused, stopping }
 
@@ -113,7 +114,7 @@ class LiveShareService {
         startedAt: DateTime.parse(row['started_at'] as String),
         expiresAt: DateTime.parse(row['expires_at'] as String),
       );
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'live_share_service.dart'); }
   }
 
   Future<void> _ensurePermission() async {
@@ -283,7 +284,7 @@ class LiveShareService {
         'alert': on ? 'fall' : null,
         'alert_at': on ? DateTime.now().toUtc().toIso8601String() : null,
       }).eq('id', s.shareId!);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'live_share_service.dart'); }
   }
 
   /// Stopt delen. Je route en locatie worden direct van de server gewist.

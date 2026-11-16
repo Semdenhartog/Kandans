@@ -13,6 +13,7 @@ import '../../shared/widgets.dart';
 import 'runner_avatar.dart';
 import 'runner_profile_screen.dart';
 import '../profile/share_app_screen.dart' show openShareApp;
+import 'package:runwise/core/error_reporter.dart';
 
 void openStepsContest(BuildContext c) =>
     Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const StepsContestScreen()));
@@ -80,7 +81,7 @@ class _StepsContestScreenState extends ConsumerState<StepsContestScreen> {
     _connected = Platform.isAndroid && await _sync.stepsEnabled();
     try {
       _groups = await ref.read(togetherServiceProvider).groups();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'steps_contest_screen.dart'); }
     await _refresh();
   }
 

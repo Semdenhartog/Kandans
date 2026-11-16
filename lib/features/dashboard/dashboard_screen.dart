@@ -60,6 +60,7 @@ import '../profile/run_pause_tile.dart' show PauseBanner;
 import '../../shared/nav_buttons.dart';
 import '../../shared/art/wolkje.dart';
 import '../planner/this_week_screen.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -103,7 +104,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       final runs = await ref.read(activitiesProvider.future);
       final m = typicalRunMinutes([for (final a in runs) a.movingTimeSeconds]);
       if (m != null && mounted) setState(() => _durationMinutes = m);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'dashboard_screen.dart'); }
   }
 
   @override

@@ -10,6 +10,7 @@ import '../../core/supabase.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/services/sync_service.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 const _stravaOrange = Color(0xFFFC5200);
 
@@ -67,7 +68,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
         _oldest = DateTime.tryParse(p.getString(_kOldest) ?? '');
         if (p.getBool(_kDone) ?? false) _state = _State.done;
       });
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'strava_history_screen.dart'); }
   }
 
   Future<void> _save({bool done = false}) async {
@@ -77,7 +78,7 @@ class _StravaHistoryScreenState extends ConsumerState<StravaHistoryScreen> {
       await p.setInt(_kTotal, _total);
       if (_oldest != null) await p.setString(_kOldest, _oldest!.toIso8601String());
       await p.setBool(_kDone, done);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'strava_history_screen.dart'); }
   }
 
   Future<void> _start() async {

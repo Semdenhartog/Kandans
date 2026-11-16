@@ -9,6 +9,7 @@ import '../../data/services/phone_calendar_service.dart';
 import '../../data/services/roster_service.dart';
 import '../../data/services/weather_service.dart';
 import '../../domain/availability.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 const _key = 'availability_v1';
 
@@ -38,7 +39,7 @@ Future<void> saveAvailability(WidgetRef ref, Availability a) async {
     } else {
       await p.setString(_key, jsonEncode(a.toJson()));
     }
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'availability_provider.dart'); }
   ref.invalidate(availabilityProvider);
 }
 

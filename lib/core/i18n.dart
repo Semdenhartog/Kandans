@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'i18n_strings.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Talen in Kadans. Nederlands is de brontaal: elke tekst in de code is Nederlands en wordt via [tr] vertaald.
 enum AppLanguage {
@@ -42,7 +43,7 @@ class LanguageController extends ChangeNotifier {
         _chosen = true;
         return;
       }
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'i18n.dart'); }
     final phone = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     _lang = AppLanguage.values.where((l) => l.code == phone).firstOrNull ?? AppLanguage.nl;
   }
@@ -53,7 +54,7 @@ class LanguageController extends ChangeNotifier {
     notifyListeners();
     try {
       await (await SharedPreferences.getInstance()).setString(_key, l.code);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'i18n.dart'); }
   }
 }
 

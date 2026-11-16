@@ -14,6 +14,7 @@ import '../../shared/permission_primer.dart';
 import '../../shared/widgets.dart';
 import 'elevation_profile.dart';
 import 'route_map.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Alles wat nodig is om een route groot te tonen.
 class RouteMapData {
@@ -82,7 +83,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
       if (mounted && (perm == LocationPermission.always || perm == LocationPermission.whileInUse)) {
         setState(() => _showMe = true);
       }
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'route_map_screen.dart'); }
   }
 
   void _fitRoute() {

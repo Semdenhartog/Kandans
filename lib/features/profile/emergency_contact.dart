@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
 import '../../shared/widgets.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Noodcontact (alleen op deze telefoon bewaard, gaat nooit naar de server).
 class EmergencyContact {
@@ -133,7 +134,7 @@ Future<void> showSosSheet(BuildContext context) async {
                     final p = await Geolocator.getLastKnownPosition() ??
                         await Geolocator.getCurrentPosition().timeout(const Duration(seconds: 8));
                     where = ' Mijn locatie: https://maps.google.com/?q=${p.latitude.toStringAsFixed(5)},${p.longitude.toStringAsFixed(5)}';
-                  } catch (_) {}
+                  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'emergency_contact.dart'); }
                   final body = 'Ik ben aan het hardlopen en heb hulp nodig.$where';
                   final ok = await launchUrl(Uri(scheme: 'sms', path: contact.phone, queryParameters: {'body': body}));
                   if (!ok && ctx.mounted) showMessage(ctx, 'Sms-app kon niet worden geopend.', error: true);

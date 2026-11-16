@@ -22,6 +22,7 @@ import '../../domain/weekly_load.dart';
 import '../../shared/widgets.dart';
 import '../record/record_run_screen.dart';
 import 'custom_plan_screen.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 void openTrainingPlan(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TrainingPlanScreen()));
@@ -67,14 +68,14 @@ Future<void> _rememberSetup(PlanSetup setup) async {
   try {
     final p = await SharedPreferences.getInstance();
     await p.setString(_setupKey, jsonEncode(setup.toJson()));
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'training_plan_screen.dart'); }
 }
 
 Future<void> _forgetSetup() async {
   try {
     final p = await SharedPreferences.getInstance();
     await p.remove(_setupKey);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'training_plan_screen.dart'); }
 }
 
 Future<PlanSetup?> _savedSetup() async {

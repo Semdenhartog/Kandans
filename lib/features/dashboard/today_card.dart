@@ -25,6 +25,7 @@ import '../planner/training_plan_screen.dart';
 import 'dashboard_providers.dart';
 import '../../data/services/run_pause_store.dart';
 import '../../data/services/health_consent.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// "Jij vandaag": training uit je schema, je klaar-score, herstel en vorm.
 class TodayCard extends ConsumerWidget {
@@ -376,7 +377,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_key, _thisWeek);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'today_card.dart'); }
   }
 
   @override

@@ -17,6 +17,7 @@ import '../../domain/monthly_goal.dart' show suggestedGoalKm;
 import '../../shared/widgets.dart';
 import '../activities/badges_screen.dart' show badgeIcon;
 import 'community_screen.dart' show openCommunity;
+import 'package:runwise/core/error_reporter.dart';
 
 const challengeGold = Color(0xFFD9B45A);
 
@@ -37,14 +38,14 @@ class JoinedChallenges extends Notifier<List<Challenge>> {
       final p = await SharedPreferences.getInstance();
       final raw = jsonDecode(p.getString(_key) ?? '[]') as List;
       state = [for (final j in raw) Challenge.fromJson(j)].whereType<Challenge>().toList();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'challenges.dart'); }
   }
 
   Future<void> _save() async {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_key, jsonEncode([for (final c in state) c.toJson()]));
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'challenges.dart'); }
   }
 
   Future<void> join(Challenge c) async {

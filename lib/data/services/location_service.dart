@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/config.dart';
 import '../models/models.dart';
 import '../repositories/repositories.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 class Coordinates {
   const Coordinates(this.latitude, this.longitude, this.label);
@@ -30,7 +31,7 @@ Future<bool> locationExplained() async {
 Future<void> markLocationExplained() async {
   try {
     await (await SharedPreferences.getInstance()).setBool(locationExplainedKey, true);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'location_service.dart'); }
 }
 
 /// Vraagt de GPS-locatie op. Geeft null als dat niet mag of niet lukt.

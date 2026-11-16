@@ -22,6 +22,7 @@ import '../dashboard/dashboard_providers.dart';
 import '../planner/availability_provider.dart';
 import '../planner/roster_screen.dart' show openRosterScreen;
 import '../profile/member_card.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 const _doneKey = 'onboarding_done_v1';
 
@@ -36,7 +37,7 @@ Future<bool> onboardingDone() async {
 Future<void> _markDone() async {
   try {
     await (await SharedPreferences.getInstance()).setBool(_doneKey, true);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'onboarding_screen.dart'); }
 }
 
 /// Wat de gebruiker na de rondleiding wil doen.

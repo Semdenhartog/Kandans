@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Maakt een WAV-bestand met [beats] tikken op [spm] stappen per minuut (zachte houtblok-tik).
 /// Elke tik is kort en zacht, zodat hij boven muziek uit hoorbaar is zonder te storen.
@@ -82,20 +83,20 @@ class MetronomeService {
   Future<void> pause() async {
     try {
       await _player?.pause();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'metronome_service.dart'); }
   }
 
   Future<void> resume() async {
     if (_spm == null) return;
     try {
       await _player?.resume();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'metronome_service.dart'); }
   }
 
   Future<void> stop() async {
     _spm = null;
     try {
       await _player?.stop();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'metronome_service.dart'); }
   }
 }

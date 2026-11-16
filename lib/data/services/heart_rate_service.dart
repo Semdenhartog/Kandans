@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/heart_rate.dart';
 import 'stride_sensor_service.dart';
 import 'health_consent.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 enum HrStatus { off, scanning, connecting, connected, lost }
 
@@ -43,7 +44,7 @@ class HeartRateService {
       _deviceId = p.getString(_idKey);
       deviceName = p.getString(_nameKey);
       maxHr.value = p.getInt(_maxKey) ?? 190;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'heart_rate_service.dart'); }
   }
 
   bool get hasSavedDevice => _deviceId != null;
@@ -82,7 +83,7 @@ class HeartRateService {
       final p = await SharedPreferences.getInstance();
       await p.setString(_idKey, id);
       await p.setString(_nameKey, deviceName!);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'heart_rate_service.dart'); }
     _wanted = true;
     await _open();
   }
@@ -178,6 +179,6 @@ class HeartRateService {
       final p = await SharedPreferences.getInstance();
       await p.remove(_idKey);
       await p.remove(_nameKey);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'heart_rate_service.dart'); }
   }
 }

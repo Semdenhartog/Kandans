@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Eigen Kadans-geluidjes (zelf gemaakt, in assets/sounds): start, elke km, intervalwissel, record en finish.
 /// Muziek wordt even zachter gezet in plaats van gestopt.
@@ -32,7 +33,7 @@ class SoundService {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setBool(_key, on);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'sound_service.dart'); }
   }
 
   Future<void> play(RwSound s) async {
@@ -68,7 +69,7 @@ class SoundService {
       await player.stop();
       await player.play(BytesSource(go ? (_goWav ??= toneWav(1320, 0.45)) : (_tickWav ??= toneWav(880, 0.16)), mimeType: 'audio/wav'),
           volume: 0.9);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'sound_service.dart'); }
   }
 
   AudioPlayer? _beeper;

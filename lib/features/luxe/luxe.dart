@@ -13,6 +13,7 @@ import '../../data/services/billing_service.dart';
 import '../../domain/geo.dart';
 import '../../shared/widgets.dart';
 import '../routes/poster_design.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 const luxeGold = Color(0xFFD9B45A);
 
@@ -36,7 +37,7 @@ final luxeAccessProvider = FutureProvider<bool>((ref) async {
   SharedPreferences? prefs;
   try {
     prefs = await SharedPreferences.getInstance();
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'luxe.dart'); }
   final cached = prefs?.getBool(_cacheKey) ?? false;
   final user = ref.watch(currentUserProvider);
   // Luxe via een actiecode (tabel user_entitlements, migratie 0032).
@@ -120,7 +121,7 @@ class _LuxeSheetState extends ConsumerState<_LuxeSheet> {
     try {
       final p = await billing.luxePrice(user.id);
       if (mounted) setState(() => _price = p);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'luxe.dart'); }
   }
 
   Future<void> _buy() async {

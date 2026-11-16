@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// De knop op je oortjes tijdens een run: één druk = pauze/verder, twee keer = ronde.
 /// Werkt via een eigen Android-mediasessie (android_extra/kotlin/KadansChannels.kt).
@@ -48,6 +49,6 @@ class MediaButtonService {
     _sub = null;
     try {
       await _m.invokeMethod<void>('stop');
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'media_button_service.dart'); }
   }
 }

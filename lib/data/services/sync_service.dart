@@ -17,6 +17,7 @@ import '../repositories/repositories.dart';
 import 'pending_runs.dart';
 import 'weather_service.dart';
 import 'health_consent.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Status van de Strava-koppeling (rij in external_connections).
 class StravaConnection {
@@ -154,7 +155,7 @@ class SyncService {
     if (!await stravaAutoUpload()) return;
     try {
       await uploadToStrava(activityId);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'sync_service.dart'); }
   }
 
   /// Eén stap van "oude runs ophalen": 200 Strava-activiteiten ouder dan [before] (epoch-seconden).
@@ -271,7 +272,7 @@ class SyncService {
   Future<void> disconnectSteps() async {
     try {
       await (await SharedPreferences.getInstance()).setBool(_stepsKey, false);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'sync_service.dart'); }
   }
 
   /// Stappen van vandaag (voor de dagstand in de wedstrijd). Null als het niet kan.
@@ -604,7 +605,7 @@ class SyncService {
       try {
         await repo.autoLinkActivity(a.id!, m.routeId);
         linked++;
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'sync_service.dart'); }
     }
     if (linked > 0) _ref.invalidate(activitiesProvider);
     return linked;
@@ -642,7 +643,7 @@ class SyncService {
       }
       try {
         await autoLinkRuns();
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'sync_service.dart'); }
     } finally {
       _busy = false;
     }

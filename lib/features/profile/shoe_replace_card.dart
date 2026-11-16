@@ -12,6 +12,7 @@ import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 import '../../domain/shoe_shop.dart';
 import '../../shared/widgets.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Welke winkel achter "Bekijk nieuwe schoenen" zit (instelbaar in Supabase, zie [ShoeShop]).
 final shoeShopProvider = FutureProvider<ShoeShop>((ref) async {
@@ -64,7 +65,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
         if (until != null && until.isAfter(now)) out.add(k.substring('shoe_snooze_'.length));
       }
       if (mounted) setState(() => _snoozed = out);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'shoe_replace_card.dart'); }
   }
 
   Future<void> _later(Shoe s) async {
@@ -72,7 +73,7 @@ class _ShoeReplaceCardState extends ConsumerState<ShoeReplaceCard> {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_key(s.id!), DateTime.now().add(const Duration(days: _snoozeDays)).toIso8601String());
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'shoe_replace_card.dart'); }
     if (!mounted) return;
     setState(() => _snoozed = {..._snoozed, s.id!});
     showMessage(context, 'We herinneren je over een maand.');

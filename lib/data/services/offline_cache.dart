@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Bewaart de laatst opgehaalde gegevens op de telefoon, zodat de app ook
 /// zonder internet iets laat zien (runs, routes, profiel en het weer).
@@ -17,7 +18,7 @@ class OfflineCache {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString('$_prefix$key', jsonEncode({'at': DateTime.now().toIso8601String(), 'data': data}));
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'offline_cache.dart'); }
   }
 
   static Future<({Object? data, DateTime at})?> load(String key, {Duration? maxAge}) async {
@@ -41,7 +42,7 @@ class OfflineCache {
       for (final k in p.getKeys().where((k) => k.startsWith(_prefix)).toList()) {
         await p.remove(k);
       }
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'offline_cache.dart'); }
     showingCachedSince.value = null;
   }
 

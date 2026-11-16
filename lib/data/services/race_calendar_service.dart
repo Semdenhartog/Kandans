@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/race_calendar.dart';
 import 'location_service.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Wedstrijden uit de wedstrijdkalender (open overheidsdata), 12 uur bewaard op het toestel.
 class RaceCalendarService {
@@ -61,6 +62,6 @@ final raceCalendarProvider = FutureProvider<RaceCalendarState>((ref) async {
   Coordinates? at;
   try {
     at = await ref.watch(weatherLocationProvider.future);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'race_calendar_service.dart'); }
   return RaceCalendarState(races, at?.latitude, at?.longitude, at?.label);
 });

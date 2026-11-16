@@ -50,6 +50,6 @@ class RecordingStore {
     try {
       final f = await _file();
       if (await f.exists()) await f.delete();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'recording_store.dart'); }
   }
 }

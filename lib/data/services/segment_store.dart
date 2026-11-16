@@ -7,6 +7,7 @@ import '../../domain/run_streams.dart';
 import '../../domain/segments.dart';
 import '../models/models.dart';
 import '../repositories/repositories.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 class SegmentBest {
   const SegmentBest(this.seconds, this.runId, this.date, this.efforts);
@@ -82,7 +83,7 @@ class SegmentStore {
         final pos = st?.positions;
         if (st == null || pos == null || pos.length < 10) continue;
         tracks.add(SegTrack(a.id!, a.startedAt, pos, st.time, st.distance));
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'segment_store.dart'); }
     }
     final old = await load();
     final names = {for (final s in old.segments) s.id: s.name};

@@ -1,4 +1,5 @@
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Scherm op volle helderheid (zonmodus) of terug naar wat de gebruiker had.
 /// Alleen voor Kadans zelf; de systeeminstelling blijft ongemoeid.
@@ -10,7 +11,7 @@ Future<void> setNightBrightness(bool on) async {
     } else {
       await ScreenBrightness.instance.resetApplicationScreenBrightness();
     }
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'device_extras.dart'); }
 }
 
 Future<void> setMaxBrightness(bool on) async {

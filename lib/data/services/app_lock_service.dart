@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// App vergrendelen met vingerafdruk of gezicht (of anders de pincode van je telefoon).
 /// Je blijft gewoon ingelogd; bij openen bevestig je alleen dat jij het bent.
@@ -30,7 +31,7 @@ class AppLockService {
       final p = await SharedPreferences.getInstance();
       enabled.value = p.getBool(_key) ?? false;
       locked.value = enabled.value;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'app_lock_service.dart'); }
   }
 
   Future<bool> isAvailable() async {
@@ -63,7 +64,7 @@ class AppLockService {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setBool(_key, on);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'app_lock_service.dart'); }
     return true;
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/config.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Zet beelden één voor één om in een mp4 (Android, kanaal `kadans/video` in KadansChannels.kt).
 class VideoEncoder {
@@ -46,7 +47,7 @@ class VideoEncoder {
   static Future<void> cancel() async {
     try {
       await _channel.invokeMethod('cancel');
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'video_encoder.dart'); }
   }
 
   /// Opent Instagram met de video (keuzescherm of rechtstreeks naar een verhaal, zie [InstagramShare]).

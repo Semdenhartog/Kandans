@@ -9,6 +9,7 @@ import '../../data/services/social_service.dart';
 import '../../shared/widgets.dart';
 import 'community_feed_screen.dart' show RunnerAvatar;
 import 'runner_profile_screen.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// [tab]: 0 = zoeken en verzoeken, 1 = volgers, 2 = volgend.
 void openPeople(BuildContext context, {int tab = 0}) =>
@@ -83,7 +84,7 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
       try {
         final r = await _svc.search(q.trim());
         if (mounted && _query.text.trim() == q.trim()) setState(() => _results = r);
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'people_screen.dart'); }
     });
   }
 

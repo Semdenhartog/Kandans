@@ -13,6 +13,7 @@ import '../../domain/geo.dart';
 import '../../domain/run_goal.dart';
 import '../../domain/run_streams.dart';
 import '../../domain/training_plan.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Alle database-toegang via Supabase. Row Level Security zorgt ervoor
 /// dat elke gebruiker alleen zijn eigen rijen kan zien en wijzigen.
@@ -146,7 +147,7 @@ class RunWiseRepository {
       final row = await _db.from('activities').select('photos').eq('id', id).maybeSingle();
       final photos = (row?['photos'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
       if (photos.isNotEmpty) await _db.storage.from(_photoBucket).remove(photos);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'repositories.dart'); }
     await _db.from('activities').delete().eq('id', id);
   }
 
@@ -241,7 +242,7 @@ class RunWiseRepository {
     try {
       final r = await ElevationService().correct(streams);
       if (r != null) await setActivityElevation(id, r.streams, r.gain);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'repositories.dart'); }
   }
 
   /// Een eigen opname bijsnijden (vergeten te stoppen): nieuwe afstand, tijd, spoor en verloop.

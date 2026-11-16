@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Tijdens een run het opnamescherm (grote cijfers) boven het vergrendelscherm tonen (punt 52):
 /// even op de aan/uit-knop drukken en je ziet tijd, afstand en tempo zonder te ontgrendelen.
@@ -25,7 +26,7 @@ class LockScreenDisplay {
   static Future<void> setEnabled(bool on) async {
     try {
       await (await SharedPreferences.getInstance()).setBool(_key, on);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'lock_screen_service.dart'); }
     if (!on) await show(false);
   }
 

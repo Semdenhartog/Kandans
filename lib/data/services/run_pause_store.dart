@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/run_pause.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Pauzes (blessure, ziek, vakantie) staan alleen op de telefoon.
 class RunPauseStore {
@@ -26,7 +27,7 @@ class RunPauseStore {
       final cutoff = DateTime.now().subtract(const Duration(days: 400));
       final keep = [for (final x in pauses) if (x.end == null || x.end!.isAfter(cutoff)) x];
       await p.setString(_key, jsonEncode([for (final x in keep) x.toJson()]));
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'run_pause_store.dart'); }
   }
 
   /// Loopt er nu een pauze? (Voor meldingen en de coach, buiten Riverpod om.)

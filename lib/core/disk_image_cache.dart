@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Bewaart kaarttegels en foto's op de telefoon: sneller laden, minder data en
 /// (eerder bekeken) kaarten werken ook zonder internet.
@@ -69,7 +70,7 @@ class DiskImageCache {
       try {
         final f = File('${d.path}/$n');
         if (await f.exists()) await f.delete();
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'disk_image_cache.dart'); }
     }
   }
 
@@ -78,13 +79,13 @@ class DiskImageCache {
     try {
       final pinned = File('${(await offlineFolder()).path}/$name');
       if (await pinned.exists()) return await pinned.readAsBytes();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'disk_image_cache.dart'); }
     final f = File('${(await _folder()).path}/$name');
     try {
       if (await f.exists() && DateTime.now().difference(await f.lastModified()) < maxAge) {
         return await f.readAsBytes();
       }
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'disk_image_cache.dart'); }
     try {
       final res = await _client.get(Uri.parse(url), headers: headers).timeout(const Duration(seconds: 20));
       if (res.statusCode != 200 || res.bodyBytes.isEmpty) throw HttpException('HTTP ${res.statusCode}');
@@ -115,7 +116,7 @@ class DiskImageCache {
         await f.delete();
         total -= s.size;
       }
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'disk_image_cache.dart'); }
   }
 
   /// Alles wissen (bij uitloggen).
@@ -124,13 +125,13 @@ class DiskImageCache {
       final d = await _folder();
       await d.delete(recursive: true);
       _dir = null;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'disk_image_cache.dart'); }
     // Ook de offline kaarten: die verraden waar je loopt.
     try {
       final o = await offlineFolder();
       await o.delete(recursive: true);
       _offDir = null;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'disk_image_cache.dart'); }
   }
 }
 

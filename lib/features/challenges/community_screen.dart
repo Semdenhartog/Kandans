@@ -10,6 +10,7 @@ import '../../shared/widgets.dart';
 import '../../data/repositories/repositories.dart' show profileProvider;
 import 'challenges.dart' show challengeGold;
 import 'invite_card.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 void openCommunity(BuildContext context) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CommunityScreen()));
@@ -27,14 +28,14 @@ Future<void> refreshCommunityQuietly(CommunityService service) async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool(_joinedKey) != true) return;
     await service.refresh();
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'community_screen.dart'); }
 }
 
 Future<void> _rememberJoined(bool joined) async {
   try {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_joinedKey, joined);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'community_screen.dart'); }
 }
 
 /// "Samen": ranglijsten met andere lopers (alleen bijnaam en totaal).
@@ -71,7 +72,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     try {
       await ref.read(communityServiceProvider).refresh();
       ref.invalidate(communityBoardProvider);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'community_screen.dart'); }
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -115,7 +116,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       final clip = (await Clipboard.getData(Clipboard.kTextPlain))?.text ?? '';
       final code = friendCodeFrom(clip);
       if (code != null && code != ref.read(communityStatusProvider).value?.friendCode) ctrl.text = code;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'community_screen.dart'); }
     if (!mounted) return;
     final code = await showDialog<String>(
       context: context,

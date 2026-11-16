@@ -19,6 +19,7 @@ import '../routes/route_map.dart';
 import 'runner_avatar.dart';
 import 'runner_profile_screen.dart';
 import 'steps_contest_screen.dart' show openStepsContest;
+import 'package:runwise/core/error_reporter.dart';
 
 void openBuddies(BuildContext c) => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const BuddiesScreen()));
 void openBets(BuildContext c) => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const BetsScreen()));
@@ -461,10 +462,10 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
     try {
       _rows = await _svc.board(_g.id);
       _g = (await _svc.groups()).where((x) => x.id == _g.id).firstOrNull ?? _g;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'together_screens.dart'); }
     try {
       _runs = await _svc.groupRuns(_g.id);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'together_screens.dart'); }
     if (mounted) setState(() => _loading = false);
   }
 

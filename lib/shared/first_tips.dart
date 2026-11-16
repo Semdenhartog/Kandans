@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/theme.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Korte uitleg die één keer bovenaan een tabblad staat. Wegtikken = nooit meer (tot je de tips
 /// opnieuw aanzet in Ik → Hulp).
@@ -32,7 +33,7 @@ Future<void> resetFirstTips() async {
       await p.remove(k);
     }
     firstTipsReset.value++;
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'first_tips.dart'); }
 }
 
 /// Telt op als de tips opnieuw aangezet worden, zodat open schermen ze meteen weer tonen.
@@ -59,14 +60,14 @@ class _FirstTipState extends State<FirstTip> {
       final p = await SharedPreferences.getInstance();
       final seen = p.getBool('$_prefix${widget.id}') ?? false;
       if (mounted) setState(() => _show = !seen);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'first_tips.dart'); }
   }
 
   Future<void> _dismiss() async {
     setState(() => _show = false);
     try {
       await (await SharedPreferences.getInstance()).setBool('$_prefix${widget.id}', true);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'first_tips.dart'); }
   }
 
   @override

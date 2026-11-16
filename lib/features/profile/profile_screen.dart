@@ -42,6 +42,7 @@ import '../../core/config.dart';
 import 'health_consent_tile.dart';
 import '../../shared/nav_buttons.dart';
 import 'share_app_screen.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -285,7 +286,7 @@ class ProfileScreen extends ConsumerWidget {
                     String? code;
                     try {
                       code = (await ref.read(communityServiceProvider).status()).friendCode;
-                    } catch (_) {}
+                    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'profile_screen.dart'); }
                     final p = ref.read(profileProvider).value;
                     if (!context.mounted) return;
                     openShareApp(context, name: p == null || p.displayName == 'loper' ? '' : p.displayName, friendCode: code);

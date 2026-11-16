@@ -12,6 +12,7 @@ import '../../shared/widgets.dart';
 import 'community_feed_screen.dart' show RunnerAvatar;
 import 'people_screen.dart';
 import 'shared_run_card.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 void openRunnerProfile(BuildContext context, String nickname) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RunnerProfileScreen(nickname: nickname)));
@@ -236,7 +237,7 @@ class _RunnerProfileScreenState extends ConsumerState<RunnerProfileScreen> {
                                   RunnerProfile? p2;
                                   try {
                                     p2 = await _svc.profile(widget.nickname);
-                                  } catch (_) {}
+                                  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'runner_profile_screen.dart'); }
                                   if (!mounted) return;
                                   if (p2 == null) {
                                     Navigator.of(context).pop();

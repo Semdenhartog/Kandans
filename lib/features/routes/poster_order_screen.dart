@@ -16,6 +16,7 @@ import '../../shared/widgets.dart';
 import '../luxe/luxe.dart' show luxeGold;
 import 'poster_design.dart';
 import 'poster_orders_screen.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Opent het bestellen van een gedrukte poster.
 void openPosterOrder(BuildContext context, {required PosterData data, required PosterStyle style}) {
@@ -77,7 +78,7 @@ class _PosterOrderScreenState extends ConsumerState<PosterOrderScreen> {
         _country = a.country;
         if (a.email.isNotEmpty) _email.text = a.email;
       });
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'poster_order_screen.dart'); }
   }
 
   ShippingAddress get _address => ShippingAddress(
@@ -130,7 +131,7 @@ class _PosterOrderScreenState extends ConsumerState<PosterOrderScreen> {
       try {
         final p = await SharedPreferences.getInstance();
         await p.setString(_addressKey, jsonEncode(address.toJson()));
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'poster_order_screen.dart'); }
       final ok = await launchUrl(r.checkoutUrl, mode: LaunchMode.externalApplication);
       if (!mounted) return;
       if (!ok) throw Exception('De betaalpagina kon niet worden geopend.');

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// TESTFASE: de "Kadans-stem" (ElevenLabs, via de edge function `tts`, zodat de sleutel nooit in de app zit).
 ///
@@ -87,7 +88,7 @@ class KadansVoice {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setBool(_key, on);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'kadans_voice.dart'); }
   }
 
   /// Volume van de Kadans-stem (0,2–1,0), los van het mediavolume (punt 14).
@@ -105,7 +106,7 @@ class KadansVoice {
     try {
       await _player?.setVolume(_volume!);
       await (await SharedPreferences.getInstance()).setDouble(_volumeKey, _volume!);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'kadans_voice.dart'); }
   }
 
   /// Haalt zinnen alvast op (één tegelijk, hooguit 40) zodat ze tijdens de run uit de cache komen.
@@ -152,7 +153,7 @@ class KadansVoice {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_voiceKey, key);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'kadans_voice.dart'); }
   }
 
   /// Speelt een kort voorbeeld van [option]. Geeft null terug als het lukte, anders een uitleg in gewone woorden.
@@ -215,7 +216,7 @@ class KadansVoice {
   Future<void> stopPlayback() async {
     try {
       await _player?.stop();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'kadans_voice.dart'); }
   }
 
   /// Vaste sleutel per zin (FNV-1a, 64 bit), los van de Dart-versie.
@@ -262,7 +263,7 @@ class KadansVoice {
       try {
         final j = jsonDecode(res.body);
         if (j is Map) reason = '${j['reason'] ?? ''}';
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'kadans_voice.dart'); }
       throw TtsError(res.statusCode, reason);
     }
     if (res.bodyBytes.isEmpty) throw const TtsError(502, 'empty');

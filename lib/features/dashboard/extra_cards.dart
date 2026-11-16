@@ -13,6 +13,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../shared/widgets.dart';
 import '../record/record_run_screen.dart';
 import 'dashboard_providers.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// "Nog een keer": je laatste route met één tik opnieuw lopen.
 class AgainCard extends ConsumerWidget {
@@ -100,7 +101,7 @@ final _goldenProvider = FutureProvider<({GoldenHour hour, StartTimeScore? score}
       score = StartTimePlanner(forecast: f, profile: ref.watch(insightsProvider), durationMinutes: 45)
           .scoreAt(g.middle, TrainingType.easy);
     }
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'extra_cards.dart'); }
   return (hour: g, score: score);
 });
 
@@ -190,7 +191,7 @@ class YearGoalNotifier extends Notifier<double?> {
       final p = await SharedPreferences.getInstance();
       final v = p.getDouble(_key);
       if (v != null) state = v;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'extra_cards.dart'); }
   }
 
   Future<void> set(double? km) async {
@@ -202,7 +203,7 @@ class YearGoalNotifier extends Notifier<double?> {
       } else {
         await p.setDouble(_key, km);
       }
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'extra_cards.dart'); }
   }
 }
 

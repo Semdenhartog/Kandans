@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Waarvoor je loopt (gekozen in de rondleiding, op dit toestel bewaard).
 enum RunGoal { start, fit, faster, race }
@@ -35,7 +36,7 @@ Future<void> saveRunGoal(RunGoal g) async {
   runGoalNotifier.value = g;
   try {
     await (await SharedPreferences.getInstance()).setString(_goalKey, g.name);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'run_goal.dart'); }
 }
 
 /// Hoe lang de antwoorden van de coach zijn (Coach → menu).
@@ -63,7 +64,7 @@ Future<CoachLength> savedCoachStyle() async {
 Future<void> saveCoachStyle(CoachLength c) async {
   try {
     await (await SharedPreferences.getInstance()).setString(_coachLengthKey, c.name);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'run_goal.dart'); }
 }
 
 /// Huidig doel, zodat schermen meteen bijwerken als je het wijzigt (null = nog niet gekozen).

@@ -17,6 +17,7 @@ import '../../domain/geo.dart';
 import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
 import 'run_paths_layer.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Ondergrond van de kaart.
 enum MapLayer { kaart, satelliet }
@@ -35,7 +36,7 @@ class _MapLayerNotifier extends ValueNotifier<MapLayer> {
     try {
       final p = await SharedPreferences.getInstance();
       if (p.getString(_key) == 'satelliet') value = MapLayer.satelliet;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'route_map.dart'); }
   }
 
   void choose(MapLayer layer) {
@@ -703,7 +704,7 @@ class _MyLocationLayerState extends State<_MyLocationLayer> {
       ).listen((p) {
         if (mounted) setState(() => _pos = p);
       }, onError: (_) {});
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'route_map.dart'); }
   }
 
   @override

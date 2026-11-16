@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Weergave: volg de telefoon, of altijd licht (Zand) of altijd donker (Zand avond).
 enum Appearance {
@@ -35,7 +36,7 @@ class AppearanceController extends ChangeNotifier {
     notifyListeners();
     try {
       await (await SharedPreferences.getInstance()).setString('start_tab', tab);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'appearance.dart'); }
   }
 
   Future<void> load() async {
@@ -45,7 +46,7 @@ class AppearanceController extends ChangeNotifier {
       _mode = Appearance.values.firstWhere((a) => a.name == v, orElse: () => Appearance.system);
       final tab = p.getString('start_tab');
       if (tab != null && startTabs.containsKey(tab)) _startTab = tab;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'appearance.dart'); }
     apply(PlatformDispatcher.instance.platformBrightness);
   }
 
@@ -56,7 +57,7 @@ class AppearanceController extends ChangeNotifier {
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_key, mode.name);
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'appearance.dart'); }
   }
 
   /// Kleurenset voor deze weergave en de stand van de telefoon.

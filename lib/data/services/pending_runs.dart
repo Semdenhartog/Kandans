@@ -128,7 +128,7 @@ class PendingRunStore {
       try {
         final run = PendingRun.fromJson(jsonDecode(await e.readAsString()));
         if (run != null) out.add((e, run));
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'pending_runs.dart'); }
     }
     out.sort((a, b) => a.$2.createdAt.compareTo(b.$2.createdAt));
     return out;
@@ -137,7 +137,7 @@ class PendingRunStore {
   static Future<void> refreshCount() async {
     try {
       count.value = (await _all()).length;
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'pending_runs.dart'); }
   }
 
   /// Verstuurt alles wat wacht, oudste eerst. Stopt bij de eerste fout (meestal nog geen internet).
@@ -165,7 +165,7 @@ class PendingRunStore {
         if (id == null) break;
         try {
           await file.delete();
-        } catch (_) {}
+        } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'pending_runs.dart'); }
         sent++;
         await up.afterUpload(id, toSend).catchError((Object _) {});
       }

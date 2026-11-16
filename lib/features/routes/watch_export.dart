@@ -17,6 +17,7 @@ import '../../domain/route_turns.dart';
 import '../../shared/widgets.dart';
 import '../../core/config.dart';
 import '../../domain/route_share.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Merk van je horloge: bepaalt welk bestand Kadans maakt en welke stappen we uitleggen.
 enum WatchBrand { garmin, garminBasic, coros, suunto, polar, amazfit, wearos, none }
@@ -107,7 +108,7 @@ Future<void> saveWatchBrand(WatchBrand b) async {
     await p.setString(_kBrand, b.name);
     // Garmin zonder routes toont alleen basistekens: dan alleen ← en → in de afslagmeldingen.
     await p.setBool('simple_turn_arrows', b == WatchBrand.garminBasic);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'watch_export.dart'); }
 }
 
 /// Kies je horloge (één keer; later te wijzigen).
@@ -374,7 +375,7 @@ Future<void> _askIfItArrived(BuildContext context, WatchBrand brand) async {
     count = p.getInt(_kChecks) ?? 0;
     if (count >= 3) return;
     await p.setInt(_kChecks, count + 1);
-  } catch (_) {}
+  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'watch_export.dart'); }
   if (!context.mounted) return;
   final ok = await showDialog<bool>(
     context: context,

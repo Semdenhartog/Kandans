@@ -22,6 +22,7 @@ import '../../shared/widgets.dart';
 import 'route_anim_controls.dart';
 import 'route_anim_editor.dart';
 import 'route_anim_painter.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 void openRouteAnim(BuildContext context, Activity a, {RunRoute? route}) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RouteAnimScreen(activity: a, route: route)));
@@ -84,7 +85,7 @@ class _RouteAnimScreenState extends ConsumerState<RouteAnimScreen> with SingleTi
       if (!mounted) return;
       setState(() => _logo = img);
       _rebuild();
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'route_anim_screen.dart'); }
   }
 
   Future<void> _editTitle() async {

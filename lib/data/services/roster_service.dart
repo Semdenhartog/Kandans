@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/roster.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Gekoppeld rooster: diensten en instellingen (op dit toestel bewaard).
 class RosterState {
@@ -47,7 +48,7 @@ class RosterService {
     if (refresh && url != null && stale) {
       try {
         state = await linkUrl(url);
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'roster_service.dart'); }
     }
     return state;
   }

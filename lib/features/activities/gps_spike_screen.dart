@@ -14,6 +14,7 @@ import '../../domain/gps_spikes.dart';
 import '../../domain/run_streams.dart';
 import '../../shared/widgets.dart';
 import '../routes/route_map.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 String _okKey(String id) => 'gps_spikes_ok_$id';
 
@@ -70,7 +71,7 @@ class GpsSpikeCard extends ConsumerWidget {
                 onPressed: () async {
                   try {
                     await (await SharedPreferences.getInstance()).setBool(_okKey(a.id!), true);
-                  } catch (_) {}
+                  } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'gps_spike_screen.dart'); }
                   ref.invalidate(_gpsOkProvider(a.id!));
                 },
                 child: const Text('Klopt wel'),

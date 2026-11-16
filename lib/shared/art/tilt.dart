@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Hoe schuin je de telefoon houdt (-1..1 per as), zacht uitgemiddeld.
 /// Eén luisteraar voor de hele app; de sensor staat alleen aan zolang iets kijkt.
@@ -46,7 +47,7 @@ class Tilt extends ValueNotifier<Offset> {
         final next = Offset(value.dx * 0.85 + tx * 0.15, value.dy * 0.85 + ty * 0.15);
         if ((next - value).distance > 0.004) value = next;
       }, onError: (Object _) {});
-    } catch (_) {}
+    } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'tilt.dart'); }
   }
 
   void _stop() {

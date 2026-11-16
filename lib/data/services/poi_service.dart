@@ -10,6 +10,7 @@ import '../../domain/poster_map.dart';
 import '../../domain/route_geometry.dart';
 import '../../domain/run_paths.dart';
 import 'offline_cache.dart';
+import 'package:runwise/core/error_reporter.dart';
 
 /// Zoekt watertappunten en toiletten langs een route in OpenStreetMap (Overpass, gratis).
 class PoiService {
@@ -83,7 +84,7 @@ class PoiService {
     if (cached?.data is String) {
       try {
         return lightingAlong(track, parseLitWays(cached!.data! as String));
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'poi_service.dart'); }
     }
     try {
       final body = await _race(query);
@@ -141,7 +142,7 @@ class PoiService {
     if (cached?.data is String) {
       try {
         return decodePosterMap(cached!.data! as String);
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'poi_service.dart'); }
     }
     final lines = parsePosterMap(await _race(query));
     OfflineCache.save(key, encodePosterMap(lines)).ignore();
@@ -155,7 +156,7 @@ class PoiService {
     if (cached?.data is String) {
       try {
         return decodeRunPaths(cached!.data! as String);
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'poi_service.dart'); }
     }
     try {
       final paths = parseRunPaths(await _race(runPathsQuery(p)));
@@ -178,7 +179,7 @@ class PoiService {
     if (cached?.data is String) {
       try {
         return poisAlongRoute(parseOverpass(cached!.data! as String), track);
-      } catch (_) {}
+      } catch (qE, qSt) { ErrorReporter.quiet(qE, qSt, 'poi_service.dart'); }
     }
     try {
       final body = await _race(query);

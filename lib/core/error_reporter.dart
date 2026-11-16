@@ -39,6 +39,19 @@ class ErrorReporter {
   @visibleForTesting
   static String clip(String s, int max) => s.length <= max ? s : '${s.substring(0, max - 1)}…';
 
+  static final _quiet = <String, int>{};
+
+  /// Voor fouten die we bewust niet aan de gebruiker tonen (cache, bijzaken):
+  /// in debug zichtbaar in het logboek, in release alleen geteld. Stuurt niets
+  /// op, zodat zulke fouten de meldingen voor echte fouten niet verdringen.
+  static void quiet(Object error, StackTrace? stack, String where) {
+    _quiet[where] = (_quiet[where] ?? 0) + 1;
+    if (kDebugMode) debugPrint('Kadans (stil) $where: $error');
+  }
+
+  @visibleForTesting
+  static Map<String, int> get quietCounts => Map.unmodifiable(_quiet);
+
   static Future<void> report(Object error, StackTrace? stack, {String? context}) async {
     if (kDebugMode) debugPrint('Kadans-fout: $error\n$stack');
     if (_sending || _sent >= maxPerSession) return;
