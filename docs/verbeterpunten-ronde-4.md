@@ -72,3 +72,10 @@ Cijfers uit de code van 16-11: 99 lege `catch (_) {}`, 64 teksten kleiner dan 11
 - **11, 13, 22, 23, 24** zijn klein en zichtbaar.
 - **31–33** pas na meten: zonder profiel (`flutter run --profile`) weet ik niet zeker dat dit de knelpunten zijn; Flutter staat niet lokaal, dus dat kan alleen Sem op de telefoon.
 - Niet doen zonder overleg: **21** (353 kleuren) is groot en kan donker/licht breken; liever per scherm bij werk dat er toch gebeurt.
+
+## Stand 16-11 (avond)
+**Gedaan:** 1–8 (alle 99 lege catches → `ErrorReporter.quiet`, test `quiet_catch_ratchet_test.dart`), 9 en 10 nagelopen (geen wijziging nodig: timers worden geannuleerd,
+controllers in `State` worden opgeruimd; losse controllers in dialogen bewust niet, want opruimen vlak na sluiten kan crashen),
+11 (teksten < 11 px → 11, behalve © -regels, posters en PDF), 15 (zes `GestureDetector`s op `opaque`), 22 (`hardcoded_color_ratchet_test.dart`, 328), 37 (Cloudy wipt niet buiten beeld), 50 (versie onderaan Hulp).
+**Al zo / niets te doen:** 13 (alle IconButtons hebben een tooltip), 16 (weerbalkjes hadden al `Semantics`), 23–25 (afrondingen zijn al 8/16/24; 999 = bewuste pillen).
+**Niet gedaan (bewust):** 21, 31–33, 40 (profiel nodig / te riskant zonder toestel), 12, 14, 17–20, 26–30, 34–36, 38–39, 41–49 (niet gebouwd; geen test op een toestel mogelijk).
