@@ -665,6 +665,8 @@ class _ResultsState extends State<_Results> {
             line: line,
             weather: widget.nowWeather,
             overlap: overlap,
+            // Cloudy gluurt over de kaart (bui = weer van nu). Hij staat in de scène zelf: buiten de kaart zou een tik er niet doorkomen.
+            peek: _AskCloudy(mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather)),
             onSpeak: () {
               HapticFeedback.selectionClick();
               final w = verdict.best.weather;
@@ -694,12 +696,6 @@ class _ResultsState extends State<_Results> {
                 lat: widget.planner.forecast.latitude,
                 lon: widget.planner.forecast.longitude,
               ),
-            ),
-            // Wolkje gluurt over de kaart (bui = weer van nu), met een handgeschreven pijl; tik = naar de coach.
-            Positioned(
-              right: 18,
-              top: -96,
-              child: _AskCloudy(mood: wolkjeVoorWeer(widget.nowWeather ?? shown.weather)),
             ),
           ]),
         ),
@@ -1547,13 +1543,14 @@ bool _foggy(HourWeather? w) {
 /// Het beeld bovenaan Vandaag: een sfeerfoto met daarin je groet en het advies van vandaag.
 /// De advieskaart ligt er half overheen.
 class _TodayScene extends StatelessWidget {
-  const _TodayScene({required this.greeting, required this.subLine, this.line, this.weather, this.onSpeak, this.overlap = 64});
+  const _TodayScene({required this.greeting, required this.subLine, this.line, this.weather, this.onSpeak, this.overlap = 64, this.peek});
   final String greeting;
   final String subLine;
   final String? line;
   final HourWeather? weather;
   final VoidCallback? onSpeak;
   final double overlap;
+  final Widget? peek;
 
   @override
   Widget build(BuildContext context) {
@@ -1629,6 +1626,7 @@ class _TodayScene extends StatelessWidget {
               ],
             ]),
           ),
+          if (peek != null) Positioned(right: 30, bottom: overlap - 4, child: peek!),
         ]),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:runwise/data/models/models.dart';
 import 'package:runwise/shared/art/wolkje.dart';
 
@@ -39,5 +40,22 @@ void main() {
     ));
     expect(find.byType(Wolkje), findsOneWidget);
     expect(tester.getSize(find.byType(Wolkje)), const Size(72, 64));
+  });
+
+  testWidgets('elke hoek van Cloudy opent de coach', (tester) async {
+    final router = GoRouter(routes: [
+      GoRoute(path: '/', builder: (_, _) => const Scaffold(body: Center(child: Wolkje(size: 52, opensCoach: true)))),
+      GoRoute(path: '/coach', builder: (_, _) => const Scaffold(body: Text('coach-scherm'))),
+    ]);
+    final plek = find.byType(Wolkje);
+    for (final hoek in [Alignment.topLeft, Alignment.topRight, Alignment.bottomLeft, Alignment.bottomRight, Alignment.center]) {
+      router.go('/');
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      final r = tester.getRect(plek);
+      await tester.tapAt(Offset(r.left + (hoek.x + 1) / 2 * (r.width - 2) + 1, r.top + (hoek.y + 1) / 2 * (r.height - 2) + 1));
+      await tester.pumpAndSettle();
+      expect(find.text('coach-scherm'), findsOneWidget, reason: 'tik op $hoek');
+    }
   });
 }
