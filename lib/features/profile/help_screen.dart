@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/error_reporter.dart';
 import '../../core/theme.dart';
 import '../../shared/first_tips.dart';
 import '../../shared/widgets.dart';
@@ -142,6 +143,12 @@ class HelpScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.lightbulb_outline),
             label: const Text('Tips opnieuw tonen'),
+          ),
+          const SizedBox(height: 16),
+          // Versie bij een bugmelding: dan weten we welke build het was.
+          Center(
+            child: SelectableText('Kadans ${ErrorReporter.appVersion}',
+                style: TextStyle(color: RwColors.subtle, fontSize: 12)),
           ),
         ],
       ),

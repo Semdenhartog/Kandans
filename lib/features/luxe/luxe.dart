@@ -76,7 +76,7 @@ class LuxeBadge extends StatelessWidget {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(locked ? Icons.lock : Icons.auto_awesome, size: 10, color: _ink),
           const SizedBox(width: 3),
-          const Text('LUXE', style: TextStyle(color: _ink, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+          const Text('LUXE', style: TextStyle(color: _ink, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
         ]),
       );
 }

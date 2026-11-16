@@ -1201,6 +1201,7 @@ class _HourBarsState extends State<_HourBars> {
             excludeSemantics: true,
             label: '${_dayLabel(s.start)} ${Fmt.time(s.start)}, score ${s.score}, ${s.verdict.toLowerCase()}${isBest ? ', beste moment' : ''}',
             child: GestureDetector(
+ behavior: HitTestBehavior.opaque,
             onTap: () {
               if (!isSel) HapticFeedback.selectionClick();
               onTap(s);
@@ -1215,7 +1216,7 @@ class _HourBarsState extends State<_HourBars> {
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.visible,
-                    style: TextStyle(fontSize: 10, color: RwColors.accent, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 11, color: RwColors.accent, fontWeight: FontWeight.w700),
                   ),
                   // Score boven het gekozen en het beste uur, zodat je niet hoeft te raden.
                   Text(
@@ -1701,7 +1702,7 @@ class _FactRow extends StatelessWidget {
           for (final (label, value) in facts)
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(label.toUpperCase(), style: SectionLabel.style(color: RwColors.subtle).copyWith(fontSize: 10)),
+                Text(label.toUpperCase(), style: SectionLabel.style(color: RwColors.subtle).copyWith(fontSize: 11)),
                 SizedBox(height: 3),
                 Text(value,
                     maxLines: 1,
@@ -1820,6 +1821,7 @@ class _WeekRow extends ConsumerWidget {
               final fg = first ? Color(0xFFF1E9DC) : RwColors.text;
               final soft = first ? Color(0xFFBDB1A0) : RwColors.muted;
               return GestureDetector(
+ behavior: HitTestBehavior.opaque,
                 onTap: () => openThisWeek(context),
                 child: Container(
                   width: cardW,
@@ -1831,7 +1833,7 @@ class _WeekRow extends ConsumerWidget {
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(dayLabel(p.date).toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: SectionLabel.style(color: soft).copyWith(fontSize: 10)),
+                        style: SectionLabel.style(color: soft).copyWith(fontSize: 11)),
                     Spacer(),
                     Text(t == null ? (p.distanceMeters == null ? '–' : Fmt.km(p.distanceMeters!)) : Fmt.time(t),
                         maxLines: 1,

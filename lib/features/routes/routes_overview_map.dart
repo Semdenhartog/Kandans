@@ -173,6 +173,7 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
                         width: r == sel ? 34 : 26,
                         height: r == sel ? 34 : 26,
                         child: GestureDetector(
+ behavior: HitTestBehavior.opaque,
                           onTap: () => _select(i, fromMap: true),
                           child: Container(
                             decoration: BoxDecoration(

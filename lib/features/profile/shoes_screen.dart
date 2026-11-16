@@ -169,7 +169,7 @@ class _ShoeCard extends StatelessWidget {
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
                       Text('${((1 - v) * 100).round()}%',
                           style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 20, fontWeight: FontWeight.w800, color: color)),
-                      Text('over', style: TextStyle(color: RwColors.subtle, fontSize: 10)),
+                      Text('over', style: TextStyle(color: RwColors.subtle, fontSize: 11)),
                     ]),
                   ),
                 ),

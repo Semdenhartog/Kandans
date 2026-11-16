@@ -177,6 +177,7 @@ class _MemberCardState extends State<MemberCard> {
                           SizedBox(width: width * 0.05),
                           Flexible(
                             child: GestureDetector(
+ behavior: HitTestBehavior.opaque,
                               onTap: w.onBadges,
                               child: FittedBox(fit: BoxFit.scaleDown, child: _Fig(label: 'BADGES', value: '${w.badges}', ink: ink, soft: soft)),
                             ),
@@ -215,7 +216,7 @@ class _Fig extends StatelessWidget {
         crossAxisAlignment: end ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: TextStyle(fontSize: 9, letterSpacing: 1.6, fontWeight: FontWeight.w700, color: soft)),
+          Text(label, style: TextStyle(fontSize: 11, letterSpacing: 1.6, fontWeight: FontWeight.w700, color: soft)),
           Text(value, style: TextStyle(fontFamily: RwFonts.display, fontFeatures: rwTnum, fontSize: 16, fontWeight: FontWeight.w700, color: ink)),
         ],
       );

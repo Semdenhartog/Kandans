@@ -34,13 +34,13 @@ lib/features/challenges/community_screen.dart 467
 lib/features/coach/coach_screen.dart 802
 lib/features/coach/paywall_screen.dart 364
 lib/features/community/club_events_strip.dart 364
-lib/features/community/community_feed_screen.dart 893
+lib/features/community/community_feed_screen.dart 894
 lib/features/community/race_calendar_ui.dart 528
 lib/features/community/runner_profile_screen.dart 408
 lib/features/community/shared_run_card.dart 621
 lib/features/community/steps_contest_screen.dart 337
 lib/features/community/together_screens.dart 781
-lib/features/dashboard/dashboard_screen.dart 1978
+lib/features/dashboard/dashboard_screen.dart 1979
 lib/features/dashboard/extra_cards.dart 308
 lib/features/dashboard/today_card.dart 571
 lib/features/live/live_share_screen.dart 316
@@ -61,7 +61,7 @@ lib/features/routes/generate_route_screen.dart 504
 lib/features/routes/poster_design.dart 713
 lib/features/routes/poster_order_screen.dart 380
 lib/features/routes/route_detail_screen.dart 848
-lib/features/routes/route_map.dart 1145
+lib/features/routes/route_map.dart 1146
 lib/features/routes/route_photos_strip.dart 333
 lib/features/routes/routes_screen.dart 489
 lib/features/routes/watch_export.dart 490

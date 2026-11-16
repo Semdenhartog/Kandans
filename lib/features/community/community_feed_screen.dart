@@ -603,6 +603,7 @@ class _PostCard extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               GestureDetector(
+ behavior: HitTestBehavior.opaque,
                 onTap: () => openRunnerProfile(context, p.nickname),
                 child: Text(p.nickname, style: TextStyle(fontWeight: FontWeight.w700)),
               ),

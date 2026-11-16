@@ -281,7 +281,7 @@ class _DrawRouteScreenState extends ConsumerState<DrawRouteScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text('Routes © openrouteservice.org | kaartdata © OpenStreetMap-bijdragers',
-                      textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 10)),
+                      textAlign: TextAlign.center, style: TextStyle(color: RwColors.subtle, fontSize: 11)),
                 ],
               ),
             ),

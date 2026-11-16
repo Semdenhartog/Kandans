@@ -187,6 +187,7 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
                   selected: sel,
                   label: 'Stijl ${st.label}${st.isLuxe ? ', luxe' : ''}',
                   child: GestureDetector(
+ behavior: HitTestBehavior.opaque,
                     onTap: () {
                       HapticFeedback.selectionClick();
                       setState(() => _style = st);

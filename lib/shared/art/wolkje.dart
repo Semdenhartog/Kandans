@@ -217,7 +217,8 @@ class _WolkjeState extends State<Wolkje> {
       return;
     }
     _timer ??= Timer.periodic(const Duration(milliseconds: 650), (_) {
-      if (!mounted) return;
+      // Niet wippen als het tabblad niet in beeld is (bespaart accu en tekenwerk).
+      if (!mounted || !TickerMode.of(context)) return;
       setState(() {
         _tik++;
         // Gewoon: af en toe knipogen; de rest wisselt elke tik.

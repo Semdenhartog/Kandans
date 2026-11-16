@@ -247,7 +247,7 @@ class _RunCalendarScreenState extends ConsumerState<RunCalendarScreen> {
                                 )),
                             if (runs != null)
                               Text((m / 1000).toStringAsFixed(m >= 10000 ? 0 : 1).replaceAll('.', ','),
-                                  style: TextStyle(fontSize: 9, color: RwColors.accentDark)),
+                                  style: TextStyle(fontSize: 11, color: RwColors.accentDark)),
                           ],
                         ),
                       ),

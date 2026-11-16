@@ -509,7 +509,7 @@ class RunShareCard extends StatelessWidget {
                   ],
                   if (a.source == 'strava') ...[
                     const SizedBox(height: 4),
-                    Text(tr('Gegevens via Strava'), style: TextStyle(color: muted, fontSize: 9)),
+                    Text(tr('Gegevens via Strava'), style: TextStyle(color: muted, fontSize: 11)),
                   ],
                 ],
               ),
@@ -529,7 +529,7 @@ class RunShareCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(color: muted, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
+            Text(label, style: TextStyle(color: muted, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
             const SizedBox(height: 3),
             Text(
               value,

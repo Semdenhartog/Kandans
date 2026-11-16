@@ -563,6 +563,7 @@ class _LayerToggle extends StatelessWidget {
         button: true,
         selected: on,
         child: GestureDetector(
+ behavior: HitTestBehavior.opaque,
           onTap: () => onChanged(l),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
@@ -649,7 +650,7 @@ class _Legend extends StatelessWidget {
           children: [
             Container(width: 14, height: 4, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(2))),
             const SizedBox(width: 4),
-            Text(label, style: TextStyle(fontSize: 10.5, color: RwColors.text, fontWeight: FontWeight.w600)),
+            Text(label, style: TextStyle(fontSize: 11, color: RwColors.text, fontWeight: FontWeight.w600)),
           ],
         );
 

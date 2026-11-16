@@ -3438,7 +3438,7 @@ class _PresetCard extends StatelessWidget {
               SizedBox(width: 10),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title.toUpperCase(), style: TextStyle(color: RwColors.accentLight, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                  Text(title.toUpperCase(), style: TextStyle(color: RwColors.accentLight, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
                   Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w700)),
                 ]),
               ),

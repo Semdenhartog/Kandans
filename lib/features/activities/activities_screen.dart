@@ -782,7 +782,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                             SizedBox(height: 4),
                             FittedBox(
                               child: Text(_barLabel(w, i == totals.length - 1),
-                                  style: TextStyle(fontSize: 10, color: RwColors.subtle)),
+                                  style: TextStyle(fontSize: 11, color: RwColors.subtle)),
                             ),
                           ],
                         ),
