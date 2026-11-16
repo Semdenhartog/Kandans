@@ -204,6 +204,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `RaceDetailScreen` → `AddRaceScreen(initialName/Date/Km)`); header = PDOK-luchtfoto van de start (`AerialHeader`), terugval eigen foto.
   Verbergen van een foute wedstrijd: `update race_calendar set hidden = true where key = …`.
 - **Wolkje, in de app heet hij sinds 14-11 "Cloudy" (klasse/bestand blijven `Wolkje`/`wolkje.dart`; `Wolkje(opensCoach: true)` = tikken opent de coach, aan op lege schermen en recordfeest) (10-11, mascotte/coach, Sems keuze uit ±27 opties op Design-canvas "Kadans – mascotte Haas (voorbeeld)"):**
+  **Tikken (16-11):** op Vandaag stond Cloudy half buiten de advieskaart (`top: -96`); buiten de grenzen van de ouder komt een tik niet aan, dus alleen de onderste paar pixels werkten. Nu staat hij in `_TodayScene` (`peek`). Zet nooit tikbare dingen buiten de grenzen van hun `Stack`/`Transform`; test `wolkje_test.dart` tikt op alle hoeken.
   `shared/art/wolkje.dart` (pixel 18×16, gouden rand, vaste kleuren in licht én donker; buien `WolkjeMood` gewoon/regen/zon/wind/nacht/koud/blij/denkt,
   `wolkjeVoorWeer(HourWeather)`, wipt via Timer, stil bij disableAnimations). Staat in: Vandaag (gluurt over advieskaart, weer van nu),
   coach-avatar `_CoachMark`, `CoachButton` (niet meer in de Vandaag-scène), handgeschreven "vraag het Wolkje → tik hier" + getekende pijl (`_AskWolkje`, lettertype Caveat OFL) → /coach, lege schermen (`EmptyArt`), recordkaart (blij). Test `test/wolkje_test.dart`.
