@@ -40,7 +40,7 @@ lib/features/community/runner_profile_screen.dart 408
 lib/features/community/shared_run_card.dart 622
 lib/features/community/steps_contest_screen.dart 337
 lib/features/community/together_screens.dart 781
-lib/features/dashboard/dashboard_screen.dart 1408
+lib/features/dashboard/dashboard_screen.dart 854
 lib/features/dashboard/extra_cards.dart 308
 lib/features/dashboard/today_card.dart 571
 lib/features/live/live_share_screen.dart 316
