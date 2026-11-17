@@ -100,3 +100,8 @@ Reden: raken veel bestanden of zijn alleen op een toestel/in de database te cont
 8 (`translation_keys_test.dart`: elke `tr()`-sleutel moet in `i18n_strings.dart` staan; 7 bekende uitzonderingen, mag alleen dalen), 22 (kapotte bewaarde schemawensen laten het scherm niet meer crashen).
 **Bewust niet:** 23 (alles wissen bij uitloggen zou schoenen, pijntjes en stukken kwijtmaken: die staan alleen op het toestel), 6, 7 (vragen eerst de juiste aanroepen uitzoeken),
 19–21, 24–29, 33, 35 (veel bestanden, alleen met controle op een toestel verantwoord), 44, 49.
+
+
+## Stand 17-11 (deel 5)
+- Punt 26 gedaan: `dashboard_screen.dart` 1980 → 1408 regels; nieuwe bestanden `today_scene.dart`, `hour_bars.dart`, `week_row.dart`, `ask_cloudy.dart` (alle ≤ 300). Build + schermen groen; niet op telefoon getest.
+- Nog open in dat bestand: ongebruikte imports opruimen, `_HeroCard` (±270 regels) en kaartjes (`_ClothingCard`, `_RainCard`, `_WarningsCard`) apart zetten.

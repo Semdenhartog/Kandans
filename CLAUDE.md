@@ -85,7 +85,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   **getters**: **nooit in `const`**. Weergave: `lib/core/appearance.dart`. Premium, Luxe, ledenkaart, deelkaart en posters altijd donker-goud.
 - Lettertypes: Saira (koppen/cijfers), DM Sans (tekst).
 - Vormen (12-11): knoppen uit het thema (Filled/Outlined/Segmented) zijn een blok met afronding 8 i.p.v. een pil, kaarten 16, bladen/dialogen 24,
-  melding 16, markering in de navigatiebalk 8. Tabwissel vervaagt kort (`_TabFade` in `home_shell.dart`). Vandaag: weercijfer per uur is te slepen (vasthouden + vegen, `_HourBarsState._scrub`, tikje per uur). Opnemen: cijfers ademen bij pauze (`_PausedBlink`), statusbalk en startgloed volgen de blokvorm. Coach: tekstballonnen 16/4, gouden paywall-knop is een blok. Rondleiding had al blokknoppen. Chips en balkjes blijven pil.
+  melding 16, markering in de navigatiebalk 8. Tabwissel vervaagt kort (`_TabFade` in `home_shell.dart`). Vandaag: weercijfer per uur is te slepen (vasthouden + vegen, `HourBarsState._scrub`, tikje per uur). Opnemen: cijfers ademen bij pauze (`_PausedBlink`), statusbalk en startgloed volgen de blokvorm. Coach: tekstballonnen 16/4, gouden paywall-knop is een blok. Rondleiding had al blokknoppen. Chips en balkjes blijven pil.
 - Talen: `lib/core/i18n.dart` (`tr()`, `trf()` met {invulplekken}), vertalingen in `tools/vertalingen.py` →
   `python3 tools/maak_vertalingen.py`. Nieuw scherm: `python3 tools/tr_codemod.py <bestand>`, daarna vertalingen aanvullen.
 
@@ -157,15 +157,15 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Stappen van de maand (0038, `steps_submit`/`steps_board`): `community/steps_contest_screen.dart`, Health Connect `READ_STEPS`
   (`SyncService.connectSteps/monthSteps`), alleen maandtotaal naar server. Ranglijst vrienden + per loopgroep.
 - Rondenotities 6-11 t/m 14-11 en de Instagram-aanpak (marketing) staan in `docs/overdracht-archief.md` onder "Verplaatst uit CLAUDE.md (17-11)". Instagram: **@kadans.app**; stijl "Zelfde rondje.", nooit AI-handen/telefoons/schoenen/stockfoto-tips.
-- **App in site-stijl (7-11):** Vandaag = `_TodayScene` (eigen landschap + lucht, groet/advies in wit, lopertje dat meeleeft met weer:
+- **App in site-stijl (7-11):** Vandaag = `TodayScene` (eigen landschap + lucht, groet/advies in wit, lopertje dat meeleeft met weer:
   capuchon/muts/zweet, sterren 's nachts, regenstreepjes; params `rain/feels/runner/night` in `KadansLandscape`) met de advieskaart
-  64 px eroverheen (`Transform.translate`), kaart kantelt licht mee (`_TiltCard`, `Tilt`), tijd telt op (`_CountClock`/`CountUpText`),
-  feitenrij `_FactRow`, zonneboog ingeklapt (`_MoreDetails` "Zon en licht"), "§ 02 Deze week" als veegrij (`_WeekRow`).
+  64 px eroverheen (`Transform.translate`), kaart kantelt licht mee (`TiltCard`, `Tilt`), tijd telt op (`CountClock`/`CountUpText`),
+  feitenrij `FactRow`, zonneboog ingeklapt (`MoreDetails` "Zon en licht"), "§ 02 Deze week" als veegrij (`WeekRow`).
   Gedeeld: `SectionLabel` (labels "01  TEKST", § weg sinds 8-11, lettertype `KadansMono` = DejaVu Sans Mono), `KadansButton` (donker blok + goud vierkant),
   papierkorrel in `RwAura` (`PaperGrainPainter`). Route in 3D is weer weggehaald (8-11, Sem).
   Ledenkaart kantelt ook met de telefoon mee. **Ronde 8-11:** weercijfer per uur (`DashCard.hours`, staafjes) staat weer vast
   onder de advieskaart (§ 02, schakelaar "Goede uren"), Deze week = § 03; lopertje weg (Sem vond het knullig: geen getekende lopertjes meer);
-  Vandaag-beeld = sfeerfoto `assets/foto/heide.jpg` of `mist.jpg` (mist/buien/grijs, `_foggy`), 's nachts donkerder.
+  Vandaag-beeld = sfeerfoto `assets/foto/heide.jpg` of `mist.jpg` (mist/buien/grijs, `isFoggy`), 's nachts donkerder.
   Opnemen: vaste lettergroottes (hoofdcijfer, getallen 28, tekst 16, labels 13). Badges hebben niveaus `BadgeTier`
   (brons/zilver/goud/platina, `tierColor`, legenda `BadgeTierLegend`). Bluetooth (`FlutterReactiveBle`) is `late` in de services.
   Schermtests: echte Amsterdamse routes (Amsterdamse Bos = "Rondje bos", Vondelpark, Amstel; via BRouter) en echte PDOK-tegels
@@ -186,7 +186,7 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
   `RaceDetailScreen` → `AddRaceScreen(initialName/Date/Km)`); header = PDOK-luchtfoto van de start (`AerialHeader`), terugval eigen foto.
   Verbergen van een foute wedstrijd: `update race_calendar set hidden = true where key = …`.
 - **Wolkje, in de app heet hij sinds 14-11 "Cloudy" (klasse/bestand blijven `Wolkje`/`wolkje.dart`; `Wolkje(opensCoach: true)` = tikken opent de coach, aan op lege schermen en recordfeest) (10-11, mascotte/coach, Sems keuze uit ±27 opties op Design-canvas "Kadans – mascotte Haas (voorbeeld)"):**
-  **Tikken (16-11):** op Vandaag stond Cloudy half buiten de advieskaart (`top: -96`); buiten de grenzen van de ouder komt een tik niet aan, dus alleen de onderste paar pixels werkten. Nu staat hij in `_TodayScene` (`peek`). Zet nooit tikbare dingen buiten de grenzen van hun `Stack`/`Transform`; test `wolkje_test.dart` tikt op alle hoeken.
+  **Tikken (16-11):** op Vandaag stond Cloudy half buiten de advieskaart (`top: -96`); buiten de grenzen van de ouder komt een tik niet aan, dus alleen de onderste paar pixels werkten. Nu staat hij in `TodayScene` (`peek`, `AskCloudy`). Zet nooit tikbare dingen buiten de grenzen van hun `Stack`/`Transform`; test `wolkje_test.dart` tikt op alle hoeken.
   `shared/art/wolkje.dart` (pixel 18×16, gouden rand, vaste kleuren in licht én donker; buien `WolkjeMood` gewoon/regen/zon/wind/nacht/koud/blij/denkt,
   `wolkjeVoorWeer(HourWeather)`, wipt via Timer, stil bij disableAnimations). Staat in: Vandaag (gluurt over advieskaart, weer van nu),
   coach-avatar `_CoachMark`, `CoachButton` (niet meer in de Vandaag-scène), handgeschreven "vraag het Wolkje → tik hier" + getekende pijl (`_AskWolkje`, lettertype Caveat OFL) → /coach, lege schermen (`EmptyArt`), recordkaart (blij). Test `test/wolkje_test.dart`.
