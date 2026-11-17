@@ -68,3 +68,47 @@ Afgeronde zaken en achtergrond die uit `CLAUDE.md` zijn gehaald (30 okt 2026). N
 - Shop: tasje met "nieuw"-stip, gouden tegel in Ik. Uitnodiging: `site/vriend.html` → `/vriend?code=`.
 - Bronnen-scherm: `lib/features/profile/sources_screen.dart` (`SourcesLink`); kaartvermelding blijft op kaarten (licentie).
 - Talen: vertaald zijn inloggen, rondleiding, onderbalk, Ik, shop, community. Rest (Vandaag, opnemen, stemcoach, runs, routes) nog NL.
+
+## Verplaatst uit CLAUDE.md (17-11)
+Deze notities stonden in CLAUDE.md; ze zijn afgerond en worden niet elke sessie meer gelezen.
+
+- Ronde 6-11 (17 verbeteringen): stem vooraf laden (`KadansVoice.prefetch/commonPhrases`) + `volume()`; `whyNotNow` (verdict.dart) +
+  `typicalRunMinutes` (dashboard onthoudt `plan_duration_minutes`); route-generator stelt rondjes >5% bij; tekenscherm toont ondergrond
+  (`routes/surface_bar.dart`, path-modus geeft `surface` mee); tussentijden groen/oranje t.o.v. gemiddelde; kaart op tempo/hartslag
+  (`valueSegments`/`relativeScale`, `RouteMap.colorSegments`); runtitel wijzigen (`setActivityTitle`, 0039); run-deelkaart ook als verhaal 9:16;
+  route naar bekend horloge in één tik (`sendRouteToWatch(full:)`); profiel-voortgang; applaus-pop + dubbel tikken; stappen: vandaag,
+  afstand tot volgende, `StepsSync` (bij openen app, melding bij inhalen); lege Samen-schermen met uitnodigen; introductie 5 stappen;
+  unslop deels: `RwRadius.s/m/l` overal, `ShineText` effen zonder eigen kleuren, gouden gloed neutraal (emoji nog niet nagelopen).
+- Ronde 6-11 nacht (11 punten + fotofix): vergrendelscherm tijdens run (kanaal `kadans/screen` in `KadansChannels.kt`,
+  `data/services/lock_screen_service.dart`, chip onder "Meer opties"); aftellen 3-2-1 met piep (`SoundService.beep`, `toneWav`) + tril;
+  tempo-alarm met bandbreedte (`PaceCoach.band`, pref `rec_pace_band`); route andersom (`domain/route_reverse.dart`); vlieg over de route
+  (`routes/route_flyover_screen.dart`, schuin via Transform); deel-link met `h=` (hoogtemeters) en `e=` (profiel) → `site/route.html`;
+  recordfeest + deelkaart (`record/record_celebration_screen.dart`, vanzelf na de samenvatting); reacties 👏🔥💪 (`social_react`,
+  `social_comments_of2`) en @vermeldingen (`social_mentions`, `MentionSync` bij openen app, melding kanaal 'samen'); groepsagenda
+  (`group_runs_*` in 0040, `TogetherService.groupRuns`, kaart AGENDA in `GroupScreen`); trekken om te vernieuwen in groepen, lopers, Doelen, Logboek.
+  Profielfoto-fout was: upsert zonder SELECT-regel op `storage.objects` → nu upsert uit + regel `avatars_own_select`, grens 2 MB.
+- **Ronde 9-11 nacht:** clubevenementen in Samen → Runs (`community/club_events_strip.dart`, `ClubEventsStrip`/`ClubEventsScreen`, datumtegel `DateTile`):
+  groepsruns uit al je loopgroepen + clubagenda's via iCal-link (`domain/club_calendar.dart`, `data/services/club_events_service.dart`, max 5 links,
+  op toestel, elke 6 u ververst). Kaarten: donkerder blauwgrijs (`_darkMap`), gouden looppaden uit OSM (`domain/run_paths.dart`,
+  `routes/run_paths_layer.dart`, `PoiService.runPaths`, vak 0,03°, 30 dagen bewaard, knop `RunPathsButton`, standaard aan) in LiveTrackMap en DrawRouteMap.
+  Opnemen vóór start = kaart + `_GpsPill` (bij < 300 px ruimte de oude compacte weergave). Runoverzicht: grote kaart gekleurd op tempo
+  (`coloredRunSegments` + `PaceLegend` in `splits_card.dart`). Wedstrijdkalender: nog geen bron; mail om toestemming (running.life/Atletiekunie) ligt bij Sem.
+- Marketing (buiten de repo): Instagram **@kadans.app**. Instagram-skills (`/ig-reel`, `/ig-caption`, `/ig-plan` enz.) en
+  `frontend-design` en `unslop-ui` (controle op AI-look, scanner: `devibe_scan.py` uit JCarterJohnson/vibecoded-design-tells) zijn als skills beschikbaar in Claude (geen koppeling nodig). Profielfoto = alleen de gouden K.
+  **Instagram-stijl (9-11, Sems keuze na proefronde):** vaste reeks **"Zelfde rondje."**: dia 1 = zelfde foto gesplitst (links regen,
+  koel, rechts droog, warm goud), gouden middenlijn, label "45 MIN LATER", grote tijden 15:50 / 16:35 (klopt met `site/app/vandaag.jpg`).
+  Dia 2 = weerbalk per kwartier op papier, dia 3 = echt Vandaag-scherm in strak getekend toestel + gouden kader "Beste moment",
+  dia 4 = heide + "Jouw rondje. Beter moment." + knop "STUUR WEER" + "Nu voor Android". Maken met `tools/insta/dia1_split.py` en
+  `dia2_4.py` (PIL, vanuit de repo-root, echte foto's `site/foto/`). Analyse (500 vragen): `docs/insta-500-vragen.md`.
+  **Niet doen** (Sem vond het amateuristisch): AI-handen, AI-telefoons met geplakt scherm, schoenen, stockfoto's met tip-tekst,
+  zware kop over het onderwerp. AI-beelden alleen voor weer/landschap/straat. Beeldgenerator: HF-koppeling "Hugging face beelden"
+  (`gr1_flux_1_krea_dev_infer`, gratis ZeroGPU, daglimiet snel op). ElevenLabs-beelden kosten Sems tegoed (alleen na "ja, ElevenLabs").
+  Captions: nuchter/droge humor, herkenbare looperszinnen ("Het is maar regen, je smelt niet", "Ik heb geen zin", "Ga gewoon"),
+  eerste zin < 125 tekens, één vraag, max 5 hashtags, CTA "Stuur WEER". Doel: 100 testers. Eerste 5 captions staan in de chat van 9-11
+  (rondje, wind, donker, kou, gewoonte). Nog te doen: posten + alt-tekst, contentmaakster echte split-foto's laten maken (zelfde plek, 2 momenten).
+- **Ronde 14-11 (nacht):** hartslagalarm (`domain/hr_alarm.dart`, pref `hr_alarm_zone`, kaart in `profile/heart_rate_screen.dart`, spreekt via `RunRecorderService.say`),
+  "Waarom dit moment?" op de advieskaart (`_showWhySheet` in `dashboard_screen.dart`), sectie AFGELOPEN bij Uitdagingen (`_OverCard`),
+  migratietest `tools/migraties_testen.sh` + workflow `migraties.yml` (nepversies van auth/storage/pg_cron/pg_net; alle 46 migraties groen),
+  ratchet-test `test/untranslated_ratchet_test.dart` (onvertaalde teksten, nu 550, mag alleen dalen), lijst `docs/verbeterpunten-later.md`.
+  Bestond al (niet opnieuw bouwen): herstel na crash (`RecordingStore`, `_offerRestore`), foutrapporten (`ErrorReporter` → `app_errors`), GPS-gaten (`GpsQuality`),
+  slaap/herstel (`readiness.dart`), Dependabot gegroepeerd, widget/melding kijken ook naar morgen.

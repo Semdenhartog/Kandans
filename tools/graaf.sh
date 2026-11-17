@@ -34,7 +34,9 @@ if [ ! -f "$UIT/graph.json" ] || [ "${1:-}" = "" ] || [ "${1:-}" = "ophalen" ]; 
   NU=$(git -C "$ROOT" rev-parse HEAD)
   echo "Codekaart opgehaald (gemaakt van ${KAART:0:8}, jouw checkout ${NU:0:8})."
   if ! git -C "$ROOT" diff --quiet "$KAART" HEAD -- lib supabase test test_screens tools 2>/dev/null; then
-    echo "Let op: code is daarna veranderd; controleer gewijzigde bestanden zelf."
+    N=$(git -C "$ROOT" rev-list --count "$KAART..HEAD" 2>/dev/null || echo "?")
+    echo "Let op: code is daarna veranderd ($N commits verder dan de kaart); controleer gewijzigde bestanden zelf:"
+    git -C "$ROOT" diff --name-only "$KAART" HEAD -- lib supabase test test_screens tools 2>/dev/null | head -8 | sed 's/^/  /'
   fi
   [ "${1:-}" = "" ] || [ "${1:-}" = "ophalen" ] && exit 0
 fi

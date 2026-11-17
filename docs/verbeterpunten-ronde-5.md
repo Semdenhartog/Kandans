@@ -74,3 +74,11 @@ de twee `<img alt="">` op de voorpagina zijn bewust leeg (versiering).
 - **14, 41, 42, 36–38:** CI-test, bestanden voor de site en een kleinere `CLAUDE.md`. Weinig risico, meteen merkbaar (schonere sessies).
 - **19–21 en 32:** zichtbaar sneller en consistenter, maar raken veel bestanden: één groep per build.
 - **24–28** (grote bestanden splitsen) alleen als je er toch in werkt; een split zonder toestel-test is risicovol.
+
+## Stand 17-11
+**Gedaan:** 1 (`fit_parser_test`), 4 (`shoes_test`), 9 (`friendly_error_test`), 10 (`health_consent_guard_test`), 14 + 15 (RLS- en search_path-controle in `tools/migraties_testen.sh`;
+live gecontroleerd: nu 0 afwijkingen), 31 (`MediaQuery.sizeOf`/`disableAnimationsOf`), 32 (twee gewone meldingen via `showMessage`; de met "Ongedaan maken" blijven bewust een SnackBar),
+36–38 (CLAUDE.md 43 → 37 KB: rondenotities en marketing naar het archief), 41 + 42 (`robots.txt`, `sitemap.xml`, `og:image` op alle openbare pagina's, `noindex` op beheer/bedankt),
+47 (`tools/site_links.py` in `site.yml`, alleen waarschuwing), 50 (`graaf.sh` toont aantal commits en gewijzigde bestanden).
+**Niet gedaan:** 2, 3 (nog geen test; ingang `adviseRace`/`RunGoal` vraagt eerst uitzoeken), 5–8, 11–13, 16–35 (behalve 31/32), 33–35, 39, 40, 43–46, 48, 49.
+Reden: raken veel bestanden of zijn alleen op een toestel/in de database te controleren; liever per groep met controle.

@@ -68,5 +68,5 @@ lib/features/routes/watch_export.dart 490
 lib/features/shop/shop_screen.dart 464
 lib/shared/art/exercise_figure.dart 574
 lib/shared/art/landscape.dart 360
-lib/shared/home_shell.dart 397
+lib/shared/home_shell.dart 400
 lib/shared/widgets.dart 830

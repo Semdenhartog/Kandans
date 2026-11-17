@@ -483,7 +483,7 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = message.isUser;
-    final maxW = MediaQuery.of(context).size.width * (user ? 0.8 : 0.74);
+    final maxW = MediaQuery.sizeOf(context).width * (user ? 0.8 : 0.74);
     final bubble = Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),

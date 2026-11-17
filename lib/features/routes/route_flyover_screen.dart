@@ -87,7 +87,7 @@ class _RouteFlyoverScreenState extends State<RouteFlyoverScreen> with SingleTick
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Minder beweging aan: niet vanzelf vliegen, wel met de schuif.
-    if (MediaQuery.of(context).disableAnimations) _anim.stop();
+    if (MediaQuery.disableAnimationsOf(context)) _anim.stop();
   }
 
   @override
@@ -177,7 +177,7 @@ class _RouteFlyoverScreenState extends State<RouteFlyoverScreen> with SingleTick
                               onMapReady: () {
                                 _ready = true;
                                 _onTick();
-                                if (!MediaQuery.of(context).disableAnimations) {
+                                if (!MediaQuery.disableAnimationsOf(context)) {
                                   Future<void>.delayed(const Duration(milliseconds: 600), () {
                                     if (mounted && _anim.value == 0) _anim.forward();
                                   });

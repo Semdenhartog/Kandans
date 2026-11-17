@@ -136,7 +136,7 @@ class _RecordCelebrationScreenState extends State<RecordCelebrationScreen> {
               TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('Verder naar je run'))),
             ]),
           ),
-          if (!MediaQuery.of(context).disableAnimations) const Positioned.fill(child: IgnorePointer(child: Confetti())),
+          if (!MediaQuery.disableAnimationsOf(context)) const Positioned.fill(child: IgnorePointer(child: Confetti())),
         ]),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:quick_actions/quick_actions.dart';
 
 import '../core/theme.dart';
+import 'widgets.dart';
 import 'tab_scroll.dart';
 import 'aura.dart';
 import 'whats_new.dart';
@@ -365,11 +366,13 @@ class PendingRunsBanner extends ConsumerWidget {
               HapticFeedback.selectionClick();
               final sent = await ref.read(syncServiceProvider).flushPendingRuns().catchError((Object _) => 0);
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(sent > 0
+              showMessage(
+                context,
+                sent > 0
                     ? (sent == 1 ? 'Je run is opgeslagen.' : '$sent runs opgeslagen.')
-                    : 'Nog geen verbinding. We proberen het vanzelf opnieuw.'),
-              ));
+                    : 'Nog geen verbinding. We proberen het vanzelf opnieuw.',
+                error: sent == 0,
+              );
             },
             child: Container(
               width: double.infinity,

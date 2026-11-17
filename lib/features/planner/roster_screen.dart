@@ -163,7 +163,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
                   final ok = await ref.read(phoneCalendarServiceProvider).setEnabled(v);
                   ref.invalidate(phoneCalendarOnProvider);
                   if (!ok && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Zonder toestemming kan Kadans je agenda niet lezen.'))));
+                    showMessage(context, tr('Zonder toestemming kan Kadans je agenda niet lezen.'), error: true);
                   }
                 },
               ),

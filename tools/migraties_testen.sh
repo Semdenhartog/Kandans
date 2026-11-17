@@ -34,4 +34,15 @@ for f in $(ls supabase/migrations/*.sql | sort); do
   src=/tmp/migratie.sql
   if psql -f "$src" >/tmp/migratie.log 2>&1; then echo "ok   $f"; else echo "FOUT $f"; tail -5 /tmp/migratie.log; fail=1; break; fi
 done
+# Beveiligingscontrole (ronde 5): elke tabel in public heeft row level security, elke security definer een vast search_path.
+if [ $fail -eq 0 ]; then
+  bad=$(psql -At -f - <<'SQL'
+select 'tabel zonder RLS: ' || tablename from pg_tables where schemaname='public' and not rowsecurity
+union all
+select 'security definer zonder search_path: ' || p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+ where n.nspname='public' and p.prosecdef and not exists (select 1 from unnest(coalesce(p.proconfig,'{}')) c where c like 'search_path=%');
+SQL
+)
+  if [ -n "$bad" ]; then echo "FOUT beveiligingscontrole:"; echo "$bad"; fail=1; else echo "ok   beveiligingscontrole (RLS + search_path)"; fi
+fi
 exit $fail

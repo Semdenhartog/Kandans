@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /coach-beheer.html
+Disallow: /bedankt.html
+Disallow: /live.html
+Disallow: /route.html
+
+Sitemap: https://kadans.fit/sitemap.xml
