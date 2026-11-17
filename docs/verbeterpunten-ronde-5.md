@@ -94,3 +94,9 @@ Reden: raken veel bestanden of zijn alleen op een toestel/in de database te cont
 31, 32, 36–38, 41, 42, 47, 50 (eerder gedaan).
 **Bleek al goed:** 34 (de vier `FutureBuilder`-kaarten verbergen zich bij een fout, dat is hier juist de bedoeling), 43 (subpagina's gebruiken al `pagina.css`; CLAUDE.md liep achter).
 **Niet gedaan:** 33 (ListView.builder: per lijst eerst nalopen), 35 (klok per scherm), 44 (WebP: de beelden zijn CSS-achtergronden, dat vraagt een herschrijving van de stijl), 49 (lettervoorlaad vóór export: alleen op een toestel te controleren).
+
+## Stand 17-11 (deel 4)
+**Gedaan:** 5 (was al bijna overal zo: 16 van 17 functies in `domain/` namen al `now`; `adviseRace` kreeg het nu ook, test gebruikt een vaste datum),
+8 (`translation_keys_test.dart`: elke `tr()`-sleutel moet in `i18n_strings.dart` staan; 7 bekende uitzonderingen, mag alleen dalen), 22 (kapotte bewaarde schemawensen laten het scherm niet meer crashen).
+**Bewust niet:** 23 (alles wissen bij uitloggen zou schoenen, pijntjes en stukken kwijtmaken: die staan alleen op het toestel), 6, 7 (vragen eerst de juiste aanroepen uitzoeken),
+19–21, 24–29, 33, 35 (veel bestanden, alleen met controle op een toestel verantwoord), 44, 49.

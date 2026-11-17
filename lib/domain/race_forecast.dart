@@ -46,9 +46,10 @@ RaceAdvice adviseRace({
   required PerformanceInsights profile,
   Forecast? forecast,
   RouteWind? routeWind,
+  DateTime? now, // alleen voor tests: vaste "nu"
 }) {
   // 1. Basistijd uit recente runs (laatste 120 dagen, minimaal 3 km).
-  final cutoff = DateTime.now().subtract(const Duration(days: 120));
+  final cutoff = (now ?? DateTime.now()).subtract(const Duration(days: 120));
   final recent = activities
       .where((a) => a.startedAt.isAfter(cutoff) && a.distanceMeters >= 3000)
       .toList();

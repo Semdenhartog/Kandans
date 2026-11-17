@@ -1,3 +1,4 @@
+import 'package:runwise/core/error_reporter.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -111,7 +112,12 @@ class _CustomPlanScreenState extends ConsumerState<CustomPlanScreen> {
       return;
     }
     final p = await SharedPreferences.getInstance();
-    final saved = PlanWishes.fromJson(jsonDecode(p.getString(_wishesKey) ?? 'null'));
+    PlanWishes? saved;
+    try {
+      saved = PlanWishes.fromJson(jsonDecode(p.getString(_wishesKey) ?? 'null'));
+    } catch (qE, qSt) {
+      ErrorReporter.quiet(qE, qSt, 'custom_plan_screen.dart'); // kapotte bewaarde wensen: opnieuw beginnen
+    }
     final runs = ref.read(activitiesProvider).value ?? await ref.read(activitiesProvider.future).catchError((_) => <Activity>[]);
     final given = widget.wishes;
     if (given != null) {

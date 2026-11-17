@@ -46,7 +46,7 @@ lib/features/dashboard/today_card.dart 571
 lib/features/live/live_share_screen.dart 316
 lib/features/onboarding/onboarding_screen.dart 917
 lib/features/planner/custom_plan_pdf.dart 321
-lib/features/planner/custom_plan_screen.dart 1036
+lib/features/planner/custom_plan_screen.dart 1042
 lib/features/planner/training_plan_screen.dart 881
 lib/features/planner/week_planner_screen.dart 353
 lib/features/profile/heart_rate_screen.dart 395
