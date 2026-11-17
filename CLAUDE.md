@@ -139,6 +139,9 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Tekeningen/animaties (eigen, geen pakketten) in `lib/shared/art/`: landschap (seizoenen), weericonen, zonneboog, lopend figuur,
   oefenfiguren (`motionFor(naam)`), uitleg-animatie, seizoensplaatje, kantelen (`Tilt`). Avatars/omslag Samen: `community/runner_avatar.dart` (0036).
   Fotomuur `activities/photo_wall_screen.dart`. Play Store-plaatjes + promovideo: `.github/scripts/store_screens.py` / `store_video.sh`.
+- **iOS 26-stijl (branch `ios26`, 17-11):** zwevende glazen tabbalk `shared/glass_nav_bar.dart` (capsule, balk ligt níét over de inhoud heen: geen `extendBody`),
+  `shared/glass.dart` = `GlassPanel` uit de glas-proef, ronde glasknoppen `MeButton`/`CoachButton`, tabmarkering is een capsule. Vandaag-scène, Cloudy, goud/ledenkaart,
+  Opnemen en routes zijn bewust niet aangeraakt. Ontwerp: Design-canvas "Kadans – iPhone 17 (iOS 26) voorstel". Niet lokaal gebouwd.
 - **Glas-proef (alleen op branch `glas-proef`, niet op main):** `GlassPanel` in `lib/shared/glass.dart` (matglas met BackdropFilter, effen
   terugval bij "minder beweging"). Kaartpagina van Opnemen: kaart volle hoogte, cijfers + Markeren in glas (bottom 30, vrij van © Kadaster/PDOK).
   Schermtests `11g_glas_kaart` / `65g_donker_glas_kaart` (`_shot` heeft nu een `act:`-parameter om te vegen). Build + schermen groen.

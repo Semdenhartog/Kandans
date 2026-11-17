@@ -19,6 +19,12 @@ class MeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
         tooltip: tr('Ik'),
+        // Ronde glasknop (iOS 26-stijl): doorzichtig vlak met een lichte rand, zonder vervaging (kost geen accu).
+        style: IconButton.styleFrom(
+          backgroundColor: color != null ? color!.withValues(alpha: 0.18) : RwColors.surfaceHigh.withValues(alpha: 0.7),
+          shape: const CircleBorder(),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+        ),
         icon: Icon(Icons.account_circle_outlined, color: color ?? RwColors.muted),
         onPressed: () => context.go('/me'),
       );
@@ -34,6 +40,11 @@ class CoachButton extends StatelessWidget {
   Widget build(BuildContext context) => compact
       ? IconButton(
           tooltip: tr('Vraag de coach'),
+          style: IconButton.styleFrom(
+            backgroundColor: color != null ? color!.withValues(alpha: 0.18) : RwColors.surfaceHigh.withValues(alpha: 0.7),
+            shape: const CircleBorder(),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+          ),
           icon: const Wolkje(size: 30, mood: WolkjeMood.denkt, animate: false),
           onPressed: () => context.go('/coach'),
         )

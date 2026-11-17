@@ -270,7 +270,7 @@ ThemeData buildTheme() {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: RwColors.surface,
       indicatorColor: RwColors.accent,
-      indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
+      indicatorShape: const StadiumBorder(),
       iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
           color: states.contains(WidgetState.selected)

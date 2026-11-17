@@ -8,6 +8,7 @@ import '../core/theme.dart';
 import 'widgets.dart';
 import 'tab_scroll.dart';
 import 'aura.dart';
+import 'glass_nav_bar.dart';
 import 'whats_new.dart';
 import 'nav_buttons.dart';
 import '../features/record/quick_start.dart';
@@ -175,32 +176,19 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         children: [
           const _OfflineBanner(),
           const PendingRunsBanner(),
-          // Satijnen navigatiebalk: licht doorschijnend, met een fijne lichte rand bovenaan.
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [RwColors.surfaceHigh.withValues(alpha: 0.92), RwColors.surface],
-              ),
-              border: Border(top: BorderSide(color: RwColors.hairline)),
-            ),
-            child: NavigationBar(
-              backgroundColor: Colors.transparent,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              // Ik en Coach zitten niet in de balk: dan staat de "selectie" op de Lopen-knop, die geen markering toont.
-              selectedIndex: homeSlotForBranch(shell.currentIndex),
-              animationDuration: Duration(milliseconds: 450),
-              onDestinationSelected: (slot) {
-                final i = homeBranchForSlot(slot);
-                if (i < 0) return; // de Lopen-knop regelt zijn eigen tik
-                if (i != shell.currentIndex) HapticFeedback.selectionClick();
-                if (i == shell.currentIndex) notifyTabReselected(i);
-                lastMainBranch = i;
-                shell.goBranch(i, initialLocation: i == shell.currentIndex);
-              },
-              destinations: homeDestinations(),
-            ),
+          // Zwevende glasbalk (iOS 26-stijl, zie glass_nav_bar.dart).
+          GlassNavBar(
+            // Ik en Coach zitten niet in de balk: dan staat de "selectie" op de Lopen-knop, die geen markering toont.
+            selectedIndex: homeSlotForBranch(shell.currentIndex),
+            onSelected: (slot) {
+              final i = homeBranchForSlot(slot);
+              if (i < 0) return; // de Lopen-knop regelt zijn eigen tik
+              if (i != shell.currentIndex) HapticFeedback.selectionClick();
+              if (i == shell.currentIndex) notifyTabReselected(i);
+              lastMainBranch = i;
+              shell.goBranch(i, initialLocation: i == shell.currentIndex);
+            },
+            destinations: homeDestinations(),
           ),
         ],
       ),
