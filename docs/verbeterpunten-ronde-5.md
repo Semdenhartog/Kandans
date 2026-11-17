@@ -82,3 +82,7 @@ live gecontroleerd: nu 0 afwijkingen), 31 (`MediaQuery.sizeOf`/`disableAnimation
 47 (`tools/site_links.py` in `site.yml`, alleen waarschuwing), 50 (`graaf.sh` toont aantal commits en gewijzigde bestanden).
 **Niet gedaan:** 2, 3 (nog geen test; ingang `adviseRace`/`RunGoal` vraagt eerst uitzoeken), 5–8, 11–13, 16–35 (behalve 31/32), 33–35, 39, 40, 43–46, 48, 49.
 Reden: raken veel bestanden of zijn alleen op een toestel/in de database te controleren; liever per groep met controle.
+
+## Stand 17-11 (deel 2)
+**Erbij gedaan:** 2 (`race_forecast_test`), 3 (`run_goal_test`), 11 (`invokeFunction` met 45 s tijdslimiet op alle 12 aanroepen van edge functions; `TimeoutException` → "Dit duurt te lang…", getest).
+**Bewust niet:** 12 (opnieuw proberen: niet veilig bij bestellen/verwijderen account), 13 (de server geeft de limiet-fout nog niet als eigen soort terug; eerst server aanpassen).
