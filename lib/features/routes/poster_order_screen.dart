@@ -17,6 +17,7 @@ import '../luxe/luxe.dart' show luxeGold;
 import 'poster_design.dart';
 import 'poster_orders_screen.dart';
 import 'package:runwise/core/error_reporter.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Opent het bestellen van een gedrukte poster.
 void openPosterOrder(BuildContext context, {required PosterData data, required PosterStyle style}) {
@@ -326,7 +327,7 @@ class _FormatTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(RwRadius.m),
           onTap: onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
+            duration: RwMotion.fast,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: selected ? (RwColors.isDark ? const Color(0xFF1E180C) : const Color(0xFFF0E3C8)) : RwColors.surface,

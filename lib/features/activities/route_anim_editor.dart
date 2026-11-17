@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/route_anim.dart';
 import 'route_anim_painter.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Wat de gebruiker aan de routevideo aanpast: foto erachter (met zoom/verschuiven), plek van de tekst en eigen titel.
 /// De plek van de tekst wordt bewaard (pref `route_anim_layout`), de foto en titel gelden voor deze video.
@@ -45,7 +46,7 @@ class RouteAnimEditor extends ChangeNotifier {
       pan = Offset.zero;
       notifyListeners();
       // Het oude beeld pas loslaten als het scherm het niet meer tekent.
-      Future<void>.delayed(const Duration(milliseconds: 300), () => old?.dispose());
+      Future<void>.delayed(RwMotion.normal, () => old?.dispose());
       return true;
     } catch (_) {
       return false;
@@ -58,7 +59,7 @@ class RouteAnimEditor extends ChangeNotifier {
     zoom = 1;
     pan = Offset.zero;
     notifyListeners();
-    Future<void>.delayed(const Duration(milliseconds: 300), () => old?.dispose());
+    Future<void>.delayed(RwMotion.normal, () => old?.dispose());
   }
 
   void setTitle(String v) {

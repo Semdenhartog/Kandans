@@ -61,6 +61,7 @@ import '../../shared/nav_buttons.dart';
 import '../../shared/art/wolkje.dart';
 import '../planner/this_week_screen.dart';
 import 'package:runwise/core/error_reporter.dart';
+import 'package:runwise/core/motion.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -1243,7 +1244,7 @@ class _HourBarsState extends State<_HourBars> {
                           heightFactor: h,
                           // Kleur loopt vloeiend over als je een ander uur kiest.
                           child: AnimatedContainer(
-                            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : Duration(milliseconds: 180),
+                            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : RwMotion.fast,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,

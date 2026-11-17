@@ -1,5 +1,13 @@
 # Play Store – klaar om te plakken
 
+## Vóór insturen (afvinklijst, 17-11)
+- [ ] Privacy-URL https://kadans.fit/privacy.html en verwijder-URL https://kadans.fit/verwijderen.html ingevuld
+- [ ] Gegevensveiligheid: agenda (alleen op toestel), afgeronde locatie loopmaatjes (alleen als aangezet), stappen, profielfoto's
+- [ ] Health Connect-aanvraag ingediend (duurt 1–3 weken)
+- [ ] Screenshots uit `schermen-main/playstore/` en promovideo op YouTube ("niet vermeld")
+- [ ] App bundle gebouwd en geüpload naar Interne tests, 5–10 testers
+- [ ] `PLAY_LIVE = true` in `site/vriend.html` pas als de app live is
+
 Alles wat Google vraagt voordat Kadans in de Play Store mag. Gemaakt uit de echte rechten
 en diensten in de code (22-10-2026). Klopt er iets niet meer na een wijziging, pas dit bestand dan ook aan.
 

@@ -36,6 +36,7 @@ import 'photos_card.dart';
 import 'elevation_card.dart';
 import 'splits_card.dart';
 import 'trim_run_screen.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Eén run: tijden, weer, records, route en delen.
 class ActivityDetailScreen extends ConsumerWidget {
@@ -764,7 +765,7 @@ class _JumpChips extends StatelessWidget {
                 return;
               }
               HapticFeedback.selectionClick();
-              Scrollable.ensureVisible(ctx, duration: Duration(milliseconds: 500), curve: Curves.easeOutCubic, alignment: 0.05);
+              Scrollable.ensureVisible(ctx, duration: RwMotion.slow, curve: Curves.easeOutCubic, alignment: 0.05);
             },
           );
         },

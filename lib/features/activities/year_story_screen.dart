@@ -10,6 +10,7 @@ import '../../data/repositories/repositories.dart';
 import '../../domain/best_efforts.dart';
 import '../../domain/year_recap.dart';
 import 'run_insights_screens.dart' show openYearRecap;
+import 'package:runwise/core/motion.dart';
 
 void openYearStory(BuildContext context, {int? year}) {
   Navigator.of(context).push(PageRouteBuilder<void>(
@@ -94,7 +95,7 @@ class _YearStoryScreenState extends ConsumerState<YearStoryScreen> with SingleTi
         onLongPressStart: (_) => _progress.stop(),
         onLongPressEnd: (_) => _progress.forward(),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 500),
+          duration: RwMotion.slow,
           decoration: BoxDecoration(
             gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: s.colors),
           ),

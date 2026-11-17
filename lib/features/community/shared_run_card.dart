@@ -12,6 +12,7 @@ import '../routes/route_map.dart';
 import '../routes/route_shape.dart';
 import 'community_feed_screen.dart' show RunnerAvatar, askReportReason, communityAgo, ensureCommunityRules;
 import 'runner_profile_screen.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Een gedeelde run in de feed of op een profiel.
 class SharedRunCard extends StatelessWidget {
@@ -582,7 +583,7 @@ class _ReactionRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(RwRadius.s),
             onTap: () => onToggle(e),
             child: AnimatedContainer(
-              duration: Duration(milliseconds: 180),
+              duration: RwMotion.fast,
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(RwRadius.s),

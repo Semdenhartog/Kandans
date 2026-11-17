@@ -9,6 +9,7 @@ import 'art/landscape.dart';
 import 'art/wolkje.dart';
 import 'rolling_text.dart';
 import '../core/i18n.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Kaart met optionele titel, in Kadans-stijl: fijne lichtrand bovenaan (als glas), zachte diepte,
 /// en als je erop kunt tikken veert hij een fractie in.
@@ -504,7 +505,7 @@ class _OdometerInState extends State<OdometerIn> {
   void initState() {
     super.initState();
     if (_shown == widget.text) return;
-    Future<void>.delayed(Duration(milliseconds: 180), () {
+    Future<void>.delayed(RwMotion.fast, () {
       if (mounted) setState(() => _shown = widget.text);
     });
   }

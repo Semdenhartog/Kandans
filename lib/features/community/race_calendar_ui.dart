@@ -78,6 +78,7 @@ class AerialHeader extends StatelessWidget {
               width: size + 0.5,
               height: size + 0.5,
               child: Image(
+                excludeFromSemantics: true, // losse tegels: de kop erboven beschrijft het geheel
                 image: CachedNetImage('$_photoTiles/$zoom/$tx/$ty.jpeg'),
                 fit: BoxFit.fill,
                 gaplessPlayback: true,
@@ -88,7 +89,7 @@ class AerialHeader extends StatelessWidget {
         }
       }
       return Stack(fit: StackFit.expand, clipBehavior: Clip.hardEdge, children: [
-        Image.asset(_fallback, fit: BoxFit.cover),
+        Image.asset(_fallback, fit: BoxFit.cover, semanticLabel: 'Beeld bij de wedstrijd'),
         ...tiles,
         // Warm, donker verloop: luxe en leesbaar.
         const DecoratedBox(

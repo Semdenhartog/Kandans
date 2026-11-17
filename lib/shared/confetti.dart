@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 import '../data/services/sound_service.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Een korte regen van confetti in Kadans-kleuren (bij een record of nieuwe badge). Eén keer, ~2,5 s.
 class Confetti extends StatefulWidget {
@@ -40,7 +41,7 @@ class _ConfettiState extends State<Confetti> with SingleTickerProviderStateMixin
     super.initState();
     _off = WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
     if (!_off) {
-      Future<void>.delayed(const Duration(milliseconds: 500), () {
+      Future<void>.delayed(RwMotion.slow, () {
         if (!mounted) return;
         HapticFeedback.heavyImpact();
         SoundService.instance.play(RwSound.record).ignore();

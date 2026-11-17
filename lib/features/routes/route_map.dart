@@ -18,6 +18,7 @@ import '../../domain/poi.dart';
 import '../../domain/route_geometry.dart';
 import 'run_paths_layer.dart';
 import 'package:runwise/core/error_reporter.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Ondergrond van de kaart.
 enum MapLayer { kaart, satelliet }
@@ -566,7 +567,7 @@ class _LayerToggle extends StatelessWidget {
  behavior: HitTestBehavior.opaque,
           onTap: () => onChanged(l),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
+            duration: RwMotion.fast,
             padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
             decoration: BoxDecoration(
               color: on ? RwColors.accent : Colors.transparent,

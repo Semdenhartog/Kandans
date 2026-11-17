@@ -92,6 +92,7 @@ class _Tile extends StatelessWidget {
             child: url == null
                 ? Container(color: RwColors.surfaceHigh)
                 : Image(
+                  semanticLabel: 'Foto van een run',
                     image: CachedNetImage(url!, cacheKey: 'run-photo:$path'),
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) => Container(color: RwColors.surfaceHigh),
@@ -117,6 +118,7 @@ class PhotoPin extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(RwRadius.s),
           child: Image(
+            semanticLabel: 'Foto van een run',
             image: CachedNetImage(url, cacheKey: 'run-photo:$path'),
             fit: BoxFit.cover,
             errorBuilder: (_, _, _) => Container(color: RwColors.surfaceHigh),

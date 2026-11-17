@@ -67,6 +67,8 @@ Lees dit eerst. Achtergrond en afgeronde zaken: `docs/overdracht-archief.md` (al
 - Branch **`graaf`** (wordt na elke push naar main bijgewerkt door `graaf.yml`).
 - `tools/graaf.sh` (ophalen, meldt of code sindsdien veranderd is), dan `tools/graaf.sh explain <bestand.dart of pad::Symbool>`
   of `tools/graaf.sh path <A> <B>`. Daarna **alleen** de nodige regels lezen (Read met offset/limit).
+- Voorbeelden: `tools/graaf.sh explain lib/domain/custom_plan.dart` (wat het bestand doet, wie het gebruikt) ·
+  `tools/graaf.sh explain lib/domain/run_goal.dart::RunGoal` (één symbool) · `tools/graaf.sh path dashboard_screen.dart wolkje.dart` (verband).
 - `query "vrije tekst"` geeft veel ruis. `GRAPH_REPORT.md` niet in z'n geheel lezen.
 - Kaart is alleen van **main**; op een branch kloppen nieuwe/gewijzigde bestanden niet — dan zelf lezen.
 

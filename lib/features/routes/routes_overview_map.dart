@@ -11,6 +11,7 @@ import '../../domain/geo.dart';
 import '../../domain/start_time_scoring.dart';
 import 'route_map.dart';
 import 'route_photos_strip.dart';
+import 'package:runwise/core/motion.dart';
 
 enum LengthFilter {
   all('Alle lengtes'),
@@ -97,7 +98,7 @@ class _RoutesOverviewMapState extends ConsumerState<RoutesOverviewMap> {
     setState(() => _selected = i);
     _focus(shown[i]);
     if (fromMap && _pages.hasClients) {
-      _pages.animateToPage(i, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      _pages.animateToPage(i, duration: RwMotion.normal, curve: Curves.easeOut);
     }
   }
 

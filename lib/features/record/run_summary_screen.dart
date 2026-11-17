@@ -26,6 +26,7 @@ import '../profile/emergency_contact.dart';
 import '../routes/route_map.dart';
 import '../routes/route_poster_screen.dart';
 import 'record_celebration_screen.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Direct na het opslaan: je run in één oogopslag, met snelste stukken en records.
 class RunSummaryScreen extends StatelessWidget {
@@ -435,7 +436,7 @@ class _QuickFeelState extends ConsumerState<_QuickFeel> {
                       borderRadius: BorderRadius.circular(RwRadius.m),
                       onTap: () => _save(v),
                       child: AnimatedContainer(
-                        duration: Duration(milliseconds: 180),
+                        duration: RwMotion.fast,
                         padding: EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: _feel == v ? RwColors.accent : RwColors.surfaceHigh,

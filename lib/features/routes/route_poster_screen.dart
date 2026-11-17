@@ -15,6 +15,7 @@ import '../../shared/widgets.dart';
 import '../luxe/luxe.dart';
 import 'poster_design.dart';
 import 'poster_order_screen.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Deel een route als poster: strakke lijn, naam en de cijfers. Mooi voor je story of om te laten drukken.
 void openRoutePoster(BuildContext context, RunRoute r, {int? fastestSeconds, int timesRun = 0}) {
@@ -195,7 +196,7 @@ class _RoutePosterScreenState extends ConsumerState<RoutePosterScreen> {
                     child: Column(children: [
                       Stack(clipBehavior: Clip.none, children: [
                         AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
+                          duration: RwMotion.fast,
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(

@@ -17,6 +17,7 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../domain/strength.dart';
 import '../../shared/widgets.dart';
+import 'package:runwise/core/motion.dart';
 
 void openStrength(BuildContext context, {String? routineId}) {
   final r = routineId == null ? null : Routine.all.where((x) => x.id == routineId).firstOrNull;
@@ -313,7 +314,7 @@ class _CountdownRing extends StatelessWidget {
         return TweenAnimationBuilder<double>(
           tween: Tween(end: fraction.clamp(0.0, 1.0)),
           // Elke tik duurt een seconde: de ring loopt zo zonder schokken leeg.
-          duration: running ? const Duration(seconds: 1) : const Duration(milliseconds: 300),
+          duration: running ? const Duration(seconds: 1) : RwMotion.normal,
           builder: (_, f, child) => TweenAnimationBuilder<Color?>(
             tween: ColorTween(end: color),
             duration: const Duration(milliseconds: 400),

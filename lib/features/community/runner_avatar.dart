@@ -204,6 +204,7 @@ class _RunnerAvatarState extends State<RunnerAvatar> {
         clipBehavior: s?.photoUrl != null ? Clip.antiAlias : Clip.none,
         child: s?.photoUrl != null
             ? Image(
+              semanticLabel: 'Profielfoto',
                 image: ResizeImage(CachedNetImage(s!.photoUrl!), width: (size * MediaQuery.devicePixelRatioOf(context)).round()),
                 width: size,
                 height: size,

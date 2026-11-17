@@ -77,6 +77,7 @@ import 'fall_alert.dart';
 import '../challenges/community_screen.dart' show refreshCommunityQuietly;
 import '../../data/services/community_service.dart' show communityServiceProvider;
 import '../../data/services/kadans_voice.dart';
+import 'package:runwise/core/motion.dart';
 
 /// Opent het opnamescherm. Met [plan] of [targetPace] staat een training uit je schema al klaar.
 void openRecorder(BuildContext context, {IntervalPlan? plan, double? targetPace, String? sessionTitle, RunRoute? route, bool? indoor}) {
@@ -2815,7 +2816,7 @@ class _GpsRadarState extends State<_GpsRadar> with SingleTickerProviderStateMixi
       Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
         for (var i = 0; i < 4; i++)
           AnimatedContainer(
-            duration: Duration(milliseconds: 300),
+            duration: RwMotion.normal,
             margin: EdgeInsets.symmetric(horizontal: 1.5),
             width: 5,
             height: 6.0 + i * 4,
@@ -3133,7 +3134,7 @@ class _BackToStart extends StatelessWidget {
             if (b.relative != null)
               TweenAnimationBuilder<double>(
                 tween: Tween(end: b.relative!),
-                duration: Duration(milliseconds: 500),
+                duration: RwMotion.slow,
                 builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
                 child: Icon(Icons.navigation, color: RwColors.accent),
               )
@@ -3181,7 +3182,7 @@ class _WayToRouteCard extends StatelessWidget {
           if (way.relative != null)
             TweenAnimationBuilder<double>(
               tween: Tween(end: way.relative!),
-              duration: Duration(milliseconds: 500),
+              duration: RwMotion.slow,
               builder: (_, deg, child) => Transform.rotate(angle: deg * math.pi / 180, child: child),
               child: Icon(Icons.navigation, color: color, size: 40),
             )

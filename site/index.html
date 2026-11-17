@@ -14,6 +14,8 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="foto/heide.jpg">
+<link rel="preload" as="font" type="font/woff" href="fonts/Saira-ExtraBold.woff" crossorigin>
+<link rel="preload" as="font" type="font/woff" href="fonts/DMSans-Regular.woff" crossorigin>
 <link rel="stylesheet" href="fonts.css">
 <script>document.documentElement.classList.add('js')</script>
 <style>
@@ -750,6 +752,7 @@ body{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org
         body: JSON.stringify({ email: email, source: 'website' })
       }).then(function (r) {
         if (r.ok || r.status === 409) { location.href = 'bedankt.html'; return; }
+        if (r.status === 429) { msg.textContent = 'Te veel pogingen vanaf dit netwerk. Probeer het over een uur opnieuw.'; btn.disabled = false; return; }
         throw new Error(r.status);
       }).catch(function () {
         msg.textContent = 'Aanmelden lukte niet. Probeer het over een paar minuten opnieuw.';

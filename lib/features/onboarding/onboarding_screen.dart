@@ -23,6 +23,7 @@ import '../planner/availability_provider.dart';
 import '../planner/roster_screen.dart' show openRosterScreen;
 import '../profile/member_card.dart';
 import 'package:runwise/core/error_reporter.dart';
+import 'package:runwise/core/motion.dart';
 
 const _doneKey = 'onboarding_done_v1';
 
@@ -131,7 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onTap: () async {
                   setState(() => _goal = g);
                   await saveRunGoal(g);
-                  await Future<void>.delayed(const Duration(milliseconds: 300));
+                  await Future<void>.delayed(RwMotion.normal);
                   if (mounted) _next();
                 },
               ),

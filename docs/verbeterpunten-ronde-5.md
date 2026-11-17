@@ -86,3 +86,11 @@ Reden: raken veel bestanden of zijn alleen op een toestel/in de database te cont
 ## Stand 17-11 (deel 2)
 **Erbij gedaan:** 2 (`race_forecast_test`), 3 (`run_goal_test`), 11 (`invokeFunction` met 45 s tijdslimiet op alle 12 aanroepen van edge functions; `TimeoutException` → "Dit duurt te lang…", getest).
 **Bewust niet:** 12 (opnieuw proberen: niet veilig bij bestellen/verwijderen account), 13 (de server geeft de limiet-fout nog niet als eigen soort terug; eerst server aanpassen).
+
+## Stand 17-11 (deel 3, punt 30–50)
+**Gedaan:** 30 (deels: `lib/core/motion.dart` met `RwMotion.fast/normal/slow` = 180/300/500 ms, 18 plekken omgezet met exact dezelfde tijd; de overige losse waarden blijven tot ze bewust gekozen zijn),
+39 (voorbeeldcommando's codekaart in CLAUDE.md), 40 (afvinklijst bovenaan `docs/play-store.md`), 45 (preload `Saira-ExtraBold` + `DMSans-Regular`),
+46 (wachtlijst bewaarde het adres en zette de knop weer aan; nieuw: eigen melding bij 429), 48 (`semanticLabel` op fotomuur, profielfoto's en wedstrijdbeeld; losse kaarttegels uitgesloten),
+31, 32, 36–38, 41, 42, 47, 50 (eerder gedaan).
+**Bleek al goed:** 34 (de vier `FutureBuilder`-kaarten verbergen zich bij een fout, dat is hier juist de bedoeling), 43 (subpagina's gebruiken al `pagina.css`; CLAUDE.md liep achter).
+**Niet gedaan:** 33 (ListView.builder: per lijst eerst nalopen), 35 (klok per scherm), 44 (WebP: de beelden zijn CSS-achtergronden, dat vraagt een herschrijving van de stijl), 49 (lettervoorlaad vóór export: alleen op een toestel te controleren).
