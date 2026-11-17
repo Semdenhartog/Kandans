@@ -28,7 +28,7 @@ class RoutePhotosService {
     final samples = photoSamples(t, max: max);
     if (samples.isEmpty) return (photos: const <RoutePhoto>[], configured: true);
     try {
-      final res = await _db.functions.invoke('street-photos', body: {
+      final res = await invokeFunction(_db, 'street-photos', body: {
         'points': [
           for (final s in samples) [s.point.lat, s.point.lon, s.bearing.roundToDouble()],
         ],

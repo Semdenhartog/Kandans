@@ -61,7 +61,7 @@ class CommunityService {
 
   Future<Map<String, dynamic>> _call(String action, [Map<String, dynamic> extra = const {}]) async {
     try {
-      final res = await _db.functions.invoke('community', body: {'action': action, ...extra});
+      final res = await invokeFunction(_db, 'community', body: {'action': action, ...extra});
       return (res.data as Map).cast<String, dynamic>();
     } on FunctionException catch (e) {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};

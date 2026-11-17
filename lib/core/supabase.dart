@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +17,16 @@ final currentUserProvider = Provider<User?>((ref) {
   ref.watch(authStateProvider);
   return ref.watch(supabaseProvider).auth.currentUser;
 });
+
+/// Roept een edge function aan met een tijdslimiet: zonder verbinding of bij een hangende server
+/// blijft de app anders eindeloos wachten. Bij overschrijding komt een [TimeoutException].
+Future<FunctionResponse> invokeFunction(
+  SupabaseClient db,
+  String name, {
+  Map<String, dynamic>? body,
+  Duration timeout = const Duration(seconds: 45),
+}) =>
+    db.functions.invoke(name, body: body).timeout(timeout);
 
 /// Vertaalt technische foutmeldingen naar begrijpelijk Nederlands.
 String friendlyError(Object error) {
@@ -36,6 +48,9 @@ String friendlyError(Object error) {
   }
   if (error is PostgrestException) {
     return 'Opslaan of ophalen is mislukt (${error.code ?? 'onbekend'}). Probeer het opnieuw.';
+  }
+  if (error is TimeoutException) {
+    return 'Dit duurt te lang. Controleer je verbinding en probeer het opnieuw.';
   }
   final text = error.toString();
   if (text.contains('SocketException') || text.contains('ClientException')) {

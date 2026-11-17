@@ -182,7 +182,7 @@ class PosterOrderService {
     required ShippingAddress address,
   }) async {
     try {
-      final res = await _db.functions.invoke('poster-order', body: {
+      final res = await invokeFunction(_db, 'poster-order', body: {
         'product_id': product.id,
         'title': title,
         'style': style,

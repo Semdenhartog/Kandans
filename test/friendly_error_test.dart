@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:runwise/core/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,5 +25,9 @@ void main() {
 
   test('overige fouten: tekst zonder "Exception: "', () {
     expect(friendlyError(Exception('Iets anders')), 'Iets anders');
+  });
+
+  test('time-out krijgt een eigen melding', () {
+    expect(friendlyError(TimeoutException('x')), contains('duurt te lang'));
   });
 }

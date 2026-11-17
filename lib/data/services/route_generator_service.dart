@@ -63,7 +63,7 @@ class RouteGeneratorService {
   /// [direction] = kant op in graden (0 noord, 90 oost, 180 zuid, 270 west); null = maakt niet uit.
   Future<List<GeneratedLoop>> generate(double lat, double lon, double distanceMeters, {int count = 4, int? direction}) async {
     try {
-      final res = await _db.functions.invoke('route-generator', body: {
+      final res = await invokeFunction(_db, 'route-generator', body: {
         'lat': lat,
         'lon': lon,
         'distance_m': distanceMeters.round(),
@@ -91,7 +91,7 @@ class RouteGeneratorService {
   /// Volgt paden en wegen langs de getikte punten (zelf een route tekenen).
   Future<GeneratedLoop> followPath(List<LatLng> points) async {
     try {
-      final res = await _db.functions.invoke('route-generator', body: {
+      final res = await invokeFunction(_db, 'route-generator', body: {
         'mode': 'path',
         'points': [for (final p in points) [p.lat, p.lon]],
       });

@@ -35,7 +35,7 @@ class RunWiseRepository {
     var streams = row?['streams'] is Map ? (row!['streams'] as Map).cast<String, dynamic>() : null;
     if (streams == null && row?['source'] == 'strava') {
       try {
-        final res = await _db.functions.invoke('strava', body: {'action': 'streams', 'activity_id': activityId});
+        final res = await invokeFunction(_db, 'strava', body: {'action': 'streams', 'activity_id': activityId});
         final data = (res.data as Map?)?['streams'];
         streams = data is Map ? data.cast<String, dynamic>() : null;
       } on FunctionException catch (e) {
@@ -463,7 +463,7 @@ class RunWiseRepository {
       final goal = await savedRunGoal();
       final style = await savedCoachStyle();
       final pause = await RunPauseStore.current();
-      final res = await _db.functions.invoke('coach', body: {
+      final res = await invokeFunction(_db, 'coach', body: {
         'message': message,
         if (goal != null) 'goal': goal.name,
         if (style != CoachLength.normal) 'length': style.name,
@@ -487,7 +487,7 @@ class RunWiseRepository {
   Future<String> summarizeRun(String activityId) async {
     try {
       final pause = await RunPauseStore.current();
-      final res = await _db.functions.invoke('coach', body: {
+      final res = await invokeFunction(_db, 'coach', body: {
         'mode': 'summary',
         'activity_id': activityId,
         if (pause != null) 'pause': pause.toJson(),
@@ -515,7 +515,7 @@ class RunWiseRepository {
     final sample = [for (var i = 0; i < pts.length; i += step) pts[i]];
     if (sample.last != pts.last) sample.add(pts.last);
     try {
-      final res = await _db.functions.invoke('route-generator', body: {
+      final res = await invokeFunction(_db, 'route-generator', body: {
         'mode': 'surface',
         'points': [
           for (final p in sample.take(50)) [p.lat, p.lon],
@@ -572,7 +572,7 @@ class RunWiseRepository {
 
   /// Verwijdert het account definitief via de Edge Function `delete-account`.
   Future<void> deleteAccount() async {
-    final res = await _db.functions.invoke('delete-account');
+    final res = await invokeFunction(_db, 'delete-account');
     if (res.status != 200) {
       throw Exception('Account verwijderen is mislukt. Probeer het later opnieuw.');
     }

@@ -112,7 +112,7 @@ class SyncService {
 
   Future<Map<String, dynamic>> _strava(String action, [Map<String, dynamic> extra = const {}]) async {
     try {
-      final res = await _db.functions.invoke('strava', body: {'action': action, ...extra});
+      final res = await invokeFunction(_db, 'strava', body: {'action': action, ...extra});
       return (res.data as Map).cast<String, dynamic>();
     } on FunctionException catch (e) {
       final details = e.details is Map ? (e.details as Map).cast<String, dynamic>() : <String, dynamic>{};
@@ -162,7 +162,7 @@ class SyncService {
   /// Strava te druk? Dan [StravaHistoryPage.rateLimited] in plaats van een fout, zodat je later verder kunt.
   Future<StravaHistoryPage> stravaHistoryPage({int? before}) async {
     try {
-      final res = await _db.functions.invoke('strava', body: {'action': 'history', if (before != null) 'before': before});
+      final res = await invokeFunction(_db, 'strava', body: {'action': 'history', if (before != null) 'before': before});
       final m = (res.data as Map).cast<String, dynamic>();
       return StravaHistoryPage(
         imported: (m['imported'] as num?)?.toInt() ?? 0,
