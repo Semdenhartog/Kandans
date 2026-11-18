@@ -8,6 +8,7 @@ import '../../domain/start_time_scoring.dart';
 import '../../shared/alarm.dart';
 import '../../domain/run_helpers.dart';
 import '../../shared/calendar.dart';
+import '../../shared/glass.dart';
 import '../../shared/art/sun_arc.dart';
 import '../../shared/art/weather_icon.dart';
 import '../../shared/widgets.dart';
@@ -67,16 +68,8 @@ class HeroCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: '${v.title}. ${v.detail}',
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(RwRadius.l),
-          color: RwColors.surface,
-          border: Border.all(color: RwColors.hairline),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: RwColors.isDark ? 0.35 : 0.14), blurRadius: 36, offset: Offset(0, 18)),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
+      child: GlassFrame(
+        radius: RwRadius.l,
         child: Stack(children: [
           Positioned.fill(child: WeatherAmbience(weather: w, golden: isGoldenHour(s.start, lat, lon))),
           Padding(

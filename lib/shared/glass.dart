@@ -52,3 +52,40 @@ class GlassPanel extends StatelessWidget {
     );
   }
 }
+
+/// Glazen kaartvlak met schaduw (iOS 26-stijl), voor kaarten die over een foto of kaart liggen.
+///
+/// Vult zich met [child] zonder opvulling, zodat bestaande kaartindelingen ongewijzigd blijven. Valt bij
+/// "minder beweging" terug op een effen vlak.
+class GlassFrame extends StatelessWidget {
+  const GlassFrame({super.key, required this.child, this.radius = 28, this.blur = 22});
+
+  final Widget child;
+  final double radius;
+  final double blur;
+
+  @override
+  Widget build(BuildContext context) {
+    final plain = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final dark = RwColors.isDark;
+    final shape = BorderRadius.circular(radius);
+    final inner = DecoratedBox(
+      decoration: BoxDecoration(
+        color: plain ? RwColors.surface : RwColors.surface.withValues(alpha: dark ? 0.7 : 0.8),
+        borderRadius: shape,
+        border: Border.all(color: Colors.white.withValues(alpha: dark ? 0.14 : 0.7)),
+      ),
+      child: child,
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: shape,
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: dark ? 0.35 : 0.14), blurRadius: 36, offset: const Offset(0, 18))],
+      ),
+      child: ClipRRect(
+        borderRadius: shape,
+        child: plain ? inner : BackdropFilter(filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur), child: inner),
+      ),
+    );
+  }
+}

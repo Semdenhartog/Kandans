@@ -214,9 +214,9 @@ ThemeData buildTheme() {
         fontFamily: RwFonts.display,
         fontFeatures: rwTnum,
         fontWeight: FontWeight.w800,
-        fontSize: 24,
+        fontSize: 32,
         color: RwColors.text,
-        letterSpacing: -0.3,
+        letterSpacing: -0.4,
       ),
     ),
     listTileTheme: ListTileThemeData(

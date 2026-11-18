@@ -55,6 +55,7 @@ import '../../domain/route_turns.dart';
 import '../../domain/extras.dart' show daysAgoWords, calendarDaysBetween;
 import '../../domain/shoes.dart';
 import '../../shared/permission_primer.dart';
+import 'glass_map_overlay.dart';
 import '../../shared/rolling_text.dart';
 import '../../shared/segmented.dart';
 import '../../shared/widgets.dart';
@@ -2162,11 +2163,9 @@ class _RecordRunScreenState extends ConsumerState<RecordRunScreen> {
                                         ),
                                         Padding(
                                           padding: EdgeInsets.only(top: 12, bottom: 8),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          child: GlassMapOverlay(
+                                            map: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute, ghost: v.ghostPoint),
                                             children: [
-                                              Expanded(child: LiveTrackMap(track: v.track, position: v.position, planned: v.followRoute, ghost: v.ghostPoint)),
-                                              SizedBox(height: 10),
                                               Row(
                                                 children: [
                                                   Expanded(child: _Big(label: tr('Afstand'), value: Fmt.km(v.distance, decimals: 2), small: true)),
