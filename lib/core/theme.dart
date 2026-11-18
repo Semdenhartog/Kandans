@@ -248,7 +248,7 @@ ThemeData buildTheme() {
         iconColor: WidgetStateProperty.resolveWith(
             (s) => s.contains(WidgetState.selected) ? RwColors.accentDark : RwColors.muted),
         side: WidgetStateProperty.all(BorderSide(color: RwColors.border)),
-        shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s))),
+        shape: WidgetStateProperty.all(const StadiumBorder()),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -363,7 +363,7 @@ ThemeData buildTheme() {
       behavior: SnackBarBehavior.floating,
       backgroundColor: RwColors.palette.snack,
       elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.m), side: BorderSide(color: RwColors.hairline)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28), side: BorderSide(color: RwColors.hairline)),
       insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 14),
       contentTextStyle: TextStyle(fontFamily: RwFonts.body, color: dark ? RwColors.text : const Color(0xFFF7F2EA), fontWeight: FontWeight.w500),
     ),
@@ -411,6 +411,6 @@ ThemeData buildTheme() {
 class RwRadius {
   RwRadius._();
   static const double s = 8;
-  static const double m = 16;
-  static const double l = 24;
+  static const double m = 22;
+  static const double l = 32;
 }

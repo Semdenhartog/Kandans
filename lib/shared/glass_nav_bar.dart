@@ -39,7 +39,7 @@ class GlassNavBar extends StatelessWidget {
       child: NavigationBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        height: 68,
+        height: 80,
         indicatorShape: const StadiumBorder(),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         selectedIndex: selectedIndex,

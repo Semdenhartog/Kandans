@@ -67,6 +67,7 @@ import 'package:runwise/features/auth/login_screen.dart';
 import 'package:runwise/features/onboarding/onboarding_screen.dart';
 import 'package:runwise/features/profile/privacy_screen.dart';
 import 'package:runwise/features/profile/strava_archive_screen.dart';
+import 'package:runwise/shared/glass_nav_bar.dart';
 import 'package:runwise/shared/home_shell.dart';
 import 'package:runwise/features/shop/shop_screen.dart';
 import 'package:runwise/features/community/community_feed_screen.dart';
@@ -521,9 +522,9 @@ class _FakeShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: child,
-        bottomNavigationBar: NavigationBar(
+        bottomNavigationBar: GlassNavBar(
           selectedIndex: index,
-          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+          onSelected: (_) {},
           destinations: homeDestinations(),
         ),
       );
