@@ -23,6 +23,17 @@ bool isFoggy(HourWeather? w) {
   return c == 3 || c == 45 || c == 48 || (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || (w.precipitationProbability ?? 0) >= 50;
 }
 
+/// Welke sfeerfoto bij het weer van nu hoort: 's nachts zwart-wit bos, bij regen een nat bospad, bij mist de mistfoto,
+/// bij vorst een bevroren veld en anders de heide.
+String sceneFoto(HourWeather? w) {
+  if (w == null) return 'assets/foto/heide.jpg';
+  final c = w.weatherCode ?? 0, rain = (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || (w.precipitationProbability ?? 0) >= 50;
+  if (!w.isDay) return 'assets/foto/mist_zw.jpg';
+  if (rain) return 'assets/foto/regen.jpg';
+  if (isFoggy(w)) return 'assets/foto/mist.jpg';
+  return (w.feelsLike ?? w.temperature) <= 2 ? 'assets/foto/vorst.jpg' : 'assets/foto/heide.jpg';
+}
+
 /// Het beeld bovenaan Vandaag: een sfeerfoto met daarin je groet en het advies van vandaag.
 /// De advieskaart ligt er half overheen.
 class TodayScene extends StatelessWidget {
@@ -54,10 +65,10 @@ class TodayScene extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(children: [
-          // Sfeerfoto (zoals op kadans.fit): heide bij droog weer, mist bij mist, buien of grijs weer.
+          // Sfeerfoto (zoals op kadans.fit), gekozen op het weer van nu (zie sceneFoto).
           Positioned.fill(
             child: Image.asset(
-              isFoggy(w) ? 'assets/foto/mist.jpg' : 'assets/foto/heide.jpg',
+              sceneFoto(w),
               fit: BoxFit.cover,
               alignment: Alignment(0, -0.1),
               color: night ? Colors.black.withValues(alpha: 0.45) : null,

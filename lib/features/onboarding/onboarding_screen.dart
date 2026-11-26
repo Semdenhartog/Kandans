@@ -642,7 +642,7 @@ class _PhotoHead extends StatelessWidget {
             duration: const Duration(milliseconds: 2600),
             curve: Curves.easeOutCubic,
             builder: (_, s, c) => Transform.scale(scale: s, child: c),
-            child: Image.asset('assets/foto/heide.jpg',
+            child: Image.asset('assets/foto/heide_goud.jpg',
                 fit: BoxFit.cover, alignment: const Alignment(0, -0.1), errorBuilder: (_, _, _) => const ColoredBox(color: _inkHigh)),
           ),
           DecoratedBox(

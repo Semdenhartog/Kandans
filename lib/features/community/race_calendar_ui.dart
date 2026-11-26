@@ -57,7 +57,7 @@ class AerialHeader extends StatelessWidget {
 
   String get _fallback => switch (kind) {
         RaceKind.cross || RaceKind.trail => 'assets/foto/mist.jpg',
-        _ => 'assets/foto/heide.jpg',
+        RaceKind.marathon || RaceKind.halve => 'assets/foto/vondelpark.jpg', _ => 'assets/foto/heide.jpg',
       };
 
   @override
