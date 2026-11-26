@@ -1,0 +1,214 @@
+00:00 +0: loading /home/runner/work/Kandans/Kandans/test_screens/screens_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: 28a schema op maat vragen
+00:00 +1: 28b schema op maat
+00:01 +2: 60 donker vandaag
+00:03 +3: 61 donker runs
+00:05 +4: 62 donker run detail
+00:08 +5: 63 donker routes
+00:09 +6: 64 donker ik
+00:11 +7: 65 donker opnemen
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:12 +8: 66 donker coach
+00:12 +9: 01 vandaag
+00:14 +10: 01b vandaag boven
+00:15 +11: 02 runs
+00:17 +12: 03 run detail
+00:19 +13: 04 routes
+00:20 +14: 05 coach
+00:21 +15: 06 ik
+00:22 +16: 70 deze week
+00:23 +17: 71 doelen
+00:24 +18: 72 vandaag groot
+00:25 +19: 07 fitheid
+00:26 +20: 08 badges
+00:27 +21: 10 opnemen start
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:28 +22: 11 opnemen bezig
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:29 +23: 11c opnemen kaart
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:30 +24: 11b afslag nu, groot
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:31 +25: 12 route detail
+00:33 +26: 12f vlieg over route
+00:34 +27: 13 inloggen
+00:34 +28: 14 rondleiding
+00:35 +29: 14c rondleiding doel
+00:35 +30: 16 privacy
+00:35 +31: 17 shop
+00:35 +32: 18 community
+00:36 +33: 18b community met balk
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+00:37 +34: 18c community balk grote letters
+00:37 +35: 18d community runs
+00:38 +36: 18w wedstrijdkalender
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+00:39 +37: 18x wedstrijd detail
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+Kadans (stil) disk_image_cache.dart: MissingPluginException(No implementation found for method getApplicationSupportDirectory on channel plugins.flutter.io/path_provider)
+00:39 +38: 18y wedstrijdkalender donker
+00:40 +39: 18e community runs donker
+00:41 +40: 18f lopers
+00:41 +41: 18g profiel
+00:42 +42: 18h run delen
+00:43 +43: 18k pauze starten
+00:44 +44: 18l vandaag met pauze
+00:45 +45: 18m gps-sprong
+00:46 +46: 18i lopers groot
+00:46 +47: 18s stappen van de maand
+00:47 +48: 18t kadans delen
+00:48 +49: 18j profiel groot
+00:49 +50: 19 strava-archief
+00:50 +51: 14d rondleiding wanneer
+══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════
+The following assertion was thrown:
+ListTile background color or ink splashes may be invisible.
+The ListTile is wrapped in a DecoratedBox that has a background color. Because ListTile paints its
+background and ink splashes on the nearest Material ancestor, this DecoratedBox will hide those
+effects.
+To fix this, wrap the ListTile in its own Material widget, or remove the background color from the
+intermediate DecoratedBox.
+
+ListTile:
+  ListTile(selectedColor: Color(alpha: 1.0000, red: 0.4784, green: 0.3529, blue: 0.2039, colorSpace: ColorSpace.sRGB), contentPadding: EdgeInsets.zero, onTap: Closure: () => void)
+DecoratedBox:
+  DecoratedBox(bg: BoxDecoration(color: Color(alpha: 1.0000, red: 0.9294, green: 0.9020, blue: 0.8549, colorSpace: ColorSpace.sRGB), image: DecorationImage(AssetImage(bundle: null, name: "assets/achtergronden/zonsopkomst_licht.jpg"), BoxFit.cover, Alignment.center, scale 1.0, opacity 1.0, FilterQuality.medium)))
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:50 +51 -1: 14d rondleiding wanneer [E]
+  Test failed. See exception logs above.
+  The test description was: 14d rondleiding wanneer
+  
+00:50 +51 -1: 14e rondleiding stem
+00:50 +52 -1: 14f rondleiding advies
+00:51 +53 -1: 14g rondleiding ledenkaart
+00:52 +54 -1: 15 na je run
+══╡ EXCEPTION CAUGHT BY SERVICES LIBRARY ╞══════════════════════════════════════════════════════════
+The following MissingPluginException was thrown while activating platform stream on channel
+xyz.luan/audioplayers.global/events:
+MissingPluginException(No implementation found for method listen on channel
+xyz.luan/audioplayers.global/events)
+
+When the exception was thrown, this was the stack:
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      EventChannel.receiveBroadcastStream.<anonymous closure> (package:flutter/src/services/platform_channel.dart:710:11)
+<asynchronous suspension>
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:54 +54 -2: 15 na je run [E]
+  Test failed. See exception logs above.
+  The test description was: 15 na je run
+  
+00:54 +54 -2: 15b record feest
+00:54 +55 -2: 20 groot vandaag
+00:56 +56 -2: 21 groot opnemen
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:56 +57 -2: 22 groot runs
+00:57 +58 -2: 23 schema kiezen
+00:58 +59 -2: 24 briefing
+00:59 +60 -2: 25 loopband
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+00:59 +61 -2: 26 kracht
+01:01 +62 -2: 27 kracht bezig
+01:01 +63 -2: 27b oefenfiguren
+01:02 +64 -2: 28 jaarverhaal
+01:02 +65 -2: 29 premium
+01:02 +66 -2: 40 nieuw vandaag
+01:04 +67 -2: 41 nieuw runs
+01:05 +68 -2: 42 nieuw routes
+01:05 +69 -2: 43 nieuw coach
+01:06 +70 -2: 44 schoenen aan vervanging toe
+01:06 +71 -2: 45 luxe posters
+01:07 +72 -2: 45b poster maken
+01:07 +73 -2: 46 gouden deelkaart
+01:08 +74 -2: 47 poster bestellen
+01:09 +75 -2: 48 strava oude runs
+01:09 +76 -2: 49 strava routes
+01:10 +77 -2: 50 uitdagingen
+01:11 +78 -2: 51 samen ranglijst
+01:11 +79 -2: 52 samen meedoen
+01:12 +80 -2: 53 groot samen
+01:13 +81 -2: 30 groot opnemen start
+Kadans-fout: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:363:7)
+<asynchronous suspension>
+#1      MethodChannelBattery.batteryLevel.<anonymous closure> (package:battery_plus_platform_interface/method_channel_battery_plus.dart:31:18)
+<asynchronous suspension>
+#2      _RecordRunScreenState._readBattery (package:runwise/features/record/record_run_screen.dart:320:21)
+<asynchronous suspension>
+
+01:13 +82 -2: 31 groot run detail
+01:16 +83 -2: 32 groot routes
+01:17 +84 -2: 33 groot coach
+01:18 +85 -2: 34 groot ik
+01:19 +86 -2: 09 schema
+01:20 +87 -2: (tearDownAll)
+01:20 +87 -2: Some tests failed.
+
+Failing tests:
+  /home/runner/work/Kandans/Kandans/test_screens/screens_test.dart: 14d rondleiding wanneer
+  /home/runner/work/Kandans/Kandans/test_screens/screens_test.dart: 15 na je run
