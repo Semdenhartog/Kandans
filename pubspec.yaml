@@ -66,6 +66,8 @@ flutter:
     - assets/sounds/
     # Sfeerfoto's bovenaan Vandaag (Unsplash-licentie, vrij te gebruiken).
     - assets/foto/
+    # Eigen achtergronden (tools/maak_achtergronden.py): geen foto's van anderen.
+    - assets/achtergronden/
     - assets/fonts/OFL-Saira.txt
     - assets/fonts/OFL-DMSans.txt
   fonts:

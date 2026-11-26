@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +21,7 @@ import '../dashboard/dashboard_providers.dart';
 import '../planner/availability_provider.dart';
 import '../planner/roster_screen.dart' show openRosterScreen;
 import '../profile/member_card.dart';
+import '../../shared/achtergrond.dart';
 import 'package:runwise/core/error_reporter.dart';
 import 'package:runwise/core/motion.dart';
 
@@ -218,7 +218,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           backgroundColor: dark ? _ink : RwColors.background,
           body: AnimatedContainer(
             duration: const Duration(milliseconds: 420),
-            color: dark ? _ink : RwColors.background,
+            decoration: achtergrondBox('zonsopkomst', dark ? _ink : null),
             child: SafeArea(
               child: Column(children: [
                 Padding(

@@ -26,7 +26,7 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: [
-        Positioned.fill(child: RwAura()),
+        Positioned.fill(child: RwAura(beeld: 'mist_heuvels')),
         Positioned.fill(child: DrawnRoute(top: true)),
         // Taal kiezen, meteen op het beginscherm.
         const SafeArea(child: Align(alignment: Alignment.topRight, child: Padding(padding: EdgeInsets.all(8), child: LanguageButton()))),
