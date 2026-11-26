@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../shared/glass_page.dart';
 
 /// Eén kleurenset. Kadans heeft er twee: Zand (licht, overdag) en Zand avond (donker).
 class RwPalette {
@@ -185,7 +186,7 @@ ThemeData buildTheme() {
   final base = ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: RwColors.background,
+    scaffoldBackgroundColor: Colors.transparent,
     fontFamily: RwFonts.body,
   );
   TextStyle? display(TextStyle? s) => s?.copyWith(fontFamily: RwFonts.display, fontWeight: FontWeight.w800, fontFeatures: rwTnum);
@@ -258,13 +259,13 @@ ThemeData buildTheme() {
       ),
     ),
     cardTheme: CardThemeData(
-      color: RwColors.surface,
+      color: RwColors.surface.withValues(alpha: dark ? 0.62 : 0.68),
       elevation: 0,
       margin: EdgeInsets.zero,
       // Zelfde rand als RwCard, zodat lijstkaarten (Ik, schema) en RwCards één familie zijn.
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RwRadius.m),
-        side: BorderSide(color: RwColors.hairline),
+        side: BorderSide(color: Colors.white.withValues(alpha: dark ? 0.14 : 0.85)),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -292,7 +293,7 @@ ThemeData buildTheme() {
       filled: true,
       // Veld licht iets op zodra je erin typt.
       fillColor: WidgetStateColor.resolveWith(
-        (st) => st.contains(WidgetState.focused) ? RwColors.palette.focusFill : RwColors.surfaceHigh,
+        (st) => (st.contains(WidgetState.focused) ? RwColors.palette.focusFill : RwColors.surfaceHigh).withValues(alpha: 0.7),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       labelStyle: TextStyle(color: RwColors.muted),
@@ -339,7 +340,7 @@ ThemeData buildTheme() {
         backgroundColor: RwColors.accent,
         foregroundColor: RwColors.accentDark,
         minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
+        shape: const StadiumBorder(),
         textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: 0.2),
       ),
     ),
@@ -347,7 +348,7 @@ ThemeData buildTheme() {
       style: OutlinedButton.styleFrom(
         foregroundColor: RwColors.text,
         minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RwRadius.s)),
+        shape: const StadiumBorder(),
         side: BorderSide(color: RwColors.border, width: 1.5),
         textStyle: const TextStyle(fontFamily: RwFonts.body, fontWeight: FontWeight.w700, fontSize: 15, letterSpacing: 0.2),
       ),
@@ -374,7 +375,7 @@ ThemeData buildTheme() {
       linearTrackColor: RwColors.bar,
     ),
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: RwColors.palette.sheet,
+      backgroundColor: RwColors.palette.sheet.withValues(alpha: 0.95),
       surfaceTintColor: Colors.transparent,
       modalBarrierColor: RwColors.palette.scrim,
       showDragHandle: true,
@@ -400,11 +401,10 @@ ThemeData buildTheme() {
     dividerTheme: DividerThemeData(color: RwColors.border),
     // Vloeiende overgangen tussen schermen (vervagen en schuiven, zoals de nieuwste Android-stijl).
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.android: GlassPageTransitions(),
     }),
   );
 }
-
 
 /// Vaste afrondingen (unslop-ronde): klein 8, middel 16, groot 24. Knoppen zijn sinds 12-11-2026 een blok (8), net als
 /// [KadansButton] en kadans.fit; pil (999) alleen nog voor chips en voortgangsbalkjes.

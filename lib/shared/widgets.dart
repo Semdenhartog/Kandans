@@ -57,21 +57,16 @@ class _RwCardState extends State<RwCard> {
       duration: Duration(milliseconds: 140),
       curve: Curves.easeOut,
       child: DecoratedBox(
-        // Rand: licht aan de bovenkant, wegvallend naar onder.
+        // Matglas: fijne witte rand, zachte schaduw; de achtergrond (aura) schijnt door de vulling.
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(RwRadius.m),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white.withValues(alpha: RwColors.isDark ? 0.11 : 0.8), RwColors.border.withValues(alpha: 0.6), RwColors.border.withValues(alpha: 0.35)],
-            stops: [0, 0.35, 1],
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: RwColors.isDark ? 0.14 : 0.85)),
           boxShadow: [BoxShadow(color: RwColors.palette.shadow, blurRadius: 24, offset: Offset(0, 10), spreadRadius: -8)],
         ),
         child: Padding(
           padding: EdgeInsets.all(1),
           child: Material(
-            color: RwColors.surface,
+            color: RwColors.surface.withValues(alpha: RwColors.isDark ? 0.62 : 0.68),
             borderRadius: BorderRadius.circular(RwRadius.m),
             clipBehavior: Clip.antiAlias,
             child: Ink(
@@ -79,7 +74,7 @@ class _RwCardState extends State<RwCard> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [RwColors.isDark ? Color(0xFF221D18) : Color(0xFFFBF8F2), RwColors.surface],
+                  colors: [Colors.white.withValues(alpha: RwColors.isDark ? 0.05 : 0.3), Colors.transparent],
                 ),
               ),
               child: w.onTap == null

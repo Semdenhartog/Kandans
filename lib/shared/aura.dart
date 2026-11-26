@@ -26,16 +26,9 @@ class RwAura extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(color: RwColors.background),
           child: Stack(children: [
-            Positioned(
-              top: -220,
-              left: -160,
-              child: _blob(c[0], 520, 0.16),
-            ),
-            Positioned(
-              top: -260,
-              right: -200,
-              child: _blob(c[1], 560, 0.11),
-            ),
+            // Twee grote zachte lichtvlakken (goud rechtsboven, zand linksonder): het matglas van de kaarten ligt hier overheen.
+            Positioned(top: -140, right: -150, child: _blob(c[0], 460, RwColors.isDark ? 0.26 : 0.5)),
+            Positioned(bottom: -120, left: -150, child: _blob(c[1], 420, RwColors.isDark ? 0.14 : 0.3)),
             // Lichte papierstructuur (zoals kadans.fit): één keer getekend, kost geen accu.
             Positioned.fill(child: RepaintBoundary(child: CustomPaint(painter: PaperGrainPainter(dark: RwColors.isDark)))),
           ]),
