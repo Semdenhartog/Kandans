@@ -2931,7 +2931,7 @@ class _GlowPulseState extends State<_GlowPulse> with SingleTickerProviderStateMi
         builder: (_, child) => DecoratedBox(
           decoration: BoxDecoration(
             // Zelfde hoek als de knop eronder (blok sinds 12-11), anders steekt de gloed bij de hoeken uit.
-            borderRadius: BorderRadius.circular(RwRadius.s),
+            borderRadius: BorderRadius.circular(999),
             boxShadow: widget.active
                 ? [BoxShadow(color: RwColors.accent.withValues(alpha: 0.18 + 0.22 * _c.value), blurRadius: 14 + 16 * _c.value, spreadRadius: -2)]
                 : [],

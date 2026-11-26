@@ -57,11 +57,10 @@ class _RwCardState extends State<RwCard> {
       duration: Duration(milliseconds: 140),
       curve: Curves.easeOut,
       child: DecoratedBox(
-        // Matglas: fijne witte rand, zachte schaduw; de achtergrond (aura) schijnt door de vulling.
+        // Matglas: fijne witte rand, geen schaduw (die scheen als grijs vlak door het glas); de achtergrond (aura) schijnt door de vulling.
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(RwRadius.m),
           border: Border.all(color: Colors.white.withValues(alpha: RwColors.isDark ? 0.14 : 0.85)),
-          boxShadow: [BoxShadow(color: RwColors.palette.shadow, blurRadius: 24, offset: Offset(0, 10), spreadRadius: -8)],
         ),
         child: Padding(
           padding: EdgeInsets.all(1),
@@ -538,7 +537,7 @@ class RwFab extends StatelessWidget {
               colors: [RwColors.accentLight, RwColors.accent, RwColors.accentDeep],
             ),
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 22, spreadRadius: -4, offset: Offset(0, 8)),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.07), blurRadius: 22, spreadRadius: -8, offset: Offset(0, 8)),
             ],
           ),
           child: Material(
